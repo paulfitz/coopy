@@ -1,0 +1,27 @@
+Installation
+------------
+installation usually consists of:
+make && make test && make install
+
+see the INSTALL file for details and instructions on other systems
+
+
+License
+-------
+The libcsv library is licensed under the LGPL, see the LICENSE file for details
+The example programs are licensed under the GPL, see the LICENSE file in the
+examples directory for details
+
+
+Documentation
+-------------
+See the accompanying man pages or pdf documentation
+
+
+libcsv interfaces for other programming languages
+-------------------------------------------------
+Perl - Text-CSV-LibCSV by Jiro Nishiguchi
+       http://search.cpan.org/dist/Text-CSV-LibCSV/
+
+Ruby - SimpleCSV by Ken Date
+       http://rubyforge.org/projects/simplecsv/

@@ -1,0 +1,128 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+PROJECT(ssfossil)
+
+SET(WORKING_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+SET(OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+MESSAGE(STATUS "Working in ${WORKING_DIR}")
+
+SET(SSFOSSIL_MODULE_PATH ${WORKING_DIR}/scripts)
+SET(CMAKE_MODULE_PATH ${SSFOSSIL_MODULE_PATH})
+
+# for binary builds -- completely optional
+SET (STATLIB "${CMAKE_BINARY_DIR}/static_libs")
+IF (EXISTS ${STATLIB})
+    MESSAGE(STATUS "static_libs directory present: ${STATLIB}")
+    LINK_DIRECTORIES(${STATLIB})
+    ADD_DEFINITIONS(-static-libgcc)
+    SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
+    FILE(GLOB statlibs ${STATLIB}/*.a)
+    LINK_LIBRARIES(${statlibs})
+ENDIF (EXISTS ${STATLIB})
+
+# Force exceptions to be propagated through C code, so we can catch
+# when fossil aborts.
+ADD_DEFINITIONS(-fexceptions)
+
+IF (MINGW)
+  # langinfo.h missing?
+  MESSAGE(STATUS "Internationalization may not be working under MSYS right now")
+  ADD_DEFINITIONS(-DFOSSIL_I18N=0)
+ENDIF (MINGW)
+
+
+INCLUDE_DIRECTORIES(${WORKING_DIR}/libcsv)
+ADD_LIBRARY(csv libcsv/csv.h libcsv/libcsv.c)
+
+ADD_EXECUTABLE(makeheaders fossil/src/makeheaders.c)
+ADD_EXECUTABLE(translate src/fossil/translate.c)
+#ADD_EXECUTABLE(translate fossil/src/translate.c)
+ADD_EXECUTABLE(mkindex fossil/src/mkindex.c)
+
+GET_TARGET_PROPERTY(MAKEHEADERS_LOC makeheaders LOCATION)
+GET_TARGET_PROPERTY(TRANSLATE_LOC translate LOCATION)
+GET_TARGET_PROPERTY(MKINDEX_LOC mkindex LOCATION)
+
+# The following is very minimal, more dependencies should be captured
+# if actually modifying fossil code.
+
+FILE(GLOB FOSSIL_SRCS RELATIVE ${WORKING_DIR}/fossil/src ${WORKING_DIR}/fossil/src/*.c)
+SET(GEN_HDRS)
+SET(MAKEHEADERS_ARGS)
+SET(GEN_SRCS)
+SET(ORG_SRCS)
+FOREACH(src ${FOSSIL_SRCS})
+  IF (NOT src MATCHES "(makeheaders.c)|(translate.c)|(mkindex.c)|(th.c)|(sqlite3.c)")
+    STRING(REPLACE ".c" ".h" hdr ${src})
+    SET(GEN_HDRS ${GEN_HDRS} ${OUTPUT_DIR}/${hdr})
+    STRING(REPLACE ".c" "_.c" src_ ${src})
+    SET(GEN_SRCS ${GEN_SRCS} ${OUTPUT_DIR}/${src_})
+    SET(MAKEHEADERS_ARGS ${MAKEHEADERS_ARGS} "${src_}:${hdr}")
+    SET(dir ${WORKING_DIR}/fossil/src)
+    # If source code exists in src/fossil, override official code.
+    IF (EXISTS ${WORKING_DIR}/src/fossil/${src})
+      SET(dir ${WORKING_DIR}/src/fossil)
+    ENDIF (EXISTS ${WORKING_DIR}/src/fossil/${src})
+    SET(ORG_SRCS ${ORG_SRCS} ${dir}/${src})
+    ADD_CUSTOM_COMMAND(OUTPUT ${OUTPUT_DIR}/${src_}
+      COMMAND ${TRANSLATE_LOC} ${src} > ${OUTPUT_DIR}/${src_}
+      WORKING_DIRECTORY ${dir}
+      DEPENDS ${dir}/${src}
+      DEPENDS ${TRANSLATE_LOC}
+    )
+  ENDIF (NOT src MATCHES "(makeheaders.c)|(translate.c)|(mkindex.c)|(th.c)|(sqlite3.c)")
+ENDFOREACH(src)
+
+ADD_CUSTOM_COMMAND(OUTPUT ${GEN_HDRS}
+  COMMAND ${MAKEHEADERS_LOC} ${MAKEHEADERS_ARGS}  ${WORKING_DIR}/fossil/src/sqlite3.h ${WORKING_DIR}/fossil/src/th.h ${WORKING_DIR}/src/fossil/VERSION.h
+  COMMAND touch ${GEN_HDRS}
+  DEPENDS ${MAKEHEADERS_LOC}
+#  DEPENDS ${ORG_SRCS}
+)
+
+ADD_CUSTOM_COMMAND(OUTPUT ${OUTPUT_DIR}/page_index.h
+  COMMAND ${MKINDEX_LOC} ${GEN_SRCS} > ${OUTPUT_DIR}/page_index.h
+  COMMAND cat ${WORKING_DIR}/src/fossil/main.h >> ${OUTPUT_DIR}/page_index.h
+  DEPENDS ${GEN_SRCS}
+  DEPENDS ${MKINDEX_LOC}
+)
+
+INCLUDE_DIRECTORIES(${OUTPUT_DIR})
+INCLUDE_DIRECTORIES(${WORKING_DIR}/fossil/src)
+INCLUDE_DIRECTORIES(${WORKING_DIR}/src/fossil)
+
+ADD_LIBRARY(csvfossil ${GEN_SRCS} ${GEN_HDRS} 
+  fossil/src/th.c fossil/src/sqlite3.c ${OUTPUT_DIR}/page_index.h
+  src/csv_merge.cpp 
+  src/CsvSheet.h src/CsvMerge.h src/CsvMerge.cpp src/ssfossil.h src/ssfossil.cpp
+)
+TARGET_LINK_LIBRARIES(csvfossil z)
+IF (MINGW)
+  TARGET_LINK_LIBRARIES(csvfossil ws2_32)
+ELSE (MINGW)
+  TARGET_LINK_LIBRARIES(csvfossil dl pthread)
+ENDIF (MINGW)
+TARGET_LINK_LIBRARIES(csvfossil csv)
+
+ADD_EXECUTABLE(ssfossil ${WORKING_DIR}/src/main.cpp)
+TARGET_LINK_LIBRARIES(ssfossil csvfossil)
+
+SET (COMPILE_GUI TRUE CACHE BOOL "Compile GUI?")
+
+IF (COMPILE_GUI)
+  FIND_PACKAGE(wxWidgets)
+  IF (wxWidgets_FOUND)
+    INCLUDE_DIRECTORIES(${wxWidgets_INCLUDE_DIRS})
+    ADD_EXECUTABLE(ssfossil_gui ${WORKING_DIR}/src/gui.cpp)
+    TARGET_LINK_LIBRARIES(ssfossil_gui csvfossil)
+    TARGET_LINK_LIBRARIES(ssfossil_gui ${wxWidgets_LIBRARIES})
+    SET_PROPERTY(TARGET ssfossil_gui 
+      PROPERTY COMPILE_DEFINITIONS ${wxWidgets_DEFINITIONS})
+    IF (NOT MINGW)
+      TARGET_LINK_LIBRARIES(ssfossil_gui X11)
+    ENDIF (NOT MINGW)
+  ELSE (wxWidgets_FOUND)
+    MESSAGE(STATUS "Skipping GUI")
+  ENDIF (wxWidgets_FOUND)
+ENDIF (COMPILE_GUI)
+
