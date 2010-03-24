@@ -1,3 +1,5 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+cmake_minimum_required(VERSION 2.6)
 
-ADD_SUBDIRECTORY(sheet_scm)
+project(coopy)
+
+add_subdirectory(sheet_scm)
