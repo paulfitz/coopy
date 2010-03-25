@@ -420,7 +420,7 @@ bool MyFrame::OnInit() {
     topsizer->Add(new wxStaticText(this,-1,_T("Let's get coopy!")),tflags);
     //topsizer->Add(m_textCtrl, flags);
     
-    log_box = new wxTextCtrl(this, TEXT_Main, "[Status messages appear here during actions]\n\nWelcome to Coopy!\n\nThe purpose of Coopy is to facilitate cooperative data-collection projects. It uses fossil (www.fossil-scm.org) to share files between computers, and works to merge spreadsheets intelligently.\n\nWarning: this is pre-alpha software, keep backups of your data.\n", 
+    log_box = new wxTextCtrl(this, TEXT_Main, wxT("[Status messages appear here during actions]\n\nWelcome to Coopy!\n\nThe purpose of Coopy is to facilitate cooperative data-collection projects. It uses fossil (www.fossil-scm.org) to share files between computers, and works to merge spreadsheets intelligently.\n\nWarning: this is pre-alpha software, keep backups of your data.\n"), 
                              wxDefaultPosition, wxSize(500,200),  
                              wxTE_MULTILINE | wxTE_RICH, 
                              wxDefaultValidator, wxTextCtrlNameStr);
@@ -472,7 +472,7 @@ bool MyFrame::haveSource() {
         }
         wxTextEntryDialog dlg(NULL, wxT("Enter source URL"),
                               wxT("Enter source URL"),
-                              wxT(suggest.c_str()));
+                              conv(suggest));
         if (dlg.ShowModal()==wxID_OK) {
             source = conv(dlg.GetValue());
             /*
@@ -497,7 +497,7 @@ bool MyFrame::haveDestination() {
         }
         wxTextEntryDialog dlg(NULL, wxT("Enter destination URL"),
                               wxT("Enter destination URL"),
-                              wxT(suggest.c_str()));
+                              conv(suggest));
         if (dlg.ShowModal()==wxID_OK) {
             destination = conv(dlg.GetValue());
             askDestination = false;
