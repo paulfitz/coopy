@@ -16,11 +16,15 @@ SET(CMAKE_SYSTEM_NAME Windows)
 SET(CMAKE_C_COMPILER /usr/bin/i586-mingw32msvc-gcc)
 SET(CMAKE_CXX_COMPILER "/usr/bin/i586-mingw32msvc-g++")
 
-# here is the target environment located
-SET(CMAKE_FIND_ROOT_PATH  /usr/i586-mingw32msvc /home/paulfitz/mingw/install /home/paulfitz/mingw/install/bin )
+IF (NOT HOME)
+  SET(HOME $ENV{HOME})
+ENDIF (NOT HOME)
 
-LINK_DIRECTORIES(/home/paulfitz/mingw/install/lib)
-INCLUDE_DIRECTORIES(/home/paulfitz/mingw/install/include)
+# here is the target environment located
+SET(CMAKE_FIND_ROOT_PATH  /usr/i586-mingw32msvc ${HOME}/mingw/install ${HOME}/mingw/install/bin )
+
+LINK_DIRECTORIES(${HOME}/mingw/install/lib)
+INCLUDE_DIRECTORIES(${HOME}/mingw/install/include)
 
 # adjust the default behaviour of the FIND_XXX() commands:
 # search headers and libraries in the target environment, search 
