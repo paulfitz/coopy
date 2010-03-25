@@ -88,12 +88,14 @@ ADD_CUSTOM_COMMAND(OUTPUT ${OUTPUT_DIR}/page_index.h
 INCLUDE_DIRECTORIES(${OUTPUT_DIR})
 INCLUDE_DIRECTORIES(${WORKING_DIR}/fossil/src)
 INCLUDE_DIRECTORIES(${WORKING_DIR}/src/fossil)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/merge3x2d)
 
 ADD_LIBRARY(csvfossil ${GEN_SRCS} ${GEN_HDRS} 
   fossil/src/th.c fossil/src/sqlite3.c ${OUTPUT_DIR}/page_index.h
   src/csv_merge.cpp 
-  src/CsvSheet.h src/CsvMerge.h src/CsvMerge.cpp src/ssfossil.h src/ssfossil.cpp
+  src/ssfossil.h src/ssfossil.cpp
 )
+TARGET_LINK_LIBRARIES(csvfossil merge3x2d)
 TARGET_LINK_LIBRARIES(csvfossil z)
 IF (MINGW)
   TARGET_LINK_LIBRARIES(csvfossil ws2_32)

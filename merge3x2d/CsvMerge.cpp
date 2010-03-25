@@ -1,11 +1,13 @@
 
 #include "CsvMerge.h"
 
-#include "ssfossil.h"
-
 using namespace std;
 
+static bool _merge_debug = false;
+
 class CsvMergeTests {
+private:
+  bool debug;
 public:
   CsvSheet age_sheet(string location, string age) {
     CsvSheet work;
@@ -64,7 +66,7 @@ int CsvMerge::apply(CsvSheet& pivot, CsvSheet& v1, CsvSheet& v2) {
 	    } else if (v2.cell(x,y)==pivot.cell(x,y)) {
 	      work.addField(v1.cell(x,y).c_str());
 	    } else {
-	      if (ssfossil_debug()) {
+	      if (_merge_debug) {
 		printf("Mismatch [%s] [%s] [%s]\n",
 		       pivot.cell(x,y).c_str(),
 		       v1.cell(x,y).c_str(),
@@ -87,6 +89,7 @@ int CsvMerge::apply(CsvSheet& pivot, CsvSheet& v1, CsvSheet& v2) {
 
 int CsvMerge::run_tests() {
   printf("Running tests\n");
+  _merge_debug = true;
   CsvMergeTests tests;
   return tests.run();
 }
