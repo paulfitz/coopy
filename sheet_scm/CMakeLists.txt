@@ -29,9 +29,6 @@ IF (MINGW)
 ENDIF (MINGW)
 
 
-INCLUDE_DIRECTORIES(${WORKING_DIR}/libcsv)
-ADD_LIBRARY(csv libcsv/csv.h libcsv/libcsv.c)
-
 ADD_EXECUTABLE(makeheaders fossil/src/makeheaders.c)
 ADD_EXECUTABLE(translate src/fossil/translate.c)
 #ADD_EXECUTABLE(translate fossil/src/translate.c)
@@ -89,6 +86,8 @@ INCLUDE_DIRECTORIES(${OUTPUT_DIR})
 INCLUDE_DIRECTORIES(${WORKING_DIR}/fossil/src)
 INCLUDE_DIRECTORIES(${WORKING_DIR}/src/fossil)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/merge3x2d)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/scanss)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/scanss/libcsv)
 
 ADD_LIBRARY(csvfossil ${GEN_SRCS} ${GEN_HDRS} 
   fossil/src/th.c fossil/src/sqlite3.c ${OUTPUT_DIR}/page_index.h
