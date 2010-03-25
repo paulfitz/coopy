@@ -102,7 +102,25 @@ ELSE (MINGW)
 ENDIF (MINGW)
 TARGET_LINK_LIBRARIES(csvfossil csv)
 
-ADD_EXECUTABLE(ssfossil ${WORKING_DIR}/src/main.cpp)
+# May need icons for windows
+SET (DECOR)
+if(MINGW)
+  FIND_PROGRAM(windres_bin NAMES windres i586-mingw32msvc-windres)
+  MESSAGE(STATUS "windres: ${windres_bin}")
+  IF (windres_bin)
+    set(CMAKE_RC_COMPILER ${windres_bin})
+    SET(CMAKE_RC_OUTPUT_EXTENSION .obj)  # doesn't work, for some reason...
+    SET(CMAKE_RC_COMPILE_OBJECT
+      "<CMAKE_RC_COMPILER> --output-format=coff -I${WORKING_DIR}/src -o <OBJECT> <SOURCE>")
+    #"<CMAKE_RC_COMPILER> <FLAGS> <DEFINES> -o <OBJECT> <SOURCE>")
+    ENABLE_LANGUAGE(RC)
+    set(DECOR src/decor.rc)
+  ELSE (windres_bin)
+    MESSAGE(STATUS "Cannot find windres, ignoring program icon on windows")
+  ENDIF (windres_bin)
+endif(MINGW)
+
+ADD_EXECUTABLE(ssfossil ${WORKING_DIR}/src/main.cpp ${DECOR})
 TARGET_LINK_LIBRARIES(ssfossil csvfossil)
 INSTALL(TARGETS ssfossil COMPONENT utilities DESTINATION bin)
 
@@ -112,7 +130,7 @@ IF (COMPILE_GUI)
   FIND_PACKAGE(wxWidgets)
   IF (wxWidgets_FOUND)
     INCLUDE_DIRECTORIES(${wxWidgets_INCLUDE_DIRS})
-    ADD_EXECUTABLE(ssfossil_gui ${WORKING_DIR}/src/gui.cpp)
+    ADD_EXECUTABLE(ssfossil_gui WIN32 ${WORKING_DIR}/src/gui.cpp ${DECOR})
     TARGET_LINK_LIBRARIES(ssfossil_gui csvfossil)
     TARGET_LINK_LIBRARIES(ssfossil_gui ${wxWidgets_LIBRARIES})
     SET_PROPERTY(TARGET ssfossil_gui 
