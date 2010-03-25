@@ -228,6 +228,7 @@ int main(int argc, char **argv){
   int rc;
   db_reset_all();
   _verify_setup();
+  _manifest_setup();
 
   g.now = time(0);
   g.argc = argc;
@@ -242,7 +243,9 @@ int main(int argc, char **argv){
     g.fSqlTrace = find_option("sqltrace", 0, 0)!=0;
     g.fSqlPrint = find_option("sqlprint", 0, 0)!=0;
     g.fHttpTrace = find_option("httptrace", 0, 0)!=0;
-    g.zLogin = find_option("user", "U", 1);
+    if (!g.zLogin) {
+      g.zLogin = find_option("user", "U", 1);
+    }
     zCmdName = argv[1];
   }
   rc = name_search(zCmdName, aCommand, count(aCommand), &idx);

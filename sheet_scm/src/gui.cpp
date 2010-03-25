@@ -16,6 +16,7 @@
 #include <wx/filefn.h>
 #include <wx/filename.h>
 #include <wx/textctrl.h>
+#include <wx/url.h>
 
 #include <string>
 #include <list>
@@ -198,8 +199,13 @@ private:
 
     UiFossilHandler handler; 
 
+    bool askPath;
+    bool askSource;
+    bool askDestination;
+
     string path;
     string source;
+    string destination;
     string commit_message;
     ostream *stream;
 
@@ -211,9 +217,8 @@ public:
     void OnAbout(wxCommandEvent& event);
 
     void OnExit(wxCloseEvent& event) {
-        printf("Removing frame\n");
         Destroy();
-        printf("Exiting\n");
+        printf("Exiting Coopy\n");
     }
 
     void OnOK(wxCommandEvent& event);
@@ -226,6 +231,7 @@ public:
 
     bool havePath();
     bool haveSource();
+    bool haveDestination();
 
     int ssfossil(int argc, char *argv[]) {
         try {
@@ -370,6 +376,9 @@ END_EVENT_TABLE()
 bool MyFrame::OnInit() {
 
     stream = NULL;
+    askPath = true;
+    askSource = true;
+    askDestination = true;
 
     ssfossil_set_handler(&handler);
 
@@ -436,13 +445,16 @@ bool MyFrame::OnInit() {
 
 
 bool MyFrame::havePath() {
-    if (path=="") {
+    if (path=="" || askPath) {
         wxDirDialog dlg(NULL, wxT("Choose input directory"), wxT(""),
                         wxDD_DEFAULT_STYLE); // | wxDD_DIR_MUST_EXIST);
         if (dlg.ShowModal()==wxID_OK) {
             wxString result = dlg.GetPath();
             path = conv(result);
             printf("Selected a directory %s\n", result.c_str());
+            askPath = false;
+        } else {
+            path = "";
         }
     }
     if (path!="") {
@@ -453,7 +465,46 @@ bool MyFrame::havePath() {
 
 
 bool MyFrame::haveSource() {
-    if (source=="") {
+    if (source==""||askSource) {
+        string suggest = source;
+        if (suggest=="") {
+            suggest = "http://coopy.sourceforge.net/cgi-bin/wiki/home";
+        }
+        wxTextEntryDialog dlg(NULL, wxT("Enter source URL"),
+                              wxT("Enter source URL"),
+                              wxT(suggest.c_str()));
+        if (dlg.ShowModal()==wxID_OK) {
+            source = conv(dlg.GetValue());
+            /*
+string("http://") +
+                FOSSIL_USERNAME + ":" + conv(dlg.GetValue()) + "@" +
+                FOSSIL_ROOT + FOSSIL_REPO;
+            */
+            printf("Source set to %s\n", source.c_str());
+            askSource = false;
+        } else {
+            source = "";
+        }
+    }
+    return source!="";
+}
+
+bool MyFrame::haveDestination() {
+    if (destination==""||askDestination) {
+        string suggest = destination;
+        if (suggest=="") {
+            suggest = source;
+        }
+        wxTextEntryDialog dlg(NULL, wxT("Enter destination URL"),
+                              wxT("Enter destination URL"),
+                              wxT(suggest.c_str()));
+        if (dlg.ShowModal()==wxID_OK) {
+            destination = conv(dlg.GetValue());
+            askDestination = false;
+        } else {
+            destination = "";
+        }
+        /*
         wxPasswordEntryDialog dlg(NULL, wxT("Enter password"));
         if (dlg.ShowModal()==wxID_OK) {
             source = string("http://") +
@@ -461,54 +512,70 @@ bool MyFrame::haveSource() {
                 FOSSIL_ROOT + FOSSIL_REPO;
             printf("Source set to %s\n", source.c_str());
         }
+        */
     }
-    return source!="";
+    return destination!="";
 }
 
 void MyFrame::OnOK(wxCommandEvent& ev) {
-    path = "";
-    source = "";
+    askPath = true;
+    askSource = true;
+    askDestination = true;
 }
 
 void MyFrame::OnSync(wxCommandEvent& event) {
     startStream();
-    if (havePath()) {
-        printf("Should pull %s\n", path.c_str());
-        wxChar sep = wxFileName::GetPathSeparator();
-        wxString target = conv(path) + sep + wxT("clone.fossil");
-        if (!wxFileExists(target)) {
-            printf("Need to clone %s\n", conv(target).c_str());
-            if (haveSource()) {
-                int argc = 4;
-                char *argv[] = {
-                    (char*)"fossil",
-                    (char*)"clone",
-                    (char*)source.c_str(),
-                    (char*)target.c_str(),
-                    NULL };
-                ssfossil(argc,argv);
+    if (haveSource()) {
+        if (havePath()) {
+            printf("Should pull %s\n", path.c_str());
+            wxChar sep = wxFileName::GetPathSeparator();
+            wxString target = conv(path) + sep + wxT("clone.fossil");
+            if (!wxFileExists(target)) {
+                printf("Need to clone %s\n", conv(target).c_str());
+                if (haveSource()) {
+                    int argc = 4;
+                    char *argv[] = {
+                        (char*)"fossil",
+                        (char*)"clone",
+                        (char*)source.c_str(),
+                        (char*)target.c_str(),
+                        NULL };
+                    ssfossil(argc,argv);
+                }
             }
-        }
-        if (wxFileExists(target)) {
-            wxString view_target = conv(path) + sep + wxT("_FOSSIL_");
-            if (!wxFileExists(view_target)) {
-                printf("No view yet %s\n", conv(view_target).c_str());
-                int argc = 3;
-                char *argv[] = {
-                    (char*)"fossil",
-                    (char*)"open",
-                    (char*)target.c_str(),
-                    NULL };
-                ssfossil(argc,argv);
-            }
-            if (wxFileExists(view_target)) {
-                printf("Simple sync\n");
-                int argc = 2;
-                char *argv[] = {
-                    (char*)"fossil",
-                    (char*)"update",
-                    NULL };
-                ssfossil(argc,argv);
+            if (wxFileExists(target)) {
+                wxString view_target = conv(path) + sep + wxT("_FOSSIL_");
+                if (!wxFileExists(view_target)) {
+                    printf("No view yet %s\n", conv(view_target).c_str());
+                    int argc = 3;
+                    char *argv[] = {
+                        (char*)"fossil",
+                        (char*)"open",
+                        (char*)target.c_str(),
+                        NULL };
+                    ssfossil(argc,argv);
+
+                    if (wxFileExists(view_target)) {
+                        // get rid of autosync
+                        int argc = 4;
+                        char *argv[] = {
+                            (char*)"fossil",
+                            (char*)"setting",
+                            (char*)"autosync",
+                            (char*)"0",
+                            NULL };
+                        ssfossil(argc,argv);
+                    }
+                }
+                if (wxFileExists(view_target)) {
+                    printf("Simple sync\n");
+                    int argc = 2;
+                    char *argv[] = {
+                        (char*)"fossil",
+                        (char*)"update",
+                        NULL };
+                    ssfossil(argc,argv);
+                }
             }
         }
     }
@@ -534,63 +601,75 @@ void MyFrame::OnCommit(wxCommandEvent& event) {
     printf("Should commit\n");
     startStream();
     if (havePath()) {
-        doFiles(getExtras(),"add");
-        list<string> changes = getChanges();
-        list<string> missing = getMissing(changes);
-        if (missing.size()>0) {
+        if (haveDestination()) {
+            doFiles(getExtras(),"add");
+            list<string> changes = getChanges();
+            list<string> missing = getMissing(changes);
+            if (missing.size()>0) {
+                string msg = "";
+                for (list<string>::const_iterator it = missing.begin();
+                     it != missing.end();
+                     it++) {
+                    msg += it->c_str();
+                    msg += " is missing";
+                    msg += "\n";
+                }
+                msg += "Should this/these be removed in the repository?";
+                printf("Message is %s\n", msg.c_str());
+                wxMessageDialog dlg(NULL, conv(msg), wxT(""), 
+                                    wxYES_NO|wxCANCEL);
+                if (dlg.ShowModal()!=wxID_YES) {
+                    endStream();
+                    return;
+                }
+                doFiles(missing,"rm");
+                changes = getChanges();
+            }
             string msg = "";
-            for (list<string>::const_iterator it = missing.begin();
-                 it != missing.end();
+            for (list<string>::const_iterator it = changes.begin();
+                 it != changes.end();
                  it++) {
                 msg += it->c_str();
-                msg += " is missing";
                 msg += "\n";
             }
-            msg += "Should this/these be removed in the repository?";
-            printf("Message is %s\n", msg.c_str());
-            wxMessageDialog dlg(NULL, conv(msg), wxT(""), 
-                                wxYES_NO|wxCANCEL);
-            if (dlg.ShowModal()!=wxID_YES) {
+            if (msg!="") {
+                msg += "Enter brief description of changes";
+            } else {
+                msg = "No changes!";
+                (*stream) << "No changes to push" << endl;
                 endStream();
                 return;
             }
-            doFiles(missing,"rm");
-            changes = getChanges();
-        }
-        string msg = "";
-        for (list<string>::const_iterator it = changes.begin();
-             it != changes.end();
-             it++) {
-            msg += it->c_str();
-            msg += "\n";
-        }
-        if (msg!="") {
-            msg += "Enter brief description of changes";
-        } else {
-            msg = "No changes!";
-            (*stream) << "No changes to push" << endl;
-            endStream();
-            return;
-        }
-        printf("Message is %s\n", msg.c_str());
-        wxTextEntryDialog dlg(NULL, conv(msg));
-        if (dlg.ShowModal()==wxID_OK) {
-            commit_message = conv(dlg.GetValue());
-            if (commit_message == "") {
-                commit_message = "[from coopy]";
+            printf("Message is %s\n", msg.c_str());
+            wxTextEntryDialog dlg(NULL, conv(msg));
+            if (dlg.ShowModal()==wxID_OK) {
+                commit_message = conv(dlg.GetValue());
+                if (commit_message == "") {
+                    commit_message = "[from coopy]";
+                }
+                int argc = 4;
+                // commit currently fails if called twice, unless username
+                // specified (need to remove some global state from fossil)
+                char *argv[] = {
+                    (char*)"fossil",
+                    (char*)"commit",
+                    //(char*)"--user",
+                    //(char*)FOSSIL_USERNAME,
+                    (char*)"-m",
+                    (char*)commit_message.c_str(),
+                    NULL };
+                ssfossil(argc,argv);
+
+                if (true) {
+                    int argc = 3;
+                    char *argv[] = {
+                        (char*)"fossil",
+                        (char*)"push",
+                        (char*)destination.c_str(),
+                        NULL };
+                    ssfossil(argc,argv);
+                }
             }
-            int argc = 6;
-            // commit currently fails if called twice, unless username
-            // specified (need to remove some global state from fossil)
-            char *argv[] = {
-                (char*)"fossil",
-                (char*)"commit",
-                (char*)"--user",
-                (char*)FOSSIL_USERNAME,  
-                (char*)"-m",
-                (char*)commit_message.c_str(),
-                NULL };
-            ssfossil(argc,argv);
         }
     }
     endStream();

@@ -890,6 +890,11 @@ static void add_mlink(int pid, Manifest *pParent, int cid, Manifest *pChild){
 */
 static int manifest_crosslink_busy = 0;
 
+int _manifest_setup() {
+  manifest_crosslink_busy = 0;
+  return 0;
+}
+
 /*
 ** Setup to do multiple manifest_crosslink() calls.
 ** This is only required if processing ticket changes.
