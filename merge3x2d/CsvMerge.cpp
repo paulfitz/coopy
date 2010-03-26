@@ -86,6 +86,51 @@ int CsvMerge::apply(CsvSheet& pivot, CsvSheet& v1, CsvSheet& v2) {
   return -1;
 }
 
+void CsvMerge::dumb_conflict(CsvSheet& local, CsvSheet& remote) {
+  int lw = local.width();
+  int lh = local.height();
+  int rw = remote.width();
+  int rh = remote.height();
+  int w = lw+rw+1;
+  int h = lw+rw+1;
+  work.clear();
+  for (int i=0; i<h; i++) {
+    for (int j=0; j<w; j++) {
+      printf("%d %d\n", i, j);
+      if (i==0) {
+	if (j==0) {
+	  work.addField("[conflict]");
+	} else if (j<1+lw) {
+	  work.addField("local");
+	} else {
+	  work.addField("remote");
+	}
+      } else {
+	if (j==0) {
+	  if (i<1+lh) {
+	    work.addField("local");
+	  } else {
+	    work.addField("remote");
+	  }
+	} else if (j<1+lw) {
+	  if (i<1+lh) {
+	    work.addField(local.cell(j-1,i-1).c_str());
+	  } else {
+	    work.addField("");
+	  }
+	} else {
+	  if (i>=1+lh) {
+	    work.addField(remote.cell(j-lw-1,i-lh-1).c_str());
+	  } else {
+	    work.addField("");
+	  }
+	}
+      }
+    }
+    work.addRecord();
+  }
+}
+
 
 int CsvMerge::run_tests() {
   printf("Running tests\n");

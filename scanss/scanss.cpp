@@ -14,7 +14,10 @@ int main(int argc, char *argv[]) {
   int digit_optind = 0;
   int result = 0;
 
-  CsvSheet ss;
+  CsvSheet local;
+  CsvSheet remote;
+  CsvSheet parent;
+  CsvSheet *ss = &local;
   CsvStat stat;
   bool dirty = true;
   
@@ -28,6 +31,10 @@ int main(int argc, char *argv[]) {
       {"prop", 1, 0, 'p'},
       {"assert", 1, 0, 'a'},
       {"remove_row", 1, 0, 'd'},
+      {"local", 0, 0, 'L'},
+      {"remote", 0, 0, 'R'},
+      {"parent", 0, 0, 'P'},
+      {"dumb", 0, 0, 'D'},
       {0, 0, 0, 0}
     };
 
@@ -35,24 +42,36 @@ int main(int argc, char *argv[]) {
 		    long_options, &option_index);
     if (c==-1) break;
     switch (c) {
+    case 'L':
+      printf("Switching to local sheet\n");
+      ss = &local;
+      break;
+    case 'R':
+      printf("Switching to remote sheet\n");
+      ss = &remote;
+      break;
+    case 'P':
+      printf("Switching to parent sheet\n");
+      ss = &parent;
+      break;
     case 'r':
       if (optarg) {
-	CsvFile::read(optarg,ss);
-	printf("Read %s (%dx%d)\n", optarg, ss.width(), ss.height());
+	CsvFile::read(optarg,*ss);
+	printf("Read %s (%dx%d)\n", optarg, ss->width(), ss->height());
 	dirty = true;
       }
       break;
     case 'w':
       if (optarg) {
-	CsvFile::write(ss,optarg);
-	printf("Wrote %s (%dx%d)\n", optarg, ss.width(), ss.height());
+	CsvFile::write(*ss,optarg);
+	printf("Wrote %s (%dx%d)\n", optarg, ss->width(), ss->height());
       }
       break;
     case 'p':
       if (optarg) {
 	if (dirty) {
 	  printf("Evaluating...\n");
-	  stat.evaluate(ss);
+	  stat.evaluate(*ss);
 	  dirty = false;
 	}
 	std::string prop = optarg;
@@ -76,11 +95,21 @@ int main(int argc, char *argv[]) {
     case 'd':
       if (optarg) {
 	int row = atoi(optarg);
-	ss.removeRow(row);
+	ss->removeRow(row);
 	printf("Removed row %d\n");
 	dirty = true;
       }
       break;
+    case 'D':
+      printf("Making dumb conflict sheet\n");
+      {
+	CsvMerge merge;
+	merge.dumb_conflict(local,remote);
+	local = merge.get();
+	ss = &local;
+      }
+      break;
+
     default:
       fprintf(stderr, "Usage: %s [--read fname] [--eval]\n",
 	      argv[0]);
