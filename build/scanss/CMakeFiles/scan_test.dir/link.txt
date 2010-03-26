@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/scan_test.dir/main_test.cpp.o  -o scan_test -rdynamic ../merge3x2d/libmerge3x2d.a libcsv.a libscancsv.a 

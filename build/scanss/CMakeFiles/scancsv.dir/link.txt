@@ -1,2 +1,0 @@
-/usr/bin/ar cr libscancsv.a  CMakeFiles/scancsv.dir/CsvFile.cpp.o
-/usr/bin/ranlib libscancsv.a

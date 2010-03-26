@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/scanss.dir/scanss.cpp.o  -o scanss -rdynamic libscancsv.a ../merge3x2d/libmerge3x2d.a libcsv.a 

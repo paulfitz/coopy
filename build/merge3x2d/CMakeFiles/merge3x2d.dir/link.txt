@@ -1,2 +1,0 @@
-/usr/bin/ar cr libmerge3x2d.a  CMakeFiles/merge3x2d.dir/CsvMerge.cpp.o CMakeFiles/merge3x2d.dir/CsvColumn.cpp.o CMakeFiles/merge3x2d.dir/CsvStat.cpp.o
-/usr/bin/ranlib libmerge3x2d.a
