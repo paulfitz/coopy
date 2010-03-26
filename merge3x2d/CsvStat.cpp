@@ -6,6 +6,7 @@
 using namespace std;
 
 void CsvStat::evaluate(CsvSheet& sheet) {
+  clear();
   col.clear();
   oddness.resize(sheet.width(),sheet.height(),0);
   oddness_accum.resize(1,sheet.height(),0);
@@ -89,4 +90,5 @@ void CsvStat::evaluate(CsvSheet& sheet) {
   } else {
     printf("Cannot guess header\n");
   }
+  rowDivider = top;
 }

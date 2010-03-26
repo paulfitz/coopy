@@ -7,3 +7,29 @@ TARGET_LINK_LIBRARIES(scancsv merge3x2d csv)
 ADD_EXECUTABLE(scanss scanss.cpp)
 TARGET_LINK_LIBRARIES(scanss scancsv)
 
+
+SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
+
+############################################################################
+# check detection of header line
+
+ADD_TEST(directory_header scanss --read ${TESTS}/test001_base.csv 
+  --prop hdr --assert 0)
+ADD_TEST(directory_header_missing scanss --read ${TESTS}/test001_base.csv 
+  --remove_row 0 --prop hdr --assert -1)
+
+ADD_TEST(latlong_header scanss --read ${TESTS}/test002_base.csv 
+  --prop hdr --assert 0)
+ADD_TEST(latlong_header_missing scanss --read ${TESTS}/test002_base.csv 
+  --remove_row 0 --prop hdr --assert -1)
+
+ADD_TEST(company_header scanss --read ${TESTS}/test003_base.csv 
+  --prop hdr --assert 0)
+ADD_TEST(company_header_missing scanss --read ${TESTS}/test003_base.csv 
+  --remove_row 0 --prop hdr --assert -1)
+
+ADD_TEST(car_headerless scanss --read ${TESTS}/test004_base.csv 
+  --prop hdr --assert -1)
+ADD_TEST(car_headerless2 scanss --read ${TESTS}/test004_base.csv 
+  --remove_row 0 --prop hdr --assert -1)
+
