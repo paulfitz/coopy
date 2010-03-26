@@ -1,0 +1,141 @@
+
+<h1>Merge algorithm</h1>
+
+<h2>Three-way merge</h2>
+
+<p>
+We implement a three-way merge.  When doing a merge, we 
+have three sheets:
+</p>
+
+<ul>
+<li>The <b>local</b> sheet (L).</li>
+<li>The <b>remote</b> sheet (R).</li>
+<li>The <b>pivot</b> sheet (P), a common ancestor of the local and remote
+sheet.</li>
+</ul>
+
+<p>
+(One can also think of L, R, and P being Left, Right, and Parent).
+</p>
+
+<h2>Limitations</h2>
+
+<p>
+For now, we will only operate on well-formed CSV files.
+</p>  
+
+<p>
+Sheets should
+be in "portrait" format, with data of the same type grouped in
+columns, and data referring to the same entity grouped in rows.
+</p>
+
+<p>
+Sheets should typically have a row or two of header information 
+in the first few rows, but this isn't required.  In general,
+the "top" of a sheet may have different content than its "body".
+</p>
+
+<p>
+The treatment of empty values can be tricky.
+</p>
+
+
+<h2>Comparison with text merge</h2>
+
+<p>
+Compared with standard three-way text merge, sheets have some
+differences.
+</p>
+
+<p>
+A reordering of lines is no longer a drastic change.
+For many sheets, rows may be treated as elements in 
+an unordered set.
+</p>
+
+<p>
+There is a uniform structure to every line in sheets, and 
+this structure may get systematically permuted.
+</p>
+
+
+<h2>Representing conflicts</h2>
+
+<p>
+Some merges will need human intervention.  It is useful
+if a conflicting merge can be represented as a sheet.
+The most convenient way to do this is by insertion of 
+extra conflict-control rows and columns.  The version control
+tool should detect and prevent unresolved conflicts from
+being checked in.
+</p>
+
+<p>
+Imagine a three-way merge where all sheets SL, SR, SP are unrelated.
+A "dumb" conflict sheet can be produced as follows:
+</p>
+
+<ul>
+<li>Start with an empty sheet.<li>
+<li>Insert an empty column C0.</li>
+<li>Insert columns Cl for all the columns in SL.</li>
+<li>Insert columns Cr for all the columns in SR.</li>
+<li>Insert an empty row R0.</li>
+<li>Place a special tag T0 in the cell R0,C0.</li>
+<li>Place "local" in all cells R0,Cl.</li>
+<li>Place "remote" in all cells R0,Cr.</li>
+<li>Add rows Rl for all the rows in SL, filling columns Cl only.<li>
+<li>Add rows Rr for all the rows in SR, filling columns Cr only.<li>
+<li>Place "local" in all cells Rl,C0.</li>
+<li>Place "remote" in all cells Rr,C0.</li>
+</ul>
+
+<p>
+This conflict sheet has the benefit of being reversible (well, there
+are issues with treatment of blank values).
+The purpose of merging is to reduce redundancy in this sheet,
+ideally to the point where the special tag T0 doesn't need to be 
+used at all.
+</p>
+
+<p>
+An example of a full conflict sheet (with T0 set to [conflict]):
+</p>
+
+<pre>
+LOCAL sheet
+-----------
+name,  age, location
+Paul,   99, Space
+Noemi, -10, Imagination
+
+REMOTE sheet
+------------
+item, cost, qty
+frog,   10,  1
+bell,    5, 10
+
+CONFLICT sheet
+--------------
+
+[conflict], local, local, local,      remote, remote, remote
+local,      name,  age,   location
+local,      Paul,   99,   Space
+local,      Noemi, -10,   Imagination
+remote,                               item,    cost,   qty
+remote,                               frog,      10,    1
+remote,                               bell,       5,   10
+
+
+</pre>
+
+<p>
+Now, in less extreme cases, we should be able to find columns and
+rows that we don't need to duplicate, since they either exist
+in both (we will label these "share") or can be easily merged
+(we will label these "merge").  And if everything is 
+shared/merged, we don't need to include the conflict row and
+column.
+</p>
