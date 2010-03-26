@@ -7,6 +7,7 @@ class CsvStat {
 public:
   std::vector<CsvColumn> col;
   FloatSheet oddness;
+  FloatSheet oddness_accum;
 
   void evaluate(CsvSheet& sheet);
 };

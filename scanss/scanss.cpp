@@ -12,6 +12,9 @@ int main(int argc, char *argv[]) {
   CsvFile::read(argv[1],ss);
   CsvStat stat;
   stat.evaluate(ss);
+  printf("Removing first row, reevaluating...\n");
+  ss.removeRow(0);
+  stat.evaluate(ss);
   CsvFile::write(ss,"junk.csv");
   
   return 0;

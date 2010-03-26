@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include <math.h>
+
 class DataSheet {
 public:
   virtual int width() = 0;
@@ -59,6 +61,7 @@ public:
   }
   
   void resize(int w, int h, const T& zero) {
+    arr.clear();
     for (int i=0; i<h; i++) {
       arr.push_back(std::vector<T>());
       std::vector<T>& lst = arr.back();
@@ -90,6 +93,9 @@ public:
     snprintf(buf,sizeof(buf),"%g",cell(x,y));
     return buf;
   }
+
+  void normalize(int first=-1, int last=-1, float sc=0.1);
+
 };
 
 class CsvSheet : public DataSheet {
@@ -102,6 +108,15 @@ public:
   CsvSheet() {
     w = h = 0;
     tw = th = 0;
+  }
+
+  bool removeRow(int index) {
+    arr.erase(arr.begin()+index);
+    if (arr.size()<h) {
+      th = h = arr.size();
+      return true;
+    }
+    return false;
   }
 
   void addField(const char *s) {
