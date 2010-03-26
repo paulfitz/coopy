@@ -1,1 +1,0 @@
-/usr/bin/gcc     CMakeFiles/mkindex.dir/fossil/src/mkindex.c.o  -o mkindex -rdynamic 

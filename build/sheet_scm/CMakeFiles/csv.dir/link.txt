@@ -1,2 +1,0 @@
-/usr/bin/ar cr libcsv.a  CMakeFiles/csv.dir/libcsv/libcsv.c.o
-/usr/bin/ranlib libcsv.a
