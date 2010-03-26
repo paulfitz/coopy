@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/paulfitz/cvs/coopy/merge3x2d/CsvColumn.cpp
+CsvColumn.h
+/home/paulfitz/cvs/coopy/merge3x2d/CsvColumn.h
+
+/home/paulfitz/cvs/coopy/merge3x2d/CsvColumn.h
+CsvSheet.h
+/home/paulfitz/cvs/coopy/merge3x2d/CsvSheet.h
+
+/home/paulfitz/cvs/coopy/merge3x2d/CsvMerge.cpp
+CsvMerge.h
+/home/paulfitz/cvs/coopy/merge3x2d/CsvMerge.h
+
+/home/paulfitz/cvs/coopy/merge3x2d/CsvMerge.h
+CsvSheet.h
+/home/paulfitz/cvs/coopy/merge3x2d/CsvSheet.h
+
+/home/paulfitz/cvs/coopy/merge3x2d/CsvSheet.h
+vector
+-
+string
+-
+

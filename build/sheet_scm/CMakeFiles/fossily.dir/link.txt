@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/fossily.dir/src/main.cpp.o  -o fossily -rdynamic libcsvfossil.a ../merge3x2d/libmerge3x2d.a -lz -ldl -lpthread ../scanss/libcsv.a 

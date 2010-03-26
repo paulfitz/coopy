@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/paulfitz/cvs/coopy/sheet_scm/src/main.cpp
+ssfossil.h
+/home/paulfitz/cvs/coopy/sheet_scm/src/ssfossil.h
+
+/home/paulfitz/cvs/coopy/sheet_scm/src/ssfossil.h
+

@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/paulfitz/cvs/coopy/sheet_scm/libcsv/csv.h
+stdlib.h
+-
+stdio.h
+-
+
+/home/paulfitz/cvs/coopy/sheet_scm/libcsv/libcsv.c
+stdint.h
+-
+csv.h
+/home/paulfitz/cvs/coopy/sheet_scm/libcsv/csv.h
+

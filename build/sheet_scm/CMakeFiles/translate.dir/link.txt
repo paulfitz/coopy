@@ -1,0 +1,1 @@
+/usr/bin/gcc     CMakeFiles/translate.dir/src/fossil/translate.c.o  -o translate -rdynamic 

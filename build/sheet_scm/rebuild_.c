@@ -1,0 +1,407 @@
+/*
+** Copyright (c) 2007 D. Richard Hipp
+**
+** This program is free software; you can redistribute it and/or
+** modify it under the terms of the GNU General Public
+** License version 2 as published by the Free Software Foundation.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+** General Public License for more details.
+** 
+** You should have received a copy of the GNU General Public
+** License along with this library; if not, write to the
+** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+** Boston, MA  02111-1307, USA.
+**
+** Author contact information:
+**   drh@hwaci.com
+**   http://www.hwaci.com/drh/
+**
+*******************************************************************************
+**
+** This file contains code used to rebuild the database.
+*/
+#include "config.h"
+#include "rebuild.h"
+#include <assert.h>
+
+/*
+** Schema changes
+*/
+static const char zSchemaUpdates[] =
+
+
+"CREATE INDEX IF NOT EXISTS delta_i1 ON delta(srcid);\n"
+"\n"
+
+
+
+
+
+
+
+
+
+
+"CREATE TABLE IF NOT EXISTS shun(uuid UNIQUE);\n"
+"\n"
+
+
+
+"CREATE TABLE IF NOT EXISTS private(rid INTEGER PRIMARY KEY);\n"
+"\n"
+
+
+
+"CREATE TABLE IF NOT EXISTS reportfmt(\n"
+"   rn integer primary key,\n"
+"   owner text,\n"
+"   title text,\n"
+"   cols text,\n"
+"   sqlcode text\n"
+");\n"
+"\n"
+
+
+
+
+
+
+
+
+"CREATE TABLE IF NOT EXISTS concealed(\n"
+"  hash TEXT PRIMARY KEY,\n"
+"  content TEXT\n"
+");\n"
+;
+
+/*
+** Variables used for progress information
+*/
+static int totalSize;       /* Total number of artifacts to process */
+static int processCnt;      /* Number processed so far */
+static int ttyOutput;       /* Do progress output */
+static Bag bagDone;         /* Bag of records rebuilt */
+
+/*
+** Called after each artifact is processed
+*/
+static void rebuild_step_done(rid){
+  /* assert( bag_find(&bagDone, rid)==0 ); */
+  bag_insert(&bagDone, rid);
+  if( ttyOutput ){
+    processCnt++;
+    if (!g.fQuiet) {
+      _ssfossil_printf("%d (%d%%)...\r", processCnt, (processCnt*100/totalSize));
+      fflush(stdout);
+    }
+  }
+}
+
+/*
+** Rebuild cross-referencing information for the artifact
+** rid with content pBase and all of its descendants.  This
+** routine clears the content buffer before returning.
+*/
+static void rebuild_step(int rid, int size, Blob *pBase){
+  Stmt q1;
+  Bag children;
+  Blob copy;
+  Blob *pUse;
+  int nChild, i, cid;
+
+  /* Fix up the "blob.size" field if needed. */
+  if( size!=blob_size(pBase) ){
+    db_multi_exec(
+       "UPDATE blob SET size=%d WHERE rid=%d", blob_size(pBase), rid
+    );
+  }
+
+  /* Find all children of artifact rid */
+  db_prepare(&q1, "SELECT rid FROM delta WHERE srcid=%d", rid);
+  bag_init(&children);
+  while( db_step(&q1)==SQLITE_ROW ){
+    int cid = db_column_int(&q1, 0);
+    if( !bag_find(&bagDone, cid) ){
+      bag_insert(&children, cid);
+    }
+  }
+  nChild = bag_count(&children);
+  db_finalize(&q1);
+
+  /* Crosslink the artifact */
+  if( nChild==0 ){
+    pUse = pBase;
+  }else{
+    blob_copy(&copy, pBase);
+    pUse = &copy;
+  }
+  manifest_crosslink(rid, pUse);
+  blob_reset(pUse);
+
+  /* Call all children recursively */
+  for(cid=bag_first(&children), i=1; cid; cid=bag_next(&children, cid), i++){
+    Stmt q2;
+    int sz;
+    if( nChild==i ){
+      pUse = pBase;
+    }else{
+      blob_copy(&copy, pBase);
+      pUse = &copy;
+    }
+    db_prepare(&q2, "SELECT content, size FROM blob WHERE rid=%d", cid);
+    if( db_step(&q2)==SQLITE_ROW && (sz = db_column_int(&q2,1))>=0 ){
+      Blob delta;
+      db_ephemeral_blob(&q2, 0, &delta);
+      blob_uncompress(&delta, &delta);
+      blob_delta_apply(pUse, &delta, pUse);
+      blob_reset(&delta);
+      db_finalize(&q2);
+      rebuild_step(cid, sz, pUse);
+    }else{
+      db_finalize(&q2);
+      blob_reset(pUse);
+    }
+  }
+  bag_clear(&children);
+  rebuild_step_done(rid);
+}
+
+/*
+** Check to see if the the "sym-trunk" tag exists.  If not, create it
+** and attach it to the very first check-in.
+*/
+static void rebuild_tag_trunk(void){
+  int tagid = db_int(0, "SELECT 1 FROM tag WHERE tagname='sym-trunk'");
+  int rid;
+  char *zUuid;
+
+  if( tagid>0 ) return;
+  rid = db_int(0, "SELECT pid FROM plink AS x WHERE NOT EXISTS("
+                  "  SELECT 1 FROM plink WHERE cid=x.pid)");
+  if( rid==0 ) return;
+
+  /* Add the trunk tag to the root of the whole tree */
+  zUuid = db_text(0, "SELECT uuid FROM blob WHERE rid=%d", rid);
+  if( zUuid==0 ) return;
+  tag_add_artifact("sym-", "trunk", zUuid, 0, 2);
+  tag_add_artifact("", "branch", zUuid, "trunk", 2);
+}
+
+/*
+** Core function to rebuild the infomration in the derived tables of a
+** fossil repository from the blobs. This function is shared between
+** 'rebuild_database' ('rebuild') and 'reconstruct_cmd'
+** ('reconstruct'), both of which have to regenerate this information
+** from scratch.
+**
+** If the randomize parameter is true, then the BLOBs are deliberately
+** extracted in a random order.  This feature is used to test the
+** ability of fossil to accept records in any order and still
+** construct a sane repository.
+*/
+int rebuild_db(int randomize, int doOut){
+  Stmt s;
+  int errCnt = 0;
+  char *zTable;
+
+  bag_init(&bagDone);
+  ttyOutput = doOut;
+  processCnt = 0;
+  if (!g.fQuiet) {
+    _ssfossil_printf("0 (0%%)...\r");
+    fflush(stdout);
+  }
+  db_multi_exec(zSchemaUpdates);
+  for(;;){
+    zTable = db_text(0,
+       "SELECT name FROM sqlite_master"
+       " WHERE type='table'"
+       " AND name NOT IN ('blob','delta','rcvfrom','user',"
+                         "'config','shun','private','reportfmt',"
+                         "'concealed')"
+    );
+    if( zTable==0 ) break;
+    db_multi_exec("DROP TABLE %Q", zTable);
+    free(zTable);
+  }
+  db_multi_exec(zRepositorySchema2);
+  ticket_create_table(0);
+  shun_artifacts();
+
+  db_multi_exec(
+     "INSERT INTO unclustered"
+     " SELECT rid FROM blob EXCEPT SELECT rid FROM private"
+  );
+  db_multi_exec(
+     "DELETE FROM unclustered"
+     " WHERE rid IN (SELECT rid FROM shun JOIN blob USING(uuid))"
+  );
+  db_multi_exec(
+    "DELETE FROM config WHERE name IN ('remote-code', 'remote-maxid')"
+  );
+  totalSize = db_int(0, "SELECT count(*) FROM blob");
+  db_prepare(&s,
+     "SELECT rid, size FROM blob"
+     " WHERE NOT EXISTS(SELECT 1 FROM shun WHERE uuid=blob.uuid)"
+     "   AND NOT EXISTS(SELECT 1 FROM delta WHERE rid=blob.rid)"
+  );
+  manifest_crosslink_begin();
+  while( db_step(&s)==SQLITE_ROW ){
+    int rid = db_column_int(&s, 0);
+    int size = db_column_int(&s, 1);
+    if( size>=0 ){
+      Blob content;
+      content_get(rid, &content);
+      rebuild_step(rid, size, &content);
+    }
+  }
+  db_finalize(&s);
+  db_prepare(&s,
+     "SELECT rid, size FROM blob"
+     " WHERE NOT EXISTS(SELECT 1 FROM shun WHERE uuid=blob.uuid)"
+  );
+  while( db_step(&s)==SQLITE_ROW ){
+    int rid = db_column_int(&s, 0);
+    int size = db_column_int(&s, 1);
+    if( size>=0 ){
+      if( !bag_find(&bagDone, rid) ){
+        Blob content;
+        content_get(rid, &content);
+        rebuild_step(rid, size, &content);
+      }
+    }else{
+      db_multi_exec("INSERT OR IGNORE INTO phantom VALUES(%d)", rid);
+      rebuild_step_done(rid);
+    }
+  }
+  db_finalize(&s);
+  manifest_crosslink_end();
+  rebuild_tag_trunk();
+  if(!g.fQuiet && ttyOutput ){
+    _ssfossil_printf("\n");
+  }
+  return errCnt;
+}
+
+/*
+** COMMAND:  rebuild
+**
+** Usage: %fossil rebuild ?REPOSITORY?
+**
+** Reconstruct the named repository database from the core
+** records.  Run this command after updating the fossil
+** executable in a way that changes the database schema.
+*/
+void rebuild_database(void){
+  int forceFlag;
+  int randomizeFlag;
+  int errCnt;
+
+  forceFlag = find_option("force","f",0)!=0;
+  randomizeFlag = find_option("randomize", 0, 0)!=0;
+  if( g.argc==3 ){
+    db_open_repository(g.argv[2]);
+  }else{
+    db_find_and_open_repository(1);
+    if( g.argc!=2 ){
+      usage("?REPOSITORY-FILENAME?");
+    }
+    db_close();
+    db_open_repository(g.zRepositoryName);
+  }
+  db_begin_transaction();
+  ttyOutput = 1;
+  errCnt = rebuild_db(randomizeFlag, 1);
+  if( errCnt && !forceFlag ){
+    _ssfossil_printf("%d errors. Rolling back changes. Use --force to force a commit.\n",
+            errCnt);
+    db_end_transaction(1);
+  }else{
+    db_end_transaction(0);
+  }
+}
+
+/*
+** COMMAND:  test-detach
+**
+** Change the project-code and make other changes in order to prevent
+** the repository from ever again pushing or pulling to other
+** repositories.  Used to create a "test" repository for development
+** testing by cloning a working project repository.
+*/
+void test_detach_cmd(void){
+  db_find_and_open_repository(1);
+  db_begin_transaction();
+  db_multi_exec(
+    "DELETE FROM config WHERE name='last-sync-url';"
+    "UPDATE config SET value=lower(hex(randomblob(20)))"
+    " WHERE name='project-code';"
+    "UPDATE config SET value='detached-' || value"
+    " WHERE name='project-name' AND value NOT GLOB 'detached-*';"
+  );
+  db_end_transaction(0);
+}
+
+/*
+** COMMAND: scrub
+** %fossil scrub [--verily] [--force] [REPOSITORY]
+**
+** The command removes sensitive information (such as passwords) from a
+** repository so that the respository can be sent to an untrusted reader.
+**
+** By default, only passwords are removed.  However, if the --verily option
+** is added, then private branches, concealed email addresses, IP
+** addresses of correspondents, and similar privacy-sensitive fields
+** are also purged.
+**
+** This command permanently deletes the scrubbed information.  The effects
+** of this command are irreversible.  Use with caution.
+**
+** The user is prompted to confirm the scrub unless the --force option
+** is used.
+*/
+void scrub_cmd(void){
+  int bVerily = find_option("verily",0,0)!=0;
+  int bForce = find_option("force", "f", 0)!=0;
+  int bNeedRebuild = 0;
+  if( g.argc!=2 && g.argc!=3 ) usage("?REPOSITORY?");
+  if( g.argc==2 ){
+    db_must_be_within_tree();
+  }else{
+    db_open_repository(g.argv[2]);
+  }
+  if( !bForce ){
+    Blob ans;
+    blob_zero(&ans);
+    prompt_user("Scrubbing the repository will permanently remove user\n"
+                "passwords and other information. Changes cannot be undone.\n"
+                "Continue (y/N)? ", &ans);
+    if( blob_str(&ans)[0]!='y' ){
+      _ssfossil_exit(1);
+    }
+  }
+  db_begin_transaction();
+  db_multi_exec(
+    "UPDATE user SET pw='';"
+    "DELETE FROM config WHERE name GLOB 'last-sync-*';"
+  );
+  if( bVerily ){
+    bNeedRebuild = db_exists("SELECT 1 FROM private");
+    db_multi_exec(
+      "DELETE FROM concealed;"
+      "UPDATE rcvfrom SET ipaddr='unknown';"
+      "UPDATE user SET photo=NULL, info='';"
+      "INSERT INTO shun SELECT uuid FROM blob WHERE rid IN private;"
+    );
+  }
+  if( !bNeedRebuild ){
+    db_end_transaction(0);
+    db_multi_exec("VACUUM;");
+  }else{
+    rebuild_db(0, 1);
+    db_end_transaction(0);
+  }
+}

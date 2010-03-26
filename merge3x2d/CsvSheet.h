@@ -4,7 +4,95 @@
 #include <vector>
 #include <string>
 
-class CsvSheet {
+class DataSheet {
+public:
+  virtual int width() = 0;
+  virtual int height() = 0;
+
+  virtual std::string cellString(int x, int y) = 0;
+
+  std::string encode() {
+    std::string result = "";
+    for (int y=0;y<height();y++) {
+      for (int x=0;x<width();x++) {
+	if (x>0) {
+	  result += ",";
+	}
+	result += encodeCell(cellString(x,y));
+      }
+      result += "\r\n"; // use Windows encoding, since UNIX is more forgiving
+    }
+    return result;
+  }
+
+  static std::string encodeCell(std::string str) {
+    bool need_quote = false;
+    for (int i=0; i<str.length(); i++) {
+      char ch = str[i];
+      if (ch=='"'||ch=='\''||ch==','||ch=='\r'||ch=='\n'||ch=='\t'||ch==' ') {
+	need_quote = true;
+	break;
+      }
+    }
+    std::string result = "";
+    if (need_quote) { result += '"'; }
+    for (int i=0; i<str.length(); i++) {
+      char ch = str[i];
+      if (ch=='"') {
+	result += '"';
+      }
+      result += ch;
+    }
+    if (need_quote) { result += '"'; }
+    return result;
+  }
+};
+
+template <class T>
+class TypedSheet : public DataSheet {
+public:
+  std::vector<std::vector<T> > arr;
+  int h, w;
+
+  TypedSheet() {
+    h = w = 0;
+  }
+  
+  void resize(int w, int h, const T& zero) {
+    for (int i=0; i<h; i++) {
+      arr.push_back(std::vector<T>());
+      std::vector<T>& lst = arr.back();
+      for (int j=0; j<w; j++) {
+	lst.push_back(zero);
+      }
+    }
+    this->h = h;
+    this->w = w;
+  }
+
+  int width() {
+    return w;
+  }
+
+  int height() {
+    return h;
+  }
+
+  T& cell(int x, int y) {
+    return arr[y][x];
+  }
+};
+
+class FloatSheet : public TypedSheet<float> {
+public:
+  virtual std::string cellString(int x, int y) {
+    char buf[256];
+    snprintf(buf,sizeof(buf),"%g",cell(x,y));
+    return buf;
+  }
+};
+
+class CsvSheet : public DataSheet {
 public:
   std::vector<std::string> rec;
   std::vector<std::vector<std::string> > arr;
@@ -58,40 +146,8 @@ public:
     return h;
   }
 
-  std::string encode() {
-    std::string result = "";
-    for (int y=0;y<height();y++) {
-      for (int x=0;x<width();x++) {
-	if (x>0) {
-	  result += ",";
-	}
-	result += encode_cell(cell(x,y));
-      }
-      result += "\r\n"; // use Windows encoding, since UNIX is more forgiving
-    }
-    return result;
-  }
-
-  static std::string encode_cell(std::string str) {
-    bool need_quote = false;
-    for (int i=0; i<str.length(); i++) {
-      char ch = str[i];
-      if (ch=='"'||ch=='\''||ch==','||ch=='\r'||ch=='\n'||ch=='\t') {
-	need_quote = true;
-	break;
-      }
-    }
-    std::string result = "";
-    if (need_quote) { result += '"'; }
-    for (int i=0; i<str.length(); i++) {
-      char ch = str[i];
-      if (ch=='"') {
-	result += '"';
-      }
-      result += ch;
-    }
-    if (need_quote) { result += '"'; }
-    return result;
+  std::string cellString(int x, int y) {
+    return arr[y][x];
   }
 
 };

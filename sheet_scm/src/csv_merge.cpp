@@ -36,6 +36,7 @@ int blob_to_csv(Blob *pIn, CsvSheet& csv) {
   csv_fini(&p,cvs_merge_cb1,
 	   cvs_merge_cb2,
 	   (void*)(&csv));
+  csv_free(&p);
   return (result==blob_size(pIn))?0:-1;
 }
 

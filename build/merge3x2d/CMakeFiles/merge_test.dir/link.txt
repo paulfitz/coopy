@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/merge_test.dir/main_test.cpp.o  -o merge_test -rdynamic libmerge3x2d.a 
