@@ -2,6 +2,7 @@
 #include "CsvMerge.h"
 #include "CsvFile.h"
 #include "CsvStat.h"
+#include "CsvCompare.h"
 
 #include <getopt.h>
 #include <stdlib.h>
@@ -35,6 +36,7 @@ int main(int argc, char *argv[]) {
       {"remote", 0, 0, 'R'},
       {"parent", 0, 0, 'P'},
       {"dumb", 0, 0, 'D'},
+      {"compare", 0, 0, 'c'},
       {0, 0, 0, 0}
     };
 
@@ -107,6 +109,12 @@ int main(int argc, char *argv[]) {
 	merge.dumb_conflict(local,remote);
 	local = merge.get();
 	ss = &local;
+      }
+      break;
+    case 'c':
+      {
+	CsvCompare cmp;
+	cmp.compare(local,remote);
       }
       break;
 

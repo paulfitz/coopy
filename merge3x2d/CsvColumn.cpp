@@ -129,3 +129,9 @@ void CsvColumn::evaluate() {
   */
 }
 
+
+
+void CsvColumnPair::compare(CsvColumn& a, CsvColumn& b) {
+}
+
+

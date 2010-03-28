@@ -73,6 +73,25 @@ public:
   void evaluate();
   
   Nature getNature() { return nmean; }
+
+  int height() {
+    return sheet->height();
+  }
+
+  int size() {
+    return sheet->height();
+  }
+
+  std::string cell(int x) {
+    return sheet->cell(index,x);
+  }
 };
+
+class CsvColumnPair {
+private:
+public:
+  void compare(CsvColumn& a, CsvColumn& b);
+};
+
 
 #endif
