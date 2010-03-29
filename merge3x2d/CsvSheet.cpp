@@ -2,7 +2,8 @@
 
 using namespace std;
 
-void FloatSheet::normalize(int first, int last, float sc) {
+Stat FloatSheet::normalize(int first, int last, float sc, bool modify) {
+  Stat s;
   int hh = height();
   int ww = width();
   if (first==-1) first = 0;
@@ -18,7 +19,7 @@ void FloatSheet::normalize(int first, int last, float sc) {
       ct++;
     }
   }
-  if (ct==0) return;
+  if (ct==0) return s;
   float mean = tot;
   float dev = 1;
   mean /= ct;
@@ -30,11 +31,17 @@ void FloatSheet::normalize(int first, int last, float sc) {
   }
   //printf("mean %g, dev %g\n", mean, dev);
   if (dev<sc) dev = sc;
-  for (int i=0; i<hh; i++) {
-    for (int j=first; j<=last; j++) {
-      float r = cell(j,i);
-      r = (r-mean)/dev;
-      cell(j,i) = r;
+  if (modify) {
+    for (int i=0; i<hh; i++) {
+      for (int j=first; j<=last; j++) {
+	float r = cell(j,i);
+	r = (r-mean)/dev;
+	cell(j,i) = r;
+      }
     }
   }
+  s.mean = mean;
+  s.stddev = dev;
+  s.valid = true;
+  return s;
 }

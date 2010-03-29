@@ -86,6 +86,34 @@ public:
   }
 };
 
+class Stat {
+public:
+  double mean;
+  double stddev;
+  bool valid;
+
+  Stat() {
+    mean = stddev = 0;
+    valid = false;
+  }
+
+  bool isValid() { 
+    return valid;
+  }
+
+  double evaluate(double x) {
+    if (stddev<0.001) {
+      return 1;
+    }
+    return (x-mean)/stddev;
+  }
+
+  double rescale(double factor) {
+    mean *= factor;
+    stddev *= factor;
+  }
+};
+
 class FloatSheet : public TypedSheet<float> {
 public:
   virtual std::string cellString(int x, int y) {
@@ -94,8 +122,26 @@ public:
     return buf;
   }
 
-  void normalize(int first=-1, int last=-1, float sc=0.1);
+  Stat normalize(int first=-1, int last=-1, float sc=0.1, bool modify = true);
+  
+  void rescale(double factor) {
+    int w = width();
+    int h = height();
+    for (int x=0; x<w; x++) {
+      for (int y=0; y<h; y++) {
+	cell(x,y) *= factor;
+      }
+    }
+  }
+};
 
+class IntSheet : public TypedSheet<int> {
+public:
+  virtual std::string cellString(int x, int y) {
+    char buf[256];
+    snprintf(buf,sizeof(buf),"%d",cell(x,y));
+    return buf;
+  }
 };
 
 class CsvSheet : public DataSheet {

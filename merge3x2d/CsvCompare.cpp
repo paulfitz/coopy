@@ -2,6 +2,8 @@
 #include "CsvCompare.h"
 #include "CsvWrite.h"
 
+#include <ctype.h>
+
 #include <map>
 #include <set>
 
@@ -73,32 +75,6 @@ int rem;
 
 
 
-/*
-class Feature {
-public:
-  string str;
-
-  Feature() {
-    str = "";
-  }
-
-  bool operator==(const Feature& alt) {
-    return str==alt.str;
-  }
-
-  bool operator!=(const Feature& alt) {
-    return !((*this)==alt);
-  }
-};
-
-class FeatureHash {
-public:
-  size_t operator() (const Feature& f) {
-    return SuperFastHash(f.str.c_str(),f.str.length());
-  }
-};
-*/
-
 typedef std::string Feature;
 
 class FVal {
@@ -137,24 +113,6 @@ public:
   }
 
   void queryBit(string txt) {
-    /*
-    if (f.find(Feature(txt))==f.end()) {
-      // miss!
-    } else {
-      FVal& val = f[Feature(txt)];
-      if (val.index.size()!=1) {
-	// non-unique match
-      } else {
-	// match!
-      for (set<int>::iterator it = val.index.begin();
-	   it != val.index.end();
-	   it++) {
-	//printf("Relate %d -> %d\n", ycurr, (*it));
-	rowMatch.cell((*it),ycurr)++;
-      }
-      //}
-    }
-  */
     if (f.find(Feature(txt))==f.end()) {
       // miss!
     } else {
@@ -183,30 +141,75 @@ public:
     for (int k=1; k<10; k++) {
       for (int i=0; i<len-k; i++){
 	string part;
+	string low;
 	part = txt.substr(i,k+1);
+	low = part;
+	for (int c=0; c<low.length(); c++) {
+	  low[c] = tolower(low[c]);
+	}
 	if (query) {
 	  queryBit(part);
+	  if (low!=part) queryBit(low);
 	} else {
 	  addBit(part);
+	  if (low!=part) addBit(low);
 	}
       }
     }
   }
 
-  void apply(CsvSheet& a, bool query) {
+  void apply(CsvSheet& a, IntSheet& asel, bool query) {
     this->query = query;
     int w = a.width();
     int h = a.height();
     ct = 0;
     for (int y=0; y<h; y++) {
-      for (int x=0; x<w; x++) {
-	string txt = a.cell(x,y);
-	xcurr = x;
-	ycurr = y;
-	add(txt,query);
+      if (asel.cell(0,y)==-1) {
+	for (int x=0; x<w; x++) {
+	  string txt = a.cell(x,y);
+	  xcurr = x;
+	  ycurr = y;
+	  add(txt,query);
+	}
       }
     }
     summarize(true);
+  }
+
+  void apply(CsvSheet& a, CsvSheet& b, IntSheet& asel, IntSheet& bsel) {
+    rowMatch.resize(a.height(),b.height(),0);
+    apply(a,asel,false);
+    apply(b,bsel,true);
+  }
+
+  Stat flatten(IntSheet& sel) {
+    int w = rowMatch.width();
+    int h = rowMatch.height();
+    double mean = 0;
+    int ct = 0;
+    for (int y=0; y<h; y++) {
+      if (y<w) {
+	float tmp = rowMatch.cell(0,y);
+	rowMatch.cell(0,y) = rowMatch.cell(y,y);
+	rowMatch.cell(y,y) = tmp;
+	if (sel.cell(0,y)!=-1) {
+	  mean += rowMatch.cell(0,y);
+	  ct++;
+	}
+      } else {
+	rowMatch.cell(0,y) = 0;
+      }
+    }
+    if (ct>0) { mean /= ct; }
+    Stat s;
+    s.mean = mean;
+    s.stddev = 0;
+    s.valid = true;
+    //Stat s1 = rowMatch.normalize(0,0,0.1,false);
+    //Stat s2 = rowMatch.normalize(1,w);
+    //printf("mean self-match %g +- %g\n", s1.mean, s1.stddev);
+    //printf("mean non-match %g +- %g\n", s2.mean, s2.stddev);
+    return s;
   }
 
   void summarize(bool force = false) {
@@ -218,12 +221,97 @@ public:
 };
 
 
+class ComparePass {
+public:
+  IntSheet asel, bsel;
+
+  void compare(CsvSheet& a, CsvSheet& b) {
+    asel.resize(1,a.height(),-1);
+    bsel.resize(1,b.height(),-1);
+    int rem = -1;
+    for (int i=0; i<20; i++) {
+      printf("\n\nPass %d\n", i);
+      comparePass(a,b);
+      int processed = 0;
+      int remaining = 0;
+      for (int j=0; j<bsel.height(); j++) {
+	if (bsel.cell(0,j)==-1) {
+	  remaining++;
+	} else {
+	  processed++;
+	}
+      }
+      if (remaining == 0) {
+	printf("Everything allocated\n");
+	break;
+      }
+      if (rem==remaining) {
+	printf("No progress\n");
+	break;
+      }
+      rem = remaining;
+    }
+  }
+
+  void comparePass(CsvSheet& a, CsvSheet& b) {
+    FeatMan feat, norm1, norm2;
+    Stat astat, bstat;
+    feat.apply(a,b,asel,bsel);
+    norm1.apply(a,a,asel,asel);
+    astat = norm1.flatten(asel);
+    norm2.apply(b,b,bsel,bsel);
+    bstat = norm2.flatten(bsel);
+    double scale = 1;
+    if (bstat.mean>0.01) {
+      scale = astat.mean/bstat.mean;
+    }
+    printf("Rescaling norm2 by %g\n", scale);
+    norm2.rowMatch.rescale(scale);
+    CsvFile::write(feat.rowMatch,"match.csv");
+    CsvFile::write(norm1.rowMatch,"norm1.csv");
+    CsvFile::write(norm2.rowMatch,"norm2.csv");
+    
+    FloatSheet match = feat.rowMatch;
+    for (int y=0; y<match.height(); y++) {
+      if (bsel.cell(0,y)==-1) {
+	int bestIndex = y;
+	double bestValue = 0;
+	double bestInc = 0;
+	for (int x=0; x<match.width(); x++) {
+	  double val = match.cell(x,y);
+	  if (val>bestValue) {
+	    bestIndex = x;
+	    bestInc = val - bestValue;
+	    bestValue = val;
+	  }
+	}
+	double ref = norm2.rowMatch.cell(0,y);
+	bool ok = false;
+	if (bestValue>ref/4) {
+	  if (bestInc>bestValue/2) {
+	    printf("%d->%d, remote row %d maps to local row %d\n",
+		   y,bestIndex,y,bestIndex);
+	    ok = true;
+	    bsel.cell(0,y) = bestIndex;
+	    if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=-y) {
+	      printf("IGNORING COLLISION!\n");
+	      printf("This case has not been dealt with yet\n");
+	    }
+	    asel.cell(0,bestIndex) = y;
+	  }
+	}
+	if (!ok) {
+	  printf("%d->?, do not know what to make of remote row %d (%d %g %g : %g)\n",
+		 y, y, bestIndex, bestValue, bestInc, ref);
+	}
+      }
+    }
+  }
+};
+
 void CsvCompare::compare(CsvSheet& a, CsvSheet& b) {
-  FeatMan feat;
-  feat.rowMatch.resize(a.height(),b.height(),0);
-  feat.apply(a,false);
-  feat.apply(b,true);
-  CsvFile::write(feat.rowMatch,"match.csv");
+  ComparePass pass;
+  pass.compare(a,b);
 }
 
 
