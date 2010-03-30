@@ -51,7 +51,7 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
 }
 
 
-int CsvFile::write(DataSheet& src, const char *fname) {
+int CsvFile::write(const DataSheet& src, const char *fname) {
   FILE *fp;
   fp = fopen(fname,"wb");
   if (!fp) {

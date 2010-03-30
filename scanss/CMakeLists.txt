@@ -7,6 +7,9 @@ TARGET_LINK_LIBRARIES(scancsv merge3x2d csv)
 ADD_EXECUTABLE(scanss scanss.cpp)
 TARGET_LINK_LIBRARIES(scanss scancsv)
 
+ADD_EXECUTABLE(csvmerge csvmerge.cpp)
+TARGET_LINK_LIBRARIES(csvmerge scancsv)
+
 
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 

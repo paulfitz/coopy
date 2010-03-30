@@ -4,7 +4,7 @@
 #include "CsvSheet.h"
 
 namespace CsvFile {
-  int write(DataSheet& src, const char *fname);
+  int write(const DataSheet& src, const char *fname);
 };
 
 #endif

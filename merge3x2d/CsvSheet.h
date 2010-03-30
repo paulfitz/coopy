@@ -8,12 +8,12 @@
 
 class DataSheet {
 public:
-  virtual int width() = 0;
-  virtual int height() = 0;
+  virtual int width() const = 0;
+  virtual int height() const = 0;
 
-  virtual std::string cellString(int x, int y) = 0;
+  virtual std::string cellString(int x, int y) const = 0;
 
-  std::string encode() {
+  std::string encode() const {
     std::string result = "";
     for (int y=0;y<height();y++) {
       for (int x=0;x<width();x++) {
@@ -73,15 +73,19 @@ public:
     this->w = w;
   }
 
-  int width() {
+  int width() const {
     return w;
   }
 
-  int height() {
+  int height() const {
     return h;
   }
 
   T& cell(int x, int y) {
+    return arr[y][x];
+  }
+
+  const T& cell(int x, int y) const {
     return arr[y][x];
   }
 };
@@ -116,7 +120,7 @@ public:
 
 class FloatSheet : public TypedSheet<float> {
 public:
-  virtual std::string cellString(int x, int y) {
+  virtual std::string cellString(int x, int y) const {
     char buf[256];
     snprintf(buf,sizeof(buf),"%g",cell(x,y));
     return buf;
@@ -137,7 +141,7 @@ public:
 
 class IntSheet : public TypedSheet<int> {
 public:
-  virtual std::string cellString(int x, int y) {
+  virtual std::string cellString(int x, int y) const {
     char buf[256];
     snprintf(buf,sizeof(buf),"%d",cell(x,y));
     return buf;
@@ -202,19 +206,23 @@ public:
     rec.clear();
   }
 
-  std::string cell(int x, int y) {
+  std::string& cell(int x, int y) {
     return arr[y][x];
   }
 
-  int width() {
+  const std::string& cell(int x, int y) const {
+    return arr[y][x];
+  }
+
+  int width() const {
     return w;
   }
 
-  int height() {
+  int height() const {
     return h;
   }
 
-  std::string cellString(int x, int y) {
+  std::string cellString(int x, int y) const {
     return arr[y][x];
   }
 
