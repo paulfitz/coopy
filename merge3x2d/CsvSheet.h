@@ -188,6 +188,13 @@ public:
     h = th;
   }
 
+  void addRow(CsvSheet& alt, int row) {
+    for (int i=0; i<alt.width(); i++) {
+      addField(alt.cell(i,row).c_str());
+    }
+    addRecord();
+  }
+
   void clear() {
     tw = th = 0;
     w = h = 0;

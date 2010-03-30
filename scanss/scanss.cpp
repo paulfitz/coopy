@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
   int digit_optind = 0;
   int result = 0;
 
+  bool parented = false;
   CsvSheet local;
   CsvSheet remote;
   CsvSheet parent;
@@ -54,6 +55,7 @@ int main(int argc, char *argv[]) {
       break;
     case 'P':
       printf("Switching to parent sheet\n");
+      parented = true;
       ss = &parent;
       break;
     case 'r':
@@ -113,8 +115,13 @@ int main(int argc, char *argv[]) {
       break;
     case 'c':
       {
-	CsvCompare cmp;
-	cmp.compare(local,remote);
+	if (parented) {
+	  CsvCompare3 cmp;
+	  cmp.compare(parent,local,remote);
+	} else {
+	  CsvCompare cmp;
+	  cmp.compare(local,remote);
+	}
       }
       break;
 
