@@ -24,6 +24,8 @@ private:
   CsvSheet cmp;
 public:
   void compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote);
+
+  const CsvSheet& get() { return cmp; }
 };
 
 #endif

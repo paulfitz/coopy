@@ -73,15 +73,18 @@ int main(int argc, char *argv[]) {
       break;
     case 'p':
       if (optarg) {
-	if (dirty) {
-	  printf("Evaluating...\n");
-	  stat.evaluate(*ss);
-	  dirty = false;
-	}
 	std::string prop = optarg;
 	if (prop=="hdr") {
+	  if (dirty) {
+	    printf("Evaluating...\n");
+	    stat.evaluate(*ss);
+	    dirty = false;
+	  }
 	  result = stat.getRowDivider();
 	  printf("hdr is %d\n", result);
+	} else if (prop=="height") {
+	  result = local.height();
+	  printf("height is %d\n", result);
 	}
       }
       break;
@@ -118,6 +121,8 @@ int main(int argc, char *argv[]) {
 	if (parented) {
 	  CsvCompare3 cmp;
 	  cmp.compare(parent,local,remote);
+	  local = cmp.get();
+	  ss = &local;
 	} else {
 	  CsvCompare cmp;
 	  cmp.compare(local,remote);

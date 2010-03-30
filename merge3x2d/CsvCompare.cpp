@@ -326,9 +326,9 @@ public:
       printf("Rescaling norm2 by %g\n", scale);
       norm2.rowMatch.rescale(scale);
     }
-    CsvFile::write(feat.rowMatch,"match.csv");
-    CsvFile::write(norm1.rowMatch,"norm1.csv");
-    CsvFile::write(norm2.rowMatch,"norm2.csv");
+    //CsvFile::write(feat.rowMatch,"match.csv");
+    //CsvFile::write(norm1.rowMatch,"norm1.csv");
+    //CsvFile::write(norm2.rowMatch,"norm2.csv");
     
     FloatSheet match = feat.rowMatch;
     for (int y=0; y<match.height(); y++) {
@@ -534,10 +534,11 @@ void RowOrder::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
       result.addRow(remote,_r);
     }
   }
-  CsvFile::write(result,"result.csv");
-}  
+  //CsvFile::write(result,"result.csv");
+}
 
 void CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
   RowOrder order;
   order.compare(pivot,local,remote);
+  cmp = order.result;
 }

@@ -33,3 +33,13 @@ ADD_TEST(car_headerless scanss --read ${TESTS}/test004_base.csv
 ADD_TEST(car_headerless2 scanss --read ${TESTS}/test004_base.csv 
   --remove_row 0 --prop hdr --assert -1)
 
+# Parent   1 2 3
+# Local  0 1 2 3
+# Remote     2 3
+# MERGE: 0   2 3
+ADD_TEST(latlong_compare1 scanss
+  --local --read ${TESTS}/test002_base.csv 
+  --remote --read ${TESTS}/test002_base.csv --remove_row 0 --remove_row 1
+  --parent --read ${TESTS}/test002_base.csv --remove_row 0
+  --compare
+  --prop height --assert 3)
