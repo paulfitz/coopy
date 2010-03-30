@@ -9,6 +9,7 @@
 
 using namespace std;
 
+
 typedef std::string Feature;
 
 class FVal {
@@ -32,24 +33,33 @@ public:
   }
 };
 
-
-class FeatMan {
+class FMap {
 public:
-  int xcurr, ycurr;
   int ct;
-  FloatSheet rowMatch;
-  bool query;
-  int vigor;
-
+  int xcurr, ycurr;
   map<Feature,FVal> f;
+  FloatSheet& rowMatch;
+  bool query;
 
-  FeatMan() {
+  FMap(FloatSheet& sheet) : rowMatch(sheet) {
     query = false;
-    vigor = 0;
+    ct = 0;
   }
 
-  void setVigor(int vigor) {
-    this->vigor = vigor;
+  FloatSheet& getMatch();
+
+  //void setSize(int w, int h) {
+  //rowMatch.resize(w,h,0);
+  //  }
+
+  void setCurr(int x, int y) {
+    xcurr = x;
+    ycurr = y;
+  }
+
+  void resetCount() {
+    ct = 0;
+    query = -1;
   }
 
   void queryBit(string txt) {
@@ -77,8 +87,9 @@ public:
   }
 
   void add(string txt, bool query) {
+    this->query = query;
     int len = txt.length();
-    for (int k=1; k<10; k++) {
+    for (int k=0; k<10; k++) {
       for (int i=0; i<len-k; i++){
 	string part;
 	string low;
@@ -119,43 +130,6 @@ public:
     */
   }
 
-  void apply(CsvSheet& a, IntSheet& asel, bool query) {
-    this->query = query;
-    int w = a.width();
-    int h = a.height();
-    ct = 0;
-    for (int y=0; y<h; y++) {
-      if (asel.cell(0,y)==-1) {
-	for (int x=0; x<w; x++) {
-	  string txt = a.cell(x,y);
-	  xcurr = x;
-	  ycurr = y;
-	  add(txt,query);
-	}
-      }
-    }
-    if (vigor==1) {
-      for (int y=0; y<h; y++) {
-	if (asel.cell(0,y)==-1) {
-	  for (int x=0; x<w-1; x++) {
-	    string txt = a.cell(x,y);
-	    txt += a.cell(x+1,y);
-	    xcurr = x;
-	    ycurr = y;
-	    add(txt,query);
-	  }
-	}
-      }
-    }
-    summarize(true);
-  }
-
-  void apply(CsvSheet& a, CsvSheet& b, IntSheet& asel, IntSheet& bsel) {
-    rowMatch.resize(a.height(),b.height(),0);
-    apply(a,asel,false);
-    apply(b,bsel,true);
-  }
-
   Stat flatten(IntSheet& sel) {
     int w = rowMatch.width();
     int h = rowMatch.height();
@@ -191,6 +165,109 @@ public:
     if (ct%100000==0 || force) {
       printf("%s %d features\n", query?"Queried":"Added",ct);
     }
+  }
+
+};
+
+
+class ColMan {
+public:
+  FloatSheet match;
+  CsvCompare& comp;
+
+  ColMan(CsvCompare& comp) : comp(comp) {
+  }
+
+  //vector<ColDesc> fa;
+  //vector<ColDesc> fb;
+  
+  /*
+    find where the columns of b are in a
+  */
+  void compare(CsvSheet& a, CsvSheet& b, bool identity=false) {
+    int wa = a.width();
+    int wb = b.width();
+    int ha = a.height();
+    int hb = b.height();
+
+    /*
+    fa.clear();
+    fb.clear();
+    for (int i=0; i<wa; i++) fa.push_back(ColDesc());
+    for (int i=0; i<wb; i++) fb.push_back(ColDesc());
+    */
+
+    printf("Column comparison\n");
+    match.resize(wa,wb,0);
+    for (int rb=0; rb<hb; rb++) {
+      int ra = rb;
+      if (!identity) {
+	ra = comp.b2a(rb);
+      }
+      if (ra!=-1) {
+	FMap m(match);
+	//m.resize(wa,wb);
+	for (int i=0; i<wa; i++) {
+	  m.setCurr(i,i);
+	  m.add(a.cell(i,ra),false);
+	}
+	for (int j=0; j<wb; j++) {
+	  m.setCurr(j,j);
+	  m.add(b.cell(j,rb),true);
+	}
+      }
+    }
+  }
+};
+
+
+
+class FeatMan {
+public:
+  int vigor;
+  FMap m;
+  FloatSheet match;
+
+  FeatMan() : m(match) {
+    vigor = 0;
+  }
+
+  void setVigor(int vigor) {
+    this->vigor = vigor;
+  }
+
+  void apply(CsvSheet& a, IntSheet& asel, bool query) {
+    int w = a.width();
+    int h = a.height();
+    m.resetCount();
+    for (int y=0; y<h; y++) {
+      if (asel.cell(0,y)==-1) {
+	for (int x=0; x<w; x++) {
+	  string txt = a.cell(x,y);
+	  m.setCurr(x,y);
+	  m.add(txt,query);
+	}
+      }
+    }
+    if (vigor==1) {
+      for (int y=0; y<h; y++) {
+	if (asel.cell(0,y)==-1) {
+	  for (int x=0; x<w-1; x++) {
+	    string txt = a.cell(x,y);
+	    txt += a.cell(x+1,y);
+	    m.setCurr(x,y);
+	    m.add(txt,query);
+	  }
+	}
+      }
+    }
+    m.summarize(true);
+  }
+
+  void apply(CsvSheet& a, CsvSheet& b, IntSheet& asel, IntSheet& bsel) {
+    match.resize(a.height(),b.height(),0);
+    apply(a,asel,false);
+    apply(b,bsel,true);
   }
 
 };
@@ -248,23 +325,23 @@ public:
     feat.apply(a,b,asel,bsel);
     norm1.apply(a,a,asel,asel);
     printf("Checking [local] statistics\n");
-    astat = norm1.flatten(asel);
+    astat = norm1.m.flatten(asel);
     norm2.apply(b,b,bsel,bsel);
     printf("Checking [remote] statistics\n");
-    bstat = norm2.flatten(bsel);
+    bstat = norm2.m.flatten(bsel);
     double scale = 1;
     if (bstat.valid && astat.valid) {
       if (bstat.mean>0.01) {
 	scale = astat.mean/bstat.mean;
       }
       printf("Rescaling norm2 by %g\n", scale);
-      norm2.rowMatch.rescale(scale);
+      norm2.m.rowMatch.rescale(scale);
     }
     //CsvFile::write(feat.rowMatch,"match.csv");
     //CsvFile::write(norm1.rowMatch,"norm1.csv");
     //CsvFile::write(norm2.rowMatch,"norm2.csv");
     
-    FloatSheet match = feat.rowMatch;
+    FloatSheet match = feat.m.rowMatch;
     for (int y=0; y<match.height(); y++) {
       if (bsel.cell(0,y)==-1) {
 	int bestIndex = -1;
@@ -278,7 +355,7 @@ public:
 	    bestValue = val;
 	  }
 	}
-	double ref = norm2.rowMatch.cell(0,y);
+	double ref = norm2.m.rowMatch.cell(0,y);
 	bool ok = false;
 	if (bestValue>ref/4 ||
 	    (bestValue>(bestValue-bestInc)*10 && bestValue>ref/8)) {
@@ -474,5 +551,24 @@ void RowOrder::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
 void CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
   RowOrder order;
   order.compare(pivot,local,remote);
-  cmp = order.result;
+
+
+  ColMan col_local(order.comp_local);
+  col_local.compare(pivot,local);
+
+  ColMan col_remote(order.comp_remote);
+  col_remote.compare(pivot,remote);
+
+  ColMan col_norm1(order.comp_local);
+  col_norm1.compare(local,local,true);
+
+  ColMan col_norm2(order.comp_remote);
+  col_norm2.compare(remote,remote,true);
+
+  CsvFile::write(col_local.match,"cols_local.csv");
+  CsvFile::write(col_remote.match,"cols_remote.csv");
+
+  CsvFile::write(col_norm1.match,"norm_local.csv");
+  CsvFile::write(col_norm2.match,"norm_remote.csv");
+
 }
