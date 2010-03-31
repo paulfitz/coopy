@@ -119,11 +119,13 @@ int main(int argc, char *argv[]) {
     case 'c':
       {
 	if (parented) {
+	  printf("Three way compare...\n");
 	  CsvCompare3 cmp;
 	  cmp.compare(parent,local,remote);
 	  local = cmp.get();
 	  ss = &local;
 	} else {
+	  printf("Two way compare...\n");
 	  CsvCompare cmp;
 	  cmp.compare(local,remote);
 	}
