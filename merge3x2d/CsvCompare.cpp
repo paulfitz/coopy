@@ -625,6 +625,7 @@ class Merger {
 public:
   OrderMerge row_merge;
   OrderMerge col_merge;
+  int conflicts;
 
   CsvSheet result;
 
@@ -633,6 +634,24 @@ public:
 	     const OrderResult& nrow_remote,
 	     const OrderResult& ncol_local,
 	     const OrderResult& ncol_remote);
+
+  void mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+		int _p, int _l, int _r);
+
+  void addRow(const char *tag,
+	      const vector<string>& row,
+	      const string& blank) {
+    CsvSheet& target = result;
+    target.addField(tag);
+    for (int i=0; i<row.size(); i++) {
+      if (row[i]!=blank) {
+	target.addField(row[i].c_str());
+      } else {
+	target.addField("");
+      }
+    }
+    target.addRecord();
+  }
 
   void addRow(CsvSheet& target,
 	      const char *tag,
@@ -651,6 +670,71 @@ public:
   }
 };
 
+void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+		     int pRow, int lRow, int rRow) {
+  string blank = "__NOT_SET__CSVCOMPARE_SSFOSSIL";
+  vector<string> expandLocal, expandRemote, expandPivot, expandMerge;
+  for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+       it!=col_merge.accum.end(); 
+       it++) {
+    MatchUnit& unit = *it;
+    int pCol = unit.localUnit;
+    int lCol = unit.pivotUnit;
+    int rCol = unit.remoteUnit;
+    if (lRow!=-1 && lCol!=-1) {
+      expandLocal.push_back(local.cell(lCol,lRow));
+    } else {
+      expandLocal.push_back(blank);
+    }
+    if (rRow!=-1 && rCol!=-1) {
+      expandRemote.push_back(remote.cell(rCol,rRow));
+    } else {
+      expandRemote.push_back(blank);
+    }
+    if (pRow!=-1 && pCol!=-1) {
+      expandPivot.push_back(pivot.cell(pCol,pRow));
+    } else {
+      expandPivot.push_back(blank);
+    }
+  }
+  bool conflict = false;
+  expandMerge = expandLocal;
+  for (int i=0; i<expandLocal.size(); i++) {
+    string& _l = expandMerge[i];
+    string& _r = expandRemote[i];
+    string& _p = expandPivot[i];
+    if (_l!=_r) {
+      if (_l==blank) {
+	_l = _r;
+      } else {
+	if (_r!=blank) {
+	  // two assertions, do they conflict?
+	  // if pivot is the same as either, then no.
+	  if (_p==_l||_p==_r) {
+	    if (_p==_l) { _l = _r; }
+	  } else {
+	    conflict = true;
+	    break;
+	  }
+	}
+      }
+    }
+  }
+
+  if (conflict) {
+    conflicts++;
+    addRow("[local]",expandLocal,blank);
+    addRow("[conflicting]",expandRemote,blank);
+  } else {
+    if (lRow!=-1 && rRow!=-1) {
+      addRow("",expandMerge,blank);
+    } else if (lRow!=-1) {
+      addRow("",expandMerge,blank); // local add
+    } else if (rRow!=-1) {
+      addRow("[add]",expandMerge,blank); // remote add
+    }
+  }
+}
 
 void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 		   const OrderResult& row_local,
@@ -664,37 +748,48 @@ void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
   printf("Merging column order...\n");
   col_merge.merge(col_local,col_remote);
 
-  // premature, but just for fun, lets generate a merge
-  // (we haven't dealt with column manipulations yet though)
+  conflicts = 0;
+
+  vector<string> header;
+  for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+       it!=col_merge.accum.end(); 
+       it++) {
+    MatchUnit& unit = *it;
+    int pCol = unit.localUnit;
+    int lCol = unit.pivotUnit;
+    int rCol = unit.remoteUnit;
+    if (lCol!=-1&&rCol!=-1) {
+      header.push_back("");
+    } else if (lCol!=-1) {
+      header.push_back(""); // local add
+    } else if (rCol!=-1) {
+      header.push_back("[add]"); // remote add
+    }
+  }
+  addRow("[conflict]",header,"");
+
   for (list<MatchUnit>::iterator it=row_merge.accum.begin();
        it!=row_merge.accum.end(); 
        it++) {
     MatchUnit& unit = *it;
     int _l = unit.localUnit;
+    int _p = unit.pivotUnit;
     int _r = unit.remoteUnit;
-    int len = 10;
-    if (_l!=-1&&_r!=-1) {
-      bool ok = false;
-      if (local.width()==remote.width()) {
-	int i = 0;
-	for (i=0; i<local.width(); i++) {
-	  if (local.cell(i,_l)!=remote.cell(i,_r)) break;
-	}
-	if (i==local.width()) {
-	  addRow(result,"[merge]",local,_l,len);
-	  ok = true;
-	}
+    mergeRow(pivot,local,remote,_p,_l,_r);
+  }
+
+  if (conflicts==0) {
+    printf("No conflicts!\n");
+    CsvSheet tmp = result;
+    result.clear();
+    for (int y=1; y<tmp.height(); y++) {
+      for (int x=1; x<tmp.width(); x++) {
+	result.addField(tmp.cell(x,y).c_str());
       }
-      if (!ok) {
-	addRow(result,"[local]",local,_l,len);
-	addRow(result,"[remote]",remote,_r,len);
-      }
-    } else if (_l!=-1) {
-      addRow(result,"[localAdd]",local,_l,len);
-    } else if (_r!=-1) {
-      addRow(result,"[remoteADD]",remote,_r,len);
+      result.addRecord();
     }
   }
+
   printf("Got merged result (%dx%d)\n", result.width(), result.height());
   //CsvFile::write(result,"result.csv");
 }
