@@ -678,25 +678,30 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
        it!=col_merge.accum.end(); 
        it++) {
     MatchUnit& unit = *it;
-    int pCol = unit.localUnit;
-    int lCol = unit.pivotUnit;
+    int pCol = unit.pivotUnit;
+    int lCol = unit.localUnit;
     int rCol = unit.remoteUnit;
     if (lRow!=-1 && lCol!=-1) {
+      //printf("access local %d %d (size %d %d)\n", lCol, lRow, 
+      //local.width(), local.height());
       expandLocal.push_back(local.cell(lCol,lRow));
     } else {
       expandLocal.push_back(blank);
     }
     if (rRow!=-1 && rCol!=-1) {
+      //printf("access remote %d %d\n", rCol, rRow);
       expandRemote.push_back(remote.cell(rCol,rRow));
     } else {
       expandRemote.push_back(blank);
     }
     if (pRow!=-1 && pCol!=-1) {
+      //printf("access pivot %d %d\n", pCol, pRow);
       expandPivot.push_back(pivot.cell(pCol,pRow));
     } else {
       expandPivot.push_back(blank);
     }
   }
+  //printf("Onwards\n");
   bool conflict = false;
   expandMerge = expandLocal;
   for (int i=0; i<expandLocal.size(); i++) {
