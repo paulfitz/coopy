@@ -21,6 +21,7 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
   char buf[32768];
   size_t bytes_read;
   struct csv_parser p;
+  dest.clear();
   if (csv_init(&p,0)!=0) {
     fprintf(stderr,"csv failed to initialize\n");
     exit(1);

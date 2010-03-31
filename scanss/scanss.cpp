@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
   CsvSheet *ss = &local;
   CsvStat stat;
   bool dirty = true;
+  int diffs = 0;
   
   while (1) {
     int this_option_optind = optind ? optind : 1;
@@ -38,6 +39,7 @@ int main(int argc, char *argv[]) {
       {"parent", 0, 0, 'P'},
       {"dumb", 0, 0, 'D'},
       {"compare", 0, 0, 'c'},
+      {"diff", 0, 0, 'f'},
       {0, 0, 0, 0}
     };
 
@@ -74,6 +76,7 @@ int main(int argc, char *argv[]) {
     case 'p':
       if (optarg) {
 	std::string prop = optarg;
+	result = -1;
 	if (prop=="hdr") {
 	  if (dirty) {
 	    printf("Evaluating...\n");
@@ -85,6 +88,9 @@ int main(int argc, char *argv[]) {
 	} else if (prop=="height") {
 	  result = local.height();
 	  printf("height is %d\n", result);
+	} else if (prop=="diffs") {
+	  result = diffs;
+	  printf("diffs is %d\n", result);
 	}
       }
       break;
@@ -114,6 +120,24 @@ int main(int argc, char *argv[]) {
 	merge.dumb_conflict(local,remote);
 	local = merge.get();
 	ss = &local;
+      }
+      break;
+    case 'f': 
+      {
+	diffs = 0;
+	printf("Check if remote and local are similar\n");
+	if (remote.width()!=local.width() ||
+	    remote.height()!=local.height()) {
+	  diffs = 1000;
+	} else {
+	  for (int x=0; x<remote.width(); x++) {
+	    for (int y=0; y<remote.height(); y++) {
+	      if (remote.cell(x,y)!=local.cell(x,y)) {
+		diffs++;
+	      }
+	    }
+	  }
+	}
       }
       break;
     case 'c':

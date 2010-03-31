@@ -58,13 +58,22 @@ ADD_TEST(company_merge_conflict ${scanss}
 #  --write /tmp/check.csv
   --prop height --assert 5)
 
-## WARNING - this test is not implemented yet!
 ADD_TEST(company_merge_add_col ${scanss}
   --parent --read ${TESTS}/test003_base.csv 
   --local --read ${TESTS}/test003_add.csv
   --remote --read ${TESTS}/test003_insert_col.csv
   --compare
-  --local --write ${TESTS}/result_company_merge_add_col.csv
-#  --remote --read ${TESTS}/result_company_merge_add_col.csv
-#  --diff
+#  --local --write ${TESTS}/result_company_merge_add_col.csv
+  --remote --read ${TESTS}/result_company_merge_add_col.csv
+  --diff
+  --prop diffs --assert 0)
+
+ADD_TEST(directory_merge_add_col ${scanss}
+  --parent --read ${TESTS}/test001_base.csv 
+  --local --read ${TESTS}/test001_add.csv
+  --remote --read ${TESTS}/test001_col.csv
+  --compare
+#  --local --write ${TESTS}/result_directory_merge_add_col.csv
+  --remote --read ${TESTS}/result_directory_merge_add_col.csv
+  --diff
   --prop diffs --assert 0)
