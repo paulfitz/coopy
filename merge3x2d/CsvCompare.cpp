@@ -28,22 +28,22 @@ public:
     this->_b2a = _b2a;
   }
 
-  virtual int a2b(int x) {
+  virtual int a2b(int x) const {
     return _a2b.cell(0,x);
   }
 
-  virtual int b2a(int x) {
+  virtual int b2a(int x) const {
     return _b2a.cell(0,x);
   }
 };
 
 class IdentityOrderResult : public OrderResult {
 public:
-  virtual int a2b(int x) {
+  virtual int a2b(int x) const {
     return x;
   }
 
-  virtual int b2a(int x) {
+  virtual int b2a(int x) const {
     return x;
   }
 };
@@ -410,9 +410,9 @@ public:
 
 class ColMan : public Measure {
 public:
-  OrderResult& comp;
+  const OrderResult& comp;
 
-  ColMan(OrderResult& comp) : comp(comp) {
+  ColMan(const OrderResult& comp) : comp(comp) {
   }
 
   virtual void setup(MeasurePass& pass) {
@@ -536,16 +536,26 @@ public:
 
 class Merger {
 public:
-  OrderResult comp_local, comp_remote;
+  OrderResult row_local, row_remote;
+  OrderResult col_local, col_remote;
   list<RowUnit> rows;
   IntSheet xlocal, xremote;
   int start_local;
   int start_remote;
+
+  /*
+  IntSheet col_xlocal, col_xremote;
+  int col_start_local;
+  int col_start_remote;
+  */
+
   CsvSheet result;
 
   void merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
-	     const OrderResult& ncomp_local,
-	     const OrderResult& ncomp_remote);
+	     const OrderResult& nrow_local,
+	     const OrderResult& nrow_remote,
+	     const OrderResult& ncol_local,
+	     const OrderResult& ncol_remote);
 
   void process(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 	       int ilocal, int iremote,
@@ -582,9 +592,9 @@ void Merger::process(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
     if (ilocal<stop_local) {
       if (_l<local.height()) {
 	if (xlocal.cell(0,_l)==0) {
-	  int _lp = comp_local.b2a(_l);
+	  int _lp = row_local.b2a(_l);
 	  if (_lp!=-1) {
-	    int _lpr = comp_remote.a2b(_lp);
+	    int _lpr = row_remote.a2b(_lp);
 	    if (_lpr!=-1) {
 	      process(pivot,local,remote,0,0,ilocal,_lpr);
 	      printf("Local line %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
@@ -606,9 +616,9 @@ void Merger::process(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
       int _r = iremote;
       if (_r<remote.height()) {
 	if (xremote.cell(0,_r)==0) {
-	  int _rp = comp_remote.b2a(_r);
+	  int _rp = row_remote.b2a(_r);
 	  if (_rp!=-1) {
-	    int _rpl = comp_local.a2b(_rp);
+	    int _rpl = row_local.a2b(_rp);
 	    if (_rpl!=-1) {
 	      // we will get this (assuming no collisions), skip...
 	    } else {
@@ -632,11 +642,13 @@ void Merger::process(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 
 
 void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
-		   const OrderResult& ncomp_local,
-		   const OrderResult& ncomp_remote) {
+		   const OrderResult& nrow_local,
+		   const OrderResult& nrow_remote,
+		   const OrderResult& ncol_local,
+		   const OrderResult& ncol_remote) {
 
-  comp_local = ncomp_local;
-  comp_remote = ncomp_remote;
+  row_local = nrow_local;
+  row_remote = nrow_remote;
     
   xlocal.resize(1,local.height(),0);
   xremote.resize(1,remote.height(),0);
@@ -727,44 +739,52 @@ void CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
 			 p2r_row_norm2,p2r_row_pass_norm2,
 			 1);
 
-  // Compare p2r rows
   p2r_row_man.compare();
 
-  Merger merger;
-  merger.merge(pivot,local,remote,
-	       p2l_row_pass_local.getOrder(),
-	       p2r_row_pass_local.getOrder());
-
-  cmp = merger.result;
-
-  /*
-
-  // Prepare for column comparison
+  // Now, column comparison
 
   MeasurePass p2l_col_pass_local(pivot,local);
   MeasurePass p2l_col_pass_norm1(pivot,pivot);
   MeasurePass p2l_col_pass_norm2(local,local);
 
-  ColMan p2l_col_local(order.comp_local);
+  OrderResult p2l_row_order = p2l_row_pass_local.getOrder();
+  ColMan p2l_col_local(p2l_row_order);
   ColMan p2l_col_norm1(id);
   ColMan p2l_col_norm2(id);
 
-  MeasureMan col_man(col_local,col_pass_local,
-		     col_norm1,col_pass_norm1,
-		     col_norm2,col_pass_norm2,
-		     0);
+  MeasureMan p2l_col_man(p2l_col_local,p2l_col_pass_local,
+			 p2l_col_norm1,p2l_col_pass_norm1,
+			 p2l_col_norm2,p2l_col_pass_norm2,
+			 0);
 
-  // Compare p2l columns
-  col_man.compare();
-  */
+  p2l_col_man.compare();
 
-  /*
+  MeasurePass p2r_col_pass_local(pivot,remote);
+  MeasurePass p2r_col_pass_norm1(pivot,pivot);
+  MeasurePass p2r_col_pass_norm2(remote,remote);
 
-  CsvFile::write(pass_local.match,"cols_local.csv");
-  //CsvFile::write(pass_remote.match,"cols_remote.csv");
+  OrderResult p2r_row_order = p2r_row_pass_local.getOrder();
+  ColMan p2r_col_local(p2r_row_order);
+  ColMan p2r_col_norm1(id);
+  ColMan p2r_col_norm2(id);
 
-  CsvFile::write(pass_norm1.match,"norm_local.csv");
-  CsvFile::write(pass_norm2.match,"norm_remote.csv");
-  */
+  MeasureMan p2r_col_man(p2r_col_local,p2r_col_pass_local,
+			 p2r_col_norm1,p2r_col_pass_norm1,
+			 p2r_col_norm2,p2r_col_pass_norm2,
+			 0);
 
+  p2r_col_man.compare();
+
+
+  OrderResult p2l_col_order = p2l_col_pass_local.getOrder();
+  OrderResult p2r_col_order = p2r_col_pass_local.getOrder();
+
+  Merger merger;
+  merger.merge(pivot,local,remote,
+	       p2l_row_order,
+	       p2r_row_order,
+	       p2l_col_order,
+	       p2r_col_order);
+
+  cmp = merger.result;
 }
