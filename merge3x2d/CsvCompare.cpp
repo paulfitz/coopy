@@ -35,6 +35,9 @@ public:
   virtual int b2a(int x) const {
     return _b2a.cell(0,x);
   }
+
+  int alen() const { return _a2b.height(); }
+  int blen() const { return _b2a.height(); }
 };
 
 class IdentityOrderResult : public OrderResult {
@@ -516,38 +519,112 @@ public:
 
 
 
-class RowUnit {
+class MatchUnit {
 public:
-  int pivotRow;
-  int localRow;
-  int remoteRow;
+  int pivotUnit;
+  int localUnit;
+  int remoteUnit;
 
-  RowUnit() {
-    remoteRow = localRow = pivotRow = -1;
+  MatchUnit() {
+    remoteUnit = localUnit = pivotUnit = -1;
   }
 
-  RowUnit(int pivot, int local, int remote) {
-    pivotRow = pivot;
-    localRow = local;
-    remoteRow = remote;
+  MatchUnit(int pivot, int local, int remote) {
+    pivotUnit = pivot;
+    localUnit = local;
+    remoteUnit = remote;
   }
 };
 
 
-class Merger {
+class OrderMerge {
 public:
-  OrderResult row_local, row_remote;
-  OrderResult col_local, col_remote;
-  list<RowUnit> rows;
+  OrderResult order_local, order_remote;
+  list<MatchUnit> accum;
   IntSheet xlocal, xremote;
   int start_local;
   int start_remote;
 
-  /*
-  IntSheet col_xlocal, col_xremote;
-  int col_start_local;
-  int col_start_remote;
-  */
+  void process(int ilocal, int iremote,
+	       int stop_local, int stop_remote);
+
+  void merge(const OrderResult& nlocal,
+	     const OrderResult& nremote) {
+    order_local = nlocal;
+    order_remote = nremote;
+    xlocal.resize(1,order_local.blen(),0);
+    xremote.resize(1,order_remote.blen(),0);
+    start_local = 0;
+    start_remote = 0;
+    process(0,0,order_local.blen(),order_remote.blen());
+  }
+};
+
+void OrderMerge::process(int ilocal, int iremote,
+			 int stop_local, int stop_remote) {
+  while (true) {
+    if (ilocal>=stop_local &&
+	iremote>=stop_remote) {
+      break;
+    }
+    int _l = ilocal;
+    if (ilocal<stop_local) {
+      if (_l<xlocal.height()) {
+	if (xlocal.cell(0,_l)==0) {
+	  int _lp = order_local.b2a(_l);
+	  if (_lp!=-1) {
+	    int _lpr = order_remote.a2b(_lp);
+	    if (_lpr!=-1) {
+	      process(0,0,ilocal,_lpr);
+	      printf("Local unit %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
+	      accum.push_back(MatchUnit(_lp,_l,_lpr));
+	      xremote.cell(0,_lpr) = 1;
+	      xlocal.cell(0,_l) = 1;
+	    } else {
+	      printf("Local unit %d exists in pivot at %d, but not in remote - [DELETE]\n", _l, _lp);
+	      xlocal.cell(0,_l) = 1;
+	    }
+	  } else {
+	    printf("Local unit %d not in pivot - [ADD]\n", _l);
+	    accum.push_back(MatchUnit(-1,_l,-1));
+	    xlocal.cell(0,_l) = 1;
+	  }
+	}
+      }
+    } else {
+      int _r = iremote;
+      if (_r<xremote.height()) {
+	if (xremote.cell(0,_r)==0) {
+	  int _rp = order_remote.b2a(_r);
+	  if (_rp!=-1) {
+	    int _rpl = order_local.a2b(_rp);
+	    if (_rpl!=-1) {
+	      // we will get this (assuming no collisions), skip...
+	    } else {
+	      // deleted locally
+	    }
+	  } else {
+	    printf("Remote unit %d not in pivot - [ADD]\n", _r);
+	    accum.push_back(MatchUnit(-1,-1,_r));
+	    xremote.cell(0,_r) = 1;
+	  }
+	}
+      }
+    }
+    if (ilocal<stop_local) {
+      ilocal++;
+    } else {
+      iremote++;
+    }
+  }
+}
+
+
+
+class Merger {
+public:
+  OrderMerge row_merge;
+  OrderMerge col_merge;
 
   CsvSheet result;
 
@@ -556,10 +633,6 @@ public:
 	     const OrderResult& nrow_remote,
 	     const OrderResult& ncol_local,
 	     const OrderResult& ncol_remote);
-
-  void process(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
-	       int ilocal, int iremote,
-	       int stop_local, int stop_remote);
 
   void addRow(CsvSheet& target,
 	      const char *tag,
@@ -579,94 +652,26 @@ public:
 };
 
 
-void Merger::process(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
-		     int ilocal, int iremote,
-		     int stop_local, int stop_remote) {
-  while (true) {
-    //printf("CsvCompare3 loop [local] %d [remote] %d\n", ilocal, iremote);
-    if (ilocal>=stop_local &&
-	iremote>=stop_remote) {
-      break;
-    }
-    int _l = ilocal;
-    if (ilocal<stop_local) {
-      if (_l<local.height()) {
-	if (xlocal.cell(0,_l)==0) {
-	  int _lp = row_local.b2a(_l);
-	  if (_lp!=-1) {
-	    int _lpr = row_remote.a2b(_lp);
-	    if (_lpr!=-1) {
-	      process(pivot,local,remote,0,0,ilocal,_lpr);
-	      printf("Local line %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
-	      rows.push_back(RowUnit(_lp,_l,_lpr));
-	      xremote.cell(0,_lpr) = 1;
-	      xlocal.cell(0,_l) = 1;
-	    } else {
-	      printf("Local line %d exists in pivot at %d, but not in remote - [DELETE]\n", _l, _lp);
-	      xlocal.cell(0,_l) = 1;
-	    }
-	  } else {
-	    printf("Local line %d not in pivot - [ADD]\n", _l);
-	    rows.push_back(RowUnit(-1,_l,-1));
-	    xlocal.cell(0,_l) = 1;
-	  }
-	}
-      }
-    } else {
-      int _r = iremote;
-      if (_r<remote.height()) {
-	if (xremote.cell(0,_r)==0) {
-	  int _rp = row_remote.b2a(_r);
-	  if (_rp!=-1) {
-	    int _rpl = row_local.a2b(_rp);
-	    if (_rpl!=-1) {
-	      // we will get this (assuming no collisions), skip...
-	    } else {
-	      // deleted locally
-	    }
-	  } else {
-	    printf("Remote line %d not in pivot - [ADD]\n", _r);
-	    rows.push_back(RowUnit(-1,-1,_r));
-	    xremote.cell(0,_r) = 1;
-	  }
-	}
-      }
-    }
-    if (ilocal<stop_local) {
-      ilocal++;
-    } else {
-      iremote++;
-    }
-  }
-}
-
-
 void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
-		   const OrderResult& nrow_local,
-		   const OrderResult& nrow_remote,
-		   const OrderResult& ncol_local,
-		   const OrderResult& ncol_remote) {
+		   const OrderResult& row_local,
+		   const OrderResult& row_remote,
+		   const OrderResult& col_local,
+		   const OrderResult& col_remote) {
 
-  row_local = nrow_local;
-  row_remote = nrow_remote;
-    
-  xlocal.resize(1,local.height(),0);
-  xremote.resize(1,remote.height(),0);
+  printf("Merging row order...\n");
+  row_merge.merge(row_local,row_remote);
 
-  start_local = 0;
-  start_remote = 0;
-  process(pivot,local,remote,0,0,local.height(),remote.height());
-
-  printf("Merging...\n");
+  printf("Merging column order...\n");
+  col_merge.merge(col_local,col_remote);
 
   // premature, but just for fun, lets generate a merge
   // (we haven't dealt with column manipulations yet though)
-  for (list<RowUnit>::iterator it=rows.begin();
-       it!=rows.end(); 
+  for (list<MatchUnit>::iterator it=row_merge.accum.begin();
+       it!=row_merge.accum.end(); 
        it++) {
-    RowUnit& unit = *it;
-    int _l = unit.localRow;
-    int _r = unit.remoteRow;
+    MatchUnit& unit = *it;
+    int _l = unit.localUnit;
+    int _r = unit.remoteUnit;
     int len = 10;
     if (_l!=-1&&_r!=-1) {
       bool ok = false;
