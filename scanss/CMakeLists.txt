@@ -77,3 +77,14 @@ ADD_TEST(directory_merge_add_col ${scanss}
   --remote --read ${TESTS}/result_directory_merge_add_col.csv
   --diff
   --prop diffs --assert 0)
+
+ADD_TEST(directory_merge_spelling ${scanss}
+  --parent --read ${TESTS}/test001_base.csv 
+  --local --read ${TESTS}/test001_add.csv
+  --remote --read ${TESTS}/test001_spell.csv
+  --compare
+  --local --write ${TESTS}/result_directory_merge_spelling.csv
+  --remote --read ${TESTS}/result_directory_merge_spelling.csv
+  --diff
+  --prop diffs --assert 0)
+

@@ -7,49 +7,36 @@
 
 #include <ctype.h>
 
-#include <map>
+//#include <map>
 #include <list>
+
+#include "OrderResult.h"
 
 using namespace std;
 
+#ifdef __GNUC__
+#include <ext/hash_map>
+using namespace __gnu_cxx;
+#define map hash_map
+//#include <unordered_map>
+//#define map unordered_map
+namespace __gnu_cxx {
+  template <>
+  struct hash<std::string> {
+    size_t operator() (const std::string& x) const {
+      return hash<const char*>()(x.c_str());
+    }
+  };
+}
+#else
+#warning "Unfamiliar compiler, compiling without a hash map chosen - fix this"
+#include <map>
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 //
 // Row/Column neutral code
 //
-
-class OrderResult {
-private:
-  IntSheet _a2b, _b2a;
-public:
-
-  void setup(IntSheet& _a2b, IntSheet& _b2a) {
-    this->_a2b = _a2b;
-    this->_b2a = _b2a;
-  }
-
-  virtual int a2b(int x) const {
-    return _a2b.cell(0,x);
-  }
-
-  virtual int b2a(int x) const {
-    return _b2a.cell(0,x);
-  }
-
-  int alen() const { return _a2b.height(); }
-  int blen() const { return _b2a.height(); }
-};
-
-class IdentityOrderResult : public OrderResult {
-public:
-  virtual int a2b(int x) const {
-    return x;
-  }
-
-  virtual int b2a(int x) const {
-    return x;
-  }
-};
 
 
 typedef std::string Feature;
@@ -105,7 +92,7 @@ public:
   }
 
   void queryBit(string txt) {
-    if (f.find(Feature(txt))==f.end()) {
+    if (f.find(txt)==f.end()) {
       // miss!
     } else {
       FVal& val = f[Feature(txt)];
@@ -128,10 +115,10 @@ public:
     summarize();
   }
 
-  void add(string txt, bool query) {
+  void add(string txt, bool query, int ctrl = 0) {
     this->query = query;
     int len = txt.length();
-    for (int k=0; k<10; k++) {
+    for (int k=8-ctrl*2; k<10; k++) {
       for (int i=0; i<len-k; i++){
 	string part;
 	string low;
@@ -150,6 +137,8 @@ public:
       }
     }
   }
+
+  static int getCtrlMax() { return 4; }
 
   void summarize(bool force = false) {
     if (ct%100000==0 || force) {
@@ -217,7 +206,9 @@ public:
 class Measure {
 public:
   virtual void setup(MeasurePass& pass) = 0;
-  virtual void measure(MeasurePass& pass) = 0;
+  virtual void measure(MeasurePass& pass, int ctrl=0) = 0;
+
+  virtual int getCtrlMax() = 0;
 };
 
 
@@ -253,9 +244,11 @@ public:
     bnorm.setup(bnorm_pass);
 
     int rem = -1;
+    int ctrl = 0;
+    int ctrlMax = main.getCtrlMax();
     for (int i=0; i<20; i++) {
       printf("\n\nPass %d\n", i);
-      compare1();
+      compare1(ctrl);
       //comparePass(a,b);
       int processed = 0;
       int remaining = 0;
@@ -270,9 +263,22 @@ public:
 	printf("Everything allocated\n");
 	break;
       }
+      printf("Not everything allocated, %d remain (a-total %d b-total %d)\n",
+	     remaining,
+	     main_pass.asel.height(),
+	     main_pass.bsel.height());
+      if (remaining<=(main_pass.bsel.height()-main_pass.asel.height())) {
+	printf("No more could be allocated\n");
+	break;
+      }
       if (rem==remaining) {
 	printf("No progress\n");
-	break;
+	if (ctrl<ctrlMax) {
+	  printf("Increasing desperation\n");
+	  ctrl++;
+	} else {
+	  break;
+	}
       }
       rem = remaining;
     }
@@ -285,19 +291,19 @@ public:
     return a.cell(y,x);
   }
 
-  void compare1() {
+  void compare1(int ctrl) {
     Stat astat, bstat;
     //feat.apply(a,b,asel,bsel);
-    main.measure(main_pass);
+    main.measure(main_pass,ctrl);
     //norm1.apply(a,a,asel,asel);
     anorm_pass.asel = main_pass.asel;
     anorm_pass.bsel = main_pass.asel;
-    anorm.measure(anorm_pass);
+    anorm.measure(anorm_pass,ctrl);
     printf("Checking [local] statistics\n");
     astat = anorm_pass.flatten();
     bnorm_pass.asel = main_pass.bsel;
     bnorm_pass.bsel = main_pass.bsel;
-    bnorm.measure(bnorm_pass);
+    bnorm.measure(bnorm_pass,ctrl);
     printf("Checking [remote] statistics\n");
     bstat = bnorm_pass.flatten();
     double scale = 1;
@@ -332,8 +338,8 @@ public:
 	}
 	double ref = bnorm_pass.match.cell(0,y);
 	bool ok = false;
-	if (bestValue>ref/4 ||
-	    (bestValue>(bestValue-bestInc)*10 && bestValue>ref/8)) {
+	if (bestValue>ref/4) {// ||
+	  //	    (bestValue>(bestValue-bestInc)*10 && bestValue>ref/8)) {
 	  if (bestInc>bestValue/2 && bestIndex>=0) {
 	    printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
 		   y,bestIndex,y,bestIndex,
@@ -383,7 +389,7 @@ public:
   }
 
 
-  virtual void measure(MeasurePass& pass) {
+  virtual void measure(MeasurePass& pass, int ctrl) {
     int wa = pass.a.width();
     int wb = pass.b.width();
     int ha = pass.a.height();
@@ -391,21 +397,29 @@ public:
 
     printf("Column comparison\n");
     pass.clearMatch();
-    for (int rb=0; rb<hb; rb++) {
+    int step = hb/pow(2,ctrl+4);
+    if (step<1) step = 1;
+    printf("Desperation %d, step size %d\n", ctrl, step);
+    for (int rb=0; rb<hb; rb+=step) {
       int ra = comp.b2a(rb);
       if (ra!=-1) {
 	FMap m(pass.match);
+	int c = m.getCtrlMax();
 	//m.resize(wa,wb);
 	for (int i=0; i<wa; i++) {
 	  m.setCurr(i,i);
-	  m.add(pass.a.cell(i,ra),false);
+	  m.add(pass.a.cell(i,ra),false,c);
 	}
 	for (int j=0; j<wb; j++) {
 	  m.setCurr(j,j);
-	  m.add(pass.b.cell(j,rb),true);
+	  m.add(pass.b.cell(j,rb),true,c);
 	}
       }
     }
+  }
+
+  virtual int getCtrlMax() {
+    return 5;
   }
 
 };
@@ -436,7 +450,7 @@ public:
     pass.setSize(pass.a.height(),pass.b.height());
   }
 
-  void apply(CsvSheet& a, IntSheet& asel, bool query) {
+  void apply(CsvSheet& a, IntSheet& asel, bool query, int ctrl) {
     int w = a.width();
     int h = a.height();
     m.resetCount();
@@ -445,7 +459,7 @@ public:
 	for (int x=0; x<w; x++) {
 	  string txt = a.cell(x,y);
 	  m.setCurr(x,y);
-	  m.add(txt,query);
+	  m.add(txt,query,ctrl);
 	}
       }
     }
@@ -456,7 +470,7 @@ public:
 	    string txt = a.cell(x,y);
 	    txt += a.cell(x+1,y);
 	    m.setCurr(x,y);
-	    m.add(txt,query);
+	    m.add(txt,query,ctrl);
 	  }
 	}
       }
@@ -464,15 +478,20 @@ public:
     m.summarize(true);
   }
 
-  void apply(CsvSheet& a, CsvSheet& b, IntSheet& asel, IntSheet& bsel) {
+  void apply(CsvSheet& a, CsvSheet& b, IntSheet& asel, IntSheet& bsel,
+	     int ctrl) {
     match.resize(a.height(),b.height(),0);
-    apply(a,asel,false);
-    apply(b,bsel,true);
+    apply(a,asel,false,ctrl);
+    apply(b,bsel,true,ctrl);
   }
 
-  virtual void measure(MeasurePass& pass) {
-    apply(pass.a, pass.b, pass.asel, pass.bsel);
+  virtual void measure(MeasurePass& pass, int ctrl) {
+    apply(pass.a, pass.b, pass.asel, pass.bsel, ctrl);
     pass.match = match;
+  }
+
+  virtual int getCtrlMax() {
+    return FMap::getCtrlMax();
   }
 };
 
