@@ -347,12 +347,13 @@ public:
 	    printf("  [remote] %s\n", cell(b,0,y).c_str());
 	    printf("  [local] %s\n", cell(a,0,bestIndex).c_str());
 	    ok = true;
-	    bsel.cell(0,y) = bestIndex;
-	    if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=-y) {
-	      printf("IGNORING COLLISION!\n");
-	      printf("This case has not been dealt with yet\n");
+	    if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
+	      printf("COLLISION! Ignoring unavailable match\n");
+	      printf("This case has not been optimized\n");
+	    } else {
+	      bsel.cell(0,y) = bestIndex;
+	      asel.cell(0,bestIndex) = y;
 	    }
-	    asel.cell(0,bestIndex) = y;
 	  }
 	}
 	if (!ok) {
