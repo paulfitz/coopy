@@ -151,33 +151,6 @@ public:
     }
   }
 
-  Stat flatten(IntSheet& sel) {
-    int w = rowMatch.width();
-    int h = rowMatch.height();
-    double mean = 0;
-    int ct = 0;
-    for (int y=0; y<h; y++) {
-      if (y<w) {
-	float tmp = rowMatch.cell(0,y);
-	rowMatch.cell(0,y) = rowMatch.cell(y,y);
-	rowMatch.cell(y,y) = tmp;
-	if (sel.cell(0,y)==-1) {
-	  mean += rowMatch.cell(0,y);
-	  ct++;
-	}
-      } else {
-	rowMatch.cell(0,y) = 0;
-      }
-    }
-    if (ct>0) { mean /= ct; }
-    Stat s;
-    s.mean = mean;
-    s.stddev = 0;
-    s.valid = (ct>10);
-    printf("Mean is %g (count %d)\n", s.mean, ct);
-    return s;
-  }
-
   void summarize(bool force = false) {
     if (ct%100000==0 || force) {
       printf("%s %d features\n", query?"Queried":"Added",ct);
@@ -231,10 +204,6 @@ public:
     s.stddev = 0;
     s.valid = (ct>10);
     printf("Mean is %g (count %d)\n", s.mean, ct);
-    //Stat s1 = rowMatch.normalize(0,0,0.1,false);
-    //Stat s2 = rowMatch.normalize(1,w);
-    //printf("mean self-match %g +- %g\n", s1.mean, s1.stddev);
-    //printf("mean non-match %g +- %g\n", s2.mean, s2.stddev);
     return s;
   }
 
@@ -304,15 +273,6 @@ public:
       if (rem==remaining) {
 	printf("No progress\n");
 	break;
-	/*
-	if (vigor==1) {
-	  printf("Nothing left to try\n");
-	  break;
-	} else {
-	  printf("Try with vigor\n");
-	  vigor = 1;
-	}
-	*/
       }
       rem = remaining;
     }
@@ -375,7 +335,7 @@ public:
 	if (bestValue>ref/4 ||
 	    (bestValue>(bestValue-bestInc)*10 && bestValue>ref/8)) {
 	  if (bestInc>bestValue/2 && bestIndex>=0) {
-	    printf("%d->%d, remote row %d maps to local unit %d (%d %g %g : %g)\n",
+	    printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
 		   y,bestIndex,y,bestIndex,
 		   bestIndex, bestValue, bestInc, ref);
 	    printf("  [remote] %s\n", cell(b,0,y).c_str());
