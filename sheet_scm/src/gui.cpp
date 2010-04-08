@@ -108,14 +108,26 @@ private:
     bool logging;
     list<string> results;
     ostream *stream;
+    wxWindow *owner;
+    wxTextCtrl *ctrl;
 public:
     UiFossilHandler() {
         logging = false;
         stream = NULL;
+        owner = NULL;
+        ctrl = NULL;
     }
 
     void setStream(ostream *stream) {
         this->stream = stream;
+    }
+
+    void setOwner(wxWindow& owner) {
+        this->owner = &owner;
+    }
+
+    void setCtrl(wxTextCtrl& ctrl) {
+        this->ctrl = &ctrl;
     }
 
     virtual int exit(int result) {
@@ -163,6 +175,10 @@ public:
                 replace(str,"Received:","\nReceived:");
                 (*stream) << str;
                 (*stream).flush();
+                if (owner!=NULL) {
+                    owner->Update();
+                    ctrl->SetSelection(ctrl->GetLastPosition(),-1);
+                }
             }
         }
     }
@@ -382,6 +398,7 @@ bool MyFrame::OnInit() {
     askDestination = true;
 
     ssfossil_set_handler(&handler);
+    handler.setOwner(*this);
 
     SetIcon(wxIcon((char**)appicon_xpm));
 
@@ -461,6 +478,8 @@ bool MyFrame::OnInit() {
                              wxDefaultPosition, wxSize(620,200),  
                              wxTE_MULTILINE | wxTE_RICH, 
                              wxDefaultValidator, wxTextCtrlNameStr);
+
+    handler.setCtrl(*log_box);
 
     topsizer->Add(log_box);
     topsizer->Add(button_sizer,wxSizerFlags(0).Align(wxALIGN_RIGHT));
