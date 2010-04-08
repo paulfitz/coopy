@@ -11,7 +11,7 @@ while [ ! "k$1" = "k" ]; do
 	echo "  MINGW_BUILD=/home/paulfitz/cvs/coopy/mingw"
 	echo "  LINUX_CHROOT=/scratch/debian-etch-i386"
 	echo "  LINUX_CHROOT_REPO=/home/paulfitz/coopy"
-	echo "  LINUX_CHROOT_BUILD=/home/paulfitz/coopy/build"
+	echo "  LINUX_CHROOT_BUILD=/home/paulfitz/coopy_build"
 	echo "  OUTPUT=/tmp/coopy"
 	exit 1
     fi
