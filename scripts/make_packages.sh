@@ -41,15 +41,15 @@ while [ ! "k$1" = "k" ]; do
 	sudo git pull
 	cd $LINUX_CHROOT
 	cd ./$LINUX_CHROOT_BUILD || exit 1
-	sudo rm -rf *.tgz *.sh *.Z
+	sudo rm -rf *.gz *.sh *.Z
 	(
 	    echo "cd $LINUX_CHROOT_BUILD"
 	    echo "cmake ."
 	    echo "make"
 	    echo "make package"
-	    echo "make source_package"
+	    echo "make package_source"
 	    ) | sudo chroot $LINUX_CHROOT
-	cp -v *.tgz *.sh *.Z $OUTPUT
+	cp -v *.gz *.sh *.Z $OUTPUT
     fi
 
     shift
