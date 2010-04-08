@@ -786,7 +786,7 @@ void CsvCompare::compare(CsvSheet& local, CsvSheet& remote) {
   exit(1);
 }
 
-void CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
+int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
   IdentityOrderResult id;
 
   //RowOrder order;
@@ -872,4 +872,6 @@ void CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
 	       p2r_col_order);
 
   cmp = merger.result;
+
+  return 0;
 }

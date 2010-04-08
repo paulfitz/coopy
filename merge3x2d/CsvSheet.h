@@ -154,10 +154,12 @@ public:
   std::vector<std::vector<std::string> > arr;
   int h, w;
   int th, tw;
+  bool valid;
 
   CsvSheet() {
     w = h = 0;
     tw = th = 0;
+    valid = true;
   }
 
   bool removeRow(int index) {
@@ -185,6 +187,9 @@ public:
     arr.push_back(rec);
     rec.clear();
     if (tw>w) {
+      if (w!=tw && w!=0) {
+	valid = false;
+      }
       w = tw;
     }
     tw = 0;
@@ -204,6 +209,7 @@ public:
     w = h = 0;
     arr.clear();
     rec.clear();
+    valid = true;
   }
 
   std::string& cell(int x, int y) {
@@ -226,6 +232,9 @@ public:
     return arr[y][x];
   }
 
+  bool isValid() const {
+    return valid;
+  }
 };
 
 #endif

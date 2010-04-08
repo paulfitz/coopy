@@ -17,6 +17,7 @@
 #include <wx/filename.h>
 #include <wx/textctrl.h>
 #include <wx/url.h>
+#include <wx/filepicker.h>
 
 #include <string>
 #include <list>
@@ -28,11 +29,6 @@
 #define static const
 #include "icon/appicon.xpm"
 #undef static
-
-// Hardcoded variables at this point
-#define FOSSIL_ROOT "www.giszpatrick.com/repo/repo.cgi/"
-#define FOSSIL_REPO "test"
-#define FOSSIL_USERNAME "paulfitz"
 
 using namespace std;
 
@@ -195,7 +191,9 @@ private:
     //wxTextCtrl* m_textCtrl;
 
     wxTextCtrl *log_box;
-
+    wxTextCtrl *src_box;
+    wxTextCtrl *dest_box;
+    wxDirPickerCtrl *dir_box;
 
     UiFossilHandler handler; 
 
@@ -324,6 +322,9 @@ public:
 enum
     {
         TEXT_Main = wxID_HIGHEST + 1,
+        TEXT_Src,
+        TEXT_Dest,
+        TEXT_Dir,
         ID_Quit,
         ID_Commit,
         ID_Sync,
@@ -337,7 +338,7 @@ enum
 
 bool MyApp::OnInit()
 {
-    MyFrame *frame = new MyFrame( _T("coopy"), wxPoint(50,50), wxSize(450,340) );
+    MyFrame *frame = new MyFrame( _T("Coopy"), wxPoint(50,50), wxSize(450,340) );
 
     g_hwnd = (int)(frame->GetHandle());
 
@@ -404,28 +405,63 @@ bool MyFrame::OnInit() {
                       wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10));    
 
 
-    wxBoxSizer *button_sizer2 = new wxBoxSizer( wxHORIZONTAL );
-    button_sizer2->Add(new wxButton( this, ID_Sync, _T("Pull &in changes") ),
-                       wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10));
-    button_sizer2->Add(new wxButton( this, ID_Undo, _T("&Undo last pull") ),
-                       wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10));
-    button_sizer2->Add(new wxButton( this, ID_Commit, _T("Push &out changes") ),
-                       wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10));
-
-
     wxSizerFlags tflags = 
         wxSizerFlags(0).Align(wxALIGN_LEFT).Border(wxLEFT|wxRIGHT|wxTOP, 10);
     wxSizerFlags flags = 
         wxSizerFlags(0).Align(wxALIGN_CENTER).Border(wxALL, 10);
-    topsizer->Add(new wxStaticText(this,-1,_T("Let's get coopy!")),tflags);
-    //topsizer->Add(m_textCtrl, flags);
+    wxSizerFlags rflags = 
+        wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10);
+    wxSizerFlags lflags = 
+        wxSizerFlags(0).Align(wxALIGN_LEFT).Border(wxALL, 10);
+
+    wxBoxSizer *source_bar = new wxBoxSizer( wxHORIZONTAL );
+    source_bar->Add(new wxStaticText(this,-1,_T("Pull from"),
+                                     wxDefaultPosition,
+                                     wxSize(70,-1)),lflags);
+    src_box = new wxTextCtrl(this,TEXT_Src, wxT(""),
+                             wxDefaultPosition,
+                             wxSize(300,-1));
+    source_bar->Add(src_box,lflags);
+    source_bar->Add(new wxButton( this, ID_Sync, _T("Pull &in") ),
+                    lflags);
+    source_bar->Add(new wxButton( this, ID_Undo, _T("&Undo") ),
+                    lflags);
+    topsizer->Add(source_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
+
+
+    wxBoxSizer *dest_bar = new wxBoxSizer( wxHORIZONTAL );
+    dest_bar->Add(new wxStaticText(this,-1,_T("Push to"),
+                                   wxDefaultPosition,
+                                   wxSize(70,-1)),lflags);
+    dest_box = new wxTextCtrl(this,TEXT_Src, wxT(""),
+                              wxDefaultPosition,
+                              wxSize(300,-1));
+    dest_bar->Add(dest_box,lflags);
+    dest_bar->Add(new wxButton( this, ID_Commit, _T("Push &out") ),
+                  lflags);
+    topsizer->Add(dest_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
+
     
-    log_box = new wxTextCtrl(this, TEXT_Main, wxT("[Status messages appear here during actions]\n\nWelcome to Coopy!\n\nThe purpose of Coopy is to facilitate cooperative data-collection projects. It uses fossil (www.fossil-scm.org) to share files between computers, and works to merge spreadsheets intelligently.\n\nWarning: this is pre-alpha software, keep backups of your data.\n"), 
-                             wxDefaultPosition, wxSize(500,200),  
+    wxBoxSizer *dir_bar = new wxBoxSizer( wxHORIZONTAL );
+    dir_bar->Add(new wxStaticText(this,-1,_T("Directory"),
+                                   wxDefaultPosition,
+                                   wxSize(70,-1)),lflags);
+    dir_box = new wxDirPickerCtrl(this,TEXT_Dir, wxT(""),
+                                  wxT("Select a folder"),
+                                  wxDefaultPosition,
+                                  wxSize(300,-1));
+                                  //wxDIRP_USE_TEXTCTRL);
+    //dir_box->SetTextCtrlProportion(0);
+    dir_box->SetPath(::wxGetCwd());
+    dir_bar->Add(dir_box,lflags);
+    topsizer->Add(dir_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
+
+    
+    log_box = new wxTextCtrl(this, TEXT_Main, wxT("Welcome to Coopy!\n\nThe purpose of Coopy is to facilitate cooperative data-collection projects. It uses fossil (www.fossil-scm.org) to share files between computers, and works to merge spreadsheets intelligently.\n\nWarning: this is pre-alpha software, keep backups of your data.\n\n[Status messages appear here during actions]\n"), 
+                             wxDefaultPosition, wxSize(620,200),  
                              wxTE_MULTILINE | wxTE_RICH, 
                              wxDefaultValidator, wxTextCtrlNameStr);
 
-    topsizer->Add(button_sizer2,wxSizerFlags(0).Align(wxALIGN_RIGHT));
     topsizer->Add(log_box);
     topsizer->Add(button_sizer,wxSizerFlags(0).Align(wxALIGN_RIGHT));
 
@@ -445,8 +481,18 @@ bool MyFrame::OnInit() {
 
 
 bool MyFrame::havePath() {
+    if (dir_box) {
+        string ref = conv(dir_box->GetPath());
+        printf("Found %s\n", ref.c_str());
+        if (ref!=path) {
+            path = ref;
+            printf("setting to %s\n", path.c_str());
+        }
+    }
+
     if (path=="" || askPath) {
-        wxDirDialog dlg(NULL, wxT("Choose input directory"), wxT(""),
+        wxDirDialog dlg(NULL, wxT("Choose input directory"), 
+                        conv(path),
                         wxDD_DEFAULT_STYLE); // | wxDD_DIR_MUST_EXIST);
         if (dlg.ShowModal()==wxID_OK) {
             wxString result = dlg.GetPath();
@@ -460,11 +506,26 @@ bool MyFrame::havePath() {
     if (path!="") {
         wxSetWorkingDirectory(conv(path));
     }
+
+    if (dir_box) {
+        string ref = conv(dir_box->GetPath());
+        if (ref!=path && path!="") {
+            dir_box->SetPath(conv(path));
+        }
+    }
+
     return path!="";
 }
 
 
 bool MyFrame::haveSource() {
+    if (src_box) {
+        string ref = conv(src_box->GetValue());
+        if (ref!=source) {
+            source = ref;
+        }
+    }
+
     if (source==""||askSource) {
         string suggest = source;
         if (suggest=="") {
@@ -486,10 +547,25 @@ string("http://") +
             source = "";
         }
     }
+
+    if (src_box) {
+        string ref = conv(src_box->GetValue());
+        if (ref!=source && source!="") {
+            src_box->ChangeValue(conv(source));
+        }
+    }
+
     return source!="";
 }
 
 bool MyFrame::haveDestination() {
+    if (dest_box) {
+        string ref = conv(dest_box->GetValue());
+        if (ref!=destination) {
+            destination = ref;
+        }
+    }
+
     if (destination==""||askDestination) {
         string suggest = destination;
         if (suggest=="") {
@@ -514,13 +590,24 @@ bool MyFrame::haveDestination() {
         }
         */
     }
+
+    if (dest_box) {
+        string ref = conv(dest_box->GetValue());
+        if (ref!=destination && destination!="") {
+            dest_box->ChangeValue(conv(destination));
+        }
+    }
+
     return destination!="";
 }
 
 void MyFrame::OnOK(wxCommandEvent& ev) {
+    printf("DIR: %s\n", conv(dir_box->GetPath()).c_str());
     askPath = true;
     askSource = true;
     askDestination = true;
+    if (src_box) { src_box->ChangeValue(wxT("")); }
+    if (dest_box) { dest_box->ChangeValue(wxT("")); }
 }
 
 void MyFrame::OnSync(wxCommandEvent& event) {
@@ -696,7 +783,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     SetMenuBar( menuBar );
 
     CreateStatusBar();
-    SetStatusText( _T("Welcome to coopy!") );
+    SetStatusText( _T("Welcome to Coopy!") );
 }
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
