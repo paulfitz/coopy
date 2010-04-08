@@ -483,10 +483,8 @@ bool MyFrame::OnInit() {
 bool MyFrame::havePath() {
     if (dir_box) {
         string ref = conv(dir_box->GetPath());
-        printf("Found %s\n", ref.c_str());
         if (ref!=path) {
             path = ref;
-            printf("setting to %s\n", path.c_str());
         }
     }
 
@@ -602,7 +600,6 @@ bool MyFrame::haveDestination() {
 }
 
 void MyFrame::OnOK(wxCommandEvent& ev) {
-    printf("DIR: %s\n", conv(dir_box->GetPath()).c_str());
     askPath = true;
     askSource = true;
     askDestination = true;
