@@ -398,7 +398,7 @@ public:
 
     printf("Column comparison\n");
     pass.clearMatch();
-    int step = hb/pow(2,ctrl+4);
+    int step = (int)(hb/pow(2,ctrl+4));
     if (step<1) step = 1;
     printf("Desperation %d, step size %d\n", ctrl, step);
     for (int rb=0; rb<hb; rb+=step) {
