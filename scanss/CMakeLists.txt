@@ -83,8 +83,18 @@ ADD_TEST(directory_merge_spelling ${scanss}
   --local --read ${TESTS}/test001_add.csv
   --remote --read ${TESTS}/test001_spell.csv
   --compare
-  --local --write ${TESTS}/result_directory_merge_spelling.csv
+#  --local --write ${TESTS}/result_directory_merge_spelling.csv
   --remote --read ${TESTS}/result_directory_merge_spelling.csv
+  --diff
+  --prop diffs --assert 0)
+
+ADD_TEST(altitude_merge ${scanss}
+  --parent --read ${TESTS}/test005_base.csv 
+  --local --read ${TESTS}/test005_fix_typo_add.csv
+  --remote --read ${TESTS}/test005_replace_column.csv
+  --compare
+#  --local --write ${TESTS}/result_altitude_merge.csv
+  --remote --read ${TESTS}/result_altitude_merge.csv
   --diff
   --prop diffs --assert 0)
 
