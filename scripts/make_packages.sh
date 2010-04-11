@@ -19,7 +19,6 @@ while [ ! "k$1" = "k" ]; do
     source $cfg
     
     OUTPUT="$OUTPUT/coopy-pack"
-    rm -rf $OUTPUT
     mkdir -p $OUTPUT
     
     if [ "k$1" = "kmingw" ]; then
@@ -32,6 +31,9 @@ while [ ! "k$1" = "k" ]; do
 	rm -f *.exe
 	make package || exit 1
 	cp -v *.exe $OUTPUT
+
+	# Give a no-install version
+	cp -v bin/coopy.exe $OUTPUT/`echo coopy-0.1.3.exe | sed "s/.exe/-direct.exe/"`
     fi
 
     if [ "k$1" = "klinux" ]; then
