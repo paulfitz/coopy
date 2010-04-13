@@ -107,3 +107,13 @@ ADD_TEST(altitude_merge_without_header ${scanss}
   --diff
   --prop diffs --assert 0)
 
+ADD_TEST(altitude_merge_conflict ${scanss}
+  --parent --read ${TESTS}/test005_base.csv 
+  --local --read ${TESTS}/test005_fix_typo_add.csv
+  --remote --read ${TESTS}/test005_fix_typo_conflict.csv
+  --compare
+#  --local --write ${TESTS}/result_altitude_merge_conflict.csv
+  --remote --read ${TESTS}/result_altitude_merge_conflict.csv
+  --diff
+  --prop diffs --assert 0)
+
