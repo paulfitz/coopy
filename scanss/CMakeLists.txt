@@ -9,7 +9,7 @@ TARGET_LINK_LIBRARIES(scanss scancsv)
 
 ADD_EXECUTABLE(csvmerge csvmerge.cpp)
 TARGET_LINK_LIBRARIES(csvmerge scancsv)
-
+INSTALL(TARGETS csvmerge COMPONENT utilities DESTINATION bin)
 
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 
@@ -95,6 +95,15 @@ ADD_TEST(altitude_merge ${scanss}
   --compare
 #  --local --write ${TESTS}/result_altitude_merge.csv
   --remote --read ${TESTS}/result_altitude_merge.csv
+  --diff
+  --prop diffs --assert 0)
+
+ADD_TEST(altitude_merge_without_header ${scanss}
+  --parent --read ${TESTS}/test005_base.csv --remove_row 0
+  --local --read ${TESTS}/test005_fix_typo_add.csv --remove_row 0
+  --remote --read ${TESTS}/test005_replace_column.csv --remove_row 0
+  --compare
+  --remote --read ${TESTS}/result_altitude_merge.csv --remove_row 0
   --diff
   --prop diffs --assert 0)
 
