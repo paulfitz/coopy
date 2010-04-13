@@ -33,7 +33,7 @@ while [ ! "k$1" = "k" ]; do
 	cp -v *.exe $OUTPUT
 
 	# Give a no-install version
-	cp -v bin/coopy.exe $OUTPUT/`echo coopy-0.1.3.exe | sed "s/.exe/-direct.exe/"`
+	cp -v bin/coopy.exe $OUTPUT/`echo coopy-*.exe | sed "s/.exe/-direct.exe/"`
     fi
 
     if [ "k$1" = "klinux" ]; then
