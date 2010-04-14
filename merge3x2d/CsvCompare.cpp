@@ -606,8 +606,17 @@ public:
   OrderMerge row_merge;
   OrderMerge col_merge;
   int conflicts;
+  bool diffMode;
 
   CsvSheet result;
+
+  Merger() {
+    diffMode = false;
+  }
+
+  void setDiffMode(bool diffMode) {
+    this->diffMode = diffMode;
+  }
 
   void merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 	     const OrderResult& nrow_local,
@@ -620,35 +629,23 @@ public:
 
   void addRow(const char *tag,
 	      const vector<string>& row,
-	      const string& blank) {
-    CsvSheet& target = result;
-    target.addField(tag);
-    for (int i=0; i<row.size(); i++) {
-      if (row[i]!=blank) {
-	target.addField(row[i].c_str());
-      } else {
-	target.addField("");
-      }
-    }
-    target.addRecord();
-  }
-
-  void addRow(CsvSheet& target,
-	      const char *tag,
-	      CsvSheet& src,
-	      int index,
-	      int len) {
-    target.addField(tag);
-    for (int i=0; i<len; i++) {
-      if (i<src.width()) {
-	target.addField(src.cell(i,index).c_str());
-      } else {
-	target.addField("");
-      }
-    }
-    target.addRecord();
-  }
+	      const string& blank);
 };
+
+void Merger::addRow(const char *tag,
+		    const vector<string>& row,
+		    const string& blank) {
+  CsvSheet& target = result;
+  target.addField(tag);
+  for (int i=0; i<row.size(); i++) {
+    if (row[i]!=blank) {
+      target.addField(row[i].c_str());
+    } else {
+      target.addField("");
+    }
+  }
+  target.addRecord();
+}
 
 void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 		     int pRow, int lRow, int rRow) {
@@ -786,7 +783,8 @@ void CsvCompare::compare(CsvSheet& local, CsvSheet& remote) {
   exit(1);
 }
 
-int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
+int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+			 bool makeDiff) {
   IdentityOrderResult id;
 
   //RowOrder order;
@@ -865,6 +863,7 @@ int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote) {
   OrderResult p2r_col_order = p2r_col_pass_local.getOrder();
 
   Merger merger;
+  merger.setDiffMode(makeDiff);
   merger.merge(pivot,local,remote,
 	       p2l_row_order,
 	       p2r_row_order,
