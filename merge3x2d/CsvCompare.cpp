@@ -504,15 +504,18 @@ public:
   int pivotUnit;
   int localUnit;
   int remoteUnit;
+  bool deleted;
 
   MatchUnit() {
     remoteUnit = localUnit = pivotUnit = -1;
+    deleted = false;
   }
 
-  MatchUnit(int pivot, int local, int remote) {
+  MatchUnit(int pivot, int local, int remote, bool deleted) {
     pivotUnit = pivot;
     localUnit = local;
     remoteUnit = remote;
+    this->deleted = deleted;
   }
 };
 
@@ -557,16 +560,17 @@ void OrderMerge::process(int ilocal, int iremote,
 	    if (_lpr!=-1) {
 	      process(0,0,ilocal,_lpr);
 	      printf("Local unit %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
-	      accum.push_back(MatchUnit(_lp,_l,_lpr));
+	      accum.push_back(MatchUnit(_lp,_l,_lpr,false));
 	      xremote.cell(0,_lpr) = 1;
 	      xlocal.cell(0,_l) = 1;
 	    } else {
 	      printf("Local unit %d exists in pivot at %d, but not in remote - [DELETE]\n", _l, _lp);
+	      accum.push_back(MatchUnit(_lp,_l,-1,true));
 	      xlocal.cell(0,_l) = 1;
 	    }
 	  } else {
 	    printf("Local unit %d not in pivot - [ADD]\n", _l);
-	    accum.push_back(MatchUnit(-1,_l,-1));
+	    accum.push_back(MatchUnit(-1,_l,-1,false));
 	    xlocal.cell(0,_l) = 1;
 	  }
 	}
@@ -585,7 +589,7 @@ void OrderMerge::process(int ilocal, int iremote,
 	    }
 	  } else {
 	    printf("Remote unit %d not in pivot - [ADD]\n", _r);
-	    accum.push_back(MatchUnit(-1,-1,_r));
+	    accum.push_back(MatchUnit(-1,-1,_r,false));
 	    xremote.cell(0,_r) = 1;
 	  }
 	}
@@ -606,16 +610,10 @@ public:
   OrderMerge row_merge;
   OrderMerge col_merge;
   int conflicts;
-  bool diffMode;
 
   CsvSheet result;
 
   Merger() {
-    diffMode = false;
-  }
-
-  void setDiffMode(bool diffMode) {
-    this->diffMode = diffMode;
   }
 
   void merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
@@ -624,8 +622,17 @@ public:
 	     const OrderResult& ncol_local,
 	     const OrderResult& ncol_remote);
 
+  void diff(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+	    const OrderResult& nrow_local,
+	    const OrderResult& nrow_remote,
+	    const OrderResult& ncol_local,
+	    const OrderResult& ncol_remote);
+
   void mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 		int _p, int _l, int _r);
+
+  void diffRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+	       int _p, int _l, int _r, bool deleted);
 
   void addRow(const char *tag,
 	      const vector<string>& row,
@@ -658,24 +665,27 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
     int pCol = unit.pivotUnit;
     int lCol = unit.localUnit;
     int rCol = unit.remoteUnit;
-    if (lRow!=-1 && lCol!=-1) {
-      //printf("access local %d %d (size %d %d)\n", lCol, lRow, 
-      //local.width(), local.height());
-      expandLocal.push_back(local.cell(lCol,lRow));
-    } else {
-      expandLocal.push_back(blank);
-    }
-    if (rRow!=-1 && rCol!=-1) {
-      //printf("access remote %d %d\n", rCol, rRow);
-      expandRemote.push_back(remote.cell(rCol,rRow));
-    } else {
-      expandRemote.push_back(blank);
-    }
-    if (pRow!=-1 && pCol!=-1) {
-      //printf("access pivot %d %d\n", pCol, pRow);
-      expandPivot.push_back(pivot.cell(pCol,pRow));
-    } else {
-      expandPivot.push_back(blank);
+    bool deleted = unit.deleted;
+    if (!deleted) {
+      if (lRow!=-1 && lCol!=-1) {
+	//printf("access local %d %d (size %d %d)\n", lCol, lRow, 
+	//local.width(), local.height());
+	expandLocal.push_back(local.cell(lCol,lRow));
+      } else {
+	expandLocal.push_back(blank);
+      }
+      if (rRow!=-1 && rCol!=-1) {
+	//printf("access remote %d %d\n", rCol, rRow);
+	expandRemote.push_back(remote.cell(rCol,rRow));
+      } else {
+	expandRemote.push_back(blank);
+      }
+      if (pRow!=-1 && pCol!=-1) {
+	//printf("access pivot %d %d\n", pCol, pRow);
+	expandPivot.push_back(pivot.cell(pCol,pRow));
+      } else {
+	expandPivot.push_back(blank);
+      }
     }
   }
   //printf("Onwards\n");
@@ -718,6 +728,15 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
   }
 }
 
+
+void Merger::diffRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+		     int _p, int _l, int _r, bool deleted) {
+  string blank = "__NOT_SET__CSVCOMPARE_SSFOSSIL";
+  vector<string> expandMerge;
+  addRow("[notimplemented]",expandMerge,blank); // remote add
+}
+
+
 void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 		   const OrderResult& row_local,
 		   const OrderResult& row_remote,
@@ -740,12 +759,15 @@ void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
     int pCol = unit.localUnit;
     int lCol = unit.pivotUnit;
     int rCol = unit.remoteUnit;
-    if (lCol!=-1&&rCol!=-1) {
-      header.push_back("");
-    } else if (lCol!=-1) {
-      header.push_back(""); // local add
-    } else if (rCol!=-1) {
-      header.push_back("[add]"); // remote add
+    bool deleted = unit.deleted;
+    if (!deleted) {
+      if (lCol!=-1&&rCol!=-1) {
+	header.push_back("");
+      } else if (lCol!=-1) {
+	header.push_back(""); // local add
+      } else if (rCol!=-1) {
+	header.push_back("[add]"); // remote add
+      }
     }
   }
   addRow("[conflict]",header,"");
@@ -757,7 +779,10 @@ void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
     int _l = unit.localUnit;
     int _p = unit.pivotUnit;
     int _r = unit.remoteUnit;
-    mergeRow(pivot,local,remote,_p,_l,_r);
+    bool deleted = unit.deleted;
+    if (!deleted) {
+      mergeRow(pivot,local,remote,_p,_l,_r);
+    }
   }
 
   if (conflicts==0) {
@@ -774,6 +799,30 @@ void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 
   printf("Got merged result (%dx%d)\n", result.width(), result.height());
   //CsvFile::write(result,"result.csv");
+}
+
+
+
+void Merger::diff(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+		  const OrderResult& row_local,
+		  const OrderResult& row_remote,
+		  const OrderResult& col_local,
+		  const OrderResult& col_remote) {
+
+  row_merge.merge(row_local,row_remote);
+  col_merge.merge(col_local,col_remote);
+  conflicts = 0;
+
+  for (list<MatchUnit>::iterator it=row_merge.accum.begin();
+       it!=row_merge.accum.end(); 
+       it++) {
+    MatchUnit& unit = *it;
+    int _l = unit.localUnit;
+    int _p = unit.pivotUnit;
+    int _r = unit.remoteUnit;
+    bool deleted = unit.deleted;
+    diffRow(pivot,local,remote,_p,_l,_r,deleted);
+  }
 }
 
 
@@ -863,12 +912,19 @@ int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
   OrderResult p2r_col_order = p2r_col_pass_local.getOrder();
 
   Merger merger;
-  merger.setDiffMode(makeDiff);
-  merger.merge(pivot,local,remote,
-	       p2l_row_order,
-	       p2r_row_order,
-	       p2l_col_order,
-	       p2r_col_order);
+  if (makeDiff) {
+    merger.diff(pivot,local,remote,
+		p2l_row_order,
+		p2r_row_order,
+		p2l_col_order,
+		p2r_col_order);
+  } else {
+    merger.merge(pivot,local,remote,
+		 p2l_row_order,
+		 p2r_row_order,
+		 p2l_col_order,
+		 p2r_col_order);
+  }
 
   cmp = merger.result;
 
