@@ -117,3 +117,29 @@ ADD_TEST(altitude_merge_conflict ${scanss}
   --diff
   --prop diffs --assert 0)
 
+
+# DIFF stuff is not ready by any means
+
+IF(FALSE)
+
+ADD_TEST(company_diff_add_col ${scanss}
+  --parent --read ${TESTS}/test003_base.csv 
+  --local --read ${TESTS}/test003_base.csv
+  --remote --read ${TESTS}/test003_insert_col.csv
+  --compare=1
+  --local --write ${TESTS}/result_company_diff_add_col.csv
+  --remote --read ${TESTS}/result_company_diff_add_col.csv
+  --diff
+  --prop diffs --assert 0)
+
+ADD_TEST(company_diff_spell ${scanss}
+  --parent --read ${TESTS}/test003_base.csv 
+  --local --read ${TESTS}/test003_base.csv
+  --remote --read ${TESTS}/test003_spell.csv
+  --compare=1
+  --local --write ${TESTS}/result_company_diff_spell.csv
+  --remote --read ${TESTS}/result_company_diff_spell.csv
+  --diff
+  --prop diffs --assert 0)
+
+ENDIF()

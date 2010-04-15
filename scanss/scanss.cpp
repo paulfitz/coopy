@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
       {"remote", 0, 0, 'R'},
       {"parent", 0, 0, 'P'},
       {"dumb", 0, 0, 'D'},
-      {"compare", 0, 0, 'c'},
+      {"compare", 2, 0, 'c'},
       {"diff", 0, 0, 'f'},
       {0, 0, 0, 0}
     };
@@ -142,10 +142,15 @@ int main(int argc, char *argv[]) {
       break;
     case 'c':
       {
+	bool diffMode = false;
+	if (optarg) {
+	  diffMode = (atoi(optarg)!=0);
+	  printf("Diff mode is %d\n", diffMode);
+	}
 	if (parented) {
 	  printf("Three way compare...\n");
 	  CsvCompare3 cmp;
-	  cmp.compare(parent,local,remote);
+	  cmp.compare(parent,local,remote,diffMode);
 	  local = cmp.get();
 	  ss = &local;
 	} else {
