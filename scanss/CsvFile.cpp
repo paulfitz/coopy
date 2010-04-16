@@ -6,6 +6,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
   ((CsvSheet*)p)->addField((char *)s, i);
@@ -26,7 +27,13 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
     fprintf(stderr,"csv failed to initialize\n");
     exit(1);
   }
-  fp = fopen(src,"rb");
+  bool need_close = true;
+  if (strcmp(src,"-")==0) {
+    fp = stdin;
+    need_close = false;
+  } else {
+    fp = fopen(src,"rb");
+  }
   if (!fp) {
     fprintf(stderr,"could not open %s\n", src);
     exit(1);
@@ -46,7 +53,9 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
 	   csvfile_merge_cb1,
 	   csvfile_merge_cb2,
 	   (void*)(&dest));
-  fclose(fp);
+  if (need_close) {
+    fclose(fp);
+  }
   csv_free(&p);
   return 0;
 }

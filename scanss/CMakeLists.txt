@@ -19,6 +19,10 @@ ADD_EXECUTABLE(csvpatch csvpatch.cpp)
 TARGET_LINK_LIBRARIES(csvpatch scancsv)
 INSTALL(TARGETS csvpatch COMPONENT utilities DESTINATION bin)
 
+ADD_EXECUTABLE(csv2html csv2html.cpp)
+TARGET_LINK_LIBRARIES(csv2html scancsv)
+INSTALL(TARGETS csv2html COMPONENT utilities DESTINATION bin)
+
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 
 ############################################################################
@@ -168,3 +172,16 @@ ADD_TEST(altitude_patch_remove_row ${scanss}
   --patch
   --diff
   --prop diffs --assert 0)
+
+
+# ADD_TEST(altitude_diff_replace_col ${scanss}
+#   --parent --read ${TESTS}/test005_base.csv 
+#   --local --read ${TESTS}/test005_base.csv
+#   --remote --read ${TESTS}/test005_replace_column.csv
+#   --compare=1
+#   --local --write ${TESTS}/result_altitude_diff_replace_col.csv
+#   --remote --read ${TESTS}/result_altitude_diff_replace_col.csv
+#   --diff
+#   --prop diffs --assert 0)
+
+
