@@ -3,6 +3,7 @@
 #include "CsvFile.h"
 #include "CsvStat.h"
 #include "CsvCompare.h"
+#include "CsvPatch.h"
 
 #include <getopt.h>
 #include <stdlib.h>
@@ -32,6 +33,7 @@ int main(int argc, char *argv[]) {
       {"write", 1, 0, 'w'},
       {"save", 1, 0, 's'},
       {"prop", 1, 0, 'p'},
+      {"patch", 0, 0, 't'},
       {"assert", 1, 0, 'a'},
       {"remove_row", 1, 0, 'd'},
       {"local", 0, 0, 'L'},
@@ -138,6 +140,15 @@ int main(int argc, char *argv[]) {
 	    }
 	  }
 	}
+      }
+      break;
+    case 't':
+      {
+	printf("Applying patch ('local') to parent, result goes to local\n");
+	CsvPatch patch;
+	patch.apply(parent,local);
+	local = patch.get();
+	ss = &local;
       }
       break;
     case 'c':

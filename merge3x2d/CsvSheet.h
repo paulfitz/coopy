@@ -171,6 +171,22 @@ public:
     return false;
   }
 
+  bool insertRow(int index, int width = -1) {
+    std::vector<std::string> rec;
+    if (width == -1) { width = w; }
+    for (int i=0; i<width; i++) {
+      rec.push_back("");
+    }
+    if (index == -1 || index>=height()) {
+      arr.push_back(rec);
+    } else {
+      arr.insert(arr.begin()+index,rec);
+    }
+    th = h = arr.size();
+    tw = w = rec.size();
+    return true;
+  }
+
   void addField(const char *s) {
     rec.push_back(s);
     tw++;
