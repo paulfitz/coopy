@@ -116,6 +116,29 @@ void Patcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
       for (int j=1; j<target.size(); j++) {
 	result.cell(j-1,row_out) = target[j];
       }
+    } else if (cmd == "[---]") {
+      vector<string> target = extract(patch,i,1,-1);
+      if (target.size()!=action.size()) {
+	fprintf(stderr,"[---] does not match a [do], line %d\n", i);
+	exit(1);
+      }
+      string placement = target[0];
+      int row = -1;
+      row = atoi(placement.c_str())-1;
+      for (int j=1; j<target.size(); j++) {
+	if (safe_cell(original,j-1,row) != target[j]) {
+	  fprintf(stderr,"[---] does not match row (%s vs %s), line %d\n", 
+		  safe_cell(original,j-1,row).c_str(),
+		  target[j].c_str(),
+		  i);
+	  exit(1);
+	}
+      }
+      int row_out = row_o2r(row);
+      result.removeRow(row_out);
+      for (int j=row; j<rows_o2r.height(); j++) {
+	rows_o2r.cell(0,j)--;
+      }
     } else if (cmd == "[-]") {
       compare = extract(patch,i,1,-1);
       if (compare.size()!=action.size()) {

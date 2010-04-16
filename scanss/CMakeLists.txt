@@ -136,6 +136,7 @@ ADD_TEST(altitude_diff_typo ${scanss}
   --diff
   --prop diffs --assert 0)
 
+
 # Check that producing a diff against remote, then applying it as a patch, 
 # correctly gives remote
 ADD_TEST(altitude_patch_typo ${scanss}
@@ -147,3 +148,23 @@ ADD_TEST(altitude_patch_typo ${scanss}
   --diff
   --prop diffs --assert 0)
 
+
+ADD_TEST(altitude_diff_remove_row ${scanss}
+  --parent --read ${TESTS}/test005_base.csv 
+  --local --read ${TESTS}/test005_base.csv
+  --remote --read ${TESTS}/test005_remove_row.csv
+  --compare=1
+#  --local --write ${TESTS}/result_altitude_diff_remove_row.csv
+  --remote --read ${TESTS}/result_altitude_diff_remove_row.csv
+  --diff
+  --prop diffs --assert 0)
+
+
+ADD_TEST(altitude_patch_remove_row ${scanss}
+  --parent --read ${TESTS}/test005_base.csv 
+  --local --read ${TESTS}/test005_base.csv
+  --remote --read ${TESTS}/test005_remove_row.csv
+  --compare=1
+  --patch
+  --diff
+  --prop diffs --assert 0)

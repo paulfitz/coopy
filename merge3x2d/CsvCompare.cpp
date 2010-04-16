@@ -289,6 +289,13 @@ public:
     }
   }
 
+  int cellLength(CsvSheet& a) {
+    if (rowLike) {
+      return a.width();
+    }
+    return a.height();
+  }
+
   string cell(CsvSheet& a, int x, int y) {
     if (rowLike) {
       return a.cell(x,y);
@@ -346,19 +353,41 @@ public:
 	if (bestValue>ref/4) {// ||
 	  //	    (bestValue>(bestValue-bestInc)*10 && bestValue>ref/8)) {
 	  if (bestInc>bestValue/2 && bestIndex>=0) {
-	    dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
-		   y,bestIndex,y,bestIndex,
-		   bestIndex, bestValue, bestInc, ref);
-	    dbg_printf("  [remote] %s\n", cell(b,0,y).c_str());
-	    dbg_printf("  [local] %s\n", cell(a,0,bestIndex).c_str());
 	    ok = true;
-	    if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
-	      dbg_printf("COLLISION! Ignoring unavailable match\n");
-	      dbg_printf("This case has not been optimized\n");
-	    } else {
-	      bsel.cell(0,y) = bestIndex;
-	      asel.cell(0,bestIndex) = y;
+	  }
+	}
+	if (!ok) {
+	  if (bestIndex>=0 && y>=0) {
+	    // let's examine the best match in detail
+	    printf("Detail check... %d->%d\n",y,bestIndex);
+	    if (cellLength(a)==cellLength(b)) {
+	      int misses = 0;
+	      for (int kk=0; kk<cellLength(a); kk++) {
+		if (cell(a,kk,bestIndex)!=cell(b,kk,y)) {
+		  misses++;
+		}
+	      }
+	      printf("Detailed examination gives %d misses for best match\n", 
+		     misses);
+	      if (misses==0) {
+		// perfect match, let it through
+		ok = true;
+	      }
 	    }
+	  }
+	}
+	if (ok) {
+	  dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
+		     y,bestIndex,y,bestIndex,
+		     bestIndex, bestValue, bestInc, ref);
+	  dbg_printf("  [remote] %s\n", cell(b,0,y).c_str());
+	  dbg_printf("  [local] %s\n", cell(a,0,bestIndex).c_str());
+	  if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
+	    dbg_printf("COLLISION! Ignoring unavailable match\n");
+	    dbg_printf("This case has not been optimized\n");
+	  } else {
+	    bsel.cell(0,y) = bestIndex;
+	    asel.cell(0,bestIndex) = y;
 	  }
 	}
 	if (!ok) {
@@ -759,10 +788,12 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
       }
     }
     if (diff&&!novel) {
-      _l = blank;
-      _r = blank;
-      _p = blank;
-      expandLocal[i] = blank;
+      if (!delRow) {
+	_l = blank;
+	_r = blank;
+	_p = blank;
+	expandLocal[i] = blank;
+      }
     }
   }
 
@@ -812,7 +843,11 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
       }
     }
 
-    if (activity) {
+    dbg_printf("diff %d (%d %d %d) %d\n", activity, 
+	       lRow, rRow, pRow, 
+	       delRow);
+
+    if (activity||delRow) {
       char buf[256];
       if (lRow==-1) {
 	addition++;
@@ -823,13 +858,18 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
       }
       expandMerge.insert(expandMerge.begin(),buf);
       expandLocal.insert(expandLocal.begin(),buf);
+      expandRemote.insert(expandRemote.begin(),buf);
       if (change) {
 	addRow("[-]",expandLocal,blank);
       }
       if (lRow==-1) {
 	addRow("[+++]",expandMerge,blank);
       } else {
-	addRow("[+]",expandMerge,blank);
+	if (rRow==-1) {
+	  addRow("[---]",expandLocal,blank);
+	} else {
+	  addRow("[+]",expandMerge,blank);
+	}
       }
     }
     if (lRow!=-1) {
