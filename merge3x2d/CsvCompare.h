@@ -30,6 +30,8 @@ public:
 	      bool makeDiff = false);
 
   const CsvSheet& get() { return cmp; }
+
+  void setVerbose(bool verbose);
 };
 
 #endif

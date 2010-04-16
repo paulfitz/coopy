@@ -33,6 +33,11 @@ namespace __gnu_cxx {
 #include <map>
 #endif
 
+
+static bool _csv_verbose = false;
+
+#define dbg_printf if (_csv_verbose) printf
+
 ////////////////////////////////////////////////////////////////////////
 //
 // Row/Column neutral code
@@ -142,7 +147,7 @@ public:
 
   void summarize(bool force = false) {
     if (ct%100000==0 || force) {
-      printf("%s %d features\n", query?"Queried":"Added",ct);
+      dbg_printf("%s %d features\n", query?"Queried":"Added",ct);
     }
   }
 
@@ -192,7 +197,7 @@ public:
     s.mean = mean;
     s.stddev = 0;
     s.valid = (ct>10);
-    printf("Mean is %g (count %d)\n", s.mean, ct);
+    dbg_printf("Mean is %g (count %d)\n", s.mean, ct);
     return s;
   }
 
@@ -247,7 +252,7 @@ public:
     int ctrl = 0;
     int ctrlMax = main.getCtrlMax();
     for (int i=0; i<20; i++) {
-      printf("\n\nPass %d\n", i);
+      dbg_printf("\n\nPass %d\n", i);
       compare1(ctrl);
       //comparePass(a,b);
       int processed = 0;
@@ -260,21 +265,21 @@ public:
 	}
       }
       if (remaining == 0) {
-	printf("Everything allocated\n");
+	dbg_printf("Everything allocated\n");
 	break;
       }
-      printf("Not everything allocated, %d remain (a-total %d b-total %d)\n",
+      dbg_printf("Not everything allocated, %d remain (a-total %d b-total %d)\n",
 	     remaining,
 	     main_pass.asel.height(),
 	     main_pass.bsel.height());
       if (remaining<=(main_pass.bsel.height()-main_pass.asel.height())) {
-	printf("No more could be allocated\n");
+	dbg_printf("No more could be allocated\n");
 	break;
       }
       if (rem==remaining) {
-	printf("No progress\n");
+	dbg_printf("No progress\n");
 	if (ctrl<ctrlMax) {
-	  printf("Increasing desperation\n");
+	  dbg_printf("Increasing desperation\n");
 	  ctrl++;
 	} else {
 	  break;
@@ -299,19 +304,19 @@ public:
     anorm_pass.asel = main_pass.asel;
     anorm_pass.bsel = main_pass.asel;
     anorm.measure(anorm_pass,ctrl);
-    printf("Checking [local] statistics\n");
+    dbg_printf("Checking [local] statistics\n");
     astat = anorm_pass.flatten();
     bnorm_pass.asel = main_pass.bsel;
     bnorm_pass.bsel = main_pass.bsel;
     bnorm.measure(bnorm_pass,ctrl);
-    printf("Checking [remote] statistics\n");
+    dbg_printf("Checking [remote] statistics\n");
     bstat = bnorm_pass.flatten();
     double scale = 1;
     if (bstat.valid && astat.valid) {
       if (bstat.mean>0.01) {
 	scale = astat.mean/bstat.mean;
       }
-      printf("Rescaling bnorm by %g\n", scale);
+      dbg_printf("Rescaling bnorm by %g\n", scale);
       bnorm_pass.match.rescale(scale);
     }
     //CsvFile::write(feat.rowMatch,"match.csv");
@@ -341,15 +346,15 @@ public:
 	if (bestValue>ref/4) {// ||
 	  //	    (bestValue>(bestValue-bestInc)*10 && bestValue>ref/8)) {
 	  if (bestInc>bestValue/2 && bestIndex>=0) {
-	    printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
+	    dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
 		   y,bestIndex,y,bestIndex,
 		   bestIndex, bestValue, bestInc, ref);
-	    printf("  [remote] %s\n", cell(b,0,y).c_str());
-	    printf("  [local] %s\n", cell(a,0,bestIndex).c_str());
+	    dbg_printf("  [remote] %s\n", cell(b,0,y).c_str());
+	    dbg_printf("  [local] %s\n", cell(a,0,bestIndex).c_str());
 	    ok = true;
 	    if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
-	      printf("COLLISION! Ignoring unavailable match\n");
-	      printf("This case has not been optimized\n");
+	      dbg_printf("COLLISION! Ignoring unavailable match\n");
+	      dbg_printf("This case has not been optimized\n");
 	    } else {
 	      bsel.cell(0,y) = bestIndex;
 	      asel.cell(0,bestIndex) = y;
@@ -357,11 +362,11 @@ public:
 	  }
 	}
 	if (!ok) {
-	  printf("%d->?, do not know what to make of remote unit %d (%d %g %g : %g)\n",
+	  dbg_printf("%d->?, do not know what to make of remote unit %d (%d %g %g : %g)\n",
 		 y, y, bestIndex, bestValue, bestInc, ref);
-	  printf("  [remote] %s\n", cell(b,0,y).c_str());
+	  dbg_printf("  [remote] %s\n", cell(b,0,y).c_str());
 	  if (bestIndex>=0) {
-	    printf("  [local] [MISS] %s\n", cell(a,0,bestIndex).c_str());
+	    dbg_printf("  [local] [MISS] %s\n", cell(a,0,bestIndex).c_str());
 	  }
 	}
       }
@@ -396,11 +401,11 @@ public:
     int ha = pass.a.height();
     int hb = pass.b.height();
 
-    printf("Column comparison\n");
+    dbg_printf("Column comparison\n");
     pass.clearMatch();
     int step = (int)(hb/pow(2,ctrl+4));
     if (step<1) step = 1;
-    printf("Desperation %d, step size %d\n", ctrl, step);
+    dbg_printf("Desperation %d, step size %d\n", ctrl, step);
     for (int rb=0; rb<hb; rb+=step) {
       int ra = comp.b2a(rb);
       if (ra!=-1) {
@@ -559,17 +564,17 @@ void OrderMerge::process(int ilocal, int iremote,
 	    int _lpr = order_remote.a2b(_lp);
 	    if (_lpr!=-1) {
 	      process(0,0,ilocal,_lpr);
-	      printf("Local unit %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
+	      dbg_printf("Local unit %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
 	      accum.push_back(MatchUnit(_lp,_l,_lpr,false));
 	      xremote.cell(0,_lpr) = 1;
 	      xlocal.cell(0,_l) = 1;
 	    } else {
-	      printf("Local unit %d exists in pivot at %d, but not in remote - [DELETE]\n", _l, _lp);
+	      dbg_printf("Local unit %d exists in pivot at %d, but not in remote - [DELETE]\n", _l, _lp);
 	      accum.push_back(MatchUnit(_lp,_l,-1,true));
 	      xlocal.cell(0,_l) = 1;
 	    }
 	  } else {
-	    printf("Local unit %d not in pivot - [ADD]\n", _l);
+	    dbg_printf("Local unit %d not in pivot - [ADD]\n", _l);
 	    accum.push_back(MatchUnit(-1,_l,-1,false));
 	    xlocal.cell(0,_l) = 1;
 	  }
@@ -588,7 +593,7 @@ void OrderMerge::process(int ilocal, int iremote,
 	      // deleted locally
 	    }
 	  } else {
-	    printf("Remote unit %d not in pivot - [ADD]\n", _r);
+	    dbg_printf("Remote unit %d not in pivot - [ADD]\n", _r);
 	    accum.push_back(MatchUnit(-1,-1,_r,false));
 	    xremote.cell(0,_r) = 1;
 	  }
@@ -612,6 +617,9 @@ public:
   int conflicts;
   vector<string> lastAddress;
   vector<string> lastAction;
+  int current_row;
+  int last_row;
+  int addition;
 
   CsvSheet result;
 
@@ -666,7 +674,7 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
   vector<string> action;
   int lastCol = -1;
   int addCol = 0;
-  address.push_back("[row]");
+  address.push_back("0");
   action.push_back("select");
   for (list<MatchUnit>::iterator it=col_merge.accum.begin();
        it!=col_merge.accum.end(); 
@@ -751,7 +759,10 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
       }
     }
     if (diff&&!novel) {
-      _l = "--";
+      _l = blank;
+      _r = blank;
+      _p = blank;
+      expandLocal[i] = blank;
     }
   }
 
@@ -783,13 +794,48 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
       addRow("[do]",action,blank);
       lastAction = action;
     }
-    char buf[256];
-    snprintf(buf,sizeof(buf),"%d",lRow);
-    expandMerge.insert(expandMerge.begin(),buf);
-    expandLocal.insert(expandLocal.begin(),buf);
-    addRow("[data]",expandMerge,blank);
-    if (change) {
-      addRow("[was]",expandLocal,blank);
+
+    bool activity = true;
+    if (expandMerge.size()==local.width()) {
+      if (current_row<local.height()) {
+	int i;
+	for (i=0; i<expandMerge.size(); i++) {
+	  string data = expandMerge[i];
+	  string was = local.cell(i,current_row);
+	  if (was!=data && data!=blank) {
+	    break;
+	  }
+	}
+	if (i==expandMerge.size()) {
+	  activity = false;
+	}
+      }
+    }
+
+    if (activity) {
+      char buf[256];
+      if (lRow==-1) {
+	addition++;
+	snprintf(buf,sizeof(buf),"%d+%d",last_row+1,addition);
+      } else {
+	snprintf(buf,sizeof(buf),"%d",lRow+1);
+	addition = 0;
+      }
+      expandMerge.insert(expandMerge.begin(),buf);
+      expandLocal.insert(expandLocal.begin(),buf);
+      if (change) {
+	addRow("[-]",expandLocal,blank);
+      }
+      if (lRow==-1) {
+	addRow("[+++]",expandMerge,blank);
+      } else {
+	addRow("[+]",expandMerge,blank);
+      }
+    }
+    if (lRow!=-1) {
+      current_row = lRow;
+      last_row = lRow;
+      current_row++;
     }
   }
 }
@@ -801,10 +847,10 @@ void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 		   const OrderResult& col_local,
 		   const OrderResult& col_remote) {
 
-  printf("Merging row order...\n");
+  dbg_printf("Merging row order...\n");
   row_merge.merge(row_local,row_remote);
 
-  printf("Merging column order...\n");
+  dbg_printf("Merging column order...\n");
   col_merge.merge(col_local,col_remote);
 
   conflicts = 0;
@@ -844,7 +890,7 @@ void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
   }
 
   if (conflicts==0) {
-    printf("No conflicts!\n");
+    dbg_printf("No conflicts!\n");
     CsvSheet tmp = result;
     result.clear();
     for (int y=1; y<tmp.height(); y++) {
@@ -855,7 +901,7 @@ void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
     }
   }
 
-  printf("Got merged result (%dx%d)\n", result.width(), result.height());
+  dbg_printf("Got merged result (%dx%d)\n", result.width(), result.height());
   //CsvFile::write(result,"result.csv");
 }
 
@@ -870,6 +916,9 @@ void Merger::diff(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
   row_merge.merge(row_local,row_remote);
   col_merge.merge(col_local,col_remote);
   conflicts = 0;
+  current_row = 0;
+  last_row = -1;
+  addition = 0;
   lastAddress.clear();
   lastAction.clear();
 
@@ -986,4 +1035,9 @@ int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
   cmp = merger.result;
 
   return 0;
+}
+
+
+void CsvCompare3::setVerbose(bool verbose) {
+  _csv_verbose = verbose;
 }

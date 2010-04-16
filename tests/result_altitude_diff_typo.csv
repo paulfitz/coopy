@@ -1,0 +1,7 @@
+[for],0,1,2,3,4,5
+[do],select,,,,,
+[+++],1+1,500,5,10,7,"Smooth flight"
+[-],4,,,,,"Ominous silense"
+[+],4,,,,,"Ominous silence"
+[-],5,,,,,"Ominous silense"
+[+],5,,,,,"Ominous silence"

@@ -11,6 +11,14 @@ ADD_EXECUTABLE(csvmerge csvmerge.cpp)
 TARGET_LINK_LIBRARIES(csvmerge scancsv)
 INSTALL(TARGETS csvmerge COMPONENT utilities DESTINATION bin)
 
+ADD_EXECUTABLE(csvdiff csvdiff.cpp)
+TARGET_LINK_LIBRARIES(csvdiff scancsv)
+INSTALL(TARGETS csvdiff COMPONENT utilities DESTINATION bin)
+
+ADD_EXECUTABLE(csvpatch csvpatch.cpp)
+TARGET_LINK_LIBRARIES(csvpatch scancsv)
+INSTALL(TARGETS csvpatch COMPONENT utilities DESTINATION bin)
+
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 
 ############################################################################
@@ -118,28 +126,13 @@ ADD_TEST(altitude_merge_conflict ${scanss}
   --prop diffs --assert 0)
 
 
-# DIFF stuff is not ready by any means
-
-IF(FALSE)
-
-ADD_TEST(company_diff_add_col ${scanss}
-  --parent --read ${TESTS}/test003_base.csv 
-  --local --read ${TESTS}/test003_base.csv
-  --remote --read ${TESTS}/test003_insert_col.csv
+ADD_TEST(altitude_diff_typo ${scanss}
+  --parent --read ${TESTS}/test005_base.csv 
+  --local --read ${TESTS}/test005_base.csv
+  --remote --read ${TESTS}/test005_fix_typo_add.csv
   --compare=1
-  --local --write ${TESTS}/result_company_diff_add_col.csv
-  --remote --read ${TESTS}/result_company_diff_add_col.csv
+#  --local --write ${TESTS}/result_altitude_diff_typo.csv
+  --remote --read ${TESTS}/result_altitude_diff_typo.csv
   --diff
   --prop diffs --assert 0)
 
-ADD_TEST(company_diff_spell ${scanss}
-  --parent --read ${TESTS}/test003_base.csv 
-  --local --read ${TESTS}/test003_base.csv
-  --remote --read ${TESTS}/test003_spell.csv
-  --compare=1
-  --local --write ${TESTS}/result_company_diff_spell.csv
-  --remote --read ${TESTS}/result_company_diff_spell.csv
-  --diff
-  --prop diffs --assert 0)
-
-ENDIF()
