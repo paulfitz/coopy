@@ -25,9 +25,21 @@ string ml_encode(string x) {
 }
 
 int main(int argc, char *argv[]) {
+  bool full = false;
+  bool decorate = false;
   const char *fname = "-";
-  if (argc>1) {
-    fname = argv[1];
+  while (argc>1) {
+    string arg = argv[1];
+    if (arg=="--full" || arg=="-f") {
+      full = true;
+      decorate = true;
+    } else if (arg=="--decorate" || arg=="-d") {
+      decorate = true;
+    } else {
+      fname = argv[1];
+    }
+    argv++;
+    argc--;
   }
   CsvSheet sheet;
   if (CsvFile::read(fname,sheet)!=0) {
@@ -35,16 +47,98 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  if (full) {
+    printf("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
+    printf("<html>\n");
+    printf("<head>\n");
+    printf("<title>csv2html</title>\n");
+    printf("<style>\n");
+    printf("body {\n");
+    printf("  background-color: #fff;\n");
+    printf("}\n");
+    printf(".csv2html table {\n");
+    printf("  background-color: #ddd;\n");
+    printf("}\n");
+    printf(".csv2html td {\n");
+    printf("  background-color: #ffa;\n");
+    printf("  padding: 3px;\n");
+    printf("}\n");
+    printf("tr.csv_row_ppp td { background-color: #afa; }\n");
+    printf("tr.csv_row_mmm td { background-color: #faa; text-decoration: line-through; }\n");
+    printf("tr.csv_row_p td { background-color: #dfd; }\n");
+    printf("tr.csv_row_m td { background-color: #fdd; text-decoration: line-through; }\n");
+    printf("tr.csv_row_for td { background-color: #aaf; }\n");
+    printf("tr.csv_row_do td { background-color: #ddf; }\n");
+    printf("td.csv_cmd { text-decoration: none; text-weight: bold; }\n");
+    printf("</style>\n");
+    printf("</head>\n");
+    printf("<body>\n");
+    printf("<div class=\"csv2html\">\n");
+  }
   if (sheet.width()>=1 && sheet.height()>=1) {
-    printf("<table class=\"csvtable\">\n");
+    printf("<table>\n");
     for (int i=0; i<sheet.height(); i++) {
-      printf("  <tr>");
-      for (int j=0; j<sheet.width(); j++) {
-	printf(" <td>%s</td>", ml_encode(sheet.cell(j,i)).c_str());
+      string row_mode = "";
+      string txt = sheet.cell(0,i);
+      if (txt == "[---]") {
+	row_mode = "csv_row_mmm";
+      } else if (txt == "[+++]") {
+	row_mode = "csv_row_ppp";
+      } else if (txt == "[-]") {
+	row_mode = "csv_row_m";
+      } else if (txt == "[+]") {
+	row_mode = "csv_row_p";
+      } else if (txt == "[for]") {
+	row_mode = "csv_row_for";
+      } else if (txt == "[do]") {
+	row_mode = "csv_row_do";
       }
-      printf(" </tr>\n");
+      string row_decorate = "";
+      if (decorate&&row_mode!="") {
+	row_decorate = string(" class=\"") + row_mode + "\"";
+      }
+      printf("  <tr%s>", row_decorate.c_str());
+      for (int j=0; j<sheet.width(); j++) {
+	string txt = sheet.cell(j,i);
+	  /*
+	vector<string> modes;
+	string mode_txt;
+	if (decorate) {
+	  if (row_mode!="" && j>0) {
+	    modes.push_back(row_mode);
+	  }
+	}
+	if (modes.size()>0) {
+	  mode_txt = " class=\"";
+	  for (int k=0; k<modes.size(); k++) {
+	    if (k!=0) {
+	      mode_txt += " ";
+	    }
+	    mode_txt += modes[k];
+	  }
+	  mode_txt += "\"";
+	}
+	  */
+	txt = ml_encode(txt);
+	string cell_decorate = "";
+	if (decorate) {
+	  if (txt!="") {
+	    txt = string("&nbsp;") + txt + "&nbsp;";
+	  }
+	  if (j==0) {
+	    cell_decorate = " class=\"csv_cmd\"";
+	  }
+	}
+	printf("<td%s>%s</td>", cell_decorate.c_str(), txt.c_str());
+      }
+      printf("</tr>\n");
     }
     printf("</table>\n");
+  }
+  if (full) {
+    printf("</div>\n");
+    printf("</body>\n");
+    printf("</html>\n");
   }
 
   return 0;
