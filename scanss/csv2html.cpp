@@ -5,6 +5,8 @@
 #include <string>
 using namespace std;
 
+string csv2html_css();
+
 static void replace(string& str, const string& old, const string& rep) {
   int pos = 0;
   while((pos = str.find(old, pos)) != std::string::npos) {
@@ -53,23 +55,7 @@ int main(int argc, char *argv[]) {
     printf("<head>\n");
     printf("<title>csv2html</title>\n");
     printf("<style>\n");
-    printf("body {\n");
-    printf("  background-color: #fff;\n");
-    printf("}\n");
-    printf(".csv2html table {\n");
-    printf("  background-color: #ddd;\n");
-    printf("}\n");
-    printf(".csv2html td {\n");
-    printf("  background-color: #ffa;\n");
-    printf("  padding: 3px;\n");
-    printf("}\n");
-    printf("tr.csv_row_ppp td { background-color: #afa; }\n");
-    printf("tr.csv_row_mmm td { background-color: #faa; text-decoration: line-through; }\n");
-    printf("tr.csv_row_p td { background-color: #dfd; }\n");
-    printf("tr.csv_row_m td { background-color: #fdd; text-decoration: line-through; }\n");
-    printf("tr.csv_row_for td { background-color: #aaf; }\n");
-    printf("tr.csv_row_do td { background-color: #ddf; }\n");
-    printf("td.csv_cmd { text-decoration: none; text-weight: bold; }\n");
+    printf("%s",csv2html_css().c_str());
     printf("</style>\n");
     printf("</head>\n");
     printf("<body>\n");

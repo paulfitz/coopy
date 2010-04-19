@@ -19,7 +19,15 @@ ADD_EXECUTABLE(csvpatch csvpatch.cpp)
 TARGET_LINK_LIBRARIES(csvpatch scancsv)
 INSTALL(TARGETS csvpatch COMPONENT utilities DESTINATION bin)
 
-ADD_EXECUTABLE(csv2html csv2html.cpp)
+ADD_EXECUTABLE(stringify stringify.cpp)
+
+ADD_CUSTOM_COMMAND(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp 
+  COMMAND stringify ${CMAKE_CURRENT_SOURCE_DIR}/csv2html.css ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp csv2html_css
+  DEPENDS stringify ${CMAKE_CURRENT_SOURCE_DIR}/csv2html.css
+)
+
+ADD_EXECUTABLE(csv2html csv2html.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
 TARGET_LINK_LIBRARIES(csv2html scancsv)
 INSTALL(TARGETS csv2html COMPONENT utilities DESTINATION bin)
 

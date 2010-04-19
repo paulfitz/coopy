@@ -1,0 +1,17 @@
+body {
+  background-color: #fff;
+}
+.csv2html table {
+  background-color: #ddd;
+}
+.csv2html td {
+  background-color: #ffa;
+  padding: 3px;
+}
+tr.csv_row_ppp td { background-color: #afa; }
+tr.csv_row_mmm td { background-color: #faa; text-decoration: line-through; }
+tr.csv_row_p td { background-color: #dfd; }
+tr.csv_row_m td { background-color: #fdd; text-decoration: line-through; }
+tr.csv_row_for td { background-color: #aaf; }
+tr.csv_row_do td { background-color: #ddf; }
+tr td.csv_cmd { text-decoration: none; text-weight: bold; }
