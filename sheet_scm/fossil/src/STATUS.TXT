@@ -1,0 +1,38 @@
+$ fossil timeline
+=== 2010-04-19 ===
+08:44:39 [e45f755d64] New ticket [901936cf06] <i>web interface behaves
+         badly</i>. (user: anonymous)
+05:48:10 [6b11bf44db] New ticket [9c8d43bfa6] <i>RSS permissions too
+         strict</i>. (user: ron)
+=== 2010-04-16 ===
+21:10:14 [536b5522d7] New ticket [c3971eac71] <i>fossil breaks if HOME points
+         to read-only directory</i>. (user: anonymous)
+06:20:52 [2fee863295] New ticket [2666a00316] <i>failure w/ cryptic error when
+         file missing.</i>. (user: bharder)
+02:06:22 [0fecde7348] Ticket [beb8f31ea5] <i>Wrong redirect after successful
+         logon</i> status still Open with 1 other change (user: anonymous)
+02:02:38 [b06761843f] Ticket [beb8f31ea5] <i>Wrong redirect after successful
+         logon</i> status still Open with 2 other changes (user: anonymous)
+=== 2010-04-15 ===
+23:53:15 [7c37b46b12] *CURRENT* Update to the latest stable check-in of
+         SQLite, as a beta-test for SQLite. (user: drh tags: trunk)
+23:50:26 [0e7b85bb92] Fill the boxes on the graph with the same background
+         color as the text in the timeline description. (user: drh tags: trunk)
+10:19:19 [a476e7216f] New ticket [beb8f31ea5] <i>Wrong redirect after
+         successful logon</i>. (user: anonymous)
+
+
+$ fossil status
+...
+server-code:  475487f89d47625be2052e2082ad96edd7871829
+checkout:     7c37b46b12331fda2b89b3d1ba11047174ccad06 2010-04-15 23:53:15 UTC
+parent:       0e7b85bb92ba33660410560fb0a531e2318702da 2010-04-15 23:50:26 UTC
+tags:         trunk
+EDITED     src/blob.c
+EDITED     src/checkin.c
+EDITED     src/db.c
+EDITED     src/main.c
+EDITED     src/manifest.c
+EDITED     src/merge3.c
+EDITED     src/translate.c
+EDITED     src/verify.c

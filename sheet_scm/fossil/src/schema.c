@@ -325,6 +325,22 @@ const char zRepositorySchema2[] =
 @ );
 @ CREATE INDEX backlink_src ON backlink(srcid, srctype);
 @
+@ -- Each attachment is an entry in the following table.  Only
+@ -- the most recent attachment (identified by the D card) is saved.
+@ --
+@ CREATE TABLE attachment(
+@   attachid INTEGER PRIMARY KEY,   -- Local id for this attachment
+@   isLatest BOOLEAN DEFAULT 0,     -- True if this is the one to use
+@   mtime TIMESTAMP,                -- Time when attachment last changed
+@   src TEXT,                       -- UUID of the attachment.  NULL to delete
+@   target TEXT,                    -- Object attached to. Wikiname or Tkt UUID
+@   filename TEXT,                  -- Filename for the attachment
+@   comment TEXT,                   -- Comment associated with this attachment
+@   user TEXT                       -- Name of user adding attachment
+@ );
+@ CREATE INDEX attachment_idx1 ON attachment(target, filename, mtime);
+@ CREATE INDEX attachment_idx2 ON attachment(src);
+@
 @ -- Template for the TICKET table
 @ --
 @ -- NB: when changing the schema of the TICKET table here, also make the

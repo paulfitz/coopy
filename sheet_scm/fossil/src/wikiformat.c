@@ -371,6 +371,19 @@ struct Renderer {
   } *aStack;
 };
 
+/*
+** Return TRUE if HTML should be used as the sole markup language for wiki.
+**
+** On first invocation, this routine consults the "wiki-use-html" setting.
+** It caches the result for subsequent invocations, under the assumption
+** that the setting will not change.
+*/
+static int wikiUsesHtml(void){
+  static int r = -1;
+  if( r<0 ) r = db_get_boolean("wiki-use-html", 0);
+  return r;
+}
+
 
 /*
 ** z points to a "<" character.  Check to see if this is the start of
@@ -381,13 +394,16 @@ struct Renderer {
 static int markupLength(const char *z){
   int n = 1;
   int inparen = 0;
+  int c;
   if( z[n]=='/' ){ n++; }
   if( !isalpha(z[n]) ) return 0;
   while( isalnum(z[n]) ){ n++; }
-  if( z[n]!='>' && !isspace(z[n]) ) return 0;
-  while( z[n] && (z[n]!='>' || inparen) ){
-    if( z[n]=='"' ){
-      inparen = !inparen;
+  if( (c = z[n])!='>' && !isspace(c) ) return 0;
+  while( (c = z[n])!=0 && (c!='>' || inparen) ){
+    if( c==inparen ){
+      inparen = 0;
+    }else if( c=='"' || c=='\'' ){
+      inparen = c;
     }
     n++;
   }
@@ -702,6 +718,10 @@ static void parseMarkup(ParsedMarkup *p, char *z){
         i++;
         zValue = &z[i];
         while( z[i] && z[i]!='"' ){ i++; }
+      }else if( z[i]=='\'' ){
+        i++;
+        zValue = &z[i];
+        while( z[i] && z[i]!='\'' ){ i++; }
       }else{
         zValue = &z[i];
         while( !isspace(z[i]) && z[i]!='>' ){ z++; }
@@ -1392,7 +1412,7 @@ void wiki_convert(Blob *pIn, Blob *pOut, int flags){
   }else{
     renderer.wantAutoParagraph = 1;
   }
-  if( db_get_int("wiki-use-html", 0) ){
+  if( wikiUsesHtml() ){
     renderer.state |= WIKI_USE_HTML;
   }
   if( pOut ){
@@ -1479,7 +1499,7 @@ void wiki_extract_links(
   if( flags & WIKI_NOBLOCK ){
     renderer.state |= INLINE_MARKUP_ONLY;
   }
-  if( db_get_int("wiki-use-html", 0) ){
+  if( wikiUsesHtml() ){
     renderer.state |= WIKI_USE_HTML;
     wikiUseHtml = 1;
   }

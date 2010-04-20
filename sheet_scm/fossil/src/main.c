@@ -132,6 +132,7 @@ struct Global {
   int okNewTkt;           /* n: create new tickets */
   int okApndTkt;          /* c: append to tickets via the web */
   int okWrTkt;            /* w: make changes to tickets via web */
+  int okAttach;           /* b: add attachments */
   int okTktFmt;           /* t: create new ticket report formats */
   int okRdAddr;           /* e: read email addresses or other private data */
   int okZip;              /* z: download zipped artifact via /zip URL */
@@ -218,6 +219,7 @@ static int name_search(
   return 1+(cnt>1);
 }
 
+static int _main_config = 0;
 
 /*
 ** This procedure runs first.
@@ -230,6 +232,10 @@ int main(int argc, char **argv){
   _verify_setup();
   _manifest_setup();
 
+  if (!_main_config) {
+    sqlite3_config(SQLITE_CONFIG_LOG, fossil_sqlite_log, 0);
+    _main_config = 1;
+  }
   g.now = time(0);
   g.argc = argc;
   g.argv = argv;
@@ -352,6 +358,46 @@ void fossil_warning(const char *zFormat, ...){
   }else{
     fprintf(stderr, "%s: %s\n", g.argv[0], z);
   }
+}
+
+/*
+** Return a name for an SQLite error code
+*/
+static const char *sqlite_error_code_name(int iCode){
+  static char zCode[30];
+  switch( iCode & 0xff ){
+    case SQLITE_OK:         return "SQLITE_OK";
+    case SQLITE_ERROR:      return "SQLITE_ERROR";
+    case SQLITE_PERM:       return "SQLITE_PERM";
+    case SQLITE_ABORT:      return "SQLITE_ABORT";
+    case SQLITE_BUSY:       return "SQLITE_BUSY";
+    case SQLITE_NOMEM:      return "SQLITE_NOMEM";
+    case SQLITE_READONLY:   return "SQLITE_READONLY";
+    case SQLITE_INTERRUPT:  return "SQLITE_INTERRUPT";
+    case SQLITE_IOERR:      return "SQLITE_IOERR";
+    case SQLITE_CORRUPT:    return "SQLITE_CORRUPT";
+    case SQLITE_FULL:       return "SQLITE_FULL";
+    case SQLITE_CANTOPEN:   return "SQLITE_CANTOPEN";
+    case SQLITE_PROTOCOL:   return "SQLITE_PROTOCOL";
+    case SQLITE_EMPTY:      return "SQLITE_EMPTY";
+    case SQLITE_SCHEMA:     return "SQLITE_SCHEMA";
+    case SQLITE_CONSTRAINT: return "SQLITE_CONSTRAINT";
+    case SQLITE_MISMATCH:   return "SQLITE_MISMATCH";
+    case SQLITE_MISUSE:     return "SQLITE_MISUSE";
+    case SQLITE_NOLFS:      return "SQLITE_NOLFS";
+    case SQLITE_FORMAT:     return "SQLITE_FORMAT";
+    case SQLITE_RANGE:      return "SQLITE_RANGE";
+    case SQLITE_NOTADB:     return "SQLITE_NOTADB";
+    default: {
+      sqlite3_snprintf(sizeof(zCode),zCode,"error code %d",iCode);
+    }
+  }
+  return zCode;
+}
+
+/* Error logs from SQLite */
+void fossil_sqlite_log(void *notUsed, int iCode, const char *zErrmsg){
+  fossil_warning("%s: %s", sqlite_error_code_name(iCode), zErrmsg);
 }
 
 /*
@@ -614,6 +660,10 @@ static char *enter_chroot_jail(char *zRepo){
     }
     setgid(sStat.st_gid);
     setuid(sStat.st_uid);
+    if( g.db!=0 ){
+      db_close();
+      db_open_repository(zRepo);
+    }
   }
 #endif
   return zRepo;
@@ -657,6 +707,7 @@ static void process_one_web_page(const char *zNotFound){
     for(j=strlen(g.zRepositoryName)+1, k=0; k<i-1; j++, k++){
       if( !isalnum(zRepo[j]) && zRepo[j]!='-' ) zRepo[j] = '_';
     }
+    if( zRepo[0]=='/' && zRepo[1]=='/' ) zRepo++;
 
     if( file_size(zRepo)<1024 ){
       if( zNotFound ){

@@ -1,0 +1,457 @@
+Index: src/blob.c
+===================================================================
+--- src/blob.c
++++ src/blob.c
+@@ -56,10 +56,11 @@
+ */
+ #define BLOB_SEEK_SET 1
+ #define BLOB_SEEK_CUR 2
+ #define BLOB_SEEK_END 3
+ 
++
+ #endif /* INTERFACE */
+ 
+ /*
+ ** Make sure a blob is initialized
+ */
+@@ -902,5 +903,10 @@
+     if( z[i]!='\r' ) z[j++] = z[i];
+   }
+   z[j] = 0;
+   p->nUsed = j;
+ }
++
++int blob_initialized(Blob *x) {
++  return (x)->xRealloc==blobReallocMalloc || (x)->xRealloc==blobReallocStatic;
++}
++
+
+Index: src/checkin.c
+===================================================================
+--- src/checkin.c
++++ src/checkin.c
+@@ -117,11 +117,12 @@
+   db_must_be_within_tree();
+   blob_zero(&report);
+   vid = db_lget_int("checkout", 0);
+   vfile_check_signature(vid, 0);
+   status_report(&report, "", 0);
+-  blob_write_to_file(&report, "-");
++  //blob_write_to_file(&report, "-");
++  printf("%s",blob_buffer(&report));
+ }
+ 
+ /*
+ ** COMMAND: status
+ **
+
+Index: src/db.c
+===================================================================
+--- src/db.c
++++ src/db.c
+@@ -55,10 +55,13 @@
+ struct Stmt {
+   Blob sql;               /* The SQL for this statement */
+   sqlite3_stmt *pStmt;    /* The results of sqlite3_prepare() */
+   Stmt *pNext, *pPrev;    /* List of all unfinalized statements */
+   int nStep;              /* Number of sqlite3_step() calls */
++  Stmt *proxy;
++  int prep_count;
++  int src;
+ };
+ #endif /* INTERFACE */
+ 
+ /*
+ ** Call this routine when a database error occurs.
+@@ -92,15 +95,48 @@
+ 
+ static int nBegin = 0;      /* Nesting depth of BEGIN */
+ static int isNewRepo = 0;   /* True if the repository is newly created */
+ static int doRollback = 0;  /* True to force a rollback */
+ static int nCommitHook = 0; /* Number of commit hooks */
++static int db_busy = 0;
+ static struct sCommitHook {
+   int (*xHook)(void);  /* Functions to call at db_end_transaction() */
+   int sequence;        /* Call functions in sequence order */
+ } aHook[5];
+-static Stmt *pAllStmt = 0;  /* List of all unfinalized statements */
++static Stmt *pAllStmt = 0;  /* List of all unfinalized dynamic statements */
++static Stmt *pLastStmt = 0;
++
++static Stmt *db_make_proxy(Stmt *pStmt) {
++  Stmt *proxy = (Stmt *)malloc(sizeof(Stmt));
++  assert(proxy!=0);
++  proxy->pStmt = pStmt->pStmt;
++  proxy->proxy = 0;
++
++  proxy->pNext = pAllStmt;
++  proxy->pPrev = 0;
++  if( pAllStmt ) pAllStmt->pPrev = proxy;
++  pAllStmt = proxy;
++  proxy->src = 9;
++
++  pStmt->proxy = proxy;
++  //;printf("  Made proxy %ld\n", (long int)(pStmt->proxy));
++
++  return proxy;
++}
++
++
++int db_reset_all() {
++  nBegin = 0;
++  isNewRepo = 0;
++  doRollback = 0;
++  nCommitHook = 0;
++  db_busy = 0;
++  pAllStmt = 0;
++  pLastStmt = 0;
++  return 0;
++}
++
+ 
+ /*
+ ** This routine is called by the SQLite commit-hook mechanism
+ ** just prior to each commit.  All this routine does is verify
+ ** that nBegin really is zero.  That insures that transactions
+@@ -139,23 +175,22 @@
+     db_multi_exec(doRollback ? "ROLLBACK" : "COMMIT");
+     doRollback = 0;
+   }
+ }
+ void db_force_rollback(void){
+-  static int busy = 0;
+-  if( busy ) return;
+-  busy = 1;
++  if( db_busy ) return;
++  db_busy = 1;
+   undo_rollback();
+   if( nBegin ){
+     sqlite3_exec(g.db, "ROLLBACK", 0, 0, 0);
+     if( isNewRepo ){
+       db_close();
+       unlink(g.zRepositoryName);
+     }
+   }
+   nBegin = 0;
+-  busy = 0;
++  db_busy = 0;
+ }
+ 
+ /*
+ ** Install a commit hook.  Hooks are installed in sequence order.
+ ** It is an error to install the same commit hook more than once.
+@@ -199,30 +234,38 @@
+   if( sqlite3_prepare_v2(g.db, zSql, -1, &pStmt->pStmt, 0)!=0 ){
+     db_err("%s\n%s", sqlite3_errmsg(g.db), zSql);
+   }
+   pStmt->pNext = pStmt->pPrev = 0;
+   pStmt->nStep = 0;
++  pStmt->proxy = 0;
+   return 0;
+ }
+ int db_prepare(Stmt *pStmt, const char *zFormat, ...){
+   int rc;
+   va_list ap;
+   va_start(ap, zFormat);
+   rc = db_vprepare(pStmt, zFormat, ap);
+   va_end(ap);
++  pStmt->proxy = 0;
++  if (rc==SQLITE_OK) {
++    db_make_proxy(pStmt);
++  }
+   return rc;
+ }
+ int db_static_prepare(Stmt *pStmt, const char *zFormat, ...){
++  pStmt->prep_count++;
+   int rc = SQLITE_OK;
+   if( blob_size(&pStmt->sql)==0 ){
+     va_list ap;
+     va_start(ap, zFormat);
+     rc = db_vprepare(pStmt, zFormat, ap);
+     pStmt->pNext = pAllStmt;
+     pStmt->pPrev = 0;
+     if( pAllStmt ) pAllStmt->pPrev = pStmt;
+     pAllStmt = pStmt;
++    pStmt->src = 2;
++    pStmt->proxy = 0;
+     va_end(ap);
+   }
+   return rc;
+ }
+ 
+@@ -313,24 +356,40 @@
+   return rc;
+ }
+ int db_finalize(Stmt *pStmt){
+   int rc;
+   db_stats(pStmt);
+-  blob_reset(&pStmt->sql);
++  if (pStmt->src!=9) {
++    blob_reset(&pStmt->sql);
++    if (pStmt->proxy) {
++      //;printf("  Freeing unneeded proxy %ld\n", (long int)(pStmt->proxy));
++      if( pStmt->proxy->pNext ){
++	pStmt->proxy->pNext->pPrev = pStmt->proxy->pPrev;
++      }
++      if( pStmt->proxy->pPrev ){
++	pStmt->proxy->pPrev->pNext = pStmt->proxy->pNext;
++      } else if( pAllStmt==pStmt->proxy ){
++	pAllStmt = pStmt->proxy->pNext;
++      }
++      free(pStmt->proxy);
++      pStmt->proxy = 0;
++    }
++  }
+   rc = sqlite3_finalize(pStmt->pStmt);
+   db_check_result(rc);
+   pStmt->pStmt = 0;
+   if( pStmt->pNext ){
+     pStmt->pNext->pPrev = pStmt->pPrev;
+   }
+   if( pStmt->pPrev ){
+     pStmt->pPrev->pNext = pStmt->pNext;
+-  }else if( pAllStmt==pStmt ){
++  } else if( pAllStmt==pStmt ){
+     pAllStmt = pStmt->pNext;
+   }
+   pStmt->pNext = 0;
+   pStmt->pPrev = 0;
++  //;printf("Finalized statement %ld\n", (long int)pStmt);
+   return rc;
+ }
+ 
+ /*
+ ** Return the rowid of the most recent insert
+@@ -864,19 +923,33 @@
+ 
+ /*
+ ** Close the database connection.
+ */
+ void db_close(void){
+-  if( g.db==0 ) return;
++  if( g.db==0 && g.dbConfig==0 ) return;
+   while( pAllStmt ){
++    /*
++    ;printf("Shutting down %ld (%s:%d) %d\n", (long int)(pAllStmt),
++	    (pAllStmt->src==1)?"dynamic":((pAllStmt->src==2)?"static":"proxy"),pAllStmt->src,pAllStmt->prep_count);
++    */
+     db_finalize(pAllStmt);
+   }
+   g.repositoryOpen = 0;
+   g.localOpen = 0;
+   g.configOpen = 0;
+-  sqlite3_close(g.db);
+-  g.db = 0;
++  if (g.db) {
++    if (sqlite3_close(g.db)!=SQLITE_OK) {
++      printf("Problem closing database (1)\n");
++    }
++    g.db = 0;
++  }
++  if (g.dbConfig) {
++    if (sqlite3_close(g.dbConfig)!=SQLITE_OK) {
++      printf("Problem closing database (2)\n");
++    }
++    g.dbConfig = 0;
++  }
+ }
+ 
+ 
+ /*
+ ** Create a new empty repository database with the given name.
+
+Index: src/main.c
+===================================================================
+--- src/main.c
++++ src/main.c
+@@ -217,20 +217,27 @@
+     return 0;
+   }
+   return 1+(cnt>1);
+ }
+ 
++static int _main_config = 0;
+ 
+ /*
+ ** This procedure runs first.
+ */
+ int main(int argc, char **argv){
+   const char *zCmdName;
+   int idx;
+   int rc;
+-
+-  sqlite3_config(SQLITE_CONFIG_LOG, fossil_sqlite_log, 0);
++  db_reset_all();
++  _verify_setup();
++  _manifest_setup();
++
++  if (!_main_config) {
++    sqlite3_config(SQLITE_CONFIG_LOG, fossil_sqlite_log, 0);
++    _main_config = 1;
++  }
+   g.now = time(0);
+   g.argc = argc;
+   g.argv = argv;
+   if( getenv("GATEWAY_INTERFACE")!=0 ){
+     zCmdName = "cgi";
+@@ -240,11 +247,13 @@
+   }else{
+     g.fQuiet = find_option("quiet", 0, 0)!=0;
+     g.fSqlTrace = find_option("sqltrace", 0, 0)!=0;
+     g.fSqlPrint = find_option("sqlprint", 0, 0)!=0;
+     g.fHttpTrace = find_option("httptrace", 0, 0)!=0;
+-    g.zLogin = find_option("user", "U", 1);
++    if (!g.zLogin) {
++      g.zLogin = find_option("user", "U", 1);
++    }
+     zCmdName = argv[1];
+   }
+   rc = name_search(zCmdName, aCommand, count(aCommand), &idx);
+   if( rc==1 ){
+     fprintf(stderr,"%s: unknown command: %s\n"
+
+Index: src/manifest.c
+===================================================================
+--- src/manifest.c
++++ src/manifest.c
+@@ -854,10 +854,15 @@
+ /*
+ ** True if manifest_crosslink_begin() has been called but
+ ** manifest_crosslink_end() is still pending.
+ */
+ static int manifest_crosslink_busy = 0;
++
++int _manifest_setup() {
++  manifest_crosslink_busy = 0;
++  return 0;
++}
+ 
+ /*
+ ** Setup to do multiple manifest_crosslink() calls.
+ ** This is only required if processing ticket changes.
+ */
+
+Index: src/merge3.c
+===================================================================
+--- src/merge3.c
++++ src/merge3.c
+@@ -32,10 +32,12 @@
+ #else
+ #define DEBUG(X)
+ #define ISDEBUG 0
+ #endif
+ 
++int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut);
++
+ /* The minimum of two integers */
+ #define min(A,B)  (A<B?A:B)
+ 
+ /*
+ ** Compare N lines of text from pV1 and pV2.  If the lines
+@@ -157,10 +159,11 @@
+   int *aC2;              /* Changes from pPivot to pV2 */
+   int i1, i2;            /* Index into aC1[] and aC2[] */
+   int nCpy, nDel, nIns;  /* Number of lines to copy, delete, or insert */
+   int limit1, limit2;    /* Sizes of aC1[] and aC2[] */
+   int nConflict = 0;     /* Number of merge conflicts seen so far */
++  int sub;
+   static const char zBegin[] = ">>>>>>> BEGIN MERGE CONFLICT\n";
+   static const char zMid[]   = "============================\n";
+   static const char zEnd[]   = "<<<<<<< END MERGE CONFLICT\n";
+ 
+   blob_zero(pOut);         /* Merge results stored in pOut */
+@@ -264,10 +267,16 @@
+       nConflict++;
+       while( !ends_at_CPY(&aC1[i1], sz) || !ends_at_CPY(&aC2[i2], sz) ){
+         sz++;
+       }
+       DEBUG( printf("CONFLICT %d\n", sz); )
++      sub = csv_merge(pPivot, pV1, pV2, pOut);
++      if (sub==1 || sub==-1) {
++        free(aC1);
++        free(aC2);
++        return (sub==1)?0:-1;
++      }
+       blob_appendf(pOut, zBegin);
+       i1 = output_one_side(pOut, pV1, aC1, i1, sz);
+       blob_appendf(pOut, zMid);
+       i2 = output_one_side(pOut, pV2, aC2, i2, sz);
+       blob_appendf(pOut, zEnd);
+
+Index: src/translate.c
+===================================================================
+--- src/translate.c
++++ src/translate.c
+@@ -85,11 +85,28 @@
+   c1 = c2 = '-';
+   while( fgets(zLine, sizeof(zLine), in) ){
+     for(i=0; zLine[i] && isspace(zLine[i]); i++){}
+     if( zLine[i]!='@' ){
+       if( inPrint || inStr ) end_block(out);
+-      fprintf(out,"%s",zLine);
++      if (strncmp(zLine+i,"printf",6)==0) {
++	zLine[i] = '\0';
++	fprintf(out,"%s",zLine);
++	fprintf(out,"_ssfossil_p");
++	fprintf(out,"%s",zLine+i+1);
++      } else if (strncmp(zLine+i,"exit(",5)==0) {
++	zLine[i] = '\0';
++	fprintf(out,"%s",zLine);
++	fprintf(out,"_ssfossil_e");
++	fprintf(out,"%s",zLine+i+1);
++      } else if (strncmp(zLine+i,"fprintf(stderr",14)==0) {
++	zLine[i] = '\0';
++	fprintf(out,"%s",zLine);
++	fprintf(out,"_ssfossil_f");
++	fprintf(out,"%s",zLine+i+1);
++      } else {
++	fprintf(out,"%s",zLine);
++      }
+                        /* 0123456789 12345 */
+       if( strncmp(zLine, "/* @-comment: ", 14)==0 ){
+         c1 = zLine[14];
+         c2 = zLine[15];
+       }
+
+Index: src/verify.c
+===================================================================
+--- src/verify.c
++++ src/verify.c
+@@ -67,10 +67,19 @@
+ ** The following bag holds the rid for every record that needs
+ ** to be verified.
+ */
+ static Bag toVerify;
+ static int inFinalVerify = 0;
++static int _verify_isInit = 0;
++
++int _verify_setup() {
++  bag_clear(&toVerify);
++  inFinalVerify = 0;
++  _verify_isInit = 0;
++  return 0;
++}
++
+ 
+ /*
+ ** This routine is called just prior to each commit operation.
+ **
+ ** Invoke verify_rid() on every record that has been added or modified
+@@ -96,14 +105,13 @@
+ ** If the record rid is less than 1, then just initialize the
+ ** verification system but do not record anything as needing
+ ** verification.
+ */
+ void verify_before_commit(int rid){
+-  static int isInit = 0;
+-  if( !isInit ){
++  if( !_verify_isInit ){
+     db_commit_hook(verify_at_commit, 1000);
+-    isInit = 1;
++    _verify_isInit = 1;
+   }
+   assert( !inFinalVerify );
+   if( rid>0 ){
+     bag_insert(&toVerify, rid);
+   }
+

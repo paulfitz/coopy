@@ -87,7 +87,24 @@ static void trans(FILE *in, FILE *out){
     for(i=0; zLine[i] && isspace(zLine[i]); i++){}
     if( zLine[i]!='@' ){
       if( inPrint || inStr ) end_block(out);
-      fprintf(out,"%s",zLine);
+      if (strncmp(zLine+i,"printf",6)==0) {
+	zLine[i] = '\0';
+	fprintf(out,"%s",zLine);
+	fprintf(out,"_ssfossil_p");
+	fprintf(out,"%s",zLine+i+1);
+      } else if (strncmp(zLine+i,"exit(",5)==0) {
+	zLine[i] = '\0';
+	fprintf(out,"%s",zLine);
+	fprintf(out,"_ssfossil_e");
+	fprintf(out,"%s",zLine+i+1);
+      } else if (strncmp(zLine+i,"fprintf(stderr",14)==0) {
+	zLine[i] = '\0';
+	fprintf(out,"%s",zLine);
+	fprintf(out,"_ssfossil_f");
+	fprintf(out,"%s",zLine+i+1);
+      } else {
+	fprintf(out,"%s",zLine);
+      }
                        /* 0123456789 12345 */
       if( strncmp(zLine, "/* @-comment: ", 14)==0 ){
         c1 = zLine[14];

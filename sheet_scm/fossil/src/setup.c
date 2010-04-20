@@ -149,6 +149,8 @@ void setup_ulist(void){
   @ <table>
      @ <tr><td valign="top"><b>a</b></td>
      @   <td><i>Admin:</i> Create and delete users</td></tr>
+     @ <tr><td valign="top"><b>b</b></td>
+     @   <td><i>Attach:</i> Add attachments to wiki or tickets</td></tr>
      @ <tr><td valign="top"><b>c</b></td>
      @   <td><i>Append-Tkt:</i> Append to tickets</td></tr>
      @ <tr><td valign="top"><b>d</b></td>
@@ -183,10 +185,10 @@ void setup_ulist(void){
      @ <tr><td valign="top"><b>t</b></td>
      @   <td><i>Tkt-Report:</i> Create new bug summary reports</td></tr>
      @ <tr><td valign="top"><b>u</b></td>
-     @   <td><i>Reader:</i> Inherit privileges of 
+     @   <td><i>Reader:</i> Inherit privileges of
      @   user <tt>reader</tt></td></tr>
      @ <tr><td valign="top"><b>v</b></td>
-     @   <td><i>Developer:</i> Inherit privileges of 
+     @   <td><i>Developer:</i> Inherit privileges of
      @   user <tt>developer</tt></td></tr>
      @ <tr><td valign="top"><b>w</b></td>
      @   <td><i>Write-Tkt:</i> Edit tickets</td></tr>
@@ -241,7 +243,7 @@ void user_edit(void){
   const char *zId, *zLogin, *zInfo, *zCap, *zPw;
   char *oaa, *oas, *oar, *oaw, *oan, *oai, *oaj, *oao, *oap;
   char *oak, *oad, *oac, *oaf, *oam, *oah, *oag, *oae;
-  char *oat, *oau, *oav, *oaz;
+  char *oat, *oau, *oav, *oab, *oaz;
   const char *inherit[128];
   int doWrite;
   int uid;
@@ -278,6 +280,7 @@ void user_edit(void){
     char zCap[50];
     int i = 0;
     int aa = P("aa")!=0;
+    int ab = P("ab")!=0;
     int ad = P("ad")!=0;
     int ae = P("ae")!=0;
     int ai = P("ai")!=0;
@@ -299,6 +302,7 @@ void user_edit(void){
     int av = P("av")!=0;
     int az = P("az")!=0;
     if( aa ){ zCap[i++] = 'a'; }
+    if( ab ){ zCap[i++] = 'b'; }
     if( ac ){ zCap[i++] = 'c'; }
     if( ad ){ zCap[i++] = 'd'; }
     if( ae ){ zCap[i++] = 'e'; }
@@ -355,7 +359,7 @@ void user_edit(void){
   zInfo = "";
   zCap = "";
   zPw = "";
-  oaa = oac = oad = oae = oaf = oag = oah = oai = oaj = oak = oam =
+  oaa = oab = oac = oad = oae = oaf = oag = oah = oai = oaj = oak = oam =
         oan = oao = oap = oar = oas = oat = oau = oav = oaw = oaz = "";
   if( uid ){
     zLogin = db_text("", "SELECT login FROM user WHERE uid=%d", uid);
@@ -363,6 +367,7 @@ void user_edit(void){
     zCap = db_text("", "SELECT cap FROM user WHERE uid=%d", uid);
     zPw = db_text("", "SELECT pw FROM user WHERE uid=%d", uid);
     if( strchr(zCap, 'a') ) oaa = " checked";
+    if( strchr(zCap, 'b') ) oab = " checked";
     if( strchr(zCap, 'c') ) oac = " checked";
     if( strchr(zCap, 'd') ) oad = " checked";
     if( strchr(zCap, 'e') ) oae = " checked";
@@ -469,11 +474,12 @@ void user_edit(void){
   @    <input type="checkbox" name="af"%s(oaf)/>%s(B('f'))New Wiki<br>
   @    <input type="checkbox" name="am"%s(oam)/>%s(B('m'))Append Wiki<br>
   @    <input type="checkbox" name="ak"%s(oak)/>%s(B('k'))Write Wiki<br>
-  @    <input type="checkbox" name="ar"%s(oar)/>%s(B('r'))Read Tkt<br>
-  @    <input type="checkbox" name="an"%s(oan)/>%s(B('n'))New Tkt<br>
-  @    <input type="checkbox" name="ac"%s(oac)/>%s(B('c'))Append Tkt<br>
-  @    <input type="checkbox" name="aw"%s(oaw)/>%s(B('w'))Write Tkt<br>
-  @    <input type="checkbox" name="at"%s(oat)/>%s(B('t'))Tkt Report<br>
+  @    <input type="checkbox" name="ab"%s(oab)/>%s(B('b'))Attachments<br>
+  @    <input type="checkbox" name="ar"%s(oar)/>%s(B('r'))Read Ticket<br>
+  @    <input type="checkbox" name="an"%s(oan)/>%s(B('n'))New Ticket<br>
+  @    <input type="checkbox" name="ac"%s(oac)/>%s(B('c'))Append Ticket<br>
+  @    <input type="checkbox" name="aw"%s(oaw)/>%s(B('w'))Write Ticket<br>
+  @    <input type="checkbox" name="at"%s(oat)/>%s(B('t'))Ticket Report<br>
   @    <input type="checkbox" name="az"%s(oaz)/>%s(B('z'))Download Zip
   @   </td>
   @ </tr>
@@ -566,9 +572,9 @@ void user_edit(void){
   @ <li><p>
   @ The <b>Read Wiki</b>, <b>New Wiki</b>, <b>Append Wiki</b>, and
   @ <b>Write Wiki</b> privileges control access to wiki pages.  The
-  @ <b>Read Tkt</b>, <b>New Tkt</b>, <b>Append Tkt</b>, and
-  @ <b>Write Tkt</b> privileges control access to trouble tickets.
-  @ The <b>Tkt Report</b> privilege allows the user to create or edit
+  @ <b>Read Ticket</b>, <b>New Ticket</b>, <b>Append Ticket</b>, and
+  @ <b>Write Ticket</b> privileges control access to trouble tickets.
+  @ The <b>Ticket Report</b> privilege allows the user to create or edit
   @ ticket report formats.
   @ </p></li>
   @
@@ -586,12 +592,17 @@ void user_edit(void){
   @ </p></li>
   @
   @ <li><p>
+  @ The <b>Attachment</b> privilege is needed in order to add attachments
+  @ to tickets or wiki.  Write privilege on the ticket or wiki is also
+  @ required.</p></li>
+  @
+  @ <li><p>
   @ Login is prohibited if the password is an empty string.
   @ </p></li>
   @ </ul>
   @
   @ <h2>Special Logins</h2>
-  @ 
+  @
   @ <ul>
   @ <li><p>
   @ No login is required for user "<b>nobody</b>".  The capabilities
@@ -729,13 +740,12 @@ void setup_access(void){
   @ 127.0.0.1.</p></li>
 
   @ <hr>
-  onoff_attribute("Show javascript button to fill in CAPTCHA",
-                  "auto-captcha", "autocaptcha", 0);
-  @ <p>When enabled, a button appears on the login screen for user
-  @ "anonymous" that will automatically fill in the CAPTCHA password.
-  @ This is less secure that forcing the user to do it manually, but is
-  @ probably secure enough and it is certainly more convenient for
-  @ anonymous users.</p>
+  onoff_attribute("Allow REMOTE_USER authentication",
+     "remote_user_ok", "remote_user_ok", 0);
+  @ <p>When enabled, if the REMOTE_USER environment variable is set to the
+  @ login name of a valid user and no other login credentials are available,
+  @ then the REMOTE_USER is accepted as an authenticated user.
+  @ </p></li>
 
   @ <hr>
   entry_attribute("Login expiration time", 6, "cookie-expire", "cex", "8766");
@@ -749,8 +759,17 @@ void setup_access(void){
   @ <p>Fossil tries to limit out-bound sync, clone, and pull packets
   @ to this many bytes, uncompressed.  If the client requires more data
   @ than this, then the client will issue multiple HTTP requests.
-  @ Values below 1 million are not recommended.  5 million is a 
+  @ Values below 1 million are not recommended.  5 million is a
   @ reasonable number.</p>
+
+  @ <hr>
+  onoff_attribute("Show javascript button to fill in CAPTCHA",
+                  "auto-captcha", "autocaptcha", 0);
+  @ <p>When enabled, a button appears on the login screen for user
+  @ "anonymous" that will automatically fill in the CAPTCHA password.
+  @ This is less secure that forcing the user to do it manually, but is
+  @ probably secure enough and it is certainly more convenient for
+  @ anonymous users.</p>
 
   @ <hr>
   @ <p><input type="submit"  name="submit" value="Apply Changes"></p>
@@ -794,7 +813,7 @@ void setup_timeline(void){
   @ clicking.  This setting selects the default.</p>
 
   @ <hr>
-  entry_attribute("Max timeline comment length", 6, 
+  entry_attribute("Max timeline comment length", 6,
                   "timeline-max-comment", "tmc", "0");
   @ <p>The maximum length of a comment to be displayed in a timeline.
   @ "0" there is no length limit.</p>
@@ -839,55 +858,61 @@ void setup_behavior(void){
                   "clearsign", "clearsign", 0);
   @ <p>When enabled (the default), fossil will attempt to
   @     sign all commits with GPG.  When disabled, commits will
-  @    be unsigned.</p>  
-  
+  @    be unsigned.</p>
+
   @ <hr>
   onoff_attribute("Require local authentication",
                   "localauth", "localauth", 0);
   @ <p>If enabled, require that HTTP connections from
   @         127.0.0.1 be authenticated by password.  If
   @        false, all HTTP requests from localhost have
-  @        unrestricted access to the repository.</p>  
-  
+  @        unrestricted access to the repository.</p>
+
   @ <hr>
   onoff_attribute("Modification times used to detect changes",
                   "mtime-changes", "mtime-changes", 0);
-  @ <p>Use file modification times (mtimes) to detect when files have been modified.</p>  
-  
-  @ <hr>
-  entry_attribute("Diff Command", 16, 
-                  "diff-command", "diff-command", "diff");
-  @ <p>External command used to generate a textual diff</p>  
-  
-  @ <hr>
-  entry_attribute("Gdiff Command", 16, 
-                  "gdiff-command", "gdiff-command", "gdiff");
-  @ <p>External command to run when performing a graphical diff. If undefined, text diff will be used.</p>  
-    
-  @ <hr>
-  entry_attribute("Editor", 16, 
-                  "editor", "editor", "");
-  @ <p>Text editor command used for check-in comments.</p>  
-  
-  @ <hr>
-  entry_attribute("HTTP port", 16, 
-                  "http-port", "http-port", "8080");
-  @ <p>The TCP/IP port number to use by the "server" and "ui" commands.  Default: 8080</p>  
+  @ <p>Use file modification times (mtimes) to detect when files have been modified.</p>
 
   @ <hr>
-  entry_attribute("PGP Command", 32, 
+  entry_attribute("File Ignore Glob", 40,
+                  "ignore-glob", "ignore-glob", "");
+  @ <p>Cause the 'extra' command to ignore files matching the glob. Example:
+  @ '*.o,*.a,*.bck,*~'</p>
+
+  @ <hr>
+  entry_attribute("Diff Command", 16,
+                  "diff-command", "diff-command", "diff");
+  @ <p>External command used to generate a textual diff</p>
+
+  @ <hr>
+  entry_attribute("Gdiff Command", 16,
+                  "gdiff-command", "gdiff-command", "gdiff");
+  @ <p>External command to run when performing a graphical diff. If undefined, text diff will be used.</p>
+
+  @ <hr>
+  entry_attribute("Editor", 16,
+                  "editor", "editor", "");
+  @ <p>Text editor command used for check-in comments.</p>
+
+  @ <hr>
+  entry_attribute("HTTP port", 16,
+                  "http-port", "http-port", "8080");
+  @ <p>The TCP/IP port number to use by the "server" and "ui" commands.  Default: 8080</p>
+
+  @ <hr>
+  entry_attribute("PGP Command", 32,
                   "pgp-command", "pgp-command", "gpg --clearsign -o ");
-  @ <p>Command used to clear-sign manifests at check-in.The default is "gpg --clearsign -o ".</p>  
-  
+  @ <p>Command used to clear-sign manifests at check-in.The default is "gpg --clearsign -o ".</p>
+
   @ <hr>
-  entry_attribute("Proxy", 32, 
+  entry_attribute("Proxy", 32,
                   "proxy", "proxy", "off");
-  @ <p>URL of the HTTP proxy.</p>  
-  
+  @ <p>URL of the HTTP proxy.</p>
+
   @ <hr>
-  entry_attribute("Web browser", 32, 
+  entry_attribute("Web browser", 32,
                   "web-browser", "web-browser", "");
-  @ <p>Default web browser for "fossil ui".</p>  
+  @ <p>Default web browser for "fossil ui".</p>
 
   @ <hr>
   @ <p><input type="submit"  name="submit" value="Apply Changes"></p>
@@ -989,7 +1014,7 @@ void setup_editcss(void){
   @ <hr>
   @ The default CSS is shown below for reference.  Other examples
   @ of CSS files can be seen on the <a href="setup_skin">skins page</a>.
-  @ See also the <a href="setup_header">header</a> and 
+  @ See also the <a href="setup_header">header</a> and
   @ <a href="setup_footer">footer</a> editing screens.
   @ <blockquote><pre>
   @ %h(zDefaultCSS)
@@ -1092,7 +1117,7 @@ void setup_logo(void){
     Blob img;
     Stmt ins;
     blob_init(&img, aImg, szImg);
-    db_prepare(&ins, 
+    db_prepare(&ins,
         "REPLACE INTO config(name, value)"
         " VALUES('logo-image',:bytes)"
     );
@@ -1116,7 +1141,7 @@ void setup_logo(void){
   @ <p>The current project logo has a MIME-Type of <b>%h(zMime)</b> and looks
   @ like this:</p>
   @ <blockquote><img src="%s(g.zTop)/logo" alt="logo"></blockquote>
-  @ 
+  @
   @ <p>The logo is accessible to all users at this URL:
   @ <a href="%s(g.zBaseURL)/logo">%s(g.zBaseURL)/logo</a>.
   @ The logo may or may not appear on each

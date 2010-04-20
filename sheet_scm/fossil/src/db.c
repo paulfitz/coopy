@@ -56,12 +56,11 @@ struct Stmt {
   Blob sql;               /* The SQL for this statement */
   sqlite3_stmt *pStmt;    /* The results of sqlite3_prepare() */
   Stmt *pNext, *pPrev;    /* List of all unfinalized statements */
-
+  int nStep;              /* Number of sqlite3_step() calls */
   Stmt *proxy;
-  int src;
   int prep_count;
+  int src;
 };
-
 #endif /* INTERFACE */
 
 /*
@@ -236,24 +235,11 @@ int db_vprepare(Stmt *pStmt, const char *zFormat, va_list ap){
     db_err("%s\n%s", sqlite3_errmsg(g.db), zSql);
   }
   pStmt->pNext = pStmt->pPrev = 0;
+  pStmt->nStep = 0;
   pStmt->proxy = 0;
   return 0;
 }
-
 int db_prepare(Stmt *pStmt, const char *zFormat, ...){
-  /*
-  int rc = SQLITE_OK;
-  va_list ap;
-  va_start(ap, zFormat);
-  rc = db_vprepare(pStmt, zFormat, ap);
-  pStmt->pNext = pAllStmt;
-  pStmt->pPrev = 0;
-  if( pAllStmt ) pAllStmt->pPrev = pStmt;
-  pAllStmt = pStmt;
-  pStmt->src = 1;
-  va_end(ap);
-  return rc;
-  */
   int rc;
   va_list ap;
   va_start(ap, zFormat);
@@ -265,12 +251,10 @@ int db_prepare(Stmt *pStmt, const char *zFormat, ...){
   }
   return rc;
 }
-
 int db_static_prepare(Stmt *pStmt, const char *zFormat, ...){
   pStmt->prep_count++;
   int rc = SQLITE_OK;
-  if( blob_size(&pStmt->sql)==0){
-    //;printf("Preparing statement %ld\n", (long int)pStmt);
+  if( blob_size(&pStmt->sql)==0 ){
     va_list ap;
     va_start(ap, zFormat);
     rc = db_vprepare(pStmt, zFormat, ap);
@@ -335,20 +319,45 @@ int db_bind_str(Stmt *pStmt, const char *zParamName, Blob *pBlob){
 int db_step(Stmt *pStmt){
   int rc;
   rc = sqlite3_step(pStmt->pStmt);
+  pStmt->nStep++;
   return rc;
+}
+
+/*
+** Print warnings if a query is inefficient.
+*/
+static void db_stats(Stmt *pStmt){
+#ifdef FOSSIL_DEBUG
+  int c1, c2, c3;
+  const char *zSql = sqlite3_sql(pStmt->pStmt);
+  if( zSql==0 ) return;
+  c1 = sqlite3_stmt_status(pStmt->pStmt, SQLITE_STMTSTATUS_FULLSCAN_STEP, 1);
+  c2 = sqlite3_stmt_status(pStmt->pStmt, SQLITE_STMTSTATUS_AUTOINDEX, 1);
+  c3 = sqlite3_stmt_status(pStmt->pStmt, SQLITE_STMTSTATUS_SORT, 1);
+  if( c1>pStmt->nStep*4 && strstr(zSql,"/*scan*/")==0 ){
+    fossil_warning("%d scan steps for %d rows in [%s]", c1, pStmt->nStep, zSql);
+  }else if( c2 ){
+    fossil_warning("%d automatic index rows in [%s]", c2, zSql);
+  }else if( c3 && strstr(zSql,"/*sort*/")==0 && strstr(zSql,"/*scan*/")==0 ){
+    fossil_warning("sort w/o index in [%s]", zSql);
+  }
+  pStmt->nStep = 0;
+#endif
 }
 
 /*
 ** Reset or finalize a statement.
 */
 int db_reset(Stmt *pStmt){
-  int rc = sqlite3_reset(pStmt->pStmt);
+  int rc;
+  db_stats(pStmt);
+  rc = sqlite3_reset(pStmt->pStmt);
   db_check_result(rc);
   return rc;
 }
 int db_finalize(Stmt *pStmt){
   int rc;
-  //;printf("Finalizing statement %ld\n", (long int)pStmt);
+  db_stats(pStmt);
   if (pStmt->src!=9) {
     blob_reset(&pStmt->sql);
     if (pStmt->proxy) {
@@ -364,8 +373,6 @@ int db_finalize(Stmt *pStmt){
       free(pStmt->proxy);
       pStmt->proxy = 0;
     }
-  } else {
-    //;printf("  Skipping blob reset for proxy\n");
   }
   rc = sqlite3_finalize(pStmt->pStmt);
   db_check_result(rc);
@@ -598,6 +605,10 @@ char *db_text(char *zDefault, const char *zSql, ...){
   db_finalize(&s);
   return z;
 }
+
+#ifdef __MINGW32__
+extern char *sqlite3_win32_mbcs_to_utf8(const char*);
+#endif
 
 /*
 ** Initialize a new database file with the given schema.  If anything
@@ -1286,6 +1297,7 @@ int is_false(const char *zVal){
 void db_swap_connections(void){
   if( !g.useAttach ){
     sqlite3 *dbTemp = g.db;
+    assert( g.dbConfig!=0 );
     g.db = g.dbConfig;
     g.dbConfig = dbTemp;
   }

@@ -30,8 +30,7 @@ ENDIF (MINGW)
 
 
 ADD_EXECUTABLE(makeheaders fossil/src/makeheaders.c)
-ADD_EXECUTABLE(translate src/fossil/translate.c)
-#ADD_EXECUTABLE(translate fossil/src/translate.c)
+ADD_EXECUTABLE(translate fossil/src/translate.c)
 ADD_EXECUTABLE(mkindex fossil/src/mkindex.c)
 
 GET_TARGET_PROPERTY(MAKEHEADERS_LOC makeheaders LOCATION)
