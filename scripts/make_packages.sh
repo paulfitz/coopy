@@ -43,6 +43,10 @@ while [ ! "k$1" = "k" ]; do
 	sudo git pull
 	cd $LINUX_CHROOT
 	cd ./$LINUX_CHROOT_BUILD || exit 1
+	test -e static_libs || (
+	    echo "Static libraries not set up"
+	    exit 1
+	    )
 	sudo rm -rf *.gz *.sh *.Z
 	(
 	    echo "cd $LINUX_CHROOT_BUILD"
