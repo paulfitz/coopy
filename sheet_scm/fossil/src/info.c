@@ -832,12 +832,36 @@ void diff_page(void){
 void rawartifact_page(void){
   int rid;
   const char *zMime;
+  const char *zFile;
   Blob content;
 
   rid = name_to_rid(PD("name","0"));
   zMime = PD("m","application/x-fossil-artifact");
+  zFile = PD("file","");
   login_check_credentials();
   if( !g.okRead ){ login_needed(); return; }
+  if (zFile[0]) {
+    Manifest m;
+    Blob content;
+    char *uuid = NULL;
+    if((rid = name_to_rid("trunk"))!=0 && content_get(rid, &content)){
+      if( !manifest_parse(&m, &content) || m.type!=CFTYPE_MANIFEST ){
+	rid = 0;
+      }
+    }
+    if (rid!=0) {
+      int i;
+      for(i=0; i<m.nFile; i++){
+	if (strcmp(m.aFile[i].zName,zFile)==0) {
+	  uuid = m.aFile[i].zUuid;
+	}
+      }
+    }
+    rid = 0;
+    if (uuid!=0) {
+      rid = name_to_rid(uuid);
+    }
+  }
   if( rid==0 ){ cgi_redirect("/home"); }
   content_get(rid, &content);
   cgi_set_content_type(zMime);

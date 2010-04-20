@@ -21,6 +21,12 @@ string ml_encode(string x) {
   replace(x,"&","&amp;");
   replace(x,"<","&lt;");
   replace(x,">","&rt;");
+
+  if (x.find("http://")==0) {
+    replace(x,"\"","%22");
+    x = string("<a href=\"") + x +"\">" + x + "</a>";
+  }
+
   return x;
 }
 

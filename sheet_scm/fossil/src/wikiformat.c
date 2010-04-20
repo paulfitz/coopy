@@ -38,6 +38,8 @@
 #endif
 
 static int sheet_mode = 0;
+static int sheet_token = 0;
+static int sheet_ref = 0;
 static Blob sheet_blob = BLOB_INITIALIZER;
 
 int csv_render(Blob *in, Blob *out);
@@ -1101,7 +1103,28 @@ static void wiki_render(Renderer *p, char *z){
     p->state &= ~(AT_NEWLINE|AT_PARAGRAPH);
 
     if (sheet_mode && tokenType!=TOKEN_MARKUP) {
-      blob_append(&sheet_blob, z, n);
+      int i;
+      if (sheet_token==0) {
+	for (i=0; i<n; i++) {
+	  char ch = z[i];
+	  if (ch=='!') {
+	    sheet_ref = 1;
+	    break;
+	  }
+	  if (ch!='\n'&&ch!='\r'&&ch!=' '&&ch!='\t') {
+	    break;
+	  }
+	}
+      }
+      if (sheet_ref) {
+	if (sheet_token==0) {
+	  blob_append(&sheet_blob, z+i+1, n-i-1);
+	  blob_trim(&sheet_blob);
+	}
+      } else {
+	blob_append(&sheet_blob, z, n);
+      }
+      sheet_token++;
     } else
     switch( tokenType ){
       case TOKEN_PARAGRAPH: {
@@ -1320,8 +1343,40 @@ static void wiki_render(Renderer *p, char *z){
 	  p->wantAutoParagraph = 0;
 	  sheet_mode = !markup.endTag;
 	  if (sheet_mode) {
+	    sheet_token = 0;
+	    sheet_ref = 0;
 	    blob_reset(&sheet_blob);
 	  } else {
+	    if (sheet_ref) {
+	      Manifest m;
+	      Blob content;
+	      int rid = 0;
+	      char *uuid = NULL;
+	      if((rid = name_to_rid("trunk"))!=0 && content_get(rid, &content)){
+		if( !manifest_parse(&m, &content) || m.type!=CFTYPE_MANIFEST ){
+		  rid = 0;
+		}
+	      }
+	      if (rid!=0) {
+		int i;
+		for(i=0; i<m.nFile; i++){
+		  if (strlen(m.aFile[i].zName)==blob_size(&sheet_blob)) {
+		    if (strncmp(m.aFile[i].zName,
+				blob_buffer(&sheet_blob),
+				blob_size(&sheet_blob))==0) {
+		      uuid = m.aFile[i].zUuid;
+		    }
+		  }
+		}
+	      }
+	      rid = 0;
+	      if (uuid!=0) {
+		rid = name_to_rid(uuid);
+	      }
+	      if (rid!=0) {
+		content_get(rid, &sheet_blob);
+	      }
+	    }
 	    if (csv_render(&sheet_blob,p->pOut)==0) {
 	      blob_append(p->pOut, blob_buffer(&sheet_blob), 
 			  blob_size(&sheet_blob));
