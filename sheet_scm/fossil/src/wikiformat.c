@@ -37,6 +37,11 @@
 #define WIKI_NOBLOCK        0x008  /* No block markup of any kind */
 #endif
 
+static int sheet_mode = 0;
+static Blob sheet_blob = BLOB_INITIALIZER;
+
+int csv_render(Blob *in, Blob *out);
+
 
 /*
 ** These are the only markup attributes allowed.
@@ -145,8 +150,6 @@ static int findAttr(const char *z){
   return 0;
 }
 
-
-
 /*
 ** Allowed markup.
 **
@@ -190,20 +193,21 @@ static int findAttr(const char *z){
 #define MARKUP_PRE              32
 #define MARKUP_S                33
 #define MARKUP_SAMP             34
-#define MARKUP_SMALL            35
-#define MARKUP_STRIKE           36
-#define MARKUP_STRONG           37
-#define MARKUP_SUB              38
-#define MARKUP_SUP              39
-#define MARKUP_TABLE            40
-#define MARKUP_TD               41
-#define MARKUP_TH               42
-#define MARKUP_TR               43
-#define MARKUP_TT               44
-#define MARKUP_U                45
-#define MARKUP_UL               46
-#define MARKUP_VAR              47
-#define MARKUP_VERBATIM         48
+#define MARKUP_SHEET            35
+#define MARKUP_SMALL            36
+#define MARKUP_STRIKE           37
+#define MARKUP_STRONG           38
+#define MARKUP_SUB              39
+#define MARKUP_SUP              40
+#define MARKUP_TABLE            41
+#define MARKUP_TD               42
+#define MARKUP_TH               43
+#define MARKUP_TR               44
+#define MARKUP_TT               45
+#define MARKUP_U                46
+#define MARKUP_UL               47
+#define MARKUP_VAR              48
+#define MARKUP_VERBATIM         49
 
 /*
 ** The various markup is divided into the following types:
@@ -277,6 +281,7 @@ static const struct AllowedMarkup {
  { "pre",           MARKUP_PRE,          MUTYPE_BLOCK,         0  },
  { "s",             MARKUP_S,            MUTYPE_FONT,          0  },
  { "samp",          MARKUP_SAMP,         MUTYPE_FONT,          0  },
+ { "sheet",         MARKUP_SHEET,        MUTYPE_BLOCK,         0  },
  { "small",         MARKUP_SMALL,        MUTYPE_FONT,          0  },
  { "strike",        MARKUP_STRIKE,       MUTYPE_FONT,          0  },
  { "strong",        MARKUP_STRONG,       MUTYPE_FONT,          0  },
@@ -1094,6 +1099,10 @@ static void wiki_render(Renderer *p, char *z){
       n = nextWikiToken(z, p, &tokenType);
     }
     p->state &= ~(AT_NEWLINE|AT_PARAGRAPH);
+
+    if (sheet_mode && tokenType!=TOKEN_MARKUP) {
+      blob_append(&sheet_blob, z, n);
+    } else
     switch( tokenType ){
       case TOKEN_PARAGRAPH: {
         if( inlineOnly ){
@@ -1305,6 +1314,20 @@ static void wiki_render(Renderer *p, char *z){
         */
         if( inlineOnly && (markup.iType&MUTYPE_INLINE)==0 ){
           /* Do nothing */
+        }else
+
+        if( markup.iCode==MARKUP_SHEET ){
+	  p->wantAutoParagraph = 0;
+	  sheet_mode = !markup.endTag;
+	  if (sheet_mode) {
+	    blob_reset(&sheet_blob);
+	  } else {
+	    if (csv_render(&sheet_blob,p->pOut)==0) {
+	      blob_append(p->pOut, blob_buffer(&sheet_blob), 
+			  blob_size(&sheet_blob));
+	    }
+	    blob_reset(&sheet_blob);
+	  }
         }else
 
         /* Generate end-tags */

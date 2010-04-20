@@ -88,19 +88,20 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/merge3x2d)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/scanss)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/scanss/libcsv)
 
-ADD_LIBRARY(csvfossil ${GEN_SRCS} ${GEN_HDRS} 
+ADD_LIBRARY(coopy_fossil ${GEN_SRCS} ${GEN_HDRS} 
   fossil/src/th.c fossil/src/sqlite3.c ${OUTPUT_DIR}/page_index.h
-  src/csv_merge.cpp 
+  src/csv_hooks.cpp 
   src/ssfossil.h src/ssfossil.cpp
 )
-TARGET_LINK_LIBRARIES(csvfossil merge3x2d)
-TARGET_LINK_LIBRARIES(csvfossil z)
+TARGET_LINK_LIBRARIES(coopy_fossil merge3x2d)
+TARGET_LINK_LIBRARIES(coopy_fossil csvrender)
+TARGET_LINK_LIBRARIES(coopy_fossil z)
 IF (MINGW)
-  TARGET_LINK_LIBRARIES(csvfossil ws2_32)
+  TARGET_LINK_LIBRARIES(coopy_fossil ws2_32)
 ELSE (MINGW)
-  TARGET_LINK_LIBRARIES(csvfossil dl pthread)
+  TARGET_LINK_LIBRARIES(coopy_fossil dl pthread)
 ENDIF (MINGW)
-TARGET_LINK_LIBRARIES(csvfossil csv)
+TARGET_LINK_LIBRARIES(coopy_fossil csv)
 
 # May need icons for windows
 SET (DECOR)
@@ -119,9 +120,9 @@ if(MINGW)
   ENDIF (windres_bin)
 endif(MINGW)
 
-ADD_EXECUTABLE(fossily ${WORKING_DIR}/src/main.cpp ${DECOR})
-TARGET_LINK_LIBRARIES(fossily csvfossil)
-INSTALL(TARGETS fossily COMPONENT utilities DESTINATION bin)
+ADD_EXECUTABLE(csvfossil ${WORKING_DIR}/src/main.cpp ${DECOR})
+TARGET_LINK_LIBRARIES(csvfossil coopy_fossil)
+INSTALL(TARGETS csvfossil COMPONENT utilities DESTINATION bin)
 
 SET (COMPILE_GUI TRUE CACHE BOOL "Compile GUI?")
 
@@ -130,7 +131,7 @@ IF (COMPILE_GUI)
   IF (wxWidgets_FOUND)
     INCLUDE_DIRECTORIES(${wxWidgets_INCLUDE_DIRS})
     ADD_EXECUTABLE(coopy WIN32 ${WORKING_DIR}/src/gui.cpp ${DECOR})
-    TARGET_LINK_LIBRARIES(coopy csvfossil)
+    TARGET_LINK_LIBRARIES(coopy coopy_fossil)
     TARGET_LINK_LIBRARIES(coopy ${wxWidgets_LIBRARIES})
     SET_PROPERTY(TARGET coopy 
       PROPERTY COMPILE_DEFINITIONS ${wxWidgets_DEFINITIONS})

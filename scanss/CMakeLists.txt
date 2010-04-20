@@ -27,8 +27,10 @@ ADD_CUSTOM_COMMAND(
   DEPENDS stringify ${CMAKE_CURRENT_SOURCE_DIR}/csv2html.css
 )
 
-ADD_EXECUTABLE(csv2html csv2html.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
-TARGET_LINK_LIBRARIES(csv2html scancsv)
+ADD_LIBRARY(csvrender CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
+
+ADD_EXECUTABLE(csv2html csv2html.cpp)
+TARGET_LINK_LIBRARIES(csv2html scancsv csvrender)
 INSTALL(TARGETS csv2html COMPONENT utilities DESTINATION bin)
 
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)

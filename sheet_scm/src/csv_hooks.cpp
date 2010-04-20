@@ -2,7 +2,7 @@
 
 extern "C" {
 #include "config.h"
-#include "merge3.h"
+#include "blob.h"
 }
 
 extern "C" { 
@@ -11,8 +11,12 @@ extern "C" {
 
 #include "CsvSheet.h"
 #include "CsvCompare.h"
+#include "CsvRender.h"
 
 #include "ssfossil.h"
+
+extern "C" int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut);
+extern "C" int csv_render(Blob *in, Blob *out);
 
 extern "C" void cvs_merge_cb1 (void *s, size_t i, void *p) {
   ((CsvSheet*)p)->addField((char *)s, i);
@@ -21,7 +25,6 @@ extern "C" void cvs_merge_cb1 (void *s, size_t i, void *p) {
 extern "C" void cvs_merge_cb2 (int c, void *p) {
   ((CsvSheet*)p)->addRecord();
 }
-
 
 int blob_to_csv(Blob *pIn, CsvSheet& csv) {
   csv.clear();
@@ -59,7 +62,6 @@ void blob_show_csv(const CsvSheet& csv, Blob *pOut) {
   blob_appendf(pOut,"%s",csv.encode().c_str());
 }
 
-extern "C" int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut);
 
 /*
   return 1 if a result has been set, otherwise 0; -1 aborts.
@@ -83,6 +85,24 @@ int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut) {
       blob_show_csv(merger.get(),pOut);
       return 1;
     }
+  }
+  return 0;
+}
+
+
+
+/*
+  return 1 if a result has been set, otherwise 0; -1 aborts.
+ */
+int csv_render(Blob *in, Blob *out) {
+  CsvSheet sheet;
+  if (blob_to_csv(in,sheet)==0) {
+    CsvRender render;
+    render.setFull(false);
+    render.setDecorate(true);
+    std::string result = render.renderHtml(sheet);
+    blob_appendf(out,"%s",result.c_str());
+    return 1;
   }
   return 0;
 }
