@@ -8,6 +8,9 @@ body {
   background-color: #ffa;
   padding: 3px;
 }
+tr.csv_row_err td { background-color: #f00; text-color: #fff; }
+tr.csv_row_local td { background-color: #aaf; }
+tr.csv_row_conflicting td { background-color: #faa; }
 tr.csv_row_ppp td { background-color: #afa; }
 tr.csv_row_mmm td { background-color: #faa; text-decoration: line-through; }
 tr.csv_row_p td { background-color: #dfd; }

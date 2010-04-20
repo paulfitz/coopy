@@ -78,6 +78,12 @@ int main(int argc, char *argv[]) {
 	row_mode = "csv_row_for";
       } else if (txt == "[do]") {
 	row_mode = "csv_row_do";
+      } else if (txt == "[conflict]") {
+	row_mode = "csv_row_err";
+      } else if (txt == "[local]") {
+	row_mode = "csv_row_local";
+      } else if (txt == "[conflicting]") {
+	row_mode = "csv_row_conflicting";
       }
       string row_decorate = "";
       if (decorate&&row_mode!="") {
