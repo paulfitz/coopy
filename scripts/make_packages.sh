@@ -27,7 +27,10 @@ while [ ! "k$1" = "k" ]; do
 	git pull || exit 1
 	cd $MINGW_BUILD || exit 1
 	cmake . || exit 1
-	make || exit 1
+	make || {
+	    make clean
+	    make || exit 1
+	}
 	rm -f *.exe
 	make package || exit 1
 	cp -v *.exe $OUTPUT
@@ -51,7 +54,7 @@ while [ ! "k$1" = "k" ]; do
 	(
 	    echo "cd $LINUX_CHROOT_BUILD"
 	    echo "cmake ."
-	    echo "make"
+	    echo "make || ( make clean; make )"
 	    echo "make package"
 	    echo "make package_source"
 	    ) | sudo chroot $LINUX_CHROOT
