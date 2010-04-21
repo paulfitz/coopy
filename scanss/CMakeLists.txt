@@ -20,10 +20,11 @@ TARGET_LINK_LIBRARIES(csvpatch scancsv)
 INSTALL(TARGETS csvpatch COMPONENT utilities DESTINATION bin)
 
 ADD_EXECUTABLE(stringify stringify.cpp)
+GET_TARGET_PROPERTY(STRINGIFY_LOC stringify LOCATION)
 
 ADD_CUSTOM_COMMAND(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp 
-  COMMAND stringify ${CMAKE_CURRENT_SOURCE_DIR}/csv2html.css ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp csv2html_css
+  COMMAND ${STRINGIFY_LOC} ${CMAKE_CURRENT_SOURCE_DIR}/csv2html.css ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp csv2html_css
   DEPENDS stringify ${CMAKE_CURRENT_SOURCE_DIR}/csv2html.css
 )
 
