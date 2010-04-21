@@ -27,10 +27,14 @@ extern "C" void cvs_merge_cb2 (int c, void *p) {
 }
 
 int blob_to_csv(Blob *pIn, CsvSheet& csv) {
+  CsvStyle style;
+  style.setFromInspection(blob_buffer(pIn),blob_size(pIn));
   csv.clear();
+  csv.setStyle(style);
   if (pIn==NULL) return -1;
   struct csv_parser p;
   csv_init(&p,0); // CSV_APPEND_NULL does not seem reliable
+  csv_set_delim(&p,style.getDelimiter()[0]);
   int result = csv_parse(&p,
 			 blob_buffer(pIn),
 			 blob_size(pIn),
@@ -51,7 +55,7 @@ int blob_to_csv(Blob *pIn, CsvSheet& csv) {
 }
 
 
-void blob_show_csv(const CsvSheet& csv, Blob *pOut) {
+void blob_show_csv(const CsvSheet& csv, const CsvStyle& style, Blob *pOut) {
   //blob_appendf(pOut,"CSV: %dx%d\n",csv.width(),csv.height());
   //for (int y=0;y<csv.height();y++) {
   //for (int x=0;x<csv.width();x++) {
@@ -59,7 +63,7 @@ void blob_show_csv(const CsvSheet& csv, Blob *pOut) {
   //}
   //blob_appendf(pOut,"\n");
   //}
-  blob_appendf(pOut,"%s",csv.encode().c_str());
+  blob_appendf(pOut,"%s",csv.encode(style.getDelimiter()).c_str());
 }
 
 
@@ -82,7 +86,7 @@ int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut) {
       blob_zero(pOut);
       //blob_appendf(pOut,"Hello from %s:%d\n", __FILE__, __LINE__);
       //blob_appendf(pOut,"Conflict resolution is being modified.\n");
-      blob_show_csv(merger.get(),pOut);
+      blob_show_csv(merger.get(),csv1.getStyle(),pOut);
       return 1;
     }
   }

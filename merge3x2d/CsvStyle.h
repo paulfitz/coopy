@@ -13,6 +13,8 @@ public:
 
   void setFromFilename(const char *fname);
 
+  void setFromInspection(const char *buffer, int len);
+
   std::string getDelimiter() const {
     return delim;
   }
