@@ -27,6 +27,11 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
     fprintf(stderr,"csv failed to initialize\n");
     exit(1);
   }
+  CsvStyle style;
+  style.setFromFilename(src);
+  dest.setStyle(style);
+  csv_set_delim(&p,style.getDelimiter()[0]);
+
   bool need_close = true;
   if (strcmp(src,"-")==0) {
     fp = stdin;

@@ -6,6 +6,8 @@
 
 #include <math.h>
 
+#include "CsvStyle.h"
+
 class DataSheet {
 public:
   virtual int width() const = 0;
@@ -13,25 +15,26 @@ public:
 
   virtual std::string cellString(int x, int y) const = 0;
 
-  std::string encode() const {
+  std::string encode(const std::string& delim = ",") const {
     std::string result = "";
     for (int y=0;y<height();y++) {
       for (int x=0;x<width();x++) {
 	if (x>0) {
-	  result += ",";
+	  result += delim;
 	}
-	result += encodeCell(cellString(x,y));
+	result += encodeCell(cellString(x,y),delim);
       }
       result += "\r\n"; // use Windows encoding, since UNIX is more forgiving
     }
     return result;
   }
 
-  static std::string encodeCell(std::string str) {
+  static std::string encodeCell(const std::string& str, 
+				const std::string& delim) {
     bool need_quote = false;
     for (int i=0; i<str.length(); i++) {
       char ch = str[i];
-      if (ch=='"'||ch=='\''||ch==','||ch=='\r'||ch=='\n'||ch=='\t'||ch==' ') {
+      if (ch=='"'||ch=='\''||ch==delim[0]||ch=='\r'||ch=='\n'||ch=='\t'||ch==' ') {
 	need_quote = true;
 	break;
       }
@@ -149,17 +152,27 @@ public:
 };
 
 class CsvSheet : public DataSheet {
-public:
+private:
   std::vector<std::string> rec;
   std::vector<std::vector<std::string> > arr;
   int h, w;
   int th, tw;
   bool valid;
+  CsvStyle style;
+ public:
 
   CsvSheet() {
     w = h = 0;
     tw = th = 0;
     valid = true;
+  }
+
+  const CsvStyle& getStyle() {
+    return style;
+  }
+
+  void setStyle(const CsvStyle& style) {
+    this->style = style;
   }
 
   bool removeRow(int index) {
