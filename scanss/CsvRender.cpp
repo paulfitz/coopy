@@ -110,7 +110,7 @@ string CsvRender::renderHtml(const CsvSheet& sheet) {
 	    cell_decorate = " class=\"csv_cmd\"";
 	  }
 	}
-	result += "  <td";
+	result += "<td";
 	result += cell_decorate;
 	result += ">";
 	result += txt;
