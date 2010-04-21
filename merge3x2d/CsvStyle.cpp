@@ -5,6 +5,8 @@ using namespace std;
 
 #include <ctype.h>
 
+const CsvStyle CsvStyle::defaultStyle;
+
 void CsvStyle::setFromFilename(const char *fname) {
   string name = fname;
   delim = ",";

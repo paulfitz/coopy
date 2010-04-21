@@ -18,6 +18,8 @@ public:
   std::string getDelimiter() const {
     return delim;
   }
+
+  static const CsvStyle defaultStyle;
 };
 
 #endif
