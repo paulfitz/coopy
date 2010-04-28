@@ -50,6 +50,13 @@ string CsvRender::renderHtml(const CsvSheet& sheet) {
       result += " class=\"csv_sheet\"";
     }
     result += ">\n";
+
+    if (decorate) {
+      if (sheet.cell(0,0)[0]!='[') {
+	decorate = false;
+      }
+    }
+
     for (int i=0; i<sheet.height(); i++) {
       string row_mode = "";
       string txt = sheet.cell(0,i);
@@ -81,25 +88,6 @@ string CsvRender::renderHtml(const CsvSheet& sheet) {
       result += ">";
       for (int j=0; j<sheet.width(); j++) {
 	string txt = sheet.cell(j,i);
-	  /*
-	vector<string> modes;
-	string mode_txt;
-	if (decorate) {
-	  if (row_mode!="" && j>0) {
-	    modes.push_back(row_mode);
-	  }
-	}
-	if (modes.size()>0) {
-	  mode_txt = " class=\"";
-	  for (int k=0; k<modes.size(); k++) {
-	    if (k!=0) {
-	      mode_txt += " ";
-	    }
-	    mode_txt += modes[k];
-	  }
-	  mode_txt += "\"";
-	}
-	  */
 	txt = ml_encode(txt);
 	string cell_decorate = "";
 	if (decorate) {
