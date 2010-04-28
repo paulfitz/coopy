@@ -8,6 +8,9 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
+#include <string>
+using namespace std;
+
 extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
   ((CsvSheet*)p)->addField((char *)s, i);
 }
@@ -27,6 +30,11 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
     fprintf(stderr,"csv failed to initialize\n");
     exit(1);
   }
+  CsvStyle style;
+  style.setFromFilename(src);
+  dest.setStyle(style);
+  csv_set_delim(&p,style.getDelimiter()[0]);
+
   bool need_close = true;
   if (strcmp(src,"-")==0) {
     fp = stdin;
@@ -38,15 +46,36 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
     fprintf(stderr,"could not open %s\n", src);
     exit(1);
   }
-  while ((bytes_read=fread(buf,1,sizeof(buf),fp))>0) {
+
+  if (fp==stdin) {
+    string pre;
+    while ((bytes_read=fread(buf,1,sizeof(buf),fp))>0) {
+      pre.append(buf,bytes_read);
+    }
+    CsvStyle style;
+    style.setFromInspection(pre.c_str(),pre.length());
+    csv_set_delim(&p,style.getDelimiter()[0]);
+    dest.setStyle(style);
     if (csv_parse(&p,
-		  buf,
-		  bytes_read,
+		  pre.c_str(),
+		  pre.length(),
 		  csvfile_merge_cb1,
 		  csvfile_merge_cb2,
-		  (void*)(&dest)) != bytes_read) {
-      fprintf(stderr,"error parsing %s\n", src);
+		  (void*)(&dest)) != pre.length()) {
+      fprintf(stderr,"error parsing standard input\n");
       exit(1);
+    }
+  } else {
+    while ((bytes_read=fread(buf,1,sizeof(buf),fp))>0) {
+      if (csv_parse(&p,
+		    buf,
+		    bytes_read,
+		    csvfile_merge_cb1,
+		    csvfile_merge_cb2,
+		    (void*)(&dest)) != bytes_read) {
+	fprintf(stderr,"error parsing %s\n", src);
+	exit(1);
+      }
     }
   }
   csv_fini(&p,

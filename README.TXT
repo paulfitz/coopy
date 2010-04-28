@@ -4,7 +4,7 @@ Coopy version 3
 This program uses fossil (the SCM) to make distributed data collection
 projects easier.
 
-To build, use CMake (see autogen.sh for tips).
+To build, use CMake (if you have cmake, you can just run ./autogen.sh).
 
 Coopy is licensed under the GPLv2.  See sheet_scm/fossil and
 sheet_scm/libcsv for authorship of fossil and libcsv.

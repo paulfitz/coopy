@@ -10,7 +10,10 @@ int CsvFile::write(const DataSheet& src, const char *fname) {
     fprintf(stderr,"could not open %s\n", fname);
     exit(1);
   }
-  std::string result = src.encode();
+  CsvStyle style;
+  style.setFromFilename(fname);
+  std::string delim = style.getDelimiter();
+  std::string result = src.encode(delim);
   fwrite(result.c_str(),1,result.length(),fp);
   fclose(fp);
   return 0;
