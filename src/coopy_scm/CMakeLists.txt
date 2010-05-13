@@ -87,7 +87,7 @@ INCLUDE_DIRECTORIES(${WORKING_DIR}/src/fossil)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmanip)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmanip2)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmanip2/libcsv)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmerge)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssrender)
 ADD_LIBRARY(coopy_fossil ${GEN_SRCS} ${GEN_HDRS} 
   fossil/src/th.c fossil/src/sqlite3.c ${OUTPUT_DIR}/page_index.h
   src/csv_hooks.cpp 
@@ -100,7 +100,7 @@ ELSE (MINGW)
   TARGET_LINK_LIBRARIES(coopy_fossil dl pthread)
 ENDIF (MINGW)
 TARGET_LINK_LIBRARIES(coopy_fossil ssmanip ssmanip2)
-TARGET_LINK_LIBRARIES(coopy_fossil csvrender)
+TARGET_LINK_LIBRARIES(coopy_fossil ssrender)
 TARGET_LINK_LIBRARIES(coopy_fossil csv)
 
 # May need icons for windows
@@ -120,9 +120,9 @@ if(MINGW)
   ENDIF (windres_bin)
 endif(MINGW)
 
-ADD_EXECUTABLE(csvfossil ${WORKING_DIR}/src/main.cpp ${DECOR})
-TARGET_LINK_LIBRARIES(csvfossil coopy_fossil)
-INSTALL(TARGETS csvfossil COMPONENT utilities DESTINATION bin)
+ADD_EXECUTABLE(ssfossil ${WORKING_DIR}/src/main.cpp ${DECOR})
+TARGET_LINK_LIBRARIES(ssfossil coopy_fossil)
+INSTALL(TARGETS ssfossil COMPONENT utilities DESTINATION bin)
 
 SET (COMPILE_GUI TRUE CACHE BOOL "Compile GUI?")
 
