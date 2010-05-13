@@ -1,22 +1,20 @@
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/merge3x2d)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmanip)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmanip2)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/libcsv)
-ADD_LIBRARY(csv libcsv/csv.h libcsv/libcsv.c)
-ADD_LIBRARY(scancsv CsvFile.h CsvFile.cpp)
-TARGET_LINK_LIBRARIES(scancsv merge3x2d csv)
+
 ADD_EXECUTABLE(scanss scanss.cpp)
-TARGET_LINK_LIBRARIES(scanss scancsv)
+TARGET_LINK_LIBRARIES(scanss ssmanip2)
 
 ADD_EXECUTABLE(csvmerge csvmerge.cpp)
-TARGET_LINK_LIBRARIES(csvmerge scancsv)
+TARGET_LINK_LIBRARIES(csvmerge ssmanip2)
 INSTALL(TARGETS csvmerge COMPONENT utilities DESTINATION bin)
 
 ADD_EXECUTABLE(csvdiff csvdiff.cpp)
-TARGET_LINK_LIBRARIES(csvdiff scancsv)
+TARGET_LINK_LIBRARIES(csvdiff ssmanip2)
 INSTALL(TARGETS csvdiff COMPONENT utilities DESTINATION bin)
 
 ADD_EXECUTABLE(csvpatch csvpatch.cpp)
-TARGET_LINK_LIBRARIES(csvpatch scancsv)
+TARGET_LINK_LIBRARIES(csvpatch ssmanip2)
 INSTALL(TARGETS csvpatch COMPONENT utilities DESTINATION bin)
 
 ADD_EXECUTABLE(stringify stringify.cpp)
@@ -31,7 +29,7 @@ ADD_CUSTOM_COMMAND(
 ADD_LIBRARY(csvrender CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
 
 ADD_EXECUTABLE(csv2html csv2html.cpp)
-TARGET_LINK_LIBRARIES(csv2html scancsv csvrender)
+TARGET_LINK_LIBRARIES(csv2html ssmanip2 csvrender)
 INSTALL(TARGETS csv2html COMPONENT utilities DESTINATION bin)
 
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)

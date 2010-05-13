@@ -12,14 +12,7 @@ message(STATUS "Executables are placed in ${EXECUTABLE_OUTPUT_PATH}")
 make_directory(${LIBRARY_OUTPUT_PATH})
 make_directory(${EXECUTABLE_OUTPUT_PATH})
 
-# three-way merges of a 2D array
-add_subdirectory(merge3x2d)
-
-# probing properties of sheets
-add_subdirectory(scanss)
-
-# fossil integration
-add_subdirectory(sheet_scm)
+add_subdirectory(src)
 
 SET(COOPY_VERSION_MAJOR "0")
 SET(COOPY_VERSION_MINOR "1")

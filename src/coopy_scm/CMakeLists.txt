@@ -84,23 +84,23 @@ ADD_CUSTOM_COMMAND(OUTPUT ${OUTPUT_DIR}/page_index.h
 INCLUDE_DIRECTORIES(${OUTPUT_DIR})
 INCLUDE_DIRECTORIES(${WORKING_DIR}/fossil/src)
 INCLUDE_DIRECTORIES(${WORKING_DIR}/src/fossil)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/merge3x2d)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/scanss)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/scanss/libcsv)
-
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmanip)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmanip2)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmanip2/libcsv)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssmerge)
 ADD_LIBRARY(coopy_fossil ${GEN_SRCS} ${GEN_HDRS} 
   fossil/src/th.c fossil/src/sqlite3.c ${OUTPUT_DIR}/page_index.h
   src/csv_hooks.cpp 
   src/ssfossil.h src/ssfossil.cpp
 )
-TARGET_LINK_LIBRARIES(coopy_fossil merge3x2d)
-TARGET_LINK_LIBRARIES(coopy_fossil csvrender)
 TARGET_LINK_LIBRARIES(coopy_fossil z)
 IF (MINGW)
   TARGET_LINK_LIBRARIES(coopy_fossil ws2_32)
 ELSE (MINGW)
   TARGET_LINK_LIBRARIES(coopy_fossil dl pthread)
 ENDIF (MINGW)
+TARGET_LINK_LIBRARIES(coopy_fossil ssmanip ssmanip2)
+TARGET_LINK_LIBRARIES(coopy_fossil csvrender)
 TARGET_LINK_LIBRARIES(coopy_fossil csv)
 
 # May need icons for windows
