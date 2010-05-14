@@ -1,11 +1,19 @@
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/impl_include)
 
 # need hash_map or unordered_map or something for efficient hashing.
 # hash_map is deprecated under newer gcc versions.
 ADD_DEFINITIONS(-Wno-deprecated)
 
-ADD_LIBRARY(sheet_core CsvMerge.cpp include/coopy/CsvMerge.h CsvSheet.cpp include/coopy/CsvSheet.h include/coopy/CsvColumn.h CsvColumn.cpp include/coopy/CsvStat.h CsvStat.cpp include/coopy/CsvCompare.h CsvCompare.cpp include/coopy/CsvWrite.h CsvWrite.cpp include/coopy/OrderResult.h CsvPatch.cpp include/coopy/CsvPatch.h CsvStyle.cpp include/coopy/CsvStyle.h)
+file(GLOB folder_source *.cpp)
+file(GLOB_RECURSE folder_header include/*.h)
+file(GLOB_RECURSE folder_header2 impl_include/*.h)
+SET(folder_header ${folder_header} ${folder_header2})
+source_group("Source Files" FILES ${folder_source})
+source_group("Header Files" FILES ${folder_header})
+
+ADD_LIBRARY(sheet_core ${folder_source} ${folder_header})
 
 ADD_EXECUTABLE(merge_test main_test.cpp)
 TARGET_LINK_LIBRARIES(merge_test sheet_core)
