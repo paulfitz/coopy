@@ -19,11 +19,7 @@ sheet.</li>
 (One can also think of L, R, and P being Left, Right, and Parent).
 </p>
 
-<h2>Limitations</h2>
-
-<p>
-For now, we will only operate on well-formed CSV files.
-</p>  
+<h2>Assumptions</h2>
 
 <p>
 Sheets should
@@ -32,13 +28,13 @@ columns, and data referring to the same entity grouped in rows.
 </p>
 
 <p>
-Sheets should typically have a row or two of header information 
-in the first few rows, but this isn't required.  In general,
-the "top" of a sheet may have different content than its "body".
+Sheets may have a row or two of header information 
+in the first few rows. This isn't required, but it is anticipated
+that the "top" of a sheet may have different content than its "body".
 </p>
 
 <p>
-The treatment of empty values can be tricky.
+Empty cells are treated as "unspecified" for merging purposes.
 </p>
 
 

@@ -1,7 +1,7 @@
 #ifndef SSFOSSIL_CSVCOLUMN
 #define SSFOSSIL_CSVCOLUMN
 
-#include "CsvSheet.h"
+#include <coopy/CsvSheet.h>
 
 class Vote {
 public:

@@ -1,7 +1,7 @@
 #ifndef SSFOSSIL_CSVFILE_INC
 #define SSFOSSIL_CSVFILE_INC
 
-#include "CsvWrite.h"
+#include <coopy/CsvWrite.h>
 
 namespace CsvFile {
   int read(const char *src, CsvSheet& dest);

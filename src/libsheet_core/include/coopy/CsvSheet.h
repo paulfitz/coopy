@@ -6,7 +6,7 @@
 
 #include <math.h>
 
-#include "CsvStyle.h"
+#include <coopy/CsvStyle.h>
 
 class DataSheet {
 public:

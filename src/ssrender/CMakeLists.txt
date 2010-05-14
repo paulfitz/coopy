@@ -1,5 +1,5 @@
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 ADD_EXECUTABLE(stringify stringify.cpp)
 GET_TARGET_PROPERTY(STRINGIFY_LOC stringify LOCATION)
@@ -10,7 +10,7 @@ ADD_CUSTOM_COMMAND(
   DEPENDS stringify ${CMAKE_CURRENT_SOURCE_DIR}/csv2html.css
 )
 
-ADD_LIBRARY(ssrender CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
+ADD_LIBRARY(ssrender include/coopy/CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
 
 ADD_EXECUTABLE(csv2html csv2html.cpp)
 TARGET_LINK_LIBRARIES(csv2html sheet ssrender)

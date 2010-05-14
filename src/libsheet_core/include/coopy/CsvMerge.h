@@ -1,7 +1,7 @@
 #ifndef SSFOSSIL_CSVMERGE
 #define SSFOSSIL_CSVMERGE
 
-#include "CsvSheet.h"
+#include <coopy/CsvSheet.h>
 
 class CsvMerge {
 private:

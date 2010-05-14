@@ -1,8 +1,8 @@
 
 #include <stdio.h>
 
-#include "CsvFile.h"
-#include "CsvCompare.h"
+#include <coopy/CsvFile.h>
+#include <coopy/CsvCompare.h>
 
 int main(int argc, char *argv[]) {
   if (argc!=5) {

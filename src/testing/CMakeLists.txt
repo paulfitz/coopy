@@ -1,5 +1,4 @@
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 # This is a utility primarily for testing
 ADD_EXECUTABLE(test_sheet test_sheet.cpp)

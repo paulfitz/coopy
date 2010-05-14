@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "CsvMerge.h"
+#include <coopy/CsvMerge.h>
 
 #include <string>
 using namespace std;

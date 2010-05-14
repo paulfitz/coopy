@@ -1,5 +1,3 @@
-#include "CsvFile.h"
-
 extern "C" { 
 #include "csv.h"
 }
@@ -9,7 +7,11 @@ extern "C" {
 #include <string.h>
 
 #include <string>
+
+#include <coopy/CsvFile.h>
+
 using namespace std;
+
 
 extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
   ((CsvSheet*)p)->addField((char *)s, i);

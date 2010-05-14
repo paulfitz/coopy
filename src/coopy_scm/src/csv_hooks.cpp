@@ -9,9 +9,9 @@ extern "C" {
 #include "csv.h"
 }
 
-#include "CsvSheet.h"
-#include "CsvCompare.h"
-#include "CsvRender.h"
+#include <coopy/CsvSheet.h>
+#include <coopy/CsvCompare.h>
+#include <coopy/CsvRender.h>
 
 #include "ssfossil.h"
 

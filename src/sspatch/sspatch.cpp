@@ -1,8 +1,8 @@
 
 #include <stdio.h>
 
-#include "CsvFile.h"
-#include "CsvPatch.h"
+#include <coopy/CsvFile.h>
+#include <coopy/CsvPatch.h>
 
 int main(int argc, char *argv[]) {
   if (argc<3) {

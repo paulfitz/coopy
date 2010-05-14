@@ -1,7 +1,7 @@
 #ifndef CSVSHEET_PATCH_INC
 #define CSVSHEET_PATCH_INC
 
-#include "CsvSheet.h"
+#include <coopy/CsvSheet.h>
 
 class CsvPatch {
 private:

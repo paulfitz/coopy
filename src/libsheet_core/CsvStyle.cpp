@@ -1,9 +1,10 @@
-#include "CsvStyle.h"
+#include <ctype.h>
 
 #include <string>
-using namespace std;
 
-#include <ctype.h>
+#include <coopy/CsvStyle.h>
+
+using namespace std;
 
 const CsvStyle CsvStyle::defaultStyle;
 

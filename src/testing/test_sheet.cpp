@@ -1,15 +1,15 @@
 
-#include "CsvMerge.h"
-#include "CsvFile.h"
-#include "CsvStat.h"
-#include "CsvCompare.h"
-#include "CsvPatch.h"
-
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <string>
+
+#include <coopy/CsvMerge.h>
+#include <coopy/CsvFile.h>
+#include <coopy/CsvStat.h>
+#include <coopy/CsvCompare.h>
+#include <coopy/CsvPatch.h>
 
 int main(int argc, char *argv[]) {
   int c;

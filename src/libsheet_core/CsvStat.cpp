@@ -1,7 +1,7 @@
-#include "CsvStat.h"
-#include "CsvWrite.h"
-
 #include <math.h>
+
+#include <coopy/CsvStat.h>
+#include <coopy/CsvWrite.h>
 
 using namespace std;
 

@@ -1,7 +1,7 @@
 #ifndef SSFOSSIL_CSVSTAT
 #define SSFOSSIL_CSVSTAT
 
-#include "CsvColumn.h"
+#include <coopy/CsvColumn.h>
 
 class CsvStat {
 private:

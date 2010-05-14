@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include "CsvSheet.h"
-#include "CsvFile.h"
-#include "CsvRender.h"
-using namespace std;
+#include <coopy/CsvSheet.h>
+#include <coopy/CsvFile.h>
+#include <coopy/CsvRender.h>
 
+using namespace std;
 
 int main(int argc, char *argv[]) {
   bool full = false;

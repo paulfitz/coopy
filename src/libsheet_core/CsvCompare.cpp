@@ -1,16 +1,13 @@
 
-#include "CsvCompare.h"
-#include "CsvWrite.h"
-
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <ctype.h>
 
-//#include <map>
 #include <list>
 
-#include "OrderResult.h"
+#include <coopy/CsvCompare.h>
+#include <coopy/CsvWrite.h>
+#include <coopy/OrderResult.h>
 
 using namespace std;
 

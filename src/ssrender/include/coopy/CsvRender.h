@@ -1,7 +1,7 @@
 #ifndef CSVRENDER_INC
 #define CSVRENDER_INC
 
-#include "CsvSheet.h"
+#include <coopy/CsvSheet.h>
 
 class CsvRender {
 private:
