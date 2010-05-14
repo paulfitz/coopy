@@ -1,18 +1,7 @@
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-ADD_EXECUTABLE(scanss scanss.cpp)
-TARGET_LINK_LIBRARIES(scanss sheet)
-
-ADD_EXECUTABLE(csvmerge csvmerge.cpp)
-TARGET_LINK_LIBRARIES(csvmerge sheet)
-INSTALL(TARGETS csvmerge COMPONENT utilities DESTINATION bin)
-
-ADD_EXECUTABLE(csvdiff csvdiff.cpp)
-TARGET_LINK_LIBRARIES(csvdiff sheet)
-INSTALL(TARGETS csvdiff COMPONENT utilities DESTINATION bin)
-
-ADD_EXECUTABLE(csvpatch csvpatch.cpp)
-TARGET_LINK_LIBRARIES(csvpatch sheet)
-INSTALL(TARGETS csvpatch COMPONENT utilities DESTINATION bin)
+ADD_EXECUTABLE(ssmerge ssmerge.cpp)
+TARGET_LINK_LIBRARIES(ssmerge sheet)
+INSTALL(TARGETS ssmerge COMPONENT utilities DESTINATION bin)
 

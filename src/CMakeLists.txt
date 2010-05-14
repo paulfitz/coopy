@@ -8,6 +8,8 @@ set(SHEET_INCLUDE_DIRS
   ${CMAKE_SOURCE_DIR}/src/libsheet)
 
 add_subdirectory(ssmerge)
+add_subdirectory(ssdiff)
+add_subdirectory(sspatch)
 add_subdirectory(ssrender)
 add_subdirectory(coopy_scm)
 
