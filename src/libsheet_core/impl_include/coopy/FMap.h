@@ -6,23 +6,7 @@
 #include <coopy/FVal.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/Dbg.h>
-
-#ifdef __GNUC__
-#include <ext/hash_map>
-#define efficient_map __gnu_cxx::hash_map
-namespace __gnu_cxx {
-  template <>
-  struct hash<std::string> {
-    size_t operator() (const std::string& x) const {
-      return hash<const char*>()(x.c_str());
-    }
-  };
-}
-#else
-#warning "Unfamiliar compiler, compiling without a hash map chosen - fix this"
-#include <map>
-#define efficient_map std::map
-#endif
+#include <coopy/EfficientMap.h>
 
 typedef std::string Feature;
 
@@ -31,10 +15,10 @@ public:
   int ct;
   int xcurr, ycurr;
   efficient_map<Feature,FVal> f;
-  FloatSheet& rowMatch;
+  SparseFloatSheet& rowMatch;
   bool query;
 
-  FMap(FloatSheet& sheet) : rowMatch(sheet) {
+  FMap(SparseFloatSheet& sheet) : rowMatch(sheet) {
     query = false;
     ct = 0;
   }
@@ -81,22 +65,30 @@ public:
 
   void add(std::string txt, bool query, int ctrl = 0) {
     this->query = query;
-    int len = txt.length();
-    for (int k=8-ctrl*2; k<10; k++) {
-      for (int i=0; i<len-k; i++){
-	std::string part;
-	std::string low;
-	part = txt.substr(i,k+1);
-	low = part;
-	for (int c=0; c<low.length(); c++) {
-	  low[c] = tolower(low[c]);
-	}
-	if (query) {
-	  queryBit(part);
-	  if (low!=part) queryBit(low);
-	} else {
-	  addBit(part);
-	  if (low!=part) addBit(low);
+    if (ctrl==0) {
+      if (query) {
+	queryBit(txt);
+      } else {
+	addBit(txt);
+      }
+    } else {
+      int len = txt.length();
+      for (int k=8-ctrl*2; k<10; k++) {
+	for (int i=0; i<len-k; i++){
+	  std::string part;
+	  std::string low;
+	  part = txt.substr(i,k+1);
+	  low = part;
+	  for (int c=0; c<low.length(); c++) {
+	    low[c] = tolower(low[c]);
+	  }
+	  if (query) {
+	    queryBit(part);
+	    if (low!=part) queryBit(low);
+	  } else {
+	    addBit(part);
+	    if (low!=part) addBit(low);
+	  }
 	}
       }
     }
@@ -105,7 +97,7 @@ public:
   static int getCtrlMax() { return 4; }
 
   void summarize(bool force = false) {
-    if (ct%100000==0 || force) {
+    if (ct%1000==0 || force) {
       dbg_printf("%s %d features\n", query?"Queried":"Added",ct);
     }
   }

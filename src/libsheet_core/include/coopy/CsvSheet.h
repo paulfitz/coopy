@@ -8,6 +8,8 @@
 
 #include <coopy/CsvStyle.h>
 
+#include <stdlib.h>
+
 class DataSheet {
 public:
   virtual int width() const = 0;
@@ -33,6 +35,10 @@ public:
   }
   
   void resize(int w, int h, const T& zero) {
+    //if (w*h>30000) {
+    //fprintf(stderr,"Too big %d %d (%d), use a sparse map\n", w, h, w*h);
+    //exit(1);
+    //}
     arr.clear();
     for (int i=0; i<h; i++) {
       arr.push_back(std::vector<T>());

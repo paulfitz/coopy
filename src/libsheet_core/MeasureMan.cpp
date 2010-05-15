@@ -19,6 +19,7 @@ void MeasureMan::compare() {
   }
   if (remaining==0) {
     dbg_printf("\n\nNothing to do\n");
+    return;
   }
 
   for (int i=0; i<20; i++) {
@@ -61,6 +62,7 @@ void MeasureMan::compare() {
 
 void MeasureMan::compare1(int ctrl) {
   Stat astat, bstat;
+  dbg_printf("MeasureMan::compare1(%d)\n",ctrl);  
   main.measure(main_pass,ctrl);
   anorm_pass.asel = main_pass.asel;
   anorm_pass.bsel = main_pass.asel;
@@ -81,7 +83,7 @@ void MeasureMan::compare1(int ctrl) {
     bnorm_pass.match.rescale(scale);
   }
     
-  FloatSheet match = main_pass.match;
+  SparseFloatSheet match = main_pass.match;
   IntSheet& asel = main_pass.asel;
   IntSheet& bsel = main_pass.bsel;
   CsvSheet& a = main_pass.a;
@@ -92,7 +94,7 @@ void MeasureMan::compare1(int ctrl) {
       double bestValue = 0;
       double bestInc = 0;
       for (int x=0; x<match.width(); x++) {
-	double val = match.cell(x,y);
+	const double& val = match.cell(x,y);
 	if (val>bestValue) {
 	  bestIndex = x;
 	  bestInc = val - bestValue;
@@ -130,8 +132,7 @@ void MeasureMan::compare1(int ctrl) {
 	dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
 		   y,bestIndex,y,bestIndex,
 		   bestIndex, bestValue, bestInc, ref);
-	dbg_printf("  [remote] %s\n", cell(b,0,y).c_str());
-	dbg_printf("  [local] %s\n", cell(a,0,bestIndex).c_str());
+	dbg_printf("  [remote/local] %s %s\n", cell(b,0,y).c_str(), cell(a,0,bestIndex).c_str());
 	if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
 	  dbg_printf("COLLISION! Ignoring unavailable match\n");
 	  dbg_printf("This case has not been optimized\n");
@@ -150,4 +151,5 @@ void MeasureMan::compare1(int ctrl) {
       }
     }
   }
+  dbg_printf("Done in MeasureMan::compare1\n");
 }

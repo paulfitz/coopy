@@ -4,13 +4,14 @@
 #include <coopy/CsvSheet.h>
 #include <coopy/OrderResult.h>
 #include <coopy/Dbg.h>
+#include <coopy/SparseSheet.h>
 
 class MeasurePass {
 public:
   CsvSheet& a;
   CsvSheet& b;
   IntSheet asel, bsel;
-  FloatSheet match;
+  SparseFloatSheet match;
 
   MeasurePass(CsvSheet& a, CsvSheet& b) : a(a), b(b) {
   }
@@ -32,6 +33,16 @@ public:
     int ct = 0;
     for (int y=0; y<h; y++) {
       if (y<w) {
+	float tmp = match.cell(y,y);
+	match.cell(y,y) = match.cell(0,y);
+	match.cell(0,y) = tmp;
+	if (asel.cell(0,y)==-1) {
+	  mean += tmp;
+	  ct++;
+	}
+      }
+      /*
+      if (y<w) {
 	float tmp = match.cell(0,y);
 	match.cell(0,y) = match.cell(y,y);
 	match.cell(y,y) = tmp;
@@ -42,6 +53,7 @@ public:
       } else {
 	match.cell(0,y) = 0;
       }
+      */
     }
     if (ct>0) { mean /= ct; }
     Stat s;

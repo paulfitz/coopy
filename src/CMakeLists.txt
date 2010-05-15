@@ -1,5 +1,3 @@
-option(PROFILING OFF "Turn on profiling")
-
 add_subdirectory(libsheet_core)
 add_subdirectory(libcsv)
 add_subdirectory(libsheet)
@@ -15,3 +13,10 @@ add_subdirectory(ssrender)
 add_subdirectory(coopy_scm)
 
 add_subdirectory(testing)
+
+option(PROFILING OFF "Turn on profiling")
+IF (PROFILING)
+  FOREACH(target ssmerge csv sheet sheet_core)
+    SET_TARGET_PROPERTIES(${target} PROPERTIES COMPILE_FLAGS -pg LINK_FLAGS -pg)
+  ENDFOREACH()
+ENDIF (PROFILING)

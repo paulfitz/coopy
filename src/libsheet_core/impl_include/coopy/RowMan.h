@@ -8,7 +8,7 @@ class RowMan : public Measure {
 public:
   int vigor;
   FMap m;
-  FloatSheet match;
+  SparseFloatSheet match;
 
   RowMan() : m(match) {
     vigor = 0;
