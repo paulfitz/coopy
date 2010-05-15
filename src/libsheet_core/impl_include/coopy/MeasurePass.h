@@ -3,6 +3,7 @@
 
 #include <coopy/CsvSheet.h>
 #include <coopy/OrderResult.h>
+#include <coopy/Dbg.h>
 
 class MeasurePass {
 public:

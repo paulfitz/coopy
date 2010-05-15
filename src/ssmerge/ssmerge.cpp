@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   if (CsvFile::read(argv[3],remote)!=0) {
     return 1;
   }
-  CsvCompare3 cmp;
+  CsvCompare cmp;
   cmp.compare(parent,local,remote);
   if (CsvFile::write(cmp.get(),argv[4])!=0) {
     return 1;

@@ -1,3 +1,4 @@
+option(PROFILING OFF "Turn on profiling")
 
 add_subdirectory(libsheet_core)
 add_subdirectory(libcsv)

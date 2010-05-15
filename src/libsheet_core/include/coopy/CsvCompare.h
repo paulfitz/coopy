@@ -4,17 +4,8 @@
 #include <coopy/CsvSheet.h>
 
 
+
 class CsvCompare {
-private:
-  CsvSheet cmp;
-public:
-  void compare(CsvSheet& a, CsvSheet& b);
-
-  const CsvSheet& get() { return cmp; }
-};
-
-
-class CsvCompare3 {
 private:
   CsvSheet cmp;
 public:

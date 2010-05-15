@@ -2,45 +2,54 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include <list>
-
-using namespace std;
-
-
-////////////////////////////////////////////////////////////////////////
-//
-// Row/Column neutral code
-//
-
 #include <coopy/CsvCompare.h>
-#include <coopy/CsvWrite.h>
+#include <coopy/CsvSheet.h>
 #include <coopy/OrderResult.h>
-
-#include <coopy/FVal.h>
-#include <coopy/FMap.h>
 #include <coopy/MeasurePass.h>
-#include <coopy/Measure.h>
-#include <coopy/MeasureMan.h>
-#include <coopy/ColMan.h>
 #include <coopy/RowMan.h>
-#include <coopy/MatchUnit.h>
-#include <coopy/OrderMerge.h>
+#include <coopy/ColMan.h>
+#include <coopy/MeasureMan.h>
 #include <coopy/Merger.h>
 
+class FastMatch {
+public:
+  MeasurePass& pass;
 
-void CsvCompare::compare(CsvSheet& local, CsvSheet& remote) {
-  printf("Two-way compare no longer implemented\n");
-  exit(1);
-}
+  FastMatch(MeasurePass& pass) : pass(pass) {
+  }
 
-int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+  void match(bool rowLike) {
+    // add matches for easy cases here
+    if (pass.a.width()==pass.b.width() &&
+	pass.a.height()==pass.b.height()) {
+      bool fail = false;
+      for (int r=0; r<pass.a.height() && !fail; r++) {
+	for (int c=0; c<pass.a.width(); c++) {
+	  if (pass.a.cell(c,r)!=pass.b.cell(c,r)) {
+	    fail = true;
+	    break;
+	  }
+	}
+      }
+      if (!fail) {
+	// sheets are identical!
+	dbg_printf("MATCH!\n");
+	for (int i=0; i<pass.asel.height(); i++) {
+	  pass.asel.cell(0,i) = i;
+	  pass.bsel.cell(0,i) = i;
+	}
+      }
+    }
+  }
+};
+
+int CsvCompare::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 			 bool makeDiff) {
   IdentityOrderResult id;
 
-  //RowOrder order;
-  //order.compare(pivot,local,remote);
+  /////////////////////////////////////////////////////////////////////////
+  // PIVOT to LOCAL row mapping
 
-  // Prepare for p2l row comparison
   MeasurePass p2l_row_pass_local(pivot,local);
   MeasurePass p2l_row_pass_norm1(pivot,pivot);
   MeasurePass p2l_row_pass_norm2(local,local);
@@ -54,11 +63,15 @@ int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 			 p2l_row_norm2,p2l_row_pass_norm2,
 			 1);
 
-  // Compare p2l rows
+  p2l_row_man.setup();
+  FastMatch p2l_row_fast_match(p2l_row_pass_local);
+  p2l_row_fast_match.match(true);
   p2l_row_man.compare();
 
 
-  // Prepare for p2r row comparison
+  /////////////////////////////////////////////////////////////////////////
+  // PIVOT to REMOTE row mapping
+
   MeasurePass p2r_row_pass_local(pivot,remote);
   MeasurePass p2r_row_pass_norm1(pivot,pivot);
   MeasurePass p2r_row_pass_norm2(remote,remote);
@@ -72,9 +85,14 @@ int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 			 p2r_row_norm2,p2r_row_pass_norm2,
 			 1);
 
+  p2r_row_man.setup();
+  FastMatch p2r_row_fast_match(p2r_row_pass_local);
+  p2r_row_fast_match.match(true);
   p2r_row_man.compare();
 
-  // Now, column comparison
+
+  /////////////////////////////////////////////////////////////////////////
+  // PIVOT to LOCAL column mapping
 
   MeasurePass p2l_col_pass_local(pivot,local);
   MeasurePass p2l_col_pass_norm1(pivot,pivot);
@@ -90,7 +108,14 @@ int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 			 p2l_col_norm2,p2l_col_pass_norm2,
 			 0);
 
+  p2l_col_man.setup();
+  FastMatch p2l_col_fast_match(p2l_col_pass_local);
+  p2l_col_fast_match.match(false);
   p2l_col_man.compare();
+
+
+  /////////////////////////////////////////////////////////////////////////
+  // PIVOT to REMOTE column mapping
 
   MeasurePass p2r_col_pass_local(pivot,remote);
   MeasurePass p2r_col_pass_norm1(pivot,pivot);
@@ -106,8 +131,14 @@ int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 			 p2r_col_norm2,p2r_col_pass_norm2,
 			 0);
 
+  p2r_col_man.setup();
+  FastMatch p2r_col_fast_match(p2r_col_pass_local);
+  p2r_col_fast_match.match(false);
   p2r_col_man.compare();
 
+
+  /////////////////////////////////////////////////////////////////////////
+  // Integrate results
 
   OrderResult p2l_col_order = p2l_col_pass_local.getOrder();
   OrderResult p2r_col_order = p2r_col_pass_local.getOrder();
@@ -133,6 +164,6 @@ int CsvCompare3::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 }
 
 
-void CsvCompare3::setVerbose(bool verbose) {
+void CsvCompare::setVerbose(bool verbose) {
   _csv_verbose = verbose;
 }

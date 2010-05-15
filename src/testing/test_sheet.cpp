@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 	}
 	if (parented) {
 	  printf("Three way compare...\n");
-	  CsvCompare3 cmp;
+	  CsvCompare cmp;
 	  cmp.setVerbose(true);
 	  cmp.compare(parent,local,remote,diffMode);
 	  local = cmp.get();
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
 	} else {
 	  printf("Two way compare...\n");
 	  CsvCompare cmp;
-	  cmp.compare(local,remote);
+	  cmp.compare(local,local,remote);
 	}
       }
       break;

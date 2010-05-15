@@ -81,7 +81,7 @@ int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut) {
   if (blob_to_csv(pPivot,csv0)==0 && 
       blob_to_csv(pV1,csv1)==0 && 
       blob_to_csv(pV2,csv2)==0) {
-    CsvCompare3 merger;
+    CsvCompare merger;
     if (merger.compare(csv0,csv1,csv2)==0) {
       blob_zero(pOut);
       //blob_appendf(pOut,"Hello from %s:%d\n", __FILE__, __LINE__);

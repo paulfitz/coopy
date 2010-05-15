@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
   if (CsvFile::read(argv[2],remote)!=0) {
     return 1;
   }
-  CsvCompare3 cmp;
+  CsvCompare cmp;
   cmp.compare(local,local,remote,true);
   const CsvSheet& result = cmp.get();
   if (argc>=4) {
