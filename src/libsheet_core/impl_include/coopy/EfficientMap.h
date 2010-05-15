@@ -13,6 +13,13 @@ namespace __gnu_cxx {
       return hash<const char*>()(x.c_str());
     }
   };
+
+  template <>
+  struct hash<long long> {
+    size_t operator() (long long x) const {
+      return hash<long>()(x);
+    }
+  };
 }
 #else
 #warning "Unfamiliar compiler, compiling without a hash map chosen - fix this"

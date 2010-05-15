@@ -2,7 +2,7 @@
 # run from build directory
 
 make make_sheet ssmerge
-./bin/make_sheet 10000 10 > test.csv
+./bin/make_sheet 50000 10 > test.csv
 wc test.csv
 tac test.csv > test_reverse.csv
 rm -f gmon.out junk

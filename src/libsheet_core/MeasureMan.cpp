@@ -81,6 +81,7 @@ void MeasureMan::compare1(int ctrl) {
     }
     dbg_printf("Rescaling bnorm by %g\n", scale);
     bnorm_pass.match.rescale(scale);
+    dbg_printf("Done rescaling\n");
   }
     
   SparseFloatSheet match = main_pass.match;
@@ -91,7 +92,9 @@ void MeasureMan::compare1(int ctrl) {
 
   IntSheet bestIndices;
   FloatSheet bestValues, bestIncs;
+  dbg_printf("Find best\n");
   match.findBest(bestIndices, bestValues, bestIncs);
+  dbg_printf("Done find best\n");
 
   for (int y=0; y<match.height(); y++) {
     //dbg_printf("at %d / %d\n", y, match.height());

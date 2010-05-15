@@ -11,8 +11,8 @@ Stat SparseFloatSheet::normalize(int first, int last, float sc, bool modify) {
   float tot = 0;
   float tot2 = 0;
   int ct = 0;
-  for (efficient_map<long int,float>::iterator it=data.begin(); it!=data.end(); it++) {
-    long int col = it->first % ww;
+  for (efficient_map<long long,float>::iterator it=data.begin(); it!=data.end(); it++) {
+    long long col = it->first % ww;
     if (col>=first&&col<=last) {
       float r = it->second;
       tot += r;
@@ -33,8 +33,8 @@ Stat SparseFloatSheet::normalize(int first, int last, float sc, bool modify) {
   //printf("mean %g, dev %g\n", mean, dev);
   if (dev<sc) dev = sc;
   if (modify) {
-    for (efficient_map<long int,float>::iterator it=data.begin(); it!=data.end(); it++) {
-      long int col = it->first % ww;
+    for (efficient_map<long long,float>::iterator it=data.begin(); it!=data.end(); it++) {
+      long long col = it->first % ww;
       if (col>=first&&col<=last) {
 	float r = it->second;
 	r = (r-mean)/dev;
@@ -53,9 +53,9 @@ void SparseFloatSheet::findBest(IntSheet& bestIndex, FloatSheet& bestValue, Floa
   bestIndex.resize(1,h,-1);
   bestValue.resize(1,h,0);
   bestInc.resize(1,h,0);
-  for (efficient_map<long int,float>::iterator it=data.begin(); it!=data.end(); it++) {
-    long int x = it->first % w;
-    long int y = (it->first - x) / w;
+  for (efficient_map<long long,float>::iterator it=data.begin(); it!=data.end(); it++) {
+    long long x = it->first % w;
+    long long y = it->first / w;
     float val = it->second;
     float& best = bestValue.cell(0,y);
     if (val>best) {

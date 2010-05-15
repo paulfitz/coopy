@@ -7,7 +7,7 @@
 template <class T>
 class SparseSheet : public DataSheet {
 public:
-  efficient_map<long int,T> data;
+  efficient_map<long long,T> data;
   int h, w;
   T zero;
 
@@ -40,7 +40,7 @@ public:
   }
 
   const T& cell(int x, int y) const {
-    typename efficient_map<long int,T>::const_iterator it = data.find(y*w+x);
+    typename efficient_map<long long,T>::const_iterator it = data.find(((long long)y)*w+x);
     if (it==data.end()) {
       return zero;
     }
@@ -48,7 +48,7 @@ public:
   }
 
   const T& cell_const(int x, int y) const {
-    typename efficient_map<long int,T>::const_iterator it = data.find(y*w+x);
+    typename efficient_map<long long,T>::const_iterator it = data.find(((long long)y)*w+x);
     if (it==data.end()) {
       return zero;
     }
@@ -56,9 +56,9 @@ public:
   }
 
   T& cell(int x, int y) {
-    typename efficient_map<long int,T>::iterator it = data.find(y*w+x);
+    typename efficient_map<long long,T>::iterator it = data.find(((long long)y)*w+x);
     if (it==data.end()) {
-      T& result = data[y*w+x];
+      T& result = data[((long long)y)*w+x];
       result = zero;
       return result;
     }
@@ -78,7 +78,7 @@ public:
   Stat normalize(int first=-1, int last=-1, float sc=0.1, bool modify = true);
   
   void rescale(double factor) {
-    for (efficient_map<long int,float>::iterator it=data.begin(); it!=data.end(); it++) {
+    for (efficient_map<long long,float>::iterator it=data.begin(); it!=data.end(); it++) {
       it->second *= factor;
     }
   }
