@@ -17,6 +17,7 @@ public:
   int start_remote;
 
   void process(int ilocal, int iremote,
+	       int& base_local, int& base_remote,
 	       int stop_local, int stop_remote);
 
   void merge(const OrderResult& nlocal,
@@ -27,7 +28,9 @@ public:
     xremote.resize(1,order_remote.blen(),0);
     start_local = 0;
     start_remote = 0;
-    process(0,0,order_local.blen(),order_remote.blen());
+    int base_local = 0;
+    int base_remote = 0;
+    process(0,0,base_local,base_remote,order_local.blen(),order_remote.blen());
   }
 };
 

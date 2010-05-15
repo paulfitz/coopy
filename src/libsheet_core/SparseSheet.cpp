@@ -47,3 +47,24 @@ Stat SparseFloatSheet::normalize(int first, int last, float sc, bool modify) {
   s.valid = true;
   return s;
 }
+
+
+void SparseFloatSheet::findBest(IntSheet& bestIndex, FloatSheet& bestValue, FloatSheet& bestInc) {
+  bestIndex.resize(1,h,-1);
+  bestValue.resize(1,h,0);
+  bestInc.resize(1,h,0);
+  for (efficient_map<long int,float>::iterator it=data.begin(); it!=data.end(); it++) {
+    long int x = it->first % w;
+    long int y = (it->first - x) / w;
+    float val = it->second;
+    float& best = bestValue.cell(0,y);
+    if (val>best) {
+      bestIndex.cell(0,y) = x;
+      bestInc.cell(0,y) = val - best;
+      best = val;
+    }
+  }
+}
+
+
+

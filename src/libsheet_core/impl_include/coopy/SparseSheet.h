@@ -47,6 +47,14 @@ public:
     return it->second;
   }
 
+  const T& cell_const(int x, int y) const {
+    typename efficient_map<long int,T>::const_iterator it = data.find(y*w+x);
+    if (it==data.end()) {
+      return zero;
+    }
+    return it->second;
+  }
+
   T& cell(int x, int y) {
     typename efficient_map<long int,T>::iterator it = data.find(y*w+x);
     if (it==data.end()) {
@@ -74,6 +82,8 @@ public:
       it->second *= factor;
     }
   }
+
+  void findBest(IntSheet& bestIndex, FloatSheet& bestValue, FloatSheet& bestInc);
 };
 
 

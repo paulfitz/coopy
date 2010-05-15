@@ -97,7 +97,7 @@ public:
   static int getCtrlMax() { return 4; }
 
   void summarize(bool force = false) {
-    if (ct%1000==0 || force) {
+    if (ct%10000==0 || force) {
       dbg_printf("%s %d features\n", query?"Queried":"Added",ct);
     }
   }

@@ -88,19 +88,30 @@ void MeasureMan::compare1(int ctrl) {
   IntSheet& bsel = main_pass.bsel;
   CsvSheet& a = main_pass.a;
   CsvSheet& b = main_pass.b;
+
+  IntSheet bestIndices;
+  FloatSheet bestValues, bestIncs;
+  match.findBest(bestIndices, bestValues, bestIncs);
+
   for (int y=0; y<match.height(); y++) {
+    //dbg_printf("at %d / %d\n", y, match.height());
     if (bsel.cell(0,y)==-1) {
+      int bestIndex = bestIndices.cell(0,y);
+      double bestValue = bestValues.cell(0,y);
+      double bestInc = bestIncs.cell(0,y);
+      /*
       int bestIndex = -1;
       double bestValue = 0;
       double bestInc = 0;
       for (int x=0; x<match.width(); x++) {
-	const double& val = match.cell(x,y);
+	const double& val = match.cell_const(x,y);
 	if (val>bestValue) {
 	  bestIndex = x;
 	  bestInc = val - bestValue;
 	  bestValue = val;
 	}
       }
+      */
       double ref = bnorm_pass.match.cell(0,y);
       bool ok = false;
       if (bestValue>ref/4) {

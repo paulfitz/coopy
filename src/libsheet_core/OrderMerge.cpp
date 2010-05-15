@@ -2,8 +2,13 @@
 #include <coopy/Dbg.h>
 
 void OrderMerge::process(int ilocal, int iremote,
+			 int& base_local, int& base_remote,
 			 int stop_local, int stop_remote) {
+  //dbg_printf("process %d %d / %d %d / %d %d\n", ilocal, iremote, 
+  //base_local, base_remote, stop_local, stop_remote);
   while (true) {
+    //dbg_printf("--- process %d %d / %d %d / %d %d\n", ilocal, iremote, 
+    //base_local, base_remote, stop_local, stop_remote);
     if (ilocal>=stop_local &&
 	iremote>=stop_remote) {
       break;
@@ -16,7 +21,7 @@ void OrderMerge::process(int ilocal, int iremote,
 	  if (_lp!=-1) {
 	    int _lpr = order_remote.a2b(_lp);
 	    if (_lpr!=-1) {
-	      process(0,0,ilocal,_lpr);
+	      process(base_local,base_remote,base_local,base_remote,ilocal,_lpr);
 	      dbg_printf("Local unit %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
 	      accum.push_back(MatchUnit(_lp,_l,_lpr,false));
 	      xremote.cell(0,_lpr) = 1;
@@ -55,8 +60,10 @@ void OrderMerge::process(int ilocal, int iremote,
     }
     if (ilocal<stop_local) {
       ilocal++;
+      base_local++;
     } else {
       iremote++;
+      base_remote++;
     }
   }
 }
