@@ -12,14 +12,24 @@ public:
   CsvSheet& b;
   IntSheet asel, bsel;
   SparseFloatSheet match;
+  int bound;
 
   MeasurePass(CsvSheet& a, CsvSheet& b) : a(a), b(b) {
+    bound = -1;
   }
 
   void setSize(int alen, int blen) {
     asel.resize(1,alen,-1);
     bsel.resize(1,blen,-1);
     match.resize(alen,blen,0);
+  }
+
+  void setBound(int bound) {
+    this->bound = bound;
+  }
+
+  int getBound() {
+    return bound;
   }
 
   void clearMatch() {
@@ -33,12 +43,16 @@ public:
     int ct = 0;
     for (int y=0; y<h; y++) {
       if (y<w) {
-	float tmp = match.cell(y,y);
-	match.cell(y,y) = match.cell(0,y);
-	match.cell(0,y) = tmp;
-	if (asel.cell(0,y)==-1) {
-	  mean += tmp;
-	  ct++;
+	float tmp = match.cell_const(y,y);
+	float tmp2 = match.cell_const(0,y);
+	if (tmp2>=-0.0001) {
+	  match.cell(y,y) = tmp2;
+	  match.cell(0,y) = tmp;
+	  if (asel.cell(0,y)==-1) {
+	    printf(" [%d:%g] ", ct, tmp);
+	    mean += tmp;
+	    ct++;
+	  }
 	}
       }
       /*

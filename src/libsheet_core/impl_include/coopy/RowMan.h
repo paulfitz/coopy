@@ -7,11 +7,13 @@
 class RowMan : public Measure {
 public:
   int vigor;
+  int bound;
   FMap m;
   SparseFloatSheet match;
 
   RowMan() : m(match) {
     vigor = 0;
+    bound = -1;
   }
 
   void setVigor(int vigor) {
@@ -26,18 +28,25 @@ public:
     int w = a.width();
     int h = a.height();
     m.resetCount();
+    int top = (bound<0)?h:bound;
+    int at = 0;
     for (int y=0; y<h; y++) {
       if (asel.cell(0,y)==-1) {
-	for (int x=0; x<w; x++) {
-	  std::string txt = a.cell(x,y);
-	  m.setCurr(x,y);
-	  m.add(txt,query,ctrl);
+	if (at<top) {
+	  at++;
+	  for (int x=0; x<w; x++) {
+	    std::string txt = a.cell(x,y);
+	    m.setCurr(x,y);
+	    m.add(txt,query,ctrl);
+	  }
+	} else {
+	  match.cell(0,y) = -2;
 	}
       }
     }
     if (vigor==1) {
       for (int y=0; y<h; y++) {
-	if (asel.cell(0,y)==-1) {
+	if (asel.cell(0,y)>=-1) {
 	  for (int x=0; x<w-1; x++) {
 	    std::string txt = a.cell(x,y);
 	    txt += a.cell(x+1,y);
@@ -58,6 +67,7 @@ public:
   }
 
   virtual void measure(MeasurePass& pass, int ctrl) {
+    bound = pass.bound;
     apply(pass.a, pass.b, pass.asel, pass.bsel, ctrl);
     pass.match = match;
   }

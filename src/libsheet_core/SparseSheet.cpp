@@ -56,6 +56,11 @@ void SparseFloatSheet::findBest(IntSheet& bestIndex, FloatSheet& bestValue, Floa
   for (efficient_map<long long,float>::iterator it=data.begin(); it!=data.end(); it++) {
     long long x = it->first % w;
     long long y = it->first / w;
+    if (x>=w || y>=h) {
+      fprintf(stderr,"SparseSheet - out of range: %d %d : (%dx%d)\n", 
+	      (long)x, (long)y, w, h);
+      exit(1);
+    }
     float val = it->second;
     float& best = bestValue.cell(0,y);
     if (val>best) {

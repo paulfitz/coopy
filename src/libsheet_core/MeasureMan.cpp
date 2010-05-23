@@ -66,11 +66,13 @@ void MeasureMan::compare1(int ctrl) {
   main.measure(main_pass,ctrl);
   anorm_pass.asel = main_pass.asel;
   anorm_pass.bsel = main_pass.asel;
+  //anorm_pass.bound = 40;  // bounds do not work yet
   anorm.measure(anorm_pass,ctrl);
   dbg_printf("Checking [local] statistics\n");
   astat = anorm_pass.flatten();
   bnorm_pass.asel = main_pass.bsel;
   bnorm_pass.bsel = main_pass.bsel;
+  //bnorm_pass.bound = 40;  // bounds do not work yet  
   bnorm.measure(bnorm_pass,ctrl);
   dbg_printf("Checking [remote] statistics\n");
   bstat = bnorm_pass.flatten();
