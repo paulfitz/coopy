@@ -1,30 +1,21 @@
 #ifndef SSFOSSIL_CSVSHEET
 #define SSFOSSIL_CSVSHEET
 
-#include <coopy/DataSheet.h>
-
-//#include <coopy/TypedSheet.h>
-//#include <coopy/IntSheet.h>
-//#include <coopy/FloatSheet.h>
-//#include <math.h>
-//#include <stdlib.h>
+#include <coopy/TextSheet.h>
 
 #include <vector>
 #include <string>
 
 
-class CsvSheet : public DataSheet {
+class CsvSheet : public TextSheet {
 private:
   std::vector<std::string> rec;
-  std::vector<std::vector<std::string> > arr;
-  int h, w;
   int th, tw;
   bool valid;
   SheetStyle style;
- public:
+public:
 
   CsvSheet() {
-    w = h = 0;
     tw = th = 0;
     valid = true;
   }
@@ -103,6 +94,7 @@ private:
     valid = true;
   }
 
+  /*
   std::string& cell(int x, int y) {
     return arr[y][x];
   }
@@ -122,6 +114,7 @@ private:
   std::string cellString(int x, int y) const {
     return arr[y][x];
   }
+  */
 
   bool isValid() const {
     return valid;

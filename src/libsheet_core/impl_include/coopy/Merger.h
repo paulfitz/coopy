@@ -3,6 +3,8 @@
 
 #include <coopy/OrderMerge.h>
 #include <coopy/OrderResult.h>
+#include <coopy/TextSheet.h>
+#include <coopy/CsvSheet.h>
 
 #include <vector>
 
@@ -22,19 +24,19 @@ public:
   Merger() {
   }
 
-  void merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+  void merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	     const OrderResult& nrow_local,
 	     const OrderResult& nrow_remote,
 	     const OrderResult& ncol_local,
 	     const OrderResult& ncol_remote);
 
-  void diff(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+  void diff(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	    const OrderResult& nrow_local,
 	    const OrderResult& nrow_remote,
 	    const OrderResult& ncol_local,
 	    const OrderResult& ncol_remote);
 
-  void mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+  void mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 		MatchUnit& row_unit, bool diff);
 
   void addRow(const char *tag,

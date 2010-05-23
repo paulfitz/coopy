@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include <coopy/CsvFile.h>
-#include <coopy/CsvCompare.h>
+#include <coopy/SheetCompare.h>
 
 int main(int argc, char *argv[]) {
   if (argc!=5) {
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   if (CsvFile::read(argv[3],remote)!=0) {
     return 1;
   }
-  CsvCompare cmp;
+  SheetCompare cmp;
   cmp.compare(parent,local,remote);
   if (CsvFile::write(cmp.get(),argv[4])!=0) {
     return 1;

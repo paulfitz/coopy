@@ -30,14 +30,14 @@ public:
   }
 	     
 
-  int cellLength(CsvSheet& a) {
+  int cellLength(DataSheet& a) {
     if (rowLike) {
       return a.width();
     }
     return a.height();
   }
 
-  std::string cell(CsvSheet& a, int x, int y) {
+  std::string cell(TextSheet& a, int x, int y) {
     if (rowLike) {
       return a.cell(x,y);
     }

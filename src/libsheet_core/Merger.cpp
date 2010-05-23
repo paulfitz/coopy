@@ -20,7 +20,7 @@ void Merger::addRow(const char *tag,
   target.addRecord();
 }
 
-void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 		      MatchUnit& row_unit, bool diff) {
   
   int pRow = row_unit.pivotUnit;
@@ -211,7 +211,7 @@ void Merger::mergeRow(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 }
 
 
-void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 		   const OrderResult& row_local,
 		   const OrderResult& row_remote,
 		   const OrderResult& col_local,
@@ -277,7 +277,7 @@ void Merger::merge(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 
 
 
-void Merger::diff(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
+void Merger::diff(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 		  const OrderResult& row_local,
 		  const OrderResult& row_remote,
 		  const OrderResult& col_local,

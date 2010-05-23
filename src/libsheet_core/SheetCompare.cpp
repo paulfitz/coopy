@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include <coopy/CsvCompare.h>
+#include <coopy/SheetCompare.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/OrderResult.h>
 #include <coopy/MeasurePass.h>
@@ -43,8 +43,8 @@ public:
   }
 };
 
-int CsvCompare::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
-			 bool makeDiff) {
+int SheetCompare::compare(TextSheet& pivot, TextSheet& local, TextSheet& remote,
+			  bool makeDiff) {
   IdentityOrderResult id;
 
   /////////////////////////////////////////////////////////////////////////
@@ -164,6 +164,6 @@ int CsvCompare::compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote,
 }
 
 
-void CsvCompare::setVerbose(bool verbose) {
+void SheetCompare::setVerbose(bool verbose) {
   _csv_verbose = verbose;
 }

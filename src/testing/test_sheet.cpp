@@ -8,7 +8,7 @@
 #include <coopy/CsvMerge.h>
 #include <coopy/CsvFile.h>
 #include <coopy/CsvStat.h>
-#include <coopy/CsvCompare.h>
+#include <coopy/SheetCompare.h>
 #include <coopy/CsvPatch.h>
 
 int main(int argc, char *argv[]) {
@@ -160,14 +160,14 @@ int main(int argc, char *argv[]) {
 	}
 	if (parented) {
 	  printf("Three way compare...\n");
-	  CsvCompare cmp;
+	  SheetCompare cmp;
 	  cmp.setVerbose(true);
 	  cmp.compare(parent,local,remote,diffMode);
 	  local = cmp.get();
 	  ss = &local;
 	} else {
 	  printf("Two way compare...\n");
-	  CsvCompare cmp;
+	  SheetCompare cmp;
 	  cmp.compare(local,local,remote);
 	}
       }

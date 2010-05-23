@@ -1,20 +1,20 @@
 #ifndef COOPY_MEASUREPASS
 #define COOPY_MEASUREPASS
 
-#include <coopy/CsvSheet.h>
+#include <coopy/TextSheet.h>
 #include <coopy/OrderResult.h>
 #include <coopy/Dbg.h>
 #include <coopy/SparseSheet.h>
 
 class MeasurePass {
 public:
-  CsvSheet& a;
-  CsvSheet& b;
+  TextSheet& a;
+  TextSheet& b;
   IntSheet asel, bsel;
   SparseFloatSheet match;
   int bound;
 
-  MeasurePass(CsvSheet& a, CsvSheet& b) : a(a), b(b) {
+  MeasurePass(TextSheet& a, TextSheet& b) : a(a), b(b) {
     bound = -1;
   }
 

@@ -3,9 +3,7 @@
 
 #include <coopy/CsvSheet.h>
 
-
-
-class CsvCompare {
+class SheetCompare {
 private:
   CsvSheet cmp;
 public:
@@ -17,7 +15,7 @@ public:
     If a diff is not made, the result in cmp is an actual merged
     sheet.
    */
-  int compare(CsvSheet& pivot, CsvSheet& local, CsvSheet& remote, 
+  int compare(TextSheet& pivot, TextSheet& local, TextSheet& remote, 
 	      bool makeDiff = false);
 
   const CsvSheet& get() { return cmp; }

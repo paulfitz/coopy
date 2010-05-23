@@ -89,8 +89,8 @@ void MeasureMan::compare1(int ctrl) {
   SparseFloatSheet match = main_pass.match;
   IntSheet& asel = main_pass.asel;
   IntSheet& bsel = main_pass.bsel;
-  CsvSheet& a = main_pass.a;
-  CsvSheet& b = main_pass.b;
+  TextSheet& a = main_pass.a;
+  TextSheet& b = main_pass.b;
 
   IntSheet bestIndices;
   FloatSheet bestValues, bestIncs;
