@@ -2,6 +2,7 @@
 #define SSFOSSIL_CSVSTAT
 
 #include <coopy/CsvColumn.h>
+#include <coopy/FloatSheet.h>
 
 class CsvStat {
 private:

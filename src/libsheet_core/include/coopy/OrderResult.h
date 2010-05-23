@@ -1,7 +1,7 @@
 #ifndef ORDERRESULT_INC
 #define ORDERRESULT_INC
 
-#include <coopy/CsvSheet.h>
+#include <coopy/IntSheet.h>
 
 class OrderResult {
 private:

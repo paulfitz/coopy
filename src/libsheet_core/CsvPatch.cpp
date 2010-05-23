@@ -5,6 +5,7 @@
 #include <string>
 
 #include <coopy/CsvPatch.h>
+#include <coopy/IntSheet.h>
 
 using namespace std;
 

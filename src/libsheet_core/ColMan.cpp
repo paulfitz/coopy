@@ -1,6 +1,8 @@
 #include <coopy/ColMan.h>
 #include <coopy/FMap.h>
 
+#include <math.h>
+
 void ColMan::measure(MeasurePass& pass, int ctrl) {
     int wa = pass.a.width();
     int wb = pass.b.width();

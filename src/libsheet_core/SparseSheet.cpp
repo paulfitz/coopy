@@ -1,5 +1,7 @@
 #include <coopy/SparseSheet.h>
 
+#include <math.h>
+
 using namespace std;
 
 Stat SparseFloatSheet::normalize(int first, int last, float sc, bool modify) {

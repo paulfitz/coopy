@@ -3,114 +3,15 @@
 
 #include <coopy/DataSheet.h>
 
-#include <math.h>
-#include <stdlib.h>
+//#include <coopy/TypedSheet.h>
+//#include <coopy/IntSheet.h>
+//#include <coopy/FloatSheet.h>
+//#include <math.h>
+//#include <stdlib.h>
 
 #include <vector>
 #include <string>
 
-
-template <class T>
-class TypedSheet : public DataSheet {
-public:
-  std::vector<std::vector<T> > arr;
-  int h, w;
-
-  TypedSheet() {
-    h = w = 0;
-  }
-  
-  void resize(int w, int h, const T& zero) {
-    //if (w*h>30000) {
-    //fprintf(stderr,"Too big %d %d (%d), use a sparse map\n", w, h, w*h);
-    //exit(1);
-    //}
-    arr.clear();
-    for (int i=0; i<h; i++) {
-      arr.push_back(std::vector<T>());
-      std::vector<T>& lst = arr.back();
-      for (int j=0; j<w; j++) {
-	lst.push_back(zero);
-      }
-    }
-    this->h = h;
-    this->w = w;
-  }
-
-  int width() const {
-    return w;
-  }
-
-  int height() const {
-    return h;
-  }
-
-  T& cell(int x, int y) {
-    return arr[y][x];
-  }
-
-  const T& cell(int x, int y) const {
-    return arr[y][x];
-  }
-};
-
-class Stat {
-public:
-  double mean;
-  double stddev;
-  bool valid;
-
-  Stat() {
-    mean = stddev = 0;
-    valid = false;
-  }
-
-  bool isValid() { 
-    return valid;
-  }
-
-  double evaluate(double x) {
-    if (stddev<0.001) {
-      return 1;
-    }
-    return (x-mean)/stddev;
-  }
-
-  double rescale(double factor) {
-    mean *= factor;
-    stddev *= factor;
-  }
-};
-
-class FloatSheet : public TypedSheet<float> {
-public:
-  virtual std::string cellString(int x, int y) const {
-    char buf[256];
-    snprintf(buf,sizeof(buf),"%g",cell(x,y));
-    return buf;
-  }
-
-  Stat normalize(int first=-1, int last=-1, float sc=0.1, bool modify = true);
-  
-  void rescale(double factor) {
-    int w = width();
-    int h = height();
-    for (int x=0; x<w; x++) {
-      for (int y=0; y<h; y++) {
-	cell(x,y) *= factor;
-      }
-    }
-  }
-};
-
-class IntSheet : public TypedSheet<int> {
-public:
-  virtual std::string cellString(int x, int y) const {
-    char buf[256];
-    snprintf(buf,sizeof(buf),"%d",cell(x,y));
-    return buf;
-  }
-};
 
 class CsvSheet : public DataSheet {
 private:
@@ -226,5 +127,6 @@ private:
     return valid;
   }
 };
+
 
 #endif

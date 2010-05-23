@@ -1,8 +1,11 @@
 #ifndef COOPY_SPARSESHEET
 #define COOPY_SPARSESHEET
 
-#include <coopy/CsvSheet.h>
 #include <coopy/EfficientMap.h>
+#include <coopy/DataSheet.h>
+#include <coopy/IntSheet.h>
+#include <coopy/FloatSheet.h>
+#include <coopy/Stat.h>
 
 template <class T>
 class SparseSheet : public DataSheet {
