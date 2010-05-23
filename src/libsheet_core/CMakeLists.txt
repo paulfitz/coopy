@@ -17,3 +17,5 @@ ADD_LIBRARY(sheet_core ${folder_source} ${folder_header})
 
 ADD_EXECUTABLE(merge_test main_test.cpp)
 TARGET_LINK_LIBRARIES(merge_test sheet_core)
+
+# touch 1 2 3

@@ -1,14 +1,14 @@
+#include <coopy/SheetStyle.h>
+
 #include <ctype.h>
 
 #include <string>
 
-#include <coopy/CsvStyle.h>
-
 using namespace std;
 
-const CsvStyle CsvStyle::defaultStyle;
+const SheetStyle SheetStyle::defaultStyle;
 
-void CsvStyle::setFromFilename(const char *fname) {
+void SheetStyle::setFromFilename(const char *fname) {
   string name = fname;
   delim = ",";
   if (name.length()>=4) {
@@ -26,7 +26,7 @@ void CsvStyle::setFromFilename(const char *fname) {
   }
 }
 
-void CsvStyle::setFromInspection(const char *buffer, int len) {
+void SheetStyle::setFromInspection(const char *buffer, int len) {
   int comma_ct = 0;
   int comma_prev = -1;
   int tab_ct = 0;

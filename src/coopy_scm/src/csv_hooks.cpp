@@ -27,7 +27,7 @@ extern "C" void cvs_merge_cb2 (int c, void *p) {
 }
 
 int blob_to_csv(Blob *pIn, CsvSheet& csv) {
-  CsvStyle style;
+  SheetStyle style;
   style.setFromInspection(blob_buffer(pIn),blob_size(pIn));
   csv.clear();
   csv.setStyle(style);
@@ -55,7 +55,7 @@ int blob_to_csv(Blob *pIn, CsvSheet& csv) {
 }
 
 
-void blob_show_csv(const CsvSheet& csv, const CsvStyle& style, Blob *pOut) {
+void blob_show_csv(const CsvSheet& csv, const SheetStyle& style, Blob *pOut) {
   //blob_appendf(pOut,"CSV: %dx%d\n",csv.width(),csv.height());
   //for (int y=0;y<csv.height();y++) {
   //for (int x=0;x<csv.width();x++) {

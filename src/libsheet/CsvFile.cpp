@@ -9,6 +9,7 @@ extern "C" {
 #include <string>
 
 #include <coopy/CsvFile.h>
+#include <coopy/CsvSheet.h>
 
 using namespace std;
 
@@ -32,7 +33,7 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
     fprintf(stderr,"csv failed to initialize\n");
     exit(1);
   }
-  CsvStyle style;
+  SheetStyle style;
   style.setFromFilename(src);
   dest.setStyle(style);
   csv_set_delim(&p,style.getDelimiter()[0]);
@@ -54,7 +55,7 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
     while ((bytes_read=fread(buf,1,sizeof(buf),fp))>0) {
       pre.append(buf,bytes_read);
     }
-    CsvStyle style;
+    SheetStyle style;
     style.setFromInspection(pre.c_str(),pre.length());
     csv_set_delim(&p,style.getDelimiter()[0]);
     dest.setStyle(style);

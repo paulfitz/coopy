@@ -1,13 +1,13 @@
-#ifndef CSVSTYLE_INC
-#define CSVSTYLE_INC
+#ifndef SHEETSTYLE_INC
+#define SHEETSTYLE_INC
 
 #include <string>
 
-class CsvStyle {
+class SheetStyle {
 private:
   std::string delim;
 public:
-  CsvStyle() {
+  SheetStyle() {
     delim = ",";
   }
 
@@ -19,7 +19,7 @@ public:
     return delim;
   }
 
-  static const CsvStyle defaultStyle;
+  static const SheetStyle defaultStyle;
 };
 
 #endif

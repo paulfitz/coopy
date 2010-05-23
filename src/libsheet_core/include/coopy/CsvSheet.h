@@ -1,28 +1,14 @@
 #ifndef SSFOSSIL_CSVSHEET
 #define SSFOSSIL_CSVSHEET
 
+#include <coopy/DataSheet.h>
+
+#include <math.h>
+#include <stdlib.h>
+
 #include <vector>
 #include <string>
 
-#include <math.h>
-
-#include <coopy/CsvStyle.h>
-
-#include <stdlib.h>
-
-class DataSheet {
-public:
-  virtual int width() const = 0;
-  virtual int height() const = 0;
-
-  virtual std::string cellString(int x, int y) const = 0;
-
-  std::string encode(const std::string& delim = ",") const;
-
-  static std::string encodeCell(const std::string& str, 
-				const std::string& delim);
-
-};
 
 template <class T>
 class TypedSheet : public DataSheet {
@@ -133,7 +119,7 @@ private:
   int h, w;
   int th, tw;
   bool valid;
-  CsvStyle style;
+  SheetStyle style;
  public:
 
   CsvSheet() {
@@ -142,11 +128,11 @@ private:
     valid = true;
   }
 
-  const CsvStyle& getStyle() {
+  const SheetStyle& getStyle() {
     return style;
   }
 
-  void setStyle(const CsvStyle& style) {
+  void setStyle(const SheetStyle& style) {
     this->style = style;
   }
 
