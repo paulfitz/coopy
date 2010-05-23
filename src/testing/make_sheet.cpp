@@ -18,7 +18,8 @@ int main(int argc, char *argv[]) {
       s.cell(x,y) = ct;
     }
   }
-  printf("%s",s.encode().c_str());
+  SheetStyle style;
+  printf("%s",s.encode(style).c_str());
   return 0;
 }
 

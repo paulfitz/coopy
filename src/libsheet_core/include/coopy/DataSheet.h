@@ -12,10 +12,12 @@ public:
 
   virtual std::string cellString(int x, int y) const = 0;
 
-  std::string encode(const std::string& delim = ",") const;
+  //std::string encode(const std::string& delim = ",") const;
+
+  std::string encode(const SheetStyle& style) const;
 
   static std::string encodeCell(const std::string& str, 
-				const std::string& delim);
+				const SheetStyle& style);
 
 };
 

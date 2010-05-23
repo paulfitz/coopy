@@ -12,8 +12,7 @@ int CsvFile::write(const DataSheet& src, const char *fname) {
   }
   SheetStyle style;
   style.setFromFilename(fname);
-  std::string delim = style.getDelimiter();
-  std::string result = src.encode(delim);
+  std::string result = src.encode(style);
   fwrite(result.c_str(),1,result.length(),fp);
   fclose(fp);
   return 0;

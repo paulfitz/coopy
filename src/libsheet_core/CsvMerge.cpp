@@ -29,11 +29,12 @@ public:
     CsvSheet s2 = age_sheet("Glen Ridge","10");
     CsvSheet target = age_sheet("Glen Ridge","20");
     CsvMerge merger;
+    SheetStyle style;
     int result = merger.apply(s0,s1,s2);
     if (result!=0) {
       printf("FAIL\n");
     } else {
-      printf(">>> %s", merger.get().encode().c_str());
+      printf(">>> %s", merger.get().encode(style).c_str());
     }
     return 0;
   }

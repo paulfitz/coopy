@@ -28,7 +28,8 @@ int main(int argc, char *argv[]) {
       return 1;
     }
   } else {
-    std::string out = result.encode();
+    SheetStyle style;
+    std::string out = result.encode(style);
     printf("%s",out.c_str());
   }
   return 0;

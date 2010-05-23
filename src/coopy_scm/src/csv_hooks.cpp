@@ -63,7 +63,7 @@ void blob_show_csv(const CsvSheet& csv, const SheetStyle& style, Blob *pOut) {
   //}
   //blob_appendf(pOut,"\n");
   //}
-  blob_appendf(pOut,"%s",csv.encode(style.getDelimiter()).c_str());
+  blob_appendf(pOut,"%s",csv.encode(style).c_str());
 }
 
 
