@@ -49,7 +49,7 @@ public:
 	  match.cell(y,y) = tmp2;
 	  match.cell(0,y) = tmp;
 	  if (asel.cell(0,y)==-1) {
-	    printf(" [%d:%g] ", ct, tmp);
+	    //printf(" [%d:%g] ", ct, tmp);
 	    mean += tmp;
 	    ct++;
 	  }
