@@ -84,7 +84,9 @@ INCLUDE_DIRECTORIES(${WORKING_DIR}/src/fossil)
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssrender/include)
 ADD_LIBRARY(coopy_fossil ${GEN_SRCS} ${GEN_HDRS} 
-  fossil/src/th.c fossil/src/sqlite3.c ${OUTPUT_DIR}/page_index.h
+  fossil/src/th.c 
+  #fossil/src/sqlite3.c 
+  ${OUTPUT_DIR}/page_index.h
   src/csv_hooks.cpp 
   src/ssfossil.h src/ssfossil.cpp
 )
