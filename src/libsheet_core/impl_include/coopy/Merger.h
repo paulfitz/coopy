@@ -9,16 +9,8 @@
 #include <vector>
 
 class Merger {
-public:
-  OrderMerge row_merge;
-  OrderMerge col_merge;
-  int conflicts;
-  std::vector<std::string> lastAddress;
-  std::vector<std::string> lastAction;
-  int current_row;
-  int last_row;
-  int addition;
 
+public:
   Merger() {
   }
 
@@ -31,6 +23,21 @@ public:
 
   void mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 		MatchUnit& row_unit, MergeOutput& output);
+
+private:
+  OrderMerge row_merge;
+  OrderMerge col_merge;
+  int conflicts;
+  std::vector<std::string> lastAddress;
+  std::vector<std::string> lastAction;
+  int current_row;
+  int last_row;
+  int addition;
+  //SheetSchema defaultSheetSchema;
+  //SheetSchema *pivotSheetSchema;
+  //SheetSchema *localSheetSchema;
+  //SheetSchema *remoteSheetSchema;
+
 };
 
 #endif

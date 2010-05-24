@@ -2,6 +2,7 @@
 #define COOPY_DATASHEET
 
 #include <coopy/SheetStyle.h>
+#include <coopy/SheetSchema.h>
 
 #include <string>
 
@@ -16,6 +17,10 @@ public:
 
   static std::string encodeCell(const std::string& str, 
 				const SheetStyle& style);
+
+  virtual SheetSchema *getSchema() {
+    return 0 /*NULL*/;
+  }
 
 };
 
