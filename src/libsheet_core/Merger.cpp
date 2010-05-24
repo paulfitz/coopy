@@ -53,12 +53,15 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
   bool delRow = row_unit.deleted;
   string blank = "__NOT_SET__CSVCOMPARE_SSFOSSIL";
   vector<string> expandLocal, expandRemote, expandPivot, expandMerge;
+  vector<int> expandDel;
+  map<string,string> cond, value;
   vector<string> address;
   vector<string> action;
   int lastCol = -1;
   int addCol = 0;
   address.push_back("0");
   action.push_back("select");
+  int at = 0;
   for (list<MatchUnit>::iterator it=col_merge.accum.begin();
        it!=col_merge.accum.end(); 
        it++) {
@@ -67,7 +70,9 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
     int lCol = unit.localUnit;
     int rCol = unit.remoteUnit;
     bool deleted = unit.deleted;
+    string mval = "";
     if (diff||!deleted) {
+      expandDel.push_back(deleted);
       if (lRow!=-1 && lCol!=-1) {
 	//printf("access local %d %d (size %d %d)\n", lCol, lRow, 
 	//local.width(), local.height());
@@ -87,6 +92,14 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       } else {
 	expandPivot.push_back(blank);
       }
+    }
+    if (lRow!=-1 && lCol!=-1 && !deleted) {
+      if (diff) {
+	cond[names[at]] = local.cell(lCol,lRow);
+      }
+    }
+    if (!deleted) {
+      at++;
     }
     if (diff) {
       if (lCol!=-1) {
@@ -115,11 +128,13 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
   bool conflict = false;
   bool change = false;
   expandMerge = expandLocal;
+  at = 0;
   for (int i=0; i<expandLocal.size(); i++) {
     string& _l = expandMerge[i];
     string& _r = expandRemote[i];
     string& _p = expandPivot[i];
     bool novel = false;
+    bool deleted = (bool)expandDel[i];
     if (_l!=_r) {
       if (_l==blank) {
 	_l = _r;
@@ -139,6 +154,14 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	    break;
 	  }
 	}
+      }
+    }
+    if (diff) {
+      if (!deleted) {
+	if (novel) {
+	  value[names[at]] = _l;
+	}
+	at++;
       }
     }
     if (diff&&!novel) {
@@ -167,6 +190,7 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       }
     }
   } else {
+
     if (conflict) {
       printf("Cannot produce a diff when there are data conflicts\n");
       exit(1);
@@ -216,13 +240,23 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       if (change) {
 	output.addRow("[-]",expandLocal,blank);
       }
+      RowChange rowChange;
+      rowChange.cond = cond;
+      rowChange.val = value;
+
       if (lRow==-1) {
 	output.addRow("[+++]",expandMerge,blank);
+	rowChange.mode = ROW_CHANGE_INSERT;
+	output.changeRow(rowChange);
       } else {
 	if (rRow==-1) {
 	  output.addRow("[---]",expandLocal,blank);
+	  rowChange.mode = ROW_CHANGE_DELETE;
+	  output.changeRow(rowChange);
 	} else {
 	  output.addRow("[+]",expandMerge,blank);
+	  rowChange.mode = ROW_CHANGE_UPDATE;
+	  output.changeRow(rowChange);
 	}
       }
     }
@@ -352,6 +386,8 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	at++;
       }
     }
+
+    names = local_col_names;
 
     // Now process rows
     for (list<MatchUnit>::iterator it=row_merge.accum.begin();

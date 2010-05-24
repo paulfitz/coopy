@@ -30,6 +30,7 @@ private:
   int conflicts;
   std::vector<std::string> lastAddress;
   std::vector<std::string> lastAction;
+  std::vector<std::string> names;
   int current_row;
   int last_row;
   int addition;

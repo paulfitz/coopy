@@ -3,11 +3,19 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 enum {
   ORDER_CHANGE_NONE,
   ORDER_CHANGE_DELETE,
   ORDER_CHANGE_INSERT,
+};
+
+enum {
+  ROW_CHANGE_NONE,
+  ROW_CHANGE_DELETE,
+  ROW_CHANGE_INSERT,
+  ROW_CHANGE_UPDATE,
 };
 
 class OrderChange {
@@ -21,6 +29,14 @@ public:
   int subject; // subject in local coords
 
   int mode;
+};
+
+
+class RowChange {
+public:
+  int mode;
+  std::map<std::string,std::string> cond;
+  std::map<std::string,std::string> val;
 };
 
 class MergeOutput {
@@ -40,6 +56,8 @@ public:
   virtual bool stripMarkup() { return false; }
 
   virtual bool changeColumn(const OrderChange& change) { return false; }
+
+  virtual bool changeRow(const RowChange& change) { return false; }
 };
 
 #endif
