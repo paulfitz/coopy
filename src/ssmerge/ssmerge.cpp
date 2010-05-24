@@ -3,6 +3,7 @@
 
 #include <coopy/CsvFile.h>
 #include <coopy/SheetCompare.h>
+#include <coopy/MergeOutputAccum.h>
 
 int main(int argc, char *argv[]) {
   if (argc!=5) {
@@ -13,6 +14,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   CsvSheet local, remote, parent;
+  MergeOutputAccum accum;
   if (CsvFile::read(argv[1],parent)!=0) {
     return 1;
   }
@@ -23,8 +25,8 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   SheetCompare cmp;
-  cmp.compare(parent,local,remote);
-  if (CsvFile::write(cmp.get(),argv[4])!=0) {
+  cmp.compare(parent,local,remote,accum);
+  if (CsvFile::write(accum.get(),argv[4])!=0) {
     return 1;
   }
   return 0;

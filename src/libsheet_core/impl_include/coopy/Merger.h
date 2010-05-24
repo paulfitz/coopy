@@ -4,7 +4,7 @@
 #include <coopy/OrderMerge.h>
 #include <coopy/OrderResult.h>
 #include <coopy/TextSheet.h>
-#include <coopy/CsvSheet.h>
+#include <coopy/MergeOutput.h>
 
 #include <vector>
 
@@ -19,8 +19,6 @@ public:
   int last_row;
   int addition;
 
-  CsvSheet result;
-
   Merger() {
   }
 
@@ -28,20 +26,11 @@ public:
 	     const OrderResult& nrow_local,
 	     const OrderResult& nrow_remote,
 	     const OrderResult& ncol_local,
-	     const OrderResult& ncol_remote);
-
-  void diff(TextSheet& pivot, TextSheet& local, TextSheet& remote,
-	    const OrderResult& nrow_local,
-	    const OrderResult& nrow_remote,
-	    const OrderResult& ncol_local,
-	    const OrderResult& ncol_remote);
+	     const OrderResult& ncol_remote,
+	     MergeOutput& output);
 
   void mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
-		MatchUnit& row_unit, bool diff);
-
-  void addRow(const char *tag,
-	      const std::vector<std::string>& row,
-	      const std::string& blank);
+		MatchUnit& row_unit, MergeOutput& output);
 };
 
 #endif

@@ -65,7 +65,6 @@ public:
   }
 
   void addRecord() {
-    //printf("Add record\n");
     arr.push_back(rec);
     rec.clear();
     if (tw>w) {
@@ -93,28 +92,6 @@ public:
     rec.clear();
     valid = true;
   }
-
-  /*
-  std::string& cell(int x, int y) {
-    return arr[y][x];
-  }
-
-  const std::string& cell(int x, int y) const {
-    return arr[y][x];
-  }
-
-  int width() const {
-    return w;
-  }
-
-  int height() const {
-    return h;
-  }
-
-  std::string cellString(int x, int y) const {
-    return arr[y][x];
-  }
-  */
 
   bool isValid() const {
     return valid;

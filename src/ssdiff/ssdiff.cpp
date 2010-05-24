@@ -1,8 +1,9 @@
 
 #include <stdio.h>
 
-#include <coopy/CsvFile.h>
 #include <coopy/SheetCompare.h>
+#include <coopy/CsvFile.h>
+#include <coopy/MergeOutputPatch.h>
 
 int main(int argc, char *argv[]) {
   if (argc<3) {
@@ -19,10 +20,11 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   SheetCompare cmp;
-  cmp.compare(local,local,remote,true);
-  const CsvSheet& result = cmp.get();
+  MergeOutputPatch patch;
+  cmp.compare(local,local,remote,patch);
+  const CsvSheet& result = patch.get();
   if (argc>=4) {
-    if (CsvFile::write(cmp.get(),argv[3])!=0) {
+    if (CsvFile::write(result,argv[3])!=0) {
       return 1;
     }
   } else {

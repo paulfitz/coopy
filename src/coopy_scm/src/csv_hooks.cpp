@@ -9,8 +9,8 @@ extern "C" {
 #include "csv.h"
 }
 
-#include <coopy/CsvSheet.h>
 #include <coopy/SheetCompare.h>
+#include <coopy/MergeOutputAccum.h>
 #include <coopy/CsvRender.h>
 
 #include "ssfossil.h"
@@ -82,11 +82,12 @@ int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut) {
       blob_to_csv(pV1,csv1)==0 && 
       blob_to_csv(pV2,csv2)==0) {
     SheetCompare merger;
-    if (merger.compare(csv0,csv1,csv2)==0) {
+    MergeOutputAccum result;
+    if (merger.compare(csv0,csv1,csv2,result)==0) {
       blob_zero(pOut);
       //blob_appendf(pOut,"Hello from %s:%d\n", __FILE__, __LINE__);
       //blob_appendf(pOut,"Conflict resolution is being modified.\n");
-      blob_show_csv(merger.get(),csv1.getStyle(),pOut);
+      blob_show_csv(result.get(),csv1.getStyle(),pOut);
       return 1;
     }
   }

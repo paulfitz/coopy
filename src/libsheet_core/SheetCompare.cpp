@@ -44,7 +44,7 @@ public:
 };
 
 int SheetCompare::compare(TextSheet& pivot, TextSheet& local, TextSheet& remote,
-			  bool makeDiff) {
+			  MergeOutput& output) {
   IdentityOrderResult id;
 
   /////////////////////////////////////////////////////////////////////////
@@ -144,22 +144,12 @@ int SheetCompare::compare(TextSheet& pivot, TextSheet& local, TextSheet& remote,
   OrderResult p2r_col_order = p2r_col_pass_local.getOrder();
 
   Merger merger;
-  if (makeDiff) {
-    merger.diff(pivot,local,remote,
-		p2l_row_order,
-		p2r_row_order,
-		p2l_col_order,
-		p2r_col_order);
-  } else {
-    merger.merge(pivot,local,remote,
-		 p2l_row_order,
-		 p2r_row_order,
-		 p2l_col_order,
-		 p2r_col_order);
-  }
-
-  cmp = merger.result;
-
+  merger.merge(pivot,local,remote,
+	       p2l_row_order,
+	       p2r_row_order,
+	       p2l_col_order,
+	       p2r_col_order,
+	       output);
   return 0;
 }
 

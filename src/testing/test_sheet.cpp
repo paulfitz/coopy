@@ -10,6 +10,8 @@
 #include <coopy/CsvStat.h>
 #include <coopy/SheetCompare.h>
 #include <coopy/CsvPatch.h>
+#include <coopy/MergeOutputAccum.h>
+#include <coopy/MergeOutputPatch.h>
 
 int main(int argc, char *argv[]) {
   int c;
@@ -160,16 +162,24 @@ int main(int argc, char *argv[]) {
 	}
 	if (parented) {
 	  printf("Three way compare...\n");
-	  SheetCompare cmp;
-	  cmp.setVerbose(true);
-	  cmp.compare(parent,local,remote,diffMode);
-	  local = cmp.get();
-	  ss = &local;
-	} else {
-	  printf("Two way compare...\n");
-	  SheetCompare cmp;
-	  cmp.compare(local,local,remote);
 	}
+
+
+	SheetCompare cmp;
+	cmp.setVerbose(true);
+	if (!parented) {
+	  parent = local;
+	}
+	if (diffMode) {
+	  MergeOutputPatch output;
+	  cmp.compare(parent,local,remote,output);
+	  local = output.get();
+	} else {
+	  MergeOutputAccum output;
+	  cmp.compare(parent,local,remote,output);
+	  local = output.get();
+	}
+	ss = &local;
       }
       break;
 

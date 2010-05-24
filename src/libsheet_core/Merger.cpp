@@ -5,24 +5,10 @@
 
 using namespace std;
 
-void Merger::addRow(const char *tag,
-		    const vector<string>& row,
-		    const string& blank) {
-  CsvSheet& target = result;
-  target.addField(tag);
-  for (int i=0; i<row.size(); i++) {
-    if (row[i]!=blank) {
-      target.addField(row[i].c_str());
-    } else {
-      target.addField("");
-    }
-  }
-  target.addRecord();
-}
-
 void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
-		      MatchUnit& row_unit, bool diff) {
+		      MatchUnit& row_unit, MergeOutput& output) {
   
+  bool diff = output.wantDiff();
   int pRow = row_unit.pivotUnit;
   int lRow = row_unit.localUnit;
   int rRow = row_unit.remoteUnit;
@@ -131,15 +117,15 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
   if (!diff) {
     if (conflict) {
       conflicts++;
-      addRow("[local]",expandLocal,blank);
-      addRow("[conflicting]",expandRemote,blank);
+      output.addRow("[local]",expandLocal,blank);
+      output.addRow("[conflicting]",expandRemote,blank);
     } else {
       if (lRow!=-1 && rRow!=-1) {
-	addRow("",expandMerge,blank);
+	output.addRow("",expandMerge,blank);
       } else if (lRow!=-1) {
-	addRow("",expandMerge,blank); // local add
+	output.addRow("",expandMerge,blank); // local add
       } else if (rRow!=-1) {
-	addRow("[add]",expandMerge,blank); // remote add
+	output.addRow("[add]",expandMerge,blank); // remote add
       }
     }
   } else {
@@ -148,11 +134,11 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       exit(1);
     }
     if (address!=lastAddress) {
-      addRow("[for]",address,blank);
+      output.addRow("[for]",address,blank);
       lastAddress = address;
     }
     if (address!=lastAddress || action!=lastAction) {
-      addRow("[do]",action,blank);
+      output.addRow("[do]",action,blank);
       lastAction = action;
     }
 
@@ -190,15 +176,15 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       expandLocal.insert(expandLocal.begin(),buf);
       expandRemote.insert(expandRemote.begin(),buf);
       if (change) {
-	addRow("[-]",expandLocal,blank);
+	output.addRow("[-]",expandLocal,blank);
       }
       if (lRow==-1) {
-	addRow("[+++]",expandMerge,blank);
+	output.addRow("[+++]",expandMerge,blank);
       } else {
 	if (rRow==-1) {
-	  addRow("[---]",expandLocal,blank);
+	  output.addRow("[---]",expandLocal,blank);
 	} else {
-	  addRow("[+]",expandMerge,blank);
+	  output.addRow("[+]",expandMerge,blank);
 	}
       }
     }
@@ -215,15 +201,34 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 		   const OrderResult& row_local,
 		   const OrderResult& row_remote,
 		   const OrderResult& col_local,
-		   const OrderResult& col_remote) {
+		   const OrderResult& col_remote,
+		   MergeOutput& output) {
+  bool diff = output.wantDiff();
 
   dbg_printf("Merging row order...\n");
   row_merge.merge(row_local,row_remote);
-
   dbg_printf("Merging column order...\n");
   col_merge.merge(col_local,col_remote);
-
   conflicts = 0;
+
+  if (diff) {
+    current_row = 0;
+    last_row = -1;
+    addition = 0;
+    lastAddress.clear();
+    lastAction.clear();
+
+    for (list<MatchUnit>::iterator it=row_merge.accum.begin();
+	 it!=row_merge.accum.end(); 
+	 it++) {
+      MatchUnit& unit = *it;
+      // ignoring row order for now ...
+      mergeRow(pivot,local,remote,unit,output);
+    }
+    return;
+  }
+
+  // MERGE
 
   vector<string> header;
   for (list<MatchUnit>::iterator it=col_merge.accum.begin();
@@ -244,7 +249,7 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       }
     }
   }
-  addRow("[conflict]",header,"");
+  output.addRow("[conflict]",header,"");
 
   for (list<MatchUnit>::iterator it=row_merge.accum.begin();
        it!=row_merge.accum.end(); 
@@ -255,49 +260,18 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
     //int _r = unit.remoteUnit;
     bool deleted = unit.deleted;
     if (!deleted) {
-      mergeRow(pivot,local,remote,unit,false);
+      mergeRow(pivot,local,remote,unit,output);
     }
   }
 
   if (conflicts==0) {
     dbg_printf("No conflicts!\n");
-    CsvSheet tmp = result;
-    result.clear();
-    for (int y=1; y<tmp.height(); y++) {
-      for (int x=1; x<tmp.width(); x++) {
-	result.addField(tmp.cell(x,y).c_str());
-      }
-      result.addRecord();
-    }
+    output.stripMarkup();
   }
 
-  dbg_printf("Got merged result (%dx%d)\n", result.width(), result.height());
+  //dbg_printf("Got merged result (%dx%d)\n", result.width(), result.height());
   //CsvFile::write(result,"result.csv");
 }
 
 
-
-void Merger::diff(TextSheet& pivot, TextSheet& local, TextSheet& remote,
-		  const OrderResult& row_local,
-		  const OrderResult& row_remote,
-		  const OrderResult& col_local,
-		  const OrderResult& col_remote) {
-
-  row_merge.merge(row_local,row_remote);
-  col_merge.merge(col_local,col_remote);
-  conflicts = 0;
-  current_row = 0;
-  last_row = -1;
-  addition = 0;
-  lastAddress.clear();
-  lastAction.clear();
-
-  for (list<MatchUnit>::iterator it=row_merge.accum.begin();
-       it!=row_merge.accum.end(); 
-       it++) {
-    MatchUnit& unit = *it;
-    // ignoring row order for now ...
-    mergeRow(pivot,local,remote,unit,true);
-  }
-}
 
