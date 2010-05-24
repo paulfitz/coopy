@@ -114,6 +114,21 @@ ADD_TEST(altitude_merge_conflict ${testprg}
   --prop diffs --assert 0)
 
 
+IF (FALSE)
+# not ready for this yet
+ADD_TEST(altitude_merge_with_reorder ${testprg}
+  --parent --read ${TESTS}/test005_base.csv 
+  --local  --read ${TESTS}/test005_base.csv
+  --remote --read ${TESTS}/test005_replace_column_and_reorder.csv
+  --compare
+#  --local --write ${TESTS}/result_altitude_merge_with_reorder.csv
+  --remote --read ${TESTS}/result_altitude_merge_with_reorder.csv
+  --diff
+  --prop diffs --assert 0)
+ENDIF(FALSE)
+
+
+
 ADD_TEST(altitude_diff_typo ${testprg}
   --parent --read ${TESTS}/test005_base.csv 
   --local --read ${TESTS}/test005_base.csv
@@ -167,5 +182,4 @@ ADD_TEST(altitude_patch_remove_row ${testprg}
 #   --remote --read ${TESTS}/result_altitude_diff_replace_col.csv
 #   --diff
 #   --prop diffs --assert 0)
-
 

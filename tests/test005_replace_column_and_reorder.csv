@@ -1,0 +1,6 @@
+Probe A,Probe C,Probe D,Comment,Altitude
+10,30,5,"Wing vibration",1000
+15,52,10,"Wing vibration",2000
+3,89,15,"Ominous silense",3000
+3,12,20,"Ominous silense",4000
+3,16,100,"Severe vibration",5000

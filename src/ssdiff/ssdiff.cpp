@@ -5,9 +5,11 @@
 #include <coopy/SheetCompare.h>
 #include <coopy/CsvFile.h>
 #include <coopy/MergeOutputPatch.h>
+#include <coopy/MergeOutputSqlDiff.h>
 
 int main(int argc, char *argv[]) {
   std::string output = "";
+  std::string mode = "csv";
   while (true) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
@@ -23,10 +25,10 @@ int main(int argc, char *argv[]) {
     if (c==-1) break;
     switch (c) {
     case 'c':
-      printf("Switching to csv mode\n");
+      mode = "csv";
       break;
     case 's':
-      printf("Switching to sql mode\n");
+      mode = "sql";
       break;
     case 'o':
       output = optarg;
@@ -58,17 +60,22 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   SheetCompare cmp;
-  MergeOutputPatch patch;
-  cmp.compare(local,local,remote,patch);
-  const CsvSheet& result = patch.get();
-  if (output!="") {
-    if (CsvFile::write(result,output.c_str())!=0) {
-      return 1;
-    }
+  if (mode=="sql") {
+    MergeOutputSqlDiff sqldiff;
+    cmp.compare(local,local,remote,sqldiff);
   } else {
-    SheetStyle style;
-    std::string out = result.encode(style);
-    printf("%s",out.c_str());
+    MergeOutputPatch patch;
+    cmp.compare(local,local,remote,patch);
+    const CsvSheet& result = patch.get();
+    if (output!="") {
+      if (CsvFile::write(result,output.c_str())!=0) {
+	return 1;
+      }
+    } else {
+      SheetStyle style;
+      std::string out = result.encode(style);
+      printf("%s",out.c_str());
+    }
   }
   return 0;
 }

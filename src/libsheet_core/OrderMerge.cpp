@@ -1,14 +1,23 @@
 #include <coopy/OrderMerge.h>
 #include <coopy/Dbg.h>
 
+
+/*
+
+  Order is currently not quite right.  Inserts and deletes are ok,
+  but no analysis is done yet to determine which of local vs remote
+  orders should win.
+
+ */
+
 void OrderMerge::process(int ilocal, int iremote,
 			 int& base_local, int& base_remote,
 			 int stop_local, int stop_remote) {
   //dbg_printf("process %d %d / %d %d / %d %d\n", ilocal, iremote, 
   //base_local, base_remote, stop_local, stop_remote);
   while (true) {
-    //dbg_printf("--- process %d %d / %d %d / %d %d\n", ilocal, iremote, 
-    //base_local, base_remote, stop_local, stop_remote);
+    dbg_printf("--- process %d %d / %d %d / %d %d\n", ilocal, iremote, 
+	       base_local, base_remote, stop_local, stop_remote);
     if (ilocal>=stop_local &&
 	iremote>=stop_remote) {
       break;

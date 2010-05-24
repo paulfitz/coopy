@@ -105,6 +105,11 @@ int main(int argc, char *argv[]) {
 	  printf("Success, %d==%d\n", result, v);
 	} else {
 	  printf("Failure, %d!=%d\n", result, v);
+	  printf("Local:\n");
+	  CsvFile::write(local,"-");
+	  printf("Remote:\n");
+	  CsvFile::write(remote,"-");
+	  printf("Failure, %d!=%d\n", result, v);
 	  return 1;
 	}
       }

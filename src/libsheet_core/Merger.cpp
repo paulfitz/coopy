@@ -3,7 +3,45 @@
 
 #include <stdlib.h>
 
+#include <algorithm>
+
 using namespace std;
+
+class Mover {
+public:
+  void move(const vector<int>& src, const vector<int>& dest, 
+	    vector<int>& order, int depth) {
+    vector<int> best_order;
+    if (src!=dest) {
+
+      // code not exercised yet
+      fprintf(stderr,"Merger.cpp: Reorder needed for columns\n");
+      exit(1);
+
+      for (int i=0; i<src.size(); i++) {
+	if (src[i]==dest[i]) {
+	  continue;
+	}
+	vector<int> norder = order;
+	vector<int> nsrc = src;
+	int x = src[i];
+	nsrc.erase(nsrc.begin()+i);
+	vector<int>::const_iterator it = std::find(dest.begin(),
+						   dest.end(),
+						   x);
+	nsrc.insert(nsrc.begin()+(it-dest.begin()),x);
+	norder.push_back(i);
+	move(nsrc,dest,norder,depth+1);
+	if (norder.size()<best_order.size() || best_order.size()==0) {
+	  best_order = norder;
+	}
+      }
+    }
+    printf("At %d, order len %d\n", depth, best_order.size());
+    order = best_order;
+  }
+};
+
 
 void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 		      MatchUnit& row_unit, MergeOutput& output) {
@@ -218,6 +256,104 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
     lastAddress.clear();
     lastAction.clear();
 
+    vector<int> local_cols;
+    vector<string> local_col_names;
+    for (int i=0; i<local.width(); i++) {
+      local_cols.push_back(i);
+      char buf[256];
+      sprintf(buf,"[%d]",i);
+      local_col_names.push_back(buf);
+    }
+
+    // Pass 1: signal any column deletions
+    for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+	 it!=col_merge.accum.end(); 
+	 it++) {
+      MatchUnit& unit = *it;
+      int pCol = unit.localUnit;
+      int lCol = unit.pivotUnit;
+      int rCol = unit.remoteUnit;
+      bool deleted = unit.deleted;
+      if (lCol!=-1 && deleted) {
+	OrderChange change;
+	change.indicesBefore = local_cols;
+	change.namesBefore = local_col_names;
+	vector<int>::iterator it = std::find(local_cols.begin(),
+					     local_cols.end(),
+					     lCol);
+	if (it==local_cols.end()) {
+	  fprintf(stderr,"Merge logic failure\n");
+	  exit(1);
+	}
+	change.subject = *it;
+	int idx = it-local_cols.begin();
+	change.mode = ORDER_CHANGE_DELETE;
+	local_cols.erase(it);
+	local_col_names.erase(local_col_names.begin()+idx);
+	change.indicesAfter = local_cols;
+	change.namesAfter = local_col_names;
+	output.changeColumn(change);
+      }
+    }
+
+    // Pass 2: check order
+    vector<int> shuffled_cols;
+    for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+	 it!=col_merge.accum.end(); 
+	 it++) {
+      MatchUnit& unit = *it;
+      int pCol = unit.localUnit;
+      int lCol = unit.pivotUnit;
+      int rCol = unit.remoteUnit;
+      bool deleted = unit.deleted;
+      if (lCol!=-1 && !deleted) {
+	shuffled_cols.push_back(lCol);
+      }
+      //printf("[%d:%d:%d %d] ", lCol, pCol, rCol, deleted);
+    }
+    //printf("\n");
+
+    // Pass 2: signal any column shuffling
+    // 1 2 3 4
+    // 2 3 4 1
+    Mover move;
+    vector<int> move_order;
+    move.move(local_cols,shuffled_cols,move_order,0);
+    // Should send messages for this case, but we're not ready
+    // yet to exercise it.
+    // For now, local order will remain unchanged.
+
+    // Pass 3: signal any column insertions
+    int at = 0;
+    for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+	 it!=col_merge.accum.end(); 
+	 it++) {
+      MatchUnit& unit = *it;
+      int pCol = unit.localUnit;
+      int lCol = unit.pivotUnit;
+      int rCol = unit.remoteUnit;
+      bool deleted = unit.deleted;
+      if (lCol==-1 && rCol!=-1 && !deleted) {
+	OrderChange change;
+	change.indicesBefore = local_cols;
+	change.namesBefore = local_col_names;
+	change.subject = at;
+	change.mode = ORDER_CHANGE_INSERT;
+	local_cols.insert(local_cols.begin()+at,-rCol-1);
+	char buf[256];
+	sprintf(buf,"{%d}",rCol);
+	local_col_names.insert(local_col_names.begin()+at,buf);
+	change.indicesAfter = local_cols;
+	change.namesAfter = local_col_names;
+	output.changeColumn(change);
+	at++;
+      }
+      if (lCol!=-1 && !deleted) {
+	at++;
+      }
+    }
+
+    // Now process rows
     for (list<MatchUnit>::iterator it=row_merge.accum.begin();
 	 it!=row_merge.accum.end(); 
 	 it++) {
@@ -249,7 +385,7 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       }
     }
   }
-  output.addRow("[conflict]",header,"");
+  output.addHeader("[conflict]",header,"");
 
   for (list<MatchUnit>::iterator it=row_merge.accum.begin();
        it!=row_merge.accum.end(); 
