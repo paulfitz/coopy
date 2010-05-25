@@ -243,6 +243,7 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       RowChange rowChange;
       rowChange.cond = cond;
       rowChange.val = value;
+      rowChange.names = names;
 
       if (lRow==-1) {
 	output.addRow("[+++]",expandMerge,blank);
@@ -298,6 +299,8 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       sprintf(buf,"[%d]",i);
       local_col_names.push_back(buf);
     }
+
+    output.declareNames(local_col_names, false);
 
     // Pass 1: signal any column deletions
     for (list<MatchUnit>::iterator it=col_merge.accum.begin();
@@ -388,6 +391,8 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
     }
 
     names = local_col_names;
+
+    output.declareNames(local_col_names, true);
 
     // Now process rows
     for (list<MatchUnit>::iterator it=row_merge.accum.begin();

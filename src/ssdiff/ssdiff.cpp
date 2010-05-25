@@ -5,6 +5,7 @@
 #include <coopy/CsvFile.h>
 #include <coopy/MergeOutputPatch.h>
 #include <coopy/MergeOutputSqlDiff.h>
+#include <coopy/MergeOutputVerboseDiff.h>
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
 
@@ -17,6 +18,7 @@ int main(int argc, char *argv[]) {
     static struct option long_options[] = {
       {"format-csv", 0, 0, 'c'},
       {"format-sql", 0, 0, 's'},
+      {"format-human", 0, 0, 'h'},
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
       {0, 0, 0, 0}
@@ -31,6 +33,9 @@ int main(int argc, char *argv[]) {
       break;
     case 's':
       mode = "sql";
+      break;
+    case 'h':
+      mode = "human";
       break;
     case 'v':
       verbose = true;
@@ -81,6 +86,9 @@ int main(int argc, char *argv[]) {
   if (mode=="sql") {
     MergeOutputSqlDiff sqldiff;
     cmp.compare(local,local,remote,sqldiff);
+  } else if (mode=="human") {
+    MergeOutputVerboseDiff humandiff;
+    cmp.compare(local,local,remote,humandiff);
   } else {
     MergeOutputPatch patch;
     cmp.compare(local,local,remote,patch);

@@ -2,31 +2,11 @@
 
 #include <stdlib.h>
 
+#define WANT_MAP2STRING
+#define WANT_VECTOR2STRING
+#include <coopy/Stringer.h>
+
 using namespace std;
-
-string map2string(const map<string,string>& src) {
-  string result = "";
-  for (map<string,string>::const_iterator it=src.begin(); it!=src.end(); it++) {
-    if (it!=src.begin()) {
-      result += " ";
-    }
-    result += it->first;
-    result += ":";
-    result += it->second;
-  }
-  return result;
-}
-
-string vector2string(const vector<string>& src) {
-  string result = "";
-  for (vector<string>::const_iterator it=src.begin(); it!=src.end(); it++) {
-    if (it!=src.begin()) {
-      result += " ";
-    }
-    result += *it;
-  }
-  return result;
-}
 
 bool MergeOutputSqlDiff::changeColumn(const OrderChange& change) {
   printf("Got order change %s -> %s\n",

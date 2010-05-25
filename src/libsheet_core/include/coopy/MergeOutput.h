@@ -37,6 +37,7 @@ public:
   int mode;
   std::map<std::string,std::string> cond;
   std::map<std::string,std::string> val;
+  std::vector<std::string> names;
 };
 
 class MergeOutput {
@@ -66,6 +67,10 @@ public:
   virtual bool changeColumn(const OrderChange& change) { return false; }
 
   virtual bool changeRow(const RowChange& change) { return false; }
+
+  virtual bool declareNames(const std::vector<std::string>& names, bool final) {
+    return false;
+  }
 
   virtual bool setSheet(const char *name) { 
     ct++;
