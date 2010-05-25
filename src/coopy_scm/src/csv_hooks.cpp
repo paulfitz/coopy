@@ -45,7 +45,7 @@ int blob_to_csv(Blob *pIn, CsvSheet& csv) {
 	   cvs_merge_cb2,
 	   (void*)(&csv));
   csv_free(&p);
-  if (result!=blob_size(pIn)) {
+  if (result!=(int)blob_size(pIn)) {
     return -1;
   }
   if (!csv.isValid()) {

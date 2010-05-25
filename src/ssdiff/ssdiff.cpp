@@ -11,7 +11,7 @@
 
 int main(int argc, char *argv[]) {
   std::string output = "";
-  std::string mode = "csv";
+  std::string mode = "human";
   bool verbose = false;
   while (true) {
     int option_index = 0;
@@ -57,8 +57,11 @@ int main(int argc, char *argv[]) {
   argv += optind;
 
   if (argc<2) {
-    printf("Show difference between two CSV spreadsheets. Call as:\n");
-    printf("  ssdiff [--output output.csv] local.csv modified.csv\n");
+    printf("Show difference between two spreadsheets. Call as:\n");
+    printf("  ssdiff [--output <filename>] local.csv modified.csv\n");
+    printf("  ssdiff --format-human local.csv modified.csv # human readable output\n");
+    printf("  ssdiff --format-csv local.csv modified.csv   # format that sspatch can read\n");
+    printf("  ssdiff --format-sql local.csv modified.csv   # not working yet\n");
     printf("Output defaults to standard output.\n");
     return 1;
   }

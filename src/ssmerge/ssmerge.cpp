@@ -7,10 +7,10 @@
 
 int main(int argc, char *argv[]) {
   if (argc!=5) {
-    printf("Merge CSV spreadsheets, call as:\n");
-    printf("  csvmerge parent.csv local.csv remote.csv output.csv\n");
-    printf("Where parent.csv should be a CSV file that is an ancestor of the other two\n");
-    printf("The merged or conflicting result will be placed in the specified output file\n");
+    printf("Merge spreadsheets, with sensible treatement of changes:\n");
+    printf("  ssmerge parent.csv local.csv remote.csv output.csv\n");
+    printf("Note: parent.csv should be a 'common ancestor' of the other two.\n");
+    printf("The merged or conflicting result will be placed in the specified output file.\n");
     return 1;
   }
   CsvSheet local, remote, parent;

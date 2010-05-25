@@ -6,11 +6,11 @@
 
 int main(int argc, char *argv[]) {
   if (argc<3) {
-    printf("Apply patch to a CSV spreadsheet. Call as:\n");
-    printf("  csvpatch sheet.csv patch.csv [output.csv]\n");
+    printf("Apply patch to a spreadsheet. Currently doesn't do much.\n");
+    printf("  sspatch sheet.csv patch.csv [output.csv]\n");
     printf("Output defaults to standard output.\n");
     printf("Write output to original file by doing:.\n");
-    printf("  csvpatch sheet.csv patch.csv sheet.csv\n");
+    printf("  sspatch sheet.csv patch.csv sheet.csv\n");
     return 1;
   }
   CsvSheet local, patch;
