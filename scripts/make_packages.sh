@@ -23,8 +23,14 @@ while [ ! "k$1" = "k" ]; do
     
     if [ "k$1" = "kmingw" ]; then
 	echo "Working on MINGW"
-	cd $MINGW_REPO || ext 1
+	cd $MINGW_REPO
 	git pull || exit 1
+	cd $MINGW_BUILD || (
+	    echo "Creating $MINGW_BUILD"
+	    mkdir -p $MINGW_BUILD
+	    cd $MINGW_BUILD || exit 1
+	    cmake -DCMAKE_TOOLCHAIN_FILE=$MINGW_REPO/src/coopy_scm/scripts/mingwin.cmake $MINGW_REPO || exit 1
+	)
 	cd $MINGW_BUILD || exit 1
 	cmake . || exit 1
 	make || {
