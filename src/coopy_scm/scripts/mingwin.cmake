@@ -23,8 +23,8 @@ ENDIF (NOT HOME)
 # here is the target environment located
 SET(CMAKE_FIND_ROOT_PATH  /usr/i586-mingw32msvc ${HOME}/mingw/install ${HOME}/mingw/install/bin )
 
-LINK_DIRECTORIES(${HOME}/mingw/install/lib)
-INCLUDE_DIRECTORIES(${HOME}/mingw/install/include)
+LINK_DIRECTORIES($ENV{HOME}/mingw/install/lib)
+INCLUDE_DIRECTORIES($ENV{HOME}/mingw/install/include)
 
 # adjust the default behaviour of the FIND_XXX() commands:
 # search headers and libraries in the target environment, search 

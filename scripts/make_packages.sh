@@ -24,6 +24,8 @@ while [ ! "k$1" = "k" ]; do
     if [ "k$1" = "kmingw" ]; then
 	echo "Working on MINGW"
 	cd $MINGW_REPO
+	export LDFLAGS="-L$HOME/mingw/install/lib"
+	export CFLAGS="-I$HOME/mingw/install/include"
 	git pull || exit 1
 	cd $MINGW_BUILD || (
 	    echo "Creating $MINGW_BUILD"
