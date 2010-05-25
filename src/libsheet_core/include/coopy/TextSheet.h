@@ -8,6 +8,13 @@ public:
   virtual std::string cellString(int x, int y) const {
     return cell(x,y);
   }
+
+  const TextSheet& operator=(const TextSheet& alt) {
+    arr = alt.arr;
+    h = alt.h;
+    w = alt.w;
+    return *this;
+  }
 };
 
 

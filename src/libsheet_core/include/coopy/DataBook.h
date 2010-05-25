@@ -6,6 +6,8 @@
 
 class DataBook {
 public:
+  virtual ~DataBook() {}
+
   virtual std::vector<std::string> getNames() = 0;
 };
 
