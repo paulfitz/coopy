@@ -10,5 +10,5 @@ SET(SQLITE_DIR ${CMAKE_SOURCE_DIR}/src/coopy_scm/fossil/src)
 INCLUDE_DIRECTORIES(${SQLITE_DIR})
 
 ADD_LIBRARY(sheet include/coopy/CsvFile.h CsvFile.cpp ${SQLITE_DIR}/sqlite3.c
-  SqliteTextBook.cpp)
+  SqliteTextBook.cpp PolyBook.cpp)
 TARGET_LINK_LIBRARIES(sheet sheet_core csv)

@@ -20,7 +20,7 @@ std::string DataSheet::encodeCell(const std::string& str,
 				  const SheetStyle& style) {
   std::string delim = style.getDelimiter();
   bool need_quote = false;
-  for (int i=0; i<str.length(); i++) {
+  for (size_t i=0; i<str.length(); i++) {
     char ch = str[i];
     if (ch=='"'||ch=='\''||ch==delim[0]||ch=='\r'||ch=='\n'||ch=='\t'||ch==' ') {
       need_quote = true;
@@ -29,7 +29,7 @@ std::string DataSheet::encodeCell(const std::string& str,
   }
   std::string result = "";
   if (need_quote) { result += '"'; }
-  for (int i=0; i<str.length(); i++) {
+  for (size_t i=0; i<str.length(); i++) {
     char ch = str[i];
     if (ch=='"') {
       result += '"';

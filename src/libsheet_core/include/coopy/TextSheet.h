@@ -9,7 +9,7 @@ public:
     return cell(x,y);
   }
 
-  const TextSheet& operator=(const TextSheet& alt) {
+  const TextSheet& copy(const TextSheet& alt) {
     arr = alt.arr;
     h = alt.h;
     w = alt.w;

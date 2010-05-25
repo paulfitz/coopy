@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     char buf[1000];
     char *result = fgets(buf,sizeof(buf),fin);
     if (result!=NULL) {
-      for (int i=0; i<strlen(result); i++) {
+      for (size_t i=0; i<strlen(result); i++) {
 	char ch = result[i];
 	switch (ch) {
 	case '\r':

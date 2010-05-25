@@ -6,7 +6,7 @@ using namespace std;
 
 Stat SparseFloatSheet::normalize(int first, int last, float sc, bool modify) {
   Stat s;
-  int hh = height();
+  //int hh = height();
   int ww = width();
   if (first==-1) first = 0;
   if (last==-1) last = ww-1;
@@ -59,7 +59,7 @@ void SparseFloatSheet::findBest(IntSheet& bestIndex, FloatSheet& bestValue, Floa
     long long x = it->first % w;
     long long y = it->first / w;
     if (x>=w || y>=h) {
-      fprintf(stderr,"SparseSheet - out of range: %d %d : (%dx%d)\n", 
+      fprintf(stderr,"SparseSheet - out of range: %ld %ld : (%dx%d)\n", 
 	      (long)x, (long)y, w, h);
       exit(1);
     }

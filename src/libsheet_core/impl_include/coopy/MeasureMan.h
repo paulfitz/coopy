@@ -20,10 +20,10 @@ public:
 	     Measure& bnorm,
 	     MeasurePass& bnorm_pass,
 	     bool rowLike) : main(main), 
-			     main_pass(main_pass),
 			     anorm(anorm), 
-			     anorm_pass(anorm_pass),
 			     bnorm(bnorm),
+			     main_pass(main_pass),
+			     anorm_pass(anorm_pass),
 			     bnorm_pass(bnorm_pass),
 			     rowLike(rowLike) // just for debugging
   {

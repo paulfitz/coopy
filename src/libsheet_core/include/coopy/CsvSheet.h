@@ -30,7 +30,7 @@ public:
 
   bool removeRow(int index) {
     arr.erase(arr.begin()+index);
-    if (arr.size()<h) {
+    if (arr.size()<(size_t)h) {
       th = h = arr.size();
       return true;
     }

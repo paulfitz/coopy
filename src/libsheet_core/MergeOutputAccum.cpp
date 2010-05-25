@@ -6,7 +6,7 @@ bool MergeOutputAccum::addRow(const char *tag,
 			      const vector<string>& row,
 			      const string& blank) {
   result.addField(tag);
-  for (int i=0; i<row.size(); i++) {
+  for (size_t i=0; i<row.size(); i++) {
     if (row[i]!=blank) {
       result.addField(row[i].c_str());
     } else {

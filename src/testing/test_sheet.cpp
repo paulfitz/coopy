@@ -15,7 +15,6 @@
 
 int main(int argc, char *argv[]) {
   int c;
-  int digit_optind = 0;
   int result = 0;
 
   bool parented = false;
@@ -28,7 +27,6 @@ int main(int argc, char *argv[]) {
   int diffs = 0;
   
   while (1) {
-    int this_option_optind = optind ? optind : 1;
     int option_index = 0;
     static struct option long_options[] = {
       {"read", 1, 0, 'r'},
@@ -118,7 +116,7 @@ int main(int argc, char *argv[]) {
       if (optarg) {
 	int row = atoi(optarg);
 	ss->removeRow(row);
-	printf("Removed row %d\n");
+	printf("Removed row %d\n", row);
 	dirty = true;
       }
       break;

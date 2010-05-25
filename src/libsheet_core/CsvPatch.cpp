@@ -68,13 +68,13 @@ void Patcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
     if (cmd == "[for]") {
       address = extract(patch,i,1,-1);
       action.clear();
-      for (int j=0; j<address.size(); j++) {
+      for (int j=0; j<(int)address.size(); j++) {
 	if (atoi(address[j].c_str())!=j) {
 	  fprintf(stderr,"[for] column setup is not yet supported\n");
 	  exit(1);
 	}
       }
-      if (address.size()!=original.width()+1) {
+      if ((int)address.size()!=original.width()+1) {
 	fprintf(stderr,"[for] column setup is not yet supported\n");
 	exit(1);
       }
@@ -84,7 +84,7 @@ void Patcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
 	fprintf(stderr,"[do] does not match a [for], line %d\n", i);
 	exit(1);
       }
-      for (int j=0; j<action.size(); j++) {
+      for (int j=0; j<(int)action.size(); j++) {
 	string expected = (j==0)?"select":"";
 	if (action[j]!=expected) {
 	  fprintf(stderr,"[do] action \"%s\" not yet supported in this position; expected \"%s\"\n",
@@ -101,7 +101,7 @@ void Patcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
       string placement = target[0];
       int row = -1;
       int off = -1;
-      for (int j=0; j<placement.length(); j++) {
+      for (int j=0; j<(int)placement.length(); j++) {
 	if (placement[j] == '+') {
 	  placement[j] = '\0';
 	  row = atoi(placement.c_str());
@@ -114,7 +114,7 @@ void Patcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
       for (int j=row; j<rows_o2r.height(); j++) {
 	rows_o2r.cell(0,j)++;
       }
-      for (int j=1; j<target.size(); j++) {
+      for (int j=1; j<(int)target.size(); j++) {
 	result.cell(j-1,row_out) = target[j];
       }
     } else if (cmd == "[---]") {
@@ -126,7 +126,7 @@ void Patcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
       string placement = target[0];
       int row = -1;
       row = atoi(placement.c_str())-1;
-      for (int j=1; j<target.size(); j++) {
+      for (int j=1; j<(int)target.size(); j++) {
 	if (safe_cell(original,j-1,row) != target[j]) {
 	  fprintf(stderr,"[---] does not match row (%s vs %s), line %d\n", 
 		  safe_cell(original,j-1,row).c_str(),
@@ -157,7 +157,7 @@ void Patcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
 	fprintf(stderr,"[+]/[-] mismatch, line %d\n", i);
 	exit(1);
       }
-      for (int j=1; j<replace.size(); j++) {
+      for (int j=1; j<(int)replace.size(); j++) {
 	if (replace[j]!=compare[j]) {
 	  if (compare[j] != safe_cell(original,j-1,idx-1)) {
 	    //printf("Check %d %d\n", j-1, idx-1);

@@ -15,6 +15,11 @@ public:
   TypedSheet() {
     h = w = 0;
   }
+
+  void clear() {
+    arr.clear();
+    h = w = 0;
+  }
   
   void resize(int w, int h, const T& zero) {
     arr.clear();

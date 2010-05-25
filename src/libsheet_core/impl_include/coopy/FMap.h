@@ -78,7 +78,7 @@ public:
 	  std::string low;
 	  part = txt.substr(i,k+1);
 	  low = part;
-	  for (int c=0; c<low.length(); c++) {
+	  for (size_t c=0; c<low.length(); c++) {
 	    low[c] = tolower(low[c]);
 	  }
 	  if (query) {

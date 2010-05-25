@@ -68,7 +68,7 @@ void Nature::evaluate(const char *txt) {
 
   // How number-like are we?
   int numbery = 0;
-  for (int j=0; j<s.length(); j++) {
+  for (size_t j=0; j<s.length(); j++) {
     char ch = s[j];
     if (ch>='0'&&ch<='9') {
       numbery++;

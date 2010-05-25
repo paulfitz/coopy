@@ -84,7 +84,7 @@ bool MyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     
     // to get at your unnamed parameters use
     wxArrayString files;
-    for (int i = 0; i < parser.GetParamCount(); i++) {
+    for (size_t i = 0; i < parser.GetParamCount(); i++) {
         files.Add(parser.GetParam(i));
     }
     
@@ -138,8 +138,8 @@ public:
     void split(const string& str, 
                const string& delimiters, 
                list<string>& tokens) {
-        int lastPos = str.find_first_not_of(delimiters, 0);
-        int pos = str.find_first_of(delimiters, lastPos);
+        size_t lastPos = str.find_first_not_of(delimiters, 0);
+        size_t pos = str.find_first_of(delimiters, lastPos);
         while (string::npos != pos || string::npos != lastPos) {
             tokens.push_back(str.substr(lastPos, pos - lastPos));
             lastPos = str.find_first_not_of(delimiters, pos);
@@ -150,7 +150,7 @@ public:
 
     void replace(std::string& str, const std::string& old, 
                  const std::string& rep) {
-        int pos = 0;
+        size_t pos = 0;
         while((pos = str.find(old, pos)) != std::string::npos) {
             str.replace(pos, old.length(), rep);
             pos += rep.length();
@@ -181,6 +181,7 @@ public:
                 }
             }
         }
+        return 0;
     }
 
     void beginLog() {

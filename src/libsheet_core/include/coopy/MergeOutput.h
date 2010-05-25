@@ -40,7 +40,15 @@ public:
 };
 
 class MergeOutput {
+private:
+  int ct;
 public:
+  MergeOutput() {
+    ct = 0;
+  }
+
+  virtual ~MergeOutput() {}
+
   virtual bool wantDiff() { return false; }
 
   virtual bool addRow(const char *tag,
@@ -58,6 +66,11 @@ public:
   virtual bool changeColumn(const OrderChange& change) { return false; }
 
   virtual bool changeRow(const RowChange& change) { return false; }
+
+  virtual bool setSheet(const char *name) { 
+    ct++;
+    return (ct<=1); 
+  }
 };
 
 #endif

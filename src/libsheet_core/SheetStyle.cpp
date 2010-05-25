@@ -13,7 +13,7 @@ void SheetStyle::setFromFilename(const char *fname) {
   delim = ",";
   if (name.length()>=4) {
     string ext = name.substr(name.length()-4);
-    for (int i=0; i<ext.length(); i++) {
+    for (size_t i=0; i<ext.length(); i++) {
       ext[i] = tolower(ext[i]);
     }
     if (ext==".tsv") {

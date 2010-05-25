@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 2.6)
 
 project(coopy)
 
+option(STRICT_COMPILE "Strict compile flags" FALSE)
+if (STRICT_COMPILE)
+  option(VERY_STRICT_COMPILE "Very strict compile flags" FALSE)
+  add_definitions(-Wall)
+  if (VERY_STRICT_COMPILE)
+    add_definitions(-Werror -Wfatal-errors)
+  endif (VERY_STRICT_COMPILE)
+endif (STRICT_COMPILE)
+
 enable_testing()
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)

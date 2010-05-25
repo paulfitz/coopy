@@ -6,7 +6,7 @@
 void ColMan::measure(MeasurePass& pass, int ctrl) {
     int wa = pass.a.width();
     int wb = pass.b.width();
-    int ha = pass.a.height();
+    //int ha = pass.a.height();
     int hb = pass.b.height();
 
     dbg_printf("Column comparison\n");

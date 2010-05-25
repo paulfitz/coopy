@@ -18,7 +18,7 @@ public:
       fprintf(stderr,"Merger.cpp: Reorder needed for columns\n");
       exit(1);
 
-      for (int i=0; i<src.size(); i++) {
+      for (size_t i=0; i<src.size(); i++) {
 	if (src[i]==dest[i]) {
 	  continue;
 	}
@@ -129,7 +129,7 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
   bool change = false;
   expandMerge = expandLocal;
   at = 0;
-  for (int i=0; i<expandLocal.size(); i++) {
+  for (size_t i=0; i<expandLocal.size(); i++) {
     string& _l = expandMerge[i];
     string& _r = expandRemote[i];
     string& _p = expandPivot[i];
@@ -205,9 +205,9 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
     }
 
     bool activity = true;
-    if (expandMerge.size()==local.width()) {
+    if ((int)expandMerge.size()==local.width()) {
       if (current_row<local.height()) {
-	int i;
+	size_t i;
 	for (i=0; i<expandMerge.size(); i++) {
 	  string data = expandMerge[i];
 	  string was = local.cell(i,current_row);
@@ -304,9 +304,9 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	 it!=col_merge.accum.end(); 
 	 it++) {
       MatchUnit& unit = *it;
-      int pCol = unit.localUnit;
+      //int pCol = unit.localUnit;
       int lCol = unit.pivotUnit;
-      int rCol = unit.remoteUnit;
+      //int rCol = unit.remoteUnit;
       bool deleted = unit.deleted;
       if (lCol!=-1 && deleted) {
 	OrderChange change;
@@ -336,9 +336,9 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	 it!=col_merge.accum.end(); 
 	 it++) {
       MatchUnit& unit = *it;
-      int pCol = unit.localUnit;
+      //int pCol = unit.localUnit;
       int lCol = unit.pivotUnit;
-      int rCol = unit.remoteUnit;
+      //int rCol = unit.remoteUnit;
       bool deleted = unit.deleted;
       if (lCol!=-1 && !deleted) {
 	shuffled_cols.push_back(lCol);
@@ -363,7 +363,7 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	 it!=col_merge.accum.end(); 
 	 it++) {
       MatchUnit& unit = *it;
-      int pCol = unit.localUnit;
+      //int pCol = unit.localUnit;
       int lCol = unit.pivotUnit;
       int rCol = unit.remoteUnit;
       bool deleted = unit.deleted;
@@ -407,7 +407,7 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
        it!=col_merge.accum.end(); 
        it++) {
     MatchUnit& unit = *it;
-    int pCol = unit.localUnit;
+    //int pCol = unit.localUnit;
     int lCol = unit.pivotUnit;
     int rCol = unit.remoteUnit;
     bool deleted = unit.deleted;

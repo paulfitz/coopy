@@ -91,7 +91,7 @@ void CsvMerge::dumb_conflict(CsvSheet& local, CsvSheet& remote) {
   int lw = local.width();
   int lh = local.height();
   int rw = remote.width();
-  int rh = remote.height();
+  //int rh = remote.height();
   int w = lw+rw+1;
   int h = lw+rw+1;
   work.clear();

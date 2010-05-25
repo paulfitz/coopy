@@ -2,20 +2,22 @@
 #include <stdio.h>
 #include <getopt.h>
 
-#include <coopy/SheetCompare.h>
 #include <coopy/CsvFile.h>
 #include <coopy/MergeOutputPatch.h>
 #include <coopy/MergeOutputSqlDiff.h>
+#include <coopy/BookCompare.h>
+#include <coopy/PolyBook.h>
 
 int main(int argc, char *argv[]) {
   std::string output = "";
   std::string mode = "csv";
+  bool verbose = false;
   while (true) {
-    int this_option_optind = optind ? optind : 1;
     int option_index = 0;
     static struct option long_options[] = {
       {"format-csv", 0, 0, 'c'},
       {"format-sql", 0, 0, 's'},
+      {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
       {0, 0, 0, 0}
     };
@@ -29,6 +31,9 @@ int main(int argc, char *argv[]) {
       break;
     case 's':
       mode = "sql";
+      break;
+    case 'v':
+      verbose = true;
       break;
     case 'o':
       output = optarg;
@@ -52,6 +57,7 @@ int main(int argc, char *argv[]) {
     printf("Output defaults to standard output.\n");
     return 1;
   }
+  /*
   CsvSheet local, remote;
   if (CsvFile::read(argv[0],local)!=0) {
     return 1;
@@ -59,7 +65,19 @@ int main(int argc, char *argv[]) {
   if (CsvFile::read(argv[1],remote)!=0) {
     return 1;
   }
-  SheetCompare cmp;
+  */
+  BookCompare cmp;
+  cmp.setVerbose(verbose);
+
+  PolyBook local, remote;
+  if (!local.read(argv[0])) {
+    fprintf(stderr,"Failed to read %s\n", argv[0]);
+    return 1;
+  }
+  if (!remote.read(argv[1])) {
+    fprintf(stderr,"Failed to read %s\n", argv[1]);
+    return 1;
+  }
   if (mode=="sql") {
     MergeOutputSqlDiff sqldiff;
     cmp.compare(local,local,remote,sqldiff);

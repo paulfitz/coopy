@@ -38,9 +38,7 @@ public:
 
   bool isValid() { return book!=NULL; }
 
-  bool read(const char *fname) {
-    return false;
-  }
+  bool read(const char *fname);
 };
 
 #endif

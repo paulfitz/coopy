@@ -43,8 +43,6 @@ void CsvStat::evaluate(CsvSheet& sheet) {
       }
     }
     if (dev<0.1) dev = 0.1;
-    int normal = 0;
-    int odd = 0;
     for (int i=0; i<sheet.height(); i++) {
       float v = (cmp[i]-mean)/dev;
       v = -v;

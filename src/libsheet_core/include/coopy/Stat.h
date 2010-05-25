@@ -26,6 +26,7 @@ public:
   double rescale(double factor) {
     mean *= factor;
     stddev *= factor;
+    return mean;
   }
   
 };

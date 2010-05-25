@@ -74,7 +74,7 @@ public:
   virtual std::string cellString(int x, int y) const {
     char buf[256];
     const float& v = cell(x,y);
-    snprintf(buf,sizeof(buf),"%g");
+    snprintf(buf,sizeof(buf),"%g",v);
     return buf;
   }
 

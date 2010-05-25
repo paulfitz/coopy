@@ -6,7 +6,7 @@ using namespace std;
 string csv2html_css();
 
 static void replace(string& str, const string& old, const string& rep) {
-  int pos = 0;
+  size_t pos = 0;
   while((pos = str.find(old, pos)) != std::string::npos) {
     str.replace(pos, old.length(), rep);
     pos += rep.length();
