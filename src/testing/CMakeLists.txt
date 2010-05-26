@@ -9,11 +9,11 @@ TARGET_LINK_LIBRARIES(make_sheet sheet)
 
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 
-############################################################################
-# check detection of header line
-
 # path may need modification on windows
 SET(testprg ${EXECUTABLE_OUTPUT_PATH}/test_sheet)
+
+############################################################################
+# check detection of header line - not actually a used feature in the end
 
 ADD_TEST(directory_header ${testprg} --read ${TESTS}/test001_base.csv 
   --prop hdr --assert 0)
@@ -35,10 +35,9 @@ ADD_TEST(car_headerless ${testprg} --read ${TESTS}/test004_base.csv
 ADD_TEST(car_headerless2 ${testprg} --read ${TESTS}/test004_base.csv 
   --remove_row 0 --prop hdr --assert -1)
 
-# Parent   1 2 3
-# Local  0 1 2 3
-# Remote     2 3
-# MERGE: 0   2 3
+############################################################################
+# check merging
+
 ADD_TEST(latlong_compare1 ${testprg}
   --local --read ${TESTS}/test002_base.csv 
   --remote --read ${TESTS}/test002_base.csv --remove_row 0 --remove_row 1
@@ -51,7 +50,6 @@ ADD_TEST(company_merge_conflict ${testprg}
   --local --read ${TESTS}/test003_change.csv
   --remote --read ${TESTS}/test003_conflicting_change.csv
   --compare
-#  --write /tmp/check.csv
   --prop height --assert 5)
 
 ADD_TEST(company_merge_add_col ${testprg}
@@ -173,13 +171,12 @@ ADD_TEST(altitude_patch_remove_row ${testprg}
   --prop diffs --assert 0)
 
 
-# ADD_TEST(altitude_diff_replace_col ${testprg}
-#   --parent --read ${TESTS}/test005_base.csv 
-#   --local --read ${TESTS}/test005_base.csv
-#   --remote --read ${TESTS}/test005_replace_column.csv
-#   --compare=1
-#   --local --write ${TESTS}/result_altitude_diff_replace_col.csv
-#   --remote --read ${TESTS}/result_altitude_diff_replace_col.csv
-#   --diff
-#   --prop diffs --assert 0)
+MACRO(ADD_TEST2 name ref target)
+  # path may need modification on windows
+  ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target} --output test_out 
+    ${ARGN})
+  ADD_TEST(${name}Compare ${CMAKE_COMMAND} -E compare_files test_out ${ref})
+ENDMACRO()
 
+ADD_TEST2(tail_merge ${TESTS}/result_trimmer_merge.csv ssmerge --tail-trim
+  ${TESTS}/trimmer_base.csv ${TESTS}/trimmer_base.csv ${TESTS}/trimmer_more.csv)
