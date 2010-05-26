@@ -173,13 +173,14 @@ int main(int argc, char *argv[]) {
 	if (!parented) {
 	  parent = local;
 	}
+	CompareFlags flags;
 	if (diffMode) {
 	  MergeOutputPatch output;
-	  cmp.compare(parent,local,remote,output);
+	  cmp.compare(parent,local,remote,output,flags);
 	  local = output.get();
 	} else {
 	  MergeOutputAccum output;
-	  cmp.compare(parent,local,remote,output);
+	  cmp.compare(parent,local,remote,output,flags);
 	  local = output.get();
 	}
 	ss = &local;

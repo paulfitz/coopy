@@ -3,11 +3,12 @@
 
 #include <coopy/TextSheet.h>
 #include <coopy/MergeOutput.h>
+#include <coopy/CompareFlags.h>
 
 class SheetCompare {
 public:
   int compare(TextSheet& pivot, TextSheet& local, TextSheet& remote, 
-	      MergeOutput& output);
+	      MergeOutput& output, const CompareFlags& flags);
 
   void setVerbose(bool verbose);
 };

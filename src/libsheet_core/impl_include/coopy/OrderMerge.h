@@ -5,6 +5,7 @@
 #include <coopy/CsvSheet.h>
 #include <coopy/OrderResult.h>
 #include <coopy/MatchUnit.h>
+#include <coopy/CompareFlags.h>
 
 #include <list>
 
@@ -15,23 +16,15 @@ public:
   IntSheet xlocal, xremote;
   int start_local;
   int start_remote;
+  CompareFlags flags;
 
   void process(int ilocal, int iremote,
 	       int& base_local, int& base_remote,
 	       int stop_local, int stop_remote);
 
   void merge(const OrderResult& nlocal,
-	     const OrderResult& nremote) {
-    order_local = nlocal;
-    order_remote = nremote;
-    xlocal.resize(1,order_local.blen(),0);
-    xremote.resize(1,order_remote.blen(),0);
-    start_local = 0;
-    start_remote = 0;
-    int base_local = 0;
-    int base_remote = 0;
-    process(0,0,base_local,base_remote,order_local.blen(),order_remote.blen());
-  }
+	     const OrderResult& nremote,
+	     const CompareFlags& flags); 
 };
 
 

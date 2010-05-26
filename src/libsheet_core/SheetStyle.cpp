@@ -22,6 +22,8 @@ void SheetStyle::setFromFilename(const char *fname) {
       delim = ";";
     } else if (ext==".csv") {
       delim = ",";
+    } else if (ext==".wsv") {
+      delim = " ";
     }
   }
 }

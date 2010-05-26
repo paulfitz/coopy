@@ -44,7 +44,7 @@ public:
 };
 
 int SheetCompare::compare(TextSheet& pivot, TextSheet& local, TextSheet& remote,
-			  MergeOutput& output) {
+			  MergeOutput& output, const CompareFlags& flags) {
   IdentityOrderResult id;
 
   /////////////////////////////////////////////////////////////////////////
@@ -149,7 +149,8 @@ int SheetCompare::compare(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	       p2r_row_order,
 	       p2l_col_order,
 	       p2r_col_order,
-	       output);
+	       output,
+	       flags);
   return 0;
 }
 

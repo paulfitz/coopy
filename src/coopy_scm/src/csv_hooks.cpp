@@ -83,7 +83,8 @@ int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut) {
       blob_to_csv(pV2,csv2)==0) {
     SheetCompare merger;
     MergeOutputAccum result;
-    if (merger.compare(csv0,csv1,csv2,result)==0) {
+    CompareFlags flags;
+    if (merger.compare(csv0,csv1,csv2,result,flags)==0) {
       blob_zero(pOut);
       //blob_appendf(pOut,"Hello from %s:%d\n", __FILE__, __LINE__);
       //blob_appendf(pOut,"Conflict resolution is being modified.\n");

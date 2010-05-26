@@ -44,7 +44,8 @@ public:
 
 
 void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
-		      MatchUnit& row_unit, MergeOutput& output) {
+		      MatchUnit& row_unit, MergeOutput& output,
+		      const CompareFlags& flags) {
   
   bool diff = output.wantDiff();
   int pRow = row_unit.pivotUnit;
@@ -73,27 +74,27 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
     string mval = "";
     if (diff||!deleted) {
       expandDel.push_back(deleted);
-      if (lRow!=-1 && lCol!=-1) {
+      if (lRow>=0 && lCol>=0) {
 	//printf("access local %d %d (size %d %d)\n", lCol, lRow, 
 	//local.width(), local.height());
 	expandLocal.push_back(local.cell(lCol,lRow));
       } else {
 	expandLocal.push_back(blank);
       }
-      if (rRow!=-1 && rCol!=-1) {
+      if (rRow>=0 && rCol>=0) {
 	//printf("access remote %d %d\n", rCol, rRow);
 	expandRemote.push_back(remote.cell(rCol,rRow));
       } else {
 	expandRemote.push_back(blank);
       }
-      if (pRow!=-1 && pCol!=-1) {
+      if (pRow>=0 && pCol>=0) {
 	//printf("access pivot %d %d\n", pCol, pRow);
 	expandPivot.push_back(pivot.cell(pCol,pRow));
       } else {
 	expandPivot.push_back(blank);
       }
     }
-    if (lRow!=-1 && lCol!=-1 && !deleted) {
+    if (lRow>=0 && lCol>=0 && !deleted) {
       if (diff) {
 	cond[names[at]] = local.cell(lCol,lRow);
       }
@@ -275,14 +276,19 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 		   const OrderResult& row_remote,
 		   const OrderResult& col_local,
 		   const OrderResult& col_remote,
-		   MergeOutput& output) {
+		   MergeOutput& output,
+		   const CompareFlags& flags) {
   bool diff = output.wantDiff();
 
   dbg_printf("Merging row order...\n");
-  row_merge.merge(row_local,row_remote);
+  row_merge.merge(row_local,row_remote,flags);
   dbg_printf("Merging column order...\n");
-  col_merge.merge(col_local,col_remote);
+  CompareFlags cflags = flags;
+  cflags.head_trimmed = false;
+  cflags.tail_trimmed = false;
+  col_merge.merge(col_local,col_remote,cflags);
   conflicts = 0;
+  dbg_printf("Order merges are done...\n");
 
   if (diff) {
     current_row = 0;
@@ -400,7 +406,7 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	 it++) {
       MatchUnit& unit = *it;
       // ignoring row order for now ...
-      mergeRow(pivot,local,remote,unit,output);
+      mergeRow(pivot,local,remote,unit,output,flags);
     }
     return;
   }
@@ -437,7 +443,7 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
     //int _r = unit.remoteUnit;
     bool deleted = unit.deleted;
     if (!deleted) {
-      mergeRow(pivot,local,remote,unit,output);
+      mergeRow(pivot,local,remote,unit,output,flags);
     }
   }
 

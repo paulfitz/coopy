@@ -32,18 +32,26 @@ void OrderMerge::process(int ilocal, int iremote,
 	    if (_lpr!=-1) {
 	      process(base_local,base_remote,base_local,base_remote,ilocal,_lpr);
 	      dbg_printf("Local unit %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
-	      accum.push_back(MatchUnit(_lp,_l,_lpr,false));
-	      xremote.cell(0,_lpr) = 1;
-	      xlocal.cell(0,_l) = 1;
+	      accum.push_back(MatchUnit(_lp,_l,_lpr,false,MATCH_UNIT_PRESERVE));
+	      if (_lpr>=0) {
+		xremote.cell(0,_lpr) = 1;
+	      }
+	      if (_l>=0) {
+		xlocal.cell(0,_l) = 1;
+	      }
 	    } else {
 	      dbg_printf("Local unit %d exists in pivot at %d, but not in remote - [DELETE]\n", _l, _lp);
-	      accum.push_back(MatchUnit(_lp,_l,-1,true));
-	      xlocal.cell(0,_l) = 1;
+	      accum.push_back(MatchUnit(_lp,_l,-1,true,MATCH_UNIT_DELETE));
+	      if (_l>=0) {
+		xlocal.cell(0,_l) = 1;
+	      }
 	    }
 	  } else {
 	    dbg_printf("Local unit %d not in pivot - [ADD]\n", _l);
-	    accum.push_back(MatchUnit(-1,_l,-1,false));
-	    xlocal.cell(0,_l) = 1;
+	    accum.push_back(MatchUnit(-1,_l,-1,false,MATCH_UNIT_PRESERVE));
+	    if (_l>=0) {
+	      xlocal.cell(0,_l) = 1;
+	    }
 	  }
 	}
       }
@@ -61,8 +69,10 @@ void OrderMerge::process(int ilocal, int iremote,
 	    }
 	  } else {
 	    dbg_printf("Remote unit %d not in pivot - [ADD]\n", _r);
-	    accum.push_back(MatchUnit(-1,-1,_r,false));
-	    xremote.cell(0,_r) = 1;
+	    accum.push_back(MatchUnit(-1,-1,_r,false,MATCH_UNIT_INSERT));
+	    if (_r>=0) {
+	      xremote.cell(0,_r) = 1;
+	    }
 	  }
 	}
       }
@@ -78,4 +88,27 @@ void OrderMerge::process(int ilocal, int iremote,
 }
 
 
+
+void OrderMerge::merge(const OrderResult& nlocal,
+		       const OrderResult& nremote,
+		       const CompareFlags& flags) {
+  this->flags = flags;
+  order_local = nlocal;
+  order_remote = nremote;
+  if (flags.head_trimmed) {
+    order_local.trimHead(-1,-2);
+    order_remote.trimHead(-1,-2);
+  }
+  if (flags.tail_trimmed) {
+    order_local.trimTail(-1,-2);
+    order_remote.trimTail(-1,-2);
+  }
+  xlocal.resize(1,order_local.blen(),0);
+  xremote.resize(1,order_remote.blen(),0);
+  start_local = 0;
+  start_remote = 0;
+  int base_local = 0;
+  int base_remote = 0;
+  process(0,0,base_local,base_remote,order_local.blen(),order_remote.blen());
+}
 

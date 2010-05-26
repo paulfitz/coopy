@@ -86,15 +86,16 @@ int main(int argc, char *argv[]) {
     fprintf(stderr,"Failed to read %s\n", argv[1]);
     return 1;
   }
+  CompareFlags flags;
   if (mode=="sql") {
     MergeOutputSqlDiff sqldiff;
-    cmp.compare(local,local,remote,sqldiff);
+    cmp.compare(local,local,remote,sqldiff,flags);
   } else if (mode=="human") {
     MergeOutputVerboseDiff humandiff;
-    cmp.compare(local,local,remote,humandiff);
+    cmp.compare(local,local,remote,humandiff,flags);
   } else {
     MergeOutputPatch patch;
-    cmp.compare(local,local,remote,patch);
+    cmp.compare(local,local,remote,patch,flags);
     const CsvSheet& result = patch.get();
     if (output!="") {
       if (CsvFile::write(result,output.c_str())!=0) {

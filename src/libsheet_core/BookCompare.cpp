@@ -8,7 +8,7 @@
 using namespace std;
 
 int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote, 
-			 MergeOutput& output) {
+			 MergeOutput& output, const CompareFlags& flags) {
   // Merge currently based purely on names, no content comparison.
   // Hence a sheet rename cannot be guessed at yet.
 
@@ -58,7 +58,7 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
       fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());
       return -1;
     }
-    cmp.compare(pivot_sheet,local_sheet,remote_sheet,output);
+    cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags);
   }
 
   return -1;

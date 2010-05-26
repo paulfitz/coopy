@@ -5,6 +5,7 @@
 #include <coopy/OrderResult.h>
 #include <coopy/TextSheet.h>
 #include <coopy/MergeOutput.h>
+#include <coopy/CompareFlags.h>
 
 #include <vector>
 
@@ -19,10 +20,12 @@ public:
 	     const OrderResult& nrow_remote,
 	     const OrderResult& ncol_local,
 	     const OrderResult& ncol_remote,
-	     MergeOutput& output);
+	     MergeOutput& output,
+	     const CompareFlags& flags);
 
   void mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
-		MatchUnit& row_unit, MergeOutput& output);
+		MatchUnit& row_unit, MergeOutput& output,
+		const CompareFlags& flags);
 
 private:
   OrderMerge row_merge;
