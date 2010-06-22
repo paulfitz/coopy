@@ -7,6 +7,8 @@ int main(int argc, char *argv[]) {
     printf("Call with input file and desired output file.\n");
     printf("E.G. to convert from comma-separated to tab-separated format, call as:\n");
     printf("  ssformat input.csv output.tsv\n");
+    printf("E.G. to convert from comma-separated to sqlite-readable sql, call as:\n");
+    printf("  ssformat input.csv output.sql\n");
     return 1;
   }
 
