@@ -173,9 +173,11 @@ ADD_TEST(altitude_patch_remove_row ${testprg}
 
 MACRO(ADD_TEST2 name ref target)
   # path may need modification on windows
-  ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target} --output test_out 
+  ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target} 
+    --output test_out_${name}
     ${ARGN})
-  ADD_TEST(${name}Compare ${CMAKE_COMMAND} -E compare_files test_out ${ref})
+  ADD_TEST(${name}Compare ${CMAKE_COMMAND} -E compare_files 
+    test_out_${name} ${ref})
 ENDMACRO()
 
 ADD_TEST2(tail_merge ${TESTS}/result_trimmer_merge.csv ssmerge --tail-trim

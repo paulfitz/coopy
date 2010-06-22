@@ -33,3 +33,25 @@ bool PolyBook::read(const char *fname) {
   }
   return book!=NULL;
 }
+
+
+bool PolyBook::write(const char *fname) {
+  if (book==NULL) {
+    fprintf(stderr,"Nothing to write\n");
+    return false;
+  }
+  vector<string> names = getNames();
+  if (names.size()!=1) {
+    fprintf(stderr,"Unsupported number of sheets during write: %d\n",
+	    names.size());
+    return false;
+  }
+  CsvSheet sheet;
+  bool ok = readSheet(names[0],sheet);
+  if (!ok) { 
+    fprintf(stderr,"Could not access sheet %s\n", names[0].c_str());
+    return false;
+  }
+  return CsvFile::write(sheet,fname)==0;
+}
+
