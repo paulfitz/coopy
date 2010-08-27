@@ -1,6 +1,8 @@
 
 #include <coopy/CsvMerge.h>
 
+#include <stdio.h>
+
 using namespace std;
 
 static bool _merge_debug = false;

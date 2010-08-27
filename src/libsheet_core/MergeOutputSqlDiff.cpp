@@ -1,5 +1,6 @@
 #include <coopy/MergeOutputSqlDiff.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #define WANT_MAP2STRING

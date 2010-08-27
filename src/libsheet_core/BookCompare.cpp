@@ -5,6 +5,8 @@
 #include <set>
 #include <algorithm>
 
+#include <stdio.h>
+
 using namespace std;
 
 int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote, 

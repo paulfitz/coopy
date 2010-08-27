@@ -2,6 +2,7 @@
 #include <coopy/SheetStyle.h>
 #include <coopy/DataSheet.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #define WANT_MAP2STRING
