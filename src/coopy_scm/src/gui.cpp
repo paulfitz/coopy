@@ -32,8 +32,8 @@
 
 using namespace std;
 
-int g_hinstance = 0;
-int g_hwnd = 0;
+//long int g_hinstance = 0;
+//long int g_hwnd = 0;
 
 static wxString conv(const std::string& s) {
     return wxString(s.c_str(), wxConvUTF8);
@@ -357,7 +357,7 @@ bool MyApp::OnInit()
 {
     MyFrame *frame = new MyFrame( _T("Coopy"), wxPoint(50,50), wxSize(450,340) );
 
-    g_hwnd = (int)(frame->GetHandle());
+    //g_hwnd = (long int)(frame->GetHandle());
 
     if (!wxApp::OnInit()) {
         return false;
@@ -818,7 +818,7 @@ Now go back to work."),
 }
 
 
-#ifdef WIN32
+#ifdef _WIN32
 
 FILE *FOUT = NULL;
 
@@ -826,7 +826,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    HINSTANCE hPrevInstance,
                    LPSTR m_lpCmdLine, int nCmdShow) {
 
-    g_hinstance = (int)(hInstance);    
+    //g_hinstance = (int)(hInstance);    
     return wxEntry(hInstance,hPrevInstance,m_lpCmdLine,nCmdShow);
 }
 
