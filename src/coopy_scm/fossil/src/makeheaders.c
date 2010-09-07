@@ -3006,7 +3006,7 @@ static InFile *CreateInFile(char *zArg, int *pnErr){
   ** Get the name of the input file to be scanned
   */
   zSrc = zArg;
-  for(nSrc=0; zSrc[nSrc] && zArg[nSrc]!=':'; nSrc++){}
+  for(nSrc=0; zSrc[nSrc] && (zArg[nSrc]!=':'||nSrc<3); nSrc++){}
   pFile = SafeMalloc( sizeof(InFile) );
   memset(pFile,0,sizeof(InFile));
   pFile->zSrc = StrDup(zSrc,nSrc);
