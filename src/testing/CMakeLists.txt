@@ -10,7 +10,12 @@ TARGET_LINK_LIBRARIES(make_sheet sheet)
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 
 # path may need modification on windows
-SET(testprg ${EXECUTABLE_OUTPUT_PATH}/test_sheet)
+IF (MINGW)
+  SET(EXE_EXT ".exe")
+ELSE ()
+  SET(EXE_EXT "")
+ENDIF()
+SET(testprg ${EXECUTABLE_OUTPUT_PATH}/test_sheet${EXE_EXT})
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -172,8 +177,7 @@ ADD_TEST(altitude_patch_remove_row ${testprg}
 
 
 MACRO(ADD_TEST2 name ref target)
-  # path may need modification on windows
-  ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target} 
+  ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
     --output test_out_${name}
     ${ARGN})
   ADD_TEST(${name}Compare ${CMAKE_COMMAND} -E compare_files 

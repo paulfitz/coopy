@@ -14,7 +14,8 @@ SET(CMAKE_SYSTEM_NAME Windows)
 
 # which compilers to use for C and C++
 SET(CMAKE_C_COMPILER /usr/bin/i586-mingw32msvc-gcc)
-SET(CMAKE_CXX_COMPILER "/usr/bin/i586-mingw32msvc-g++")
+SET(CMAKE_CXX_COMPILER /usr/bin/i586-mingw32msvc-g++)
+#SET(CMAKE_RC_COMPILER /usr/bin/i586-mingw32msvc-windres)
 
 IF (NOT HOME)
   SET(HOME $ENV{HOME})
