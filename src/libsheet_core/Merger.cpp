@@ -37,7 +37,7 @@ public:
 	}
       }
     }
-    dbg_printf("At %d, order len %d\n", depth, best_order.size());
+    dbg_printf("At %d, order len %d\n", (int)depth, (int)best_order.size());
     order = best_order;
   }
 };

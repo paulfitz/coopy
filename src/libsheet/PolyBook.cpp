@@ -131,7 +131,7 @@ bool PolyBook::write(const char *fname) {
 
   if (names.size()!=1) {
     fprintf(stderr,"Unsupported number of sheets during write: %d\n",
-	    names.size());
+	    (int)names.size());
     return false;
   }
   CsvSheet sheet;
