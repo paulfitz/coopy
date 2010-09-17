@@ -18,6 +18,9 @@
 #include <wx/textctrl.h>
 #include <wx/url.h>
 #include <wx/filepicker.h>
+#include <wx/process.h>
+#include <wx/stdpaths.h>
+#include <wx/txtstrm.h>
 
 #include <string>
 #include <list>
@@ -35,6 +38,9 @@ using namespace std;
 //long int g_hinstance = 0;
 //long int g_hwnd = 0;
 
+
+
+
 static wxString conv(const std::string& s) {
     return wxString(s.c_str(), wxConvUTF8);
 }
@@ -42,6 +48,7 @@ static wxString conv(const std::string& s) {
 static std::string conv(const wxString& s) {
     return std::string(s.mb_str(wxConvUTF8));
 } 
+
 
 class MyApp: public wxApp {
 private:
@@ -198,6 +205,7 @@ public:
 };
 
 
+
 class MyFrame: public wxFrame
 {
     DECLARE_CLASS(MyFrame)
@@ -211,6 +219,8 @@ private:
     wxTextCtrl *src_box;
     wxTextCtrl *dest_box;
     wxDirPickerCtrl *dir_box;
+    wxTimer *timer;
+    wxInputStream *report;
 
     UiFossilHandler handler; 
 
@@ -222,7 +232,9 @@ private:
     string source;
     string destination;
     string commit_message;
+    string fossil_path;
     ostream *stream;
+    string next;
 
 public:
 
@@ -248,13 +260,52 @@ public:
     bool haveSource();
     bool haveDestination();
 
-    int ssfossil(int argc, char *argv[]) {
-        try {
-            return ssfossil_call(argc,argv);
-        } catch (int err) {
-            printf("exit(%d) called in ssfossil_call\n", err);
+    char *fossil() {
+        if (fossil_path=="") {
+            wxFileName name = wxFileName::FileName(wxStandardPaths::Get().GetExecutablePath());
+            name.SetName(_T("ssfossil"));
+            fossil_path = conv(name.GetFullPath());
         }
-        return -1;
+        return (char*)fossil_path.c_str();
+    }
+
+    int ssfossil(int argc, char *argv[], bool sync=false);
+
+    void OnProgressTimer(wxTimerEvent& WXUNUSED(event)) {
+        printf("Tick!\n");
+        processInput();
+    }
+
+    void processInput() {
+        while (report->CanRead()) {
+            wxTextInputStream tis(*report);
+            wxString str = tis.ReadLine();
+            printf("Got %s\n", conv(str).c_str());
+            //replace(str,string("\r"),string(" * "));
+            //replace(str,"Received:","\nReceived:");
+            log_box->AppendText(str);
+            log_box->AppendText(_T("\n"));
+            Update();
+            log_box->SetSelection(log_box->GetLastPosition(),-1);
+        }
+    }
+
+    void OnTerminate(wxProcess *process, int status) {
+        processInput();
+        timer->Stop();
+        if (status!=0) {
+            printf(">>>>> PROCESS FAILED: next ignored [%s]\n", next.c_str());
+            return;
+        }
+        printf(">>>>> PROCESS COMPLETE: next is [%s]\n", next.c_str());
+        string n = next;
+        next = "";
+        if (n=="view") {
+            ::wxLaunchDefaultBrowser(conv(string("file://")+path));
+        } else if (n=="sync") {
+            wxCommandEvent ev;
+            OnSync(ev);
+        }
     }
 
     list<string> getChanges() {
@@ -262,7 +313,7 @@ public:
         if (havePath()) {
             int argc = 2;
             char *argv[] = {
-                (char*)"fossil",
+                fossil(),
                 (char*)"changes",
                 NULL };
             ssfossil(argc,argv);
@@ -275,7 +326,7 @@ public:
         if (havePath()) {
             int argc = 2;
             char *argv[] = {
-                (char*)"fossil",
+                fossil(),
                 (char*)"extras",
                 NULL };
             ssfossil(argc,argv);
@@ -322,7 +373,7 @@ public:
                     printf("Out of memory while adding files\n");
                     exit(1);
                 }
-                argv[0] = (char*)"fossil";
+                argv[0] = fossil();
                 argv[1] = (char*)act;
                 int i = 2;
                 for (list<string>::const_iterator it = files.begin();
@@ -347,9 +398,41 @@ enum
         ID_Sync,
         ID_Undo,
         ID_About,
+        ID_Tick,
     };
 };
 
+
+class MyProcess : public wxProcess
+{
+public:
+    MyProcess(MyFrame *parent, const wxString& cmd)
+        : wxProcess(parent), m_cmd(cmd)
+    {
+        m_parent = parent;
+    }
+
+    // instead of overriding this virtual function we might as well process the
+    // event from it in the frame class - this might be more convenient in some
+    // cases
+    virtual void OnTerminate(int pid, int status);
+
+protected:
+    MyFrame *m_parent;
+    wxString m_cmd;
+};
+
+
+
+void MyProcess::OnTerminate(int pid, int status)
+{
+    /*
+    wxLogStatus(m_parent, wxT("Process %u ('%s') terminated with exit code %d."),
+                pid, m_cmd.c_str(), status);
+    */
+
+    m_parent->OnTerminate(this,status);
+}
 
 
 
@@ -388,8 +471,54 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_BUTTON(ID_Undo, MyFrame::OnUndo)
     EVT_BUTTON(ID_Commit, MyFrame::OnCommit)
     EVT_CLOSE(MyFrame::OnExit)
+    EVT_TIMER(ID_Tick, MyFrame::OnProgressTimer)
 END_EVENT_TABLE()
 
+
+int MyFrame::ssfossil(int argc, char *argv[], bool sync) {
+    printf("Calling fossil with %d arguments\n  ", argc);
+    wxString cmd;
+    for (int i=0; i<argc; i++) {
+        printf("[%s] ", argv[i]);
+        cmd = cmd + conv(argv[i]);
+        cmd = cmd + _T(" ");
+    }
+    printf("\n");
+    
+    // Create the process string
+    //wxEvtHandler *eventHandler = NULL;
+    //wxProcess *proc = new wxProcess(eventHandler);
+    MyProcess *proc = new MyProcess(this,cmd);
+    proc->Redirect();
+    if(::wxExecute(cmd, wxEXEC_ASYNC, proc) == 0){
+        cerr<<"Process launch error"<<endl;
+        exit(1);
+    }
+    wxInputStream* stdErr = proc->GetErrorStream();
+    report = proc->GetInputStream();
+    if (report==NULL) {
+        cerr<<"Process stream error"<<endl;
+        exit(1);
+    }
+    if (!sync) {
+        timer->Start(50);
+    } else {
+        while (!report->Eof()) {
+            processInput();
+        }
+    }
+    
+    return 0;
+    
+    /*
+      try {
+      return external_ssfossil_call(argc,argv);
+      } catch (int err) {
+      printf("exit(%d) called in external_ssfossil_call\n", err);
+      }
+      return -1;
+    */
+}
 
 bool MyFrame::OnInit() {
 
@@ -397,6 +526,8 @@ bool MyFrame::OnInit() {
     askPath = true;
     askSource = true;
     askDestination = true;
+
+    timer = new wxTimer(this,ID_Tick);
 
     ssfossil_set_handler(&handler);
     handler.setOwner(*this);
@@ -433,20 +564,23 @@ bool MyFrame::OnInit() {
         wxSizerFlags(0).Align(wxALIGN_LEFT).Border(wxALL, 10);
 
     wxBoxSizer *source_bar = new wxBoxSizer( wxHORIZONTAL );
-    source_bar->Add(new wxStaticText(this,-1,_T("Pull from"),
+    source_bar->Add(new wxStaticText(this,-1,_T("Link"),
                                      wxDefaultPosition,
-                                     wxSize(70,-1)),lflags);
+                                     wxSize(60,-1)),lflags);
     src_box = new wxTextCtrl(this,TEXT_Src, wxT(""),
                              wxDefaultPosition,
                              wxSize(300,-1));
     source_bar->Add(src_box,lflags);
     source_bar->Add(new wxButton( this, ID_Sync, _T("Pull &in") ),
                     lflags);
-    source_bar->Add(new wxButton( this, ID_Undo, _T("&Undo") ),
+    source_bar->Add(new wxButton( this, ID_Commit, _T("Push &out") ),
                     lflags);
+    //source_bar->Add(new wxButton( this, ID_Undo, _T("&Undo") ),
+    //lflags);
     topsizer->Add(source_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
 
 
+    /*
     wxBoxSizer *dest_bar = new wxBoxSizer( wxHORIZONTAL );
     dest_bar->Add(new wxStaticText(this,-1,_T("Push to"),
                                    wxDefaultPosition,
@@ -458,12 +592,13 @@ bool MyFrame::OnInit() {
     dest_bar->Add(new wxButton( this, ID_Commit, _T("Push &out") ),
                   lflags);
     topsizer->Add(dest_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
+    */
 
     
     wxBoxSizer *dir_bar = new wxBoxSizer( wxHORIZONTAL );
-    dir_bar->Add(new wxStaticText(this,-1,_T("Directory"),
+    dir_bar->Add(new wxStaticText(this,-1,_T("Store"),
                                    wxDefaultPosition,
-                                   wxSize(70,-1)),lflags);
+                                   wxSize(60,-1)),lflags);
     dir_box = new wxDirPickerCtrl(this,TEXT_Dir, wxT(""),
                                   wxT("Select a folder"),
                                   wxDefaultPosition,
@@ -628,7 +763,9 @@ void MyFrame::OnOK(wxCommandEvent& ev) {
 }
 
 void MyFrame::OnSync(wxCommandEvent& event) {
-    startStream();
+    printf("Syncing...\n");
+    next = "";
+    //startStream();
     if (haveSource()) {
         if (havePath()) {
             printf("Should pull %s\n", path.c_str());
@@ -639,12 +776,14 @@ void MyFrame::OnSync(wxCommandEvent& event) {
                 if (haveSource()) {
                     int argc = 4;
                     char *argv[] = {
-                        (char*)"fossil",
+                        fossil(),
                         (char*)"clone",
                         (char*)source.c_str(),
-                        (char*)target.c_str(),
+                        (char*)conv(target).c_str(),
                         NULL };
                     ssfossil(argc,argv);
+                    next = "sync";
+                    return;
                 }
             }
             if (wxFileExists(target)) {
@@ -653,37 +792,39 @@ void MyFrame::OnSync(wxCommandEvent& event) {
                     printf("No view yet %s\n", conv(view_target).c_str());
                     int argc = 3;
                     char *argv[] = {
-                        (char*)"fossil",
+                        fossil(),
                         (char*)"open",
-                        (char*)target.c_str(),
+                        (char*)conv(target).c_str(),
                         NULL };
                     ssfossil(argc,argv);
-
-                    if (wxFileExists(view_target)) {
-                        // get rid of autosync
-                        int argc = 4;
-                        char *argv[] = {
-                            (char*)"fossil",
-                            (char*)"setting",
-                            (char*)"autosync",
-                            (char*)"0",
-                            NULL };
-                        ssfossil(argc,argv);
-                    }
+                    next = "sync";
+                    return;
+                }
+                if (wxFileExists(view_target)) {
+                    // get rid of autosync
+                    int argc = 4;
+                    char *argv[] = {
+                        fossil(),
+                        (char*)"setting",
+                        (char*)"autosync",
+                        (char*)"0",
+                        NULL };
+                    ssfossil(argc,argv,true);
                 }
                 if (wxFileExists(view_target)) {
                     printf("Simple sync\n");
                     int argc = 2;
                     char *argv[] = {
-                        (char*)"fossil",
+                        fossil(),
                         (char*)"update",
                         NULL };
                     ssfossil(argc,argv);
+                    next = "view";
                 }
             }
         }
     }
-    endStream();
+    //endStream();
 }
 
 
@@ -693,7 +834,7 @@ void MyFrame::OnUndo(wxCommandEvent& event) {
     if (havePath()) {
         int argc = 2;
         char *argv[] = {
-            (char*)"fossil",
+            fossil(),
             (char*)"undo",
             NULL };
         ssfossil(argc,argv);
@@ -755,7 +896,7 @@ void MyFrame::OnCommit(wxCommandEvent& event) {
                 // commit currently fails if called twice, unless username
                 // specified (need to remove some global state from fossil)
                 char *argv[] = {
-                    (char*)"fossil",
+                    fossil(),
                     (char*)"commit",
                     //(char*)"--user",
                     //(char*)FOSSIL_USERNAME,
@@ -767,7 +908,7 @@ void MyFrame::OnCommit(wxCommandEvent& event) {
                 if (true) {
                     int argc = 3;
                     char *argv[] = {
-                        (char*)"fossil",
+                        fossil(),
                         (char*)"push",
                         (char*)destination.c_str(),
                         NULL };

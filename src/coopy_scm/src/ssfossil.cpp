@@ -35,13 +35,6 @@ int ssfossil_call(int argc, char *argv[]) {
       printf("*** Modified fossil, do not entrust it with your data ***\n");
     }
   }
-  /*
-  printf("Calling fossil with %d arguments\n  ", argc);
-  for (int i=0; i<argc; i++) {
-    printf("[%s] ", argv[i]);
-  }
-  printf("\n");
-  */
   int result = fossil_main(argc,argv);
   db_close();
   return result;
