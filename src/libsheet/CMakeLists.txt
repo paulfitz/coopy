@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # copy in fossil.  It would be trivial to replace this with
 # a standard sqlite amalgamation if needed.
 
-SET(SQLITE_DIR ${CMAKE_SOURCE_DIR}/src/coopy_scm/fossil/src)
+SET(SQLITE_DIR ${CMAKE_SOURCE_DIR}/src/ssfossil/fossil/src)
 INCLUDE_DIRECTORIES(${SQLITE_DIR})
 
 ADD_LIBRARY(sheet include/coopy/CsvFile.h CsvFile.cpp ${SQLITE_DIR}/sqlite3.c

@@ -11,6 +11,7 @@ add_subdirectory(ssdiff)
 add_subdirectory(sspatch)
 add_subdirectory(ssrender)
 add_subdirectory(ssformat)
+add_subdirectory(ssfossil)
 add_subdirectory(coopy_scm)
 
 add_subdirectory(testing)

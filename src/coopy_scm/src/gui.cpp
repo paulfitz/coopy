@@ -21,12 +21,11 @@
 #include <wx/process.h>
 #include <wx/stdpaths.h>
 #include <wx/txtstrm.h>
+#include <wx/arrstr.h>
 
 #include <string>
 #include <list>
 #include <iostream>
-
-#include "ssfossil.h"
 
 // hack to remove warning
 #define static const
@@ -109,7 +108,7 @@ IMPLEMENT_APP(MyApp);
 #endif
 
 
-
+/*
 class UiFossilHandler : public FossilHandler {
 private:
     bool logging;
@@ -171,12 +170,6 @@ public:
             split(cp,"\n",results);
         } else {
             if (stream) {
-                /*
-                for (int i=0; i<strlen(txt); i++) {
-                    ::printf("[%d:%c] ", txt[i], (txt[i]>=32)?txt[i]:'*');
-                }
-                ::printf("\n");
-                */
                 string str(txt);
                 replace(str,string("\r"),string(" * "));
                 replace(str,"Received:","\nReceived:");
@@ -203,7 +196,7 @@ public:
         return r;
     }
 };
-
+*/
 
 
 class MyFrame: public wxFrame
@@ -221,8 +214,9 @@ private:
     wxDirPickerCtrl *dir_box;
     wxTimer *timer;
     wxInputStream *report;
+    wxInputStream *reportErr;
 
-    UiFossilHandler handler; 
+    //UiFossilHandler handler; 
 
     bool askPath;
     bool askSource;
@@ -235,6 +229,47 @@ private:
     string fossil_path;
     ostream *stream;
     string next;
+    bool logging;
+    list<string> results;
+
+    void split(const string& str, 
+               const string& delimiters, 
+               list<string>& tokens) {
+        size_t lastPos = str.find_first_not_of(delimiters, 0);
+        size_t pos = str.find_first_of(delimiters, lastPos);
+        while (string::npos != pos || string::npos != lastPos) {
+            tokens.push_back(str.substr(lastPos, pos - lastPos));
+            lastPos = str.find_first_not_of(delimiters, pos);
+            pos = str.find_first_of(delimiters, lastPos);
+        }
+    }
+
+    void beginLog() {
+        results.clear();
+        logging = true;
+    }
+
+    list<string> endLog() {
+        list<string> r = results;
+        results.clear();
+        logging = false;
+        return r;
+    }
+
+    void replace(std::string& str, const std::string& old, 
+                 const std::string& rep) {
+        size_t pos = 0;
+        while((pos = str.find(old, pos)) != std::string::npos) {
+            str.replace(pos, old.length(), rep);
+            pos += rep.length();
+        }
+    }
+
+    string safetxt(const char *txt) {
+        string str(txt);
+        replace(str," ","\\ ");
+        return str;
+    }
 
 public:
 
@@ -253,6 +288,7 @@ public:
     virtual bool OnInit();
 
     void OnSync(wxCommandEvent& event);
+    void OnPush(wxCommandEvent& event);
     void OnCommit(wxCommandEvent& event);
     void OnUndo(wxCommandEvent& event);
 
@@ -276,25 +312,43 @@ public:
         processInput();
     }
 
+    void processSubInput(wxInputStream& in) {
+        wxTextInputStream tis(in);
+        wxString str = tis.ReadLine();
+        printf("Got %s\n", conv(str).c_str());
+        //replace(str,string("\r"),string(" * "));
+        //replace(str,"Received:","\nReceived:");
+        if (logging) { 
+            printf("Logging\n");
+            string cp(conv(str));
+            split(cp,"\n",results);
+            printf("Logged\n");
+        }
+        addLog(str);
+    }
+
     void processInput() {
         while (report->CanRead()) {
-            wxTextInputStream tis(*report);
-            wxString str = tis.ReadLine();
-            printf("Got %s\n", conv(str).c_str());
-            //replace(str,string("\r"),string(" * "));
-            //replace(str,"Received:","\nReceived:");
-            log_box->AppendText(str);
-            log_box->AppendText(_T("\n"));
-            Update();
-            log_box->SetSelection(log_box->GetLastPosition(),-1);
+            processSubInput(*report);
+        }
+        while (reportErr->CanRead()) {
+            processSubInput(*reportErr);
         }
     }
+
+    void addLog(const wxString& str) {
+        log_box->AppendText(str);
+        log_box->AppendText(_T("\n"));
+        Update();
+        log_box->SetSelection(log_box->GetLastPosition(),-1);
+   }
 
     void OnTerminate(wxProcess *process, int status) {
         processInput();
         timer->Stop();
         if (status!=0) {
             printf(">>>>> PROCESS FAILED: next ignored [%s]\n", next.c_str());
+            addLog(_T("\nSomething went wrong..."));
             return;
         }
         printf(">>>>> PROCESS COMPLETE: next is [%s]\n", next.c_str());
@@ -305,33 +359,36 @@ public:
         } else if (n=="sync") {
             wxCommandEvent ev;
             OnSync(ev);
+        } else if (n=="push") {
+            wxCommandEvent ev;
+            OnPush(ev);
         }
     }
 
     list<string> getChanges() {
-        handler.beginLog();
+        beginLog();
         if (havePath()) {
             int argc = 2;
             char *argv[] = {
                 fossil(),
                 (char*)"changes",
                 NULL };
-            ssfossil(argc,argv);
+            ssfossil(argc,argv,true);
         }
-        return handler.endLog();
+        return endLog();
     }
 
     list<string> getExtras() {
-        handler.beginLog();
+        beginLog();
         if (havePath()) {
             int argc = 2;
             char *argv[] = {
                 fossil(),
                 (char*)"extras",
                 NULL };
-            ssfossil(argc,argv);
+            ssfossil(argc,argv,true);
         }
-        return handler.endLog();
+        return endLog();
     }
 
     list<string> getMissing(const list<string>& report) {
@@ -347,21 +404,24 @@ public:
     }
 
     ostream *startStream() {
-        endStream();
+        //endStream();
         if (log_box) {
             log_box->Clear();
-            stream = new ostream(log_box);
+            //stream = new ostream(log_box);
         }
-        handler.setStream(stream);
-        return stream;
+        //handler.setStream(stream);
+        //return stream;
+        return NULL;
     }
 
     void endStream() {
+        /*
         if (stream) {
             delete stream;
             stream = NULL;
         }
         handler.setStream(stream);
+        */
     }
 
     void doFiles(const list<string>& files, const char *act) {
@@ -382,7 +442,7 @@ public:
                     argv[i] = (char*)(it->c_str());
                     i++;
                 }
-                ssfossil(argc,argv);
+                ssfossil(argc,argv,true);
                 delete[] argv;
             }
         }
@@ -476,27 +536,42 @@ END_EVENT_TABLE()
 
 
 int MyFrame::ssfossil(int argc, char *argv[], bool sync) {
-    printf("Calling fossil with %d arguments\n  ", argc);
-    wxString cmd;
+    printf("Calling fossil with %d arguments\n", argc);
+    wxArrayString arr;
+    wxChar *cmd[256];
+    for (int i=0; i<argc; i++) {
+        printf("Have %s\n", argv[i]);
+        arr.Add(conv(argv[i]));
+    }
+    for (int i=0; i<argc; i++) {
+        printf("* Have %s\n", conv(arr[i]).c_str());
+        cmd[i] = (wxChar*)((const wxChar *)arr[i]);
+    }
+    cmd[argc] = NULL;
+    /*
+    string cmd;
     for (int i=0; i<argc; i++) {
         printf("[%s] ", argv[i]);
-        cmd = cmd + conv(argv[i]);
-        cmd = cmd + _T(" ");
+        cmd += safetxt(argv[i]);
+        cmd += " ";
     }
-    printf("\n");
-    
+    */
+    //printf("\n");
+    //printf("Doing: %s\n", cmd.c_str());
+
     // Create the process string
     //wxEvtHandler *eventHandler = NULL;
     //wxProcess *proc = new wxProcess(eventHandler);
-    MyProcess *proc = new MyProcess(this,cmd);
+    MyProcess *proc = new MyProcess(this,_T("ssfossil"));
     proc->Redirect();
+    //if(::wxExecute(conv(cmd), wxEXEC_ASYNC, proc) == 0){
     if(::wxExecute(cmd, wxEXEC_ASYNC, proc) == 0){
         cerr<<"Process launch error"<<endl;
         exit(1);
     }
-    wxInputStream* stdErr = proc->GetErrorStream();
+    reportErr = proc->GetErrorStream();
     report = proc->GetInputStream();
-    if (report==NULL) {
+    if (report==NULL||reportErr==NULL) {
         cerr<<"Process stream error"<<endl;
         exit(1);
     }
@@ -529,8 +604,8 @@ bool MyFrame::OnInit() {
 
     timer = new wxTimer(this,ID_Tick);
 
-    ssfossil_set_handler(&handler);
-    handler.setOwner(*this);
+    //ssfossil_set_handler(&handler);
+    //handler.setOwner(*this);
 
     SetIcon(wxIcon((char**)appicon_xpm));
 
@@ -615,7 +690,7 @@ bool MyFrame::OnInit() {
                              wxTE_MULTILINE | wxTE_RICH, 
                              wxDefaultValidator, wxTextCtrlNameStr);
 
-    handler.setCtrl(*log_box);
+    //handler.setCtrl(*log_box);
 
     topsizer->Add(log_box);
     topsizer->Add(button_sizer,wxSizerFlags(0).Align(wxALIGN_RIGHT));
@@ -772,17 +847,21 @@ void MyFrame::OnSync(wxCommandEvent& event) {
             wxChar sep = wxFileName::GetPathSeparator();
             wxString target = conv(path) + sep + wxT("clone.fossil");
             if (!wxFileExists(target)) {
-                printf("Need to clone %s\n", conv(target).c_str());
+                string ctarget = conv(target);
+                printf("Need to clone %s\n", ctarget.c_str());
                 if (haveSource()) {
                     int argc = 4;
                     char *argv[] = {
                         fossil(),
                         (char*)"clone",
                         (char*)source.c_str(),
-                        (char*)conv(target).c_str(),
+                        (char*)ctarget.c_str(),
                         NULL };
-                    ssfossil(argc,argv);
+                    for (int i=0; i<argc; i++) {
+                        printf("HAVE %s\n", argv[i]);
+                    }
                     next = "sync";
+                    ssfossil(argc,argv);
                     return;
                 }
             }
@@ -796,8 +875,8 @@ void MyFrame::OnSync(wxCommandEvent& event) {
                         (char*)"open",
                         (char*)conv(target).c_str(),
                         NULL };
-                    ssfossil(argc,argv);
                     next = "sync";
+                    ssfossil(argc,argv);
                     return;
                 }
                 if (wxFileExists(view_target)) {
@@ -818,8 +897,8 @@ void MyFrame::OnSync(wxCommandEvent& event) {
                         fossil(),
                         (char*)"update",
                         NULL };
-                    ssfossil(argc,argv);
                     next = "view";
+                    ssfossil(argc,argv);
                 }
             }
         }
@@ -842,9 +921,19 @@ void MyFrame::OnUndo(wxCommandEvent& event) {
     endStream();
 }
 
+void MyFrame::OnPush(wxCommandEvent& event) {
+    int argc = 3;
+    char *argv[] = {
+        fossil(),
+        (char*)"push",
+        (char*)destination.c_str(),
+        NULL };
+    ssfossil(argc,argv);
+}
+
 void MyFrame::OnCommit(wxCommandEvent& event) {
     printf("Should commit\n");
-    startStream();
+    //startStream();
     if (havePath()) {
         if (haveDestination()) {
             doFiles(getExtras(),"add");
@@ -879,45 +968,38 @@ void MyFrame::OnCommit(wxCommandEvent& event) {
             }
             if (msg!="") {
                 msg += "Enter brief description of changes";
-            } else {
-                msg = "No changes!";
-                (*stream) << "No changes to push" << endl;
-                endStream();
-                return;
-            }
-            printf("Message is %s\n", msg.c_str());
-            wxTextEntryDialog dlg(NULL, conv(msg));
-            if (dlg.ShowModal()==wxID_OK) {
-                commit_message = conv(dlg.GetValue());
-                if (commit_message == "") {
-                    commit_message = "[from coopy]";
-                }
-                int argc = 4;
-                // commit currently fails if called twice, unless username
-                // specified (need to remove some global state from fossil)
-                char *argv[] = {
-                    fossil(),
-                    (char*)"commit",
-                    //(char*)"--user",
-                    //(char*)FOSSIL_USERNAME,
-                    (char*)"-m",
-                    (char*)commit_message.c_str(),
-                    NULL };
-                ssfossil(argc,argv);
-
-                if (true) {
-                    int argc = 3;
+                printf("Message is %s\n", msg.c_str());
+                wxTextEntryDialog dlg(NULL, conv(msg));
+                if (dlg.ShowModal()==wxID_OK) {
+                    commit_message = conv(dlg.GetValue());
+                    if (commit_message == "") {
+                        commit_message = "[from coopy]";
+                    }
+                    int argc = 4;
+                    // commit currently fails if called twice, unless username
+                    // specified (need to remove some global state from fossil)
                     char *argv[] = {
                         fossil(),
-                        (char*)"push",
-                        (char*)destination.c_str(),
+                        (char*)"commit",
+                        //(char*)"--user",
+                        //(char*)FOSSIL_USERNAME,
+                        (char*)"-m",
+                        (char*)commit_message.c_str(),
                         NULL };
+                    next = "push";
                     ssfossil(argc,argv);
+                    return;
+                } else {
+                    return;
                 }
+            } else {
+                msg = "No changes!";
+                addLog(_T("No changes to push"));
             }
         }
     }
-    endStream();
+    //endStream();
+    OnPush(event);
 }
 
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -925,6 +1007,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 {
     //m_textCtrl = NULL;
 
+    logging = false;
     path = "";
     source = "";
     commit_message = "";
