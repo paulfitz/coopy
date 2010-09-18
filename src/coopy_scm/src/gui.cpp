@@ -39,6 +39,9 @@ using namespace std;
 
 
 
+static wxString conv_c(const char *s) {
+    return wxString(s, wxConvUTF8);
+}
 
 static wxString conv(const std::string& s) {
     return wxString(s.c_str(), wxConvUTF8);
@@ -267,7 +270,13 @@ private:
 
     string safetxt(const char *txt) {
         string str(txt);
-        replace(str," ","\\ ");
+        //replace(str," ","\\ ");
+#ifdef WIN32
+        replace(str,"\\","/");
+#endif
+#ifdef WIN32
+        str = string("\"") + str + "\"";
+#endif
         return str;
     }
 
@@ -355,7 +364,11 @@ public:
         string n = next;
         next = "";
         if (n=="view") {
-            ::wxLaunchDefaultBrowser(conv(string("file://")+path));
+            wxString view = conv(path);
+#ifndef WIN32
+            view = wxT("file://") + view;
+#endif
+            ::wxLaunchDefaultBrowser(view);
         } else if (n=="sync") {
             wxCommandEvent ev;
             OnSync(ev);
@@ -541,7 +554,7 @@ int MyFrame::ssfossil(int argc, char *argv[], bool sync) {
     wxChar *cmd[256];
     for (int i=0; i<argc; i++) {
         printf("Have %s\n", argv[i]);
-        arr.Add(conv(argv[i]));
+        arr.Add(conv(safetxt(argv[i])));
     }
     for (int i=0; i<argc; i++) {
         printf("* Have %s\n", conv(arr[i]).c_str());
@@ -846,8 +859,8 @@ void MyFrame::OnSync(wxCommandEvent& event) {
             printf("Should pull %s\n", path.c_str());
             wxChar sep = wxFileName::GetPathSeparator();
             wxString target = conv(path) + sep + wxT("clone.fossil");
+            string ctarget = conv(target);
             if (!wxFileExists(target)) {
-                string ctarget = conv(target);
                 printf("Need to clone %s\n", ctarget.c_str());
                 if (haveSource()) {
                     int argc = 4;
@@ -873,20 +886,20 @@ void MyFrame::OnSync(wxCommandEvent& event) {
                     char *argv[] = {
                         fossil(),
                         (char*)"open",
-                        (char*)conv(target).c_str(),
+                        (char*)ctarget.c_str(),
                         NULL };
                     next = "sync";
                     ssfossil(argc,argv);
                     return;
                 }
                 if (wxFileExists(view_target)) {
-                    // get rid of autosync
+                    // make sure we have autosync
                     int argc = 4;
                     char *argv[] = {
                         fossil(),
                         (char*)"setting",
                         (char*)"autosync",
-                        (char*)"0",
+                        (char*)"1",
                         NULL };
                     ssfossil(argc,argv,true);
                 }
@@ -986,7 +999,7 @@ void MyFrame::OnCommit(wxCommandEvent& event) {
                         (char*)"-m",
                         (char*)commit_message.c_str(),
                         NULL };
-                    next = "push";
+                    //next = "push";
                     ssfossil(argc,argv);
                     return;
                 } else {
@@ -999,7 +1012,7 @@ void MyFrame::OnCommit(wxCommandEvent& event) {
         }
     }
     //endStream();
-    OnPush(event);
+    //OnPush(event);
 }
 
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)

@@ -1,3 +1,6 @@
+
+MESSAGE(STATUS "Using correct wxWidgets script")
+
 # - Find a wxWidgets (a.k.a., wxWindows) installation.
 # This module finds if wxWidgets is installed and selects a default
 # configuration to use. wxWidgets is a modular library. To specify the
