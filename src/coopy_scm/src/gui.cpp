@@ -32,6 +32,8 @@
 #include "icon/appicon.xpm"
 #undef static
 
+#define SITE_NAME "share.find.coop"
+
 using namespace std;
 
 //long int g_hinstance = 0;
@@ -299,6 +301,7 @@ public:
     void OnSync(wxCommandEvent& event);
     void OnPush(wxCommandEvent& event);
     void OnCommit(wxCommandEvent& event);
+    void OnCreate(wxCommandEvent& event);
     void OnUndo(wxCommandEvent& event);
 
     bool havePath();
@@ -472,6 +475,7 @@ enum
         ID_Undo,
         ID_About,
         ID_Tick,
+        ID_Create,
     };
 };
 
@@ -543,6 +547,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_BUTTON(ID_Sync, MyFrame::OnSync)
     EVT_BUTTON(ID_Undo, MyFrame::OnUndo)
     EVT_BUTTON(ID_Commit, MyFrame::OnCommit)
+    EVT_BUTTON(ID_Create, MyFrame::OnCreate)
     EVT_CLOSE(MyFrame::OnExit)
     EVT_TIMER(ID_Tick, MyFrame::OnProgressTimer)
 END_EVENT_TABLE()
@@ -651,21 +656,19 @@ bool MyFrame::OnInit() {
     wxSizerFlags lflags = 
         wxSizerFlags(0).Align(wxALIGN_LEFT).Border(wxALL, 10);
 
+    /*
     wxBoxSizer *source_bar = new wxBoxSizer( wxHORIZONTAL );
-    source_bar->Add(new wxStaticText(this,-1,_T("Link"),
+    source_bar->Add(new wxStaticText(this,-1,_T("Repo"),
                                      wxDefaultPosition,
                                      wxSize(60,-1)),lflags);
     src_box = new wxTextCtrl(this,TEXT_Src, wxT(""),
                              wxDefaultPosition,
                              wxSize(300,-1));
     source_bar->Add(src_box,lflags);
-    source_bar->Add(new wxButton( this, ID_Sync, _T("Pull &in") ),
-                    lflags);
-    source_bar->Add(new wxButton( this, ID_Commit, _T("Push &out") ),
-                    lflags);
+    */
     //source_bar->Add(new wxButton( this, ID_Undo, _T("&Undo") ),
     //lflags);
-    topsizer->Add(source_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
+    //topsizer->Add(source_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
 
 
     /*
@@ -684,9 +687,9 @@ bool MyFrame::OnInit() {
 
     
     wxBoxSizer *dir_bar = new wxBoxSizer( wxHORIZONTAL );
-    dir_bar->Add(new wxStaticText(this,-1,_T("Store"),
-                                   wxDefaultPosition,
-                                   wxSize(60,-1)),lflags);
+    //dir_bar->Add(new wxStaticText(this,-1,_T("Store"),
+    //                             wxDefaultPosition,
+    //                             wxSize(60,-1)),lflags);
     dir_box = new wxDirPickerCtrl(this,TEXT_Dir, wxT(""),
                                   wxT("Select a folder"),
                                   wxDefaultPosition,
@@ -695,10 +698,16 @@ bool MyFrame::OnInit() {
     //dir_box->SetTextCtrlProportion(0);
     dir_box->SetPath(::wxGetCwd());
     dir_bar->Add(dir_box,lflags);
+    dir_bar->Add(new wxButton( this, ID_Sync, _T("Pull &in") ),
+                    lflags);
+    dir_bar->Add(new wxButton( this, ID_Commit, _T("Push &out") ),
+                    lflags);
+    dir_bar->Add(new wxButton( this, ID_Create, _T("Create &repository") ),
+                    lflags);
     topsizer->Add(dir_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
 
     
-    log_box = new wxTextCtrl(this, TEXT_Main, wxT("Welcome to Coopy!\n\nThe purpose of Coopy is to facilitate cooperative data-collection projects. It uses fossil (www.fossil-scm.org) to share files between computers, and works to merge spreadsheets intelligently.\n\nWarning: this is pre-alpha software, keep backups of your data.\n\n[Status messages appear here during actions]\n"), 
+    log_box = new wxTextCtrl(this, TEXT_Main, conv(string("Welcome to Coopy!\n\nThe purpose of Coopy is to facilitate cooperative data-collection projects. \n\nSee http://") + SITE_NAME + " to get a repository link.\n\nWarning: this is pre-alpha software, keep backups of your data.\n"), 
                              wxDefaultPosition, wxSize(620,200),  
                              wxTE_MULTILINE | wxTE_RICH, 
                              wxDefaultValidator, wxTextCtrlNameStr);
@@ -770,10 +779,11 @@ bool MyFrame::haveSource() {
     if (source==""||askSource) {
         string suggest = source;
         if (suggest=="") {
-            suggest = "http://coopy.sourceforge.net/cgi-bin/wiki/home";
+            suggest = ""; 
+            //suggest = "http://coopy.sourceforge.net/cgi-bin/wiki/home";
         }
-        wxTextEntryDialog dlg(NULL, wxT("Enter source URL"),
-                              wxT("Enter source URL"),
+        wxTextEntryDialog dlg(NULL, wxT("Enter repository link"),
+                              wxT("Enter repository link"),
                               conv(suggest));
         if (dlg.ShowModal()==wxID_OK) {
             source = conv(dlg.GetValue());
@@ -854,65 +864,65 @@ void MyFrame::OnSync(wxCommandEvent& event) {
     printf("Syncing...\n");
     next = "";
     //startStream();
-    if (haveSource()) {
-        if (havePath()) {
-            printf("Should pull %s\n", path.c_str());
-            wxChar sep = wxFileName::GetPathSeparator();
-            wxString target = conv(path) + sep + wxT("clone.fossil");
-            string ctarget = conv(target);
-            if (!wxFileExists(target)) {
+    if (havePath()) {
+        printf("Should pull %s\n", path.c_str());
+        wxChar sep = wxFileName::GetPathSeparator();
+        wxString target = conv(path) + sep + wxT("clone.fossil");
+        string ctarget = conv(target);
+        if (!wxFileExists(target)) {
+            if (haveSource()) {
                 printf("Need to clone %s\n", ctarget.c_str());
-                if (haveSource()) {
-                    int argc = 4;
-                    char *argv[] = {
-                        fossil(),
-                        (char*)"clone",
-                        (char*)source.c_str(),
-                        (char*)ctarget.c_str(),
-                        NULL };
-                    for (int i=0; i<argc; i++) {
-                        printf("HAVE %s\n", argv[i]);
-                    }
-                    next = "sync";
-                    ssfossil(argc,argv);
-                    return;
+                int argc = 4;
+                char *argv[] = {
+                    fossil(),
+                    (char*)"clone",
+                    (char*)source.c_str(),
+                    (char*)ctarget.c_str(),
+                    NULL };
+                for (int i=0; i<argc; i++) {
+                    printf("HAVE %s\n", argv[i]);
                 }
+                next = "sync";
+                ssfossil(argc,argv);
+                return;
+            } else {
+                return;
             }
-            if (wxFileExists(target)) {
-                wxString view_target = conv(path) + sep + wxT("_FOSSIL_");
-                if (!wxFileExists(view_target)) {
-                    printf("No view yet %s\n", conv(view_target).c_str());
-                    int argc = 3;
-                    char *argv[] = {
-                        fossil(),
-                        (char*)"open",
-                        (char*)ctarget.c_str(),
-                        NULL };
-                    next = "sync";
-                    ssfossil(argc,argv);
-                    return;
-                }
-                if (wxFileExists(view_target)) {
-                    // make sure we have autosync
-                    int argc = 4;
-                    char *argv[] = {
-                        fossil(),
-                        (char*)"setting",
-                        (char*)"autosync",
-                        (char*)"1",
-                        NULL };
-                    ssfossil(argc,argv,true);
-                }
-                if (wxFileExists(view_target)) {
-                    printf("Simple sync\n");
-                    int argc = 2;
-                    char *argv[] = {
-                        fossil(),
-                        (char*)"update",
-                        NULL };
-                    next = "view";
-                    ssfossil(argc,argv);
-                }
+        }
+        if (wxFileExists(target)) {
+            wxString view_target = conv(path) + sep + wxT("_FOSSIL_");
+            if (!wxFileExists(view_target)) {
+                printf("No view yet %s\n", conv(view_target).c_str());
+                int argc = 3;
+                char *argv[] = {
+                    fossil(),
+                    (char*)"open",
+                    (char*)ctarget.c_str(),
+                    NULL };
+                next = "sync";
+                ssfossil(argc,argv);
+                return;
+            }
+            if (wxFileExists(view_target)) {
+                // make sure we have autosync
+                int argc = 4;
+                char *argv[] = {
+                    fossil(),
+                    (char*)"setting",
+                    (char*)"autosync",
+                    (char*)"1",
+                    NULL };
+                ssfossil(argc,argv,true);
+            }
+            if (wxFileExists(view_target)) {
+                printf("Simple sync\n");
+                int argc = 2;
+                char *argv[] = {
+                    fossil(),
+                    (char*)"update",
+                    NULL };
+                next = "view";
+                ssfossil(argc,argv);
             }
         }
     }
@@ -934,6 +944,12 @@ void MyFrame::OnUndo(wxCommandEvent& event) {
     endStream();
 }
 
+void MyFrame::OnCreate(wxCommandEvent& event) {
+    printf("Create!\n");
+    ::wxLaunchDefaultBrowser(wxT(SITE_NAME));
+}
+
+
 void MyFrame::OnPush(wxCommandEvent& event) {
     int argc = 3;
     char *argv[] = {
@@ -948,7 +964,7 @@ void MyFrame::OnCommit(wxCommandEvent& event) {
     printf("Should commit\n");
     //startStream();
     if (havePath()) {
-        if (haveDestination()) {
+        //if (haveDestination()) {
             doFiles(getExtras(),"add");
             list<string> changes = getChanges();
             list<string> missing = getMissing(changes);
@@ -1009,7 +1025,7 @@ void MyFrame::OnCommit(wxCommandEvent& event) {
                 msg = "No changes!";
                 addLog(_T("No changes to push"));
             }
-        }
+            //}
     }
     //endStream();
     //OnPush(event);
