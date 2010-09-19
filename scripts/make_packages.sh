@@ -12,6 +12,9 @@ while [ ! "k$1" = "k" ]; do
 	echo "  LINUX_CHROOT=/scratch/debian-etch-i386"
 	echo "  LINUX_CHROOT_REPO=/home/paulfitz/coopy"
 	echo "  LINUX_CHROOT_BUILD=/home/paulfitz/coopy_build"
+	echo "  OSX_IP=127.0.0.1"
+	echo "  OSX_USER=paulfitz"
+	echo "  OSX_PATH=coopy/build"
 	echo "  OUTPUT=/tmp/coopy"
 	exit 1
     fi
@@ -67,6 +70,10 @@ while [ ! "k$1" = "k" ]; do
 	    echo "make package_source"
 	    ) | sudo chroot $LINUX_CHROOT
 	cp -v *.gz *.sh *.Z $OUTPUT
+    fi
+
+    if [ "k$1" = "kosx" ]; then
+	scp -v $OSX_USER@$OSX_IP:$OSX_PATH/*.dmg $OUTPUT
     fi
 
     shift
