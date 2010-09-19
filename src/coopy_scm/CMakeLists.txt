@@ -52,7 +52,7 @@ IF (COMPILE_GUI)
   IF (wxWidgets_FOUND)
     INCLUDE_DIRECTORIES(${wxWidgets_INCLUDE_DIRS})
     ADD_EXECUTABLE(coopy WIN32 src/gui.cpp ${DECOR})
-    TARGET_LINK_LIBRARIES(coopy coopy_fossil)
+    #TARGET_LINK_LIBRARIES(coopy coopy_fossil)
     TARGET_LINK_LIBRARIES(coopy ${wxWidgets_LIBRARIES})
     SET_PROPERTY(TARGET coopy 
       PROPERTY COMPILE_DEFINITIONS ${wxWidgets_DEFINITIONS})
