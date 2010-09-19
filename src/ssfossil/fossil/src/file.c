@@ -2,18 +2,12 @@
 ** Copyright (c) 2006 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -31,8 +25,16 @@
 
 /*
 ** The file status information from the most recent stat() call.
+**
+** Use _stati64 rather than stat on windows, in order to handle files
+** larger than 2GB.
 */
-static struct stat fileStat;
+#if defined(_WIN32) && defined(__MSVCRT__)
+  static struct _stati64 fileStat;
+# define stat _stati64
+#else
+  static struct stat fileStat;
+#endif
 static int fileStatValid = 0;
 
 /*
@@ -91,7 +93,10 @@ int file_isfile(const char *zFilename){
 */
 int file_isexe(const char *zFilename){
   if( getStat(zFilename) || !S_ISREG(fileStat.st_mode) ) return 0;
-#ifdef __MINGW32__
+#if defined(_WIN32)
+#  if defined(__DMC__) || defined(_MSC_VER)
+#    define S_IXUSR  _S_IEXEC
+#  endif
   return ((S_IXUSR)&fileStat.st_mode)!=0;
 #else
   return ((S_IXUSR|S_IXGRP|S_IXOTH)&fileStat.st_mode)!=0;
@@ -153,7 +158,7 @@ void file_copy(const char *zFrom, const char *zTo){
 ** Set or clear the execute bit on a file.
 */
 void file_setexe(const char *zFilename, int onoff){
-#ifndef __MINGW32__
+#if !defined(_WIN32)
   struct stat buf;
   if( stat(zFilename, &buf)!=0 ) return;
   if( onoff ){
@@ -165,7 +170,7 @@ void file_setexe(const char *zFilename, int onoff){
       chmod(zFilename, buf.st_mode & ~0111);
     }
   }
-#endif /* __MINGW32__ */
+#endif /* _WIN32 */
 }
 
 /*
@@ -182,7 +187,7 @@ int file_mkdir(const char *zName, int forceFlag){
     unlink(zName);
   }
   if( rc!=1 ){
-#ifdef __MINGW32__
+#if defined(_WIN32)
     return mkdir(zName);
 #else
     return mkdir(zName, 0755);
@@ -205,16 +210,17 @@ int file_mkdir(const char *zName, int forceFlag){
 */
 int file_is_simple_pathname(const char *z){
   int i;
-  if( *z=='/' || *z==0 ) return 0;
-  if( *z=='.' ){
+  char c = z[0];
+  if( c=='/' || c==0 ) return 0;
+  if( c=='.' ){
     if( z[1]=='/' || z[1]==0 ) return 0;
     if( z[1]=='.' && (z[2]=='/' || z[2]==0) ) return 0;
   }
-  for(i=0; z[i]; i++){
-    if( z[i]=='\\' || z[i]=='*' || z[i]=='[' || z[i]==']' || z[i]=='?' ){
+  for(i=0; (c=z[i])!=0; i++){
+    if( c=='\\' || c=='*' || c=='[' || c==']' || c=='?' ){
       return 0;
     }
-    if( z[i]=='/' ){
+    if( c=='/' ){
       if( z[i+1]=='/' ) return 0;
       if( z[i+1]=='.' ){
         if( z[i+2]=='/' || z[i+2]==0 ) return 0;
@@ -238,7 +244,7 @@ int file_is_simple_pathname(const char *z){
 int file_simplify_name(char *z, int n){
   int i, j;
   if( n<0 ) n = strlen(z);
-#ifdef __MINGW32__
+#if defined(_WIN32)
   for(i=0; i<n; i++){
     if( z[i]=='\\' ) z[i] = '/';
   }
@@ -273,7 +279,7 @@ int file_simplify_name(char *z, int n){
 */
 void file_canonical_name(const char *zOrigName, Blob *pOut){
   if( zOrigName[0]=='/' 
-#ifdef __MINGW32__
+#if defined(_WIN32)
       || zOrigName[0]=='\\'
       || (strlen(zOrigName)>3 && zOrigName[1]==':'
            && (zOrigName[2]=='\\' || zOrigName[2]=='/'))
@@ -285,7 +291,7 @@ void file_canonical_name(const char *zOrigName, Blob *pOut){
     char zPwd[2000];
     if( getcwd(zPwd, sizeof(zPwd)-20)==0 ){
       fprintf(stderr, "pwd too big: max %d\n", (int)sizeof(zPwd)-20);
-      exit(1);
+      fossil_exit(1);
     }
     blob_zero(pOut);
     blob_appendf(pOut, "%//%/", zPwd, zOrigName);
@@ -295,17 +301,25 @@ void file_canonical_name(const char *zOrigName, Blob *pOut){
 
 /*
 ** COMMAND:  test-canonical-name
+** Usage: %fossil test-canonical-name FILENAME...
 **
 ** Test the operation of the canonical name generator.
+** Also test Fossil's ability to measure attributes of a file.
 */
 void cmd_test_canonical_name(void){
   int i;
   Blob x;
   blob_zero(&x);
   for(i=2; i<g.argc; i++){
-    file_canonical_name(g.argv[i], &x);
+    const char *zName = g.argv[i];
+    file_canonical_name(zName, &x);
     printf("%s\n", blob_buffer(&x));
     blob_reset(&x);
+    printf("  file_size   = %lld\n", file_size(zName));
+    printf("  file_mtime  = %lld\n", file_mtime(zName));
+    printf("  file_isfile = %d\n", file_isfile(zName));
+    printf("  file_isexe  = %d\n", file_isexe(zName));
+    printf("  file_isdir  = %d\n", file_isdir(zName));
   }
 }
 
@@ -318,7 +332,7 @@ void cmd_test_canonical_name(void){
 int file_is_canonical(const char *z){
   int i;
   if( z[0]!='/'
-#ifdef __MINGW32__
+#if defined(_WIN32)
     && (z[0]==0 || z[1]!=':' || z[2]!='/')
 #endif
   ) return 0;
@@ -350,7 +364,7 @@ void file_relative_name(const char *zOrigName, Blob *pOut){
     char zPwd[2000];
     if( getcwd(zPwd, sizeof(zPwd)-20)==0 ){
       fprintf(stderr, "pwd too big: max %d\n", (int)sizeof(zPwd)-20);
-      exit(1);
+      fossil_exit(1);
     }
     for(i=1; zPath[i] && zPwd[i]==zPath[i]; i++){}
     if( zPath[i]==0 ){

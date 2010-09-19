@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -26,6 +20,8 @@
 #include "config.h"
 #include "rebuild.h"
 #include <assert.h>
+#include <dirent.h>
+#include <errno.h>
 
 /*
 ** Schema changes
@@ -106,7 +102,7 @@ static void rebuild_step_done(rid){
 ** routine clears the content buffer before returning.
 */
 static void rebuild_step(int rid, int size, Blob *pBase){
-  Stmt q1;
+  static Stmt q1;
   Bag children;
   Blob copy;
   Blob *pUse;
@@ -120,7 +116,8 @@ static void rebuild_step(int rid, int size, Blob *pBase){
   }
 
   /* Find all children of artifact rid */
-  db_prepare(&q1, "SELECT rid FROM delta WHERE srcid=%d", rid);
+  db_static_prepare(&q1, "SELECT rid FROM delta WHERE srcid=:rid");
+  db_bind_int(&q1, ":rid", rid);
   bag_init(&children);
   while( db_step(&q1)==SQLITE_ROW ){
     int cid = db_column_int(&q1, 0);
@@ -129,7 +126,7 @@ static void rebuild_step(int rid, int size, Blob *pBase){
     }
   }
   nChild = bag_count(&children);
-  db_finalize(&q1);
+  db_reset(&q1);
 
   /* Crosslink the artifact */
   if( nChild==0 ){
@@ -170,7 +167,7 @@ static void rebuild_step(int rid, int size, Blob *pBase){
 }
 
 /*
-** Check to see if the the "sym-trunk" tag exists.  If not, create it
+** Check to see if the "sym-trunk" tag exists.  If not, create it
 ** and attach it to the very first check-in.
 */
 static void rebuild_tag_trunk(void){
@@ -217,11 +214,12 @@ int rebuild_db(int randomize, int doOut){
   db_multi_exec(zSchemaUpdates);
   for(;;){
     zTable = db_text(0,
-       "SELECT name FROM sqlite_master"
+       "SELECT name FROM sqlite_master /*scan*/"
        " WHERE type='table'"
        " AND name NOT IN ('blob','delta','rcvfrom','user',"
                          "'config','shun','private','reportfmt',"
                          "'concealed')"
+       " AND name NOT GLOB 'sqlite_*'"
     );
     if( zTable==0 ) break;
     db_multi_exec("DROP TABLE %Q", zTable);
@@ -244,7 +242,7 @@ int rebuild_db(int randomize, int doOut){
   );
   totalSize = db_int(0, "SELECT count(*) FROM blob");
   db_prepare(&s,
-     "SELECT rid, size FROM blob"
+     "SELECT rid, size FROM blob /*scan*/"
      " WHERE NOT EXISTS(SELECT 1 FROM shun WHERE uuid=blob.uuid)"
      "   AND NOT EXISTS(SELECT 1 FROM delta WHERE rid=blob.rid)"
   );
@@ -380,7 +378,7 @@ void scrub_cmd(void){
                 "passwords and other information. Changes cannot be undone.\n"
                 "Continue (y/N)? ", &ans);
     if( blob_str(&ans)[0]!='y' ){
-      exit(1);
+      fossil_exit(1);
     }
   }
   db_begin_transaction();
@@ -404,4 +402,65 @@ void scrub_cmd(void){
     rebuild_db(0, 1);
     db_end_transaction(0);
   }
+}
+
+/*
+** COMMAND: reconstruct
+**
+** Usage: %fossil reconstruct FILENAME DIRECTORY
+**
+** This command studies the artifacts (files) in DIRECTORY and
+** reconstructs the fossil record from them. It places the new
+** fossil repository in FILENAME
+**
+*/
+void reconstruct_cmd(void) {
+  char *zPassword;
+  DIR *d;
+  struct dirent *pEntry;
+  Blob aContent; /* content of the just read artifact */
+  if( g.argc!=4 ){
+    usage("FILENAME DIRECTORY");
+  }
+  if( file_isdir(g.argv[3])!=1 ){
+    printf("\"%s\" is not a directory\n\n", g.argv[3]);
+    usage("FILENAME DIRECTORY");
+  }
+  db_create_repository(g.argv[2]);
+  db_open_repository(g.argv[2]);
+  db_open_config(0);
+  db_begin_transaction();
+  db_initial_setup(0, 0, 1);
+
+  d = opendir(g.argv[3]);
+  if( d ){
+    while( (pEntry=readdir(d))!=0 ){
+      Blob path;
+      blob_init(&path, 0, 0);
+      if( pEntry->d_name[0]=='.' ){
+        continue;
+      }
+      if( file_isdir(pEntry->d_name)==1 ){
+        continue;
+      }
+      blob_appendf(&path, "%s/%s", g.argv[3], pEntry->d_name);
+      if( blob_read_from_file(&aContent, blob_str(&path))==-1 ){
+        fossil_panic("Some unknown error occurred while reading \"%s\"", blob_str(&path));
+      }
+      content_put(&aContent, 0, 0);
+      blob_reset(&path);
+      blob_reset(&aContent);
+    }
+  }
+  else {
+    fossil_panic("Encountered error %d while trying to open \"%s\".", errno, g.argv[3]);
+  }
+
+  rebuild_db(0, 1);
+
+  db_end_transaction(0);
+  printf("project-id: %s\n", db_get("project-code", 0));
+  printf("server-id: %s\n", db_get("server-code", 0));
+  zPassword = db_text(0, "SELECT pw FROM user WHERE login=%Q", g.zLogin);
+  printf("admin-user: %s (initial password is \"%s\")\n", g.zLogin, zPassword);
 }

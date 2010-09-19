@@ -2,18 +2,12 @@
 ** Copyright (c) 2008 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -24,8 +18,9 @@
 ** This file implements a very simple (and low-performance) HTTP server
 ** for windows.
 */
-#ifdef __MINGW32__           /* This code is for win32 only */
 #include "config.h"
+#ifdef _WIN32
+/* This code is for win32 only */
 #include "winhttp.h"
 #include <windows.h>
 
@@ -141,7 +136,8 @@ void win32_http_server(
   int mnPort, int mxPort,   /* Range of allowed TCP port numbers */
   const char *zBrowser,     /* Command to launch browser.  (Or NULL) */
   const char *zStopper,     /* Stop server when this file is exists (Or NULL) */
-  const char *zNotFound     /* The --notfound option, or NULL */
+  const char *zNotFound,    /* The --notfound option, or NULL */
+  int flags                 /* One or more HTTP_SERVER_ flags */
 ){
   WSADATA wd;
   SOCKET s = INVALID_SOCKET;
@@ -166,7 +162,11 @@ void win32_http_server(
     }
     addr.sin_family = AF_INET;
     addr.sin_port = htons(iPort);
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    if( flags & HTTP_SERVER_LOCALHOST ){
+      addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    }else{
+      addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    }
     if( bind(s, (struct sockaddr*)&addr, sizeof(addr))==SOCKET_ERROR ){
       closesocket(s);
       iPort++;
@@ -223,4 +223,4 @@ void win32_http_server(
   WSACleanup();
 }
 
-#endif /* __MINGW32__  -- This code is for win32 only */
+#endif /* _WIN32  -- This code is for win32 only */

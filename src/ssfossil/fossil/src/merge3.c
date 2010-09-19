@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -176,8 +170,8 @@ int blob_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut){
   ** pivot, and the third integer is the number of lines of text that are
   ** inserted.  The edit array ends with a triple of 0,0,0.
   */
-  aC1 = text_diff(pPivot, pV1, 0, 0);
-  aC2 = text_diff(pPivot, pV2, 0, 0);
+  aC1 = text_diff(pPivot, pV1, 0, 0, 1);
+  aC2 = text_diff(pPivot, pV2, 0, 0, 1);
   if( aC1==0 || aC2==0 ){
     free(aC1);
     free(aC2);
@@ -320,24 +314,24 @@ void delta_3waymerge_cmd(void){
   Blob pivot, v1, v2, merged;
   if( g.argc!=6 ){
     fprintf(stderr,"Usage: %s %s PIVOT V1 V2 MERGED\n", g.argv[0], g.argv[1]);
-    exit(1);
+    fossil_exit(1);
   }
   if( blob_read_from_file(&pivot, g.argv[2])<0 ){
     fprintf(stderr,"cannot read %s\n", g.argv[2]);
-    exit(1);
+    fossil_exit(1);
   }
   if( blob_read_from_file(&v1, g.argv[3])<0 ){
     fprintf(stderr,"cannot read %s\n", g.argv[3]);
-    exit(1);
+    fossil_exit(1);
   }
   if( blob_read_from_file(&v2, g.argv[4])<0 ){
     fprintf(stderr,"cannot read %s\n", g.argv[4]);
-    exit(1);
+    fossil_exit(1);
   }
   blob_merge(&pivot, &v1, &v2, &merged);
   if( blob_write_to_file(&merged, g.argv[5])<blob_size(&merged) ){
     fprintf(stderr,"cannot write %s\n", g.argv[4]);
-    exit(1);
+    fossil_exit(1);
   }
   blob_reset(&pivot);
   blob_reset(&v1);

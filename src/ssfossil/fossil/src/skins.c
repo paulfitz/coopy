@@ -2,19 +2,12 @@
 ** Copyright (c) 2009 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License as published by the Free Software Foundation; either
-** version 2 of the License, or (at your option) any later version.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-**
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -39,7 +32,7 @@ static const char zBuiltinSkin1[] =
 @   margin: 0ex 1ex;
 @   padding: 0px;
 @   background-color: white;
-@   font-family: "sans serif";
+@   font-family: sans-serif;
 @ }
 @ 
 @ /* The project logo in the upper left-hand corner of each page */
@@ -51,6 +44,7 @@ static const char zBuiltinSkin1[] =
 @   font-weight: bold;
 @   background-color: #707070;
 @   color: #ffffff;
+@   min-width: 200px;
 @ }
 @ 
 @ /* The page title centered at the top of each page */
@@ -58,7 +52,7 @@ static const char zBuiltinSkin1[] =
 @   display: table-cell;
 @   font-size: 1.5em;
 @   font-weight: bold;
-@   text-align: left;
+@   text-align: center;
 @   padding: 0 0 0 10px;
 @   color: #404040;
 @   vertical-align: bottom;
@@ -73,6 +67,7 @@ static const char zBuiltinSkin1[] =
 @   color: #404040;
 @   font-size: 0.8em;
 @   font-weight: bold;
+@   min-width: 200px;
 @ }
 @ 
 @ /* The header across the top of the page */
@@ -170,11 +165,9 @@ static const char zBuiltinSkin1[] =
 @ <body>
 @ <div class="header">
 @   <div class="logo">
-@     <nobr>$<project_name></nobr>
+@     <img src="$baseurl/logo" alt="logo">
 @   </div>
-@ </div>
-@ <div class="header">
-@   <div class="title">$<title></div>
+@   <div class="title"><small>$<project_name></small><br />$<title></div>
 @   <div class="status"><nobr><th1>
 @      if {[info exists login]} {
 @        puts "Logged in as $login"
@@ -609,7 +602,7 @@ static const char zBuiltinSkin3[] =
 @ <div class="header">
 @   <div class="logo">
 @     <!-- <img src="$baseurl/logo" alt="logo"> -->
-@     <br><nobr>$<project_name></nobr>
+@     <br /><nobr>$<project_name></nobr>
 @   </div>
 @   <div class="title">$<title></div>
 @   <div class="status"><nobr><th1>
@@ -740,14 +733,14 @@ void setup_skin(void){
   /* Process requests to delete a user-defined skin */
   if( P("del1") && (zName = skinVarName(P("sn"), 1))!=0 ){
     style_header("Confirm Custom Skin Delete");
-    @ <form action="%s(g.zBaseURL)/setup_skin" method="POST">
+    @ <form action="%s(g.zBaseURL)/setup_skin" method="post"><div>
     @ <p>Deletion of a custom skin is a permanent action that cannot
     @ be undone.  Please confirm that this is what you want to do:</p>
-    @ <input type="hidden" name="sn" value="%h(P("sn"))">
-    @ <input type="submit" name="del2" value="Confirm - Delete The Skin">
-    @ <input type="submit" name="cancel" value="Cancel - Do Not Delete">
+    @ <input type="hidden" name="sn" value="%h(P("sn"))" />
+    @ <input type="submit" name="del2" value="Confirm - Delete The Skin" />
+    @ <input type="submit" name="cancel" value="Cancel - Do Not Delete" />
     login_insert_csrf_secret();
-    @ </form>
+    @ </div></form>
     style_footer();
     return;
   }
@@ -809,8 +802,9 @@ void setup_skin(void){
   style_header("Skins");
   @ <p>A "skin" is a combination of
   @ <a href="setup_editcss">CSS</a>, 
-  @ <a href="setup_header">Header</a>, and 
-  @ <a href="setup_footer">Footer</a> that determines the look and feel
+  @ <a href="setup_header">Header</a>,
+  @ <a href="setup_footer">Footer</a>, and
+  @ <a href="setup_logo">Logo</a> that determines the look and feel
   @ of the web interface.</p>
   @
   @ <h2>Available Skins:</h2>
@@ -820,11 +814,11 @@ void setup_skin(void){
     if( strcmp(aBuiltinSkin[i].zValue, zCurrent)==0 ){
       @ <li><p>%h(z).&nbsp;&nbsp; <b>Currently In Use</b></p>
     }else{
-      @ <li><form action="%s(g.zBaseURL)/setup_skin" method="POST">
+      @ <li><form action="%s(g.zBaseURL)/setup_skin" method="post"><div>
       @ %h(z).&nbsp;&nbsp; 
-      @ <input type="hidden" name="sn" value="%h(z)">
-      @ <input type="submit" name="load" value="Use This Skin">
-      @ </form></li>
+      @ <input type="hidden" name="sn" value="%h(z)" />
+      @ <input type="submit" name="load" value="Use This Skin" />
+      @ </div></form></li>
     }
   }
   db_prepare(&q,

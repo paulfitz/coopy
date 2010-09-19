@@ -2,18 +2,12 @@
 ** Copyright (c) 2006 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -57,7 +51,6 @@ struct Blob {
 #define BLOB_SEEK_SET 1
 #define BLOB_SEEK_CUR 2
 #define BLOB_SEEK_END 3
-
 
 #endif /* INTERFACE */
 
@@ -108,7 +101,7 @@ void isspace_cmd(void){
 static void blob_panic(void){
   static const char zErrMsg[] = "out of memory\n";
   write(2, zErrMsg, sizeof(zErrMsg)-1);
-  exit(1);
+  fossil_exit(1);
 }
 
 /*
@@ -669,7 +662,7 @@ int blob_write_to_file(Blob *pBlob, const char *zFilename){
     for(i=1; i<nName; i++){
       if( zName[i]=='/' ){
         zName[i] = 0;
-#ifdef __MINGW32__
+#if defined(_WIN32)
         /*
         ** On Windows, local path looks like: C:/develop/project/file.txt
         ** The if stops us from trying to create a directory of a drive letter
@@ -681,7 +674,7 @@ int blob_write_to_file(Blob *pBlob, const char *zFilename){
             fossil_fatal_recursive("unable to create directory %s", zName);
             return 0;
           }
-#ifdef __MINGW32__
+#if defined(_WIN32)
         }
 #endif
         zName[i] = '/';
@@ -865,7 +858,7 @@ void test_cycle_compress(void){
   printf("ok\n");
 }
 
-#ifdef __MINGW32__
+#if defined(_WIN32)
 /*
 ** Convert every \n character in the given blob into \r\n.
 */
@@ -906,7 +899,23 @@ void blob_remove_cr(Blob *p){
   p->nUsed = j;
 }
 
-int blob_initialized(Blob *x) {
-  return (x)->xRealloc==blobReallocMalloc || (x)->xRealloc==blobReallocStatic;
+/*
+** Shell-escape the given string.  Append the result to a blob.
+*/
+void shell_escape(Blob *pBlob, const char *zIn){
+  int n = blob_size(pBlob);
+  int k = strlen(zIn);
+  int i, c;
+  char *z;
+  for(i=0; (c = zIn[i])!=0; i++){
+    if( isspace(c) || c=='"' || (c=='\\' && zIn[i+1]!=0) ){
+      blob_appendf(pBlob, "\"%s\"", zIn);
+      z = blob_buffer(pBlob);
+      for(i=n+1; i<=n+k; i++){
+        if( z[i]=='"' ) z[i] = '_';
+      }
+      return;
+    }
+  }
+  blob_append(pBlob, zIn, -1);
 }
-

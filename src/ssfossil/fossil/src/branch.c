@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -51,7 +45,7 @@ void branch_new(void){
   zColor = find_option("bgcolor","c",1);
   verify_all_options();
   if( g.argc<5 ){
-    usage("new BRANCH-NAME BASE-CHECK-IN ?-bgcolor COLOR?");
+    usage("new BRANCH-NAME CHECK-IN ?-bgcolor COLOR?");
   }
   db_find_and_open_repository(1);  
   noSign = db_get_int("omitsign", 0)|noSign;
@@ -137,7 +131,7 @@ void branch_new(void){
     prompt_user("unable to sign manifest.  continue (y/N)? ", &ans);
     if( blob_str(&ans)[0]!='y' ){
       db_end_transaction(1);
-      exit(1);
+      fossil_exit(1);
     }
   }
 
@@ -176,7 +170,7 @@ void branch_new(void){
 **
 ** Usage: %fossil branch SUBCOMMAND ... ?-R|--repository FILE?
 **
-** Run various subcommands on the branches of the open repository or
+** Run various subcommands to manage branches of the open repository or
 ** of the repository identified by the -R or --repository option.
 **
 **    %fossil branch new BRANCH-NAME BASIS ?-bgcolor COLOR? 
@@ -223,72 +217,70 @@ void branch_cmd(void){
 void brlist_page(void){
   Stmt q;
   int cnt;
+  int showClosed = P("closed")!=0;
 
   login_check_credentials();
   if( !g.okRead ){ login_needed(); return; }
 
-  style_header("Branches");
+  style_header(showClosed ? "Closed Branches" : "Open Branches");
   style_submenu_element("Timeline", "Timeline", "brtimeline");
+  if( showClosed ){
+    style_submenu_element("Open","Open","brlist");
+  }else{
+    style_submenu_element("Closed","Closed","brlist?closed");
+  }
   login_anonymous_available();
   compute_leaves(0, 1);
   style_sidebox_begin("Nomenclature:", "33%");
   @ <ol>
-  @ <li> An <b>open branch</b> is a branch that has one or
+  @ <li> An <div class="sideboxDescribed"><a href="brlist">
+  @ open branch</a></div> is a branch that has one or
   @ more <a href="leaves">open leaves.</a>
   @ The presence of open leaves presumably means
   @ that the branch is still being extended with new check-ins.</li>
-  @ <li> A <b>closed branch</b> is a branch with only
-  @ <a href="leaves?closed">closed leaves</a>.
+  @ <li> A <div class="sideboxDescribed"><a href="brlist?closed">
+  @ closed branch</a></div> is a branch with only
+  @ <div class="sideboxDescribed"><a href="leaves?closed">
+  @ closed leaves</a></div>.
   @ Closed branches are fixed and do not change (unless they are first
   @ reopened)</li>
   @ </ol>
   style_sidebox_end();
 
-  db_prepare(&q,
-    "SELECT DISTINCT value FROM tagxref"
-    " WHERE tagid=%d AND value NOT NULL"
-    "   AND rid IN leaves"
-    " ORDER BY value /*sort*/",
-    TAG_BRANCH
-  );
   cnt = 0;
+  if( !showClosed ){
+    db_prepare(&q,
+      "SELECT DISTINCT value FROM tagxref"
+      " WHERE tagid=%d AND value NOT NULL"
+      "   AND rid IN leaves"
+      " ORDER BY value /*sort*/",
+      TAG_BRANCH
+    );
+  }else{
+    db_prepare(&q,
+      "SELECT value FROM tagxref"
+      " WHERE tagid=%d AND value NOT NULL"
+      " EXCEPT "
+      "SELECT value FROM tagxref"
+      " WHERE tagid=%d AND value NOT NULL"
+      "   AND rid IN leaves"
+      " ORDER BY value /*sort*/",
+      TAG_BRANCH, TAG_BRANCH
+    );
+  }
   while( db_step(&q)==SQLITE_ROW ){
     const char *zBr = db_column_text(&q, 0);
     if( cnt==0 ){
-      @ <h2>Open Branches:</h2>
+      if( showClosed ){
+        @ <h2>Closed Branches:</h2>
+      }else{
+        @ <h2>Open Branches:</h2>
+      }
       @ <ul>
       cnt++;
     }
     if( g.okHistory ){
-      @ <li><a href="%s(g.zBaseURL)/timeline?t=%T(zBr)">%h(zBr)</a></li>
-    }else{
-      @ <li><b>%h(zBr)</b></li>
-    }
-  }
-  db_finalize(&q);
-  if( cnt ){
-    @ </ul>
-  }
-  cnt = 0;
-  db_prepare(&q,
-    "SELECT value FROM tagxref"
-    " WHERE tagid=%d AND value NOT NULL"
-    " EXCEPT "
-    "SELECT value FROM tagxref"
-    " WHERE tagid=%d AND value NOT NULL"
-    "   AND rid IN leaves"
-    " ORDER BY value /*sort*/",
-    TAG_BRANCH, TAG_BRANCH
-  );
-  while( db_step(&q)==SQLITE_ROW ){
-    const char *zBr = db_column_text(&q, 0);
-    if( cnt==0 ){
-      @ <h2>Closed Branches:</h2>
-      @ <ul>
-      cnt++;     
-    }
-    if( g.okHistory ){
-      @ <li><a href="%s(g.zBaseURL)/timeline?t=%T(zBr)">%h(zBr)</a></li>
+      @ <li><a href="%s(g.zBaseURL)/timeline?r=%T(zBr)">%h(zBr)</a></li>
     }else{
       @ <li><b>%h(zBr)</b></li>
     }
@@ -297,9 +289,7 @@ void brlist_page(void){
     @ </ul>
   }
   db_finalize(&q);
-  @ </ul>
-  @ <br clear="both">
-  @ <script>
+  @ <script  type="text/JavaScript">
   @ function xin(id){
   @ }
   @ function xout(id){
@@ -326,7 +316,7 @@ static void brtimeline_extra(int rid){
   );
   while( db_step(&q)==SQLITE_ROW ){
     const char *zTagName = db_column_text(&q, 0);
-    @ <a href="%s(g.zBaseURL)/timeline?t=%T(zTagName)">[timeline]</a>
+    @ <a href="%s(g.zBaseURL)/timeline?r=%T(zTagName)">[timeline]</a>
   }
   db_finalize(&q);
 }
@@ -354,8 +344,7 @@ void brtimeline_page(void){
   );
   www_print_timeline(&q, 0, brtimeline_extra);
   db_finalize(&q);
-  @ <br clear="both">
-  @ <script>
+  @ <script  type="text/JavaScript">
   @ function xin(id){
   @ }
   @ function xout(id){

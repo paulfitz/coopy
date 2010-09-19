@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -583,7 +577,7 @@ static int disableLogin = 0;
 ** of application/x-fossil or application/x-fossil-debug to this page,
 ** regardless of what path was specified in the HTTP header.  This allows
 ** clone clients to specify a URL that omits default pathnames, such
-** as "http://fossil-scm.morg/" instead of "http://fossil-scm.org/index.cgi".
+** as "http://fossil-scm.org/" instead of "http://fossil-scm.org/index.cgi".
 **
 ** WEBPAGE: xfer
 **
@@ -994,7 +988,8 @@ void client_sync(
     nCardSent++;
   }
   manifest_crosslink_begin();
-  printf(zLabelFormat, "", "Bytes", "Cards", "Artifacts", "Deltas");
+  transport_global_startup();
+  fossil_print(zLabelFormat, "", "Bytes", "Cards", "Artifacts", "Deltas");
 
   while( go ){
     int newPhantom = 0;
@@ -1060,9 +1055,9 @@ void client_sync(
 
     /* Exchange messages with the server */
     nFileSend = xfer.nFileSent + xfer.nDeltaSent;
-    printf(zValueFormat, "Send:",
-            blob_size(&send), nCardSent+xfer.nGimmeSent+xfer.nIGotSent,
-            xfer.nFileSent, xfer.nDeltaSent);
+    fossil_print(zValueFormat, "Send:",
+                 blob_size(&send), nCardSent+xfer.nGimmeSent+xfer.nIGotSent,
+                 xfer.nFileSent, xfer.nDeltaSent);
     nCardSent = 0;
     nCardRcvd = 0;
     xfer.nFileSent = 0;
@@ -1093,7 +1088,7 @@ void client_sync(
       }
       xfer.nToken = blob_tokenize(&xfer.line, xfer.aToken, count(xfer.aToken));
       nCardRcvd++;
-      if (!g.fQuiet) {
+      if( !g.cgiOutput && !g.fQuiet ){
         printf("\r%d", nCardRcvd);
         fflush(stdout);
       }
@@ -1234,7 +1229,7 @@ void client_sync(
       if( blob_eq(&xfer.aToken[0],"message") && xfer.nToken==2 ){
         char *zMsg = blob_terminate(&xfer.aToken[1]);
         defossilize(zMsg);
-        if( zMsg ) printf("\rServer says: %s\n", zMsg);
+        if( zMsg ) fossil_print("\rServer says: %s\n", zMsg);
       }else
 
       /*   error MESSAGE
@@ -1286,9 +1281,9 @@ void client_sync(
     }
     origConfigRcvMask = 0;
     if( nCardRcvd>0 ){
-      printf(zValueFormat, "Received:",
-              blob_size(&recv), nCardRcvd,
-              xfer.nFileRcvd, xfer.nDeltaRcvd + xfer.nDanglingFile);
+      fossil_print(zValueFormat, "Received:",
+                   blob_size(&recv), nCardRcvd,
+                   xfer.nFileRcvd, xfer.nDeltaRcvd + xfer.nDanglingFile);
     }
     blob_reset(&recv);
     nCycle++;
@@ -1318,8 +1313,8 @@ void client_sync(
     if( cloneFlag && nCycle==1 ) go = 1;
   };
   transport_stats(&nSent, &nRcvd, 1);
-  printf("Total network traffic: %d bytes sent, %d bytes received\n",
-         nSent, nRcvd);
+  fossil_print("Total network traffic: %d bytes sent, %d bytes received\n",
+               nSent, nRcvd);
   transport_close();
   transport_global_shutdown();
   db_multi_exec("DROP TABLE onremote");

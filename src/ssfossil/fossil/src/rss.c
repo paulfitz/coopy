@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-**
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -24,9 +18,9 @@
 ** This file contains code used to create a RSS feed for the CGI interface.
 */
 #include "config.h"
+#include <time.h>
 #include "rss.h"
 #include <assert.h>
-#include <time.h>
 
 /*
 ** WEBPAGE: timeline.rss
@@ -109,6 +103,7 @@ void page_timeline_rss(void){
   @     <description>%h(zProjectDescr)</description>
   @     <pubDate>%s(zPubDate)</pubDate>
   @     <generator>Fossil version %s(MANIFEST_VERSION) %s(MANIFEST_DATE)</generator>
+  free(zPubDate);
   db_prepare(&q, blob_str(&bSQL));
   blob_reset( &bSQL );
   while( db_step(&q)==SQLITE_ROW && nLine<=nLimit ){

@@ -2,18 +2,12 @@
 ** Copyright (c) 2006 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -58,20 +52,20 @@ void delta_create_cmd(void){
   Blob orig, target, delta;
   if( g.argc!=5 ){
     fprintf(stderr,"Usage: %s %s ORIGIN TARGET DELTA\n", g.argv[0], g.argv[1]);
-    exit(1);
+    fossil_exit(1);
   }
   if( blob_read_from_file(&orig, g.argv[2])<0 ){
     fprintf(stderr,"cannot read %s\n", g.argv[2]);
-    exit(1);
+    fossil_exit(1);
   }
   if( blob_read_from_file(&target, g.argv[3])<0 ){
     fprintf(stderr,"cannot read %s\n", g.argv[3]);
-    exit(1);
+    fossil_exit(1);
   }
   blob_delta_create(&orig, &target, &delta);
   if( blob_write_to_file(&delta, g.argv[4])<blob_size(&delta) ){
     fprintf(stderr,"cannot write %s\n", g.argv[4]);
-    exit(1);
+    fossil_exit(1);
   }
   blob_reset(&orig);
   blob_reset(&target);
@@ -93,6 +87,7 @@ int blob_delta_apply(Blob *pOriginal, Blob *pDelta, Blob *pTarget){
 
   n = delta_output_size(blob_buffer(pDelta), blob_size(pDelta));
   blob_zero(&out);
+  if( n<0 ) return -1;
   blob_resize(&out, n);
   len = delta_apply(
      blob_buffer(pOriginal), blob_size(pOriginal),
@@ -120,20 +115,20 @@ void delta_apply_cmd(void){
   Blob orig, target, delta;
   if( g.argc!=5 ){
     fprintf(stderr,"Usage: %s %s ORIGIN DELTA TARGET\n", g.argv[0], g.argv[1]);
-    exit(1);
+    fossil_exit(1);
   }
   if( blob_read_from_file(&orig, g.argv[2])<0 ){
     fprintf(stderr,"cannot read %s\n", g.argv[2]);
-    exit(1);
+    fossil_exit(1);
   }
   if( blob_read_from_file(&delta, g.argv[3])<0 ){
     fprintf(stderr,"cannot read %s\n", g.argv[3]);
-    exit(1);
+    fossil_exit(1);
   }
   blob_delta_apply(&orig, &delta, &target);
   if( blob_write_to_file(&target, g.argv[4])<blob_size(&target) ){
     fprintf(stderr,"cannot write %s\n", g.argv[4]);
-    exit(1);
+    fossil_exit(1);
   }
   blob_reset(&orig);
   blob_reset(&target);

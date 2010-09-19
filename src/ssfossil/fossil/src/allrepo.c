@@ -2,18 +2,12 @@
 ** Copyright (c) 2008 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -61,12 +55,14 @@ static char *quoteFilename(const char *zFilename){
 **
 ** The ~/.fossil file records the location of all repositories for a
 ** user.  This command performs certain operations on all repositories
-** that can be useful before or after a period of disconnection operation.
+** that can be useful before or after a period of disconnected operation.
+**
+** On Win32 systems, the file is named "_fossil" and is located in
+** %LOCALAPPDATA%, %APPDATA% or %HOMEPATH%.
+**
 ** Available operations are:
 **
-**    list       Display the location of all repositories
-**
-**    ls         An alias for "list"
+**    list | ls  Display the location of all repositories
 **
 **    pull       Run a "pull" operation on all repositories
 **
@@ -95,9 +91,7 @@ void all_cmd(void){
   n = strlen(g.argv[2]);
   db_open_config(1);
   zCmd = g.argv[2];
-  if( strncmp(zCmd, "list", n)==0 ){
-    zCmd = "list";
-  }else if( strncmp(zCmd, "ls", n)==0 ){ /* alias for "list" above */
+  if( strncmp(zCmd, "list", n)==0 || strncmp(zCmd,"ls",n)==0 ){
     zCmd = "list";
   }else if( strncmp(zCmd, "push", n)==0 ){
     zCmd = "push -autourl -R";

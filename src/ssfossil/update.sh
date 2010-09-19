@@ -26,7 +26,10 @@ if true; then
     for f in `cd original/src; ls *`; do
 	echo "========================================================"
 	echo $f
-	diff original/src/$f fossil/src/$f
+	cmp original/src/$f fossil/src/$f || (
+	    echo Making diff
+	    diff -u original/src/$f fossil/src/$f | tee patch/$f.patch
+	)
     done
 fi
 

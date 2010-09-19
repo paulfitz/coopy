@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -56,9 +50,10 @@ void hyperlink_to_uuid(const char *zUuid){
   char zShortUuid[UUID_SIZE+1];
   shorten_uuid(zShortUuid, zUuid);
   if( g.okHistory ){
-    @ <a href="%s(g.zBaseURL)/info/%s(zShortUuid)">[%s(zShortUuid)]</a>
+    @ <a class="timelineHistLink" href="%s(g.zBaseURL)/info/%s(zShortUuid)">
+    @ [%s(zShortUuid)]</a>
   }else{
-    @ <b>[%s(zShortUuid)]</b>
+    @ <span class="timelineHistDsp">[%s(zShortUuid)]</span>
   }
 }
 
@@ -91,7 +86,7 @@ void hyperlink_to_diff(const char *zV1, const char *zV2){
     if( zV2==0 ){
       @ <a href="%s(g.zBaseURL)/diff?v2=%s(zV1)">[diff]</a>
     }else{
-      @ <a href="%s(g.zBaseURL)/diff?v1=%s(zV1)&v2=%s(zV2)">[diff]</a>
+      @ <a href="%s(g.zBaseURL)/diff?v1=%s(zV1)&amp;v2=%s(zV2)">[diff]</a>
     }
   }
 }
@@ -117,7 +112,7 @@ void hyperlink_to_user(const char *zU, const char *zD, const char *zSuf){
   if( zSuf==0 ) zSuf = "";
   if( g.okHistory ){
     if( zD && zD[0] ){
-      @ <a href="%s(g.zTop)/timeline?c=%T(zD)&u=%T(zU)">%h(zU)</a>%s(zSuf)
+      @ <a href="%s(g.zTop)/timeline?c=%T(zD)&amp;u=%T(zU)">%h(zU)</a>%s(zSuf)
     }else{
       @ <a href="%s(g.zTop)/timeline?u=%T(zU)">%h(zU)</a>%s(zSuf)
     }
@@ -168,14 +163,12 @@ int count_nonbranch_children(int pid){
 **    2.  Date/Time
 **    3.  Comment string
 **    4.  User
-**    5.  Number of non-merge children
-**    6.  Number of parents
-**    7.  True if is a leaf
-**    8.  background color
-**    9.  type ("ci", "w", "t")
-**   10.  list of symbolic tags.
-**   11.  tagid for ticket or wiki
-**   12.  Short comment to user for repeated tickets and wiki
+**    5.  True if is a leaf
+**    6.  background color
+**    7.  type ("ci", "w", "t")
+**    8.  list of symbolic tags.
+**    9.  tagid for ticket or wiki
+**   10.  Short comment to user for repeated tickets and wiki
 */
 void www_print_timeline(
   Stmt *pQuery,          /* Query to implement the timeline */
@@ -199,23 +192,24 @@ void www_print_timeline(
   }
   if( tmFlags & TIMELINE_GRAPH ){
     pGraph = graph_init();
+    /* style is not moved to css, because this is
+    ** a technical div for the timeline graph
+    */
     @ <div id="canvas" style="position:relative;width:1px;height:1px;"></div>
   }
 
-  @ <table cellspacing=0 border=0 cellpadding=0>
+  @ <table class="timelineTable">
   blob_zero(&comment);
   while( db_step(pQuery)==SQLITE_ROW ){
     int rid = db_column_int(pQuery, 0);
     const char *zUuid = db_column_text(pQuery, 1);
-    int nPChild = db_column_int(pQuery, 5);
-    int nParent = db_column_int(pQuery, 6);
-    int isLeaf = db_column_int(pQuery, 7);
-    const char *zBgClr = db_column_text(pQuery, 8);
+    int isLeaf = db_column_int(pQuery, 5);
+    const char *zBgClr = db_column_text(pQuery, 6);
     const char *zDate = db_column_text(pQuery, 2);
-    const char *zType = db_column_text(pQuery, 9);
+    const char *zType = db_column_text(pQuery, 7);
     const char *zUser = db_column_text(pQuery, 4);
-    const char *zTagList = db_column_text(pQuery, 10);
-    int tagid = db_column_int(pQuery, 11);
+    const char *zTagList = db_column_text(pQuery, 8);
+    int tagid = db_column_int(pQuery, 9);
     int commentColumn = 3;    /* Column containing comment text */
     char zTime[8];
     if( tagid ){
@@ -224,32 +218,32 @@ void www_print_timeline(
           suppressCnt++;
           continue;
         }else{
-          commentColumn = 12;
+          commentColumn = 10;
         }
       }
     }
     prevTagid = tagid;
     if( suppressCnt ){
-      @ <tr><td><td><td>
-      @ <small><i>... %d(suppressCnt) similar
-      @ event%s(suppressCnt>1?"s":"") omitted.</i></small></tr>
+      @ <tr><td /><td /><td>
+      @ <span class="timelineDisabled">... %d(suppressCnt) similar
+      @ event%s(suppressCnt>1?"s":"") omitted.</span></td></tr>
       suppressCnt = 0;
     }
     if( strcmp(zType,"div")==0 ){
-      @ <tr><td colspan=3><hr></td></tr>
+      @ <tr><td colspan="3"><hr /></td></tr>
       continue;
     }
     if( memcmp(zDate, zPrevDate, 10) ){
       sprintf(zPrevDate, "%.10s", zDate);
       @ <tr><td>
-      @   <div class="divider"><nobr>%s(zPrevDate)</nobr></div>
+      @   <div class="divider">%s(zPrevDate)</div>
       @ </td></tr>
     }
     memcpy(zTime, &zDate[11], 5);
     zTime[5] = 0;
     @ <tr>
-    @ <td valign="top" align="right">%s(zTime)</td>
-    @ <td width="20" align="left" valign="top">
+    @ <td class="timelineTime">%s(zTime)</td>
+    @ <td class="timelineGraph">
     if( pGraph && zType[0]=='c' ){
       int nParent = 0;
       int aParent[32];
@@ -279,40 +273,21 @@ void www_print_timeline(
       db_reset(&qbranch);
       @ <div id="m%d(gidx)"></div>
     }
+    @</td>
     if( zBgClr && zBgClr[0] ){
-      @ <td valign="top" align="left" bgcolor="%h(zBgClr)">
+      @ <td class="timelineTableCell" style="background-color: %h(zBgClr);">
     }else{
-      @ <td valign="top" align="left">
+      @ <td class="timelineTableCell">
     }
     if( zType[0]=='c' ){
-      const char *azTag[5];
-      int nTag = 0;
       hyperlink_to_uuid(zUuid);
-      if( (tmFlags & TIMELINE_LEAFONLY)==0 ){
-        if( nParent>1 ){
-          azTag[nTag++] = "Merge";
-        }
-        if( nPChild>1 ){
-          if( count_nonbranch_children(rid)>1 ){
-            azTag[nTag++] = "Fork";
-          }else{
-            azTag[nTag++] = "Branch-Point";
-          }
-        }
-      }
       if( isLeaf ){
         if( db_exists("SELECT 1 FROM tagxref"
                       " WHERE rid=%d AND tagid=%d AND tagtype>0",
                       rid, TAG_CLOSED) ){
-          azTag[nTag++] = "Closed-Leaf";
+          @ <span class="timelineLeaf">Closed-Leaf:</span>
         }else{
-          azTag[nTag++] = "Leaf";
-        }
-      }
-      if( nTag>0 ){
-        int i;
-        for(i=0; i<nTag; i++){
-          @ <b>%s(azTag[i])%s(i==nTag-1?"":",")</b>
+          @ <span class="timelineLeaf">Leaf:</span>
         }
       }
     }else if( (tmFlags & TIMELINE_ARTID)!=0 ){
@@ -341,9 +316,9 @@ void www_print_timeline(
     @ </td></tr>
   }
   if( suppressCnt ){
-    @ <tr><td><td><td>
-    @ <small><i>... %d(suppressCnt) similar
-    @ event%s(suppressCnt>1?"s":"") omitted.</i></small></tr>
+    @ <tr><td /><td /><td>
+    @ <span class="timelineDisabled">... %d(suppressCnt) similar
+    @ event%s(suppressCnt>1?"s":"") omitted.</span></td></tr>
     suppressCnt = 0;
   }
   if( pGraph ){
@@ -352,7 +327,12 @@ void www_print_timeline(
       graph_free(pGraph);
       pGraph = 0;
     }else{
-      @ <tr><td><td><div style="width:%d(pGraph->mxRail*20+30)px;"></div>
+      /* style is not moved to css, because this is
+      ** a technical div for the timeline graph
+      */
+      @ <tr><td /><td>
+      @ <div id="grbtm" style="width:%d(pGraph->mxRail*20+30)px;"></div>
+      @ </td></tr>
     }
   }
   @ </table>
@@ -368,7 +348,8 @@ void timeline_output_graph_javascript(GraphContext *pGraph){
     GraphRow *pRow;
     int i;
     char cSep;
-    @ <script type="text/JavaScript">
+    @ <script  type="text/JavaScript">
+    @ /* <![CDATA[ */
     cgi_printf("var rowinfo = [\n");
     for(pRow=pGraph->pFirst; pRow; pRow=pRow->pNext){
       cgi_printf("{id:\"m%d\",bg:\"%s\",r:%d,d:%d,mo:%d,mu:%d,u:%d,au:",
@@ -384,7 +365,7 @@ void timeline_output_graph_javascript(GraphContext *pGraph){
       for(i=0; i<GR_MAX_RAIL; i++){
         if( i==pRow->iRail ) continue;
         if( pRow->aiRaiser[i]>0 ){
-          cgi_printf("%c%d,%d", cSep, pGraph->railMap[i], pRow->aiRaiser[i]);
+          cgi_printf("%c%d,%d", cSep, i, pRow->aiRaiser[i]);
           cSep = ',';
         }
       }
@@ -393,7 +374,7 @@ void timeline_output_graph_javascript(GraphContext *pGraph){
       cSep = '[';
       for(i=0; i<GR_MAX_RAIL; i++){
         if( pRow->mergeIn & (1<<i) ){
-          cgi_printf("%c%d", cSep, pGraph->railMap[i]);
+          cgi_printf("%c%d", cSep, i);
           cSep = ',';
         }
       }
@@ -514,11 +495,11 @@ void timeline_output_graph_javascript(GraphContext *pGraph){
     @     rowinfo[i].y = absoluteY(rowinfo[i].id) + 10 - canvasY;
     @     rowinfo[i].x = left + rowinfo[i].r*20;
     @   }
-    @   var btm = rowinfo[rowinfo.length-1].y + 20;
+    @   var btm = absoluteY("grbtm") + 10 - canvasY;
     @   if( btm<32768 ){
     @     canvasDiv.innerHTML = '<canvas id="timeline-canvas" '+
     @        'style="position:absolute;left:'+(left-5)+'px;"' +
-    @        ' width="'+width+'" height="'+btm+'"></canvas>';
+    @        ' width="'+width+'" height="'+btm+'"><'+'/canvas>';
     @     realCanvas = document.getElementById('timeline-canvas');
     @   }else{
     @     realCanvas = 0;
@@ -550,6 +531,7 @@ void timeline_output_graph_javascript(GraphContext *pGraph){
     @   setTimeout("checkHeight();", 1000);
     @ }
     @ checkHeight();
+    @ /* ]]> */
     @ </script>
   }
 }
@@ -565,8 +547,6 @@ static void timeline_temp_table(void){
     @   timestamp TEXT,
     @   comment TEXT,
     @   user TEXT,
-    @   nchild INTEGER,
-    @   nparent INTEGER,
     @   isleaf BOOLEAN,
     @   bgcolor TEXT,
     @   etype TEXT,
@@ -591,8 +571,6 @@ const char *timeline_query_for_www(void){
     @   datetime(event.mtime,'localtime') AS timestamp,
     @   coalesce(ecomment, comment),
     @   coalesce(euser, user),
-    @   (SELECT count(*) FROM plink WHERE pid=blob.rid AND isprim=1),
-    @   (SELECT count(*) FROM plink WHERE cid=blob.rid),
     @   NOT EXISTS(SELECT 1 FROM plink
     @               WHERE pid=blob.rid
     @                AND coalesce((SELECT value FROM tagxref
@@ -661,6 +639,7 @@ static void timeline_add_dividers(const char *zDate){
 **    p=RID          artifact RID and up to COUNT parents and ancestors
 **    d=RID          artifact RID and up to COUNT descendants
 **    t=TAGID        show only check-ins with the given tagid
+**    r=TAGID        show check-ins related to tagid
 **    u=USER         only if belonging to this user
 **    y=TYPE         'ci', 'w', 't'
 **    s=TEXT         string search (comment and brief)
@@ -687,6 +666,7 @@ void page_timeline(void){
   const char *zBefore = P("b");      /* Events before this time */
   const char *zCirca = P("c");       /* Events near this time */
   const char *zTagName = P("t");     /* Show events with this tag */
+  const char *zBrName = P("r");      /* Show events related to this tag */
   const char *zSearch = P("s");      /* Search string */
   HQuery url;                        /* URL for various branch links */
   int tagid;                         /* Tag ID */
@@ -698,6 +678,8 @@ void page_timeline(void){
   if( !g.okRead && !g.okRdTkt && !g.okRdWiki ){ login_needed(); return; }
   if( zTagName && g.okRead ){
     tagid = db_int(0, "SELECT tagid FROM tag WHERE tagname='sym-%q'", zTagName);
+  }else if( zBrName && g.okRead ){
+    tagid = db_int(0, "SELECT tagid FROM tag WHERE tagname='sym-%q'",zBrName);
   }else{
     tagid = 0;
   }
@@ -776,10 +758,28 @@ void page_timeline(void){
     url_add_parameter(&url, "n", zNEntry);
     if( tagid>0 ){
       zType = "ci";
-      url_add_parameter(&url, "t", zTagName);
-      blob_appendf(&sql, " AND EXISTS (SELECT 1 FROM tagxref WHERE tagid=%d"
-                                        " AND tagtype>0 AND rid=blob.rid)",
-                   tagid);
+      blob_appendf(&sql,
+        "AND (EXISTS(SELECT 1 FROM tagxref"
+                    " WHERE tagid=%d AND tagtype>0 AND rid=blob.rid)", tagid);
+
+      if( zBrName ){
+        /* The next two blob_appendf() calls add SQL that causes checkins that
+        ** are not part of the branch which are parents or childen of the branch
+        ** to be included in the report.  This related check-ins are useful
+        ** in helping to visualize what has happened on a quiescent branch 
+        ** that is infrequently merged with a much more activate branch.
+        */
+        url_add_parameter(&url, "r", zBrName);
+        blob_appendf(&sql,
+          " OR EXISTS(SELECT 1 FROM plink JOIN tagxref ON rid=cid"
+                     " WHERE tagid=%d AND tagtype>0 AND pid=blob.rid)", tagid);
+        blob_appendf(&sql,
+          " OR EXISTS(SELECT 1 FROM plink JOIN tagxref ON rid=pid"
+                     " WHERE tagid=%d AND tagtype>0 AND cid=blob.rid)", tagid);
+      }else{
+        url_add_parameter(&url, "t", zTagName);
+      }
+      blob_appendf(&sql, ")");
     }
     if( (zType[0]=='w' && !g.okRdWiki)
      || (zType[0]=='t' && !g.okRdTkt)
@@ -888,16 +888,19 @@ void page_timeline(void){
       blob_appendf(&desc, " by user %h", zUser);
       tmFlags |= TIMELINE_DISJOINT;
     }
-    if( tagid>0 ){
+    if( zTagName ){
       blob_appendf(&desc, " tagged with \"%h\"", zTagName);
+      tmFlags |= TIMELINE_DISJOINT;
+    }else if( zBrName ){
+      blob_appendf(&desc, " related to \"%h\"", zBrName);
       tmFlags |= TIMELINE_DISJOINT;
     }
     if( zAfter ){
-      blob_appendf(&desc, " occurring on or after %h.<br>", zAfter);
+      blob_appendf(&desc, " occurring on or after %h.<br />", zAfter);
     }else if( zBefore ){
-      blob_appendf(&desc, " occurring on or before %h.<br>", zBefore);
+      blob_appendf(&desc, " occurring on or before %h.<br />", zBefore);
     }else if( zCirca ){
-      blob_appendf(&desc, " occurring around %h.<br>", zCirca);
+      blob_appendf(&desc, " occurring around %h.<br />", zCirca);
     }
     if( zSearch ){
       blob_appendf(&desc, " matching \"%h\"", zSearch);

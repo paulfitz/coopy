@@ -2,18 +2,12 @@
 ** Copyright (c) 2006 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -63,6 +57,7 @@ struct Global {
   long long int now;      /* Seconds since 1970 */
   int repositoryOpen;     /* True if the main repository database is open */
   char *zRepositoryName;  /* Name of the repository database */
+  char *zRepoDb;          /* SQLite database name for the repository */
   const char *zHome;      /* Name of user home directory */
   int localOpen;          /* True if the local database is open */
   char *zLocalRoot;       /* The directory holding the  local database */
@@ -80,7 +75,7 @@ struct Global {
   int iErrPriority;       /* Priority of current error message */
   char *zErrMsg;          /* Text of an error message */
   Blob cgiIn;             /* Input to an xfer www method */
-  int cgiPanic;           /* Write error messages to CGI */
+  int cgiOutput;          /* Write error and status messages to CGI */
   int xferPanic;          /* Write error messages in XFER protocol */
   int fullHttpReply;      /* True for full HTTP reply.  False for CGI reply */
   Th_Interp *interp;      /* The TH1 interpreter */
@@ -93,6 +88,7 @@ struct Global {
 
   int urlIsFile;          /* True if a "file:" url */
   int urlIsHttps;         /* True if a "https:" url */
+  int urlIsSsh;           /* True if an "ssh:" url */
   char *urlName;          /* Hostname for http: or filename for file: */
   char *urlHostname;      /* The HOST: parameter on http headers */
   char *urlProtocol;      /* "http" or "https" */
@@ -103,6 +99,7 @@ struct Global {
   char *urlPasswd;        /* Password for http: */
   char *urlCanonical;     /* Canonical representation of the URL */
   char *urlProxyAuth;     /* Proxy-Authorizer: string */
+  char *urlFossil;        /* The path of the ?fossil=path suffix on ssh: */
   int dontKeepUrl;        /* Do not persist the URL */
 
   const char *zLogin;     /* Login name.  "" if not logged in. */
@@ -219,39 +216,33 @@ static int name_search(
   return 1+(cnt>1);
 }
 
-static int _main_config = 0;
 
 /*
 ** This procedure runs first.
 */
 int main(int argc, char **argv){
-  const char *zCmdName;
+  const char *zCmdName = "unknown";
   int idx;
   int rc;
-  db_reset_all();
-  _verify_setup();
-  _manifest_setup();
 
-  if (!_main_config) {
-    sqlite3_config(SQLITE_CONFIG_LOG, fossil_sqlite_log, 0);
-    _main_config = 1;
-  }
+  sqlite3_config(SQLITE_CONFIG_LOG, fossil_sqlite_log, 0);
   g.now = time(0);
   g.argc = argc;
   g.argv = argv;
   if( getenv("GATEWAY_INTERFACE")!=0 ){
     zCmdName = "cgi";
   }else if( argc<2 ){
-    fprintf(stderr, "Usage: %s COMMAND ...\n", argv[0]);
-    exit(1);
+    fprintf(stderr, "Usage: %s COMMAND ...\n"
+                    "\"%s help\" for a list of available commands\n"
+                    "\"%s help COMMAND\" for specific details\n",
+                    argv[0], argv[0], argv[0]);
+    fossil_exit(1);
   }else{
     g.fQuiet = find_option("quiet", 0, 0)!=0;
     g.fSqlTrace = find_option("sqltrace", 0, 0)!=0;
     g.fSqlPrint = find_option("sqlprint", 0, 0)!=0;
     g.fHttpTrace = find_option("httptrace", 0, 0)!=0;
-    if (!g.zLogin) {
-      g.zLogin = find_option("user", "U", 1);
-    }
+    g.zLogin = find_option("user", "U", 1);
     zCmdName = argv[1];
   }
   rc = name_search(zCmdName, aCommand, count(aCommand), &idx);
@@ -259,14 +250,16 @@ int main(int argc, char **argv){
     fprintf(stderr,"%s: unknown command: %s\n"
                    "%s: use \"help\" for more information\n",
                    argv[0], zCmdName, argv[0]);
-    return 1;
+    fossil_exit(1);
   }else if( rc==2 ){
     fprintf(stderr,"%s: ambiguous command prefix: %s\n"
                    "%s: use \"help\" for more information\n",
                    argv[0], zCmdName, argv[0]);
-    return 1;
+    fossil_exit(1);
   }
   aCommand[idx].xFunc();
+  fossil_exit(0);
+  /*NOT_REACHED*/
   return 0;
 }
 
@@ -276,6 +269,14 @@ int main(int argc, char **argv){
 ** shutting down, the recursive errors are silently ignored.
 */
 static int mainInFatalError = 0;
+
+/*
+** Exit.  Take care to close the database first.
+*/
+void fossil_exit(int rc){
+  db_close();
+  exit(rc);
+}
 
 /*
 ** Print an error message, rollback all databases, and quit.  These
@@ -289,7 +290,7 @@ void fossil_panic(const char *zFormat, ...){
   va_start(ap, zFormat);
   z = vmprintf(zFormat, ap);
   va_end(ap);
-  if( g.cgiPanic && once ){
+  if( g.cgiOutput && once ){
     once = 0;
     cgi_printf("<p><font color=\"red\">%h</font></p>", z);
     cgi_reply();
@@ -297,7 +298,7 @@ void fossil_panic(const char *zFormat, ...){
     fprintf(stderr, "%s: %s\n", g.argv[0], z);
   }
   db_force_rollback();
-  exit(1);
+  fossil_exit(1);
 }
 void fossil_fatal(const char *zFormat, ...){
   char *z;
@@ -306,15 +307,15 @@ void fossil_fatal(const char *zFormat, ...){
   va_start(ap, zFormat);
   z = vmprintf(zFormat, ap);
   va_end(ap);
-  if( g.cgiPanic ){
-    g.cgiPanic = 0;
+  if( g.cgiOutput ){
+    g.cgiOutput = 0;
     cgi_printf("<p><font color=\"red\">%h</font></p>", z);
     cgi_reply();
   }else{
     fprintf(stderr, "%s: %s\n", g.argv[0], z);
   }
   db_force_rollback();
-  exit(1);
+  fossil_exit(1);
 }
 
 /* This routine works like fossil_fatal() except that if called
@@ -334,15 +335,15 @@ void fossil_fatal_recursive(const char *zFormat, ...){
   va_start(ap, zFormat);
   z = vmprintf(zFormat, ap);
   va_end(ap);
-  if( g.cgiPanic ){
-    g.cgiPanic = 0;
+  if( g.cgiOutput ){
+    g.cgiOutput = 0;
     cgi_printf("<p><font color=\"red\">%h</font></p>", z);
     cgi_reply();
   }else{
     fprintf(stderr, "%s: %s\n", g.argv[0], z);
   }
   db_force_rollback();
-  exit(1);
+  fossil_exit(1);
 }
 
 
@@ -353,7 +354,7 @@ void fossil_warning(const char *zFormat, ...){
   va_start(ap, zFormat);
   z = vmprintf(zFormat, ap);
   va_end(ap);
-  if( g.cgiPanic ){
+  if( g.cgiOutput ){
     cgi_printf("<p><font color=\"red\">%h</font></p>", z);
   }else{
     fprintf(stderr, "%s: %s\n", g.argv[0], z);
@@ -405,7 +406,7 @@ void fossil_sqlite_log(void *notUsed, int iCode, const char *zErrmsg){
 */
 void usage(const char *zFormat){
   fprintf(stderr, "Usage: %s %s %s\n", g.argv[0], g.argv[1], zFormat);
-  exit(1);
+  fossil_exit(1);
 }
 
 /*
@@ -633,7 +634,7 @@ void fossil_redirect_home(void){
 ** is a directory, of that directory.
 */
 static char *enter_chroot_jail(char *zRepo){
-#if !defined(__MINGW32__)
+#if !defined(_WIN32)
   if( getuid()==0 ){
     int i;
     struct stat sStat;
@@ -811,7 +812,7 @@ void cmd_cgi(void){
   }
   g.httpOut = stdout;
   g.httpIn = stdin;
-#ifdef __MINGW32__
+#if defined(_WIN32)
   /* Set binary mode on windows to avoid undesired translations
   ** between \n and \r\n. */
   setmode(_fileno(g.httpOut), _O_BINARY);
@@ -822,7 +823,7 @@ void cmd_cgi(void){
   setmode(fileno(g.httpOut), O_BINARY);
   setmode(fileno(g.httpIn), O_BINARY);
 #endif
-  g.cgiPanic = 1;
+  g.cgiOutput = 1;
   blob_read_from_file(&config, zFile);
   while( blob_line(&config, &line) ){
     if( !blob_token(&line, &key) ) continue;
@@ -917,10 +918,10 @@ void cmd_http(void){
   const char *zIpAddr;
   const char *zNotFound;
   zNotFound = find_option("notfound", 0, 1);
+  g.cgiOutput = 1;
   if( g.argc!=2 && g.argc!=3 && g.argc!=6 ){
-    cgi_panic("no repository specified");
+    fossil_fatal("no repository specified");
   }
-  g.cgiPanic = 1;
   g.fullHttpReply = 1;
   if( g.argc==6 ){
     g.httpIn = fopen(g.argv[3], "rb");
@@ -938,15 +939,23 @@ void cmd_http(void){
 }
 
 /*
+** Note that the following command is used by ssh:// processing.
+**
 ** COMMAND: test-http
 ** Works like the http command but gives setup permission to all users.
 */
 void cmd_test_http(void){
   login_set_capabilities("s");
-  cmd_http();
+  g.httpIn = stdin;
+  g.httpOut = stdout;
+  find_server_repository(0);
+  g.cgiOutput = 1;
+  g.fullHttpReply = 1;
+  cgi_handle_http_request(0);
+  process_one_web_page(0);
 }
 
-#ifndef __MINGW32__
+#if !defined(_WIN32)
 #if !defined(__DARWIN__) && !defined(__APPLE__)
 /*
 ** Search for an executable on the PATH environment variable.
@@ -985,7 +994,8 @@ static int binaryOnPath(const char *zBinary){
 ** within an open checkout.
 **
 ** The "ui" command automatically starts a web browser after initializing
-** the web server.
+** the web server.  The "ui" command also binds to 127.0.0.1 and so will
+** only process HTTP traffic from the local machine.
 **
 ** In the "server" command, the REPOSITORY can be a directory (aka folder)
 ** that contains one or more respositories with names ending in ".fossil".
@@ -999,8 +1009,9 @@ void cmd_webserver(void){
   char *zBrowserCmd = 0;    /* Command to launch the web browser */
   int isUiCmd;              /* True if command is "ui", not "server' */
   const char *zNotFound;    /* The --notfound option or NULL */
+  int flags = 0;            /* Server flags */
 
-#ifdef __MINGW32__
+#if defined(_WIN32)
   const char *zStopperFile;    /* Name of file used to terminate server */
   zStopperFile = find_option("stopper", 0, 1);
 #endif
@@ -1013,6 +1024,7 @@ void cmd_webserver(void){
   zNotFound = find_option("notfound", 0, 1);
   if( g.argc!=2 && g.argc!=3 ) usage("?REPOSITORY?");
   isUiCmd = g.argv[1][0]=='u';
+  if( isUiCmd ) flags |= HTTP_SERVER_LOCALHOST;
   find_server_repository(isUiCmd);
   if( zPort ){
     iPort = mxPort = atoi(zPort);
@@ -1020,7 +1032,7 @@ void cmd_webserver(void){
     iPort = db_get_int("http-port", 8080);
     mxPort = iPort+100;
   }
-#ifndef __MINGW32__
+#if !defined(_WIN32)
   /* Unix implementation */
   if( isUiCmd ){
 #if !defined(__DARWIN__) && !defined(__APPLE__)
@@ -1042,7 +1054,7 @@ void cmd_webserver(void){
     zBrowserCmd = mprintf("%s http://localhost:%%d/ &", zBrowser);
   }
   db_close();
-  if( cgi_http_server(iPort, mxPort, zBrowserCmd) ){
+  if( cgi_http_server(iPort, mxPort, zBrowserCmd, flags) ){
     fossil_fatal("unable to listen on TCP socket %d", iPort);
   }
   g.httpIn = stdin;
@@ -1050,7 +1062,7 @@ void cmd_webserver(void){
   if( g.fHttpTrace || g.fSqlTrace ){
     fprintf(stderr, "====== SERVER pid %d =======\n", getpid());
   }
-  g.cgiPanic = 1;
+  g.cgiOutput = 1;
   find_server_repository(isUiCmd);
   g.zRepositoryName = enter_chroot_jail(g.zRepositoryName);
   cgi_handle_http_request(0);
@@ -1062,6 +1074,6 @@ void cmd_webserver(void){
     zBrowserCmd = mprintf("%s http://127.0.0.1:%%d/", zBrowser);
   }
   db_close();
-  win32_http_server(iPort, mxPort, zBrowserCmd, zStopperFile, zNotFound);
+  win32_http_server(iPort, mxPort, zBrowserCmd, zStopperFile, zNotFound, flags);
 #endif
 }

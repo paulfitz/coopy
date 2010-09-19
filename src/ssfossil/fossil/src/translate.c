@@ -2,19 +2,12 @@
 ** Copyright (c) 2002 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License as published by the Free Software Foundation; either
-** version 2 of the License, or (at your option) any later version.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -22,7 +15,6 @@
 **
 *******************************************************************************
 **
-** This program reads C source code from standard input.  Lines that
 ** begin with the "@" character are translated into cgi_printf() statements
 ** and the translated code is written on standard output.
 **
@@ -76,35 +68,19 @@ static void end_block(FILE *out){
 ** Translate the input stream into the output stream
 */
 static void trans(FILE *in, FILE *out){
-  int i, j, k;        /* Loop counters */
-  char c1, c2;        /* Characters used to start a comment */
-  int lastWasEq = 0;  /* True if last non-whitespace character was "=" */
-  char zLine[2000];   /* A single line of input */
-  char zOut[4000];    /* The input line translated into appropriate output */
+  int i, j, k;          /* Loop counters */
+  char c1, c2;          /* Characters used to start a comment */
+  int lastWasEq = 0;    /* True if last non-whitespace character was "=" */
+  int lastWasComma = 0; /* True if last non-whitespace character was "," */
+  char zLine[2000];     /* A single line of input */
+  char zOut[4000];      /* The input line translated into appropriate output */
 
   c1 = c2 = '-';
   while( fgets(zLine, sizeof(zLine), in) ){
     for(i=0; zLine[i] && isspace(zLine[i]); i++){}
     if( zLine[i]!='@' ){
       if( inPrint || inStr ) end_block(out);
-      if (strncmp(zLine+i,"printf",6)==0) {
-	zLine[i] = '\0';
-	fprintf(out,"%s",zLine);
-	fprintf(out,"_ssfossil_p");
-	fprintf(out,"%s",zLine+i+1);
-      } else if (strncmp(zLine+i,"exit(",5)==0) {
-	zLine[i] = '\0';
-	fprintf(out,"%s",zLine);
-	fprintf(out,"_ssfossil_e");
-	fprintf(out,"%s",zLine+i+1);
-      } else if (strncmp(zLine+i,"fprintf(stderr",14)==0) {
-	zLine[i] = '\0';
-	fprintf(out,"%s",zLine);
-	fprintf(out,"_ssfossil_f");
-	fprintf(out,"%s",zLine+i+1);
-      } else {
-	fprintf(out,"%s",zLine);
-      }
+      fprintf(out,"%s",zLine);
                        /* 0123456789 12345 */
       if( strncmp(zLine, "/* @-comment: ", 14)==0 ){
         c1 = zLine[14];
@@ -112,10 +88,12 @@ static void trans(FILE *in, FILE *out){
       }
       i += strlen(&zLine[i]);
       while( i>0 && isspace(zLine[i-1]) ){ i--; }
-      lastWasEq = i>0 && zLine[i-1]=='=';
-    }else if( lastWasEq ){
+      lastWasEq    = i>0 && zLine[i-1]=='=';
+      lastWasComma = i>0 && zLine[i-1]==',';
+    }else if( lastWasEq || lastWasComma){
       /* If the last non-whitespace character before the first @ was
-      ** an "=" then generate a string literal.  But skip comments
+      ** an "="(var init/set) or a ","(const definition in list) then
+      ** generate a string literal.  But skip comments
       ** consisting of all text between c1 and c2 (default "--")
       ** and end of line.
       */

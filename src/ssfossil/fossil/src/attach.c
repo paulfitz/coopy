@@ -2,18 +2,12 @@
 ** Copyright (c) 2010 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -83,16 +77,16 @@ void attachlist_page(void){
       }
     }
     if( strlen(zTarget)==UUID_SIZE && validate16(zTarget,UUID_SIZE) ){
-      zUrlTail = mprintf("tkt=%s&file=%t", zTarget, zFilename);
+      zUrlTail = mprintf("tkt=%s&amp;file=%t", zTarget, zFilename);
     }else{
-      zUrlTail = mprintf("page=%t&file=%t", zTarget, zFilename);
+      zUrlTail = mprintf("page=%t&amp;file=%t", zTarget, zFilename);
     }
     @
     @ <p><a href="/attachview?%s(zUrlTail)">%h(zFilename)</a>
-    @ [<a href="/attachdownload/%t(zFilename)?%s(zUrlTail)">download</a>]<br>
+    @ [<a href="/attachdownload/%t(zFilename)?%s(zUrlTail)">download</a>]<br />
     if( zComment ) while( isspace(zComment[0]) ) zComment++;
     if( zComment && zComment[0] ){
-      @ %w(zComment)<br>
+      @ %w(zComment)<br />
     }
     if( zPage==0 && zTkt==0 ){
       if( zSrc==0 || zSrc[0]==0 ){
@@ -101,11 +95,8 @@ void attachlist_page(void){
         zSrc = "Added to";
       }
       if( strlen(zTarget)==UUID_SIZE && validate16(zTarget, UUID_SIZE) ){
-        char zShort[20];
-        memcpy(zShort, zTarget, 10);
-        zShort[10] = 0;
         @ %s(zSrc) ticket <a href="%s(g.zTop)/tktview?name=%s(zTarget)">
-        @ %s(zShort)</a>
+        @ %S(zTarget)</a>
       }else{
         @ %s(zSrc) wiki page <a href="%s(g.zTop)/wiki?name=%t(zTarget)">
         @ %h(zTarget)</a>
@@ -228,10 +219,12 @@ void attachadd_page(void){
   }else{
     if( g.okApndTkt==0 || g.okAttach==0 ) login_needed();
     if( !db_exists("SELECT 1 FROM tag WHERE tagname='tkt-%q'", zTkt) ){
-      fossil_redirect_home();
+      zTkt = db_text(0, "SELECT substr(tagname,5) FROM tag" 
+                        " WHERE tagname GLOB 'tkt-%q*'", zTkt);
+      if( zTkt==0 ) fossil_redirect_home();
     }
     zTarget = zTkt;
-    zTargetType = mprintf("Ticket <a href=\"%s/tktview?name=%.10s\">%.10s</a>",
+    zTargetType = mprintf("Ticket <a href=\"%s/tktview/%S\">%S</a>",
                           g.zTop, zTkt, zTkt);
   }
   if( zFrom==0 ) zFrom = mprintf("%s/home", g.zTop);
@@ -282,9 +275,9 @@ void attachadd_page(void){
   @ <form action="%s(g.zBaseURL)/attachadd" method="POST"
   @  enctype="multipart/form-data">
   @ File to Attach:
-  @ <input type="file" name="f" size="60"><br>
-  @ Description:<br>
-  @ <textarea name="comment" cols=80 rows=5 wrap="virtual"></textarea><br>
+  @ <input type="file" name="f" size="60"><br />
+  @ Description:<br />
+  @ <textarea name="comment" cols=80 rows=5 wrap="virtual"></textarea><br />
   if( zTkt ){
     @ <input type="hidden" name="tkt" value="%h(zTkt)">
   }else{
@@ -360,7 +353,7 @@ void attachdel_page(void){
   style_header("Delete Attachment");
   @ <form action="%s(g.zBaseURL)/attachdelete" method="POST">
   @ <p>Confirm that you want to delete the attachment named
-  @ "%h(zFile)" on %s(zTkt?"ticket":"wiki page") %h(zTarget):<br>
+  @ "%h(zFile)" on %s(zTkt?"ticket":"wiki page") %h(zTarget):<br />
   if( zTkt ){
     @ <input type="hidden" name="tkt" value="%h(zTkt)">
   }else{

@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -69,15 +63,6 @@ static void verify_rid(int rid){
 */
 static Bag toVerify;
 static int inFinalVerify = 0;
-static int _verify_isInit = 0;
-
-int _verify_setup() {
-  bag_clear(&toVerify);
-  inFinalVerify = 0;
-  _verify_isInit = 0;
-  return 0;
-}
-
 
 /*
 ** This routine is called just prior to each commit operation.  
@@ -107,9 +92,10 @@ static int verify_at_commit(void){
 ** verification.
 */
 void verify_before_commit(int rid){
-  if( !_verify_isInit ){
+  static int isInit = 0;
+  if( !isInit ){
     db_commit_hook(verify_at_commit, 1000);
-    _verify_isInit = 1;
+    isInit = 1;
   }
   assert( !inFinalVerify );
   if( rid>0 ){

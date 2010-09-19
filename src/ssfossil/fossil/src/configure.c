@@ -2,18 +2,12 @@
 ** Copyright (c) 2008 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -356,9 +350,9 @@ static void export_config(
       const char *zName = aConfig[i].zName;
       if( zName[0]!='@' ){
         char *zValue = db_text(0, 
-            "SELECT value FROM config WHERE name=%Q", zName);
+            "SELECT quote(value) FROM config WHERE name=%Q", zName);
         if( zValue ){
-          blob_appendf(&out,"REPLACE INTO config VALUES(%Q,%Q);\n", 
+          blob_appendf(&out,"REPLACE INTO config VALUES(%Q,%s);\n", 
                        zName, zValue);
         }
         free(zValue);
@@ -375,7 +369,7 @@ static void export_config(
 /*
 ** COMMAND: configuration
 **
-** Usage: %fossil configure METHOD ...
+** Usage: %fossil configure METHOD ... ?-R|--repository REPOSITORY?
 **
 ** Where METHOD is one of: export import merge pull push reset.  All methods
 ** accept the -R or --repository option to specific a repository.
@@ -383,7 +377,7 @@ static void export_config(
 **    %fossil configuration export AREA FILENAME
 **
 **         Write to FILENAME exported configuraton information for AREA.
-**         AREA can be one of:  all ticket skin project
+**         AREA can be one of:  all email project shun skin ticket user
 **
 **    %fossil configuration import FILENAME
 **
@@ -467,6 +461,7 @@ void configuration_cmd(void){
     url_parse(zServer);
     if( g.urlPasswd==0 && zPw ) g.urlPasswd = mprintf("%s", zPw);
     user_select();
+    url_enable_proxy("via proxy: ");
     if( strncmp(zMethod, "push", n)==0 ){
       client_sync(0,0,0,0,mask);
     }else{

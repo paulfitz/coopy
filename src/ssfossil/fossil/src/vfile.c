@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -27,7 +21,11 @@
 #include "vfile.h"
 #include <assert.h>
 #include <sys/types.h>
+#if defined(__DMC__)
+#include "dirent.h"
+#else
 #include <dirent.h>
+#endif
 
 /*
 ** Given a UUID, return the corresponding record ID.  If the UUID
@@ -68,8 +66,13 @@ int uuid_to_rid(const char *zUuid, int phantomize){
 ** Verify that an object is not a phantom.  If the object is
 ** a phantom, output an error message and quick.
 */
-void vfile_verify_not_phantom(int rid, const char *zFilename){
-  if( db_int(-1, "SELECT size FROM blob WHERE rid=%d", rid)<0 ){
+static void vfile_verify_not_phantom(
+  int rid,                  /* The RID to verify */
+  const char *zFilename,    /* Filename.  Might be NULL */
+  const char *zUuid         /* UUID.  Might be NULL */
+){
+  if( db_int(-1, "SELECT size FROM blob WHERE rid=%d", rid)<0
+      && (zUuid==0 || !db_exists("SELECT 1 FROM shun WHERE uuid='%s'", zUuid)) ){
     if( zFilename ){
       fossil_fatal("content missing for %s", zFilename);
     }else{
@@ -98,7 +101,7 @@ void vfile_build(int vid, Blob *p){
   Blob line, token, name, uuid;
   int seenHeader = 0;
   db_begin_transaction();
-  vfile_verify_not_phantom(vid, 0);
+  vfile_verify_not_phantom(vid, 0, 0);
   db_multi_exec("DELETE FROM vfile WHERE vid=%d", vid);
   db_prepare(&ins,
     "INSERT INTO vfile(vid,rid,mrid,pathname) "
@@ -120,7 +123,7 @@ void vfile_build(int vid, Blob *p){
     defossilize(zName);
     zUuid = blob_str(&uuid);
     rid = uuid_to_rid(zUuid, 0);
-    vfile_verify_not_phantom(rid, zName);
+    vfile_verify_not_phantom(rid, zName, zUuid);
     if( rid>0 && file_is_simple_pathname(zName) ){
       db_bind_int(&ins, ":id", rid);
       db_bind_text(&ins, ":name", zName);
@@ -212,7 +215,12 @@ void vfile_check_signature(int vid, int notFileIsFatal){
 ** Write all files from vid to the disk.  Or if vid==0 and id!=0
 ** write just the specific file where VFILE.ID=id.
 */
-void vfile_to_disk(int vid, int id, int verbose){
+void vfile_to_disk(
+  int vid,               /* vid to write to disk */
+  int id,                /* Write this one file, if not zero */
+  int verbose,           /* Output progress information */
+  int promptFlag         /* Prompt user to confirm overwrites */
+){
   Stmt q;
   Blob content;
   int nRepos = strlen(g.zLocalRoot);
@@ -236,6 +244,23 @@ void vfile_to_disk(int vid, int id, int verbose){
     id = db_column_int(&q, 0);
     zName = db_column_text(&q, 1);
     rid = db_column_int(&q, 2);
+    if( promptFlag ){
+      if( file_size(zName)>=0 ){
+        Blob ans;
+        char *zMsg;
+        char cReply;
+        zMsg = mprintf("overwrite %s (a=always/y/N)? ", zName);
+        prompt_user(zMsg, &ans);
+        free(zMsg);
+        cReply = blob_str(&ans)[0];
+        blob_reset(&ans);
+        if( cReply=='a' || cReply=='A' ){
+          promptFlag = 0;
+          cReply = 'y';
+        }
+        if( cReply=='n' || cReply=='N' ) continue;
+      }
+    }
     content_get(rid, &content);
     if( verbose ) printf("%s\n", &zName[nRepos]);
     blob_write_to_file(&content, zName);

@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -167,6 +161,7 @@ void checkout_cmd(void){
   int keepFlag;                  /* Do not change any files on disk */
   int latestFlag;                /* Checkout the latest version */
   char *zVers;                   /* Version to checkout */
+  int promptFlag;                /* True to prompt before overwriting */
   int vid, prior;
   Blob cksum1, cksum1b, cksum2;
   
@@ -175,6 +170,7 @@ void checkout_cmd(void){
   forceFlag = find_option("force","f",0)!=0;
   keepFlag = find_option("keep",0,0)!=0;
   latestFlag = find_option("latest",0,0)!=0;
+  promptFlag = find_option("prompt",0,0)!=0;  /* Prompt user before overwrite */
   if( (latestFlag!=0 && g.argc!=2) || (latestFlag==0 && g.argc!=3) ){
      usage("VERSION|--latest ?--force? ?--keep?");
   }
@@ -212,7 +208,7 @@ void checkout_cmd(void){
   }
   db_multi_exec("DELETE FROM vfile WHERE vid!=%d", vid);
   if( !keepFlag ){
-    vfile_to_disk(vid, 0, 1);
+    vfile_to_disk(vid, 0, 1, promptFlag);
   }
   manifest_to_disk(vid);
   db_lset_int("checkout", vid);
@@ -238,8 +234,12 @@ void unlink_local_database(void){
   static const char *azFile[] = {
      "%s_FOSSIL_",
      "%s_FOSSIL_-journal",
+     "%s_FOSSIL_-wal",
+     "%s_FOSSIL_-shm",
      "%s.fos",
      "%s.fos-journal",
+     "%s.fos-wal",
+     "%s.fos-shm",
   };
   int i;
   for(i=0; i<sizeof(azFile)/sizeof(azFile[0]); i++){

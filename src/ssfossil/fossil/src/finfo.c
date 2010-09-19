@@ -2,18 +2,12 @@
 ** Copyright (c) 2009 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -33,7 +27,7 @@
 **
 ** Print the change history for a single file.
 **
-** The "--limit N" and "--offset P" options limits the output to the first
+** The "--limit N" and "--offset P" options limit the output to the first
 ** N changes after skipping P changes.
 */
 void finfo_cmd(void){
@@ -144,7 +138,7 @@ void finfo_page(void){
   blob_reset(&title);
   pGraph = graph_init();
   @ <div id="canvas" style="position:relative;width:1px;height:1px;"></div>
-  @ <table cellspacing=0 border=0 cellpadding=0>
+  @ <table class="timelineTable">
   while( db_step(&q)==SQLITE_ROW ){
     const char *zDate = db_column_text(&q, 0);
     const char *zCom = db_column_text(&q, 1);
@@ -165,18 +159,18 @@ void finfo_page(void){
     if( memcmp(zDate, zPrevDate, 10) ){
       sprintf(zPrevDate, "%.10s", zDate);
       @ <tr><td>
-      @   <div class="divider"><nobr>%s(zPrevDate)</nobr></div>
+      @   <div class="divider">%s(zPrevDate)</div>
       @ </td></tr>
     }
     memcpy(zTime, &zDate[11], 5);
     zTime[5] = 0;
-    @ <tr><td valign="top" align="right">
+    @ <tr><td class="timelineTime">
     @ <a href="%s(g.zTop)/timeline?c=%t(zDate)">%s(zTime)</a></td>
-    @ <td width="20" align="left" valign="top"><div id="m%d(gidx)"></div></td>
+    @ <td class="timelineGraph"><div id="m%d(gidx)"></div></td>
     if( zBgClr && zBgClr[0] ){
-      @ <td valign="top" align="left" bgcolor="%h(zBgClr)">
+      @ <td class="timelineTableCell" style="background-color: %h(zBgClr);">
     }else{
-      @ <td valign="top" align="left">
+      @ <td class="timelineTableCell">
     }
     sqlite3_snprintf(sizeof(zShort), zShort, "%.10s", zUuid);
     sqlite3_snprintf(sizeof(zShortCkin), zShortCkin, "%.10s", zCkin);
@@ -195,13 +189,14 @@ void finfo_page(void){
     hyperlink_to_user(zUser, zDate, "");
     @ branch: %h(zBr))
     if( g.okHistory && zUuid ){
+      const char *z = zFilename;
       if( fpid ){
         @ <a href="%s(g.zTop)/fdiff?v1=%s(zPUuid)&amp;v2=%s(zUuid)">[diff]</a>
       }
-      @ <a href="%s(g.zTop)/annotate?checkin=%S(zCkin)&amp;filename=%h(zFilename)">
+      @ <a href="%s(g.zTop)/annotate?checkin=%S(zCkin)&amp;filename=%h(z)">
       @ [annotate]</a>
     }
-    @ </td>
+    @ </td></tr>
   }
   db_finalize(&q);
   if( pGraph ){
@@ -210,7 +205,8 @@ void finfo_page(void){
       graph_free(pGraph);
       pGraph = 0;
     }else{
-      @ <tr><td><td><div style="width:%d(pGraph->mxRail*20+30)px;"></div>
+      @ <tr><td></td><td><div style="width:%d(pGraph->mxRail*20+30)px;"></div>
+      @     </td></tr>
     }
   }
   @ </table>

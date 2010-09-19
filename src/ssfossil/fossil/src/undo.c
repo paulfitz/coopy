@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -134,7 +128,7 @@ static void undo_all(int redoFlag){
 }
 
 /*
-** Reset the the undo memory.
+** Reset the undo memory.
 */
 void undo_reset(void){
   static const char zSql[] =
@@ -291,7 +285,7 @@ void undo_cmd(void){
 **
 ** Usage: %fossil redo ?FILENAME...?
 **
-** Redo the an update or merge or revert operation that has been undone
+** Redo an update or merge or revert operation that has been undone
 ** by the undo command.  If FILENAME is specified then restore the changes
 ** associated with the named file(s) but otherwise leave the update
 ** or merge undone.

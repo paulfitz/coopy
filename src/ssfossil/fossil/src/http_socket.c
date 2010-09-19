@@ -2,18 +2,12 @@
 ** Copyright (c) 2009 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -34,9 +28,12 @@
 
 #include "config.h"
 #include "http_socket.h"
-#ifdef __MINGW32__
-#  include <windows.h>
-#  include <winsock2.h>
+#if defined(_WIN32)
+#  include <windows.h>           /* for Sleep once server works again */
+#  define sleep Sleep            /* windows does not have sleep, but Sleep */
+#  if defined(__MINGW32__)
+#    include <ws2tcpip.h>          
+#  endif
 #else
 #  include <arpa/inet.h>
 #  include <sys/socket.h>
@@ -53,7 +50,7 @@
 ** local variables:
 */
 static int socketIsInit = 0;    /* True after global initialization */
-#ifdef __MINGW32__
+#if defined(_WIN32)
 static WSADATA socketInfo;      /* Windows socket initialize data */
 #endif
 static int iSocket = -1;        /* The socket on which we talk to the server */
@@ -92,7 +89,7 @@ const char *socket_errmsg(void){
 */
 void socket_global_init(void){
   if( socketIsInit==0 ){
-#ifdef __MINGW32__
+#if defined(_WIN32)
     if( WSAStartup(MAKEWORD(2,0), &socketInfo)!=0 ){
       fossil_panic("can't initialize winsock");
     }
@@ -107,7 +104,7 @@ void socket_global_init(void){
 */
 void socket_global_shutdown(void){
   if( socketIsInit ){
-#ifdef __MINGW32__
+#if defined(_WIN32)
     WSACleanup();
 #endif
     socket_clear_errmsg();
@@ -121,7 +118,7 @@ void socket_global_shutdown(void){
 */
 void socket_close(void){
   if( iSocket>=0 ){
-#ifdef __MINGW32__
+#if defined(_WIN32)
     closesocket(iSocket);
 #else
     close(iSocket);
@@ -179,7 +176,7 @@ int socket_open(void){
     socket_close();
     return 1;
   }
-#ifndef __MINGW32__
+#if !defined(_WIN32)
   signal(SIGPIPE, SIG_IGN);
 #endif
   return 0;

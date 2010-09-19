@@ -2,18 +2,12 @@
 ** Copyright (c) 2006 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -134,7 +128,7 @@ int content_is_available(int rid){
 */
 static void content_mark_available(int rid){
   Bag pending;
-  Stmt q;
+  static Stmt q;
   if( bag_find(&contentCache.available, rid) ) return;
   bag_init(&pending);
   bag_insert(&pending, rid);
@@ -142,12 +136,13 @@ static void content_mark_available(int rid){
     bag_remove(&pending, rid);
     bag_remove(&contentCache.missing, rid);
     bag_insert(&contentCache.available, rid);
-    db_prepare(&q, "SELECT rid FROM delta WHERE srcid=%d", rid);
+    db_static_prepare(&q, "SELECT rid FROM delta WHERE srcid=:rid");
+    db_bind_int(&q, ":rid", rid);
     while( db_step(&q)==SQLITE_ROW ){
       int nx = db_column_int(&q, 0);
       bag_insert(&pending, nx);
     }
-    db_finalize(&q);
+    db_reset(&q);
   }
   bag_clear(&pending);
 }
@@ -283,36 +278,6 @@ int content_get(int rid, Blob *pBlob){
 }
 
 /*
-** Get the contents of a file within a given baseline.
-*/
-int content_get_historical_file(
-  const char *revision,    /* Name of the baseline containing the file */
-  const char *file,        /* Name of the file */
-  Blob *content            /* Write file content here */
-){
-  Blob mfile;
-  Manifest m;
-  int i, rid=0;
-  
-  rid = name_to_rid(revision);
-  content_get(rid, &mfile);
-  
-  if( manifest_parse(&m, &mfile) ){
-    for(i=0; i<m.nFile; i++){
-      if( strcmp(m.aFile[i].zName, file)==0 ){
-        rid = uuid_to_rid(m.aFile[i].zUuid, 0);
-        return content_get(rid, content);
-      }
-    }
-    fossil_panic("file: %s does not exist in revision: %s", file, revision);
-  }else{
-    fossil_panic("could not parse manifest for revision: %s", revision);
-  }
-  
-  return 0;
-}
-
-/*
 ** COMMAND:  artifact
 **
 ** Usage: %fossil artifact ARTIFACT-ID  ?OUTPUT-FILENAME?
@@ -360,12 +325,22 @@ void test_content_rawget_cmd(void){
 */
 void after_dephantomize(int rid, int linkFlag){
   Stmt q;
+  int prevTid = 0;
+
+  /* The prevTid variable is used to delay invoking this routine
+  ** recursively, if possible, until after the query has finalized,
+  ** in order to avoid having an excessive number of prepared statements.
+  ** This is most effective in the common case where the query returns 
+  ** just one row.
+  */
   db_prepare(&q, "SELECT rid FROM delta WHERE srcid=%d", rid);
   while( db_step(&q)==SQLITE_ROW ){
     int tid = db_column_int(&q, 0);
-    after_dephantomize(tid, 1);
+    if( prevTid ) after_dephantomize(prevTid, 1);
+    prevTid = tid;
   }
   db_finalize(&q);
+  if( prevTid ) after_dephantomize(prevTid, 1);
   if( linkFlag ){
     Blob content;
     content_get(rid, &content);

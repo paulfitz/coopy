@@ -2,18 +2,12 @@
 ** Copyright (c) 2006 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -23,6 +17,16 @@
 **
 ** A common header file used by all modules.
 */
+
+/* The following macros are necessary for large-file support under
+** some linux distributions, and possibly other unixes as well.
+*/
+#define _LARGE_FILE       1
+#ifndef _FILE_OFFSET_BITS
+#  define _FILE_OFFSET_BITS 64
+#endif
+#define _LARGEFILE_SOURCE 1
+
 
 /*
 ** System header files used by all modules
@@ -34,6 +38,19 @@
 #include <string.h>
 #include <stdarg.h>
 #include <assert.h>
+#if defined( __MINGW32__) ||  defined(__DMC__) || defined(_MSC_VER)
+#  if defined(__DMC__)  || defined(_MSC_VER)
+     typedef int socklen_t;
+#  endif
+#  ifndef _WIN32
+#    define _WIN32
+#  endif
+#else
+# include <sys/types.h>
+# include <signal.h>
+# include <pwd.h>
+#endif
+
 #include "sqlite3.h"
 
 /*

@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -857,11 +851,6 @@ static void add_mlink(int pid, Manifest *pParent, int cid, Manifest *pChild){
 */
 static int manifest_crosslink_busy = 0;
 
-int _manifest_setup() {
-  manifest_crosslink_busy = 0;
-  return 0;
-}
-
 /*
 ** Setup to do multiple manifest_crosslink() calls.
 ** This is only required if processing ticket changes.
@@ -1186,4 +1175,25 @@ int manifest_crosslink(int rid, Blob *pContent){
   db_end_transaction(0);
   manifest_clear(&m);
   return 1;
+}
+
+/*
+** Given a checkin name, load and parse the manifest for that checkin.
+** Throw a fatal error if anything goes wrong.
+*/
+void manifest_from_name(
+  const char *zName,
+  Manifest *pM
+){
+  int rid;
+  Blob content;
+
+  rid = name_to_rid(zName);
+  if( !is_a_version(rid) ){
+    fossil_fatal("no such checkin: %s", zName);
+  }
+  content_get(rid, &content);
+  if( !manifest_parse(pM, &content) ){
+    fossil_fatal("cannot parse manifest for checkin: %s", zName);
+  }
 }

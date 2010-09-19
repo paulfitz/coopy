@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -32,7 +26,7 @@
 ** Return true if artifact rid is a version
 */
 int is_a_version(int rid){
-  return db_exists("SELECT 1 FROM plink WHERE cid=%d", rid);
+  return db_exists("SELECT 1 FROM event WHERE objid=%d AND type='ci'", rid);
 }
 
 /*
@@ -44,7 +38,7 @@ int is_a_version(int rid){
 ** changes are retained and applied to the new checkout.
 **
 ** The VERSION argument can be a specific version or tag or branch name.
-** If the VERSION argument is omitted, then the leaf of the the subtree
+** If the VERSION argument is omitted, then the leaf of the subtree
 ** that begins at the current version is used, if there is only a single
 ** leaf.  VERSION can also be "current" to select the leaf of the current
 ** version or "latest" to select the most recent check-in.
@@ -119,6 +113,7 @@ void update_cmd(void){
                     " ORDER BY event.mtime DESC"); 
   }
 
+  if( tid==vid ) return;  /* Nothing to update */
   db_begin_transaction();
   vfile_check_signature(vid, 1);
   if( !nochangeFlag ) undo_begin();
@@ -219,18 +214,18 @@ void update_cmd(void){
       /* File added in the target. */
       printf("ADD %s\n", zName);
       undo_save(zName);
-      if( !nochangeFlag ) vfile_to_disk(0, idt, 0);
+      if( !nochangeFlag ) vfile_to_disk(0, idt, 0, 0);
     }else if( idt>0 && idv>0 && ridt!=ridv && chnged==0 ){
       /* The file is unedited.  Change it to the target version */
       printf("UPDATE %s\n", zName);
       undo_save(zName);
-      if( !nochangeFlag ) vfile_to_disk(0, idt, 0);
+      if( !nochangeFlag ) vfile_to_disk(0, idt, 0, 0);
     }else if( idt>0 && idv>0 && file_size(zFullPath)<0 ){
       /* The file missing from the local check-out. Restore it to the
       ** version that appears in the target. */
       printf("UPDATE %s\n", zName);
       undo_save(zName);
-      if( !nochangeFlag ) vfile_to_disk(0, idt, 0);
+      if( !nochangeFlag ) vfile_to_disk(0, idt, 0, 0);
     }else if( idt==0 && idv>0 ){
       if( ridv==0 ){
         /* Added in current checkout.  Continue to hold the file as
@@ -300,10 +295,11 @@ void update_cmd(void){
 
 
 /*
-** Get the contents of a file within a given revision.
+** Get the contents of a file within the checking "revision".  If
+** revision==NULL then get the file content for the current checkout.
 */
 int historical_version_of_file(
-  const char *revision,    /* The baseline name containing the file */
+  const char *revision,    /* The checkin containing the file */
   const char *file,        /* Full treename of the file */
   Blob *content,           /* Put the content here */
   int errCode              /* Error code if file not found.  Panic if 0. */
@@ -319,7 +315,7 @@ int historical_version_of_file(
   }
   if( !is_a_version(rid) ){
     if( errCode>0 ) return errCode;
-    fossil_fatal("no such check-out: %s", revision);
+    fossil_fatal("no such checkin: %s", revision);
   }
   content_get(rid, &mfile);
   
@@ -327,14 +323,16 @@ int historical_version_of_file(
     for(i=0; i<m.nFile; i++){
       if( strcmp(m.aFile[i].zName, file)==0 ){
         rid = uuid_to_rid(m.aFile[i].zUuid, 0);
+        manifest_clear(&m);
         return content_get(rid, content);
       }
     }
+    manifest_clear(&m);
     if( errCode<=0 ){
-      fossil_fatal("file %s does not exist in baseline: %s", file, revision);
+      fossil_fatal("file %s does not exist in checkin: %s", file, revision);
     }
   }else if( errCode<=0 ){
-    fossil_panic("could not parse manifest for baseline: %s", revision);
+    fossil_panic("could not parse manifest for checkin: %s", revision);
   }
   return errCode;
 }
@@ -343,11 +341,13 @@ int historical_version_of_file(
 /*
 ** COMMAND: revert
 **
-** Usage: %fossil revert ?-r REVISION? FILE ...
+** Usage: %fossil revert ?-r REVISION? ?FILE ...?
 **
 ** Revert to the current repository version of FILE, or to
 ** the version associated with baseline REVISION if the -r flag
 ** appears.
+**
+** Revert all files if no file name is provided.
 **
 ** If a file is reverted accidently, it can be restored using
 ** the "fossil undo" command.

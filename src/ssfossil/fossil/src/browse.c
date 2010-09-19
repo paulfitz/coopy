@@ -2,18 +2,12 @@
 ** Copyright (c) 2008 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -152,7 +146,7 @@ void page_dir(void){
     zShort[10] = 0;
     @ <h2>Files of check-in [<a href="vinfo?name=%T(zUuid)">%s(zShort)</a>]
     @ %s(blob_str(&dirname))</h2>
-    zSubdirLink = mprintf("%s/dir?ci=%S&name=%T", g.zTop, zUuid, zPrefix);
+    zSubdirLink = mprintf("%s/dir?ci=%S&amp;name=%T", g.zTop, zUuid, zPrefix);
     if( zD ){
       style_submenu_element("Top", "Top", "%s/dir?ci=%S", g.zTop, zUuid);
       style_submenu_element("All", "All", "%s/dir?name=%t", g.zTop, zD);
@@ -165,9 +159,9 @@ void page_dir(void){
     zSubdirLink = mprintf("%s/dir?name=%T", g.zBaseURL, zPrefix);
     if( zD ){
       style_submenu_element("Top", "Top", "%s/dir", g.zBaseURL);
-      style_submenu_element("Tip", "Tip", "%s/dir?name=%t&ci=tip",
+      style_submenu_element("Tip", "Tip", "%s/dir?name=%t&amp;ci=tip",
                             g.zBaseURL, zD);
-      style_submenu_element("Trunk", "Trunk", "%s/dir?name=%t&ci=trunk",
+      style_submenu_element("Trunk", "Trunk", "%s/dir?name=%t&amp;ci=trunk",
                              g.zBaseURL,zD);
     }else{
       style_submenu_element("Tip", "Tip", "%s/dir?ci=tip", g.zBaseURL);
@@ -224,12 +218,12 @@ void page_dir(void){
   nCol = 4;
   nRow = (cnt+nCol-1)/nCol;
   db_prepare(&q, "SELECT x, u FROM localfiles ORDER BY x /*scan*/");
-  @ <table border="0" width="100%%"><tr><td valign="top" width="25%%">
+  @ <table class="browser"><tr><td class="browser"><ul class="browser">
   i = 0;
   while( db_step(&q)==SQLITE_ROW ){
     const char *zFN;
     if( i==nRow ){
-      @ </td><td valign="top" width="25%%">
+      @ </ul></td><td class="browser"><ul class="browser">
       i = 0;
     }
     i++;
@@ -239,12 +233,13 @@ void page_dir(void){
       @ <li><a href="%s(zSubdirLink)%T(zFN)">%h(zFN)/</a></li>
     }else if( zCI ){
       const char *zUuid = db_column_text(&q, 1);
-      @ <li><a href="%s(g.zBaseURL)/artifact?name=%s(zUuid)">%h(zFN)</a>
+      @ <li><a href="%s(g.zBaseURL)/artifact?name=%s(zUuid)">%h(zFN)</a></li>
     }else{
-      @ <li><a href="%s(g.zBaseURL)/finfo?name=%T(zPrefix)%T(zFN)">%h(zFN)</a>
+      @ <li><a href="%s(g.zBaseURL)/finfo?name=%T(zPrefix)%T(zFN)">%h(zFN)
+      @     </a></li>
     }
   }
   db_finalize(&q);
-  @ </td></tr></table>
+  @ </ul></td></tr></table>
   style_footer();
 }

@@ -2,18 +2,12 @@
 ** Copyright (c) 2006 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-**
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -35,11 +29,8 @@
 **
 */
 #include "config.h"
-#ifndef __MINGW32__
+#if ! defined(_WIN32)
 #  include <pwd.h>
-#endif
-#ifdef __MINGW32__
-#  include <windows.h>
 #endif
 #include <sqlite3.h>
 #include <sys/types.h>
@@ -57,9 +48,6 @@ struct Stmt {
   sqlite3_stmt *pStmt;    /* The results of sqlite3_prepare() */
   Stmt *pNext, *pPrev;    /* List of all unfinalized statements */
   int nStep;              /* Number of sqlite3_step() calls */
-  Stmt *proxy;
-  int prep_count;
-  int src;
 };
 #endif /* INTERFACE */
 
@@ -81,8 +69,8 @@ static void db_err(const char *zFormat, ...){
     @ error Database\serror:\s%F(z)
     cgi_reply();
   }
-  if( g.cgiPanic ){
-    g.cgiPanic = 0;
+  if( g.cgiOutput ){
+    g.cgiOutput = 0;
     cgi_printf("<h1>Database Error</h1>\n"
                "<pre>%h</pre><p>%s</p>", z, zRebuildMsg);
     cgi_reply();
@@ -90,51 +78,18 @@ static void db_err(const char *zFormat, ...){
     fprintf(stderr, "%s: %s\n\n%s", g.argv[0], z, zRebuildMsg);
   }
   db_force_rollback();
-  exit(1);
+  fossil_exit(1);
 }
 
 static int nBegin = 0;      /* Nesting depth of BEGIN */
 static int isNewRepo = 0;   /* True if the repository is newly created */
 static int doRollback = 0;  /* True to force a rollback */
 static int nCommitHook = 0; /* Number of commit hooks */
-static int db_busy = 0;
 static struct sCommitHook {
   int (*xHook)(void);  /* Functions to call at db_end_transaction() */
   int sequence;        /* Call functions in sequence order */
 } aHook[5];
-static Stmt *pAllStmt = 0;  /* List of all unfinalized dynamic statements */
-static Stmt *pLastStmt = 0;
-
-static Stmt *db_make_proxy(Stmt *pStmt) {
-  Stmt *proxy = (Stmt *)malloc(sizeof(Stmt));
-  assert(proxy!=0);
-  proxy->pStmt = pStmt->pStmt;
-  proxy->proxy = 0;
-
-  proxy->pNext = pAllStmt;
-  proxy->pPrev = 0;
-  if( pAllStmt ) pAllStmt->pPrev = proxy;
-  pAllStmt = proxy;
-  proxy->src = 9;
-
-  pStmt->proxy = proxy;
-  //;printf("  Made proxy %ld\n", (long int)(pStmt->proxy));
-
-  return proxy;
-}
-
-
-int db_reset_all() {
-  nBegin = 0;
-  isNewRepo = 0;
-  doRollback = 0;
-  nCommitHook = 0;
-  db_busy = 0;
-  pAllStmt = 0;
-  pLastStmt = 0;
-  return 0;
-}
-
+static Stmt *pAllStmt = 0;  /* List of all unfinalized statements */
 
 /*
 ** This routine is called by the SQLite commit-hook mechanism
@@ -164,6 +119,7 @@ void db_begin_transaction(void){
   nBegin++;
 }
 void db_end_transaction(int rollbackFlag){
+  if( g.db==0 ) return;
   if( nBegin<=0 ) return;
   if( rollbackFlag ) doRollback = 1;
   nBegin--;
@@ -177,18 +133,19 @@ void db_end_transaction(int rollbackFlag){
   }
 }
 void db_force_rollback(void){
-  if( db_busy ) return;
-  db_busy = 1;
+  static int busy = 0;
+  if( busy || g.db==0 ) return;
+  busy = 1;
   undo_rollback();
   if( nBegin ){
     sqlite3_exec(g.db, "ROLLBACK", 0, 0, 0);
+    nBegin = 0;
     if( isNewRepo ){
       db_close();
       unlink(g.zRepositoryName);
     }
   }
-  nBegin = 0;
-  db_busy = 0;
+  busy = 0;
 }
 
 /*
@@ -236,7 +193,6 @@ int db_vprepare(Stmt *pStmt, const char *zFormat, va_list ap){
   }
   pStmt->pNext = pStmt->pPrev = 0;
   pStmt->nStep = 0;
-  pStmt->proxy = 0;
   return 0;
 }
 int db_prepare(Stmt *pStmt, const char *zFormat, ...){
@@ -245,14 +201,9 @@ int db_prepare(Stmt *pStmt, const char *zFormat, ...){
   va_start(ap, zFormat);
   rc = db_vprepare(pStmt, zFormat, ap);
   va_end(ap);
-  pStmt->proxy = 0;
-  if (rc==SQLITE_OK) {
-    db_make_proxy(pStmt);
-  }
   return rc;
 }
 int db_static_prepare(Stmt *pStmt, const char *zFormat, ...){
-  pStmt->prep_count++;
   int rc = SQLITE_OK;
   if( blob_size(&pStmt->sql)==0 ){
     va_list ap;
@@ -262,8 +213,6 @@ int db_static_prepare(Stmt *pStmt, const char *zFormat, ...){
     pStmt->pPrev = 0;
     if( pAllStmt ) pAllStmt->pPrev = pStmt;
     pAllStmt = pStmt;
-    pStmt->src = 2;
-    pStmt->proxy = 0;
     va_end(ap);
   }
   return rc;
@@ -358,22 +307,7 @@ int db_reset(Stmt *pStmt){
 int db_finalize(Stmt *pStmt){
   int rc;
   db_stats(pStmt);
-  if (pStmt->src!=9) {
-    blob_reset(&pStmt->sql);
-    if (pStmt->proxy) {
-      //;printf("  Freeing unneeded proxy %ld\n", (long int)(pStmt->proxy));
-      if( pStmt->proxy->pNext ){
-	pStmt->proxy->pNext->pPrev = pStmt->proxy->pPrev;
-      }
-      if( pStmt->proxy->pPrev ){
-	pStmt->proxy->pPrev->pNext = pStmt->proxy->pNext;
-      } else if( pAllStmt==pStmt->proxy ){
-	pAllStmt = pStmt->proxy->pNext;
-      }
-      free(pStmt->proxy);
-      pStmt->proxy = 0;
-    }
-  }
+  blob_reset(&pStmt->sql);
   rc = sqlite3_finalize(pStmt->pStmt);
   db_check_result(rc);
   pStmt->pStmt = 0;
@@ -382,12 +316,11 @@ int db_finalize(Stmt *pStmt){
   }
   if( pStmt->pPrev ){
     pStmt->pPrev->pNext = pStmt->pNext;
-  } else if( pAllStmt==pStmt ){
+  }else if( pAllStmt==pStmt ){
     pAllStmt = pStmt->pNext;
   }
   pStmt->pNext = 0;
   pStmt->pPrev = 0;
-  //;printf("Finalized statement %ld\n", (long int)pStmt);
   return rc;
 }
 
@@ -606,7 +539,7 @@ char *db_text(char *zDefault, const char *zSql, ...){
   return z;
 }
 
-#ifdef __MINGW32__
+#if defined(_WIN32)
 extern char *sqlite3_win32_mbcs_to_utf8(const char*);
 #endif
 
@@ -624,7 +557,7 @@ void db_init_database(
   const char *zSql;
   va_list ap;
 
-#ifdef __MINGW32__
+#if defined(_WIN32)
   zFileName = sqlite3_win32_mbcs_to_utf8(zFileName);
 #endif
   rc = sqlite3_open(zFileName, &db);
@@ -659,7 +592,7 @@ static sqlite3 *openDatabase(const char *zDbName){
   sqlite3 *db;
 
   zVfs = getenv("FOSSIL_VFS");
-#ifdef __MINGW32__
+#if defined(_WIN32)
   zDbName = sqlite3_win32_mbcs_to_utf8(zDbName);
 #endif
   rc = sqlite3_open_v2(
@@ -671,6 +604,7 @@ static sqlite3 *openDatabase(const char *zDbName){
     db_err(sqlite3_errmsg(db));
   }
   sqlite3_busy_timeout(db, 5000); 
+  sqlite3_wal_autocheckpoint(db, 1);  /* Set to checkpoint frequently */
   return db;
 }
 
@@ -683,12 +617,14 @@ static sqlite3 *openDatabase(const char *zDbName){
 void db_open_or_attach(const char *zDbName, const char *zLabel){
   if( !g.db ){
     g.db = openDatabase(zDbName);
+    g.zRepoDb = "main";
     db_connection_init();
   }else{
-#ifdef __MINGW32__
+#if defined(_WIN32)
     zDbName = sqlite3_win32_mbcs_to_utf8(zDbName);
 #endif
     db_multi_exec("ATTACH DATABASE %Q AS %s", zDbName, zLabel);
+    g.zRepoDb = mprintf("%s", zLabel);
   }
 }
 
@@ -708,7 +644,7 @@ void db_open_config(int useAttach){
   char *zDbName;
   const char *zHome;
   if( g.configOpen ) return;
-#ifdef __MINGW32__
+#if defined(_WIN32)
   zHome = getenv("LOCALAPPDATA");
   if( zHome==0 ){
     zHome = getenv("APPDATA");
@@ -717,18 +653,26 @@ void db_open_config(int useAttach){
     }
   }
   if( zHome==0 ){
-    db_err("cannot locate home directory - "
-           "please set the HOMEPATH environment variable");
+    fossil_fatal("cannot locate home directory - "
+                "please set the HOMEPATH environment variable");
   }
 #else
   zHome = getenv("HOME");
   if( zHome==0 ){
-    db_err("cannot locate home directory - "
-           "please set the HOME environment variable");
+    fossil_fatal("cannot locate home directory - "
+                 "please set the HOME environment variable");
+  }
+#endif
+  if( file_isdir(zHome)!=1 ){
+    fossil_fatal("invalid home directory: %s", zHome);
+  }
+#ifndef _WIN32
+  if( access(zHome, W_OK) ){
+    fossil_fatal("home directory %s must be writeable", zHome);
   }
 #endif
   g.zHome = mprintf("%/", zHome);
-#ifdef __MINGW32__
+#if defined(_WIN32)
   /* . filenames give some window systems problems and many apps problems */
   zDbName = mprintf("%//_fossil", zHome);
 #else
@@ -912,6 +856,36 @@ rep_not_found:
 }
 
 /*
+** COMMAND: test-move-repository
+**
+** Usage: %fossil test-move-repository PATHNAME
+**
+** Change the location of the repository database on a local check-out.
+** Use this command to avoid having to close and reopen a checkout
+** when relocating the repository database.
+*/
+void move_repo_cmd(void){
+  Blob repo;
+  char *zRepo;
+  if( g.argc!=3 ){
+    usage("PATHNAME");
+  }
+  if( db_open_local()==0 ){
+    fossil_fatal("not in a local checkout");
+    return;
+  }
+  file_canonical_name(g.argv[2], &repo);
+  zRepo = blob_str(&repo);
+  if( access(zRepo, 0) ){
+    fossil_fatal("no such file: %s", zRepo);
+  }
+  db_open_or_attach(zRepo, "test_repo");
+  db_lset("repository", blob_str(&repo));
+  db_close();
+}
+
+
+/*
 ** Open the local database.  If unable, exit with an error.
 */
 void db_must_be_within_tree(void){
@@ -925,27 +899,24 @@ void db_must_be_within_tree(void){
 ** Close the database connection.
 */
 void db_close(void){
-  if( g.db==0 && g.dbConfig==0 ) return;
+  sqlite3_stmt *pStmt;
+  if( g.db==0 ) return;
   while( pAllStmt ){
-    /*
-    ;printf("Shutting down %ld (%s:%d) %d\n", (long int)(pAllStmt),
-	    (pAllStmt->src==1)?"dynamic":((pAllStmt->src==2)?"static":"proxy"),pAllStmt->src,pAllStmt->prep_count);
-    */
     db_finalize(pAllStmt);
+  }
+  db_end_transaction(1);
+  pStmt = 0;
+  while( (pStmt = sqlite3_next_stmt(g.db, pStmt))!=0 ){
+    fossil_warning("unfinalized SQL statement: [%s]", sqlite3_sql(pStmt));
   }
   g.repositoryOpen = 0;
   g.localOpen = 0;
   g.configOpen = 0;
-  if (g.db) {
-    if (sqlite3_close(g.db)!=SQLITE_OK) {
-      printf("Problem closing database (1)\n");
-    }
-    g.db = 0;
-  }
-  if (g.dbConfig) {
-    if (sqlite3_close(g.dbConfig)!=SQLITE_OK) {
-      printf("Problem closing database (2)\n");
-    }
+  sqlite3_wal_checkpoint(g.db, 0);
+  sqlite3_close(g.db);
+  g.db = 0;
+  if( g.dbConfig ){
+    sqlite3_close(g.dbConfig);
     g.dbConfig = 0;
   }
 }
@@ -978,7 +949,7 @@ void db_create_default_users(int setupUserOnly, const char *zDefaultUser){
     zUser = zDefaultUser;
   }
   if( zUser==0 ){
-#ifdef __MINGW32__
+#if defined(_WIN32)
     zUser = getenv("USERNAME");
 #else
     zUser = getenv("USER");
@@ -1044,8 +1015,7 @@ void db_initial_setup(
     int rid;
     blob_zero(&manifest);
     blob_appendf(&manifest, "C initial\\sempty\\scheck-in\n");
-    zDate = db_text(0, "SELECT datetime(%Q)", zInitialDate);
-    zDate[10]='T';
+    zDate = date_in_standard_format(zInitialDate);
     blob_appendf(&manifest, "D %s\n", zDate);
     blob_appendf(&manifest, "P\n");
     md5sum_init();
@@ -1297,7 +1267,6 @@ int is_false(const char *zVal){
 void db_swap_connections(void){
   if( !g.useAttach ){
     sqlite3 *dbTemp = g.db;
-    assert( g.dbConfig!=0 );
     g.db = g.dbConfig;
     g.dbConfig = dbTemp;
   }
@@ -1418,7 +1387,7 @@ void db_lset_int(const char *zName, int value){
 
 /*
 ** Record the name of a local repository in the global_config() database.
-** The repostiroy filename %s is recorded as an entry with a "name" field
+** The repository filename %s is recorded as an entry with a "name" field
 ** of the following form:
 **
 **       repo:%s
@@ -1459,7 +1428,7 @@ void cmd_open(void){
   Blob path;
   int vid;
   int keepFlag;
-  static char *azNewArgv[] = { 0, "checkout", "--latest", 0, 0, 0 };
+  static char *azNewArgv[] = { 0, "checkout", "--prompt", "--latest", 0, 0 };
   url_proxy_options();
   keepFlag = find_option("keep",0,0)!=0;
   if( g.argc!=3 && g.argc!=4 ){
@@ -1484,7 +1453,7 @@ void cmd_open(void){
     db_lset_int("checkout", vid);
     azNewArgv[0] = g.argv[0];
     g.argv = azNewArgv;
-    g.argc = 3;
+    g.argc = 4;
     if( oldArgc==4 ){
       azNewArgv[g.argc-1] = oldArgv[3];
     }
@@ -1526,25 +1495,65 @@ static void print_setting(const char *zName){
 
 
 /*
+** define all settings, which can be controlled via the set/unset
+** command. var is the name of the internal configuration name for db_(un)set.
+** If var is 0, the settings name is used.
+** width is the length for the edit field on the behavior page, 0
+** is used for on/off checkboxes.
+** The behaviour page doesn't use a special layout. It lists all
+** set-commands and displays the 'set'-help as info.
+*/
+#if INTERFACE
+struct stControlSettings {
+  char const *name;     /* Name of the setting */
+  char const *var;      /* Internal variable name used by db_set() */
+  int width;            /* Width of display.  0 for boolean values */
+  char const *def;      /* Default value */
+};
+#endif /* INTERFACE */
+struct stControlSettings const ctrlSettings[] = {
+  { "auto-captcha",  "autocaptcha",    0, "0"                   },
+  { "auto-shun",     0,                0, "1"                   },
+  { "autosync",      0,                0, "0"                   },
+  { "binary-glob",   0,                0, "1"                   },
+  { "clearsign",     0,                0, "0"                   },
+  { "diff-command",  0,               16, "diff"                },
+  { "dont-push",     0,                0, "0"                   },
+  { "editor",        0,               16, ""                    },
+  { "gdiff-command", 0,               16, "gdiff"               },
+  { "ignore-glob",   0,               40, ""                    },
+  { "http-port",     0,               16, "8080"                },
+  { "localauth",     0,                0, "0"                   },
+  { "mtime-changes", 0,                0, "0"                   },
+  { "pgp-command",   0,               32, "gpg --clearsign -o " },
+  { "proxy",         0,               32, "off"                 },
+  { "ssh-command",   0,               32, ""                    },
+  { "web-browser",   0,               32, ""                    },
+  { 0,0,0,0 }
+};
+
+/*
 ** COMMAND: settings
 ** COMMAND: unset
-** %fossil setting ?PROPERTY? ?VALUE? ?-global?
+** %fossil settings ?PROPERTY? ?VALUE? ?-global?
 ** %fossil unset PROPERTY ?-global?
 **
-** The "setting" command with no arguments lists all properties and their
+** The "settings" command with no arguments lists all properties and their
 ** values.  With just a property name it shows the value of that property.
 ** With a value argument it changes the property for the current repository.
 **
 ** The "unset" command clears a property setting.
 **
 **
-**    auto-captcha     If enabled, the Login page will provide a button
-**                     which uses JavaScript to fill out the captcha for
-**                     the "anonymous" user. (Most bots cannot use JavaScript.)
+**    auto-captcha     If enabled, the Login page provides a button to
+**                     fill in the captcha password.  Default: on
+**
+**    auto-shun        If enabled, automatically pull the shunning list
+**                     from a server to which the client autosyncs.
 **
 **    autosync         If enabled, automatically pull prior to commit
 **                     or update and automatically push after commit or
-**                     tag or branch creation.  If the the value is "pullonly"
+**                     tag or branch creation.  If the value is "pullonly"
 **                     then only pull operations occur automatically.
 **
 **    binary-glob      The VALUE is a comma-separated list of GLOB patterns
@@ -1589,29 +1598,15 @@ static void print_setting(const char *zName){
 **                     If the http_proxy environment variable is undefined
 **                     then a direct HTTP connection is used.
 **
+**    ssh-command      Command used to talk to a remote machine with
+**                     the "ssh://" protocol.
+**
 **    web-browser      A shell command used to launch your preferred
 **                     web browser when given a URL as an argument.
 **                     Defaults to "start" on windows, "open" on Mac,
 **                     and "firefox" on Unix.
 */
 void setting_cmd(void){
-  static const char *azName[] = {
-    "auto-captcha",
-    "autosync",
-    "binary-glob",
-    "clearsign",
-    "diff-command",
-    "dont-push",
-    "editor",
-    "gdiff-command",
-    "ignore-glob",
-    "http-port",
-    "localauth",
-    "mtime-changes",
-    "pgp-command",
-    "proxy",
-    "web-browser",
-  };
   int i;
   int globalFlag = find_option("global","g",0)!=0;
   int unsetFlag = g.argv[1][0]=='u';
@@ -1624,24 +1619,24 @@ void setting_cmd(void){
     usage("PROPERTY ?-global?");
   }
   if( g.argc==2 ){
-    for(i=0; i<sizeof(azName)/sizeof(azName[0]); i++){
-      print_setting(azName[i]);
+    for(i=0; ctrlSettings[i].name; i++){
+      print_setting(ctrlSettings[i].name);
     }
   }else if( g.argc==3 || g.argc==4 ){
     const char *zName = g.argv[2];
     int n = strlen(zName);
-    for(i=0; i<sizeof(azName)/sizeof(azName[0]); i++){
-      if( strncmp(azName[i], zName, n)==0 ) break;
+    for(i=0; ctrlSettings[i].name; i++){
+      if( strncmp(ctrlSettings[i].name, zName, n)==0 ) break;
     }
-    if( i>=sizeof(azName)/sizeof(azName[0]) ){
+    if( !ctrlSettings[i].name ){
       fossil_fatal("no such setting: %s", zName);
     }
     if( unsetFlag ){
-      db_unset(azName[i], globalFlag);
+      db_unset(ctrlSettings[i].name, globalFlag);
     }else if( g.argc==4 ){
-      db_set(azName[i], g.argv[3], globalFlag);
+      db_set(ctrlSettings[i].name, g.argv[3], globalFlag);
     }else{
-      print_setting(azName[i]);
+      print_setting(ctrlSettings[i].name);
     }
   }else{
     usage("?PROPERTY? ?VALUE?");

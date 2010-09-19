@@ -2,19 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License as published by the Free Software Foundation; either
-** version 2 of the License, or (at your option) any later version.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -46,9 +39,11 @@
 */
 #include "config.h"
 #include "login.h"
-#ifdef __MINGW32__
+#if defined(_WIN32)  
 #  include <windows.h>           /* for Sleep */
-#  define sleep Sleep            /* windows does not have sleep, but Sleep */
+#  if defined(__MINGW32__) || defined(_MSC_VER)
+#    define sleep Sleep            /* windows does not have sleep, but Sleep */
+#  endif
 #endif
 #include <time.h>
 
@@ -160,17 +155,17 @@ void login_page(void){
                   g.userUid, zPasswd, zSha1Pw) ){
       sleep(1);
       zErrMsg = 
-         @ <p><font color="red">
+         @ <p><span class="loginError">
          @ You entered an incorrect old password while attempting to change
          @ your password.  Your password is unchanged.
-         @ </font></p>
+         @ </span></p>
       ;
     }else if( strcmp(zNew1,zNew2)!=0 ){
       zErrMsg = 
-         @ <p><font color="red">
+         @ <p><span class="loginError">
          @ The two copies of your new passwords do not match.
          @ Your password is unchanged.
-         @ </font></p>
+         @ </span></p>
       ;
     }else{
       char *zNewPw = sha1_shared_secret(zNew1, g.zLogin);
@@ -213,9 +208,9 @@ void login_page(void){
     if( uid<=0 ){
       sleep(1);
       zErrMsg = 
-         @ <p><font color="red">
+         @ <p><span class="loginError">
          @ You entered an unknown user or an incorrect password.
-         @ </font></p>
+         @ </span></p>
       ;
     }else{
       char *zCookie;
@@ -236,22 +231,22 @@ void login_page(void){
   }
   style_header("Login/Logout");
   @ %s(zErrMsg)
-  @ <form action="login" method="POST">
+  @ <form action="login" method="post">
   if( P("g") ){
-    @ <input type="hidden" name="g" value="%h(P("g"))">
+    @ <input type="hidden" name="g" value="%h(P("g"))" />
   }
-  @ <table align="left" hspace="10">
+  @ <table class="login_out">
   @ <tr>
-  @   <td align="right">User ID:</td>
+  @   <td class="login_out_label">User ID:</td>
   if( anonFlag ){
-    @   <td><input type="text" id="u" name="u" value="anonymous" size=30></td>
+    @ <td><input type="text" id="u" name="u" value="anonymous" size="30" /></td>
   }else{
-    @   <td><input type="text" id="u" name="u" value="" size=30></td>
+    @ <td><input type="text" id="u" name="u" value="" size="30" /></td>
   }
   @ </tr>
   @ <tr>
-  @  <td align="right">Password:</td>
-  @   <td><input type="password" id="p" name="p" value="" size=30></td>
+  @  <td class="login_out_label">Password:</td>
+  @   <td><input type="password" id="p" name="p" value="" size="30" /></td>
   @ </tr>
   if( g.zLogin==0 ){
     zAnonPw = db_text(0, "SELECT pw FROM user"
@@ -260,10 +255,10 @@ void login_page(void){
   }
   @ <tr>
   @   <td></td>
-  @   <td><input type="submit" name="in" value="Login"></td>
+  @   <td><input type="submit" name="in" value="Login" /></td>
   @ </tr>
   @ </table>
-  @ <script>document.getElementById('u').focus()</script>
+  @ <script type="text/JavaScript">document.getElementById('u').focus()</script>
   if( g.zLogin==0 ){
     @ <p>Enter
   }else{
@@ -277,45 +272,45 @@ void login_page(void){
   if( zAnonPw ){
     unsigned int uSeed = captcha_seed();
     char const *zDecoded = captcha_decode(uSeed);
-    int bAutoCaptcha = db_get_boolean("auto-captcha", 0);
+    int bAutoCaptcha = db_get_boolean("auto-captcha", 1);
     char *zCaptcha = captcha_render(zDecoded);
 
-    @ <input type="hidden" name="cs" value="%u(uSeed)"/>
-    @ <p>Visitors may enter <b>anonymous</b> as the user-ID with
+    @ <p><input type="hidden" name="cs" value="%u(uSeed)" />
+    @ Visitors may enter <b>anonymous</b> as the user-ID with
     @ the 8-character hexadecimal password shown below:</p>
-    @ <center><table border="1" cellpadding="10"><tr><td><pre>
+    @ <div class="captcha"><table class="captcha"><tr><td><pre>
     @ %s(zCaptcha)
     @ </pre></td></tr></table>
     if( bAutoCaptcha ) {
         @ <input type="button" value="Fill out captcha"
         @  onclick="document.getElementById('u').value='anonymous';
-        @           document.getElementById('p').value='%s(zDecoded)';"/>
+        @           document.getElementById('p').value='%s(zDecoded)';" />
     }
-    @ </center>
+    @ </div>
     free(zCaptcha);
   }
   if( g.zLogin ){
-    @ <br clear="both"><hr>
+    @ <hr />
     @ <p>To log off the system (and delete your login cookie)
-    @  press the following button:<br>
-    @ <input type="submit" name="out" value="Logout"></p>
+    @  press the following button:<br />
+    @ <input type="submit" name="out" value="Logout" /></p>
   }
   @ </form>
   if( g.okPassword ){
-    @ <br clear="both"><hr>
+    @ <hr />
     @ <p>To change your password, enter your old password and your
     @ new password twice below then press the "Change Password"
     @ button.</p>
-    @ <form action="login" method="POST">
+    @ <form action="login" method="post">
     @ <table>
-    @ <tr><td align="right">Old Password:</td>
-    @ <td><input type="password" name="p" size=30></td></tr>
-    @ <tr><td align="right">New Password:</td>
-    @ <td><input type="password" name="n1" size=30></td></tr>
-    @ <tr><td align="right">Repeat New Password:</td>
-    @ <td><input type="password" name="n2" size=30></td></tr>
+    @ <tr><td class="login_out_label">Old Password:</td>
+    @ <td><input type="password" name="p" size="30" /></td></tr>
+    @ <tr><td class="login_out_label">New Password:</td>
+    @ <td><input type="password" name="n1" size="30" /></td></tr>
+    @ <tr><td class="login_out_label">Repeat New Password:</td>
+    @ <td><input type="password" name="n2" size="30" /></td></tr>
     @ <tr><td></td>
-    @ <td><input type="submit" value="Change Password"></td></tr>
+    @ <td><input type="submit" value="Change Password" /></td></tr>
     @ </table>
     @ </form>
   }
@@ -603,8 +598,8 @@ void login_anonymous_available(void){
                 " WHERE login='anonymous'"
                 "   AND cap LIKE '%%h%%'") ){
     const char *zUrl = PD("REQUEST_URI", "index");
-    @ <p>Many <font color="red">hyperlinks are disabled.</font><br />
-    @ Use <a href="%s(g.zTop)/login?anon=1&g=%T(zUrl)">anonymous login</a>
+    @ <p>Many <span class="disabled">hyperlinks are disabled.</span><br />
+    @ Use <a href="%s(g.zTop)/login?anon=1&amp;g=%T(zUrl)">anonymous login</a>
     @ to enable hyperlinks.</p>
   }
 }
@@ -614,7 +609,7 @@ void login_anonymous_available(void){
 ** as a hidden element of the form.
 */
 void login_insert_csrf_secret(void){
-  @ <input type="hidden" name="csrf" value="%s(g.zCsrfToken)">
+  @ <input type="hidden" name="csrf" value="%s(g.zCsrfToken)" />
 }
 
 /*

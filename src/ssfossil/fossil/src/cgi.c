@@ -2,18 +2,12 @@
 ** Copyright (c) 2006 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -28,22 +22,23 @@
 ** decode strings in HTML or HTTP.
 */
 #include "config.h"
-#ifdef __MINGW32__
-#  include <windows.h>           /* for Sleep once server works again */
-#  include <winsock2.h>          /* socket operations */
-#  define sleep Sleep            /* windows does not have sleep, but Sleep */
-#  include <ws2tcpip.h>          
+#ifdef _WIN32
+# include <windows.h>           /* for Sleep once server works again */
+#  if defined(__MINGW32__)
+#    define sleep Sleep            /* windows does not have sleep, but Sleep */
+#    include <ws2tcpip.h>          
+#  endif
 #else
-#  include <sys/socket.h>
-#  include <netinet/in.h>
-#  include <arpa/inet.h>
-#  include <sys/times.h>
-#  include <sys/time.h>
-#  include <sys/wait.h>
-#  include <sys/select.h>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <arpa/inet.h>
+# include <sys/times.h>
+# include <sys/time.h>
+# include <sys/wait.h>
+# include <sys/select.h>
 #endif
 #ifdef __EMX__
-   typedef int socklen_t;
+  typedef int socklen_t;
 #endif
 #include <time.h>
 #include <stdio.h>
@@ -197,13 +192,10 @@ void cgi_set_cookie(
 ){
   if( zPath==0 ) zPath = g.zTop;
   if( lifetime>0 ){
-    char *zDate;
     lifetime += (int)time(0);
-    zDate = cgi_rfc822_datestamp(lifetime);
     blob_appendf(&extraHeader,
-       "Set-Cookie: %s=%t; Path=%s; expires=%s; Version=1\r\n",
-        zName, zValue, zPath, zDate);
-    if( zDate[0] ) free( zDate );
+       "Set-Cookie: %s=%t; Path=%s; expires=%z; Version=1\r\n",
+        zName, zValue, zPath, cgi_rfc822_datestamp(lifetime));
   }else{
     blob_appendf(&extraHeader,
        "Set-Cookie: %s=%t; Path=%s; Version=1\r\n",
@@ -268,7 +260,7 @@ static int check_cache_control(void){
 ** Do a normal HTTP reply
 */
 void cgi_reply(void){
-  int total_size = 0;
+  int total_size;
   if( iReplyStatus<=0 ){
     iReplyStatus = 200;
     zReplyStatus = "OK";
@@ -286,10 +278,8 @@ void cgi_reply(void){
 #endif
 
   if( g.fullHttpReply ){
-    char *zDate = cgi_rfc822_datestamp(time(0));
     fprintf(g.httpOut, "HTTP/1.0 %d %s\r\n", iReplyStatus, zReplyStatus);
-    fprintf(g.httpOut, "Date: %s\r\n", zDate );
-    if( zDate[0] ) free( zDate );
+    fprintf(g.httpOut, "Date: %s\r\n", cgi_rfc822_datestamp(time(0)));
     fprintf(g.httpOut, "Connection: close\r\n");
   }else{
     fprintf(g.httpOut, "Status: %d %s\r\n", iReplyStatus, zReplyStatus);
@@ -310,9 +300,7 @@ void cgi_reply(void){
     */
     /*time_t expires = time(0) + atoi(db_config("constant_expires","604800"));*/
     time_t expires = time(0) + 604800;
-    char * zDate = cgi_rfc822_datestamp(expires);
-    fprintf(g.httpOut, "Expires: %s\r\n", zDate );
-    if( zDate[0] ) free( zDate );
+    fprintf(g.httpOut, "Expires: %s\r\n", cgi_rfc822_datestamp(expires));
   }else{
     fprintf(g.httpOut, "Cache-control: no-cache, no-store\r\n");
   }
@@ -329,6 +317,8 @@ void cgi_reply(void){
   if( iReplyStatus != 304 ) {
     total_size = blob_size(&cgiContent[0]) + blob_size(&cgiContent[1]);
     fprintf(g.httpOut, "Content-Length: %d\r\n", total_size);
+  }else{
+    total_size = 0;
   }
   fprintf(g.httpOut, "\r\n");
   if( total_size>0 && iReplyStatus != 304 ){
@@ -362,7 +352,7 @@ void cgi_redirect(const char *zURL){
   cgi_set_status(302, "Moved Temporarily");
   free(zLocation);
   cgi_reply();
-  exit(0);
+  fossil_exit(0);
 }
 void cgi_redirectf(const char *zFormat, ...){
   va_list ap;
@@ -397,7 +387,7 @@ void cgi_set_parameter_nocopy(const char *zName, const char *zValue){
   if( nAllocQP<=nUsedQP ){
     nAllocQP = nAllocQP*2 + 10;
     aParamQP = realloc( aParamQP, nAllocQP*sizeof(aParamQP[0]) );
-    if( aParamQP==0 ) exit(1);
+    if( aParamQP==0 ) fossil_exit(1);
   }
   aParamQP[nUsedQP].zName = zName;
   aParamQP[nUsedQP].zValue = zValue;
@@ -691,7 +681,7 @@ void cgi_init(void){
     if( strcmp(zType,"application/x-www-form-urlencoded")==0 
          || strncmp(zType,"multipart/form-data",19)==0 ){
       z = malloc( len+1 );
-      if( z==0 ) exit(1);
+      if( z==0 ) fossil_exit(1);
       len = fread(z, 1, len, g.httpIn);
       z[len] = 0;
       if( zType[0]=='a' ){
@@ -865,141 +855,6 @@ void cgi_print_all(void){
 }
 
 /*
-** Write HTML text for an option menu to standard output.  zParam
-** is the query parameter that the option menu sets.  zDflt is the
-** initial value of the option menu.  Addition arguments are name/value
-** pairs that define values on the menu.  The list is terminated with
-** a single NULL argument.
-*/
-void cgi_optionmenu(int in, const char *zP, const char *zD, ...){
-  va_list ap;
-  char *zName, *zVal;
-  int dfltSeen = 0;
-  cgi_printf("%*s<select size=1 name=\"%s\">\n", in, "", zP);
-  va_start(ap, zD);
-  while( (zName = va_arg(ap, char*))!=0 && (zVal = va_arg(ap, char*))!=0 ){
-    if( strcmp(zVal,zD)==0 ){ dfltSeen = 1; break; }
-  }
-  va_end(ap);
-  if( !dfltSeen ){
-    if( zD[0] ){
-      cgi_printf("%*s<option value=\"%h\" selected>%h</option>\n",
-        in+2, "", zD, zD);
-    }else{
-      cgi_printf("%*s<option value=\"\" selected>&nbsp;</option>\n", in+2, "");
-    }
-  }
-  va_start(ap, zD);
-  while( (zName = va_arg(ap, char*))!=0 && (zVal = va_arg(ap, char*))!=0 ){
-    if( zName[0] ){
-      cgi_printf("%*s<option value=\"%h\"%s>%h</option>\n",
-        in+2, "",
-        zVal,
-        strcmp(zVal, zD) ? "" : " selected",
-        zName
-      );
-    }else{
-      cgi_printf("%*s<option value=\"\"%s>&nbsp;</option>\n",
-        in+2, "",
-        strcmp(zVal, zD) ? "" : " selected"
-      );
-    }
-  }
-  va_end(ap);
-  cgi_printf("%*s</select>\n", in, "");
-}
-
-/*
-** This routine works a lot like cgi_optionmenu() except that the list of
-** values is contained in an array.  Also, the values are just values, not
-** name/value pairs as in cgi_optionmenu.
-*/
-void cgi_v_optionmenu(
-  int in,              /* Indent by this amount */
-  const char *zP,      /* The query parameter name */
-  const char *zD,      /* Default value */
-  const char **az      /* NULL-terminated list of allowed values */
-){
-  const char *zVal;
-  int i;
-  cgi_printf("%*s<select size=1 name=\"%s\">\n", in, "", zP);
-  for(i=0; az[i]; i++){
-    if( strcmp(az[i],zD)==0 ) break;
-  }
-  if( az[i]==0 ){
-    if( zD[0]==0 ){
-      cgi_printf("%*s<option value=\"\" selected>&nbsp;</option>\n",
-       in+2, "");
-    }else{
-      cgi_printf("%*s<option value=\"%h\" selected>%h</option>\n",
-       in+2, "", zD, zD);
-    }
-  }
-  while( (zVal = *(az++))!=0  ){
-    if( zVal[0] ){
-      cgi_printf("%*s<option value=\"%h\"%s>%h</option>\n",
-        in+2, "",
-        zVal,
-        strcmp(zVal, zD) ? "" : " selected",
-        zVal
-      );
-    }else{
-      cgi_printf("%*s<option value=\"\"%s>&nbsp;</option>\n",
-        in+2, "",
-        strcmp(zVal, zD) ? "" : " selected"
-      );
-    }
-  }
-  cgi_printf("%*s</select>\n", in, "");
-}
-
-/*
-** This routine works a lot like cgi_v_optionmenu() except that the list
-** is a list of pairs.  The first element of each pair is the value used
-** internally and the second element is the value displayed to the user.
-*/
-void cgi_v_optionmenu2(
-  int in,              /* Indent by this amount */
-  const char *zP,      /* The query parameter name */
-  const char *zD,      /* Default value */
-  const char **az      /* NULL-terminated list of allowed values */
-){
-  const char *zVal;
-  int i;
-  cgi_printf("%*s<select size=1 name=\"%s\">\n", in, "", zP);
-  for(i=0; az[i]; i+=2){
-    if( strcmp(az[i],zD)==0 ) break;
-  }
-  if( az[i]==0 ){
-    if( zD[0]==0 ){
-      cgi_printf("%*s<option value=\"\" selected>&nbsp;</option>\n",
-       in+2, "");
-    }else{
-      cgi_printf("%*s<option value=\"%h\" selected>%h</option>\n",
-       in+2, "", zD, zD);
-    }
-  }
-  while( (zVal = *(az++))!=0  ){
-    const char *zName = *(az++);
-    if( zName[0] ){
-      cgi_printf("%*s<option value=\"%h\"%s>%h</option>\n",
-        in+2, "",
-        zVal,
-        strcmp(zVal, zD) ? "" : " selected",
-        zName
-      );
-    }else{
-      cgi_printf("%*s<option value=\"%h\"%s>&nbsp;</option>\n",
-        in+2, "",
-        zVal,
-        strcmp(zVal, zD) ? "" : " selected"
-      );
-    }
-  }
-  cgi_printf("%*s</select>\n", in, "");
-}
-
-/*
 ** This routine works like "printf" except that it has the
 ** extra formatting capabilities such as %h and %t.
 */
@@ -1028,7 +883,7 @@ static void malformed_request(void){
     "<html><body>Unrecognized HTTP Request</body></html>\n"
   );
   cgi_reply();
-  exit(0);
+  fossil_exit(0);
 }
 
 /*
@@ -1046,7 +901,7 @@ void cgi_panic(const char *zFormat, ...){
   vxprintf(pContent,zFormat,ap);
   va_end(ap);
   cgi_reply();
-  exit(1);
+  fossil_exit(1);
 }
 
 /*
@@ -1135,27 +990,40 @@ void cgi_handle_http_request(const char *zIpAddr){
     while( i>0 && isspace(zVal[i-1]) ){ i--; }
     zVal[i] = 0;
     for(i=0; zFieldName[i]; i++){ zFieldName[i] = tolower(zFieldName[i]); }
-    if( strcmp(zFieldName,"user-agent:")==0 ){
-      cgi_setenv("HTTP_USER_AGENT", zVal);
-    }else if( strcmp(zFieldName,"content-length:")==0 ){
+    if( strcmp(zFieldName,"content-length:")==0 ){
       cgi_setenv("CONTENT_LENGTH", zVal);
-    }else if( strcmp(zFieldName,"referer:")==0 ){
-      cgi_setenv("HTTP_REFERER", zVal);
-    }else if( strcmp(zFieldName,"host:")==0 ){
-      cgi_setenv("HTTP_HOST", zVal);
     }else if( strcmp(zFieldName,"content-type:")==0 ){
       cgi_setenv("CONTENT_TYPE", zVal);
     }else if( strcmp(zFieldName,"cookie:")==0 ){
       cgi_setenv("HTTP_COOKIE", zVal);
+    }else if( strcmp(zFieldName,"https:")==0 ){
+      cgi_setenv("HTTPS", zVal);
+    }else if( strcmp(zFieldName,"host:")==0 ){
+      cgi_setenv("HTTP_HOST", zVal);
     }else if( strcmp(zFieldName,"if-none-match:")==0 ){
       cgi_setenv("HTTP_IF_NONE_MATCH", zVal);
     }else if( strcmp(zFieldName,"if-modified-since:")==0 ){
       cgi_setenv("HTTP_IF_MODIFIED_SINCE", zVal);
     }
+#if 0
+    else if( strcmp(zFieldName,"referer:")==0 ){
+      cgi_setenv("HTTP_REFERER", zVal);
+    }else if( strcmp(zFieldName,"user-agent:")==0 ){
+      cgi_setenv("HTTP_USER_AGENT", zVal);
+    }
+#endif
   }
 
   cgi_init();
 }
+
+#if INTERFACE
+/* 
+** Bitmap values for the flags parameter to cgi_http_server().
+*/
+#define HTTP_SERVER_LOCALHOST      0x0001     /* Bind to 127.0.0.1 only */
+
+#endif /* INTERFACE */
 
 /*
 ** Maximum number of child processes that we can have running
@@ -1173,10 +1041,10 @@ void cgi_handle_http_request(const char *zIpAddr){
 ** Return 0 to each child as it runs.  If unable to establish a
 ** listening socket, return non-zero.
 */
-int cgi_http_server(int mnPort, int mxPort, char *zBrowser){
-#ifdef __MINGW32__
+int cgi_http_server(int mnPort, int mxPort, char *zBrowser, int flags){
+#if defined(_WIN32)
   /* Use win32_http_server() instead */
-  exit(1);
+  fossil_exit(1);
 #else
   int listener = -1;           /* The server socket */
   int connection;              /* A socket for each individual connection */
@@ -1192,7 +1060,11 @@ int cgi_http_server(int mnPort, int mxPort, char *zBrowser){
   while( iPort<=mxPort ){
     memset(&inaddr, 0, sizeof(inaddr));
     inaddr.sin_family = AF_INET;
-    inaddr.sin_addr.s_addr = INADDR_ANY;
+    if( flags & HTTP_SERVER_LOCALHOST ){
+      inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    }else{
+      inaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    }
     inaddr.sin_port = htons(iPort);
     listener = socket(AF_INET, SOCK_STREAM, 0);
     if( listener<0 ){
@@ -1237,7 +1109,8 @@ int cgi_http_server(int mnPort, int mxPort, char *zBrowser){
     delay.tv_usec = 0;
     FD_ZERO(&readfds);
     FD_SET( listener, &readfds);
-    if( select( listener+1, &readfds, 0, 0, &delay) ){
+    select( listener+1, &readfds, 0, 0, &delay);
+    if( FD_ISSET(listener, &readfds) ){
       lenaddr = sizeof(inaddr);
       connection = accept(listener, (struct sockaddr*)&inaddr,
                                     (socklen_t*) &lenaddr);
@@ -1266,7 +1139,7 @@ int cgi_http_server(int mnPort, int mxPort, char *zBrowser){
     }
   }
   /* NOT REACHED */  
-  exit(1);
+  fossil_exit(1);
 #endif
 }
 
@@ -1282,11 +1155,10 @@ static const char *azMonths[] =
 
 
 /*
-** Returns an RFC822-formatted time string suitable for HTTP headers, among
-** other things.
-** Returned timezone is always GMT as required by HTTP/1.1 specification.
-** The returned string is allocated with malloc() and must be freed
-** with free().
+** Returns an RFC822-formatted time string suitable for HTTP headers.
+** The timezone is always GMT.  The value returned is always a
+** string obtained from mprintf() and must be freed using free() to
+** avoid a memory leak.
 **
 ** See http://www.faqs.org/rfcs/rfc822.html, section 5
 ** and http://www.faqs.org/rfcs/rfc2616.html, section 3.3.
@@ -1294,10 +1166,13 @@ static const char *azMonths[] =
 char *cgi_rfc822_datestamp(time_t now){
   struct tm *pTm;
   pTm = gmtime(&now);
-  if( pTm==0 ) return "";
-  return mprintf("%s, %d %s %02d %02d:%02d:%02d GMT",
-                 azDays[pTm->tm_wday], pTm->tm_mday, azMonths[pTm->tm_mon],
-                 pTm->tm_year+1900, pTm->tm_hour, pTm->tm_min, pTm->tm_sec);
+  if( pTm==0 ){
+    return mprintf("");
+  }else{
+    return mprintf("%s, %d %s %02d %02d:%02d:%02d GMT",
+                   azDays[pTm->tm_wday], pTm->tm_mday, azMonths[pTm->tm_mon],
+                   pTm->tm_year+1900, pTm->tm_hour, pTm->tm_min, pTm->tm_sec);
+  }
 }
 
 /*
@@ -1367,5 +1242,5 @@ void cgi_modified_since(time_t objectTime){
   cgi_set_status(304,"Not Modified");
   cgi_reset_content();
   cgi_reply();
-  exit(0);
+  fossil_exit(0);
 }

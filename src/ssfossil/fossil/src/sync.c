@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-** 
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -45,6 +39,7 @@ void autosync(int flags){
   const char *zUrl;
   const char *zAutosync;
   const char *zPw;
+  int configSync = 0;       /* configuration changes transferred */
   if( g.fNoSync ){
     return;
   }
@@ -68,9 +63,19 @@ void autosync(int flags){
   if( g.urlUser!=0 && g.urlPasswd==0 ){
     g.urlPasswd = mprintf("%s", zPw);
   }
+  if( (flags & AUTOSYNC_PULL)!=0 && db_get_boolean("auto-shun",1) ){
+    /* When doing an automatic pull, also automatically pull shuns from
+    ** the server if pull_shuns is enabled.
+    **
+    ** TODO:  What happens if the shun list gets really big? 
+    ** Maybe the shunning list should only be pulled on every 10th
+    ** autosync, or something?
+    */
+    configSync = CONFIGSET_SHUN;
+  }
   printf("Autosync:  %s\n", g.urlCanonical);
   url_enable_proxy("via proxy: ");
-  client_sync((flags & AUTOSYNC_PUSH)!=0, 1, 0, 0, 0);
+  client_sync((flags & AUTOSYNC_PUSH)!=0, 1, 0, configSync, 0);
 }
 
 /*
@@ -79,9 +84,10 @@ void autosync(int flags){
 ** of a server to sync against.  If no argument is given, use the
 ** most recently synced URL.  Remember the current URL for next time.
 */
-void process_sync_args(void){
+static int process_sync_args(void){
   const char *zUrl = 0;
   const char *zPw = 0;
+  int configSync = 0;
   int urlOptional = find_option("autourl",0,0)!=0;
   g.dontKeepUrl = find_option("once",0,0)!=0;
   url_proxy_options();
@@ -90,11 +96,12 @@ void process_sync_args(void){
   if( g.argc==2 ){
     zUrl = db_get("last-sync-url", 0);
     zPw = db_get("last-sync-pw", 0);
+    if( db_get_boolean("auto-sync",1) ) configSync = CONFIGSET_SHUN;
   }else if( g.argc==3 ){
     zUrl = g.argv[2];
   }
   if( zUrl==0 ){
-    if( urlOptional ) exit(0);
+    if( urlOptional ) fossil_exit(0);
     usage("URL");
   }
   url_parse(zUrl);
@@ -114,6 +121,7 @@ void process_sync_args(void){
     printf("Server:    %s\n", g.urlCanonical);
   }
   url_enable_proxy("via proxy: ");
+  return configSync;
 }
 
 /*
@@ -136,8 +144,8 @@ void process_sync_args(void){
 ** See also: clone, push, sync, remote-url
 */
 void pull_cmd(void){
-  process_sync_args();
-  client_sync(0,1,0,0,0);
+  int syncFlags = process_sync_args();
+  client_sync(0,1,0,syncFlags,0);
 }
 
 /*
@@ -190,8 +198,8 @@ void push_cmd(void){
 ** See also:  clone, push, pull, remote-url
 */
 void sync_cmd(void){
-  process_sync_args();
-  client_sync(1,1,0,0,0);
+  int syncFlags = process_sync_args();
+  client_sync(1,1,0,syncFlags,0);
 }
 
 /*

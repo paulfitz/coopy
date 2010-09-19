@@ -2,18 +2,12 @@
 ** Copyright (c) 2007 D. Richard Hipp
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public
-** License version 2 as published by the Free Software Foundation.
-**
+** modify it under the terms of the Simplified BSD License (also
+** known as the "2-Clause License" or "FreeBSD License".)
+
 ** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-** General Public License for more details.
-**
-** You should have received a copy of the GNU General Public
-** License along with this library; if not, write to the
-** Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-** Boston, MA  02111-1307, USA.
+** but without any warranty; without even the implied warranty of
+** merchantability or fitness for a particular purpose.
 **
 ** Author contact information:
 **   drh@hwaci.com
@@ -54,25 +48,26 @@ int csv_render(Blob *in, Blob *out);
 #define ATTR_BORDER             4
 #define ATTR_CELLPADDING        5
 #define ATTR_CELLSPACING        6
-#define ATTR_CLEAR              7
-#define ATTR_COLOR              8
-#define ATTR_COLSPAN            9
-#define ATTR_COMPACT            10
-#define ATTR_FACE               11
-#define ATTR_HEIGHT             12
-#define ATTR_HREF               13
-#define ATTR_HSPACE             14
-#define ATTR_ID                 15
-#define ATTR_NAME               16
-#define ATTR_ROWSPAN            17
-#define ATTR_SIZE               18
-#define ATTR_SRC                19
-#define ATTR_START              20
-#define ATTR_TYPE               21
-#define ATTR_VALIGN             22
-#define ATTR_VALUE              23
-#define ATTR_VSPACE             24
-#define ATTR_WIDTH              25
+#define ATTR_CLASS              7
+#define ATTR_CLEAR              8
+#define ATTR_COLOR              9
+#define ATTR_COLSPAN            10
+#define ATTR_COMPACT            11
+#define ATTR_FACE               12
+#define ATTR_HEIGHT             13
+#define ATTR_HREF               14
+#define ATTR_HSPACE             15
+#define ATTR_ID                 16
+#define ATTR_NAME               17
+#define ATTR_ROWSPAN            18
+#define ATTR_SIZE               19
+#define ATTR_SRC                20
+#define ATTR_START              21
+#define ATTR_TYPE               22
+#define ATTR_VALIGN             23
+#define ATTR_VALUE              24
+#define ATTR_VSPACE             25
+#define ATTR_WIDTH              26
 #define AMSK_ALIGN              0x0000001
 #define AMSK_ALT                0x0000002
 #define AMSK_BGCOLOR            0x0000004
@@ -98,6 +93,7 @@ int csv_render(Blob *in, Blob *out);
 #define AMSK_VALUE              0x0400000
 #define AMSK_VSPACE             0x0800000
 #define AMSK_WIDTH              0x1000000
+#define AMSK_CLASS              0x2000000
 
 static const struct AllowedAttribute {
   const char *zName;
@@ -110,6 +106,7 @@ static const struct AllowedAttribute {
   { "border",        AMSK_BORDER,         },
   { "cellpadding",   AMSK_CELLPADDING,    },
   { "cellspacing",   AMSK_CELLSPACING,    },
+  { "class",         AMSK_CLASS,          },
   { "clear",         AMSK_CLEAR,          },
   { "color",         AMSK_COLOR,          },
   { "colspan",       AMSK_COLSPAN,        },
@@ -243,7 +240,7 @@ static const struct AllowedMarkup {
 } aMarkup[] = {
  { 0,               MARKUP_INVALID,      0,                    0  },
  { "a",             MARKUP_A,            MUTYPE_HYPERLINK,
-                    AMSK_HREF|AMSK_NAME },
+                    AMSK_HREF|AMSK_NAME|AMSK_CLASS },
  { "address",       MARKUP_ADDRESS,      MUTYPE_BLOCK,         0  },
  { "b",             MARKUP_B,            MUTYPE_FONT,          0  },
  { "big",           MARKUP_BIG,          MUTYPE_FONT,          0  },
@@ -254,20 +251,20 @@ static const struct AllowedMarkup {
  { "code",          MARKUP_CODE,         MUTYPE_FONT,          0  },
  { "dd",            MARKUP_DD,           MUTYPE_LI,            0  },
  { "dfn",           MARKUP_DFN,          MUTYPE_FONT,          0  },
- { "div",           MARKUP_DIV,          MUTYPE_BLOCK,         AMSK_ID      },
+ { "div",           MARKUP_DIV,          MUTYPE_BLOCK,         AMSK_ID|AMSK_CLASS      },
  { "dl",            MARKUP_DL,           MUTYPE_LIST,          AMSK_COMPACT },
  { "dt",            MARKUP_DT,           MUTYPE_LI,            0  },
  { "em",            MARKUP_EM,           MUTYPE_FONT,          0  },
  { "font",          MARKUP_FONT,         MUTYPE_FONT,
                     AMSK_COLOR|AMSK_FACE|AMSK_SIZE   },
- { "h1",            MARKUP_H1,           MUTYPE_BLOCK,         AMSK_ALIGN  },
- { "h2",            MARKUP_H2,           MUTYPE_BLOCK,         AMSK_ALIGN  },
- { "h3",            MARKUP_H3,           MUTYPE_BLOCK,         AMSK_ALIGN  },
- { "h4",            MARKUP_H4,           MUTYPE_BLOCK,         AMSK_ALIGN  },
- { "h5",            MARKUP_H5,           MUTYPE_BLOCK,         AMSK_ALIGN  },
- { "h6",            MARKUP_H6,           MUTYPE_BLOCK,         AMSK_ALIGN  },
+ { "h1",            MARKUP_H1,           MUTYPE_BLOCK,         AMSK_ALIGN|AMSK_CLASS  },
+ { "h2",            MARKUP_H2,           MUTYPE_BLOCK,         AMSK_ALIGN|AMSK_CLASS  },
+ { "h3",            MARKUP_H3,           MUTYPE_BLOCK,         AMSK_ALIGN|AMSK_CLASS  },
+ { "h4",            MARKUP_H4,           MUTYPE_BLOCK,         AMSK_ALIGN|AMSK_CLASS  },
+ { "h5",            MARKUP_H5,           MUTYPE_BLOCK,         AMSK_ALIGN|AMSK_CLASS  },
+ { "h6",            MARKUP_H6,           MUTYPE_BLOCK,         AMSK_ALIGN|AMSK_CLASS  },
  { "hr",            MARKUP_HR,           MUTYPE_SINGLE,
-                    AMSK_ALIGN|AMSK_COLOR|AMSK_SIZE|AMSK_WIDTH  },
+                    AMSK_ALIGN|AMSK_COLOR|AMSK_SIZE|AMSK_WIDTH|AMSK_CLASS  },
  { "i",             MARKUP_I,            MUTYPE_FONT,          0  },
  { "img",           MARKUP_IMG,          MUTYPE_SINGLE,
                     AMSK_ALIGN|AMSK_ALT|AMSK_BORDER|AMSK_HEIGHT|
@@ -279,7 +276,7 @@ static const struct AllowedMarkup {
  { "nowiki",        MARKUP_NOWIKI,       MUTYPE_SPECIAL,       0  },
  { "ol",            MARKUP_OL,           MUTYPE_LIST,
                     AMSK_START|AMSK_TYPE|AMSK_COMPACT  },
- { "p",             MARKUP_P,            MUTYPE_BLOCK,         AMSK_ALIGN  },
+ { "p",             MARKUP_P,            MUTYPE_BLOCK,         AMSK_ALIGN|AMSK_CLASS  },
  { "pre",           MARKUP_PRE,          MUTYPE_BLOCK,         0  },
  { "s",             MARKUP_S,            MUTYPE_FONT,          0  },
  { "samp",          MARKUP_SAMP,         MUTYPE_FONT,          0  },
@@ -291,15 +288,15 @@ static const struct AllowedMarkup {
  { "sup",           MARKUP_SUP,          MUTYPE_FONT,          0  },
  { "table",         MARKUP_TABLE,        MUTYPE_TABLE,
                     AMSK_ALIGN|AMSK_BGCOLOR|AMSK_BORDER|AMSK_CELLPADDING|
-                    AMSK_CELLSPACING|AMSK_HSPACE|AMSK_VSPACE  },
+                    AMSK_CELLSPACING|AMSK_HSPACE|AMSK_VSPACE|AMSK_CLASS  },
  { "td",            MARKUP_TD,           MUTYPE_TD,
                     AMSK_ALIGN|AMSK_BGCOLOR|AMSK_COLSPAN|
-                    AMSK_ROWSPAN|AMSK_VALIGN  },
+                    AMSK_ROWSPAN|AMSK_VALIGN|AMSK_CLASS  },
  { "th",            MARKUP_TH,           MUTYPE_TD,
                     AMSK_ALIGN|AMSK_BGCOLOR|AMSK_COLSPAN|
-                    AMSK_ROWSPAN|AMSK_VALIGN  },
+                    AMSK_ROWSPAN|AMSK_VALIGN|AMSK_CLASS  },
  { "tr",            MARKUP_TR,           MUTYPE_TR,
-                    AMSK_ALIGN|AMSK_BGCOLOR||AMSK_VALIGN  },
+                    AMSK_ALIGN|AMSK_BGCOLOR||AMSK_VALIGN|AMSK_CLASS  },
  { "tt",            MARKUP_TT,           MUTYPE_FONT,          0  },
  { "u",             MARKUP_U,            MUTYPE_FONT,          0  },
  { "ul",            MARKUP_UL,           MUTYPE_LIST,
@@ -333,17 +330,17 @@ static int findTag(const char *z){
 /*
 ** Token types
 */
-#define TOKEN_MARKUP        1    /* <...> */
-#define TOKEN_CHARACTER     2    /* "&" or "<" not part of markup */
-#define TOKEN_LINK          3    /* [...] */
-#define TOKEN_PARAGRAPH     4    /* blank lines */
-#define TOKEN_NEWLINE       5    /* A single "\n" */
-#define TOKEN_BUL_LI        6    /*  "  *  " */
-#define TOKEN_NUM_LI        7    /*  "  #  " */
-#define TOKEN_ENUM          8    /*  "  \(?\d+[.)]?  " */
-#define TOKEN_INDENT        9    /*  "   " */
-#define TOKEN_RAW           10   /* Output exactly (used when wiki-use-html==1) */
-#define TOKEN_TEXT          11   /* None of the above */
+#define TOKEN_MARKUP        1  /* <...> */
+#define TOKEN_CHARACTER     2  /* "&" or "<" not part of markup */
+#define TOKEN_LINK          3  /* [...] */
+#define TOKEN_PARAGRAPH     4  /* blank lines */
+#define TOKEN_NEWLINE       5  /* A single "\n" */
+#define TOKEN_BUL_LI        6  /*  "  *  " */
+#define TOKEN_NUM_LI        7  /*  "  #  " */
+#define TOKEN_ENUM          8  /*  "  \(?\d+[.)]?  " */
+#define TOKEN_INDENT        9  /*  "   " */
+#define TOKEN_RAW           10 /* Output exactly (used when wiki-use-html==1) */
+#define TOKEN_TEXT          11 /* None of the above */
 
 /*
 ** State flags
@@ -761,8 +758,16 @@ static void renderMarkup(Blob *pOut, ParsedMarkup *p){
     for(i=0; i<p->nAttr; i++){
       blob_appendf(pOut, " %s", aAttribute[p->aAttr[i].iACode].zName);
       if( p->aAttr[i].zValue ){
-        blob_appendf(pOut, "=\"%s\"", p->aAttr[i].zValue);
+        const char *zVal = p->aAttr[i].zValue;
+        if( p->aAttr[i].iACode==ATTR_SRC && zVal[0]=='/' ){
+          blob_appendf(pOut, "=\"%s%s\"", g.zBaseURL, zVal);
+        }else{
+          blob_appendf(pOut, "=\"%s\"", zVal);
+        }
       }
+    }
+    if (p->iType & MUTYPE_SINGLE){
+      blob_append(pOut, " /", 2);
     }
     blob_append(pOut, ">", 1);
   }
@@ -892,7 +897,8 @@ static int backupToType(Renderer *p, int iMask){
 ** Begin a new paragraph if that something that is needed.
 */
 static void startAutoParagraph(Renderer *p){
-  if( p->wantAutoParagraph==0 || p->wikiList==MARKUP_OL || p->wikiList==MARKUP_UL ) return;
+  if( p->wantAutoParagraph==0 ) return;
+  if( p->wikiList==MARKUP_OL || p->wikiList==MARKUP_UL ) return;
   blob_appendf(p->pOut, "<p>", -1);
   pushStack(p, MARKUP_P);
   p->wantAutoParagraph = 0;
@@ -982,6 +988,7 @@ static int is_ticket(
 **    [./relpath]
 **
 **    [WikiPageName]
+**    [wiki:WikiPageName]
 **
 **    [0123456789abcdef]
 **
@@ -1025,13 +1032,14 @@ static void openHyperlink(
       */
       if( isClosed ){
         if( g.okHistory ){
-          blob_appendf(p->pOut,"<a href=\"%s/info/%s\"><s>",
-              g.zBaseURL, zTarget
+          blob_appendf(p->pOut,
+             "<a href=\"%s/info/%s\"><span class=\"wikiTagCancelled\">",
+             g.zBaseURL, zTarget
           );
-          zTerm = "</s></a>";
+          zTerm = "</span></a>";
         }else{
-          blob_appendf(p->pOut,"<s>");
-          zTerm = "</s>";
+          blob_appendf(p->pOut,"<span class=\"wikiTagCancelled\">");
+          zTerm = "</span>";
         }
       }else{
         if( g.okHistory ){
@@ -1048,6 +1056,10 @@ static void openHyperlink(
   }else if( strlen(zTarget)>=10 && isdigit(zTarget[0]) && zTarget[4]=='-'
             && db_int(0, "SELECT datetime(%Q) NOT NULL", zTarget) ){
     blob_appendf(p->pOut, "<a href=\"%s/timeline?c=%T\">", g.zBaseURL, zTarget);
+  }else if( strncmp(zTarget, "wiki:", 5)==0 
+        && wiki_name_is_wellformed((const unsigned char*)zTarget) ){
+    zTarget += 5;
+    blob_appendf(p->pOut, "<a href=\"%s/wiki?name=%T\">", g.zBaseURL, zTarget);
   }else if( wiki_name_is_wellformed((const unsigned char *)zTarget) ){
     blob_appendf(p->pOut, "<a href=\"%s/wiki?name=%T\">", g.zBaseURL, zTarget);
   }else{
@@ -1093,6 +1105,10 @@ static void wiki_render(Renderer *p, char *z){
   int n;
   int inlineOnly = (p->state & INLINE_MARKUP_ONLY)!=0;
   int wikiUseHtml = (p->state & WIKI_USE_HTML)!=0;
+
+  /* Make sure the attribute constants and names still align
+  ** following changes in the attribute list. */
+  assert( strcmp(aAttribute[ATTR_WIDTH].zName, "width")==0 );
 
   while( z[0] ){
     if( wikiUseHtml ){
@@ -1156,6 +1172,7 @@ static void wiki_render(Renderer *p, char *z){
             if( p->wikiList ){
               popStackToTag(p, p->wikiList);
             }
+            endAutoParagraph(p);
             pushStack(p, MARKUP_UL);
             blob_append(p->pOut, "<ul>", 4);
             p->wikiList = MARKUP_UL;
@@ -1175,6 +1192,7 @@ static void wiki_render(Renderer *p, char *z){
             if( p->wikiList ){
               popStackToTag(p, p->wikiList);
             }
+            endAutoParagraph(p);
             pushStack(p, MARKUP_OL);
             blob_append(p->pOut, "<ol>", 4);
             p->wikiList = MARKUP_OL;
@@ -1194,6 +1212,7 @@ static void wiki_render(Renderer *p, char *z){
             if( p->wikiList ){
               popStackToTag(p, p->wikiList);
             }
+            endAutoParagraph(p);
             pushStack(p, MARKUP_OL);
             blob_append(p->pOut, "<ol>", 4);
             p->wikiList = MARKUP_OL;
@@ -1256,7 +1275,9 @@ static void wiki_render(Renderer *p, char *z){
         break;
       }
       case TOKEN_TEXT: {
-        startAutoParagraph(p);
+        int i;
+        for(i=0; i<n && isspace(z[i]); i++){}
+        if( i<n ) startAutoParagraph(p);
         blob_append(p->pOut, z, n);
         break;
       }
@@ -1416,12 +1437,15 @@ static void wiki_render(Renderer *p, char *z){
               vAttrDidAppend=1;
             }
           }
-          if( !vAttrDidAppend )
+          if( !vAttrDidAppend ) {
+            endAutoParagraph(p);
             blob_append(p->pOut, "<pre class='verbatim'>",-1);
+          }
           p->wantAutoParagraph = 0;
         }else
         if( markup.iType==MUTYPE_LI ){
           if( backupToType(p, MUTYPE_LIST)==0 ){
+            endAutoParagraph(p);
             pushStack(p, MARKUP_UL);
             blob_append(p->pOut, "<ul>", 4);
           }
@@ -1453,8 +1477,18 @@ static void wiki_render(Renderer *p, char *z){
         {
           if( markup.iType==MUTYPE_FONT ){
             startAutoParagraph(p);
-          }else if( markup.iType==MUTYPE_BLOCK ){
+          }else if( markup.iType==MUTYPE_BLOCK || markup.iType==MUTYPE_LIST ){
             p->wantAutoParagraph = 0;
+          }
+          if(   markup.iCode==MARKUP_HR
+             || markup.iCode==MARKUP_H1
+             || markup.iCode==MARKUP_H2
+             || markup.iCode==MARKUP_H3
+             || markup.iCode==MARKUP_H4
+             || markup.iCode==MARKUP_H5
+             || markup.iCode==MARKUP_P
+          ){
+            endAutoParagraph(p);
           }
           if( (markup.iType & MUTYPE_STACK )!=0 ){
             pushStack(p, markup.iCode);
@@ -1468,6 +1502,15 @@ static void wiki_render(Renderer *p, char *z){
   }
 }
 
+/*
+** Skip over the UTF-8 Byte-Order-Mark that some broken Windows
+** tools add to the beginning of text files.
+*/
+char *skip_bom(char *z){
+  static const char bom[] = { 0xEF, 0xBB, 0xBF };
+  if( z && memcmp(z, bom, 3)==0 ) z += 3;
+  return z;
+}
 
 /*
 ** Transform the text in the pIn blob.  Write the results
@@ -1499,7 +1542,7 @@ void wiki_convert(Blob *pIn, Blob *pOut, int flags){
     renderer.pOut = cgi_output_blob();
   }
 
-  z = blob_str(pIn);
+  z = skip_bom(blob_str(pIn));
   wiki_render(&renderer, z);
   endAutoParagraph(&renderer);
   while( renderer.nStack ){
@@ -1534,7 +1577,7 @@ int wiki_find_title(Blob *pIn, Blob *pTitle, Blob *pTail){
   char *z;
   int i;
   int iStart;
-  z = blob_str(pIn);
+  z = skip_bom(blob_str(pIn));
   for(i=0; isspace(z[i]); i++){}
   if( z[i]!='<' ) return 0;
   i++;
