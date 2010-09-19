@@ -747,7 +747,7 @@ bool MyFrame::havePath() {
         if (dlg.ShowModal()==wxID_OK) {
             wxString result = dlg.GetPath();
             path = conv(result);
-            printf("Selected a directory %s\n", result.c_str());
+            printf("Selected a directory %s\n", path.c_str());
             askPath = false;
         } else {
             path = "";
