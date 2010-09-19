@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
   argv += optind;
 
   if (argc<3) {
-    printf("Merge spreadsheets, with sensible treatement of changes:\n");
+    printf("Merge spreadsheets, with sensible treatment of changes:\n");
     printf("  ssmerge [--output output.csv] parent.csv local.csv remote.csv\n");
     printf("Note: parent.csv should be a 'common ancestor' of the other two.\n");
     printf("The merged or conflicting result will be placed in the specified output file.\n");
