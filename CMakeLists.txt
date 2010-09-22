@@ -65,3 +65,10 @@ SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin/coopy.exe")
 SET(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/src/coopy_scm/src/icon/appicon.ico")
 INCLUDE(CPack)
 
+find_program(DOXYGEN_EXE NAMES doxygen)
+mark_as_advanced(DOXYGEN_EXE)
+if (DOXYGEN_EXE)
+  configure_file(${CMAKE_SOURCE_DIR}/conf/coopy_doxygen.conf.in
+                 ${CMAKE_BINARY_DIR}/coopy_doxygen.conf IMMEDIATE)
+  add_custom_target(dox COMMAND ${DOXYGEN_EXE} ${CMAKE_BINARY_DIR}/coopy_doxygen.conf)
+endif ()
