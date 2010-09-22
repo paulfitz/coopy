@@ -9,7 +9,13 @@
 
 #include <vector>
 
-class Merger {
+namespace coopy {
+  namespace cmp {
+    class Merger;
+  }
+}
+
+class coopy::cmp::Merger {
 
 public:
   Merger() {

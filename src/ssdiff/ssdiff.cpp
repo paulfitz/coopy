@@ -10,6 +10,7 @@
 #include <coopy/PolyBook.h>
 
 using namespace coopy::store;
+using namespace coopy::cmp;
 
 int main(int argc, char *argv[]) {
   std::string output = "";

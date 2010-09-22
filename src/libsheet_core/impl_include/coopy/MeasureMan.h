@@ -3,7 +3,13 @@
 
 #include <coopy/Measure.h>
 
-class MeasureMan {
+namespace coopy {
+  namespace cmp {
+    class MeasureMan;
+  }
+}
+
+class coopy::cmp::MeasureMan {
 public:
   Measure& main;
   Measure& anorm;

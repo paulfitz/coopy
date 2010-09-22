@@ -3,7 +3,16 @@
 
 #include <coopy/CsvSheet.h>
 
-class Vote {
+namespace coopy {
+  namespace cmp {
+    class Vote;
+    class Nature;
+    class CsvColumn;
+    class CsvColumnPair;
+  }
+}
+
+class coopy::cmp::Vote {
 public:
   int votes;
   float confidence;
@@ -38,7 +47,7 @@ public:
   }
 };
 
-class Nature {
+class coopy::cmp::Nature {
 public:
   Vote web;
   Vote email;
@@ -59,7 +68,7 @@ public:
   }
 };
 
-class CsvColumn {
+class coopy::cmp::CsvColumn {
 private:
   coopy::store::CsvSheet *sheet;
   int index;
@@ -87,7 +96,7 @@ public:
   }
 };
 
-class CsvColumnPair {
+class coopy::cmp::CsvColumnPair {
 private:
 public:
   void compare(CsvColumn& a, CsvColumn& b);

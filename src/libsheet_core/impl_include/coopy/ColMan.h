@@ -3,7 +3,13 @@
 
 #include <coopy/Measure.h>
 
-class ColMan : public Measure {
+namespace coopy {
+  namespace cmp {
+    class ColMan;
+  }
+}
+
+class coopy::cmp::ColMan : public Measure {
 public:
   const OrderResult& comp;
 

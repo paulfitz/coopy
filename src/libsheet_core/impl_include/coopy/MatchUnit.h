@@ -1,15 +1,21 @@
 #ifndef COOPY_MATCHUNIT
 #define COOPY_MATCHUNIT
 
-enum {
-  // status, from local perspective
-  MATCH_UNIT_NONE,
-  MATCH_UNIT_INSERT,
-  MATCH_UNIT_DELETE,
-  MATCH_UNIT_PRESERVE,
-};
+namespace coopy {
+  namespace cmp {
+    class MatchUnit;
 
-class MatchUnit {
+    enum {
+      // status, from local perspective
+      MATCH_UNIT_NONE,
+      MATCH_UNIT_INSERT,
+      MATCH_UNIT_DELETE,
+      MATCH_UNIT_PRESERVE,
+    };
+  }
+}
+
+class coopy::cmp::MatchUnit {
 public:
   int pivotUnit;
   int localUnit;

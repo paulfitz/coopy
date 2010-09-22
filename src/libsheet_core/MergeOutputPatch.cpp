@@ -2,6 +2,7 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::cmp;
 
 bool MergeOutputPatch::addRow(const char *tag,
 			      const vector<string>& row,

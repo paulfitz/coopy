@@ -8,6 +8,7 @@
 #include <coopy/Stringer.h>
 
 using namespace std;
+using namespace coopy::cmp;
 
 bool MergeOutputSqlDiff::changeColumn(const OrderChange& change) {
   printf("Got order change %s -> %s\n",

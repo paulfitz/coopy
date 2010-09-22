@@ -4,7 +4,13 @@
 #include <coopy/MergeOutput.h>
 #include <coopy/CsvSheet.h>
 
-class MergeOutputAccum : public MergeOutput {
+namespace coopy {
+  namespace cmp {
+    class MergeOutputAccum;
+  }
+}
+
+class coopy::cmp::MergeOutputAccum : public MergeOutput {
 public:
   coopy::store::CsvSheet result;
 

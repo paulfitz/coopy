@@ -6,7 +6,13 @@
 #include <coopy/Dbg.h>
 #include <coopy/SparseSheet.h>
 
-class MeasurePass {
+namespace coopy {
+  namespace cmp {
+    class MeasurePass;
+  }
+}
+
+class coopy::cmp::MeasurePass {
 public:
   coopy::store::TextSheet& a;
   coopy::store::TextSheet& b;

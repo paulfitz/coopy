@@ -5,6 +5,7 @@
 #include <coopy/CsvPatch.h>
 
 using namespace coopy::store;
+using namespace coopy::cmp;
 
 int main(int argc, char *argv[]) {
   if (argc<3) {

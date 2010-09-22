@@ -3,7 +3,14 @@
 
 #include <coopy/MeasurePass.h>
 
-class Measure {
+namespace coopy {
+  namespace cmp {
+    class Measure;
+  }
+}
+
+
+class coopy::cmp::Measure {
 public:
   virtual void setup(MeasurePass& pass) = 0;
   virtual void measure(MeasurePass& pass, int ctrl=0) = 0;

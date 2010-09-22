@@ -1,7 +1,13 @@
 #ifndef COOPY_COMPAREFLAGS
 #define COOPY_COMPAREFLAGS
 
-class CompareFlags {
+namespace coopy {
+  namespace cmp {
+    class CompareFlags;
+  }
+}
+
+class coopy::cmp::CompareFlags {
 public:
   bool head_trimmed;
   bool tail_trimmed;

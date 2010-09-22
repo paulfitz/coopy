@@ -1,7 +1,13 @@
 #ifndef COOPY_FVAL
 #define COOPY_FVAL
 
-class FVal {
+namespace coopy {
+  namespace cmp {
+    class FVal;
+  }
+}
+
+class coopy::cmp::FVal {
 public:
   int ct;
   int index;

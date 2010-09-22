@@ -1,6 +1,7 @@
 #include <coopy/MeasureMan.h>
 
 using namespace coopy::store;
+using namespace coopy::cmp;
 
 void MeasureMan::setup() {
   main.setup(main_pass);

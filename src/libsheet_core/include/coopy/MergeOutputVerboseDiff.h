@@ -5,7 +5,13 @@
 
 #include <string>
 
-class MergeOutputVerboseDiff : public MergeOutput {
+namespace coopy {
+  namespace cmp {
+    class MergeOutputVerboseDiff;
+  }
+}
+
+class coopy::cmp::MergeOutputVerboseDiff : public MergeOutput {
 private:
   std::string sheet_name;
   std::string pending_message;

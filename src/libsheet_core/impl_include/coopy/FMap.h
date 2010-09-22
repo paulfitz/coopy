@@ -7,9 +7,16 @@
 #include <coopy/Dbg.h>
 #include <coopy/EfficientMap.h>
 
-typedef std::string Feature;
 
-class FMap {
+namespace coopy {
+  namespace cmp {
+    typedef std::string Feature;
+    class FMap;
+  }
+}
+
+
+class coopy::cmp::FMap {
 public:
   int ct;
   int xcurr, ycurr;

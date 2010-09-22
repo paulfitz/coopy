@@ -5,7 +5,13 @@
 #include <coopy/MergeOutput.h>
 #include <coopy/CompareFlags.h>
 
-class SheetCompare {
+namespace coopy {
+  namespace cmp {
+    class SheetCompare;
+  }
+}
+
+class coopy::cmp::SheetCompare {
 public:
   int compare(coopy::store::TextSheet& pivot, 
 	      coopy::store::TextSheet& local, 

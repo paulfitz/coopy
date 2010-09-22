@@ -1,6 +1,7 @@
 #include <coopy/OrderMerge.h>
 #include <coopy/Dbg.h>
 
+using namespace coopy::cmp;
 
 /*
 

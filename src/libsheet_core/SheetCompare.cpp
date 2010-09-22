@@ -12,8 +12,15 @@
 #include <coopy/Merger.h>
 
 using namespace coopy::store;
+using namespace coopy::cmp;
 
-class FastMatch {
+namespace coopy {
+  namespace cmp {
+    class FastMatch;
+  }
+}
+
+class coopy::cmp::FastMatch {
 public:
   MeasurePass& pass;
 

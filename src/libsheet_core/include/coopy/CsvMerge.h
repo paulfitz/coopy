@@ -3,7 +3,13 @@
 
 #include <coopy/CsvSheet.h>
 
-class CsvMerge {
+namespace coopy {
+  namespace cmp {
+    class CsvMerge;
+  }
+}
+
+class coopy::cmp::CsvMerge {
 private:
   coopy::store::CsvSheet work;
 public:
@@ -15,8 +21,6 @@ public:
 		     coopy::store::CsvSheet& remote);
 
   coopy::store::CsvSheet& get() { return work; }
-
-  static int run_tests();
 };
 
 #endif

@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include <coopy/CsvMerge.h>
-
 #include <string>
 using namespace std;
 
@@ -24,11 +22,6 @@ int ssfossil_debug() {
 }
 
 int ssfossil_call(int argc, char *argv[]) {
-  if (argc>1) {
-    if (strcmp(argv[1],"--test")==0) {
-      return CsvMerge::run_tests();
-    }
-  }
   if (getenv("SSFOSSIL_DEBUG")!=NULL) {
     if (!__ssfossil_debug) {
       __ssfossil_debug = 1;

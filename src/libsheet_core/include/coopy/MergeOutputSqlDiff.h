@@ -5,7 +5,13 @@
 
 #include <string>
 
-class MergeOutputSqlDiff : public MergeOutput {
+namespace coopy {
+  namespace cmp {
+    class MergeOutputSqlDiff;
+  }
+}
+
+class coopy::cmp::MergeOutputSqlDiff : public MergeOutput {
 private:
   std::string sheet_name;
 public:

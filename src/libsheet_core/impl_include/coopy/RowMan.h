@@ -4,7 +4,13 @@
 #include <coopy/Measure.h>
 #include <coopy/FMap.h>
 
-class RowMan : public Measure {
+namespace coopy {
+  namespace cmp {
+    class RowMan;
+  }
+}
+
+class coopy::cmp::RowMan : public Measure {
 public:
   int vigor;
   int bound;

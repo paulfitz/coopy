@@ -7,8 +7,15 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::cmp;
 
-class Mover {
+namespace coopy {
+  namespace cmp {
+    class Mover;
+  }
+}
+
+class coopy::cmp::Mover {
 public:
   void move(const vector<int>& src, const vector<int>& dest, 
 	    vector<int>& order, int depth) {

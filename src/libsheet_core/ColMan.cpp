@@ -3,6 +3,8 @@
 
 #include <math.h>
 
+using namespace coopy::cmp;
+
 void ColMan::measure(MeasurePass& pass, int ctrl) {
     int wa = pass.a.width();
     int wb = pass.b.width();

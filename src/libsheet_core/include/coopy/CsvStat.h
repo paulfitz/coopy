@@ -4,7 +4,13 @@
 #include <coopy/CsvColumn.h>
 #include <coopy/FloatSheet.h>
 
-class CsvStat {
+namespace coopy {
+  namespace cmp {
+    class CsvStat;
+  }
+}
+
+class coopy::cmp::CsvStat {
 private:
   int rowDivider;
 public:

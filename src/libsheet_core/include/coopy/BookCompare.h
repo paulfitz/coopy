@@ -6,7 +6,13 @@
 #include <coopy/TextBook.h>
 #include <coopy/CompareFlags.h>
 
-class BookCompare {
+namespace coopy {
+  namespace cmp {
+    class BookCompare;
+  }
+}
+
+class coopy::cmp::BookCompare {
 public:
   int compare(coopy::store::TextBook& pivot, 
 	      coopy::store::TextBook& local, 

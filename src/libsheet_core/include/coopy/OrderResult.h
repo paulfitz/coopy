@@ -3,7 +3,14 @@
 
 #include <coopy/IntSheet.h>
 
-class OrderResult {
+namespace coopy {
+  namespace cmp {
+    class OrderResult;
+    class IdentityOrderResult;
+  }
+}
+
+class coopy::cmp::OrderResult {
 private:
   coopy::store::IntSheet _a2b, _b2a;
 public:
@@ -54,7 +61,7 @@ public:
   }
 };
 
-class IdentityOrderResult : public OrderResult {
+class coopy::cmp::IdentityOrderResult : public OrderResult {
 public:
   virtual int a2b(int x) const {
     return x;

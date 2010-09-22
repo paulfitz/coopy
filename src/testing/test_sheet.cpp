@@ -14,6 +14,7 @@
 #include <coopy/MergeOutputPatch.h>
 
 using namespace coopy::store;
+using namespace coopy::cmp;
 
 int main(int argc, char *argv[]) {
   int c;

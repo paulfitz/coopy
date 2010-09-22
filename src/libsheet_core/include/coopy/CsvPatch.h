@@ -3,7 +3,13 @@
 
 #include <coopy/CsvSheet.h>
 
-class CsvPatch {
+namespace coopy {
+  namespace cmp {
+    class CsvPatch; 
+  }
+}
+
+class coopy::cmp::CsvPatch {
 private:
   coopy::store::CsvSheet result;
 public:

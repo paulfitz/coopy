@@ -5,55 +5,12 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::cmp;
 
 static bool _merge_debug = false;
 
-class CsvMergeTests {
-private:
-  bool debug;
-public:
-  CsvSheet age_sheet(string location, string age) {
-    CsvSheet work;
-    work.clear();
-    work.addField("name");
-    work.addField("location");
-    work.addField("age");
-    work.addRecord();
-    work.addField("Paul");
-    work.addField(location.c_str());
-    work.addField(age.c_str());
-    work.addRecord();
-    return work;
-  }
-
-  int run() {
-    CsvSheet s0 = age_sheet("Montclair","10");
-    CsvSheet s1 = age_sheet("Montclair","20");
-    CsvSheet s2 = age_sheet("Glen Ridge","10");
-    CsvSheet target = age_sheet("Glen Ridge","20");
-    CsvMerge merger;
-    SheetStyle style;
-    int result = merger.apply(s0,s1,s2);
-    if (result!=0) {
-      printf("FAIL\n");
-    } else {
-      printf(">>> %s", merger.get().encode(style).c_str());
-    }
-    return 0;
-  }
-};
-
 int CsvMerge::apply(CsvSheet& pivot, CsvSheet& v1, CsvSheet& v2) {
 
-  // let's just do an easy case, for practice
-  
-#if 0
-  printf("***0 %s***1 %s***2 %s",
-	 pivot.encode().c_str(),
-	 v1.encode().c_str(),
-	 v2.encode().c_str());
-#endif
-  
   work.clear();
   if (pivot.height()==v1.height() && pivot.height()==v2.height()) {
     if (pivot.width()==v1.width() && pivot.width()==v2.width()) {
@@ -133,13 +90,5 @@ void CsvMerge::dumb_conflict(CsvSheet& local, CsvSheet& remote) {
     }
     work.addRecord();
   }
-}
-
-
-int CsvMerge::run_tests() {
-  printf("Running tests\n");
-  _merge_debug = true;
-  CsvMergeTests tests;
-  return tests.run();
 }
 

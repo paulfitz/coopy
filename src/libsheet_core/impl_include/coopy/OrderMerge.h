@@ -9,7 +9,13 @@
 
 #include <list>
 
-class OrderMerge {
+namespace coopy {
+  namespace cmp {
+    class OrderMerge;
+  }
+}
+
+class coopy::cmp::OrderMerge {
 public:
   OrderResult order_local, order_remote;
   std::list<MatchUnit> accum;

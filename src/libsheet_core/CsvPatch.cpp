@@ -9,6 +9,7 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::cmp;
 
 class Patcher {
 private:

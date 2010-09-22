@@ -5,20 +5,28 @@
 #include <vector>
 #include <map>
 
-enum {
-  ORDER_CHANGE_NONE,
-  ORDER_CHANGE_DELETE,
-  ORDER_CHANGE_INSERT,
-};
+namespace coopy {
+  namespace cmp {
+    class OrderChange;
+    class RowChange;
+    class MergeOutput;
 
-enum {
-  ROW_CHANGE_NONE,
-  ROW_CHANGE_DELETE,
-  ROW_CHANGE_INSERT,
-  ROW_CHANGE_UPDATE,
-};
+    enum {
+      ORDER_CHANGE_NONE,
+      ORDER_CHANGE_DELETE,
+      ORDER_CHANGE_INSERT,
+    };
+    
+    enum {
+      ROW_CHANGE_NONE,
+      ROW_CHANGE_DELETE,
+      ROW_CHANGE_INSERT,
+      ROW_CHANGE_UPDATE,
+    };
+  }
+}
 
-class OrderChange {
+class coopy::cmp::OrderChange {
 public:
   // local-to-global mapping before and after change
   std::vector<int> indicesBefore;
@@ -32,7 +40,7 @@ public:
 };
 
 
-class RowChange {
+class coopy::cmp::RowChange {
 public:
   int mode;
   std::map<std::string,std::string> cond;
@@ -40,7 +48,7 @@ public:
   std::vector<std::string> names;
 };
 
-class MergeOutput {
+class coopy::cmp::MergeOutput {
 private:
   int ct;
 public:
