@@ -15,7 +15,9 @@ public:
   Merger() {
   }
 
-  void merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
+  void merge(coopy::store::TextSheet& pivot, 
+	     coopy::store::TextSheet& local, 
+	     coopy::store::TextSheet& remote,
 	     const OrderResult& nrow_local,
 	     const OrderResult& nrow_remote,
 	     const OrderResult& ncol_local,
@@ -23,7 +25,9 @@ public:
 	     MergeOutput& output,
 	     const CompareFlags& flags);
 
-  void mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
+  void mergeRow(coopy::store::TextSheet& pivot, 
+		coopy::store::TextSheet& local, 
+		coopy::store::TextSheet& remote,
 		MatchUnit& row_unit, MergeOutput& output,
 		const CompareFlags& flags);
 

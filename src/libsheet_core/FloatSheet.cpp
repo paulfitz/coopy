@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+using namespace coopy::store;
+
 Stat FloatSheet::normalize(int first, int last, float sc, bool modify) {
   Stat s;
   int hh = height();

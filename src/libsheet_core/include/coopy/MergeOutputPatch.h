@@ -6,7 +6,7 @@
 
 class MergeOutputPatch : public MergeOutput {
 public:
-  CsvSheet result;
+  coopy::store::CsvSheet result;
 
   virtual bool wantDiff() { return true; }
 
@@ -14,7 +14,7 @@ public:
 		      const std::vector<std::string>& row,
 		      const std::string& blank);
 
-  const CsvSheet& get() { return result; }
+  const coopy::store::CsvSheet& get() { return result; }
 
 };
 

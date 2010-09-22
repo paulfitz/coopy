@@ -1,6 +1,8 @@
 
 #include <coopy/DataSheet.h>
 
+using namespace coopy::store;
+
 std::string DataSheet::encode(const SheetStyle& style) const {
   std::string delim = style.getDelimiter();
   std::string result = "";

@@ -6,8 +6,14 @@
 #include <vector>
 #include <string>
 
+namespace coopy {
+  namespace store {
+    template <class T> class TypedSheet;
+  }
+}
+
 template <class T>
-class TypedSheet : public DataSheet {
+class coopy::store::TypedSheet : public DataSheet {
 public:
   std::vector<std::vector<T> > arr;
   int h, w;

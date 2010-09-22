@@ -6,7 +6,7 @@
 
 class MergeOutputAccum : public MergeOutput {
 public:
-  CsvSheet result;
+  coopy::store::CsvSheet result;
 
   virtual bool wantDiff() { return false; }
 
@@ -16,7 +16,7 @@ public:
 
   virtual bool stripMarkup();
 
-  const CsvSheet& get() { return result; }
+  const coopy::store::CsvSheet& get() { return result; }
 };
 
 #endif

@@ -5,11 +5,12 @@
 
 class CsvPatch {
 private:
-  CsvSheet result;
+  coopy::store::CsvSheet result;
 public:
-  void apply(CsvSheet& original, CsvSheet& patch);
+  void apply(coopy::store::CsvSheet& original, 
+	     coopy::store::CsvSheet& patch);
 
-  const CsvSheet& get() { return result; }
+  const coopy::store::CsvSheet& get() { return result; }
 };
 
 #endif

@@ -9,6 +9,8 @@
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
 
+using namespace coopy::store;
+
 int main(int argc, char *argv[]) {
   std::string output = "";
   std::string mode = "human";

@@ -3,6 +3,7 @@
 #include <math.h>
 
 using namespace std;
+using namespace coopy::store;
 
 Stat SparseFloatSheet::normalize(int first, int last, float sc, bool modify) {
   Stat s;

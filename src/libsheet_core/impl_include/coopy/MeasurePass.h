@@ -8,13 +8,14 @@
 
 class MeasurePass {
 public:
-  TextSheet& a;
-  TextSheet& b;
-  IntSheet asel, bsel;
-  SparseFloatSheet match;
+  coopy::store::TextSheet& a;
+  coopy::store::TextSheet& b;
+  coopy::store::IntSheet asel, bsel;
+  coopy::store::SparseFloatSheet match;
   int bound;
 
-  MeasurePass(TextSheet& a, TextSheet& b) : a(a), b(b) {
+  MeasurePass(coopy::store::TextSheet& a, 
+	      coopy::store::TextSheet& b) : a(a), b(b) {
     bound = -1;
   }
 
@@ -36,7 +37,7 @@ public:
     match.resize(match.width(),match.height(),0);
   }
 
-  Stat flatten() {
+  coopy::store::Stat flatten() {
     int w = match.width();
     int h = match.height();
     double mean = 0;
@@ -70,7 +71,7 @@ public:
       */
     }
     if (ct>0) { mean /= ct; }
-    Stat s;
+    coopy::store::Stat s;
     s.mean = mean;
     s.stddev = 0;
     s.valid = (ct>10);

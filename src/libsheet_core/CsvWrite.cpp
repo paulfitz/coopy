@@ -3,6 +3,8 @@
 
 #include <coopy/CsvWrite.h>
 
+using namespace coopy::store;
+
 int CsvFile::write(const DataSheet& src, const char *fname) {
   if (std::string(fname)=="-") {
     SheetStyle style;

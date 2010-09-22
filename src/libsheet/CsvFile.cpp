@@ -12,7 +12,7 @@ extern "C" {
 #include <coopy/CsvSheet.h>
 
 using namespace std;
-
+using namespace coopy::store;
 
 extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
   ((CsvSheet*)p)->addField((char *)s, i);

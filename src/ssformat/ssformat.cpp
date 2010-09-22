@@ -2,6 +2,8 @@
 
 #include <coopy/PolyBook.h>
 
+using namespace coopy::store;
+
 int main(int argc, char *argv[]) {
   if (argc!=3) {
     printf("Call with input file and desired output file.\n");

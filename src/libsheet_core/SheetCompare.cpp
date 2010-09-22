@@ -11,6 +11,8 @@
 #include <coopy/MeasureMan.h>
 #include <coopy/Merger.h>
 
+using namespace coopy::store;
+
 class FastMatch {
 public:
   MeasurePass& pass;

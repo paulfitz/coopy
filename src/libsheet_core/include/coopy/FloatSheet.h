@@ -6,7 +6,13 @@
 
 #include <stdio.h>
 
-class FloatSheet : public TypedSheet<float> {
+namespace coopy {
+  namespace store {
+    class FloatSheet;
+  }
+}
+
+class coopy::store::FloatSheet : public TypedSheet<float> {
 public:
   virtual std::string cellString(int x, int y) const {
     char buf[256];

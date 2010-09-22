@@ -5,10 +5,11 @@
 
 class OrderResult {
 private:
-  IntSheet _a2b, _b2a;
+  coopy::store::IntSheet _a2b, _b2a;
 public:
 
-  void setup(IntSheet& _a2b, IntSheet& _b2a) {
+  void setup(coopy::store::IntSheet& _a2b, 
+	     coopy::store::IntSheet& _b2a) {
     this->_a2b = _a2b;
     this->_b2a = _b2a;
   }

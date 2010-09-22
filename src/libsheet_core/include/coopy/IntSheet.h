@@ -5,7 +5,13 @@
 
 #include <stdio.h>
 
-class IntSheet : public TypedSheet<int> {
+namespace coopy {
+  namespace store {
+    class IntSheet;
+  }
+}
+
+class coopy::store::IntSheet : public TypedSheet<int> {
 public:
   virtual std::string cellString(int x, int y) const {
     char buf[256];

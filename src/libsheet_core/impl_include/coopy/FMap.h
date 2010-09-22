@@ -14,15 +14,15 @@ public:
   int ct;
   int xcurr, ycurr;
   efficient_map<Feature,FVal> f;
-  SparseFloatSheet& rowMatch;
+  coopy::store::SparseFloatSheet& rowMatch;
   bool query;
 
-  FMap(SparseFloatSheet& sheet) : rowMatch(sheet) {
+  FMap(coopy::store::SparseFloatSheet& sheet) : rowMatch(sheet) {
     query = false;
     ct = 0;
   }
 
-  FloatSheet& getMatch();
+  coopy::store::FloatSheet& getMatch();
 
   //void setSize(int w, int h) {
   //rowMatch.resize(w,h,0);

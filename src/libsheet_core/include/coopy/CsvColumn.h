@@ -61,11 +61,11 @@ public:
 
 class CsvColumn {
 private:
-  CsvSheet *sheet;
+  coopy::store::CsvSheet *sheet;
   int index;
   Nature nmean;
 public:
-  CsvColumn(CsvSheet& owner, int index) {
+  CsvColumn(coopy::store::CsvSheet& owner, int index) {
     sheet = &owner;
     this->index = index;
   }

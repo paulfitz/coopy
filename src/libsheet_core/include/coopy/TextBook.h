@@ -4,7 +4,13 @@
 #include <coopy/DataBook.h>
 #include <coopy/TextSheet.h>
 
-class TextBook : public DataBook {
+namespace coopy {
+  namespace store {
+    class TextBook;
+  }
+}
+
+class coopy::store::TextBook : public DataBook {
 public:
   virtual std::vector<std::string> getNames() = 0;
 

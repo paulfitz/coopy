@@ -2,6 +2,7 @@
 #include <coopy/CsvColumn.h>
 
 using namespace std;
+using namespace coopy::store;
 
 #define FMAX(x,y) (((x)>(y))?(x):(y))
 

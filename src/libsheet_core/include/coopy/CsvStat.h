@@ -13,14 +13,14 @@ public:
   }
 
   std::vector<CsvColumn> col;
-  FloatSheet oddness;
-  FloatSheet oddness_accum;
+  coopy::store::FloatSheet oddness;
+  coopy::store::FloatSheet oddness_accum;
 
   void clear() {
     rowDivider = -1;
   }
 
-  void evaluate(CsvSheet& sheet);
+  void evaluate(coopy::store::CsvSheet& sheet);
 
   int getRowDivider() {
     return rowDivider;

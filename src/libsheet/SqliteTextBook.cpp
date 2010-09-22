@@ -3,6 +3,7 @@
 #include "sqlite3.h"
 
 using namespace std;
+using namespace coopy::store;
 
 vector<string> SqliteTextBook::getNames() {
   vector<string> result;

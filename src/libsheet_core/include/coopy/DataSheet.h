@@ -6,7 +6,13 @@
 
 #include <string>
 
-class DataSheet {
+namespace coopy {
+  namespace store {
+    class DataSheet;
+  }
+}
+
+class coopy::store::DataSheet {
 public:
   virtual int width() const = 0;
   virtual int height() const = 0;

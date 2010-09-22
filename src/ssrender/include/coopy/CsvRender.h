@@ -14,7 +14,7 @@ public:
   }
   void setDecorate(bool flag) { decorate = flag; }
   void setFull(bool flag) { full = flag; }
-  std::string renderHtml(const CsvSheet& sheet);
+  std::string renderHtml(const coopy::store::CsvSheet& sheet);
 };
 
 #endif

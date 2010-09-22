@@ -4,7 +4,13 @@
 #include <coopy/TextBook.h>
 #include <coopy/CsvSheet.h>
 
-class ShortTextBook : public TextBook {
+namespace coopy {
+  namespace store {
+    class ShortTextBook;
+  }
+}
+
+class coopy::store::ShortTextBook : public TextBook {
 public:
   CsvSheet sheet;
 

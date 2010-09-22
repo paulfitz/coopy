@@ -3,7 +3,13 @@
 
 #include <coopy/TextBook.h>
 
-class SqliteTextBook : public TextBook {
+namespace coopy {
+  namespace store {
+    class SqliteTextBook;
+  }
+}
+
+class coopy::store::SqliteTextBook : public TextBook {
 public:
   std::vector<std::string> getNames();
 

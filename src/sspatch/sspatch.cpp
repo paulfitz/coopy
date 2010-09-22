@@ -4,6 +4,8 @@
 #include <coopy/CsvFile.h>
 #include <coopy/CsvPatch.h>
 
+using namespace coopy::store;
+
 int main(int argc, char *argv[]) {
   if (argc<3) {
     printf("Apply patch to a spreadsheet. Currently doesn't do much.\n");

@@ -8,6 +8,8 @@
 #include <stdio.h>
 
 using namespace std;
+using namespace coopy::store;
+using namespace coopy::store;
 
 int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote, 
 			 MergeOutput& output, const CompareFlags& flags) {

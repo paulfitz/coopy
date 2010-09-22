@@ -13,6 +13,8 @@
 #include <coopy/MergeOutputAccum.h>
 #include <coopy/MergeOutputPatch.h>
 
+using namespace coopy::store;
+
 int main(int argc, char *argv[]) {
   int c;
   int result = 0;

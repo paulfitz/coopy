@@ -10,6 +10,7 @@
 #include <coopy/Stringer.h>
 
 using namespace std;
+using namespace coopy::store;
 
 string encoder(string x) {
   SheetStyle style;

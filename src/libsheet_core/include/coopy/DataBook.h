@@ -4,7 +4,13 @@
 #include <vector>
 #include <string>
 
-class DataBook {
+namespace coopy {
+  namespace store {
+    class DataBook;
+  }
+}
+
+class coopy::store::DataBook {
 public:
   virtual ~DataBook() {}
 

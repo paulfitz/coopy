@@ -8,6 +8,7 @@
 #include <map>
 
 using namespace std;
+using namespace coopy::store;
 
 bool PolyBook::read(const char *fname) {
   clear();

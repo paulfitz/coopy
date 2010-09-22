@@ -5,13 +5,16 @@
 
 class CsvMerge {
 private:
-  CsvSheet work;
+  coopy::store::CsvSheet work;
 public:
-  int apply(CsvSheet& pivot, CsvSheet& v1, CsvSheet& v2);
+  int apply(coopy::store::CsvSheet& pivot, 
+	    coopy::store::CsvSheet& v1, 
+	    coopy::store::CsvSheet& v2);
 
-  void dumb_conflict(CsvSheet& local, CsvSheet& remote);
+  void dumb_conflict(coopy::store::CsvSheet& local, 
+		     coopy::store::CsvSheet& remote);
 
-  CsvSheet& get() { return work; }
+  coopy::store::CsvSheet& get() { return work; }
 
   static int run_tests();
 };

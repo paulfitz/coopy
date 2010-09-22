@@ -7,6 +7,8 @@
 #include <coopy/MergeOutputAccum.h>
 #include <coopy/PolyBook.h>
 
+using namespace coopy::store;
+
 int main(int argc, char *argv[]) {
   bool head_trimmed = false;
   bool tail_trimmed = false;

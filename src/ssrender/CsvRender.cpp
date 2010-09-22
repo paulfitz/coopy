@@ -2,6 +2,7 @@
 #include <coopy/CsvRender.h>
 
 using namespace std;
+using namespace coopy::store;
 
 string csv2html_css();
 

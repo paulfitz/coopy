@@ -4,6 +4,7 @@
 #include <coopy/CsvRender.h>
 
 using namespace std;
+using namespace coopy::store;
 
 int main(int argc, char *argv[]) {
   bool full = false;

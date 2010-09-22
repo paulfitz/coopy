@@ -8,7 +8,9 @@
 
 class BookCompare {
 public:
-  int compare(TextBook& pivot, TextBook& local, TextBook& remote, 
+  int compare(coopy::store::TextBook& pivot, 
+	      coopy::store::TextBook& local, 
+	      coopy::store::TextBook& remote, 
 	      MergeOutput& output, const CompareFlags& flags);
   
   void setVerbose(bool verbose);

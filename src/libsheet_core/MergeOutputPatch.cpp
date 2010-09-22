@@ -1,6 +1,7 @@
 #include <coopy/MergeOutputPatch.h>
 
 using namespace std;
+using namespace coopy::store;
 
 bool MergeOutputPatch::addRow(const char *tag,
 			      const vector<string>& row,

@@ -3,7 +3,13 @@
 
 #include <coopy/TextBook.h>
 
-class PolyBook : public TextBook {
+namespace coopy {
+  namespace store {
+    class PolyBook; 
+  }
+}
+
+class coopy::store::PolyBook : public TextBook {
 private:
   TextBook *book;
 public:

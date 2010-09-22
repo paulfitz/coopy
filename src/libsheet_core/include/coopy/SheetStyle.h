@@ -3,7 +3,13 @@
 
 #include <string>
 
-class SheetStyle {
+namespace coopy {
+  namespace store {
+    class SheetStyle;
+  }
+}
+
+class coopy::store::SheetStyle {
 private:
   std::string delim;
 public:

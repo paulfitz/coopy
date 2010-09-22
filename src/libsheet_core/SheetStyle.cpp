@@ -5,6 +5,7 @@
 #include <string>
 
 using namespace std;
+using namespace coopy::store;
 
 const SheetStyle SheetStyle::defaultStyle;
 

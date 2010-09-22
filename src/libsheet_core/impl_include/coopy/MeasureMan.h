@@ -30,14 +30,14 @@ public:
   }
 	     
 
-  int cellLength(DataSheet& a) {
+  int cellLength(coopy::store::DataSheet& a) {
     if (rowLike) {
       return a.width();
     }
     return a.height();
   }
 
-  std::string cell(TextSheet& a, int x, int y) {
+  std::string cell(coopy::store::TextSheet& a, int x, int y) {
     if (rowLike) {
       return a.cell(x,y);
     }

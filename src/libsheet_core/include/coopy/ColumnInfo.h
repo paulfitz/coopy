@@ -3,7 +3,13 @@
 
 #include <string>
 
-class ColumnInfo {
+namespace coopy {
+  namespace store {
+    class ColumnInfo;
+  }
+}
+
+class coopy::store::ColumnInfo {
 private:
   int index;
 public:

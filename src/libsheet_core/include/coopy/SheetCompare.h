@@ -7,7 +7,9 @@
 
 class SheetCompare {
 public:
-  int compare(TextSheet& pivot, TextSheet& local, TextSheet& remote, 
+  int compare(coopy::store::TextSheet& pivot, 
+	      coopy::store::TextSheet& local, 
+	      coopy::store::TextSheet& remote, 
 	      MergeOutput& output, const CompareFlags& flags);
 
   void setVerbose(bool verbose);

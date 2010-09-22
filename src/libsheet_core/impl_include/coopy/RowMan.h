@@ -9,7 +9,7 @@ public:
   int vigor;
   int bound;
   FMap m;
-  SparseFloatSheet match;
+  coopy::store::SparseFloatSheet match;
 
   RowMan() : m(match) {
     vigor = 0;
@@ -24,7 +24,8 @@ public:
     pass.setSize(pass.a.height(),pass.b.height());
   }
 
-  void apply(TextSheet& a, IntSheet& asel, bool query, int ctrl) {
+  void apply(coopy::store::TextSheet& a, 
+	     coopy::store::IntSheet& asel, bool query, int ctrl) {
     int w = a.width();
     int h = a.height();
     m.resetCount();
@@ -59,7 +60,10 @@ public:
     m.summarize(true);
   }
 
-  void apply(TextSheet& a, TextSheet& b, IntSheet& asel, IntSheet& bsel,
+  void apply(coopy::store::TextSheet& a, 
+	     coopy::store::TextSheet& b, 
+	     coopy::store::IntSheet& asel, 
+	     coopy::store::IntSheet& bsel,
 	     int ctrl) {
     match.resize(a.height(),b.height(),0);
     apply(a,asel,false,ctrl);

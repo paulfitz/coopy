@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 using namespace std;
+using namespace coopy::store;
 
 static bool _merge_debug = false;
 

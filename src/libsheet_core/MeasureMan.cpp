@@ -1,5 +1,7 @@
 #include <coopy/MeasureMan.h>
 
+using namespace coopy::store;
+
 void MeasureMan::setup() {
   main.setup(main_pass);
   anorm.setup(anorm_pass);

@@ -7,8 +7,15 @@
 #include <coopy/FloatSheet.h>
 #include <coopy/Stat.h>
 
+namespace coopy {
+  namespace store {
+    template <class T> class SparseSheet;
+    class SparseFloatSheet;
+  }
+}
+
 template <class T>
-class SparseSheet : public DataSheet {
+class coopy::store::SparseSheet : public DataSheet {
 public:
   efficient_map<long long,T> data;
   int h, w;
@@ -69,7 +76,7 @@ public:
   }
 };
 
-class SparseFloatSheet : public SparseSheet<float> {
+class coopy::store::SparseFloatSheet : public SparseSheet<float> {
 public:
   virtual std::string cellString(int x, int y) const {
     char buf[256];

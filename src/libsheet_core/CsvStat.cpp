@@ -4,6 +4,7 @@
 #include <coopy/CsvWrite.h>
 
 using namespace std;
+using namespace coopy::store;
 
 void CsvStat::evaluate(CsvSheet& sheet) {
   clear();

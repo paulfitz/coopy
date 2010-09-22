@@ -8,6 +8,7 @@
 #include <coopy/IntSheet.h>
 
 using namespace std;
+using namespace coopy::store;
 
 class Patcher {
 private:

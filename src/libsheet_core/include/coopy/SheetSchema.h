@@ -3,7 +3,13 @@
 
 #include <coopy/ColumnInfo.h>
 
-class SheetSchema {
+namespace coopy {
+  namespace store {
+    class SheetSchema;
+  }
+}
+
+class coopy::store::SheetSchema {
 public:
   virtual ColumnInfo getColumnInfo(int x) {
     return ColumnInfo(x);

@@ -6,8 +6,13 @@
 #include <vector>
 #include <string>
 
+namespace coopy {
+  namespace store {
+    class CsvSheet;
+  }
+}
 
-class CsvSheet : public TextSheet {
+class coopy::store::CsvSheet : public TextSheet {
 private:
   std::vector<std::string> rec;
   int th, tw;

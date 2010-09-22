@@ -13,7 +13,7 @@ class OrderMerge {
 public:
   OrderResult order_local, order_remote;
   std::list<MatchUnit> accum;
-  IntSheet xlocal, xremote;
+  coopy::store::IntSheet xlocal, xremote;
   int start_local;
   int start_remote;
   CompareFlags flags;

@@ -1,7 +1,13 @@
 #ifndef COOPY_STAT
 #define COOPY_STAT
 
-class Stat {
+namespace coopy {
+  namespace store {
+    class Stat;
+  }
+}
+
+class coopy::store::Stat {
 public:
   double mean;
   double stddev;

@@ -15,6 +15,8 @@ extern "C" {
 
 #include "ssfossil.h"
 
+using namespace coopy::store;
+
 extern "C" int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut);
 extern "C" int csv_render(Blob *in, Blob *out);
 

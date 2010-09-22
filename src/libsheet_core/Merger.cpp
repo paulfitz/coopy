@@ -6,6 +6,7 @@
 #include <algorithm>
 
 using namespace std;
+using namespace coopy::store;
 
 class Mover {
 public:
