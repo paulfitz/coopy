@@ -22,6 +22,7 @@
 #include <wx/stdpaths.h>
 #include <wx/txtstrm.h>
 #include <wx/arrstr.h>
+#include <wx/dir.h>
 
 #include <string>
 #include <list>
@@ -66,7 +67,11 @@ public:
 
     virtual void OnInitCmdLine(wxCmdLineParser& parser);
     virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
+
+    static string fossil_object;
 };
+
+string MyApp::fossil_object;
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters"),
@@ -74,6 +79,8 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("s"), wxT("silent"), wxT("disables the GUI") },
     { wxCMD_LINE_OPTION, wxT("r"), wxT("res"), wxT("set resource location"),
       wxCMD_LINE_VAL_STRING, 0  },
+    { wxCMD_LINE_PARAM, NULL, NULL, wxT("input file"), wxCMD_LINE_VAL_STRING,
+      wxCMD_LINE_PARAM_OPTIONAL },
     { wxCMD_LINE_NONE },
 };
 
@@ -98,9 +105,13 @@ bool MyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     for (size_t i = 0; i < parser.GetParamCount(); i++) {
         files.Add(parser.GetParam(i));
     }
+
+    if (files.size()>0) {
+        fossil_object = conv(files[0]);
+    }
     
     // and other command line parameters
-    
+
     // then do what you need with them.
     
     return true;
@@ -696,7 +707,22 @@ bool MyFrame::OnInit() {
                                   wxSize(300,-1));
                                   //wxDIRP_USE_TEXTCTRL);
     //dir_box->SetTextCtrlProportion(0);
-    dir_box->SetPath(::wxGetCwd());
+
+    if (MyApp::fossil_object!="") {
+        wxFileName name = wxFileName::FileName(conv(MyApp::fossil_object));
+        name.MakeAbsolute();
+        path = conv(name.GetPath());
+        dir_box->SetPath(name.GetPath());
+        askPath = false;
+    } else {
+#ifdef __LINUX__
+        dir_box->SetPath(::wxGetCwd());
+#else
+        wxStandardPaths sp;
+        dir_box->SetPath(sp.GetDocumentsDir());
+#endif
+    }
+
     dir_bar->Add(dir_box,lflags);
     dir_bar->Add(new wxButton( this, ID_Sync, _T("Pull &in") ),
                     lflags);
@@ -741,16 +767,49 @@ bool MyFrame::havePath() {
     }
 
     if (path=="" || askPath) {
-        wxDirDialog dlg(NULL, wxT("Choose input directory"), 
+        wxDirDialog dlg(NULL, wxT("Select directory to work in"), 
                         conv(path),
                         wxDD_DEFAULT_STYLE); // | wxDD_DIR_MUST_EXIST);
-        if (dlg.ShowModal()==wxID_OK) {
-            wxString result = dlg.GetPath();
-            path = conv(result);
-            printf("Selected a directory %s\n", path.c_str());
-            askPath = false;
-        } else {
-            path = "";
+        while (path==""||askPath) {
+            if (dlg.ShowModal()!=wxID_OK) {
+                return false;
+            } else {
+                wxString result = dlg.GetPath();
+                
+                wxDir dir(result);
+                int ct = 0;
+                if (dir.IsOpened()) {
+                    wxString filename;
+                    bool cont = dir.GetFirst(&filename, wxEmptyString, 
+                                             wxDIR_FILES|wxDIR_DIRS|wxDIR_HIDDEN);
+                    while ( cont ) {
+                        printf("%s\n", filename.c_str());
+                        cont = dir.GetNext(&filename);
+                        ct++;
+                    }
+                }
+                if (ct>0) {
+                    wxChar sep = wxFileName::GetPathSeparator();
+                    wxString target = result + sep + wxT("repository.coopy");
+                    if (!wxFileExists(target)) {
+                        wxString target2 = result + sep + wxT("clone.fossil");
+                        if (wxFileExists(target2)) {
+                            target = target2;
+                        }
+                    }
+ 
+                    if (!wxFileExists(target)) {
+                        wxMessageDialog msg(NULL, wxT("Please select a fresh new directory to start a new repository, or a directory that already has a Coopy repository in it."),
+                                            wxT("Sorry, cannot use selected directory"));
+                        msg.ShowModal();
+                        continue;
+                    }
+                }
+
+                path = conv(result);
+                printf("Selected a directory %s\n", path.c_str());
+                askPath = false;
+            }
         }
     }
     if (path!="") {
@@ -782,7 +841,8 @@ bool MyFrame::haveSource() {
             suggest = ""; 
             //suggest = "http://coopy.sourceforge.net/cgi-bin/wiki/home";
         }
-        wxTextEntryDialog dlg(NULL, wxT("Enter repository link"),
+        wxTextEntryDialog dlg(NULL, 
+                              wxT("Enter the link for the repository to pull in to your computer.\nIf you do not have a link, try creating a repository first."),
                               wxT("Enter repository link"),
                               conv(suggest));
         if (dlg.ShowModal()==wxID_OK) {
@@ -867,9 +927,16 @@ void MyFrame::OnSync(wxCommandEvent& event) {
     if (havePath()) {
         printf("Should pull %s\n", path.c_str());
         wxChar sep = wxFileName::GetPathSeparator();
-        wxString target = conv(path) + sep + wxT("clone.fossil");
+        wxString target = conv(path) + sep + wxT("repository.coopy");
+        if (!wxFileExists(target)) {
+            wxString target2 = conv(path) + sep + wxT("clone.fossil");
+            if (wxFileExists(target2)) {
+                target = target2;
+            }
+        }
         string ctarget = conv(target);
         if (!wxFileExists(target)) {
+            printf("Could not find %s\n", ctarget.c_str());
             if (haveSource()) {
                 printf("Need to clone %s\n", ctarget.c_str());
                 int argc = 4;

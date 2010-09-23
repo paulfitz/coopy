@@ -63,6 +63,24 @@ ENDIF (WIN32)
 SET(CPACK_PACKAGE_EXECUTABLES "coopy;coopy")
 SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin/coopy.exe")
 SET(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/src/coopy_scm/src/icon/appicon.ico")
+
+SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+\\\${registerExtension} \\\"\\\$INSTDIR\\\\bin\\\\coopy.exe\\\" \\\".coopy\\\" \\\"Coopy repository\\\"
+  ;; refresh shell icons, RefreshShellIcons
+  !define SHCNE_ASSOCCHANGED 0x08000000
+  !define SHCNF_IDLIST 0
+  System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (\\\${SHCNE_ASSOCCHANGED}, \\\${SHCNF_IDLIST}, 0, 0)'
+")
+SET(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+\\\${unregisterExtension} \\\".coopy\\\" \\\"Coopy repository\\\"
+")
+message(STATUS "Defined ${CPACK_NSIS_DEFINES}") 
+
+# we need to override the NSIS setup a bit
+set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/nsis" ${CMAKE_MODULE_PATH})
+set(AT "@")
+configure_file(${CMAKE_SOURCE_DIR}/conf/NSIS.template.in
+               ${CMAKE_BINARY_DIR}/nsis/NSIS.template.in @ONLY IMMEDIATE)
 INCLUDE(CPack)
 
 find_program(DOXYGEN_EXE NAMES doxygen)
