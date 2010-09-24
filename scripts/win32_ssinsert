@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "call as ./scripts/win32_ssinsert"
+
+# We need to jump through a lot of hoops to build against gnumeric
+# using mingw on linux...
+
+mkdir -p build/win32_ssinsert
+BASE="$PWD"
+cd build/win32_ssinsert
+rm -f CMakeCache.txt
+CFLAGS="-O2 -mno-cygwin -mms-bitfields -march=i686" PKG_CONFIG_PATH=$HOME/cvs/gnumeric/gnumeric/tools/win32/out/release/deploy/lib/pkgconfig cmake -DGNUMERIC_ROOT=$HOME/cvs/gnumeric/gnumeric/tools/win32/out/release/src/gnumeric -DGNUMERIC_INSTALL=$HOME/cvs/gnumeric/gnumeric/tools/win32/out/release/deploy  -DCMAKE_EXE_LINKER_FLAGS="-L $HOME/cvs/gnumeric/gnumeric/tools/win32/out/release/deploy/lib"  -DCMAKE_TOOLCHAIN_FILE=$BASE/src/ssinsert/mingw_gnumeric.cmake $BASE/src/ssinsert
