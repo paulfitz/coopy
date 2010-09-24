@@ -13,6 +13,7 @@ link_libraries(${GLIB2_LIBRARIES})
 link_libraries(${GOFFICE_LIBRARIES})
 
 # adapt to taste
+add_definitions(-DCUSTOM_GNUMERIC) # comment out if stf-parse.c not patched
 set(GNUMERIC_ROOT ${CMAKE_SOURCE_DIR}/../../../gnumeric/gnumeric)
 set(GNUMERIC_INSTALL /cache/gnumeric)
 

@@ -73,6 +73,11 @@ static char *ssconvert_merge_target = NULL;
 static char *ssconvert_overlay_target = NULL;
 static char **ssconvert_goal_seek = NULL;
 
+#ifdef CUSTOM_GNUMERIC
+extern int hack_csv;
+extern void stf_cell_set_text (GnmCell *cell, char const *text);
+#endif
+
 static const GOptionEntry ssconvert_options [] = {
 	{
 		"version", 'v',
@@ -294,6 +299,10 @@ read_files_to_merge (const char *inputs[], GOFileOpener *fo,
 			return NULL;
 		}
 
+#ifdef CUSTOM_GNUMERIC
+		hack_csv = 1;
+#endif
+
 		if (!wbv)
 			continue;
 
@@ -462,8 +471,16 @@ merge_single (Workbook *wb, Workbook *wb2,
 								  pos->eval.col,
 								  pos->eval.row);
 				}
+#ifdef CUSTOM_GNUMERIC
+				printf("Looking at %s\n",
+				       value_peek_string(cell->value));
+				hack_csv = 0;
+				stf_cell_set_text(cell2,
+						  value_peek_string(cell->value));
+#else
 				GnmValue *val = value_dup(cell->value);
 				sheet_cell_set_value(cell2, val);
+#endif
 						     
 			}
 			for (i = 0; i < cells->len; i++) {

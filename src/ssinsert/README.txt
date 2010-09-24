@@ -1,5 +1,6 @@
 
-Nothing to see here folks...
-==
+Requires a patch to gnumeric source, to allow for verbatim,
+uninterpreted import of CSV files.  See "patch" subdirectory.
 
-GNUMERIC_PLUGIN_PATH=/cache/gnumeric/lib/gnumeric/1.10.11/plugins/ ./ssinsert ../../convert/testing.xls foo.csv
+Better solution: convince upstream that verbatim import is a
+worthwhile use-case :-)

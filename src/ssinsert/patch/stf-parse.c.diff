@@ -1,0 +1,27 @@
+diff --git a/src/stf-parse.c b/src/stf-parse.c
+index 9df2796..e59f491 100644
+--- a/src/stf-parse.c
++++ b/src/stf-parse.c
+@@ -1182,7 +1182,9 @@ stf_parse_options_fixed_autodiscover (StfParseOptions_t *parseoptions,
+  * 2. Only '=' can start an expression.
+  */
+ 
+-static void
++int hack_csv = 0;
++
++void
+ stf_cell_set_text (GnmCell *cell, char const *text)
+ {
+ 	GnmExprTop const *texpr;
+@@ -1191,6 +1193,11 @@ stf_cell_set_text (GnmCell *cell, char const *text)
+ 	const GODateConventions *date_conv =
+ 		workbook_date_conv (cell->base.sheet->workbook);
+ 
++	if (hack_csv) {
++		gnm_cell_set_value (cell, value_new_string(text));
++		return;
++	}
++
+ 	if (*text == '=' && text[1] != 0) {
+ 		GnmExprParseFlags flags =
+ 			GNM_EXPR_PARSE_UNKNOWN_NAMES_ARE_INVALID;
