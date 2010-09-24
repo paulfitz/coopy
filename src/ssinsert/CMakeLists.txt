@@ -15,10 +15,11 @@ link_libraries(${GOFFICE_LIBRARIES})
 # adapt to taste
 set(GNUMERIC_ROOT ${CMAKE_SOURCE_DIR}/../../../gnumeric/gnumeric)
 set(GNUMERIC_INSTALL /cache/gnumeric)
+
 include_directories(${GNUMERIC_ROOT})
 include_directories(${GNUMERIC_ROOT}/src)
 include_directories(${GNUMERIC_INSTALL}/libspreadsheet-1.10/spreadsheet/)
-link_directories(${GNUMERIC_ROOT}/lib)
+link_directories(${GNUMERIC_INSTALL}/lib)
 link_libraries(spreadsheet)
 
 add_executable(ssinsert ssinsert.c)

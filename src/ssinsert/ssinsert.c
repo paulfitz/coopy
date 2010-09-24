@@ -1,4 +1,24 @@
 /* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+
+/*
+
+ Based on ssconvert.c from gnumeric, which is copyrighted as below,
+ and used here under the GPL
+
+ The modifications here are to overlay data from a 
+ csv file onto an excel/openoffice/... spreadsheet.
+ This is a compromise to allow some control over presentation
+ of data in Coopy, while not requiring arbitrary spreadsheet
+ parsing code in the revision control system.
+
+ Modifications are currently OK (see new -L option), but have
+ the classic CSV issue with interpreting integers etc (zip
+ codes like 02139 lose the leading 0).  For coopy use, CSV
+ should be uninterpreted until the point of overlay.  This
+ probably won't fit under ssconvert's mission.
+
+*/
+
 /*
  * ssconvert.c: A wrapper application to convert spreadsheet formats
  *
@@ -28,6 +48,8 @@
 #include "command-context.h"
 #include "command-context-stderr.h"
 #include "workbook-view.h"
+#include "cell.h"
+#include "value.h"
 #include <dialogs/dialogs.h>
 #include <goffice/goffice.h>
 #include <gsf/gsf-utils.h>
@@ -48,6 +70,7 @@ static char *ssconvert_import_id = NULL;
 static char *ssconvert_export_id = NULL;
 static char *ssconvert_export_options = NULL;
 static char *ssconvert_merge_target = NULL;
+static char *ssconvert_overlay_target = NULL;
 static char **ssconvert_goal_seek = NULL;
 
 static const GOptionEntry ssconvert_options [] = {
@@ -87,7 +110,14 @@ static const GOptionEntry ssconvert_options [] = {
 		"merge-to", 'M',
 		0, G_OPTION_ARG_STRING, &ssconvert_merge_target,
 		N_("Merge listed files (all same format) to make this file"),
-		N_("file")
+		N_("merge files")
+	},
+
+	{
+		"overlay-to", 'L',
+		0, G_OPTION_ARG_STRING, &ssconvert_overlay_target,
+		N_("Overlay files to make this file"),
+		N_("overlay files")
 	},
 
 	{
@@ -273,6 +303,13 @@ read_files_to_merge (const char *inputs[], GOFileOpener *fo,
 	return g_slist_reverse (wbs);
 }
 
+
+void process_cell (gpointer key,
+		   gpointer value,
+		   gpointer user_data) {
+	printf("Looking at a cell\n");
+}
+
 /*
  * Look at a set of workbooks, and pick a sheet size that would
  * be good for sheets in a workbook merging them all.
@@ -314,7 +351,8 @@ cb_fixup_name_wb (const char *name, GnmNamedExpr *nexpr, Workbook *wb)
 static gboolean
 merge_single (Workbook *wb, Workbook *wb2,
 	      int cmax, int rmax,
-	      GOCmdContext *cc)
+	      GOCmdContext *cc,
+	      int *overlay)
 {
 	/* Move names with workbook scope in wb2 over to wb */
 	GSList *names = g_slist_sort (gnm_named_expr_collection_list (wb2->names),
@@ -373,16 +411,74 @@ merge_single (Workbook *wb, Workbook *wb2,
 		if (undo)
 			g_object_unref (undo);
 
-		/* Pick a free sheet name */
-		sheet_name = workbook_sheet_get_free_name
-			(wb, sheet->name_unquoted, FALSE, TRUE);
-		g_object_set (sheet, "name", sheet_name, NULL);
-		g_free (sheet_name);
+		if (*overlay<0) {
+			/* normal merge */
 
-		/* Insert and revive the sheet */
-		workbook_sheet_attach_at_pos (wb, sheet, loc);
-		dependents_revive_sheet (sheet);
-		g_object_unref (sheet);
+			/* Pick a free sheet name */
+			sheet_name = workbook_sheet_get_free_name
+				(wb, sheet->name_unquoted, FALSE, TRUE);
+			g_object_set (sheet, "name", sheet_name, NULL);
+			g_free (sheet_name);
+			
+			/* Insert and revive the sheet */
+			workbook_sheet_attach_at_pos (wb, sheet, loc);
+			dependents_revive_sheet (sheet);
+			g_object_unref (sheet);
+		} else {
+			/* overlay mode */
+			printf("Overlay sheet %d\n", *overlay);
+			Sheet *s2 = workbook_sheet_by_index(wb, *overlay);
+			GPtrArray *cells = sheet_cells(sheet,FALSE);
+			GPtrArray *cells2 = sheet_cells(s2,FALSE);
+			unsigned int i;
+			for (i = 0; i < cells2->len; i++) {
+				GnmEvalPos *pos = (GnmEvalPos*)
+					g_ptr_array_index(cells2, i);
+				GnmCell *cell = sheet_cell_get(sheet,
+							       pos->eval.col,
+							       pos->eval.row);
+				GnmCell *cell2 = sheet_cell_get(s2,
+								pos->eval.col,
+								pos->eval.row);
+				if (cell==NULL) {
+					sheet_cell_remove(s2,
+							  cell2,
+							  FALSE,
+							  FALSE);
+				}
+			}
+
+			for (i = 0; i < cells->len; i++) {
+				GnmEvalPos *pos = (GnmEvalPos*)
+					g_ptr_array_index(cells, i);
+				GnmCell *cell = sheet_cell_get(sheet,
+							       pos->eval.col,
+							       pos->eval.row);
+				GnmCell *cell2 = sheet_cell_get(s2,
+								pos->eval.col,
+								pos->eval.row);
+				if (cell2==NULL) {
+					cell2 = sheet_cell_create(s2,
+								  pos->eval.col,
+								  pos->eval.row);
+				}
+				GnmValue *val = value_dup(cell->value);
+				sheet_cell_set_value(cell2, val);
+						     
+			}
+			for (i = 0; i < cells->len; i++) {
+				g_free (g_ptr_array_index (cells, i));
+			}
+			g_ptr_array_free (cells, TRUE);
+			for (i = 0; i < cells2->len; i++) {
+				g_free (g_ptr_array_index (cells2, i));
+			}
+			g_ptr_array_free (cells2, TRUE);
+
+			g_object_unref (sheet);
+
+			(*overlay)++;
+		}
 	}
 
 	return FALSE;
@@ -396,6 +492,13 @@ merge (Workbook *wb, char const *inputs[],
 	GSList *wbs, *l;
 	int result = 0;
 	int cmax, rmax;
+	gboolean do_overlay = FALSE;
+	int overlay = -1;
+
+	if (ssconvert_overlay_target!=NULL) {
+		printf("Should do an overlay\n");
+		do_overlay = TRUE;
+	}
 
 	wbs = read_files_to_merge (inputs, fo, io_context, cc);
 	if (go_io_error_occurred (io_context)) {
@@ -411,7 +514,11 @@ merge (Workbook *wb, char const *inputs[],
 
 		g_printerr ("Adding sheets from %s\n", uri);
 
-		result = merge_single (wb, wb2, cmax, rmax, cc);
+		if (do_overlay && l!=wbs) {
+			// kick-start overlays, if needed
+			if (overlay<0) overlay = 0;
+		}
+		result = merge_single (wb, wb2, cmax, rmax, cc, &overlay);
 		if (result)
 			break;
 	}
@@ -688,6 +795,8 @@ main (int argc, char const **argv)
 			   (get_desc_f) &go_file_opener_get_description);
 	else if (ssconvert_merge_target!=NULL && argc>=3) {
 		res = convert (argv[1], ssconvert_merge_target, argv+1, cc);
+	} else if (ssconvert_overlay_target!=NULL && argc>=3) {
+		res = convert (argv[1], ssconvert_overlay_target, argv+1, cc);
 	} else if (argc == 2 || argc == 3) {
 		res = convert (argv[1], argv[2], NULL, cc);
 	} else {
