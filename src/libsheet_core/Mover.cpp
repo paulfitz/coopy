@@ -1,8 +1,12 @@
 #include <coopy/Mover.h>
 #include <coopy/Dbg.h>
 
+#include <algorithm>
+
 using namespace std;
 using namespace coopy::cmp;
+
+#include <stdio.h>
 
 void Mover::move(const std::vector<int>& src, const std::vector<int>& dest, 
 		 std::vector<int>& order, int depth) {
