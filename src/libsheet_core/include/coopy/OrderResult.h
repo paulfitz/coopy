@@ -23,11 +23,13 @@ public:
 
   virtual int a2b(int x) const {
     if (x==-2) return -2;
+    if (x<0||x>=_a2b.height()) { return -1; }
     return _a2b.cell(0,x);
   }
 
   virtual int b2a(int x) const {
     if (x==-2) return -2;
+    if (x<0||x>=_b2a.height()) { return -1; }
     return _b2a.cell(0,x);
   }
 

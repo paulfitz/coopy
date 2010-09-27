@@ -1,3 +1,11 @@
+option(CREATE_SHARED_LIBRARIES "Compile shared libraries rather than static")
+if (CREATE_SHARED_LIBRARIES)
+  set(BUILD_SHARED_LIBS ON)
+  if (UNIX)
+    link_libraries(dl pthread)
+  endif()
+endif()
+
 add_subdirectory(libsheet_core)
 add_subdirectory(libcsv)
 add_subdirectory(libsheet)

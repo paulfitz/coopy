@@ -175,6 +175,53 @@ ADD_TEST(altitude_patch_remove_row ${testprg}
   --diff
   --prop diffs --assert 0)
 
+#######################################################################
+#######################################################################
+
+# test very basic merge properties
+
+ADD_TEST(basic_merge_garbled ${testprg}
+  --parent --read ${TESTS}/numbers_spurious_comma.csv 
+  --local --read ${TESTS}/numbers.csv
+  --remote --read ${TESTS}/numbers_change_five.csv
+  --compare
+  --remote --read ${TESTS}/numbers_change_five.csv
+  --diff
+  --prop diffs --assert 0)
+SET_PROPERTY(TEST basic_merge_garbled PROPERTY WILL_FAIL TRUE)
+
+
+ADD_TEST(basic_merge_modify_one_cell ${testprg}
+  --parent --read ${TESTS}/numbers.csv 
+  --local --read ${TESTS}/numbers.csv
+  --remote --read ${TESTS}/numbers_change_five.csv
+  --compare
+  --remote --read ${TESTS}/numbers_change_five.csv
+  --diff
+  --prop diffs --assert 0)
+
+ADD_TEST(basic_merge_modify_one_cell2 ${testprg}
+  --parent --read ${TESTS}/numbers.csv 
+  --local --read ${TESTS}/numbers_change_five.csv
+  --remote --read ${TESTS}/numbers.csv
+  --compare
+  --remote --read ${TESTS}/numbers_change_five.csv
+  --diff
+  --prop diffs --assert 0)
+
+ADD_TEST(basic_merge_flip_column ${testprg}
+  --parent --read ${TESTS}/numbers.csv 
+  --local --read ${TESTS}/numbers.csv
+  --remote --read ${TESTS}/numbers_flip_column.csv
+  --compare
+  --remote --read ${TESTS}/numbers_flip_column.csv
+  --diff
+  --prop diffs --assert 0)
+
+
+
+#######################################################################
+#######################################################################
 
 MACRO(ADD_TEST2 name ref target)
   ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 

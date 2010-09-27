@@ -1,6 +1,10 @@
 #include <coopy/OrderMerge.h>
 #include <coopy/Dbg.h>
 
+#include <list>
+#include <map>
+
+using namespace std;
 using namespace coopy::cmp;
 
 /*
@@ -89,6 +93,28 @@ void OrderMerge::process(int ilocal, int iremote,
 }
 
 
+class RematchUnit {
+public:
+  bool changeLocal;
+  bool changeRemote;
+
+  RematchUnit() {
+    changeLocal = changeRemote = false;
+  }
+};
+
+/*
+MatchUnit getIndex(map<int,MatchUnit>& ref,
+		   const map<int,int> m, int v, int offset) {
+  if (v==-1) return MatchUnit();
+  v += offset;
+  map<int,int>::const_iterator it = m.find(v);
+  if (it!=m.end()) {
+    return ref[it->second];
+  }
+  return MatchUnit();
+}
+*/
 
 void OrderMerge::merge(const OrderResult& nlocal,
 		       const OrderResult& nremote,
@@ -111,5 +137,86 @@ void OrderMerge::merge(const OrderResult& nlocal,
   int base_local = 0;
   int base_remote = 0;
   process(0,0,base_local,base_remote,order_local.blen(),order_remote.blen());
+
+  /*
+    For unit that exists in pivot, local, and remote, with
+    indices P, L, and R:
+    - Try to determine if there has been a change of order from P->L or P->R
+    - If so, try to implement that order.
+
+    - Only deal with clear-cut cases for now.
+
+   */
+
+  // Prepare a reference order
+  list<MatchUnit> canon = accum;
+  /*
+  map<int,MatchUnit> ref;
+  map<int,int> p2canon;
+  map<int,int> l2canon;
+  map<int,int> r2canon;
+  int at = 0;
+  for (list<MatchUnit>::iterator it=accum.begin();
+       it!=accum.end(); 
+       it++) {
+      MatchUnit& unit = *it;
+      int pCol = unit.localUnit;
+      int lCol = unit.pivotUnit;
+      int rCol = unit.remoteUnit;
+      bool deleted = unit.deleted;
+      if (!deleted) {
+	int idx = at;
+	if (pCol!=-1) p2canon[pCol] = idx;
+	if (lCol!=-1) l2canon[lCol] = idx;
+	if (rCol!=-1) r2canon[rCol] = idx;
+	ref[idx] = unit;
+      }
+      at++;
+  }
+  */
+
+  // Prepare a list of constraints on order
+  for (list<MatchUnit>::iterator it=accum.begin();
+       it!=accum.end(); 
+       it++) {
+    MatchUnit& unit = *it;
+    int pCol = unit.localUnit;
+    int lCol = unit.pivotUnit;
+    int rCol = unit.remoteUnit;
+    bool deleted = unit.deleted;
+    
+    if (pCol!=-1&&lCol!=-1&&rCol!=-1&&!deleted) {
+      /*
+      int lColNext = getIndex(ref,p2canon,pCol,1).localUnit;
+      int rColNext = getIndex(ref,p2canon,pCol,1).remoteUnit;
+      int lColPrev = getIndex(ref,p2canon,pCol,-1).localUnit;
+      int rColPrev = getIndex(ref,p2canon,pCol,-1).remoteUnit;
+      */
+      int lColNext = order_local.a2b(pCol+1);
+      int rColNext = order_remote.a2b(pCol+1);
+      int lColPrev = order_local.a2b(pCol-1);
+      int rColPrev = order_remote.a2b(pCol-1);
+      //lColNext = order_local.b2a(_lp);
+      printf(">> %d:%d:%d %d:%d:%d\n",
+	     lColPrev, lCol, lColNext,
+	     rColPrev, rCol, rColNext);
+      int ldiff = lColNext-lCol;
+      int rdiff = rColNext-rCol;
+      if (ldiff!=1&&rdiff!=1) { 
+	ldiff = lCol-lColPrev; 
+	rdiff = rCol-rColPrev; 
+      }
+      if (ldiff==1) {
+	if (rdiff!=1) {
+	  printf("Remote constraint P/L/R %d/%d/%d\n", pCol, lCol, rCol);
+	}
+      }
+      if (rdiff==1) {
+	if (ldiff!=1) {
+	  printf("Local constraint P/L/R %d/%d/%d\n", pCol, lCol, rCol);
+	}
+      }
+    }
+  }
 }
 

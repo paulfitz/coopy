@@ -58,10 +58,7 @@ public:
     return true;
   }
 
-  void addField(const char *s) {
-    rec.push_back(s);
-    tw++;
-  }
+  void addField(const char *s);
 
   void addField(const char *s, int len) {
     std::string str(s,len);
