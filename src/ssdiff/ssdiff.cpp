@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
       return 1;
     }
   } else {
-    pivot = local;
+    pivot.read(argv[0]);
   }
   CompareFlags flags;
   if (mode=="sql") {
