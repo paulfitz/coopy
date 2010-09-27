@@ -10,7 +10,7 @@ pkg_search_module (GOFFICE REQUIRED libgoffice-1.0 libgoffice-0.9 libgoffice-0.8
 include_directories(${GOFFICE_INCLUDE_DIRS})
 pkg_search_module (GOBJECT REQUIRED gobject-2.0)
 include_directories(${GOBJECT_INCLUDE_DIRS})
-pkg_search_module (GSF REQUIRED libgsf-win32-1)
+pkg_search_module (GSF REQUIRED libgsf-1)
 
 link_libraries(${GLIB2_LIBRARIES})
 link_libraries(${GOBJECT_LIBRARIES})
@@ -21,7 +21,7 @@ link_libraries(${GSF_LIBRARIES})
 #add_definitions(-DCUSTOM_GNUMERIC) # comment out if stf-parse.c not patched
 
 if (NOT GNUMERIC_ROOT)
-  set(GNUMERIC_ROOT ${CMAKE_SOURCE_DIR}/../../../gnumeric/gnumeric)
+  set(GNUMERIC_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../gnumeric/gnumeric)
   set(GNUMERIC_INSTALL /cache/gnumeric)
 endif ()
 
@@ -35,6 +35,9 @@ link_libraries(spreadsheet)
 if (NEED_FAKE_RT)
   add_library(rt dummy.c)
 endif()
+
+INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
+link_libraries(sheet)
 
 add_executable(ssinsert ssinsert.c)
 

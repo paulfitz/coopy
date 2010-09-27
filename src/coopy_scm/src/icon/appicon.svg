@@ -14,7 +14,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.47 r22583"
-   sodipodi:docname="New document 1">
+   sodipodi:docname="appicon.svg">
   <defs
      id="defs4">
     <inkscape:perspective
@@ -41,7 +41,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="0.44566406"
      inkscape:cx="372.04724"
-     inkscape:cy="526.18109"
+     inkscape:cy="521.6934"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -66,15 +66,6 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <rect
-       style="fill:#edf6ff;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
-       id="rect2816"
-       width="580"
-       height="580"
-       x="77.14286"
-       y="232.36218"
-       inkscape:export-xdpi="9.9099998"
-       inkscape:export-ydpi="9.9099998" />
     <text
        xml:space="preserve"
        style="font-size:578.83050537px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"

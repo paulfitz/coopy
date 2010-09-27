@@ -360,8 +360,7 @@ cb_fixup_name_wb (const char *name, GnmNamedExpr *nexpr, Workbook *wb)
 static gboolean
 merge_single (Workbook *wb, Workbook *wb2,
 	      int cmax, int rmax,
-	      GOCmdContext *cc,
-	      int *overlay)
+	      GOCmdContext *cc)
 {
 	/* Move names with workbook scope in wb2 over to wb */
 	GSList *names = g_slist_sort (gnm_named_expr_collection_list (wb2->names),
@@ -420,20 +419,21 @@ merge_single (Workbook *wb, Workbook *wb2,
 		if (undo)
 			g_object_unref (undo);
 
-		if (*overlay<0) {
-			/* normal merge */
+		/* normal merge */
+		
+		/* Pick a free sheet name */
+		sheet_name = workbook_sheet_get_free_name
+			(wb, sheet->name_unquoted, FALSE, TRUE);
+		g_object_set (sheet, "name", sheet_name, NULL);
+		g_free (sheet_name);
+		
+		/* Insert and revive the sheet */
+		workbook_sheet_attach_at_pos (wb, sheet, loc);
+		dependents_revive_sheet (sheet);
+		g_object_unref (sheet);
 
-			/* Pick a free sheet name */
-			sheet_name = workbook_sheet_get_free_name
-				(wb, sheet->name_unquoted, FALSE, TRUE);
-			g_object_set (sheet, "name", sheet_name, NULL);
-			g_free (sheet_name);
-			
-			/* Insert and revive the sheet */
-			workbook_sheet_attach_at_pos (wb, sheet, loc);
-			dependents_revive_sheet (sheet);
-			g_object_unref (sheet);
-		} else {
+
+#if 0
 			/* overlay mode */
 			printf("Overlay sheet %d\n", *overlay);
 			Sheet *s2 = workbook_sheet_by_index(wb, *overlay);
@@ -495,11 +495,21 @@ merge_single (Workbook *wb, Workbook *wb2,
 			g_object_unref (sheet);
 
 			(*overlay)++;
-		}
+#endif
 	}
 
 	return FALSE;
 }
+
+
+/* Overlay data in a spreadsheet.  Resize sheets if necessary. */
+static gboolean
+overlay_single (Workbook *wb, Workbook *wb2,
+		int cmax, int rmax,
+		GOCmdContext *cc) {
+	return TRUE;
+}
+
 
 /* Merge a collection of workbooks into one. */
 static gboolean
@@ -509,13 +519,6 @@ merge (Workbook *wb, char const *inputs[],
 	GSList *wbs, *l;
 	int result = 0;
 	int cmax, rmax;
-	gboolean do_overlay = FALSE;
-	int overlay = -1;
-
-	if (ssconvert_overlay_target!=NULL) {
-		printf("Should do an overlay\n");
-		do_overlay = TRUE;
-	}
 
 	wbs = read_files_to_merge (inputs, fo, io_context, cc);
 	if (go_io_error_occurred (io_context)) {
@@ -531,17 +534,31 @@ merge (Workbook *wb, char const *inputs[],
 
 		g_printerr ("Adding sheets from %s\n", uri);
 
-		if (do_overlay && l!=wbs) {
-			// kick-start overlays, if needed
-			if (overlay<0) overlay = 0;
-		}
-		result = merge_single (wb, wb2, cmax, rmax, cc, &overlay);
+		result = merge_single (wb, wb2, cmax, rmax, cc);
 		if (result)
 			break;
 	}
 
 	go_slist_free_custom (wbs, g_object_unref);
 	return result;
+}
+
+/* Overlay data on a workbook. */
+static gboolean
+overlay (Workbook *wb, char const *inputs[],
+	 GOFileOpener *fo, GOIOContext *io_context, GOCmdContext *cc)
+{
+	int cmax, rmax;
+
+	while (*inputs) {
+		inputs++;
+		if (!(*inputs)) {
+			break;
+		}
+		printf("Overlay from %s\n", *inputs);
+	}
+
+	return FALSE;
 }
 
 static void
@@ -610,6 +627,7 @@ run_solver (Sheet *sheet, WorkbookView *wbv)
 
 static int
 convert (char const *inarg, char const *outarg, char const *mergeargs[],
+	 char const *overlayargs[],
 	 GOCmdContext *cc)
 {
 	int res = 0;
@@ -695,6 +713,11 @@ convert (char const *inarg, char const *outarg, char const *mergeargs[],
 
 			if (mergeargs!=NULL) {
 				if (merge (wb, mergeargs, fo, io_context, cc))
+					goto out;
+			}
+
+			if (overlayargs!=NULL) {
+				if (overlay (wb, overlayargs, fo, io_context, cc))
 					goto out;
 			}
 
@@ -811,11 +834,13 @@ main (int argc, char const **argv)
 			   (get_desc_f) &go_file_opener_get_id,
 			   (get_desc_f) &go_file_opener_get_description);
 	else if (ssconvert_merge_target!=NULL && argc>=3) {
-		res = convert (argv[1], ssconvert_merge_target, argv+1, cc);
+		res = convert (argv[1], ssconvert_merge_target, argv+1, 
+			       NULL, cc);
 	} else if (ssconvert_overlay_target!=NULL && argc>=3) {
-		res = convert (argv[1], ssconvert_overlay_target, argv+1, cc);
+		res = convert (argv[1], ssconvert_overlay_target, NULL,
+			       argv+1, cc);
 	} else if (argc == 2 || argc == 3) {
-		res = convert (argv[1], argv[2], NULL, cc);
+		res = convert (argv[1], argv[2], NULL, NULL, cc);
 	} else {
 		g_printerr (_("Usage: %s [OPTION...] %s\n"),
 			    g_get_prgname (),

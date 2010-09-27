@@ -22,6 +22,8 @@ std::string map2string(const std::map<T,T>& src) {
 #ifdef WANT_VECTOR2STRING
 #include <vector>
 #include <string>
+std::string stringer_encoder(int x);
+std::string stringer_encoder(const std::string& x);
 template <class T>
 std::string vector2string(const std::vector<T>& src) {
   std::string result = "";
@@ -29,7 +31,7 @@ std::string vector2string(const std::vector<T>& src) {
     if (it!=src.begin()) {
       result += " ";
     }
-    result += *it;
+    result += stringer_encoder(*it);
   }
   return result;
 }

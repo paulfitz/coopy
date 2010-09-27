@@ -15,6 +15,7 @@ namespace coopy {
       ORDER_CHANGE_NONE,
       ORDER_CHANGE_DELETE,
       ORDER_CHANGE_INSERT,
+      ORDER_CHANGE_MOVE,
     };
     
     enum {
@@ -48,6 +49,13 @@ public:
   std::vector<std::string> names;
 };
 
+/**
+ *
+ * A generator of descriptions of a merge.  It contains a collection
+ * of callbacks, called at various stages during a merge.  Callbacks
+ * can be ignored if not relevant to the description being generated.
+ *
+ */
 class coopy::cmp::MergeOutput {
 private:
   int ct;
@@ -76,6 +84,16 @@ public:
 
   virtual bool changeRow(const RowChange& change) { return false; }
 
+  /**
+   *
+   * Called with a sequence of column names.  It is called twice.
+   * First, with final=false, giving an initial sequence.
+   * Then, a series of changeColumn() calls may happen, specifying
+   * manipulations of the columns.  After all changeColumn() calls
+   * have happened, this method is called again, with final=true,
+   * giving a final sequence of column names.
+   *
+   */
   virtual bool declareNames(const std::vector<std::string>& names, bool final) {
     return false;
   }

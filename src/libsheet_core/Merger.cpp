@@ -5,6 +5,10 @@
 
 #include <algorithm>
 
+#define WANT_MAP2STRING
+#define WANT_VECTOR2STRING
+#include <coopy/Stringer.h>
+
 using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -19,34 +23,40 @@ class coopy::cmp::Mover {
 public:
   void move(const vector<int>& src, const vector<int>& dest, 
 	    vector<int>& order, int depth) {
+    dbg_printf("* move in %d : %s / %s / %s\n", depth,
+	       vector2string(src).c_str(),
+	       vector2string(dest).c_str(),
+	       vector2string(order).c_str());
     vector<int> best_order;
-    if (src!=dest) {
+    if (src==dest) {
+      return;
+    }
+    bool solved = false;
 
-      // code not exercised yet
-      fprintf(stderr,"Merger.cpp: Reorder needed for columns\n");
-      exit(1);
-
-      for (size_t i=0; i<src.size(); i++) {
-	if (src[i]==dest[i]) {
-	  continue;
-	}
-	vector<int> norder = order;
-	vector<int> nsrc = src;
-	int x = src[i];
-	nsrc.erase(nsrc.begin()+i);
-	vector<int>::const_iterator it = std::find(dest.begin(),
-						   dest.end(),
-						   x);
-	nsrc.insert(nsrc.begin()+(it-dest.begin()),x);
-	norder.push_back(i);
-	move(nsrc,dest,norder,depth+1);
-	if (norder.size()<best_order.size() || best_order.size()==0) {
-	  best_order = norder;
-	}
+    for (size_t i=0; i<src.size(); i++) {
+      if (src[i]==dest[i]) {
+	continue;
+      }
+      vector<int> norder = order;
+      vector<int> nsrc = src;
+      int x = src[i];
+      nsrc.erase(nsrc.begin()+i);
+      vector<int>::const_iterator it = std::find(dest.begin(),
+						 dest.end(),
+						 x);
+      nsrc.insert(nsrc.begin()+(it-dest.begin()),x);
+      norder.push_back(i);
+      move(nsrc,dest,norder,depth+1);
+      if (norder.size()<best_order.size() || !solved) {
+	best_order = norder;
+	solved = true;
       }
     }
-    dbg_printf("At %d, order len %d\n", (int)depth, (int)best_order.size());
     order = best_order;
+    dbg_printf("* move out %d : %s / %s / %s\n", depth,
+	       vector2string(src).c_str(),
+	       vector2string(dest).c_str(),
+	       vector2string(order).c_str());
   }
 };
 
@@ -165,6 +175,15 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	}
       }
     }
+    /*
+    if (_csv_verbose) {
+      printf(" expandMerge: %s\n", vector2string(expandMerge).c_str());
+      printf(" expandPivot: %s\n", vector2string(expandPivot).c_str());
+      printf(" expandLocal: %s\n", vector2string(expandLocal).c_str());
+      printf(" expandRemote: %s\n", vector2string(expandRemote).c_str());
+      printf(" change %d novel %d conflict %d\n", change, novel, conflict);
+    }
+    */
     if (diff) {
       if (!deleted) {
 	if (novel) {
@@ -370,9 +389,55 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
     Mover move;
     vector<int> move_order;
     move.move(local_cols,shuffled_cols,move_order,0);
-    // Should send messages for this case, but we're not ready
-    // yet to exercise it.
-    // For now, local order will remain unchanged.
+    
+    if (move_order.size()>0) {
+      // Should send messages for this case, but we're not ready
+      // yet to exercise it.
+      // For now, local order will remain unchanged.
+
+      /*
+      printf("MOVE order %d\n", local_cols.size());
+      printf("  [%s]\n", vector2string(local_cols).c_str());
+      printf("  [%s]\n", vector2string(shuffled_cols).c_str());
+      printf("  [%s]\n\n", vector2string(move_order).c_str());
+      */
+
+      for (int m=0; m<(int)move_order.size(); m++) {
+	int p = move_order[m];
+	int a = local_cols[m];
+	//printf("Move %d: %d\n", p, a);
+
+	OrderChange change;
+	change.indicesBefore = local_cols;
+	change.namesBefore = local_col_names;
+	vector<int>::iterator it = std::find(local_cols.begin(),
+					     local_cols.end(),
+					     a);
+	if (it==local_cols.end()) {
+	  fprintf(stderr,"Merge logic failure\n");
+	  exit(1);
+	}
+	vector<int>::iterator it2 = std::find(shuffled_cols.begin(),
+					      shuffled_cols.end(),
+					      a);
+	if (it2==shuffled_cols.end()) {
+	  fprintf(stderr,"Merge logic failure\n");
+	  exit(1);
+	}
+	change.subject = *it;
+	int idx = it-local_cols.begin();
+	int idx2 = it2-shuffled_cols.begin();
+	change.mode = ORDER_CHANGE_MOVE;
+	local_cols.erase(it);
+	string name = local_col_names[idx];
+	local_col_names.erase(local_col_names.begin()+idx);
+	local_cols.insert(local_cols.begin()+idx2,a);
+	local_col_names.insert(local_col_names.begin()+idx2,name);
+	change.indicesAfter = local_cols;
+	change.namesAfter = local_col_names;
+	output.changeColumn(change);
+      }
+    }
 
     // Pass 3: signal any column insertions
     int at = 0;
