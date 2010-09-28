@@ -1,0 +1,104 @@
+/**
+ *
+
+@page ssmerge ssmerge
+
+This does a three-way merge of a spreadsheet.  Currently supported
+formats are delimiter-separated values (comma, tab, or semicolon).
+
+\if MAN_PAGE_COND
+\else
+Here are the ways you can use ssmerge:
+- \ref ssmerge_base
+- \ref ssmerge_common_usage
+- \ref ssmerge_direct_output
+- \ref ssmerge_head_trimmed
+- \ref ssmerge_tail_trimmed
+\endif
+
+@section ssmerge_base ssmerge
+
+The utility gives a friendly message if called with no arguments
+to confirm that it exists, and to give tips on where to get started
+using it.  At the time of writing, that output is:
+
+\verbatim
+Merge spreadsheets, with sensible treatment of changes:
+  ssmerge [--output output.csv] parent.csv local.csv remote.csv
+Note: parent.csv should be a 'common ancestor' of the other two.
+The merged or conflicting result will be placed in the specified output file.
+If one or more inputs have been trimmed, let ssmerge know so it won't
+treat trimming as implying deletion:
+  ssmerge [--head-trimmed] [--tail-trimmed] parent.csv local.csv remote.csv
+\endverbatim
+
+@section ssmerge_common_usage ssmerge PARENT.CSV LOCAL.CSV REMOTE.CSV
+
+When called with three files, ssmerge will assume that the first is a
+common ancestor of the other two.  It will infer changes between that
+"parent" and each of the other two (called the "local" and "remote"
+files).  It will attempt to generate a new spreadsheet that
+incorporates both sets of changes.  By default, that spreadsheet
+is output to standard output.  For example, if PARENT.CSV is:
+\verbatim
+one,1
+two,2
+thri,23
+four,4
+five,5
+\endverbatim
+and LOCAL.CSV corrects "23" to be "3":
+\verbatim
+one,1
+two,2
+thri,3
+four,4
+five,5
+\endverbatim
+and REMOTE.CSV corrects "thri" to be "three":
+\verbatim
+one,1
+two,2
+three,23
+four,4
+five,5
+\endverbatim
+then the output of ssmerge should contain both fixes:
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+
+Likewise, more complex manipulations like reordering columns and
+inserting/deleting rows should be merged if they do not 
+\if MAN_PAGE_COND
+conflict.
+\else
+conflict (see \ref merge_example).
+\endif
+
+@section ssmerge_direct_output ssmerge --output OUTPUT.CSV PARENT.CSV LOCAL.CSV REMOTE.CSV
+
+The output of ssmerge is by default standard output.  It can be redirected
+to a file using the "--output" option.  The output can have be of a different
+format to the inputs.
+
+@section ssmerge_head_trimmed ssmerge --head-trimmed PARENT.CSV LOCAL.CSV REMOTE.CSV
+
+Warn ssmerge that the inputs may have had their heads trimmed.  In
+other words, rows at the beginning of these files may have been
+removed (typically to save space).  With this warning, ssmerge will
+not assume that a row that disappears between the parent and
+the local/remote input was deliberately deleted, if that row's location
+should have been before the first row actually present.
+
+@section ssmerge_tail_trimmed ssmerge --tail-trimmed PARENT.CSV LOCAL.CSV REMOTE.CSV
+
+Just like \ref ssmerge_head_trimmed "head trimming", but at the end of files rather than
+the beginning.  Head and tail trimming flags may be used together.
+
+ *
+ */

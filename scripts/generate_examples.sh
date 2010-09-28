@@ -120,5 +120,6 @@ diff_apply numbers.csv numbers_change_five.csv update_cell
 diff_apply numbers.csv numbers_add_row.csv insert_row
 diff_apply numbers_add_row.csv numbers.csv delete_row
 diff_apply numbers.csv numbers_wide.csv insert_column
+diff_apply numbers_three_23.csv numbers.csv fix_a_cell
 merge_apply numbers.csv numbers_change_five.csv numbers_flip_column.csv change_cell_and_flip_columns
 merge_apply numbers_wide.csv numbers_wide_flip_pair1.csv numbers_wide_flip_pair2.csv flip_columns_locally_and_remotely

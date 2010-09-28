@@ -1,0 +1,45 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_fix_a_cell fix_a_cell example for ssdiff
+
+\section diff_example_fix_a_cell_command command
+\verbatim
+ ssdiff numbers_three_23.csv numbers.csv
+\endverbatim
+ 
+\section diff_example_fix_a_cell_output output
+\verbatim
+dtbl: table difference format version 0.2, human-readable flavor
+This format should be considered unstable until 1.0
+
+column names are: [0] [1]
+
+update row:
+  where [0] = three
+  set   [1] = 23 -> 3
+
+\endverbatim
+ 
+\section diff_example_fix_a_cell_ref1 numbers_three_23.csv
+\verbatim
+one,1
+two,2
+three,23
+four,4
+five,5
+\endverbatim
+ 
+\section diff_example_fix_a_cell_ref2 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+
+ *
+ */
