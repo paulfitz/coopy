@@ -308,9 +308,9 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	  fprintf(stderr,"Merge logic failure\n");
 	  exit(1);
 	}
-	change.subject = *it;
 	int idx = it-local_cols.begin();
 	change.mode = ORDER_CHANGE_DELETE;
+	change.subject = idx;
 	local_cols.erase(it);
 	local_col_names.erase(local_col_names.begin()+idx);
 	change.indicesAfter = local_cols;

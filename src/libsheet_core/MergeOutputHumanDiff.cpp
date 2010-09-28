@@ -13,10 +13,11 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
-string encoder(string x) {
-  SheetStyle style;
-  string result = DataSheet::encodeCell(x,style);
-  return (result!="")?result:"\"\"";
+string encoder(const string& x) {
+  //SheetStyle style;
+  //string result = DataSheet::encodeCell(x,style);
+  //return (result!="")?result:"\"\"";
+  return stringer_encoder(x);
 }
 
 static string cond(const vector<string>& names,
@@ -74,7 +75,8 @@ static string cond(const vector<string>& names,
 }
 
 static string cond(const vector<string>& names,
-		   const map<string,string>& vals) {
+		   const map<string,string>& vals,
+		   string val_label, string cond_label) {
   SheetStyle style;
   string c = "";
   string v = "";
@@ -86,27 +88,27 @@ static string cond(const vector<string>& names,
     if (vals.find(name)!=vals.end()) {
       ct++;
       string val = vals.find(name)->second;
-      if (c!="") c += ",";
+      if (c!="") c += " ";
       c += encoder(name);
-      if (v!="") v += ",";
+      if (v!="") v += " ";
       v += encoder(val);
     }
   }
   if (ct==names.size()) {
     c = "*";
+    return string("  ") + val_label + " " + v;
   }
-  return c + " = " + v;
+  return string("  ") + cond_label + " " + c + "\n  " + val_label + " " + v;
 }
 
 static string cond(const vector<string>& names) {
-  SheetStyle style;
   string c = "";
   for (vector<string>::const_iterator it = names.begin();
        it!=names.end();
        it++) {
     string name = *it;
-    if (c!="") c += ", ";
-    c += DataSheet::encodeCell(name,style);
+    if (c!="") c += " ";
+    c += encoder(name);
   }
   return c;
 }
@@ -128,19 +130,19 @@ bool MergeOutputHumanDiff::changeColumn(const OrderChange& change) {
   //vector2string(change.namesAfter).c_str());
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
-    printf("delete column %s\n  before %s  \nafter  %s\n\n", 
-	   change.namesAfter[change.subject].c_str(),
+    printf("delete column: %s\n  before %s\n  after  %s\n\n", 
+	   change.namesBefore[change.subject].c_str(),
 	   vector2string(change.namesBefore).c_str(),
 	   vector2string(change.namesAfter).c_str());
     break;
   case ORDER_CHANGE_INSERT:
-    printf("insert column %s\n  before %s\n  after  %s\n\n", 
+    printf("insert column: %s\n  before %s\n  after  %s\n\n", 
 	   change.namesAfter[change.subject].c_str(),
 	   vector2string(change.namesBefore).c_str(),
 	   vector2string(change.namesAfter).c_str());
     break;
   case ORDER_CHANGE_MOVE:
-    printf("move column %s\n  before %s\n  after  %s\n\n", 
+    printf("move column: %s\n  before %s\n  after  %s\n\n", 
 	   change.namesBefore[change.subject].c_str(),
 	   vector2string(change.namesBefore).c_str(),
 	   vector2string(change.namesAfter).c_str());
@@ -160,15 +162,15 @@ bool MergeOutputHumanDiff::changeRow(const RowChange& change) {
   // map2string(change.val).c_str());
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
-    printf("insert row\n  set %s\n\n",
-	   cond(change.names,change.val).c_str());
+    printf("insert row:\n%s\n\n",
+	   cond(change.names,change.val,"add","where").c_str());
     break;
   case ROW_CHANGE_DELETE:
-    printf("delete row\n  where %s\n\n",
-	   cond(change.names,change.cond).c_str());
+    printf("delete row:\n%s\n\n",
+	   cond(change.names,change.cond,"remove","where").c_str());
     break;
   case ROW_CHANGE_UPDATE:
-    printf("update row\n  where %s\n  set   %s\n\n",
+    printf("update row:\n  where %s\n  set   %s\n\n",
 	   cond(change.names,change.cond,change.val,false).c_str(),
 	   cond(change.names,change.cond,change.val,true).c_str());
     break;
@@ -188,12 +190,12 @@ bool MergeOutputHumanDiff::declareNames(const vector<string>& names,
   if (final) {
     tag = "";
     if (showed_initial_columns) {
-      now = "now ";
+      now = " now";
     }
   } else {
     showed_initial_columns = true;
   }
-  string result = tag+"column names are "+now+cond(names);
+  string result = tag+"column names are"+now+": "+cond(names);
   pending_message = result;
   return true;
 }
