@@ -1,0 +1,9 @@
+
+To fully use Coopy, you need to be able to host a fossil repository.
+Known sites for hosting repositories:
+  http://share.find.coop/
+  http://www.chiselapp.com/
+
+It is easy to do by yourself:
+  http://www.fossil-scm.org/index.html/doc/tip/www/quickstart.wiki#serversetup
+

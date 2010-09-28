@@ -1,0 +1,10 @@
+
+To build, use CMake (if you have cmake, you can just run ./autogen.sh).
++ http://www.cmake.org
+
+An example for Linux:
+  mkdir build
+  cd build
+  cmake ..
+  make
+

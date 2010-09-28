@@ -1,0 +1,13 @@
+
+Coopy is licensed under the GPLv2.  
+
+Coopy uses "fossil" under the GPL:
++ See src/ssfossil/fossil
+
+Coopy uses "libcsv" under the GPL:
++ See src/libcsv
+
+The remaining code is:
+  Copyright: (c) 2010 Paul Fitzpatrick <paulfitz@alum.mit.edu>
+  CopyPolicy: Released under the GPLv2 (see GPL.TXT)
+
