@@ -1,0 +1,47 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_move_column move_column example for ssdiff
+
+\section diff_example_move_column_command command
+\verbatim
+ ssdiff numbers.csv numbers_flip_column.csv
+\endverbatim
+ 
+\section diff_example_move_column_output output
+\verbatim
+dtbl: table difference format version 0.2, human-readable flavor
+This format should be considered unstable until 1.0
+
+original column names are: [0] [1]
+
+move column: [0]
+  before [0] [1]
+  after  [1] [0]
+
+column names are now: [1] [0]
+
+\endverbatim
+ 
+\section diff_example_move_column_ref1 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+ 
+\section diff_example_move_column_ref2 numbers_flip_column.csv
+\verbatim
+1,one
+2,two
+3,three
+4,four
+5,five
+\endverbatim
+
+ *
+ */

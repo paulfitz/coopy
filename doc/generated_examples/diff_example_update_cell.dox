@@ -1,0 +1,45 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_update_cell update_cell example for ssdiff
+
+\section diff_example_update_cell_command command
+\verbatim
+ ssdiff numbers.csv numbers_change_five.csv
+\endverbatim
+ 
+\section diff_example_update_cell_output output
+\verbatim
+dtbl: table difference format version 0.2, human-readable flavor
+This format should be considered unstable until 1.0
+
+column names are: [0] [1]
+
+update row:
+  where [1] = 5
+  set   [0] = five -> fyffe
+
+\endverbatim
+ 
+\section diff_example_update_cell_ref1 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+ 
+\section diff_example_update_cell_ref2 numbers_change_five.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+fyffe,5
+\endverbatim
+
+ *
+ */

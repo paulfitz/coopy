@@ -1,0 +1,50 @@
+/**
+ *
+
+\ingroup merge_example
+
+\defgroup merge_example_change_cell_and_flip_columns change_cell_and_flip_columns example for ssmerge
+
+\section merge_example_change_cell_and_flip_columns_command command
+\verbatim
+ssmerge numbers.csv numbers_change_five.csv numbers_flip_column.csv
+\endverbatim
+ 
+\section merge_example_change_cell_and_flip_columns_output output
+\verbatim
+1,one
+2,two
+3,three
+4,four
+5,fyffe
+\endverbatim
+ 
+\section merge_example_change_cell_and_flip_columns_parent parent/pivot file: numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+ 
+\section merge_example_change_cell_and_flip_columns_local local/left file: numbers_change_five.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+fyffe,5
+\endverbatim
+ 
+\section merge_example_change_cell_and_flip_columns_remote remote/right file: numbers_flip_column.csv
+\verbatim
+1,one
+2,two
+3,three
+4,four
+5,five
+\endverbatim
+
+ *
+ */

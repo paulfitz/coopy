@@ -17,7 +17,14 @@ string encoder(const string& x) {
   //SheetStyle style;
   //string result = DataSheet::encodeCell(x,style);
   //return (result!="")?result:"\"\"";
-  return stringer_encoder(x);
+  string result = stringer_encoder(x);
+  if (result.find("=")!=result.npos) {
+    if (result[0]!='"') {
+      // force quoting of any material containing the "=" symbol
+      result = string("\"")+result+string("\"");
+    }
+  }
+  return result;
 }
 
 static string cond(const vector<string>& names,
@@ -189,7 +196,7 @@ bool MergeOutputHumanDiff::declareNames(const vector<string>& names,
   string now = "";
   if (final) {
     tag = "";
-    if (showed_initial_columns) {
+    if (showed_initial_columns&&pending_message=="") {
       now = " now";
     }
   } else {

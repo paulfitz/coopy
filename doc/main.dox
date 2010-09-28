@@ -1,0 +1,13 @@
+/**
+ * 
+
+@mainpage Documentation for Coopy, ssmerge, and ssdiff
+
+Welcome.  This is a stub for documentation about Coopy, targeted
+mostly at developers rather than end-users.
+
+\li <a href="modules.html">Examples for command-line tools</a>.
+\li <a href="annotated.html">Classes</a> used in implementation.
+
+ *
+ */

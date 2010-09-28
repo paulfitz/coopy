@@ -1,0 +1,71 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_insert_column insert_column example for ssdiff
+
+\section diff_example_insert_column_command command
+\verbatim
+ ssdiff numbers.csv numbers_wide.csv
+\endverbatim
+ 
+\section diff_example_insert_column_output output
+\verbatim
+dtbl: table difference format version 0.2, human-readable flavor
+This format should be considered unstable until 1.0
+
+original column names are: [0] [1]
+
+insert column: {2}
+  before [0] [1]
+  after  [0] [1] {2}
+
+insert column: {3}
+  before [0] [1] {2}
+  after  [0] [1] {2} {3}
+
+column names are now: [0] [1] {2} {3}
+
+update row:
+  where [0],[1] = one,1
+  set   {2},{3} = un,.
+
+update row:
+  where [0],[1] = two,2
+  set   {2},{3} = deux,..
+
+update row:
+  where [0],[1] = three,3
+  set   {2},{3} = trois,...
+
+update row:
+  where [0],[1] = four,4
+  set   {2},{3} = quatre,....
+
+update row:
+  where [0],[1] = five,5
+  set   {2},{3} = cinq,.....
+
+\endverbatim
+ 
+\section diff_example_insert_column_ref1 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+ 
+\section diff_example_insert_column_ref2 numbers_wide.csv
+\verbatim
+one,1,un,.
+two,2,deux,..
+three,3,trois,...
+four,4,quatre,....
+five,5,cinq,.....
+\endverbatim
+
+ *
+ */

@@ -227,6 +227,16 @@ ADD_TEST(basic_merge_flip_column2 ${testprg}
   --diff
   --prop diffs --assert 0)
 
+ADD_TEST(basic_merge_change_cell_flip_column ${testprg}
+  --parent --read ${TESTS}/numbers.csv 
+  --local --read ${TESTS}/numbers_change_five.csv
+  --remote --read ${TESTS}/numbers_flip_column.csv
+  --compare
+  --remote --read ${TESTS}/numbers_flip_column_change_five.csv
+  --diff
+  --prop diffs --assert 0)
+
+
 ADD_TEST(basic_merge_flip_column_pairs ${testprg}
   --parent --read ${TESTS}/numbers_wide.csv 
   --local --read ${TESTS}/numbers_wide_flip_pair1.csv

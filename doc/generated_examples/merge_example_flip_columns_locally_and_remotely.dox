@@ -1,0 +1,51 @@
+/**
+ *
+
+\ingroup merge_example
+
+\defgroup merge_example_flip_columns_locally_and_remotely flip_columns_locally_and_remotely example for ssmerge
+
+\section merge_example_flip_columns_locally_and_remotely_command command
+\verbatim
+ssmerge numbers_wide.csv numbers_wide_flip_pair1.csv numbers_wide_flip_pair2.csv
+\endverbatim
+ 
+\section merge_example_flip_columns_locally_and_remotely_output output
+\verbatim
+1,one,.,un
+2,two,..,deux
+3,three,...,trois
+4,four,....,quatre
+5,five,.....,cinq
+\endverbatim
+ 
+\section merge_example_flip_columns_locally_and_remotely_parent parent/pivot file: numbers_wide.csv
+\verbatim
+one,1,un,.
+two,2,deux,..
+three,3,trois,...
+four,4,quatre,....
+five,5,cinq,.....
+\endverbatim
+ 
+\section merge_example_flip_columns_locally_and_remotely_local local/left file: numbers_wide_flip_pair1.csv
+\verbatim
+1,one,un,.
+2,two,deux,..
+3,three,trois,...
+4,four,quatre,....
+5,five,cinq,.....
+\endverbatim
+ 
+\section merge_example_flip_columns_locally_and_remotely_remote remote/right file: numbers_wide_flip_pair2.csv
+\verbatim
+one,1,.,un
+two,2,..,deux
+three,3,...,trois
+four,4,....,quatre
+five,5,.....,cinq
+
+\endverbatim
+
+ *
+ */

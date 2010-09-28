@@ -1,0 +1,45 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_insert_row insert_row example for ssdiff
+
+\section diff_example_insert_row_command command
+\verbatim
+ ssdiff numbers.csv numbers_add_row.csv
+\endverbatim
+ 
+\section diff_example_insert_row_output output
+\verbatim
+dtbl: table difference format version 0.2, human-readable flavor
+This format should be considered unstable until 1.0
+
+column names are: [0] [1]
+
+insert row:
+  add six 6
+
+\endverbatim
+ 
+\section diff_example_insert_row_ref1 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+ 
+\section diff_example_insert_row_ref2 numbers_add_row.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+six,6
+\endverbatim
+
+ *
+ */
