@@ -34,7 +34,7 @@ string verbose_encoder(const std::vector<std::string>& lst,
 
 
 bool MergeOutputVerboseDiff::changeColumn(const OrderChange& change) {
-  printf("changeColumn: \n");
+  printf("changeColumn: %s\n", change.modeString().c_str());
   printf("     subject: %d\n", change.subject);
   printf(" indexBefore: %s\n", vector2string(change.indicesBefore).c_str());
   printf("  indexAfter: %s\n", vector2string(change.indicesAfter).c_str());
@@ -45,8 +45,7 @@ bool MergeOutputVerboseDiff::changeColumn(const OrderChange& change) {
 }
 
 bool MergeOutputVerboseDiff::changeRow(const RowChange& change) {
-  printf("changeRow: \n");
-  //printf("  names: %s\n", verbose_encoder(change.names).c_str());
+  printf("changeRow: %s\n", change.modeString().c_str());
   printf("    conds: %s\n", verbose_encoder(change.names,change.cond).c_str());
   printf("     vals: %s\n", verbose_encoder(change.names,change.val).c_str());
   printf("\n");

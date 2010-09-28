@@ -38,6 +38,20 @@ public:
   int subject; // subject in local coords
 
   int mode;
+
+  std::string modeString() const {
+    switch (mode) {
+    case ORDER_CHANGE_NONE:
+      return "none";
+    case ORDER_CHANGE_DELETE:
+      return "delete";
+    case ORDER_CHANGE_INSERT:
+      return "insert";
+    case ORDER_CHANGE_MOVE:
+      return "move";
+    }
+    return "unknown";
+  }
 };
 
 
@@ -47,6 +61,22 @@ public:
   std::map<std::string,std::string> cond;
   std::map<std::string,std::string> val;
   std::vector<std::string> names;
+
+  std::string modeString() const {
+    switch (mode) {
+    case ROW_CHANGE_NONE:
+      return "none";
+    case ROW_CHANGE_DELETE:
+      return "delete";
+    case ROW_CHANGE_INSERT:
+      return "insert";
+    case ROW_CHANGE_UPDATE:
+      return "update";
+      //case ROW_CHANGE_MOVE:
+      //return "move";
+    }
+    return "unknown";
+  }
 };
 
 /**
