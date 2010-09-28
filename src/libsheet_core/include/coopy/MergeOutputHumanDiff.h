@@ -15,12 +15,17 @@ class coopy::cmp::MergeOutputHumanDiff : public MergeOutput {
 private:
   std::string sheet_name;
   std::string pending_message;
+  bool showed_initial_columns;
 
   void checkMessage();
 public:
+  MergeOutputHumanDiff();
+
   virtual bool wantDiff() { return true; }
   virtual bool changeColumn(const OrderChange& change);
   virtual bool changeRow(const RowChange& change);
+
+  virtual bool mergeDone();
 
   virtual bool setSheet(const char *name) { 
     sheet_name = name;

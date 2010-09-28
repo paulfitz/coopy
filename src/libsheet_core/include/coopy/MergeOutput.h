@@ -128,6 +128,10 @@ public:
     return false;
   }
 
+  virtual bool mergeDone() {
+    return true;
+  }
+
   virtual bool setSheet(const char *name) { 
     ct++;
     return (ct<=1); 

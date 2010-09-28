@@ -20,12 +20,12 @@ string verbose_encoder(const std::vector<std::string>& lst,
   for (vector<string>::const_iterator it = lst.begin();
        it!=lst.end();
        it++) {
-    if (it!=lst.begin()) {
-      x += " ";
-    }
-    x += *it;
-    x += ":";
     if (mp.find(*it)!=mp.end()) {
+      if (x.length()>0) {
+	x += " ";
+      }
+      x += *it;
+      x += ":";
       x += stringer_encoder(mp.find(*it)->second);
     }
   }

@@ -26,14 +26,24 @@ static string cond(const vector<string>& names,
   string c = "";
   string pv = "";
   string v = "";
+  bool nontrivial_past = false;
   for (vector<string>::const_iterator it = names.begin();
        it!=names.end();
        it++) {
     string name = *it;
     if (act) {
+      //if (conds.find(name)!=conds.end()) {
+	//fprintf(stderr,"Missing condition for %s\n", name.c_str());
+	//exit(1);
       if (vals.find(name)!=vals.end()) {
-	string pval = conds.find(name)->second;
+	string pval;
 	string val = vals.find(name)->second;
+	if (conds.find(name)!=conds.end()) {
+	  pval = conds.find(name)->second;
+	  if (pval!="") {
+	    nontrivial_past = true;
+	  }
+	}
 	if (pv!="") pv += ",";
 	pv += encoder(pval);
 	if (v!="") v += ",";
@@ -41,6 +51,7 @@ static string cond(const vector<string>& names,
 	if (c!="") c += ",";
 	c += encoder(name);
       }
+	//}
     } else {
       if (conds.find(name)!=conds.end()) {
 	if (vals.find(name)==vals.end()) {
@@ -54,7 +65,8 @@ static string cond(const vector<string>& names,
     }
   }
   if (act) {
-    if (pv == "") {
+    if (pv == "" || !nontrivial_past) {
+      return c + " = " + v;
     }
     return c + " = " + pv + " -> " + v;
   }
@@ -93,10 +105,20 @@ static string cond(const vector<string>& names) {
        it!=names.end();
        it++) {
     string name = *it;
-    if (c!="") c += ",";
+    if (c!="") c += ", ";
     c += DataSheet::encodeCell(name,style);
   }
   return c;
+}
+
+MergeOutputHumanDiff::MergeOutputHumanDiff() {
+  printf("dtbl: table difference format version 0.2, human-readable flavor\n");
+  printf("This format should be considered unstable until 1.0\n\n");
+  showed_initial_columns = false;
+}
+
+bool MergeOutputHumanDiff::mergeDone() {
+  checkMessage();
 }
 
 bool MergeOutputHumanDiff::changeColumn(const OrderChange& change) {
@@ -104,13 +126,29 @@ bool MergeOutputHumanDiff::changeColumn(const OrderChange& change) {
   //printf("Got order change %s -> %s\n",
   //vector2string(change.namesBefore).c_str(),
   //vector2string(change.namesAfter).c_str());
-  if (change.mode==ORDER_CHANGE_DELETE) {
-    printf("delete column %s\n", 
-	   change.namesBefore[change.subject].c_str());
-  } else {
-    printf("insert column %s in position %d\n", 
+  switch (change.mode) {
+  case ORDER_CHANGE_DELETE:
+    printf("delete column %s\n  before %s  \nafter  %s\n\n", 
 	   change.namesAfter[change.subject].c_str(),
-	   change.subject);
+	   vector2string(change.namesBefore).c_str(),
+	   vector2string(change.namesAfter).c_str());
+    break;
+  case ORDER_CHANGE_INSERT:
+    printf("insert column %s\n  before %s\n  after  %s\n\n", 
+	   change.namesAfter[change.subject].c_str(),
+	   vector2string(change.namesBefore).c_str(),
+	   vector2string(change.namesAfter).c_str());
+    break;
+  case ORDER_CHANGE_MOVE:
+    printf("move column %s\n  before %s\n  after  %s\n\n", 
+	   change.namesBefore[change.subject].c_str(),
+	   vector2string(change.namesBefore).c_str(),
+	   vector2string(change.namesAfter).c_str());
+    break;
+  default:
+    printf("  Unknown column operation\n\n");
+    exit(1);
+    break;
   }
   return true;
 }
@@ -122,20 +160,20 @@ bool MergeOutputHumanDiff::changeRow(const RowChange& change) {
   // map2string(change.val).c_str());
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
-    printf("insert row with %s\n",
+    printf("insert row\n  set %s\n\n",
 	   cond(change.names,change.val).c_str());
     break;
   case ROW_CHANGE_DELETE:
-    printf("delete row with %s\n",
+    printf("delete row\n  where %s\n\n",
 	   cond(change.names,change.cond).c_str());
     break;
   case ROW_CHANGE_UPDATE:
-    printf("for row with %s set %s\n",
+    printf("update row\n  where %s\n  set   %s\n\n",
 	   cond(change.names,change.cond,change.val,false).c_str(),
 	   cond(change.names,change.cond,change.val,true).c_str());
     break;
   default:
-    printf("  Unknown row operation\n");
+    printf("  Unknown row operation\n\n");
     exit(1);
     break;
   }
@@ -145,11 +183,17 @@ bool MergeOutputHumanDiff::changeRow(const RowChange& change) {
 
 bool MergeOutputHumanDiff::declareNames(const vector<string>& names, 
 					  bool final) {
-  string tag = "initial ";
+  string tag = "original ";
+  string now = "";
   if (final) {
     tag = "";
+    if (showed_initial_columns) {
+      now = "now ";
+    }
+  } else {
+    showed_initial_columns = true;
   }
-  string result = tag+"column names are "+cond(names);
+  string result = tag+"column names are "+now+cond(names);
   pending_message = result;
   return true;
 }
@@ -157,7 +201,7 @@ bool MergeOutputHumanDiff::declareNames(const vector<string>& names,
 
 void MergeOutputHumanDiff::checkMessage() {
   if (pending_message!="") {
-    printf("%s\n", pending_message.c_str());
+    printf("%s\n\n", pending_message.c_str());
     pending_message = "";
   }
 }

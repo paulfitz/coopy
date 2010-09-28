@@ -226,7 +226,6 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       rowChange.cond = cond;
       rowChange.val = value;
       rowChange.names = names;
-
       if (lRow==-1) {
 	output.addRow("[+++]",expandMerge,blank);
 	rowChange.mode = ROW_CHANGE_INSERT;
@@ -349,17 +348,16 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       // yet to exercise it.
       // For now, local order will remain unchanged.
 
-      /*
-      printf("MOVE order %d\n", local_cols.size());
-      printf("  [%s]\n", vector2string(local_cols).c_str());
-      printf("  [%s]\n", vector2string(shuffled_cols).c_str());
-      printf("  [%s]\n\n", vector2string(move_order).c_str());
-      */
+      dbg_printf("MOVE order %d\n", local_cols.size());
+      dbg_printf("  [%s]\n", vector2string(local_cols).c_str());
+      dbg_printf("  [%s]\n", vector2string(shuffled_cols).c_str());
+      dbg_printf("  [%s]\n\n", vector2string(move_order).c_str());
 
+      //vector<int> local_cols_save = local_cols;
       for (int m=0; m<(int)move_order.size(); m++) {
-	int p = move_order[m];
-	int a = local_cols[m];
-	//printf("Move %d: %d\n", p, a);
+	int a = move_order[m];
+	//int a = local_cols_save[p]
+	dbg_printf("Move %d\n", a);
 
 	OrderChange change;
 	change.indicesBefore = local_cols;
@@ -435,6 +433,8 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       // ignoring row order for now ...
       mergeRow(pivot,local,remote,unit,output,flags);
     }
+
+    output.mergeDone();
     return;
   }
 
@@ -473,6 +473,8 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       mergeRow(pivot,local,remote,unit,output,flags);
     }
   }
+
+  output.mergeDone();
 
   if (conflicts==0) {
     dbg_printf("No conflicts!\n");
