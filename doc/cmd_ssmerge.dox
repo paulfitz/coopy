@@ -6,8 +6,7 @@
 This does a three-way merge of a spreadsheet.  Currently supported
 formats are delimiter-separated values (comma, tab, or semicolon).
 
-\if MAN_PAGE_COND
-\else
+\if link_internal
 Here are the ways you can use ssmerge:
 - \ref ssmerge_base
 - \ref ssmerge_common_usage
@@ -32,14 +31,14 @@ treat trimming as implying deletion:
   ssmerge [--head-trimmed] [--tail-trimmed] parent.csv local.csv remote.csv
 \endverbatim
 
-@section ssmerge_common_usage ssmerge PARENT.CSV LOCAL.CSV REMOTE.CSV
+@section ssmerge_common_usage ssmerge parent.csv local.csv remote.csv
 
 When called with three files, ssmerge will assume that the first is a
 common ancestor of the other two.  It will infer changes between that
 "parent" and each of the other two (called the "local" and "remote"
 files).  It will attempt to generate a new spreadsheet that
 incorporates both sets of changes.  By default, that spreadsheet
-is output to standard output.  For example, if PARENT.CSV is:
+is output to standard output.  For example, if parent.csv is:
 \verbatim
 one,1
 two,2
@@ -47,7 +46,7 @@ thri,23
 four,4
 five,5
 \endverbatim
-and LOCAL.CSV corrects "23" to be "3":
+and local.csv corrects "23" to be "3":
 \verbatim
 one,1
 two,2
@@ -55,7 +54,7 @@ thri,3
 four,4
 five,5
 \endverbatim
-and REMOTE.CSV corrects "thri" to be "three":
+and remote.csv corrects "thri" to be "three":
 \verbatim
 one,1
 two,2
@@ -74,19 +73,19 @@ five,5
 
 Likewise, more complex manipulations like reordering columns and
 inserting/deleting rows should be merged if they do not 
-\if MAN_PAGE_COND
-conflict.
-\else
+\if link_examples
 conflict (see \ref merge_example).
+\else
+conflict.
 \endif
 
-@section ssmerge_direct_output ssmerge --output OUTPUT.CSV PARENT.CSV LOCAL.CSV REMOTE.CSV
+@section ssmerge_direct_output ssmerge --output out.csv parent.csv local.csv remote.csv
 
 The output of ssmerge is by default standard output.  It can be redirected
 to a file using the "--output" option.  The output can have be of a different
 format to the inputs.
 
-@section ssmerge_head_trimmed ssmerge --head-trimmed PARENT.CSV LOCAL.CSV REMOTE.CSV
+@section ssmerge_head_trimmed ssmerge --head-trimmed parent.csv local.csv remote.csv
 
 Warn ssmerge that the inputs may have had their heads trimmed.  In
 other words, rows at the beginning of these files may have been
@@ -95,7 +94,7 @@ not assume that a row that disappears between the parent and
 the local/remote input was deliberately deleted, if that row's location
 should have been before the first row actually present.
 
-@section ssmerge_tail_trimmed ssmerge --tail-trimmed PARENT.CSV LOCAL.CSV REMOTE.CSV
+@section ssmerge_tail_trimmed ssmerge --tail-trimmed parent.csv local.csv remote.csv
 
 Just like \ref ssmerge_head_trimmed "head trimming", but at the end of files rather than
 the beginning.  Head and tail trimming flags may be used together.
