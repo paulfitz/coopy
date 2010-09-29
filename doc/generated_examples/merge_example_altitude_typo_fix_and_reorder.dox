@@ -1,0 +1,58 @@
+/**
+ *
+
+\ingroup merge_example
+
+\defgroup merge_example_altitude_typo_fix_and_reorder altitude_typo_fix_and_reorder example for ssmerge
+
+\section merge_example_altitude_typo_fix_and_reorder_command command
+\verbatim
+ssmerge test005_base.csv test005_fix_typo_add.csv test005_replace_column_and_reorder.csv
+\endverbatim
+\li \ref merge_example_altitude_typo_fix_and_reorder_output "output"
+\li \ref merge_example_altitude_typo_fix_and_reorder_parent "input: test005_base.csv"
+\li \ref merge_example_altitude_typo_fix_and_reorder_local "input: test005_fix_typo_add.csv"
+\li \ref merge_example_altitude_typo_fix_and_reorder_remote "input: test005_replace_column_and_reorder.csv"
+ 
+\section merge_example_altitude_typo_fix_and_reorder_output output
+\verbatim
+"Probe A","Probe C","Probe D",Comment,Altitude
+5,7,,"Smooth flight",500
+10,30,5,"Wing vibration",1000
+15,52,10,"Wing vibration",2000
+3,89,15,"Ominous silence",3000
+3,12,20,"Ominous silence",4000
+3,16,100,"Severe vibration",5000
+\endverbatim
+ 
+\section merge_example_altitude_typo_fix_and_reorder_parent parent/pivot file: test005_base.csv
+\verbatim
+Altitude,Probe A,Probe B,Probe C,Comment
+1000,10,20,30,"Wing vibration"
+2000,15,25,52,"Wing vibration"
+3000,3,66,89,"Ominous silense"
+4000,3,42,12,"Ominous silense"
+\endverbatim
+ 
+\section merge_example_altitude_typo_fix_and_reorder_local local/left file: test005_fix_typo_add.csv
+\verbatim
+Altitude,Probe A,Probe B,Probe C,Comment
+500,5,10,7,"Smooth flight"
+1000,10,20,30,"Wing vibration"
+2000,15,25,52,"Wing vibration"
+3000,3,66,89,"Ominous silence"
+4000,3,42,12,"Ominous silence"
+\endverbatim
+ 
+\section merge_example_altitude_typo_fix_and_reorder_remote remote/right file: test005_replace_column_and_reorder.csv
+\verbatim
+Probe A,Probe C,Probe D,Comment,Altitude
+10,30,5,"Wing vibration",1000
+15,52,10,"Wing vibration",2000
+3,89,15,"Ominous silense",3000
+3,12,20,"Ominous silense",4000
+3,16,100,"Severe vibration",5000
+\endverbatim
+
+ *
+ */

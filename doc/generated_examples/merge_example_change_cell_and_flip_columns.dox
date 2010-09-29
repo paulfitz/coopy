@@ -9,6 +9,10 @@
 \verbatim
 ssmerge numbers.csv numbers_change_five.csv numbers_flip_column.csv
 \endverbatim
+\li \ref merge_example_change_cell_and_flip_columns_output "output"
+\li \ref merge_example_change_cell_and_flip_columns_parent "input: numbers.csv"
+\li \ref merge_example_change_cell_and_flip_columns_local "input: numbers_change_five.csv"
+\li \ref merge_example_change_cell_and_flip_columns_remote "input: numbers_flip_column.csv"
  
 \section merge_example_change_cell_and_flip_columns_output output
 \verbatim

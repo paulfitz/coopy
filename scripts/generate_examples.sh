@@ -38,7 +38,7 @@ EOF
 	    echo "Cannot find $raw"
 	    exit 1
 	fi
-	cat $raw | sed "s/## SECTION /\\\\section ${grp}_${name}_/"
+	cat $raw | sed "s/## SECTION /\\\\section ${grp}_${name}_/" | sed "s/## LINK /\\\\li \\\\ref ${grp}_${name}_/"
 	cat<<EOF
 
  *
@@ -59,6 +59,9 @@ function diff_apply {
 	echo "\verbatim"
 	echo " ssdiff $f1 $f2"
 	echo "\endverbatim"
+	echo "## LINK output \"output\""
+	echo "## LINK ref1 \"$f1\""
+	echo "## LINK ref2 \"$f2\""
 	echo " "
 	echo "## SECTION output output"
 	echo "\verbatim"
@@ -90,6 +93,10 @@ function merge_apply {
 	echo "\verbatim"
 	echo "ssmerge $f1 $f2 $f3"
 	echo "\endverbatim"
+	echo "## LINK output \"output\""
+	echo "## LINK parent \"input: $f1\""
+	echo "## LINK local \"input: $f2\""
+	echo "## LINK remote \"input: $f3\""
 	echo " "
 	echo "## SECTION output output"
 	echo "\verbatim"
@@ -123,3 +130,5 @@ diff_apply numbers.csv numbers_wide.csv insert_column
 diff_apply numbers_three_23.csv numbers.csv fix_a_cell
 merge_apply numbers.csv numbers_change_five.csv numbers_flip_column.csv change_cell_and_flip_columns
 merge_apply numbers_wide.csv numbers_wide_flip_pair1.csv numbers_wide_flip_pair2.csv flip_columns_locally_and_remotely
+merge_apply test001_base.csv test001_spell.csv test001_col.csv big_merge_with_lots_of_changes
+merge_apply test005_base.csv test005_fix_typo_add.csv test005_replace_column_and_reorder.csv altitude_typo_fix_and_reorder

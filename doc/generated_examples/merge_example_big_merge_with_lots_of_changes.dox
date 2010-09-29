@@ -1,0 +1,547 @@
+/**
+ *
+
+\ingroup merge_example
+
+\defgroup merge_example_big_merge_with_lots_of_changes big_merge_with_lots_of_changes example for ssmerge
+
+\section merge_example_big_merge_with_lots_of_changes_command command
+\verbatim
+ssmerge test001_base.csv test001_spell.csv test001_col.csv
+\endverbatim
+\li \ref merge_example_big_merge_with_lots_of_changes_output "output"
+\li \ref merge_example_big_merge_with_lots_of_changes_parent "input: test001_base.csv"
+\li \ref merge_example_big_merge_with_lots_of_changes_local "input: test001_spell.csv"
+\li \ref merge_example_big_merge_with_lots_of_changes_remote "input: test001_col.csv"
+ 
+\section merge_example_big_merge_with_lots_of_changes_output output
+\verbatim
+"This is a modified version","with typos",,
+"The letter e","has been dropped for example",,
+"and http","has been removed",,
+"and everything","is lowercased",,
+"link to dirctory","nam of dirctory",Two,Count
+dirctory.coop/,".coop dirctory",2,1
+www.agrnrindiana.com/groups,"a grnr indiana ntwork groups",2,2
+www.asanonlin.org/forconsumrs.htm,"alabama sustainabl agricultur ntwork listings",2,3
+www.bcca.coop/mmbrs_listing,"british columbia co-oprativ association mmbrs",2,4
+www.buyctgrown.com/,"buy ct grown",2,5
+www.krrcntr.com/buy-frsh.htm,"buy frsh buy local - oklahoma",2,6
+guid.buylocalca.org/,"buy frsh buy local food guid (ca)",2,7
+www.buylocalnbraska.org/,"buy frsh buy local nbraska",2,8
+www.buylocalpa.org/,"buy frsh buy local pnnsylvania",2,9
+www.tilthproducrs.org/bwo-whr.htm,"buy washington organic",2,10
+www.ccof.org/dirctoris.php,"ca crtifid organic farmrs dirctory",2,11
+www.cohousing.ca/locations.htm,"canadian cohousing ntwork",2,12
+www.cancont.com/,"canadian housing coop listings",2,13
+www.carolinafarmstwards.org/advancd.shtml,"carolina farm stwardship association find local food",2,14
+www.cascadharvst.org/community/mmbrs-and-frinds,"cascad harvst coalition mmbrs & frinds",2,15
+www.changingmain.org/cgi/cm/indx.html,"changing main dirctory",2,16
+www.cltntwork.org/indx.php?fusaction=main.mmbrlist,"clt dirctory",2,17
+www.coopmonth.coop/dirctory/submit.php,"co-op month - co-op dirctory",2,18
+www.chfcanada.coop/ng/pags2007/about_3.asp,"co-oprativ housing fdration of canada",2,19
+www.organiccolorado.org/mmbrs.html,"colorado organic producrs association mmbrs",2,20
+www.ibik.org/ncouragmnt/frbik/dirctory/indx.htm,"community bik programs dirctory",,
+acga.localharvst.org/,"community gardn databas",2,22
+smallisbautiful.org/cltdirctory.html,"community land trust dirctory",2,23
+namant.org/csf/locat,"community supportd fishris locator",2,24
+www.complmntarycurrncy.org/ccdatabas/ls_public.html,"complmntary currncy rsourc cntr",2,25
+www.ncdf.coop/mmbrship_nw.html,"coop mmbrs of ncdf",2,26
+www.cooprativgrocr.coop/coops/,"cooprativ grocr food co-op dirctory",,
+community.coop/davis/,"cooprativs and nonprofits in davis and yolo countis",2,28
+popl.hofstra.du/faculty/martha_j_krisl/dirctory_of_craft_cooprativs.html,"craft cooprativs dirctory",2,29
+www.crditunion.coop/cu_locator/quickfind.php,"crdit union locator",2,30
+www.csafarms.org/findcsa.asp,"csa farms in nw michigan & byond",2,31
+www.csi.coop/,"csi support & dvlopmnt srvics",2,32
+staylocal.org/biz/,"dirctory of locally-ownd and opratd businsss in nw orlans",2,33
+www.rurdv.usda.gov/rbs/pub/sr22.htm,"dirctory of rural farmr, ranchr, and fishry cooprativs",2,34
+www.atwllguid.org/,"at wll guid: local, sustainabl, organic food",,
+www.cobusinsslinks.com/,"cobusinsslinks grn dirctory",2,36
+conomisocialqubc.ca/,"conomi social qubc",,
+massio.org/intractiv/indx.html,"mploy ownd companis in massachustts",,
+www.kdc.coop/rsourcs/xampls_of_cooprativs_by_stat/?no_cach=1,"xampls of mid-atlantic cooprativs",2,39
+www.suprmarktcoop.com/,"fair trad and small farm producrs",2,40
+www.fairtradfdration.org/ht/d/mmdir/pid/1722,"fair trad fdration mmbrs",2,41
+www.farmfrsh.org/,"farm frsh - local food in ri, ct, ma",2,42
+www.livingconomis.org/ntviw/local-ntworks-map,"find a ball ntwork",,
+www.amiba.nt/find/intrnational_indx.html,"find an indpndnt businss allianc",2,44
+www.foginfo.org/dirctory.php,"florida organic growrs dirctory",2,45
+www.gorgiaorganics.org/organic_dirctory/,"gorgia organics dirctory",2,46
+go.coop/,go.coop,2,47
+www.offa.org/sarch-gg.php,"good arth guid to ohio organic & cological farms & gardns",2,48
+www.coopamrica.org/pubs/grnpags/,"grn amrica's national grn pags",2,49
+www.hawaiiorganic.org/organic-marktplac,"hawaii organic and crtifid products and producrs dirctory",2,50
+dirctory.ic.org/,"intntional communitis dirctory",2,51
+www.ripss.nt/n/rsaux_continnt.html,"intrcontinntal ntwork for th promotion of th social solidarity conomy",2,52
+www.landstwardshipprojct.org/foodfarm-main.html,"land stwardship projct community basd food & conomic dvlopmnt",2,53
+www.linux.org/groups/,"linux usr groups",2,54
+smallisbautiful.org/local_currncis/currncy_groups.html,"local currncy dirctory",2,55
+www.localdirt.com/,"local dirt: find & buy local food",2,56
+www.localfork.com/dirctory.mvc,"local fork dirctory",2,57
+www.localharvst.org/,"local harvst",2,58
+www.macdc.org/docs/mmbrship_list.html,"ma cdc mmbrs",2,59
+www.mofga.org/rsourcs/findlocalfoods/tabid/221/dfault.aspx,"main local foods, farmrs, csas",2,60
+www.mass.gov/agr/massgrown/farmrs_markts.htm,"mass. farmrs' markts",2,61
+www.farmrsmarkts.msu.du/2009marktlocations/tabid/772/dfault.aspx,"michigan farmrs markt association",2,62
+www.moffa.org/atorg.html,"michigan organic food & farm allianc ating organically guid",2,63
+www.maacooprativs.org/id11.html,"mid-atlantic allianc of cooprativs mmbrs",2,64
+www.missouriorganic.org/moafarmsmap.aspx,"missouri organic association mmbr farms map",2,65
+www.coophousing.org/displaypag.aspx?id=108&bmnu=56&bitm=108,"nahc mmbr associations",2,66
+www.nasco.coop/guid/,"nasco guid to co-ops",2,67
+www.nationalco-opdirctory.com/,"national co-op dirctory",2,68
+www.nvironmntaldirctory.nt/,"national nvironmntal dirctory",,
+www.coopdirctory.org/,"natural food coop dirctory srvic",2,70
+www.uitti.nt/nvp/nvp08dirctory.pdf,"naugatuck vally projct dirctory (pdf)",2,71
+www.ncfc.org/mmbr-dirctory.html,"ncfc mmbr dirctory",2,72
+www.ncga.coop/mmbr-stors,"ncga mmbr co-op grocry stors",2,73
+www.ncplnty.org/dirctory/dirctory.php,"ncplnty mmbr dirctory",,
+www.ncrc.org/indx.php?option=com_contnt&task=blogcatgory&id=57&itmid=121,"ncrc mmbrs",2,75
+www.nbsusag.org/vnts/xhibitor%20list%20for%20program%20xhibitor%20copyfinal.pdf,"nbraska sustainabl agricultur socity 2010 confrnc xhibitors",2,76
+www.nw.org/ntwork/utilitis/nwolookup.asp,"nighborworks lookup",2,77
+www.nppa.org/mmbrs/utilitymmbrs.php,"nppa mmbrs list",,
+www.citysd.org/city_markts/markts/indx.shtml,"nw havn, ct farmrs' markts map",2,79
+www.ctnofa.org/linksbusinss.htm,"nofa-ct businss mmbrs",2,80
+maps.googl.com/maps/ms?i=utf8&hl=n&om=0&msa=0&msid=115849143766969260830.0004458316f34d58a222&z=9_&mid=1217940919,"nofa-ct farm and food guid (googl map)",2,81
+www.ctnofa.org/farms.php,"nofa-ct organic farms, farmrs markts, csas, and community farms",2,82
+thorganicfoodguid.com/,"nofa-ma organic food guid",2,83
+www.nofanh.org/foodmap,"nofa-nh food map",2,84
+www.nofanh.org/rsourcs,"nofa-nh partnrs",2,85
+www.nofanj.org/find_a_farm.htm,"nofa-nj find a farm",2,86
+www.nofany.org/businss.html,"nofa-ny businss mmbrs",2,87
+nofany.org/dbapplt/fprgistry.html,"nofa-ny farmr's pldg rgistry",2,88
+www.nofari.org/markts.php,"nofa-ri businss mmbrs",2,89
+nofavt.org/about/sustainr_mmbrs,"nofa-vt businss sustainr mmbrs",2,90
+nofavt.org/find-organic-food,"nofa-vt find organic food",2,91
+www.nyfarms.info/rstaurantsindx.html,"ny farms! rstaurants buying local",2,92
+www.nypa.gov/nysrca/,"ny stat rural lctric cooprativs",2,93
+www.cnyc.org/grnmarkt/chfswhobuy,"nyc chfs why buy from grnmarkt",,
+www.justfood.org/csaloc,"nyc csa locator - just food",2,95
+maps.googl.com/maps/ms?i=utf8&hl=n&o=utf8&sourc=mbd&msa=0&msid=116730178006985764192.0004595340f30111d80f&z=11,"nyc fair trad coalition ""whr to buy"" map",2,96
+www.grnthumbnyc.org/gardnsarch.html,"nyc grnthumb: find your community gardn",2,97
+www.oasisnyc.nt/gardn/gardnsarch.aspx,"nyc opn accssibl spac information systm (oasis)",2,98
+www.mapsforamrica.com/solidarityconomy,"nyc solidarity conomy map",2,99
+www.nycworkr.coop/,"nyc workr cooprativs",2,100
+dpt.knt.du/ooc/ntwork/ntworkcompanis.htm,"ohio's mploy-ownd ntwork companis",,
+www.krrcntr.com/rsourcs/food-connction.htm,"oklahoma food connction",2,102
+www.coopsontario.com/dirctory/,"ontario co-op association -dirctory",2,103
+www.paorganic.org/pao_dirctory.htm,"pnnsylvania crtifid organic dirctoris",2,104
+www.pvsustain.com/,"pionr vally sustainabl dvlopmnt invntory",,
+www.farmandfood.org/dirctory.html,"rgional farm & food projct dirctory",2,106
+find.coop/,"rgional indx of coopration",2,107
+jascon.wik.is/,"sf bay grassroots conomy wiki",2,108
+www.slowfoodnyc.org/programs/soa,"slow food nyc snail of approval dirctory",2,109
+www.ifil.org/rdsolidaria/,solidarius,2,110
+sonomacounty.golocal.coop/businsss/indx/,"sonoma county golocal cooprativ mmbr businss dirctory",2,111
+www.nccd.org/associations/associations.html,"stat cd associations",2,112
+www.cooprativmain.org/,"strongr togthr: a dirctory of main's cooprativ conomy",,
+www.sustainabilityhub.nt/,"sustainability hub for san mato county",2,114
+www.ibiblio.org/farming-connction/localcon/hom.htm,"sustainabl farming connction",2,115
+www.vgtarianhomstading.com/indx.html,"th vgtarian homstadr's guid(tm)",,
+www.tilthproducrs.org/dirctory/tpdirportal.htm,"tilth producrs dirctory",2,117
+www.timbanks.org/dirctory.htm,"tim banks dirctory",2,118
+www.tpl.org/tir3_cd.cfm?contnt_itm_id=20723&foldr_id=628,"trust for public land projct sits",2,119
+popularconomics.org/ussn/civicrm/profil?gid=2&rst=1&forc=1&sarch=0,"us solidarity conomy ntwork mmbr organizations",2,120
+www.usworkr.coop/about/mmbrlist,"usfwc mmbrs",2,121
+wiki.vallyworkr.org/,"vally allianc of workr cooprativs mmbrs",,
+www.vggitradr.com/,"vggi tradr",,
+www.voc.org/vrmontcompanis.shtml,"vrmont mploy-ownd companis",,
+www.nobawc.org/articl.php?id=56,"workr cooprativs in th bay ara",2,125
+\endverbatim
+ 
+\section merge_example_big_merge_with_lots_of_changes_parent parent/pivot file: test001_base.csv
+\verbatim
+"Link to directory","Name of directory"
+http://directory.coop/,".coop Directory"
+http://www.agreenerindiana.com/groups,"A Greener Indiana network groups"
+http://www.asanonline.org/forconsumers.htm,"Alabama Sustainable Agriculture Network listings"
+http://www.bcca.coop/members_listing,"British Columbia Co-operative Association Members"
+http://www.buyctgrown.com/,"Buy CT Grown"
+http://www.kerrcenter.com/buy-fresh.htm,"Buy Fresh Buy Local - Oklahoma"
+http://guide.buylocalca.org/,"Buy Fresh Buy Local Food Guide (CA)"
+http://www.buylocalnebraska.org/,"Buy Fresh Buy Local Nebraska"
+http://www.buylocalpa.org/,"Buy Fresh Buy Local Pennsylvania"
+http://www.tilthproducers.org/bwo-where.htm,"Buy Washington Organic"
+http://www.ccof.org/directories.php,"CA Certified Organic Farmers Directory"
+http://www.cohousing.ca/locations.htm,"Canadian Cohousing Network"
+http://www.canconet.com/,"Canadian Housing Coop Listings"
+http://www.carolinafarmstewards.org/advanced.shtml,"Carolina Farm Stewardship Association Find Local Food"
+http://www.cascadeharvest.org/community/members-and-friends,"Cascade Harvest Coalition Members & Friends"
+http://www.changingmaine.org/cgi/cm/index.html,"Changing Maine Directory"
+http://www.cltnetwork.org/index.php?fuseaction=Main.MemberList,"CLT Directory"
+http://www.coopmonth.coop/directory/submit.php,"Co-op Month - Co-op Directory"
+http://www.chfcanada.coop/eng/pages2007/about_3.asp,"Co-operative Housing Federation of Canada"
+http://www.organiccolorado.org/members.html,"Colorado Organic Producers Association Members"
+http://www.ibike.org/encouragement/freebike/directory/index.htm,"Community Bike Programs Directory"
+http://acga.localharvest.org/,"Community Garden Database"
+http://smallisbeautiful.org/cltdirectory.html,"Community Land Trust Directory"
+http://namanet.org/csf/locate,"Community Supported Fisheries Locator"
+http://www.complementarycurrency.org/ccDatabase/les_public.html,"Complementary Currency Resource Center"
+http://www.ncdf.coop/membership_new.html,"Coop Members of NCDF"
+http://www.cooperativegrocer.coop/coops/,"Cooperative Grocer Food Co-op Directory"
+http://community.coop/davis/,"Cooperatives and Nonprofits in Davis and Yolo Counties"
+http://people.hofstra.edu/faculty/Martha_J_Kreisel/directory_of_craft_cooperatives.html,"Craft Cooperatives Directory"
+http://www.creditunion.coop/cu_locator/quickfind.php,"Credit Union Locator"
+http://www.csafarms.org/findcsa.asp,"CSA Farms in NW Michigan & beyond"
+http://www.csi.coop/,"CSI Support & Development Services"
+http://staylocal.org/biz/,"Directory of locally-owned and operated businesses in New Orleans"
+http://www.rurdev.usda.gov/rbs/pub/sr22.htm,"Directory of Rural Farmer, Rancher, and Fishery Cooperatives"
+http://www.eatwellguide.org/,"Eat Well Guide: Local, Sustainable, Organic Food"
+http://www.ecobusinesslinks.com/,"EcoBusinessLinks Green Directory"
+http://economiesocialequebec.ca/,"Economie Sociale Quebec"
+http://masseio.org/Interactive/index.html,"Employee Owned Companies in Massachusetts"
+http://www.kdc.coop/resources/examples_of_cooperatives_by_state/?no_cache=1,"Examples of Mid-Atlantic Cooperatives"
+http://www.supermarketcoop.com/,"Fair Trade and Small Farm Producers"
+http://www.fairtradefederation.org/ht/d/Memdir/pid/1722,"Fair Trade Federation Members"
+http://www.farmfresh.org/,"Farm Fresh - Local food in RI, CT, MA"
+http://www.livingeconomies.org/netview/local-networks-map,"Find a BALLE Network"
+http://www.amiba.net/find/international_index.html,"Find an Independent Business Alliance"
+http://www.foginfo.org/directory.php,"Florida Organic Growers Directory"
+http://www.georgiaorganics.org/organic_directory/,"Georgia Organics Directory"
+http://go.coop/,Go.Coop
+http://www.oeffa.org/search-geg.php,"Good Earth Guide to Ohio Organic & Ecological Farms & Gardens"
+http://www.coopamerica.org/pubs/greenpages/,"Green America's National Green Pages"
+http://www.hawaiiorganic.org/organic-marketplace,"Hawaii Organic and Certified Products and Producers Directory"
+http://directory.ic.org/,"Intentional Communities Directory"
+http://www.ripess.net/en/reseaux_continent.html,"Intercontinental Network for the Promotion of the Social Solidarity Economy"
+http://www.landstewardshipproject.org/foodfarm-main.html,"Land Stewardship Project Community Based Food & Economic Development"
+http://www.linux.org/groups/,"Linux User Groups"
+http://smallisbeautiful.org/local_currencies/currency_groups.html,"Local Currency Directory"
+http://www.localdirt.com/,"Local Dirt: find & buy local food"
+http://www.localfork.com/Directory.mvc,"Local Fork Directory"
+http://www.localharvest.org/,"Local Harvest"
+http://www.macdc.org/docs/membership_list.html,"MA CDC Members"
+http://www.mofga.org/Resources/FindLocalFoods/tabid/221/Default.aspx,"Maine Local Foods, Farmers, CSAs"
+http://www.mass.gov/agr/massgrown/farmers_markets.htm,"Mass. Farmers' Markets"
+http://www.farmersmarkets.msu.edu/2009MarketLocations/tabid/772/Default.aspx,"Michigan Farmers Market Association"
+http://www.moffa.org/eatorg.html,"Michigan Organic Food & Farm Alliance Eating Organically Guide"
+http://www.maacooperatives.org/id11.html,"Mid-Atlantic Alliance of Cooperatives Members"
+http://www.missouriorganic.org/MOAFarmsMap.aspx,"Missouri Organic Association Member Farms Map"
+http://www.coophousing.org/DisplayPage.aspx?id=108&bMenu=56&bItem=108,"NAHC Member Associations"
+http://www.nasco.coop/guide/,"NASCO Guide to Co-ops"
+http://www.nationalco-opdirectory.com/,"National Co-op Directory"
+http://www.environmentaldirectory.net/,"National Environmental Directory"
+http://www.coopdirectory.org/,"Natural Food Coop Directory Service"
+http://www.uitti.net/nvp/NVP08Directory.pdf,"Naugatuck Valley Project Directory (pdf)"
+http://www.ncfc.org/member-directory.html,"NCFC Member Directory"
+http://www.ncga.coop/member-stores,"NCGA member co-op grocery stores"
+http://www.ncplenty.org/directory/directory.php,"NCPlenty Member Directory"
+http://www.ncrc.org/index.php?option=com_content&task=blogcategory&id=57&Itemid=121,"NCRC Members"
+http://www.nebsusag.org/events/Exhibitor%20list%20for%20program%20EXHIBITOR%20COPYFinal.pdf,"Nebraska Sustainable Agriculture Society 2010 Conference Exhibitors"
+http://www.nw.org/network/Utilities/NWOLookup.asp,"NeighborWorks Lookup"
+http://www.neppa.org/members/utilitymembers.php,"NEPPA Members List"
+http://www.cityseed.org/city_markets/markets/index.shtml,"New Haven, CT Farmers' Markets map"
+http://www.ctnofa.org/LinksBusiness.htm,"NOFA-CT Business Members"
+http://maps.google.com/maps/ms?ie=UTF8&hl=en&om=0&msa=0&msid=115849143766969260830.0004458316f34d58a22e2&z=9_&mid=1217940919,"NOFA-CT Farm and Food Guide (Google map)"
+http://www.ctnofa.org/Farms.php,"NOFA-CT Organic Farms, Farmers Markets, CSAs, and Community Farms"
+http://theorganicfoodguide.com/,"NOFA-MA Organic Food Guide"
+http://www.nofanh.org/foodMap,"NOFA-NH Food Map"
+http://www.nofanh.org/resources,"NOFA-NH Partners"
+http://www.nofanj.org/find_a_farm.htm,"NOFA-NJ Find a Farm"
+http://www.nofany.org/business.html,"NOFA-NY Business Members"
+http://nofany.org/dbapplet/fpregistry.html,"NOFA-NY Farmer's Pledge Registry"
+http://www.nofari.org/markets.php,"NOFA-RI Business Members"
+http://nofavt.org/about/sustainer_members,"NOFA-VT Business Sustainer Members"
+http://nofavt.org/find-organic-food,"NOFA-VT Find Organic Food"
+http://www.nyfarms.info/restaurantsindex.html,"NY Farms! Restaurants Buying Local"
+http://www.nypa.gov/NYSRECA/,"NY State Rural Electric Cooperatives"
+http://www.cenyc.org/greenmarket/chefswhobuy,"NYC Chefs Why Buy from Greenmarket"
+http://www.justfood.org/csaloc,"NYC CSA Locator - Just Food"
+http://maps.google.com/maps/ms?ie=UTF8&hl=en&oe=UTF8&source=embed&msa=0&msid=116730178006985764192.0004595340f301e11d80f&z=11,"NYC Fair Trade Coalition ""Where to Buy"" Map"
+http://www.greenthumbnyc.org/gardensearch.html,"NYC GreenThumb: Find Your Community Garden"
+http://www.oasisnyc.net/garden/gardensearch.aspx,"NYC Open Accessible Space Information System (OASIS)"
+http://www.mapsforamerica.com/solidarityeconomy,"NYC Solidarity Economy map"
+http://www.nycworker.coop/,"NYC Worker Cooperatives"
+http://dept.kent.edu/oeoc/network/NetworkCompanies.htm,"Ohio's Employee-Owned Network Companies"
+http://www.kerrcenter.com/resources/food-connection.htm,"Oklahoma Food Connection"
+http://www.coopsontario.com/edirectory/,"Ontario Co-op Association e-Directory"
+http://www.paorganic.org/pao_directory.htm,"Pennsylvania Certified Organic Directories"
+http://www.pvsustain.com/,"Pioneer Valley Sustainable Development Inventory"
+http://www.farmandfood.org/directory.html,"Regional Farm & Food Project Directory"
+http://find.coop/,"Regional Index of Cooperation"
+http://jasecon.wik.is/,"SF bay grassroots economy wiki"
+http://www.slowfoodnyc.org/programs/soa,"Slow Food NYC Snail of Approval Directory"
+http://www.ifil.org/redesolidaria/,Solidarius
+http://sonomacounty.golocal.coop/businesses/index/,"Sonoma County GoLocal Cooperative member business directory"
+http://www.ncced.org/associations/associations.html,"State CED Associations"
+http://www.cooperativemaine.org/,"Stronger Together: A Directory of Maine's Cooperative Economy"
+http://www.sustainabilityhub.net/,"Sustainability Hub for San Mateo County"
+http://www.ibiblio.org/farming-connection/localcon/home.htm,"Sustainable Farming Connection"
+http://www.vegetarianhomesteading.com/index.html,"The Vegetarian Homesteader's Guide(tm)"
+http://www.tilthproducers.org/directory/tpdirportal.htm,"Tilth Producers Directory"
+http://www.timebanks.org/directory.htm,"Time Banks Directory"
+http://www.tpl.org/tier3_cd.cfm?content_item_id=20723&folder_id=628,"Trust for Public Land project sites"
+http://populareconomics.org/ussen/civicrm/profile?gid=2&reset=1&force=1&search=0,"US Solidarity Economy Network Member Organizations"
+http://www.usworker.coop/about/memberlist,"USFWC Members"
+http://wiki.valleyworker.org/,"Valley Alliance of Worker Cooperatives Members"
+http://www.veggietrader.com/,"Veggie Trader"
+http://www.veoc.org/vermontcompanies.shtml,"Vermont Employee-Owned Companies"
+http://www.nobawc.org/article.php?id=56,"Worker Cooperatives in the Bay Area"
+\endverbatim
+ 
+\section merge_example_big_merge_with_lots_of_changes_local local/left file: test001_spell.csv
+\verbatim
+This is a modified version, with typos
+The letter e, has been dropped for example
+and http, has been removed
+and everything, is lowercased
+
+"link to dirctory","nam of dirctory"
+dirctory.coop/,".coop dirctory"
+www.agrnrindiana.com/groups,"a grnr indiana ntwork groups"
+www.asanonlin.org/forconsumrs.htm,"alabama sustainabl agricultur ntwork listings"
+www.bcca.coop/mmbrs_listing,"british columbia co-oprativ association mmbrs"
+www.buyctgrown.com/,"buy ct grown"
+www.krrcntr.com/buy-frsh.htm,"buy frsh buy local - oklahoma"
+guid.buylocalca.org/,"buy frsh buy local food guid (ca)"
+www.buylocalnbraska.org/,"buy frsh buy local nbraska"
+www.buylocalpa.org/,"buy frsh buy local pnnsylvania"
+www.tilthproducrs.org/bwo-whr.htm,"buy washington organic"
+www.ccof.org/dirctoris.php,"ca crtifid organic farmrs dirctory"
+www.cohousing.ca/locations.htm,"canadian cohousing ntwork"
+www.cancont.com/,"canadian housing coop listings"
+www.carolinafarmstwards.org/advancd.shtml,"carolina farm stwardship association find local food"
+www.cascadharvst.org/community/mmbrs-and-frinds,"cascad harvst coalition mmbrs & frinds"
+www.changingmain.org/cgi/cm/indx.html,"changing main dirctory"
+www.cltntwork.org/indx.php?fusaction=main.mmbrlist,"clt dirctory"
+www.coopmonth.coop/dirctory/submit.php,"co-op month - co-op dirctory"
+www.chfcanada.coop/ng/pags2007/about_3.asp,"co-oprativ housing fdration of canada"
+www.organiccolorado.org/mmbrs.html,"colorado organic producrs association mmbrs"
+www.ibik.org/ncouragmnt/frbik/dirctory/indx.htm,"community bik programs dirctory"
+acga.localharvst.org/,"community gardn databas"
+smallisbautiful.org/cltdirctory.html,"community land trust dirctory"
+namant.org/csf/locat,"community supportd fishris locator"
+www.complmntarycurrncy.org/ccdatabas/ls_public.html,"complmntary currncy rsourc cntr"
+www.ncdf.coop/mmbrship_nw.html,"coop mmbrs of ncdf"
+www.cooprativgrocr.coop/coops/,"cooprativ grocr food co-op dirctory"
+community.coop/davis/,"cooprativs and nonprofits in davis and yolo countis"
+popl.hofstra.du/faculty/martha_j_krisl/dirctory_of_craft_cooprativs.html,"craft cooprativs dirctory"
+www.crditunion.coop/cu_locator/quickfind.php,"crdit union locator"
+www.csafarms.org/findcsa.asp,"csa farms in nw michigan & byond"
+www.csi.coop/,"csi support & dvlopmnt srvics"
+staylocal.org/biz/,"dirctory of locally-ownd and opratd businsss in nw orlans"
+www.rurdv.usda.gov/rbs/pub/sr22.htm,"dirctory of rural farmr, ranchr, and fishry cooprativs"
+www.atwllguid.org/,"at wll guid: local, sustainabl, organic food"
+www.cobusinsslinks.com/,"cobusinsslinks grn dirctory"
+conomisocialqubc.ca/,"conomi social qubc"
+massio.org/intractiv/indx.html,"mploy ownd companis in massachustts"
+www.kdc.coop/rsourcs/xampls_of_cooprativs_by_stat/?no_cach=1,"xampls of mid-atlantic cooprativs"
+www.suprmarktcoop.com/,"fair trad and small farm producrs"
+www.fairtradfdration.org/ht/d/mmdir/pid/1722,"fair trad fdration mmbrs"
+www.farmfrsh.org/,"farm frsh - local food in ri, ct, ma"
+www.livingconomis.org/ntviw/local-ntworks-map,"find a ball ntwork"
+www.amiba.nt/find/intrnational_indx.html,"find an indpndnt businss allianc"
+www.foginfo.org/dirctory.php,"florida organic growrs dirctory"
+www.gorgiaorganics.org/organic_dirctory/,"gorgia organics dirctory"
+go.coop/,go.coop
+www.offa.org/sarch-gg.php,"good arth guid to ohio organic & cological farms & gardns"
+www.coopamrica.org/pubs/grnpags/,"grn amrica's national grn pags"
+www.hawaiiorganic.org/organic-marktplac,"hawaii organic and crtifid products and producrs dirctory"
+dirctory.ic.org/,"intntional communitis dirctory"
+www.ripss.nt/n/rsaux_continnt.html,"intrcontinntal ntwork for th promotion of th social solidarity conomy"
+www.landstwardshipprojct.org/foodfarm-main.html,"land stwardship projct community basd food & conomic dvlopmnt"
+www.linux.org/groups/,"linux usr groups"
+smallisbautiful.org/local_currncis/currncy_groups.html,"local currncy dirctory"
+www.localdirt.com/,"local dirt: find & buy local food"
+www.localfork.com/dirctory.mvc,"local fork dirctory"
+www.localharvst.org/,"local harvst"
+www.macdc.org/docs/mmbrship_list.html,"ma cdc mmbrs"
+www.mofga.org/rsourcs/findlocalfoods/tabid/221/dfault.aspx,"main local foods, farmrs, csas"
+www.mass.gov/agr/massgrown/farmrs_markts.htm,"mass. farmrs' markts"
+www.farmrsmarkts.msu.du/2009marktlocations/tabid/772/dfault.aspx,"michigan farmrs markt association"
+www.moffa.org/atorg.html,"michigan organic food & farm allianc ating organically guid"
+www.maacooprativs.org/id11.html,"mid-atlantic allianc of cooprativs mmbrs"
+www.missouriorganic.org/moafarmsmap.aspx,"missouri organic association mmbr farms map"
+www.coophousing.org/displaypag.aspx?id=108&bmnu=56&bitm=108,"nahc mmbr associations"
+www.nasco.coop/guid/,"nasco guid to co-ops"
+www.nationalco-opdirctory.com/,"national co-op dirctory"
+www.nvironmntaldirctory.nt/,"national nvironmntal dirctory"
+www.coopdirctory.org/,"natural food coop dirctory srvic"
+www.uitti.nt/nvp/nvp08dirctory.pdf,"naugatuck vally projct dirctory (pdf)"
+www.ncfc.org/mmbr-dirctory.html,"ncfc mmbr dirctory"
+www.ncga.coop/mmbr-stors,"ncga mmbr co-op grocry stors"
+www.ncplnty.org/dirctory/dirctory.php,"ncplnty mmbr dirctory"
+www.ncrc.org/indx.php?option=com_contnt&task=blogcatgory&id=57&itmid=121,"ncrc mmbrs"
+www.nbsusag.org/vnts/xhibitor%20list%20for%20program%20xhibitor%20copyfinal.pdf,"nbraska sustainabl agricultur socity 2010 confrnc xhibitors"
+www.nw.org/ntwork/utilitis/nwolookup.asp,"nighborworks lookup"
+www.nppa.org/mmbrs/utilitymmbrs.php,"nppa mmbrs list"
+www.citysd.org/city_markts/markts/indx.shtml,"nw havn, ct farmrs' markts map"
+www.ctnofa.org/linksbusinss.htm,"nofa-ct businss mmbrs"
+maps.googl.com/maps/ms?i=utf8&hl=n&om=0&msa=0&msid=115849143766969260830.0004458316f34d58a222&z=9_&mid=1217940919,"nofa-ct farm and food guid (googl map)"
+www.ctnofa.org/farms.php,"nofa-ct organic farms, farmrs markts, csas, and community farms"
+thorganicfoodguid.com/,"nofa-ma organic food guid"
+www.nofanh.org/foodmap,"nofa-nh food map"
+www.nofanh.org/rsourcs,"nofa-nh partnrs"
+www.nofanj.org/find_a_farm.htm,"nofa-nj find a farm"
+www.nofany.org/businss.html,"nofa-ny businss mmbrs"
+nofany.org/dbapplt/fprgistry.html,"nofa-ny farmr's pldg rgistry"
+www.nofari.org/markts.php,"nofa-ri businss mmbrs"
+nofavt.org/about/sustainr_mmbrs,"nofa-vt businss sustainr mmbrs"
+nofavt.org/find-organic-food,"nofa-vt find organic food"
+www.nyfarms.info/rstaurantsindx.html,"ny farms! rstaurants buying local"
+www.nypa.gov/nysrca/,"ny stat rural lctric cooprativs"
+www.cnyc.org/grnmarkt/chfswhobuy,"nyc chfs why buy from grnmarkt"
+www.justfood.org/csaloc,"nyc csa locator - just food"
+maps.googl.com/maps/ms?i=utf8&hl=n&o=utf8&sourc=mbd&msa=0&msid=116730178006985764192.0004595340f30111d80f&z=11,"nyc fair trad coalition ""whr to buy"" map"
+www.grnthumbnyc.org/gardnsarch.html,"nyc grnthumb: find your community gardn"
+www.oasisnyc.nt/gardn/gardnsarch.aspx,"nyc opn accssibl spac information systm (oasis)"
+www.mapsforamrica.com/solidarityconomy,"nyc solidarity conomy map"
+www.nycworkr.coop/,"nyc workr cooprativs"
+dpt.knt.du/ooc/ntwork/ntworkcompanis.htm,"ohio's mploy-ownd ntwork companis"
+www.krrcntr.com/rsourcs/food-connction.htm,"oklahoma food connction"
+www.coopsontario.com/dirctory/,"ontario co-op association -dirctory"
+www.paorganic.org/pao_dirctory.htm,"pnnsylvania crtifid organic dirctoris"
+www.pvsustain.com/,"pionr vally sustainabl dvlopmnt invntory"
+www.farmandfood.org/dirctory.html,"rgional farm & food projct dirctory"
+find.coop/,"rgional indx of coopration"
+jascon.wik.is/,"sf bay grassroots conomy wiki"
+www.slowfoodnyc.org/programs/soa,"slow food nyc snail of approval dirctory"
+www.ifil.org/rdsolidaria/,solidarius
+sonomacounty.golocal.coop/businsss/indx/,"sonoma county golocal cooprativ mmbr businss dirctory"
+www.nccd.org/associations/associations.html,"stat cd associations"
+www.cooprativmain.org/,"strongr togthr: a dirctory of main's cooprativ conomy"
+www.sustainabilityhub.nt/,"sustainability hub for san mato county"
+www.ibiblio.org/farming-connction/localcon/hom.htm,"sustainabl farming connction"
+www.vgtarianhomstading.com/indx.html,"th vgtarian homstadr's guid(tm)"
+www.tilthproducrs.org/dirctory/tpdirportal.htm,"tilth producrs dirctory"
+www.timbanks.org/dirctory.htm,"tim banks dirctory"
+www.tpl.org/tir3_cd.cfm?contnt_itm_id=20723&foldr_id=628,"trust for public land projct sits"
+popularconomics.org/ussn/civicrm/profil?gid=2&rst=1&forc=1&sarch=0,"us solidarity conomy ntwork mmbr organizations"
+www.usworkr.coop/about/mmbrlist,"usfwc mmbrs"
+wiki.vallyworkr.org/,"vally allianc of workr cooprativs mmbrs"
+www.vggitradr.com/,"vggi tradr"
+www.voc.org/vrmontcompanis.shtml,"vrmont mploy-ownd companis"
+www.nobawc.org/articl.php?id=56,"workr cooprativs in th bay ara"
+\endverbatim
+ 
+\section merge_example_big_merge_with_lots_of_changes_remote remote/right file: test001_col.csv
+\verbatim
+"Link to directory","Name of directory",Two,Count
+http://directory.coop/,".coop Directory",2,1
+http://www.agreenerindiana.com/groups,"A Greener Indiana network groups",2,2
+http://www.asanonline.org/forconsumers.htm,"Alabama Sustainable Agriculture Network listings",2,3
+http://www.bcca.coop/members_listing,"British Columbia Co-operative Association Members",2,4
+http://www.buyctgrown.com/,"Buy CT Grown",2,5
+http://www.kerrcenter.com/buy-fresh.htm,"Buy Fresh Buy Local - Oklahoma",2,6
+http://guide.buylocalca.org/,"Buy Fresh Buy Local Food Guide (CA)",2,7
+http://www.buylocalnebraska.org/,"Buy Fresh Buy Local Nebraska",2,8
+http://www.buylocalpa.org/,"Buy Fresh Buy Local Pennsylvania",2,9
+http://www.tilthproducers.org/bwo-where.htm,"Buy Washington Organic",2,10
+http://www.ccof.org/directories.php,"CA Certified Organic Farmers Directory",2,11
+http://www.cohousing.ca/locations.htm,"Canadian Cohousing Network",2,12
+http://www.canconet.com/,"Canadian Housing Coop Listings",2,13
+http://www.carolinafarmstewards.org/advanced.shtml,"Carolina Farm Stewardship Association Find Local Food",2,14
+http://www.cascadeharvest.org/community/members-and-friends,"Cascade Harvest Coalition Members & Friends",2,15
+http://www.changingmaine.org/cgi/cm/index.html,"Changing Maine Directory",2,16
+http://www.cltnetwork.org/index.php?fuseaction=Main.MemberList,"CLT Directory",2,17
+http://www.coopmonth.coop/directory/submit.php,"Co-op Month - Co-op Directory",2,18
+http://www.chfcanada.coop/eng/pages2007/about_3.asp,"Co-operative Housing Federation of Canada",2,19
+http://www.organiccolorado.org/members.html,"Colorado Organic Producers Association Members",2,20
+http://www.ibike.org/encouragement/freebike/directory/index.htm,"Community Bike Programs Directory",2,21
+http://acga.localharvest.org/,"Community Garden Database",2,22
+http://smallisbeautiful.org/cltdirectory.html,"Community Land Trust Directory",2,23
+http://namanet.org/csf/locate,"Community Supported Fisheries Locator",2,24
+http://www.complementarycurrency.org/ccDatabase/les_public.html,"Complementary Currency Resource Center",2,25
+http://www.ncdf.coop/membership_new.html,"Coop Members of NCDF",2,26
+http://www.cooperativegrocer.coop/coops/,"Cooperative Grocer Food Co-op Directory",2,27
+http://community.coop/davis/,"Cooperatives and Nonprofits in Davis and Yolo Counties",2,28
+http://people.hofstra.edu/faculty/Martha_J_Kreisel/directory_of_craft_cooperatives.html,"Craft Cooperatives Directory",2,29
+http://www.creditunion.coop/cu_locator/quickfind.php,"Credit Union Locator",2,30
+http://www.csafarms.org/findcsa.asp,"CSA Farms in NW Michigan & beyond",2,31
+http://www.csi.coop/,"CSI Support & Development Services",2,32
+http://staylocal.org/biz/,"Directory of locally-owned and operated businesses in New Orleans",2,33
+http://www.rurdev.usda.gov/rbs/pub/sr22.htm,"Directory of Rural Farmer, Rancher, and Fishery Cooperatives",2,34
+http://www.eatwellguide.org/,"Eat Well Guide: Local, Sustainable, Organic Food",2,35
+http://www.ecobusinesslinks.com/,"EcoBusinessLinks Green Directory",2,36
+http://economiesocialequebec.ca/,"Economie Sociale Quebec",2,37
+http://masseio.org/Interactive/index.html,"Employee Owned Companies in Massachusetts",2,38
+http://www.kdc.coop/resources/examples_of_cooperatives_by_state/?no_cache=1,"Examples of Mid-Atlantic Cooperatives",2,39
+http://www.supermarketcoop.com/,"Fair Trade and Small Farm Producers",2,40
+http://www.fairtradefederation.org/ht/d/Memdir/pid/1722,"Fair Trade Federation Members",2,41
+http://www.farmfresh.org/,"Farm Fresh - Local food in RI, CT, MA",2,42
+http://www.livingeconomies.org/netview/local-networks-map,"Find a BALLE Network",2,43
+http://www.amiba.net/find/international_index.html,"Find an Independent Business Alliance",2,44
+http://www.foginfo.org/directory.php,"Florida Organic Growers Directory",2,45
+http://www.georgiaorganics.org/organic_directory/,"Georgia Organics Directory",2,46
+http://go.coop/,Go.Coop,2,47
+http://www.oeffa.org/search-geg.php,"Good Earth Guide to Ohio Organic & Ecological Farms & Gardens",2,48
+http://www.coopamerica.org/pubs/greenpages/,"Green America's National Green Pages",2,49
+http://www.hawaiiorganic.org/organic-marketplace,"Hawaii Organic and Certified Products and Producers Directory",2,50
+http://directory.ic.org/,"Intentional Communities Directory",2,51
+http://www.ripess.net/en/reseaux_continent.html,"Intercontinental Network for the Promotion of the Social Solidarity Economy",2,52
+http://www.landstewardshipproject.org/foodfarm-main.html,"Land Stewardship Project Community Based Food & Economic Development",2,53
+http://www.linux.org/groups/,"Linux User Groups",2,54
+http://smallisbeautiful.org/local_currencies/currency_groups.html,"Local Currency Directory",2,55
+http://www.localdirt.com/,"Local Dirt: find & buy local food",2,56
+http://www.localfork.com/Directory.mvc,"Local Fork Directory",2,57
+http://www.localharvest.org/,"Local Harvest",2,58
+http://www.macdc.org/docs/membership_list.html,"MA CDC Members",2,59
+http://www.mofga.org/Resources/FindLocalFoods/tabid/221/Default.aspx,"Maine Local Foods, Farmers, CSAs",2,60
+http://www.mass.gov/agr/massgrown/farmers_markets.htm,"Mass. Farmers' Markets",2,61
+http://www.farmersmarkets.msu.edu/2009MarketLocations/tabid/772/Default.aspx,"Michigan Farmers Market Association",2,62
+http://www.moffa.org/eatorg.html,"Michigan Organic Food & Farm Alliance Eating Organically Guide",2,63
+http://www.maacooperatives.org/id11.html,"Mid-Atlantic Alliance of Cooperatives Members",2,64
+http://www.missouriorganic.org/MOAFarmsMap.aspx,"Missouri Organic Association Member Farms Map",2,65
+http://www.coophousing.org/DisplayPage.aspx?id=108&bMenu=56&bItem=108,"NAHC Member Associations",2,66
+http://www.nasco.coop/guide/,"NASCO Guide to Co-ops",2,67
+http://www.nationalco-opdirectory.com/,"National Co-op Directory",2,68
+http://www.environmentaldirectory.net/,"National Environmental Directory",2,69
+http://www.coopdirectory.org/,"Natural Food Coop Directory Service",2,70
+http://www.uitti.net/nvp/NVP08Directory.pdf,"Naugatuck Valley Project Directory (pdf)",2,71
+http://www.ncfc.org/member-directory.html,"NCFC Member Directory",2,72
+http://www.ncga.coop/member-stores,"NCGA member co-op grocery stores",2,73
+http://www.ncplenty.org/directory/directory.php,"NCPlenty Member Directory",2,74
+http://www.ncrc.org/index.php?option=com_content&task=blogcategory&id=57&Itemid=121,"NCRC Members",2,75
+http://www.nebsusag.org/events/Exhibitor%20list%20for%20program%20EXHIBITOR%20COPYFinal.pdf,"Nebraska Sustainable Agriculture Society 2010 Conference Exhibitors",2,76
+http://www.nw.org/network/Utilities/NWOLookup.asp,"NeighborWorks Lookup",2,77
+http://www.neppa.org/members/utilitymembers.php,"NEPPA Members List",2,78
+http://www.cityseed.org/city_markets/markets/index.shtml,"New Haven, CT Farmers' Markets map",2,79
+http://www.ctnofa.org/LinksBusiness.htm,"NOFA-CT Business Members",2,80
+http://maps.google.com/maps/ms?ie=UTF8&hl=en&om=0&msa=0&msid=115849143766969260830.0004458316f34d58a22e2&z=9_&mid=1217940919,"NOFA-CT Farm and Food Guide (Google map)",2,81
+http://www.ctnofa.org/Farms.php,"NOFA-CT Organic Farms, Farmers Markets, CSAs, and Community Farms",2,82
+http://theorganicfoodguide.com/,"NOFA-MA Organic Food Guide",2,83
+http://www.nofanh.org/foodMap,"NOFA-NH Food Map",2,84
+http://www.nofanh.org/resources,"NOFA-NH Partners",2,85
+http://www.nofanj.org/find_a_farm.htm,"NOFA-NJ Find a Farm",2,86
+http://www.nofany.org/business.html,"NOFA-NY Business Members",2,87
+http://nofany.org/dbapplet/fpregistry.html,"NOFA-NY Farmer's Pledge Registry",2,88
+http://www.nofari.org/markets.php,"NOFA-RI Business Members",2,89
+http://nofavt.org/about/sustainer_members,"NOFA-VT Business Sustainer Members",2,90
+http://nofavt.org/find-organic-food,"NOFA-VT Find Organic Food",2,91
+http://www.nyfarms.info/restaurantsindex.html,"NY Farms! Restaurants Buying Local",2,92
+http://www.nypa.gov/NYSRECA/,"NY State Rural Electric Cooperatives",2,93
+http://www.cenyc.org/greenmarket/chefswhobuy,"NYC Chefs Why Buy from Greenmarket",2,94
+http://www.justfood.org/csaloc,"NYC CSA Locator - Just Food",2,95
+http://maps.google.com/maps/ms?ie=UTF8&hl=en&oe=UTF8&source=embed&msa=0&msid=116730178006985764192.0004595340f301e11d80f&z=11,"NYC Fair Trade Coalition ""Where to Buy"" Map",2,96
+http://www.greenthumbnyc.org/gardensearch.html,"NYC GreenThumb: Find Your Community Garden",2,97
+http://www.oasisnyc.net/garden/gardensearch.aspx,"NYC Open Accessible Space Information System (OASIS)",2,98
+http://www.mapsforamerica.com/solidarityeconomy,"NYC Solidarity Economy map",2,99
+http://www.nycworker.coop/,"NYC Worker Cooperatives",2,100
+http://dept.kent.edu/oeoc/network/NetworkCompanies.htm,"Ohio's Employee-Owned Network Companies",2,101
+http://www.kerrcenter.com/resources/food-connection.htm,"Oklahoma Food Connection",2,102
+http://www.coopsontario.com/edirectory/,"Ontario Co-op Association e-Directory",2,103
+http://www.paorganic.org/pao_directory.htm,"Pennsylvania Certified Organic Directories",2,104
+http://www.pvsustain.com/,"Pioneer Valley Sustainable Development Inventory",2,105
+http://www.farmandfood.org/directory.html,"Regional Farm & Food Project Directory",2,106
+http://find.coop/,"Regional Index of Cooperation",2,107
+http://jasecon.wik.is/,"SF bay grassroots economy wiki",2,108
+http://www.slowfoodnyc.org/programs/soa,"Slow Food NYC Snail of Approval Directory",2,109
+http://www.ifil.org/redesolidaria/,Solidarius,2,110
+http://sonomacounty.golocal.coop/businesses/index/,"Sonoma County GoLocal Cooperative member business directory",2,111
+http://www.ncced.org/associations/associations.html,"State CED Associations",2,112
+http://www.cooperativemaine.org/,"Stronger Together: A Directory of Maine's Cooperative Economy",2,113
+http://www.sustainabilityhub.net/,"Sustainability Hub for San Mateo County",2,114
+http://www.ibiblio.org/farming-connection/localcon/home.htm,"Sustainable Farming Connection",2,115
+http://www.vegetarianhomesteading.com/index.html,"The Vegetarian Homesteader's Guide(tm)",2,116
+http://www.tilthproducers.org/directory/tpdirportal.htm,"Tilth Producers Directory",2,117
+http://www.timebanks.org/directory.htm,"Time Banks Directory",2,118
+http://www.tpl.org/tier3_cd.cfm?content_item_id=20723&folder_id=628,"Trust for Public Land project sites",2,119
+http://populareconomics.org/ussen/civicrm/profile?gid=2&reset=1&force=1&search=0,"US Solidarity Economy Network Member Organizations",2,120
+http://www.usworker.coop/about/memberlist,"USFWC Members",2,121
+http://wiki.valleyworker.org/,"Valley Alliance of Worker Cooperatives Members",2,122
+http://www.veggietrader.com/,"Veggie Trader",2,123
+http://www.veoc.org/vermontcompanies.shtml,"Vermont Employee-Owned Companies",2,124
+http://www.nobawc.org/article.php?id=56,"Worker Cooperatives in the Bay Area",2,125
+\endverbatim
+
+ *
+ */

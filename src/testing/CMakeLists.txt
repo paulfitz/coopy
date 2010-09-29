@@ -264,7 +264,14 @@ ADD_TEST(basic_merge_add_row2 ${testprg}
   --diff
   --prop diffs --assert 0)
 
-
+ADD_TEST(basic_merge_typo_and_replace_column ${testprg}
+  --parent --read ${TESTS}/test005_base.csv
+  --local --read ${TESTS}/test005_fix_typo_add.csv
+  --remote --read ${TESTS}/test005_replace_column_and_reorder.csv
+  --compare
+  --remote --read ${TESTS}/test005_fix_typo_add_and_new_column.csv
+  --diff
+  --prop diffs --assert 0)
 
 #######################################################################
 #######################################################################

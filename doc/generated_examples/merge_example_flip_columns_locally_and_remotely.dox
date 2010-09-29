@@ -9,6 +9,10 @@
 \verbatim
 ssmerge numbers_wide.csv numbers_wide_flip_pair1.csv numbers_wide_flip_pair2.csv
 \endverbatim
+\li \ref merge_example_flip_columns_locally_and_remotely_output "output"
+\li \ref merge_example_flip_columns_locally_and_remotely_parent "input: numbers_wide.csv"
+\li \ref merge_example_flip_columns_locally_and_remotely_local "input: numbers_wide_flip_pair1.csv"
+\li \ref merge_example_flip_columns_locally_and_remotely_remote "input: numbers_wide_flip_pair2.csv"
  
 \section merge_example_flip_columns_locally_and_remotely_output output
 \verbatim

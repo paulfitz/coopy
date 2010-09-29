@@ -9,6 +9,9 @@
 \verbatim
  ssdiff numbers_three_23.csv numbers.csv
 \endverbatim
+\li \ref diff_example_fix_a_cell_output "output"
+\li \ref diff_example_fix_a_cell_ref1 "numbers_three_23.csv"
+\li \ref diff_example_fix_a_cell_ref2 "numbers.csv"
  
 \section diff_example_fix_a_cell_output output
 \verbatim
