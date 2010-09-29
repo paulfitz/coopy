@@ -3,14 +3,34 @@
 
 @mainpage Coopy Documentation
 
-Welcome.  This is a stub for documentation about Coopy, targeted
-mostly at developers rather than end-users.
+The Coopy project contains programs and libraries to help you:
+
+\li Merge CSV files that came from the same source but have been
+  modified independently (see \ref ssmerge).
+\li Analyze the difference between two or three CSV files
+  (see \ref ssdiff).
+\li Maintain a repository of CSV files with multiple active contributors
+  (see \ref ssfossil and \ref coopy).
+
+Here are some tips on how to use these programs:
 
 \li \ref ssmerge "ssmerge usage".
 \li \ref merge_example.
 \li \ref ssdiff "ssdiff usage".
 \li \ref diff_example.
+\li \ref ssfossil reference.
+\li \ref coopy graphical interface reference.
 \li <a href="annotated.html">Classes</a> used in implementation.
+
+Code in the Coopy project is all free and open source (licensed under the GPL).
+The \ref ssmerge and \ref ssdiff programs currently make use of 
+<a href="https://sourceforge.net/projects/libcsv/">libcsv</a>.
+The ssfossil program 
+is a thin wrapper around <a href='http://www.fossil-scm.org'>fossil</a>.
+The \ref coopy program uses <a href='http://www.wxwidgets.org'>wxWidgets</a>.
+The experimental (and undocumented) ssinsert program makes use of
+the spreadsheet library
+within <a href="http://projects.gnome.org/gnumeric/">Gnumeric</a>.
 
  *
  */

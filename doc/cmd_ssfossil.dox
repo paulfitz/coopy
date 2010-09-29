@@ -1,0 +1,20 @@
+/**
+ *
+
+@page ssfossil ssfossil
+
+This is a thin wrapper around 
+the <a href='http://www.fossil-scm.org'>fossil</a> version control system.
+It modifies the <b>merge</b> operation within fossil to 
+use the algorithm behind the \ref ssmerge command.
+
+For usage information, see
+the <a href="http://www.fossil-scm.org/index.html/doc/tip/www/reference.wiki">fossil reference</a>.
+
+The ssfossil client can interoperate with fossil used as a server, or 
+vice versa.
+
+ *
+ */
+
+
