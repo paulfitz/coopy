@@ -783,7 +783,8 @@ bool MyFrame::havePath() {
                     bool cont = dir.GetFirst(&filename, wxEmptyString, 
                                              wxDIR_FILES|wxDIR_DIRS|wxDIR_HIDDEN);
                     while ( cont ) {
-                        printf("%s\n", filename.c_str());
+			string fname = conv(filename);
+                        printf("%s\n", fname.c_str());
                         cont = dir.GetNext(&filename);
                         ct++;
                     }

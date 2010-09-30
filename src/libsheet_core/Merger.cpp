@@ -348,7 +348,7 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       // yet to exercise it.
       // For now, local order will remain unchanged.
 
-      dbg_printf("MOVE order %d\n", local_cols.size());
+      dbg_printf("MOVE order %d\n", (int)local_cols.size());
       dbg_printf("  [%s]\n", vector2string(local_cols).c_str());
       dbg_printf("  [%s]\n", vector2string(shuffled_cols).c_str());
       dbg_printf("  [%s]\n\n", vector2string(move_order).c_str());
