@@ -32,7 +32,7 @@ ENDIF (WIN32)
 
 SET(CPACK_PACKAGE_EXECUTABLES "coopy;coopy")
 SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin/coopy.exe")
-SET(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/src/coopy_scm/src/icon/appicon.ico")
+SET(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/src/gui/icon/appicon.ico")
 
 SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
 \\\${registerExtension} \\\"\\\$INSTDIR\\\\bin\\\\coopy.exe\\\" \\\".coopy\\\" \\\"Coopy repository\\\"

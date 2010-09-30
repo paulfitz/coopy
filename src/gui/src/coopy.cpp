@@ -55,11 +55,11 @@ static std::string conv(const wxString& s) {
 } 
 
 
-class MyApp: public wxApp {
+class CoopyApp: public wxApp {
 private:
     bool silent;
 public:
-    MyApp() {
+    CoopyApp() {
         silent = false;
     }
 
@@ -71,7 +71,7 @@ public:
     static string fossil_object;
 };
 
-string MyApp::fossil_object;
+string CoopyApp::fossil_object;
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters"),
@@ -85,13 +85,13 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
 };
 
 
-void MyApp::OnInitCmdLine(wxCmdLineParser& parser) {
+void CoopyApp::OnInitCmdLine(wxCmdLineParser& parser) {
     parser.SetDesc (g_cmdLineDesc);
     // must refuse '/' as parameter starter or cannot use "/path" style paths
     parser.SetSwitchChars (wxT("--"));
 }
  
-bool MyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
+bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     silent = parser.Found(wxT("s"));
 
     wxString location;
@@ -118,9 +118,9 @@ bool MyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
 }
 
 #ifdef WIN32
-IMPLEMENT_APP_NO_MAIN(MyApp);
+IMPLEMENT_APP_NO_MAIN(CoopyApp);
 #else
-IMPLEMENT_APP(MyApp);
+IMPLEMENT_APP(CoopyApp);
 #endif
 
 
@@ -215,9 +215,9 @@ public:
 */
 
 
-class MyFrame: public wxFrame
+class CoopyFrame: public wxFrame
 {
-    DECLARE_CLASS(MyFrame)
+    DECLARE_CLASS(CoopyFrame)
     DECLARE_EVENT_TABLE()
 
 private:
@@ -295,7 +295,7 @@ private:
 
 public:
 
-    MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
+    CoopyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
@@ -491,10 +491,10 @@ enum
 };
 
 
-class MyProcess : public wxProcess
+class FossilProcess : public wxProcess
 {
 public:
-    MyProcess(MyFrame *parent, const wxString& cmd)
+    FossilProcess(CoopyFrame *parent, const wxString& cmd)
         : wxProcess(parent), m_cmd(cmd)
     {
         m_parent = parent;
@@ -506,13 +506,13 @@ public:
     virtual void OnTerminate(int pid, int status);
 
 protected:
-    MyFrame *m_parent;
+    CoopyFrame *m_parent;
     wxString m_cmd;
 };
 
 
 
-void MyProcess::OnTerminate(int pid, int status)
+void FossilProcess::OnTerminate(int pid, int status)
 {
     /*
     wxLogStatus(m_parent, wxT("Process %u ('%s') terminated with exit code %d."),
@@ -524,9 +524,9 @@ void MyProcess::OnTerminate(int pid, int status)
 
 
 
-bool MyApp::OnInit()
+bool CoopyApp::OnInit()
 {
-    MyFrame *frame = new MyFrame( _T("Coopy"), wxPoint(50,50), wxSize(450,340) );
+    CoopyFrame *frame = new CoopyFrame( _T("Coopy"), wxPoint(50,50), wxSize(450,340) );
 
     //g_hwnd = (long int)(frame->GetHandle());
 
@@ -548,23 +548,23 @@ bool MyApp::OnInit()
 
 
 
-IMPLEMENT_CLASS(MyFrame, wxFrame)
+IMPLEMENT_CLASS(CoopyFrame, wxFrame)
 
-BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(ID_Quit, MyFrame::OnQuit)
-    EVT_MENU(ID_About, MyFrame::OnAbout)
-    EVT_BUTTON(wxID_OK, MyFrame::OnOK)
-    EVT_BUTTON(ID_Quit, MyFrame::OnQuit)
-    EVT_BUTTON(ID_Sync, MyFrame::OnSync)
-    EVT_BUTTON(ID_Undo, MyFrame::OnUndo)
-    EVT_BUTTON(ID_Commit, MyFrame::OnCommit)
-    EVT_BUTTON(ID_Create, MyFrame::OnCreate)
-    EVT_CLOSE(MyFrame::OnExit)
-    EVT_TIMER(ID_Tick, MyFrame::OnProgressTimer)
+BEGIN_EVENT_TABLE(CoopyFrame, wxFrame)
+    EVT_MENU(ID_Quit, CoopyFrame::OnQuit)
+    EVT_MENU(ID_About, CoopyFrame::OnAbout)
+    EVT_BUTTON(wxID_OK, CoopyFrame::OnOK)
+    EVT_BUTTON(ID_Quit, CoopyFrame::OnQuit)
+    EVT_BUTTON(ID_Sync, CoopyFrame::OnSync)
+    EVT_BUTTON(ID_Undo, CoopyFrame::OnUndo)
+    EVT_BUTTON(ID_Commit, CoopyFrame::OnCommit)
+    EVT_BUTTON(ID_Create, CoopyFrame::OnCreate)
+    EVT_CLOSE(CoopyFrame::OnExit)
+    EVT_TIMER(ID_Tick, CoopyFrame::OnProgressTimer)
 END_EVENT_TABLE()
 
 
-int MyFrame::ssfossil(int argc, char *argv[], bool sync) {
+int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
     printf("Calling fossil with %d arguments\n", argc);
     wxArrayString arr;
     wxChar *cmd[256];
@@ -591,7 +591,7 @@ int MyFrame::ssfossil(int argc, char *argv[], bool sync) {
     // Create the process string
     //wxEvtHandler *eventHandler = NULL;
     //wxProcess *proc = new wxProcess(eventHandler);
-    MyProcess *proc = new MyProcess(this,_T("ssfossil"));
+    FossilProcess *proc = new FossilProcess(this,_T("ssfossil"));
     proc->Redirect();
     //if(::wxExecute(conv(cmd), wxEXEC_ASYNC, proc) == 0){
     if(::wxExecute(cmd, wxEXEC_ASYNC, proc) == 0){
@@ -624,7 +624,7 @@ int MyFrame::ssfossil(int argc, char *argv[], bool sync) {
     */
 }
 
-bool MyFrame::OnInit() {
+bool CoopyFrame::OnInit() {
 
     stream = NULL;
     askPath = true;
@@ -708,8 +708,8 @@ bool MyFrame::OnInit() {
                                   //wxDIRP_USE_TEXTCTRL);
     //dir_box->SetTextCtrlProportion(0);
 
-    if (MyApp::fossil_object!="") {
-        wxFileName name = wxFileName::FileName(conv(MyApp::fossil_object));
+    if (CoopyApp::fossil_object!="") {
+        wxFileName name = wxFileName::FileName(conv(CoopyApp::fossil_object));
         name.MakeAbsolute();
         path = conv(name.GetPath());
         dir_box->SetPath(name.GetPath());
@@ -758,7 +758,7 @@ bool MyFrame::OnInit() {
 }
 
 
-bool MyFrame::havePath() {
+bool CoopyFrame::havePath() {
     if (dir_box) {
         string ref = conv(dir_box->GetPath());
         if (ref!=path) {
@@ -828,7 +828,7 @@ bool MyFrame::havePath() {
 }
 
 
-bool MyFrame::haveSource() {
+bool CoopyFrame::haveSource() {
     if (src_box) {
         string ref = conv(src_box->GetValue());
         if (ref!=source) {
@@ -870,7 +870,7 @@ string("http://") +
     return source!="";
 }
 
-bool MyFrame::haveDestination() {
+bool CoopyFrame::haveDestination() {
     if (dest_box) {
         string ref = conv(dest_box->GetValue());
         if (ref!=destination) {
@@ -913,7 +913,7 @@ bool MyFrame::haveDestination() {
     return destination!="";
 }
 
-void MyFrame::OnOK(wxCommandEvent& ev) {
+void CoopyFrame::OnOK(wxCommandEvent& ev) {
     askPath = true;
     askSource = true;
     askDestination = true;
@@ -921,7 +921,7 @@ void MyFrame::OnOK(wxCommandEvent& ev) {
     if (dest_box) { dest_box->ChangeValue(wxT("")); }
 }
 
-void MyFrame::OnSync(wxCommandEvent& event) {
+void CoopyFrame::OnSync(wxCommandEvent& event) {
     printf("Syncing...\n");
     next = "";
     //startStream();
@@ -998,7 +998,7 @@ void MyFrame::OnSync(wxCommandEvent& event) {
 }
 
 
-void MyFrame::OnUndo(wxCommandEvent& event) {
+void CoopyFrame::OnUndo(wxCommandEvent& event) {
     printf("Should undo\n");
     startStream();
     if (havePath()) {
@@ -1012,13 +1012,13 @@ void MyFrame::OnUndo(wxCommandEvent& event) {
     endStream();
 }
 
-void MyFrame::OnCreate(wxCommandEvent& event) {
+void CoopyFrame::OnCreate(wxCommandEvent& event) {
     printf("Create!\n");
     ::wxLaunchDefaultBrowser(wxT(SITE_NAME));
 }
 
 
-void MyFrame::OnPush(wxCommandEvent& event) {
+void CoopyFrame::OnPush(wxCommandEvent& event) {
     int argc = 3;
     char *argv[] = {
         fossil(),
@@ -1028,7 +1028,7 @@ void MyFrame::OnPush(wxCommandEvent& event) {
     ssfossil(argc,argv);
 }
 
-void MyFrame::OnCommit(wxCommandEvent& event) {
+void CoopyFrame::OnCommit(wxCommandEvent& event) {
     printf("Should commit\n");
     //startStream();
     if (havePath()) {
@@ -1099,7 +1099,7 @@ void MyFrame::OnCommit(wxCommandEvent& event) {
     //OnPush(event);
 }
 
-MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+CoopyFrame::CoopyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
     //m_textCtrl = NULL;
@@ -1124,14 +1124,14 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     SetStatusText( _T("Welcome to Coopy!") );
 }
 
-void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+void CoopyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
     //wxCloseEvent ev;
     //wxPostEvent(this,ev);
     Close(TRUE);
 }
 
-void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void CoopyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxMessageBox(_T("Welcome to coopy!\n\
 Now go back to work."),
