@@ -73,7 +73,19 @@ while [ ! "k$1" = "k" ]; do
     fi
 
     if [ "k$1" = "kosx" ]; then
-	scp -v $OSX_USER@$OSX_IP:$OSX_PATH/*.dmg $OUTPUT
+	scp $OSX_USER@$OSX_IP:$OSX_PATH/*.dmg $OUTPUT
+    fi
+
+    if [ "k$1" = "kdoc" ]; then
+	cd build
+	cmake .
+	make latex
+	ver=`cat coopy_version.txt`
+	echo $ver
+	cd gendoc/latex
+	rm -f refman.dvi refman.ps refman.pdf
+	latex refman && latex refman && latex refman && dvips refman.dvi && ps2pdf refman.ps
+	cp -v refman.pdf $OUTPUT/coopy-$ver.pdf
     fi
 
     shift

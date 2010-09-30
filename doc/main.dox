@@ -15,12 +15,18 @@ The Coopy project contains programs and libraries to help you:
 Here are some tips on how to use these programs:
 
 \li \ref ssmerge "ssmerge usage".
+\if link_examples
 \li \ref merge_example.
+\endif
 \li \ref ssdiff "ssdiff usage".
+\if link_examples
 \li \ref diff_example.
+\endif
 \li \ref ssfossil reference.
 \li \ref coopy graphical interface reference.
+\if link_code
 \li <a href="annotated.html">Classes</a> used in implementation.
+\endif
 
 Code in the Coopy project is all free and open source (licensed under the GPL).
 The \ref ssmerge and \ref ssdiff programs currently make use of 
