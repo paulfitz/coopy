@@ -1,3 +1,4 @@
+#include <coopy/Dbg.h>
 #include <coopy/MergeOutputAccum.h>
 
 using namespace std;
@@ -7,6 +8,7 @@ using namespace coopy::cmp;
 bool MergeOutputAccum::addRow(const char *tag,
 			      const vector<string>& row,
 			      const string& blank) {
+  dbg_printf("ADDING ROW of len %d\n", (int)row.size());
   result.addField(tag);
   for (size_t i=0; i<row.size(); i++) {
     if (row[i]!=blank) {

@@ -156,6 +156,10 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
     }
   }
 
+  dbg_printf("row lens merge local remote %d %d %d\n",
+	     (int)expandMerge.size(), 
+	     (int)expandLocal.size(),
+	     (int)expandRemote.size());
 
   if (!diff) {
     if (conflict) {
@@ -456,6 +460,8 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	header.push_back(""); // local add
       } else if (rCol!=-1) {
 	header.push_back("[add]"); // remote add
+      } else {
+	header.push_back("[float]");
       }
     }
   }

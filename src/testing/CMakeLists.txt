@@ -273,6 +273,16 @@ ADD_TEST(basic_merge_typo_and_replace_column ${testprg}
   --diff
   --prop diffs --assert 0)
 
+ADD_TEST(basic_merge_unrelated ${testprg}
+  --parent --read ${TESTS}/blank.csv
+  --local --read ${TESTS}/trimmer_base.csv
+  --remote --read ${TESTS}/numbers.csv
+  --compare
+#  --local --write ${TESTS}/result_merge_unrelated.csv
+  --remote --read ${TESTS}/result_merge_unrelated.csv
+  --diff
+  --prop diffs --assert 0)
+
 #######################################################################
 #######################################################################
 
