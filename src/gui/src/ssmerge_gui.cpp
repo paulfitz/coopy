@@ -220,12 +220,12 @@ bool MergeFrame::OnInit() {
     for (int i=0; i<3; i++) {
         wxBoxSizer *fbar = new wxBoxSizer( wxHORIZONTAL );
         files[i] = new wxFilePickerCtrl(this,TEXT_Parent, wxT(""),
-                                        conv(tips[i]),
+                                        conv_c(tips[i]),
                                         wxT("*.*"),
                                         wxDefaultPosition,
                                         wxSize(400,-1),
                                         (i==3)?(wxFLP_SAVE|wxFLP_OVERWRITE_PROMPT):wxFLP_DEFAULT_STYLE|wxFLP_CHANGE_DIR);
-        fbar->Add(new wxStaticText(this,-1,conv(labels[i]),
+        fbar->Add(new wxStaticText(this,-1,conv_c(labels[i]),
                                    wxDefaultPosition,
                                    wxSize(150,-1)),lflags);
         fbar->Add(files[i],1,wxGROW|wxALIGN_CENTER_VERTICAL|wxALL);
