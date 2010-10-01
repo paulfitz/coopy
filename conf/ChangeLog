@@ -1,0 +1,5 @@
+2010-10-01  Paul Fitzpatrick  <paulfitz@alum.mit.edu>
+
+	* CoopyVersion.cmake: bump version to 0.3.3 (and start keeping a
+	ChangeLog)
+
