@@ -30,7 +30,7 @@ ELSEIF (WIN32)
   SET(CPACK_GENERATOR "TGZ")
 ENDIF (WIN32)
 
-SET(CPACK_PACKAGE_EXECUTABLES "coopy;coopy")
+SET(CPACK_PACKAGE_EXECUTABLES "coopy;coopy;ssmerge_gui;ssmerge_gui")
 SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin/coopy.exe")
 SET(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/src/gui/icon/appicon.ico")
 
