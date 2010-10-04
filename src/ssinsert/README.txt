@@ -1,6 +1,18 @@
 
-Requires a patch to gnumeric source, to allow for verbatim,
-uninterpreted import of CSV files.  See "patch" subdirectory.
+How to compile:
 
-Better solution: convince upstream that verbatim import is a
-worthwhile use-case :-)
+* Limitation: be on a Linux machine
+* Install gnumeric (ideally through your package manager)
+* Install gnumeric source (ideally through your package manager)
+* Run "./configure" on your gnumeric source, do anything it needs
+  you to do in order to get configured (e.g. installing extra -dev
+  packages).
+* In the "src" subdirectory of gnumeric source, do 
+  "make gnumeric-paths.h".  If having trouble, see next step.
+* You may need to take other steps to bring all header files into
+  existence.  If you're having trouble, just do "make" in the
+  gnumeric source directory.
+* When compiling Coopy, turn on "GNUMERIC" flag in ccmake/cmake-gui
+* Give path to Gnumeric source in "GNUMERIC_ROOT" in ccmake/cmake-gui
+
+
