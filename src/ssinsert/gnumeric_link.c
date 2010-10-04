@@ -67,9 +67,67 @@ int gnumeric_init() {
   return 0;
 }
 
+static WorkbookView *wbv = NULL;
+
+
 int gnumeric_fini() {
+  if (wbv!=NULL) {
+    g_object_unref (wb_view_workbook (wbv));
+  }
   g_object_unref (cc);
   gnm_shutdown ();
+}
+
+int gnumeric_load(const char *fname) {
+  IOContext *io_context = gnumeric_io_context_new (cc);
+  char *uri = go_filename_to_uri (fname);
+  printf("Have uri %s\n", uri);
+  wbv = wb_view_new_from_uri (uri, NULL,
+			      io_context, NULL);
+  g_free (uri);
+  printf("Have workbook view\n");
+  g_object_unref (io_context);
+  return 0;
+}
+
+int gnumeric_save(const char *fname) {
+  int res = 0;
+  GOFileSaver *fs = NULL;
+  fs = go_file_saver_for_file_name (fname);
+  if (fs == NULL) {
+    res = 2;
+    g_printerr (_("Unable to guess exporter to use for '%s'.\n"
+		  "Try --list-exporters to see a list of possibilities.\n"),
+		fname);
+    return 1;
+  }
+  g_print ("Using exporter %s\n",
+	   go_file_saver_get_id (fs));
+  if (go_file_saver_get_save_scope (fs) !=
+      FILE_SAVE_WORKBOOK) {
+    g_printerr (_("Selected exporter (%s) does not support saving multiple sheets in one file.\n"
+		  "Only the current sheet will be saved.\n"),
+		go_file_saver_get_id (fs));
+  }
+  char *outfile = go_filename_to_uri (fname);
+  res = !wb_view_save_as (wbv, fs, outfile, cc);
+  g_free (outfile);
+  return 0;
+}
+
+int gnumeric_overlay_csv(const char *start, const char *stop) {
+    printf("For testing, try pasting some data into workbook\n");
+    //Workbook *wb = wb_view_get_workbook (wbv);
+    Sheet *sheet = wb_view_cur_sheet (wbv);
+    if (sheet==NULL) { printf("no sheet!\n"); return 1; }
+    //char data[] = "42,fortytwo\n12,twelve\n";
+    //char *start = &data[0];
+    //char *stop = start+strlen(data);
+    StfParseOptions_t *options = stf_parse_options_guess(start);
+    stf_parse_sheet(options,start,stop,sheet,0,0);
+    stf_parse_options_free(options);
+    options = NULL;
+    return 0;
 }
 
 int gnumeric_convert (const char *in, const char *out) {
