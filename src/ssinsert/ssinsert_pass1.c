@@ -78,6 +78,18 @@ extern int hack_csv;
 extern void stf_cell_set_text (GnmCell *cell, char const *text);
 #endif
 
+//#define OLD_GNUMERIC
+
+#ifdef OLD_GNUMERIC
+#define GOIOContext IOContext
+#define GO_FILE_SAVE_WORKBOOK FILE_SAVE_WORKBOOK
+#define GOErrorInfo ErrorInfo
+#define GNM_VERSION_FULL GNUMERIC_VERSION
+#define go_get_file_savers get_file_savers
+#define go_get_file_openers get_file_openers
+//#define go_ IOContext
+#endif
+
 static const GOptionEntry ssconvert_options [] = {
 	{
 		"version", 'v',
@@ -190,29 +202,8 @@ static const GOptionEntry ssconvert_options [] = {
 	{ NULL }
 };
 
-static void
-setup_range (GObject *obj, const char *key, Workbook *wb, const char *rtxt)
-{
-	GnmParsePos pp;
-	const char *end;
-	GnmRangeRef rr;
 
-	pp.wb = wb;
-	pp.sheet = workbook_sheet_by_index (wb, 0);
-	pp.eval.col = 0;
-	pp.eval.row = 0;
-
-	end = rangeref_parse (&rr, rtxt, &pp, gnm_conventions_default);
-	if (!end || end == rtxt || *end != 0) {
-		g_printerr ("Invalid range specified.\n");
-		exit (1);
-	}
-
-	g_object_set_data_full (obj, key,
-				g_memdup (&rr, sizeof (rr)),
-				g_free);
-}
-
+#ifndef OLD_GNUMERIC
 static int
 handle_export_options (GOFileSaver *fs, GODoc *doc)
 {
@@ -244,7 +235,7 @@ handle_export_options (GOFileSaver *fs, GODoc *doc)
 		return 1;
 	}
 }
-
+#endif
 
 typedef GList *(*get_them_f)(void);
 typedef gchar const *(*get_desc_f)(void *);
@@ -404,7 +395,9 @@ merge_single (Workbook *wb, Workbook *wb2,
 		/* Remove sheet from incoming workbook */
 		Sheet *sheet = workbook_sheet_by_index (wb2, 0);
 		int loc = workbook_sheet_count (wb);
+#ifndef OLD_GNUMERIC
 		GOUndo *undo;
+#endif
 		char *sheet_name;
 		gboolean err;
 
@@ -415,9 +408,11 @@ merge_single (Workbook *wb, Workbook *wb2,
 		/* Fix names that reference the old workbook */
 		gnm_sheet_foreach_name (sheet, (GHFunc)cb_fixup_name_wb, wb);
 
+#ifndef OLD_GNUMERIC
 		undo = gnm_sheet_resize (sheet, cmax, rmax, cc, &err);
 		if (undo)
 			g_object_unref (undo);
+#endif
 
 		/* normal merge */
 		
@@ -561,69 +556,6 @@ overlay (Workbook *wb, char const *inputs[],
 	return FALSE;
 }
 
-static void
-run_solver (Sheet *sheet, WorkbookView *wbv)
-{
-	GnmSolverParameters *params = sheet->solver_parameters;
-	GError *err = NULL;
-	WorkbookControl *wbc;
-	GnmSolver *sol = NULL;
-
-	wbc = g_object_new (WORKBOOK_CONTROL_TYPE, NULL);
-	wb_control_set_view (wbc, wbv, NULL);
-
-	/* Pick a functional algorithm.  */
-	if (!gnm_solver_factory_functional (params->options.algorithm,
-					    NULL)) {
-		GSList *l;
-		for (l = gnm_solver_db_get (); l; l = l->next) {
-			GnmSolverFactory *factory = l->data;
-			if (params->options.model_type != factory->type)
-				continue;
-			if (gnm_solver_factory_functional (factory, NULL)) {
-				gnm_solver_param_set_algorithm (params,
-								factory);
-				break;
-			}
-		}
-	}
-
-	if (!gnm_solver_param_valid (params, &err))
-		goto done;
-
-	sol = params->options.algorithm
-		? gnm_solver_factory_create (params->options.algorithm, params)
-		: NULL;
-	if (!sol) {
-		g_set_error (&err, go_error_invalid (), 0,
-			     _("Failed to create solver"));
-		goto done;
-	}
-
-	if (!gnm_solver_start (sol, wbc, &err))
-		goto done;
-
-	while (!gnm_solver_finished (sol)) {
-		g_main_context_iteration (NULL, TRUE);
-	}
-
-	if (sol->status != GNM_SOLVER_STATUS_DONE) {
-		g_set_error (&err, go_error_invalid (), 0,
-			     _("Solver ran, but failed"));
-		goto done;
-	}
-
-	gnm_solver_store_result (sol);
-
- done:
-	if (sol)
-		g_object_unref (sol);
-	if (err) {
-		g_printerr (_("Solver: %s\n"), err->message);
-		g_error_free (err);
-	}
-}
-
 
 static int
 convert (char const *inarg, char const *outarg, char const *mergeargs[],
@@ -705,11 +637,13 @@ convert (char const *inarg, char const *outarg, char const *mergeargs[],
 			Workbook *wb = wb_view_get_workbook (wbv);
 			Sheet *sheet = wb_view_cur_sheet (wbv);
 
+#ifndef OLD_GNUMERIC
 			res = handle_export_options (fs, GO_DOC (wb));
 			if (res) {
 				g_object_unref (wb);
 				goto out;
 			}
+#endif
 
 			if (mergeargs!=NULL) {
 				if (merge (wb, mergeargs, fo, io_context, cc))
@@ -721,31 +655,6 @@ convert (char const *inarg, char const *outarg, char const *mergeargs[],
 					goto out;
 			}
 
-			if (ssconvert_goal_seek) {
-				int i;
-
-				for (i = 0; ssconvert_goal_seek[i]; i++) {
-					setup_range (G_OBJECT (sheet),
-						     "ssconvert-goal-seek",
-						     wb,
-						     ssconvert_goal_seek[i]);
-					dialog_goal_seek (NULL, sheet);
-				}
-			}
-
-			if (ssconvert_solve)
-				run_solver (sheet, wbv);
-
-			if (ssconvert_recalc)
-				workbook_recalc_all (wb);
-			else
-				workbook_recalc (wb);
-
-			if (ssconvert_range)
-				setup_range (G_OBJECT (wb),
-					     "ssconvert-range",
-					     wb,
-					     ssconvert_range);
 			else if (workbook_sheet_count (wb) > 1 &&
 				 go_file_saver_get_save_scope (fs) != GO_FILE_SAVE_WORKBOOK) {
 				if (ssconvert_one_file_per_sheet) {
@@ -793,7 +702,12 @@ main (int argc, char const **argv)
 	GError *error = NULL;
 
 	/* No code before here, we need to init threads */
+#ifdef OLD_GNUMERIC
+	gchar const **args = go_shell_argv_to_glib_encoding (argc, argv);
+	gnm_pre_parse_init (args[0]);
+#else
 	argv = gnm_pre_parse_init (argc, argv);
+#endif
 
 	ocontext = g_option_context_new (_("INFILE [OUTFILE]"));
 	g_option_context_add_main_entries (ocontext, ssconvert_options, GETTEXT_PACKAGE);
