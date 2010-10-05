@@ -23,7 +23,8 @@ These programs can help you:
   (see coopy).
 
 There are seeds of support for sqlite databases and Excel+OpenOffice,
-but they haven't ripened just yet.
+but they haven't ripened just yet.  Excel/OpenOffice support is via
+gnumeric.
 
 ssmerge
 -------

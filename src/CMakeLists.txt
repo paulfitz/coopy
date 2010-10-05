@@ -8,10 +8,12 @@ endif()
 
 add_subdirectory(libsheet_core)
 add_subdirectory(libcsv)
+add_subdirectory(libgnumeric)
 add_subdirectory(libsheet)
 set(SHEET_INCLUDE_DIRS 
   ${CMAKE_SOURCE_DIR}/src/libsheet_core/include 
   ${CMAKE_SOURCE_DIR}/src/libcsv 
+  ${CMAKE_SOURCE_DIR}/src/libgnumeric/include 
   ${CMAKE_SOURCE_DIR}/src/libsheet/include)
 
 add_subdirectory(ssmerge)

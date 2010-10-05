@@ -5,7 +5,7 @@
 
 namespace coopy {
   namespace store {
-    class PolyBook; 
+    class PolyBook;
   }
 }
 

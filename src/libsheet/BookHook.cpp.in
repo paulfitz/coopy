@@ -1,0 +1,25 @@
+
+#include <coopy/PolyBook.h>
+
+using namespace coopy::store;
+
+#cmakedefine GNUMERIC
+
+#ifdef GNUMERIC
+#include <coopy/GnumericTextBookFactory.h>
+#endif
+
+TextBook *readHelper(const char *fname,
+		     const char *ext,
+		     const char *data) {
+  TextBook *result = NULL;
+#ifdef GNUMERIC
+  GnumericTextBookFactory fact;
+  if (fact.check(fname,ext,data)) {
+    result = fact.load(fname);
+  }
+  if (result!=NULL) return result;
+#endif
+  return result;
+}
+

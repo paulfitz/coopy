@@ -4,7 +4,7 @@
 #include <coopy/CsvFile.h>
 
 extern "C" {
-#include "gnumeric_link.h"
+#include "coopy/gnumeric_link.h"
 }
 
 using namespace coopy::store;
@@ -21,15 +21,16 @@ int main(int argc, char *argv[]) {
   const char *target_name = argv[3];
 
   gnumeric_init();
-  gnumeric_load(template_name);
+  GnumericWorkbookPtr book = gnumeric_load(template_name);
   CsvSheet data;
   CsvFile::read(data_name,data);
   SheetStyle style;
   string sdata = data.encode(style);
   char *start = (char*)(sdata.c_str());
   char *stop = (char*)(start+sdata.length());
-  gnumeric_overlay_csv(start,stop);
-  gnumeric_save(target_name);
+  gnumeric_overlay_csv(book,start,stop);
+  gnumeric_save(book,target_name);
+  gnumeric_free(book);
   gnumeric_fini();
   return 0;
 }

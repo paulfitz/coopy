@@ -26,9 +26,8 @@
 #include <gsf/gsf-utils.h>
 #include <string.h>
 #include "stf-parse.h"
-#ifdef HAVE_SYS_RESOURCE_H
-#include <sys/resource.h>
-#endif
+
+#include "coopy/gnumeric_link.h"
 
 #ifndef GNM_VERSION_FULL
 #define OLD_GNUMERIC
@@ -41,20 +40,20 @@
 #define GNM_VERSION_FULL GNUMERIC_VERSION
 #define go_get_file_savers get_file_savers
 #define go_get_file_openers get_file_openers
-#define gnumeric_io_context_new go_io_context_new
-//#define go_ IOContext
+#define go_io_context_new gnumeric_io_context_new
+#define wb_view_get_workbook wb_view_workbook
 #endif
 
 static GOErrorInfo	*plugin_errs = NULL;
 static GOCmdContext	*cc = NULL;
-//GOptionContext *ocontext;
-//GError *error = NULL;
+static int gnumeric_init_ct = 0;
 
 int gnumeric_init() {
+  gnumeric_init_ct++;
+  if (gnumeric_init_ct>1) return 0;
   int		 res = 0;
   int argc = 1;
   char const *argv[] = { "gnumeric", NULL };
-	/* No code before here, we need to init threads */
 #ifdef OLD_GNUMERIC
 	gchar const **args = go_shell_argv_to_glib_encoding (argc, argv);
 	gnm_pre_parse_init (args[0]);
@@ -71,34 +70,39 @@ int gnumeric_init() {
   return 0;
 }
 
-static WorkbookView *wbv = NULL;
+//static WorkbookView *wbv = NULL;
 
 
 int gnumeric_fini() {
-  if (wbv!=NULL) {
-#ifdef OLD_GNUMERIC
-    g_object_unref (wb_view_workbook (wbv));
-#else
-    g_object_unref (wb_view_get_workbook (wbv));
-#endif
-  }
+  gnumeric_init_ct--;
+  if (gnumeric_init_ct>0) return 0;
   g_object_unref (cc);
   gnm_shutdown ();
 }
 
-int gnumeric_load(const char *fname) {
-  GOIOContext *io_context = go_io_context_new (cc);
-  char *uri = go_filename_to_uri (fname);
-  printf("Have uri %s\n", uri);
-  wbv = wb_view_new_from_uri (uri, NULL,
-			      io_context, NULL);
-  g_free (uri);
-  printf("Have workbook view\n");
-  g_object_unref (io_context);
+int gnumeric_free(GnumericWorkbookPtr workbook) {
+  WorkbookView *wbv = (WorkbookView *)workbook;
+  if (wbv!=NULL) {
+    g_object_unref (wb_view_get_workbook (wbv));
+  }
   return 0;
 }
 
-int gnumeric_save(const char *fname) {
+
+GnumericWorkbookPtr gnumeric_load(const char *fname) {
+  GOIOContext *io_context = go_io_context_new (cc);
+  char *uri = go_filename_to_uri (fname);
+  printf("Have uri %s\n", uri);
+  WorkbookView *wbv = wb_view_new_from_uri (uri, NULL,
+					    io_context, NULL);
+  g_free (uri);
+  printf("Have workbook view\n");
+  g_object_unref (io_context);
+  return wbv;
+}
+
+int gnumeric_save(GnumericWorkbookPtr workbook, const char *fname) {
+  WorkbookView *wbv = (WorkbookView *)workbook;
   int res = 0;
   GOFileSaver *fs = NULL;
   fs = go_file_saver_for_file_name (fname);
@@ -123,18 +127,24 @@ int gnumeric_save(const char *fname) {
   return 0;
 }
 
-int gnumeric_overlay_csv(const char *start, const char *stop) {
-    printf("For testing, try pasting some data into workbook\n");
-    //Workbook *wb = wb_view_get_workbook (wbv);
-    Sheet *sheet = wb_view_cur_sheet (wbv);
-    if (sheet==NULL) { printf("no sheet!\n"); return 1; }
-    //char data[] = "42,fortytwo\n12,twelve\n";
-    //char *start = &data[0];
-    //char *stop = start+strlen(data);
-    StfParseOptions_t *options = stf_parse_options_guess(start);
-    stf_parse_sheet(options,start,stop,sheet,0,0);
-    stf_parse_options_free(options);
-    options = NULL;
-    return 0;
+int gnumeric_overlay_csv(GnumericWorkbookPtr workbook,
+			 const char *start, const char *stop) {
+  WorkbookView *wbv = (WorkbookView *)workbook;
+  printf("For testing, try pasting some data into workbook\n");
+  //Workbook *wb = wb_view_get_workbook (wbv);
+  Sheet *sheet = wb_view_cur_sheet (wbv);
+  if (sheet==NULL) { printf("no sheet!\n"); return 1; }
+  StfParseOptions_t *options = stf_parse_options_guess(start);
+  stf_parse_sheet(options,start,stop,sheet,0,0);
+  stf_parse_options_free(options);
+  options = NULL;
+  return 0;
 }
 
+/*
+GnumericSheetPtr gnumeric_sheet(GnumericWorkbookPtr workbook, int index) {
+  WorkbookView *wbv = (WorkbookView *)workbook;
+  Sheet *sheet = workbook_sheet_by_index (wb_view_get_workbook (wbv), 0);
+  return sheet;
+}
+*/

@@ -10,6 +10,10 @@
 using namespace std;
 using namespace coopy::store;
 
+extern TextBook *readHelper(const char *fname,
+			    const char *ext,
+			    const char *data);
+
 bool PolyBook::read(const char *fname) {
   clear();
   string name = fname;
@@ -18,6 +22,8 @@ bool PolyBook::read(const char *fname) {
     for (size_t i=0; i<ext.length(); i++) {
       ext[i] = tolower(ext[i]);
     }
+    book = readHelper(fname,ext.c_str(),NULL);
+    if (book!=NULL) return true;
     if (ext==".db") {
       // try to load an sqlite book
     }
