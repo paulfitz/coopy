@@ -5,6 +5,8 @@ if [ ! -e CMakeCache.txt ]; then
     exit 1
 fi
 
+key="$1"
+
 SRC=`cat CMakeCache.txt | grep "coopy_SOURCE_DIR:" | sed "s/.*=//"`
 echo "SOURCE in $SRC"
 
@@ -49,15 +51,19 @@ EOF
     echo "* Generated $SRC/doc/generated_examples/${grp}_$name.dox"
 }
 
-function diff_apply {
+function diff_base_apply {
+    format="$1"
+    shift
     f1=$1
     f2=$2
     name=$3
+    echo $name > /tmp/_gen_name.txt
+    if grep -q "$key" /tmp/_gen_name.txt; then
     out=$OUT/diff_example_$name.txt
     (
 	echo "## SECTION command command"
 	echo "\verbatim"
-	echo " ssdiff $f1 $f2"
+	echo " ssdiff --format-$format $f1 $f2"
 	echo "\endverbatim"
 	echo "## LINK output \"output\""
 	echo "## LINK ref1 \"$f1\""
@@ -65,7 +71,7 @@ function diff_apply {
 	echo " "
 	echo "## SECTION output output"
 	echo "\verbatim"
-	$DIFF $TEST/$f1 $TEST/$f2
+	$DIFF --format-$format $TEST/$f1 $TEST/$f2
 	echo "\endverbatim"
 	echo " "
 	echo "## SECTION ref1 $f1"
@@ -80,6 +86,18 @@ function diff_apply {
     ) > $out
     echo "* Generated $out"
     dox diff_example $name "$name example for ssdiff"
+    else
+	echo "skipped $name"
+    fi
+}
+
+function diff_apply {
+    f1=$1
+    f2=$2
+    namer=$3
+    diff_base_apply human $f1 $f2 $namer
+    diff_base_apply csv $f1 $f2 ${namer}_csv
+    diff_base_apply raw $f1 $f2 ${namer}_raw
 }
 
 function merge_apply {
@@ -87,6 +105,8 @@ function merge_apply {
     f2=$2
     f3=$3
     name=$4
+    echo $name > /tmp/_gen_name.txt
+    if grep -q "$key" /tmp/_gen_name.txt; then
     out=$OUT/merge_example_$name.txt
     (
 	echo "## SECTION command command"
@@ -120,6 +140,9 @@ function merge_apply {
     ) > $out
     echo "* Generated $out"
     dox merge_example $name "$name example for ssmerge"
+    else
+	echo "skipped $name"
+    fi
 }
 
 diff_apply numbers.csv numbers_flip_column.csv move_column

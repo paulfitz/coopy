@@ -1,0 +1,79 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_insert_column_raw insert_column_raw example for ssdiff
+
+\section diff_example_insert_column_raw_command command
+\verbatim
+ ssdiff --format-raw numbers.csv numbers_wide.csv
+\endverbatim
+\li \ref diff_example_insert_column_raw_output "output"
+\li \ref diff_example_insert_column_raw_ref1 "numbers.csv"
+\li \ref diff_example_insert_column_raw_ref2 "numbers_wide.csv"
+ 
+\section diff_example_insert_column_raw_output output
+\verbatim
+setSheet [single]
+
+declareNames: [0] [1] (not final)
+
+changeColumn: insert
+     subject: 2
+ indexBefore: 0 1
+  indexAfter: 0 1 -3
+ namesBefore: [0] [1]
+  namesAfter: [0] [1] {2}
+
+changeColumn: insert
+     subject: 3
+ indexBefore: 0 1 -3
+  indexAfter: 0 1 -3 -4
+ namesBefore: [0] [1] {2}
+  namesAfter: [0] [1] {2} {3}
+
+declareNames: [0] [1] {2} {3} (final)
+
+changeRow: update
+    conds: [0]:one [1]:1
+     vals: {2}:un {3}:.
+
+changeRow: update
+    conds: [0]:two [1]:2
+     vals: {2}:deux {3}:..
+
+changeRow: update
+    conds: [0]:three [1]:3
+     vals: {2}:trois {3}:...
+
+changeRow: update
+    conds: [0]:four [1]:4
+     vals: {2}:quatre {3}:....
+
+changeRow: update
+    conds: [0]:five [1]:5
+     vals: {2}:cinq {3}:.....
+
+\endverbatim
+ 
+\section diff_example_insert_column_raw_ref1 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+ 
+\section diff_example_insert_column_raw_ref2 numbers_wide.csv
+\verbatim
+one,1,un,.
+two,2,deux,..
+three,3,trois,...
+four,4,quatre,....
+five,5,cinq,.....
+\endverbatim
+
+ *
+ */

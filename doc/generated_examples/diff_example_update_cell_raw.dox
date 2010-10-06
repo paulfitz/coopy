@@ -1,0 +1,49 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_update_cell_raw update_cell_raw example for ssdiff
+
+\section diff_example_update_cell_raw_command command
+\verbatim
+ ssdiff --format-raw numbers.csv numbers_change_five.csv
+\endverbatim
+\li \ref diff_example_update_cell_raw_output "output"
+\li \ref diff_example_update_cell_raw_ref1 "numbers.csv"
+\li \ref diff_example_update_cell_raw_ref2 "numbers_change_five.csv"
+ 
+\section diff_example_update_cell_raw_output output
+\verbatim
+setSheet [single]
+
+declareNames: [0] [1] (not final)
+
+declareNames: [0] [1] (final)
+
+changeRow: update
+    conds: [0]:five [1]:5
+     vals: [0]:fyffe
+
+\endverbatim
+ 
+\section diff_example_update_cell_raw_ref1 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+ 
+\section diff_example_update_cell_raw_ref2 numbers_change_five.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+fyffe,5
+\endverbatim
+
+ *
+ */

@@ -1,0 +1,43 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_delete_row_csv delete_row_csv example for ssdiff
+
+\section diff_example_delete_row_csv_command command
+\verbatim
+ ssdiff --format-csv numbers_add_row.csv numbers.csv
+\endverbatim
+\li \ref diff_example_delete_row_csv_output "output"
+\li \ref diff_example_delete_row_csv_ref1 "numbers_add_row.csv"
+\li \ref diff_example_delete_row_csv_ref2 "numbers.csv"
+ 
+\section diff_example_delete_row_csv_output output
+\verbatim
+[for],0,1,2
+[do],select,,
+[---],6,six,6
+\endverbatim
+ 
+\section diff_example_delete_row_csv_ref1 numbers_add_row.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+six,6
+\endverbatim
+ 
+\section diff_example_delete_row_csv_ref2 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+
+ *
+ */

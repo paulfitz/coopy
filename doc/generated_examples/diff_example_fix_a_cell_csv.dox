@@ -1,0 +1,43 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_fix_a_cell_csv fix_a_cell_csv example for ssdiff
+
+\section diff_example_fix_a_cell_csv_command command
+\verbatim
+ ssdiff --format-csv numbers_three_23.csv numbers.csv
+\endverbatim
+\li \ref diff_example_fix_a_cell_csv_output "output"
+\li \ref diff_example_fix_a_cell_csv_ref1 "numbers_three_23.csv"
+\li \ref diff_example_fix_a_cell_csv_ref2 "numbers.csv"
+ 
+\section diff_example_fix_a_cell_csv_output output
+\verbatim
+[for],0,1,2
+[do],select,,
+[-],3,,23
+[+],3,,3
+\endverbatim
+ 
+\section diff_example_fix_a_cell_csv_ref1 numbers_three_23.csv
+\verbatim
+one,1
+two,2
+three,23
+four,4
+five,5
+\endverbatim
+ 
+\section diff_example_fix_a_cell_csv_ref2 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+
+ *
+ */

@@ -1,0 +1,49 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_fix_a_cell_raw fix_a_cell_raw example for ssdiff
+
+\section diff_example_fix_a_cell_raw_command command
+\verbatim
+ ssdiff --format-raw numbers_three_23.csv numbers.csv
+\endverbatim
+\li \ref diff_example_fix_a_cell_raw_output "output"
+\li \ref diff_example_fix_a_cell_raw_ref1 "numbers_three_23.csv"
+\li \ref diff_example_fix_a_cell_raw_ref2 "numbers.csv"
+ 
+\section diff_example_fix_a_cell_raw_output output
+\verbatim
+setSheet [single]
+
+declareNames: [0] [1] (not final)
+
+declareNames: [0] [1] (final)
+
+changeRow: update
+    conds: [0]:three [1]:23
+     vals: [1]:3
+
+\endverbatim
+ 
+\section diff_example_fix_a_cell_raw_ref1 numbers_three_23.csv
+\verbatim
+one,1
+two,2
+three,23
+four,4
+five,5
+\endverbatim
+ 
+\section diff_example_fix_a_cell_raw_ref2 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+
+ *
+ */

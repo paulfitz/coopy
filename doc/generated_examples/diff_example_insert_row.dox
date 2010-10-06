@@ -7,7 +7,7 @@
 
 \section diff_example_insert_row_command command
 \verbatim
- ssdiff numbers.csv numbers_add_row.csv
+ ssdiff --format-human numbers.csv numbers_add_row.csv
 \endverbatim
 \li \ref diff_example_insert_row_output "output"
 \li \ref diff_example_insert_row_ref1 "numbers.csv"

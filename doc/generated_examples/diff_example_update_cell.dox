@@ -7,7 +7,7 @@
 
 \section diff_example_update_cell_command command
 \verbatim
- ssdiff numbers.csv numbers_change_five.csv
+ ssdiff --format-human numbers.csv numbers_change_five.csv
 \endverbatim
 \li \ref diff_example_update_cell_output "output"
 \li \ref diff_example_update_cell_ref1 "numbers.csv"
