@@ -18,11 +18,13 @@ private:
   int th, tw;
   bool valid;
   SheetStyle style;
+  bool strict;
 public:
 
   CsvSheet() {
     tw = th = 0;
     valid = true;
+    strict = true;
   }
 
   const SheetStyle& getStyle() {
@@ -31,6 +33,14 @@ public:
 
   void setStyle(const SheetStyle& style) {
     this->style = style;
+  }
+
+  bool setStrict(bool strict) {
+    this->strict = strict;
+  }
+
+  bool isStrict() {
+    return strict;
   }
 
   bool removeRow(int index) {
@@ -69,10 +79,10 @@ public:
   void addRecord() {
     arr.push_back(rec);
     rec.clear();
+    if (w!=tw && w!=0) {
+      valid = false;
+    }
     if (tw>w) {
-      if (w!=tw && w!=0) {
-	valid = false;
-      }
       w = tw;
     }
     tw = 0;
@@ -97,6 +107,14 @@ public:
 
   bool isValid() const {
     return valid;
+  }
+
+  virtual std::string cellString(int x, int y) const {
+    if (valid) { return cell(x,y); }
+    if (arr[y].size()>x) {
+      return cell(x,y);
+    }
+    return "";
   }
 };
 

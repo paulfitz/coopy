@@ -15,10 +15,12 @@
  
 \section diff_example_fix_a_cell_csv_output output
 \verbatim
-[for],0,1,2
-[do],select,,
-[-],3,,23
-[+],3,,3
+dtbl,csv,version,0.2,
+config,empty_tag,*,,
+config,row_tag,ROW,,
+column,name,ROW,[0],[1]
+row,select,*,three,23
+row,update,*,*,3
 \endverbatim
  
 \section diff_example_fix_a_cell_csv_ref1 numbers_three_23.csv

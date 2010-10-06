@@ -15,13 +15,22 @@
  
 \section diff_example_insert_column_csv_output output
 \verbatim
-[for],0,1,2,2+1,2+2
-[do],select,,,add,add
-[+],1,,,un,.
-[+],2,,,deux,..
-[+],3,,,trois,...
-[+],4,,,quatre,....
-[+],5,,,cinq,.....
+dtbl,csv,version,0.2,,,
+config,empty_tag,*,,,,
+config,row_tag,ROW,,,,
+column,name,ROW,[0],[1],,
+column,insert,ROW,[0],[1],{2},
+column,insert,ROW,[0],[1],{2},{3}
+row,select,*,one,1,*,*
+row,update,*,*,*,un,.
+row,select,*,two,2,*,*
+row,update,*,*,*,deux,..
+row,select,*,three,3,*,*
+row,update,*,*,*,trois,...
+row,select,*,four,4,*,*
+row,update,*,*,*,quatre,....
+row,select,*,five,5,*,*
+row,update,*,*,*,cinq,.....
 \endverbatim
  
 \section diff_example_insert_column_csv_ref1 numbers.csv

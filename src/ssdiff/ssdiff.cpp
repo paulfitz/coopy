@@ -7,6 +7,7 @@
 #include <coopy/MergeOutputSqlDiff.h>
 #include <coopy/MergeOutputHumanDiff.h>
 #include <coopy/MergeOutputVerboseDiff.h>
+#include <coopy/MergeOutputCsvDiff.h>
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
 
@@ -22,6 +23,7 @@ int main(int argc, char *argv[]) {
     int option_index = 0;
     static struct option long_options[] = {
       {"format-csv", 0, 0, 'c'},
+      {"format-csv-old", 0, 0, '0'},
       {"format-sql", 0, 0, 's'},
       {"format-human", 0, 0, 'h'},
       {"format-raw", 0, 0, 'r'},
@@ -37,6 +39,9 @@ int main(int argc, char *argv[]) {
     switch (c) {
     case 'c':
       mode = "csv";
+      break;
+    case '0':
+      mode = "csv0";
       break;
     case 's':
       mode = "sql";
@@ -74,6 +79,7 @@ int main(int argc, char *argv[]) {
     printf("  ssdiff [--output <filename>] [--parent parent.csv] reference.csv modified.csv\n");
     printf("  ssdiff --format-human local.csv modified.csv # human readable output\n");
     printf("  ssdiff --format-csv local.csv modified.csv   # format that sspatch can read\n");
+    printf("  ssdiff --format-csv-old local.csv modified.csv   # older format that sspatch can read\n");
     printf("  ssdiff --format-sql local.csv modified.csv   # not working yet\n");
     printf("  ssdiff --format-raw local.csv modified.csv   # full information\n");
     printf("Output defaults to standard output.\n");
@@ -119,7 +125,10 @@ int main(int argc, char *argv[]) {
   } else if (mode=="raw") {
     MergeOutputVerboseDiff verbosediff;
     cmp.compare(pivot,local,remote,verbosediff,flags);
-  } else {
+  } else if (mode=="csv") {
+    MergeOutputCsvDiff diff;
+    cmp.compare(pivot,local,remote,diff,flags);
+  } else if (mode=="csv0") {
     MergeOutputPatch patch;
     cmp.compare(pivot,local,remote,patch,flags);
     const CsvSheet& result = patch.get();
@@ -132,6 +141,9 @@ int main(int argc, char *argv[]) {
       std::string out = result.encode(style);
       printf("%s",out.c_str());
     }
+  } else {
+    fprintf(stderr,"Patch mode not recognized\n");
+    return 1;
   }
   return 0;
 }

@@ -15,9 +15,11 @@
  
 \section diff_example_delete_row_csv_output output
 \verbatim
-[for],0,1,2
-[do],select,,
-[---],6,six,6
+dtbl,csv,version,0.2,
+config,empty_tag,*,,
+config,row_tag,ROW,,
+column,name,ROW,[0],[1]
+row,delete,*,six,6
 \endverbatim
  
 \section diff_example_delete_row_csv_ref1 numbers_add_row.csv

@@ -1,4 +1,4 @@
-#include <coopy/MergeOutputHumanDiff.h>
+#include <coopy/MergeOutputCsvDiff.h>
 #include <coopy/SheetStyle.h>
 #include <coopy/DataSheet.h>
 
@@ -8,6 +8,7 @@
 #define WANT_MAP2STRING
 #define WANT_VECTOR2STRING
 #include <coopy/Stringer.h>
+#define ROW_COL "ROW"
 
 using namespace std;
 using namespace coopy::store;
@@ -120,39 +121,56 @@ static string cond(const vector<string>& names) {
   return c;
 }
 
-MergeOutputHumanDiff::MergeOutputHumanDiff() {
-  printf("dtbl: table difference format version 0.2, human-readable flavor\n");
-  printf("This format should be considered unstable until 1.0\n\n");
-  showed_initial_columns = false;
+MergeOutputCsvDiff::MergeOutputCsvDiff() {
+  result.setStrict(0);
+  result.addField("dtbl");
+  result.addField("csv");
+  result.addField("version");
+  result.addField("0.2");
+  result.addRecord();
+  result.addField("config");
+  result.addField("empty_tag");
+  result.addField("*");
+  result.addRecord();
+  result.addField("config");
+  result.addField("row_tag");
+  result.addField(ROW_COL);
+  result.addRecord();
 }
 
-bool MergeOutputHumanDiff::mergeDone() {
-  checkMessage();
+bool MergeOutputCsvDiff::mergeDone() {
+  SheetStyle style;
+  printf("%s",result.encode(style).c_str());
 }
 
-bool MergeOutputHumanDiff::changeColumn(const OrderChange& change) {
-  checkMessage();
-  //printf("Got order change %s -> %s\n",
-  //vector2string(change.namesBefore).c_str(),
-  //vector2string(change.namesAfter).c_str());
+bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
-    printf("delete column: %s\n  before %s\n  after  %s\n\n", 
-	   change.namesBefore[change.subject].c_str(),
-	   vector2string(change.namesBefore).c_str(),
-	   vector2string(change.namesAfter).c_str());
+    result.addField("column");
+    result.addField("delete");
+    result.addField(ROW_COL);
+    for (int i=0; i<(int)change.namesAfter.size(); i++) {
+      result.addField(change.namesAfter[i].c_str());
+    }
+    result.addRecord();
     break;
   case ORDER_CHANGE_INSERT:
-    printf("insert column: %s\n  before %s\n  after  %s\n\n", 
-	   change.namesAfter[change.subject].c_str(),
-	   vector2string(change.namesBefore).c_str(),
-	   vector2string(change.namesAfter).c_str());
+    result.addField("column");
+    result.addField("insert");
+    result.addField(ROW_COL);
+    for (int i=0; i<(int)change.namesAfter.size(); i++) {
+      result.addField(change.namesAfter[i].c_str());
+    }
+    result.addRecord();
     break;
   case ORDER_CHANGE_MOVE:
-    printf("move column: %s\n  before %s\n  after  %s\n\n", 
-	   change.namesBefore[change.subject].c_str(),
-	   vector2string(change.namesBefore).c_str(),
-	   vector2string(change.namesAfter).c_str());
+    result.addField("column");
+    result.addField("move");
+    result.addField(ROW_COL);
+    for (int i=0; i<(int)change.namesAfter.size(); i++) {
+      result.addField(change.namesAfter[i].c_str());
+    }
+    result.addRecord();
     break;
   default:
     printf("  Unknown column operation\n\n");
@@ -162,24 +180,49 @@ bool MergeOutputHumanDiff::changeColumn(const OrderChange& change) {
   return true;
 }
 
-bool MergeOutputHumanDiff::changeRow(const RowChange& change) {
-  checkMessage();
-  //printf("Got row change %s ==> %s\n",
-  // map2string(change.cond).c_str(),
-  // map2string(change.val).c_str());
+bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
+  result.addField("row");
+  result.addField(tag);
+  result.addField("*");
+  for (int i=0; i<(int)change.names.size(); i++) {
+    string name = change.names[i];
+    if (change.cond.find(name)!=change.cond.end()) {
+      result.addField(change.cond.find(name)->second.c_str());
+    } else {
+      result.addField("*");
+    }
+  }
+  result.addRecord();
+  return true;
+}
+
+bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag) {
+  result.addField("row");
+  result.addField(tag);
+  result.addField("*");
+  for (int i=0; i<(int)change.names.size(); i++) {
+    string name = change.names[i];
+    if (change.val.find(name)!=change.val.end()) {
+      result.addField(change.val.find(name)->second.c_str());
+    } else {
+      result.addField("*");
+    }
+  }
+  result.addRecord();
+  return true;
+}
+
+bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
-    printf("insert row:\n%s\n\n",
-	   cond(change.names,change.val,"add","where").c_str());
+    describeRow(change,"insert");
     break;
   case ROW_CHANGE_DELETE:
-    printf("delete row:\n%s\n\n",
-	   cond(change.names,change.cond,"remove","where").c_str());
+    selectRow(change,"delete");
     break;
   case ROW_CHANGE_UPDATE:
-    printf("update row:\n  where %s\n  set   %s\n\n",
-	   cond(change.names,change.cond,change.val,false).c_str(),
-	   cond(change.names,change.cond,change.val,true).c_str());
+    selectRow(change,"select");
+    describeRow(change,"update");
     break;
   default:
     printf("  Unknown row operation\n\n");
@@ -190,29 +233,17 @@ bool MergeOutputHumanDiff::changeRow(const RowChange& change) {
 }
 
 
-bool MergeOutputHumanDiff::declareNames(const vector<string>& names, 
+bool MergeOutputCsvDiff::declareNames(const vector<string>& names, 
 					  bool final) {
-  string tag = "original ";
-  string now = "";
-  if (final) {
-    tag = "";
-    if (showed_initial_columns&&pending_message=="") {
-      now = " now";
+  if (!final) {
+    result.addField("column");
+    result.addField("name");
+    result.addField(ROW_COL);
+    for (int i=0; i<(int)names.size(); i++) {
+      result.addField(names[i].c_str());
     }
-  } else {
-    showed_initial_columns = true;
+    result.addRecord();
   }
-  string result = tag+"column names are"+now+": "+cond(names);
-  pending_message = result;
   return true;
 }
-
-
-void MergeOutputHumanDiff::checkMessage() {
-  if (pending_message!="") {
-    printf("%s\n\n", pending_message.c_str());
-    pending_message = "";
-  }
-}
-
 

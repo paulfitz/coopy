@@ -1,83 +1,13 @@
 #ifndef COOPY_MERGEOUTPUT
 #define COOPY_MERGEOUTPUT
 
-#include <string>
-#include <vector>
-#include <map>
+#include <coopy/Patcher.h>
 
 namespace coopy {
   namespace cmp {
-    class OrderChange;
-    class RowChange;
     class MergeOutput;
-
-    enum {
-      ORDER_CHANGE_NONE,
-      ORDER_CHANGE_DELETE,
-      ORDER_CHANGE_INSERT,
-      ORDER_CHANGE_MOVE,
-    };
-    
-    enum {
-      ROW_CHANGE_NONE,
-      ROW_CHANGE_DELETE,
-      ROW_CHANGE_INSERT,
-      ROW_CHANGE_UPDATE,
-    };
   }
 }
-
-class coopy::cmp::OrderChange {
-public:
-  // local-to-global mapping before and after change
-  std::vector<int> indicesBefore;
-  std::vector<std::string> namesBefore;
-  std::vector<int> indicesAfter;
-  std::vector<std::string> namesAfter;
-
-  int subject; // subject in local coords
-
-  int mode;
-
-  std::string modeString() const {
-    switch (mode) {
-    case ORDER_CHANGE_NONE:
-      return "none";
-    case ORDER_CHANGE_DELETE:
-      return "delete";
-    case ORDER_CHANGE_INSERT:
-      return "insert";
-    case ORDER_CHANGE_MOVE:
-      return "move";
-    }
-    return "unknown";
-  }
-};
-
-
-class coopy::cmp::RowChange {
-public:
-  int mode;
-  std::map<std::string,std::string> cond;
-  std::map<std::string,std::string> val;
-  std::vector<std::string> names;
-
-  std::string modeString() const {
-    switch (mode) {
-    case ROW_CHANGE_NONE:
-      return "none";
-    case ROW_CHANGE_DELETE:
-      return "delete";
-    case ROW_CHANGE_INSERT:
-      return "insert";
-    case ROW_CHANGE_UPDATE:
-      return "update";
-      //case ROW_CHANGE_MOVE:
-      //return "move";
-    }
-    return "unknown";
-  }
-};
 
 /**
  *
@@ -86,7 +16,7 @@ public:
  * can be ignored if not relevant to the description being generated.
  *
  */
-class coopy::cmp::MergeOutput {
+class coopy::cmp::MergeOutput : public Patcher {
 private:
   int ct;
 public:

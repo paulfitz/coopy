@@ -15,8 +15,11 @@
  
 \section diff_example_move_column_csv_output output
 \verbatim
-[for],0,2,1
-[do],select,,
+dtbl,csv,version,0.2,
+config,empty_tag,*,,
+config,row_tag,ROW,,
+column,name,ROW,[0],[1]
+column,move,ROW,[1],[0]
 \endverbatim
  
 \section diff_example_move_column_csv_ref1 numbers.csv
