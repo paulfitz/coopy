@@ -37,9 +37,17 @@ public:
   std::vector<int> indicesAfter;
   std::vector<std::string> namesAfter;
 
-  int subject; // subject in local coords
+  int subject; // subject in local (prior-to-action) coords
+  int object; // object in local (prior-to-action) coords
 
   int mode;
+
+  int identityToIndex(int id) const;
+
+  OrderChange() {
+    subject = object = -1;
+    mode = -1;
+  }
 
   std::string modeString() const {
     switch (mode) {

@@ -1,0 +1,31 @@
+#ifndef COOPY_FORMAT_INC
+#define COOPY_FORMAT_INC
+
+#include <string>
+
+namespace coopy {
+  namespace format {
+    class Format;
+
+    enum {
+      FORMAT_UNKNOWN,
+      FORMAT_PATCH_CSV,
+      FORMAT_PATCH_HUMAN,
+    };
+  }
+}
+
+
+class coopy::format::Format {
+public:
+  int id;
+  std::string name;
+  
+  Format() {
+    id = FORMAT_UNKNOWN;
+    name = "unknown";
+  }
+};
+
+#endif
+

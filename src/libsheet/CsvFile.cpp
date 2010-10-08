@@ -22,6 +22,39 @@ extern "C" void csvfile_merge_cb2 (int c, void *p) {
   ((CsvSheet*)p)->addRecord();
 }
 
+int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest) {
+  string cache = "";
+  struct csv_parser p;
+  if (csv_init(&p,0)!=0) {
+    fprintf(stderr,"csv failed to initialize\n");
+    exit(1);
+  }
+  SheetStyle style;
+  dest.clear();
+  dest.setStyle(style);
+  csv_set_delim(&p,style.getDelimiter()[0]);
+
+  do {
+    cache = reader.read();
+    if (cache!="") {
+      if (csv_parse(&p,
+		    cache.c_str(),
+		    cache.length(),
+		    csvfile_merge_cb1,
+		    csvfile_merge_cb2,
+		    (void*)(&dest)) != cache.length()) {
+	fprintf(stderr,"error parsing standard input\n");
+	exit(1);
+      }
+    }
+  } while (cache!="");
+  csv_fini(&p,
+	   csvfile_merge_cb1,
+	   csvfile_merge_cb2,
+	   (void*)(&dest));
+  csv_free(&p);
+  return 0;
+}
 
 int CsvFile::read(const char *src, CsvSheet& dest) {
   FILE *fp;

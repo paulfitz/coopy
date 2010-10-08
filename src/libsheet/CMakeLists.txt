@@ -15,7 +15,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/BookHook.cpp.in ${BOOK_HOOK}
                 IMMEDIATE)
 
 ADD_LIBRARY(sheet include/coopy/CsvFile.h CsvFile.cpp ${SQLITE_DIR}/sqlite3.c
-  SqliteTextBook.cpp PolyBook.cpp ${BOOK_HOOK})
+  SqliteTextBook.cpp PolyBook.cpp PatchParser.cpp ${BOOK_HOOK})
 TARGET_LINK_LIBRARIES(sheet sheet_core csv)
 if (GNUMERIC)
   TARGET_LINK_LIBRARIES(sheet gnumeric)

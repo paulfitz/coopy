@@ -381,11 +381,13 @@ void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	  exit(1);
 	}
 	change.subject = *it;
+	change.object = *it2;
 	int idx = it-local_cols.begin();
 	int idx2 = it2-shuffled_cols.begin();
 	change.mode = ORDER_CHANGE_MOVE;
 	local_cols.erase(it);
 	string name = local_col_names[idx];
+	change.object = *it2;
 	local_col_names.erase(local_col_names.begin()+idx);
 	local_cols.insert(local_cols.begin()+idx2,a);
 	local_col_names.insert(local_col_names.begin()+idx2,name);
