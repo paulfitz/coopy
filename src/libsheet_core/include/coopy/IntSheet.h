@@ -13,10 +13,14 @@ namespace coopy {
 
 class coopy::store::IntSheet : public TypedSheet<int> {
 public:
-  virtual std::string cellString(int x, int y) const {
+  static std::string int2string(int v) {
     char buf[256];
-    snprintf(buf,sizeof(buf),"%d",cell(x,y));
+    snprintf(buf,sizeof(buf),"%d",v);
     return buf;
+  }
+
+  virtual std::string cellString(int x, int y) const {
+    return int2string(cell(x,y));
   }
 };
 

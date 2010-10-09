@@ -12,6 +12,7 @@
 #include <coopy/CsvPatch.h>
 #include <coopy/MergeOutputAccum.h>
 #include <coopy/MergeOutputPatch.h>
+#include <coopy/MergeOutputCsvDiff.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -136,13 +137,15 @@ int main(int argc, char *argv[]) {
       {
 	diffs = 0;
 	printf("Check if remote and local are similar\n");
+	printf("remote %d %d\n", remote.width(), remote.height());
+	printf("local %d %d\n", local.width(), local.height());
 	if (remote.width()!=local.width() ||
 	    remote.height()!=local.height()) {
 	  diffs = 1000;
 	} else {
 	  for (int x=0; x<remote.width(); x++) {
 	    for (int y=0; y<remote.height(); y++) {
-	      if (remote.cell(x,y)!=local.cell(x,y)) {
+	      if (remote.cellString(x,y)!=local.cellString(x,y)) {
 		diffs++;
 	      }
 	    }
@@ -161,10 +164,10 @@ int main(int argc, char *argv[]) {
       break;
     case 'c':
       {
-	bool diffMode = false;
+	std::string diffMode = "";
 	if (optarg) {
-	  diffMode = (atoi(optarg)!=0);
-	  printf("Diff mode is %d\n", diffMode);
+	  diffMode = optarg;
+	  printf("Diff mode is [%s]\n", diffMode.c_str());
 	}
 	if (parented) {
 	  printf("Three way compare...\n");
@@ -177,10 +180,16 @@ int main(int argc, char *argv[]) {
 	  parent = local;
 	}
 	CompareFlags flags;
-	if (diffMode) {
-	  MergeOutputPatch output;
-	  cmp.compare(parent,local,remote,output,flags);
-	  local = output.get();
+	if (diffMode!="") {
+	  if (diffMode=="csv") {
+	    MergeOutputCsvDiff output;
+	    cmp.compare(parent,local,remote,output,flags);
+	    local = output.get();
+	  } else {
+	    MergeOutputPatch output;
+	    cmp.compare(parent,local,remote,output,flags);
+	    local = output.get();
+	  }
 	} else {
 	  MergeOutputAccum output;
 	  cmp.compare(parent,local,remote,output,flags);

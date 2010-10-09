@@ -196,7 +196,7 @@ bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
   return true;
 }
 
-bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag) {
+bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
   result.addField("row");
   result.addField(tag);
   result.addField("*");

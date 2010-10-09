@@ -27,7 +27,7 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
   string blank = "__NOT_SET__CSVCOMPARE_SSFOSSIL";
   vector<string> expandLocal, expandRemote, expandPivot, expandMerge;
   vector<int> expandDel;
-  map<string,string> cond, value;
+  map<string,string> cond, value, value0;
   vector<string> address;
   vector<string> action;
   int lastCol = -1;

@@ -11,20 +11,24 @@
 namespace coopy {
   namespace cmp {
     typedef std::string Feature;
-    class FMap;
+    template <class FVal> class FPolyMap;
+    typedef FPolyMap<FSingleVal> FMap;
+    typedef FPolyMap<FMultiVal> FMultiMap;
   }
 }
 
 
-class coopy::cmp::FMap {
+template <class FVal>
+class coopy::cmp::FPolyMap {
 public:
+  typedef efficient_map<Feature,FVal> Cache;
   int ct;
   int xcurr, ycurr;
-  efficient_map<Feature,FVal> f;
+  Cache f;
   coopy::store::SparseFloatSheet& rowMatch;
   bool query;
 
-  FMap(coopy::store::SparseFloatSheet& sheet) : rowMatch(sheet) {
+  FPolyMap(coopy::store::SparseFloatSheet& sheet) : rowMatch(sheet) {
     query = false;
     ct = 0;
   }
@@ -46,6 +50,7 @@ public:
   }
 
   void queryBit(std::string txt) {
+    /*
     if (f.find(txt)==f.end()) {
       // miss!
     } else {
@@ -53,6 +58,11 @@ public:
       if (val.index>=0) {
 	rowMatch.cell(val.index,ycurr)++;
       }
+    }
+    */
+    typename Cache::iterator it = f.find(txt);
+    if (it!=f.end()) {
+      it->second.apply(rowMatch,ycurr);
     }
     ct++;
     summarize();

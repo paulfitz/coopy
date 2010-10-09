@@ -17,6 +17,7 @@ using namespace coopy::cmp;
 namespace coopy {
   namespace cmp {
     class FastMatch;
+    class RedundancyMatch;
   }
 }
 
@@ -51,6 +52,47 @@ public:
     }
   }
 };
+
+/*
+class coopy::cmp::RedundancyMatch {
+public:
+  MeasurePass& pass;
+
+  RedundancyMatch(MeasurePass& pass) : pass(pass) {
+  }
+
+  void match(bool rowLike) {
+    // IN
+    // pass.a.width / pass.a.height / pass.a.cell(x,y) 
+    // pass.b.width / pass.b.height / pass.b.cell(x,y)
+    // OUT
+    // pass.asel.cell(0,q) = r
+    // pass.bsel.cell(0,r) = q
+   
+    // add matches for easy cases here
+    if (pass.a.width()==pass.b.width() &&
+	pass.a.height()==pass.b.height()) {
+      bool fail = false;
+      for (int r=0; r<pass.a.height() && !fail; r++) {
+	for (int c=0; c<pass.a.width(); c++) {
+	  if (pass.a.cell(c,r)!=pass.b.cell(c,r)) {
+	    fail = true;
+	    break;
+	  }
+	}
+      }
+      if (!fail) {
+	// sheets are identical!
+	dbg_printf("MATCH!\n");
+	for (int i=0; i<pass.asel.height(); i++) {
+	  pass.asel.cell(0,i) = i;
+	  pass.bsel.cell(0,i) = i;
+	}
+      }
+    }
+  }
+};
+*/
 
 int SheetCompare::compare(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 			  MergeOutput& output, const CompareFlags& flags) {

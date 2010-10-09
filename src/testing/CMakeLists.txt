@@ -286,6 +286,35 @@ ADD_TEST(basic_merge_unrelated ${testprg}
 #######################################################################
 #######################################################################
 
+# Basic CSV tests
+
+ADD_TEST(csv_check_blanks ${testprg}
+  --local --read ${TESTS}/csv_empty_cell.csv
+  --remote --read ${TESTS}/csv_empty_cell_variant.csv
+  --diff
+  --prop diffs --assert 0)
+
+#######################################################################
+#######################################################################
+
+# Test for some sensible behavior in face of redundancy
+
+IF (FALSE)
+ADD_TEST(redundant_numbers ${testprg}
+  --parent --read ${TESTS}/numbers_dup.csv
+  --local --read ${TESTS}/numbers_dup.csv
+  --remote --read ${TESTS}/numbers_dup_five.csv
+  --compare=csv
+  --local --write ${TESTS}/result_redundant_numbers.csv
+  --remote --read ${TESTS}/result_redundant_numbers.csv
+  --diff
+  --prop diffs --assert 0)
+ENDIF()
+
+
+#######################################################################
+#######################################################################
+
 MACRO(ADD_TEST2 name ref target)
   ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
     --output test_out_${name}

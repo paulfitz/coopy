@@ -11,6 +11,7 @@ namespace coopy {
   namespace store {
     template <class T> class SparseSheet;
     class SparseFloatSheet;
+    class SparseIntSheet;
   }
 }
 
@@ -78,6 +79,8 @@ public:
 
 class coopy::store::SparseFloatSheet : public SparseSheet<float> {
 public:
+  using SparseSheet<float>::resize;
+
   virtual std::string cellString(int x, int y) const {
     char buf[256];
     const float& v = cell(x,y);
@@ -94,7 +97,42 @@ public:
   }
 
   void findBest(IntSheet& bestIndex, FloatSheet& bestValue, FloatSheet& bestInc);
+
+  void resize(int w, int h) {
+    float zero = 0;
+    resize(w,h,zero);
+  }
+
+  const float& operator()(int x, int y) const {
+    return cell(x,y);
+  }
+
+  float& operator()(int x, int y) {
+    return cell(x,y);
+  }
 };
 
+class coopy::store::SparseIntSheet : public SparseSheet<int> {
+public:
+  using SparseSheet<int>::resize;
+
+  virtual std::string cellString(int x, int y) const {
+    const int& v = cell(x,y);
+    return IntSheet::int2string(v);
+  }
+
+  void resize(int w, int h) {
+    int zero = 0;
+    resize(w,h,zero);
+  }
+
+  const int& operator()(int x, int y) const {
+    return cell(x,y);
+  }
+
+  int& operator()(int x, int y) {
+    return cell(x,y);
+  }
+};
 
 #endif

@@ -19,7 +19,7 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
     for (int rb=0; rb<hb; rb+=step) {
       int ra = comp.b2a(rb);
       if (ra!=-1) {
-	FMap m(pass.match);
+	FMultiMap m(pass.match);
 	int c = m.getCtrlMax();
 	//m.resize(wa,wb);
 	for (int i=0; i<wa; i++) {
