@@ -7,6 +7,8 @@
 #include <coopy/FloatSheet.h>
 #include <coopy/Stat.h>
 
+#include <set>
+
 namespace coopy {
   namespace store {
     template <class T> class SparseSheet;
@@ -17,10 +19,13 @@ namespace coopy {
 
 template <class T>
 class coopy::store::SparseSheet : public DataSheet {
+ private:
+  std::set<int> empty_set;
+  T zero;
 public:
   efficient_map<long long,T> data;
+  efficient_map<long, std::set<int> > row;
   int h, w;
-  T zero;
 
   SparseSheet() {
     h = w = 0;
@@ -29,6 +34,7 @@ public:
 
   const SparseSheet& operator = (const SparseSheet& alt) {
     data = alt.data;
+    row = alt.row;
     h = alt.h;
     w = alt.w;
     zero = alt.zero;
@@ -37,6 +43,7 @@ public:
 
   void resize(int w, int h, const T& zero) {
     data.clear();
+    row.clear();
     this->zero = zero;
     this->h = h;
     this->w = w;
@@ -70,10 +77,19 @@ public:
     typename efficient_map<long long,T>::iterator it = data.find(((long long)y)*w+x);
     if (it==data.end()) {
       T& result = data[((long long)y)*w+x];
+      row[y].insert(x);
       result = zero;
       return result;
     }
     return it->second;
+  }
+
+  const std::set<int>& getCellsOnRow(int y) const {
+    std::set<int>::const_iterator it = row.find(y);
+    if (it==data.end()) {
+      return empty_set;
+    }
+    return *it;
   }
 };
 

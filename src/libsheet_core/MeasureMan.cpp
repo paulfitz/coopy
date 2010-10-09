@@ -69,13 +69,11 @@ void MeasureMan::compare1(int ctrl) {
   main.measure(main_pass,ctrl);
   anorm_pass.asel = main_pass.asel;
   anorm_pass.bsel = main_pass.asel;
-  //anorm_pass.bound = 40;  // bounds do not work yet
   anorm.measure(anorm_pass,ctrl);
   dbg_printf("Checking [local] statistics\n");
   astat = anorm_pass.flatten();
   bnorm_pass.asel = main_pass.bsel;
   bnorm_pass.bsel = main_pass.bsel;
-  //bnorm_pass.bound = 40;  // bounds do not work yet  
   bnorm.measure(bnorm_pass,ctrl);
   dbg_printf("Checking [remote] statistics\n");
   bstat = bnorm_pass.flatten();
@@ -102,24 +100,10 @@ void MeasureMan::compare1(int ctrl) {
   dbg_printf("Done find best\n");
 
   for (int y=0; y<match.height(); y++) {
-    //dbg_printf("at %d / %d\n", y, match.height());
     if (bsel.cell(0,y)==-1) {
       int bestIndex = bestIndices.cell(0,y);
       double bestValue = bestValues.cell(0,y);
       double bestInc = bestIncs.cell(0,y);
-      /*
-      int bestIndex = -1;
-      double bestValue = 0;
-      double bestInc = 0;
-      for (int x=0; x<match.width(); x++) {
-	const double& val = match.cell_const(x,y);
-	if (val>bestValue) {
-	  bestIndex = x;
-	  bestInc = val - bestValue;
-	  bestValue = val;
-	}
-      }
-      */
       double ref = bnorm_pass.match.cell(0,y);
       bool ok = false;
       if (bestValue>ref/4) {
