@@ -3,6 +3,8 @@
 #include <coopy/CsvFile.h>
 #include <coopy/Format.h>
 
+#include <stdio.h>
+
 using namespace coopy::cmp;
 using namespace coopy::format;
 using namespace coopy::store;

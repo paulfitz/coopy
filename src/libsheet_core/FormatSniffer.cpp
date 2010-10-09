@@ -1,6 +1,7 @@
 #include <coopy/FormatSniffer.h>
 
 #include <stdio.h>
+#include <string.h>
 
 using namespace std;
 using namespace coopy::format;

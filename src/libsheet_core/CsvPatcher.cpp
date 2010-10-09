@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <stdio.h>
+
 using namespace std;
 using namespace coopy::cmp;
 using namespace coopy::store;
