@@ -1,6 +1,5 @@
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/impl_include)
 
 # need hash_map or unordered_map or something for efficient hashing.
 # hash_map is deprecated under newer gcc versions.

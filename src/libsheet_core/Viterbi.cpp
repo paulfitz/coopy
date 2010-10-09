@@ -11,8 +11,8 @@ void Viterbi::setSize(int states, int sequence_length) {
   K = states;
   T = sequence_length;
   cost.resize(K,T);
-  src.resize(K,T);
-  path.resize(1,T);
+  src.resize(K,T,-1);
+  path.resize(1,T,-1);
   reset();
 }
 
@@ -30,12 +30,18 @@ void Viterbi::assertMode(int n_mode) {
       if (mode==0)
 	{
 	  assert(index<T);
-	  //cout << "Reset for index=" << index << endl;
+
+	  // Zeroing is now implicit.
+	  // The absence of a cell(x,y) should imply:
+	  //   cost(x,y) = 0
+	  //   src(x,y)  = -1
+	  /*
 	  for (int i=0; i<K; i++)
 	    {
 	      cost(i,index) = 0;
 	      src(i,index) = -1;
 	    }
+	  */
 	}
       mode = 1;
       break;

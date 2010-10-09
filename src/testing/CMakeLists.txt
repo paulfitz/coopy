@@ -1,8 +1,14 @@
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
 
-# This is a utility primarily for testing
 ADD_EXECUTABLE(test_sheet test_sheet.cpp)
 TARGET_LINK_LIBRARIES(test_sheet sheet)
+
+# need hash_map or unordered_map or something for efficient hashing.
+# hash_map is deprecated under newer gcc versions.
+ADD_DEFINITIONS(-Wno-deprecated)
+
+ADD_EXECUTABLE(test_viterbi test_viterbi.cpp)
+TARGET_LINK_LIBRARIES(test_viterbi sheet)
 
 ADD_EXECUTABLE(make_sheet make_sheet.cpp)
 TARGET_LINK_LIBRARIES(make_sheet sheet)
@@ -16,6 +22,7 @@ ELSE ()
   SET(EXE_EXT "")
 ENDIF()
 SET(testprg ${EXECUTABLE_OUTPUT_PATH}/test_sheet${EXE_EXT})
+SET(testprg_viterbi ${EXECUTABLE_OUTPUT_PATH}/test_viterbi${EXE_EXT})
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -311,6 +318,12 @@ ADD_TEST(redundant_numbers ${testprg}
   --prop diffs --assert 0)
 ENDIF()
 
+#######################################################################
+#######################################################################
+
+# Basic viterbi check
+
+ADD_TEST(viterbi_check ${testprg_viterbi})
 
 #######################################################################
 #######################################################################
