@@ -38,6 +38,38 @@ public:
     return vector2string(lst);
   }
 
+  string inferInsert(const PatchColumnNames& prior,
+		     int *dest) {
+    COOPY_ASSERT(lst.size()==prior.lst.size()+1);
+    int i;
+    for (i=0; i<(int)prior.lst.size(); i++) {
+      if (lst[i]!=prior.lst[i]) {
+	break;
+      }
+    }
+    // the inserted element is named by lst[i]
+    string mover = lst[i];
+    indices = prior.indices;
+    int subject = i;
+    if (subject>=prior.lst.size()) {
+      subject = -1;
+    }
+    int neg = 0;
+    for (int j=0; j<(int)indices.size(); j++) {
+      if (indices[j]<neg) {
+	neg = indices[j];
+      }
+    }
+    neg--;
+    if (subject>=0) {
+      indices.insert(indices.begin()+subject,neg);
+    } else {
+      indices.push_back(neg);
+    }
+    if (dest!=NULL) *dest = subject;
+    return mover;
+  }
+
   string inferMove(const PatchColumnNames& prior,
 		   int *src,
 		   int *dest) {
@@ -117,12 +149,11 @@ bool PatchParser::apply() {
       string val = patch.cell(2,i);
       dbg_printf("Set config variable %s -> %s\n", key.c_str(), val.c_str());
     } else if (cmd0=="column") {
+      PatchColumnNames names2;
+      names2.read(patch,3,i);
       if (cmd1=="name") {
-	names.read(patch,3,i);
-	dbg_printf("Set column names to %s\n", names.toString().c_str());
+	dbg_printf("Set column names to %s\n", names2.toString().c_str());
       } else if (cmd1=="move") {
-	PatchColumnNames names2;
-	names2.read(patch,3,i);
 	OrderChange change;
 	string mover = names2.inferMove(names,&change.subject,&change.object);
 	dbg_printf("Moving columns to %s (%s moves // subj %d obj %d)\n", 
@@ -136,8 +167,26 @@ bool PatchParser::apply() {
 	change.namesAfter = names2.lst;
 	change.mode = ORDER_CHANGE_MOVE;
 	patcher->changeColumn(change);
+      } else if (cmd1=="insert") {
+	PatchColumnNames names2;
+	names2.read(patch,3,i);
+	OrderChange change;
+	string mover = names2.inferInsert(names,&change.subject);
+	dbg_printf("Inserting columns to %s (%s insert // subj %d)\n", 
+		   names2.toString().c_str(),
+		   mover.c_str(),
+		   change.subject);
+	change.indicesBefore = names.indices;
+	change.namesBefore = names.lst;
+	change.indicesAfter = names2.indices;
+	change.namesAfter = names2.lst;
+	change.mode = ORDER_CHANGE_INSERT;
+	patcher->changeColumn(change);	
       } else {
 	fail = true;
+      }
+      if (!fail) {
+	names = names2;
       }
     } else {
       fail = true;
