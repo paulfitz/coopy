@@ -12,15 +12,20 @@ bool CsvPatcher::changeColumn(const OrderChange& change) {
   if (sheet==NULL) return false;
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
-    return sheet->deleteColumn(ColumnRef(change.identityToIndex(change.subject)));
+    return sheet->deleteColumn(ColumnRef(change.subject));
+    //return sheet->deleteColumn(ColumnRef(change.identityToIndex(change.subject)));
     break;
   case ORDER_CHANGE_INSERT:
-    return sheet->insertColumn(ColumnRef(change.identityToIndex(change.subject))).isValid();
+    return sheet->insertColumn(ColumnRef(change.subject)).isValid();
+    //return sheet->insertColumn(ColumnRef(change.identityToIndex(change.subject))).isValid();
     break;
   case ORDER_CHANGE_MOVE:
-    return sheet->moveColumn(ColumnRef(change.identityToIndex(change.subject)),
-			     ColumnRef(change.identityToIndex(change.object))
+    return sheet->moveColumn(ColumnRef(change.subject),
+			     ColumnRef(change.object)
 			     ).isValid();
+    //return sheet->moveColumn(ColumnRef(change.identityToIndex(change.subject)),
+    //			     ColumnRef(change.identityToIndex(change.object))
+    //			     ).isValid();
   default:
     fprintf(stderr,"* ERROR: Unknown column operation\n");
     break;

@@ -70,6 +70,24 @@ public:
     return mover;
   }
 
+  string inferDelete(const PatchColumnNames& prior,
+		     int *src) {
+    COOPY_ASSERT(lst.size()==prior.lst.size()-1);
+    int i;
+    for (i=0; i<(int)lst.size(); i++) {
+      if (lst[i]!=prior.lst[i]) {
+	break;
+      }
+    }
+    // the deleted element is named by prior.lst[i]
+    string mover = prior.lst[i];
+    indices = prior.indices;
+    int subject = i;
+    indices.erase(indices.begin()+subject);
+    if (src!=NULL) *src = subject;
+    return mover;
+  }
+
   string inferMove(const PatchColumnNames& prior,
 		   int *src,
 		   int *dest) {
@@ -149,38 +167,41 @@ bool PatchParser::apply() {
       string val = patch.cell(2,i);
       dbg_printf("Set config variable %s -> %s\n", key.c_str(), val.c_str());
     } else if (cmd0=="column") {
+      OrderChange change;
       PatchColumnNames names2;
       names2.read(patch,3,i);
+      change.indicesBefore = names.indices;
+      change.namesBefore = names.lst;
+      change.namesAfter = names2.lst;
       if (cmd1=="name") {
 	dbg_printf("Set column names to %s\n", names2.toString().c_str());
       } else if (cmd1=="move") {
-	OrderChange change;
 	string mover = names2.inferMove(names,&change.subject,&change.object);
 	dbg_printf("Moving columns to %s (%s moves // subj %d obj %d)\n", 
 		   names2.toString().c_str(),
 		   mover.c_str(),
 		   change.subject,
 		   change.object);
-	change.indicesBefore = names.indices;
-	change.namesBefore = names.lst;
 	change.indicesAfter = names2.indices;
-	change.namesAfter = names2.lst;
 	change.mode = ORDER_CHANGE_MOVE;
 	patcher->changeColumn(change);
       } else if (cmd1=="insert") {
-	PatchColumnNames names2;
-	names2.read(patch,3,i);
-	OrderChange change;
 	string mover = names2.inferInsert(names,&change.subject);
 	dbg_printf("Inserting columns to %s (%s insert // subj %d)\n", 
 		   names2.toString().c_str(),
 		   mover.c_str(),
 		   change.subject);
-	change.indicesBefore = names.indices;
-	change.namesBefore = names.lst;
 	change.indicesAfter = names2.indices;
-	change.namesAfter = names2.lst;
 	change.mode = ORDER_CHANGE_INSERT;
+	patcher->changeColumn(change);	
+      } else if (cmd1=="delete") {
+	string mover = names2.inferDelete(names,&change.subject);
+	dbg_printf("Deleting columns from %s (%s delete // subj %d)\n", 
+		   names2.toString().c_str(),
+		   mover.c_str(),
+		   change.subject);
+	change.indicesAfter = names2.indices;
+	change.mode = ORDER_CHANGE_DELETE;
 	patcher->changeColumn(change);	
       } else {
 	fail = true;
