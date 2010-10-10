@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 
+#include <stdio.h>
+
 namespace coopy {
   namespace store {
     template <class T> class TypedSheet;
@@ -87,22 +89,26 @@ public:
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {
     int offset = base.getIndex();
     if (offset>=(int)arr.size()) return ColumnRef();
-    int offset_del = src.getIndex();
+    int offset_src = src.getIndex();
+    int offset_del = offset_src;
     if (offset_del<0||offset_del>=(int)arr.size()) return ColumnRef();
     int final = offset;
-    if (offset<=offset_del) {
+    if (offset<=offset_del&&offset!=-1) {
       offset_del++;
     } else {
       final--;
     }
     T t;
+    //printf("Move col: insert %d from %d offset_del %d final %d\n", 
+    //offset, offset_src, offset_del, final);
     for (int i=0; i<(int)arr.size(); i++) {
+      std::vector<T>& row = arr[i];
       if (offset>=0) {
-	arr[i].insert(arr[i].begin()+offset,t);
+	row.insert(row.begin()+offset,row[offset_src]);
       } else {
-	arr[i].push_back(t);
+	row.push_back(row[offset_src]);
       }
-      arr[i].erase(arr[i].begin()+offset_del);
+      row.erase(row.begin()+offset_del);
     }
     if (offset<0) {
       return ColumnRef(w-1);

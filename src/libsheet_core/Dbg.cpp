@@ -26,3 +26,11 @@ void yarp_print_trace(FILE *out, const char *file, int line) {
     // Not implemented on this platform
 }
 #endif
+
+void coopy_set_verbose(bool verbose) {
+  _csv_verbose = verbose;
+}
+
+bool coopy_is_verbose() {
+  return _csv_verbose;
+}

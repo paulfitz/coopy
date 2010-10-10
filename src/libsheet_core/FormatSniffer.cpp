@@ -1,4 +1,5 @@
 #include <coopy/FormatSniffer.h>
+#include <coopy/Dbg.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -9,6 +10,7 @@ using namespace coopy::format;
 bool FormatSniffer::open(const char *fname) {
   close();
   FILE *fp;
+  dbg_printf("Looking at %s\n", fname);
   if (strcmp(fname,"-")==0) {
     fp = stdin;
     need_close = false;
