@@ -22,6 +22,7 @@ Here are some tips on how to use these programs:
 \if link_examples
 \li \ref diff_example.
 \endif
+\li \ref sspatch "sspatch usage".
 \li \ref ssfossil reference.
 \li \ref coopy graphical interface reference.
 \li \ref patch_format.

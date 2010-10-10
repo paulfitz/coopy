@@ -1,0 +1,44 @@
+/**
+ *
+
+@page sspatch sspatch
+
+This makes changes to a spreadsheet, based on instructions in a "patch"
+file (see \ref ssdiff_format_csv for the format of that file).
+
+\if link_internal
+Here are the ways you can use sspatch:
+- \ref sspatch_base
+- \ref sspatch_common_usage
+- \ref sspatch_direct_output
+\endif
+
+@section sspatch_base sspatch
+
+The utility gives a friendly message if called with no arguments
+to confirm that it exists, and to give tips on where to get started
+using it.  At the time of writing, that output is:
+
+\verbatim
+Apply patch to a spreadsheet.
+  sspatch [--verbose] [--output output.csv] sheet.csv patch.txt
+Output defaults to standard output.
+Write output to original file by doing:
+  sspatch --output sheet.csv sheet.csv patch.txt
+\endverbatim
+
+@section sspatch_common_usage sspatch sheet.csv patch.txt
+
+\if link_examples_NONO
+See \ref patch_example for more.
+\endif
+
+@section sspatch_direct_output sspatch --output out.csv sheet.csv patch.txt
+
+The output of sspatch is by default standard output.  It can be redirected
+to a file using the "--output" option.
+
+ *
+ */
+
+
