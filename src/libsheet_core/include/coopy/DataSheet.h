@@ -47,6 +47,20 @@ public:
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {
     return ColumnRef(); // invalid column
   }
+
+  virtual bool deleteRow(const RowRef& src) {
+    return false;
+  }
+
+  // insert a row before base; if base is invalid insert after all rows
+  virtual RowRef insertRow(const RowRef& base) {
+    return RowRef(); // invalid row
+  }
+
+  // move a row before base; if base is invalid move after all rows
+  virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
+    return RowRef(); // invalid column
+  }
 };
 
 #endif

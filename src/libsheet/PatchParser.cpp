@@ -219,6 +219,8 @@ bool PatchParser::apply() {
 	names = names2;
       }
     } else if (cmd0=="row") {
+      RowChange change;
+      change.names = names.lst;
       PatchColumnNames names2;
       names2.read(patch,3,i,len);
       if (cmd1=="select") {
@@ -226,9 +228,7 @@ bool PatchParser::apply() {
 	selector = names2.lst;
       } else if (cmd1=="update") {
 	dbg_printf("Updating to %s\n", names2.toString().c_str());	
-	RowChange change;
 	change.mode = ROW_CHANGE_UPDATE;
-	change.names = names.lst;
 	for (int i=0; i<len; i++) {
 	  string sel = selector[i];
 	  if (sel!="*") {
@@ -240,6 +240,16 @@ bool PatchParser::apply() {
 	  }
 	}
 	patcher->changeRow(change);
+      } else if (cmd1=="insert") {
+	dbg_printf("Inserting %s\n", names2.toString().c_str());
+	change.mode = ROW_CHANGE_INSERT;
+	for (int i=0; i<len; i++) {
+	  string val = names2.lst[i];
+	  if (val!="*") {
+	    change.val[change.names[i]] = val;
+	  }
+	}
+	patcher->changeRow(change);	
       } else {
 	fail = true;
       }

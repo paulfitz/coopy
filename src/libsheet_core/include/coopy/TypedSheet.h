@@ -73,7 +73,7 @@ public:
 
   virtual ColumnRef insertColumn(const ColumnRef& base) {
     int offset = base.getIndex();
-    if (offset>=(int)arr.size()) return ColumnRef();
+    if (offset>=w) return ColumnRef();
     T t;
     for (int i=0; i<(int)arr.size(); i++) {
       if (offset>=0) {
@@ -88,10 +88,10 @@ public:
 
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {
     int offset = base.getIndex();
-    if (offset>=(int)arr.size()) return ColumnRef();
+    if (offset>=(int)w) return ColumnRef();
     int offset_src = src.getIndex();
     int offset_del = offset_src;
-    if (offset_del<0||offset_del>=(int)arr.size()) return ColumnRef();
+    if (offset_del<0||offset_del>=w) return ColumnRef();
     int final = offset;
     if (offset<=offset_del&&offset!=-1) {
       offset_del++;
@@ -114,6 +114,36 @@ public:
       return ColumnRef(w-1);
     }
     return ColumnRef(final);
+  }
+
+  virtual bool deleteRow(const RowRef& src) {
+    int offset = src.getIndex();
+    if (offset<0||offset>=h) return false;
+    arr.erase(arr.begin()+offset);
+    h--;
+    return true;
+  }
+
+  virtual RowRef insertRow(const RowRef& base) {
+    int offset = base.getIndex();
+    T t;
+    if (offset>=h) return RowRef();
+    if (offset<0) {
+      arr.push_back(std::vector<T>());
+      offset = h;
+    } else {
+      arr.insert(arr.begin()+offset,std::vector<T>());
+    }
+    h++;
+    for (int i=0; i<w; i++) {
+      arr[offset].push_back(t);
+    }
+    return RowRef(offset);
+  }
+
+  // move a row before base; if base is invalid move after all rows
+  virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
+    return RowRef(); // NOT IMPLEMENTED
   }
 };
 

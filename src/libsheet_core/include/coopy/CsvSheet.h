@@ -43,6 +43,7 @@ public:
     return strict;
   }
 
+  // Deprecated, should migrate to deleteRow
   bool removeRow(int index) {
     arr.erase(arr.begin()+index);
     if (arr.size()<(size_t)h) {
@@ -52,6 +53,7 @@ public:
     return false;
   }
 
+  // Deprecated
   bool insertRow(int index, int width = -1) {
     std::vector<std::string> rec;
     if (width == -1) { width = w; }
