@@ -186,7 +186,7 @@ void MeasureMan::compare1(int ctrl) {
       if (ok) {
 	dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
 		   y,bestIndex,y,bestIndex,
-		   bestIndex, bestValue, -1, ref);
+		   bestIndex, bestValue, -1.0, ref);
 	dbg_printf("  [remote/local] %s %s\n", cell(b,0,y).c_str(), cell(a,0,bestIndex).c_str());
 	if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
 	  dbg_printf("COLLISION! Ignoring unavailable match\n");
@@ -198,7 +198,7 @@ void MeasureMan::compare1(int ctrl) {
       }
       if (!ok) {
 	dbg_printf("%d->?, do not know what to make of remote unit %d (%d %g %g : %g)\n",
-		   y, y, bestIndex, bestValue, -1, ref);
+		   y, y, bestIndex, bestValue, -1.0, ref);
 	dbg_printf("  [remote] %s\n", cell(b,0,y).c_str());
 	if (bestIndex>=0) {
 	  dbg_printf("  [local] [MISS] %s\n", cell(a,0,bestIndex).c_str());
