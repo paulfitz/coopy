@@ -28,9 +28,38 @@ Write output to original file by doing:
 \endverbatim
 
 @section sspatch_common_usage sspatch sheet.csv patch.txt
+Suppose sheet.csv is:
+\verbatim
+one,1
+two,2
+three,23
+four,4
+five,5
+\endverbatim
+And patch.txt is:
+\verbatim
+dtbl,csv,version,0.2,
+config,empty_tag,*,,
+config,row_tag,ROW,,
+column,name,ROW,[0],[1]
+row,select,*,three,23
+row,update,*,*,3
+\endverbatim
+Then the output will correct "23" to "3":
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
 
-\if link_examples_NONO
-See \ref patch_example for more.
+Supported patch operations are column insertion, deletion, and moving, and
+row updating, insertion, and deletion.
+
+\if link_examples
+See \ref diff_example for examples of patch files (currently, only csv format
+patches are supported).
 \endif
 
 @section sspatch_direct_output sspatch --output out.csv sheet.csv patch.txt
