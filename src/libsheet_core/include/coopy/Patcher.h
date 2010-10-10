@@ -68,6 +68,7 @@ public:
 class coopy::cmp::RowChange {
 public:
   int mode;
+  typedef std::map<std::string,std::string> txt2txt;
   std::map<std::string,std::string> cond;
   std::map<std::string,std::string> val;
   std::vector<std::string> names;

@@ -23,12 +23,16 @@ public:
   vector<string> lst;
   vector<int> indices;
 
-  void read(const TextSheet& sheet, int x, int y) {
+  void read(const TextSheet& sheet, int x, int y, int len = -1) {
     lst.clear();
     indices.clear();
-    for (int i=x; i<sheet.width(); i++) {
+    int last = sheet.width()-1;
+    if (len>=0) {
+      last = x+len-1;
+    }
+    for (int i=x; i<=last; i++) {
       string v = sheet.cell(i,y);
-      if (v=="") break;
+      if (v==""&&len==-1) break;
       lst.push_back(v);
       indices.push_back(i-x);
     }
@@ -154,6 +158,9 @@ bool PatchParser::apply() {
   }
 
   PatchColumnNames names;
+  vector<string> selector;
+  int len = 0;
+  int row_index = -1;
 
   for (int i=0; i<patch.height(); i++) {
     dbg_printf("[%d] ", i);
@@ -170,11 +177,13 @@ bool PatchParser::apply() {
       OrderChange change;
       PatchColumnNames names2;
       names2.read(patch,3,i);
+      len = (int)names2.lst.size();
       change.indicesBefore = names.indices;
       change.namesBefore = names.lst;
       change.namesAfter = names2.lst;
       if (cmd1=="name") {
 	dbg_printf("Set column names to %s\n", names2.toString().c_str());
+	patcher->declareNames(names2.lst,false);
       } else if (cmd1=="move") {
 	string mover = names2.inferMove(names,&change.subject,&change.object);
 	dbg_printf("Moving columns to %s (%s moves // subj %d obj %d)\n", 
@@ -209,11 +218,39 @@ bool PatchParser::apply() {
       if (!fail) {
 	names = names2;
       }
+    } else if (cmd0=="row") {
+      PatchColumnNames names2;
+      names2.read(patch,3,i,len);
+      if (cmd1=="select") {
+	dbg_printf("Selecting %s\n", names2.toString().c_str());
+	selector = names2.lst;
+      } else if (cmd1=="update") {
+	dbg_printf("Updating to %s\n", names2.toString().c_str());	
+	RowChange change;
+	change.mode = ROW_CHANGE_UPDATE;
+	change.names = names.lst;
+	for (int i=0; i<len; i++) {
+	  string sel = selector[i];
+	  if (sel!="*") {
+	    change.cond[change.names[i]] = sel;
+	  }
+	  string val = names2.lst[i];
+	  if (val!="*") {
+	    change.val[change.names[i]] = val;
+	  }
+	}
+	patcher->changeRow(change);
+      } else {
+	fail = true;
+      }
     } else {
       fail = true;
     }
     if (fail) {
-      fprintf(stderr,"%s %s ?\n", cmd0.c_str(), cmd1.c_str());
+      dbg_printf("%s %s ?\n", cmd0.c_str(), cmd1.c_str());
+      if (!coopy_is_verbose()) {
+	fprintf(stderr,"%s %s ?\n", cmd0.c_str(), cmd1.c_str());
+      }
       fail = false;
     }
   }

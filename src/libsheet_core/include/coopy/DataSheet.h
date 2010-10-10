@@ -21,6 +21,10 @@ public:
 
   virtual std::string cellString(int x, int y) const = 0;
 
+  virtual bool cellString(int x, int y, const std::string& str) {
+    return false;
+  }
+
   std::string encode(const SheetStyle& style) const;
 
   static std::string encodeCell(const std::string& str, 

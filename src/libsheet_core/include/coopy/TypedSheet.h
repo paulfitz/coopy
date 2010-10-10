@@ -64,7 +64,6 @@ public:
   virtual bool deleteColumn(const ColumnRef& column) {
     int offset = column.getIndex();
     if (offset<0||offset>=(int)arr.size()) return false;
-    printf("delete column %d\n", offset);
     for (int i=0; i<(int)arr.size(); i++) {
       arr[i].erase(arr[i].begin()+offset);
     }

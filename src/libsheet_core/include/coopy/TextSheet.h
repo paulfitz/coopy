@@ -15,6 +15,12 @@ public:
     return cell(x,y);
   }
 
+  virtual bool cellString(int x, int y, const std::string& str) {
+    cell(x,y) = str;
+    return true;
+  }
+
+
   const TextSheet& copy(const TextSheet& alt) {
     arr = alt.arr;
     h = alt.h;
