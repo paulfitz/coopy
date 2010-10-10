@@ -161,6 +161,7 @@ bool PatchParser::apply() {
   vector<string> selector;
   int len = 0;
   int row_index = -1;
+  bool ok = true;
 
   for (int i=0; i<patch.height(); i++) {
     dbg_printf("[%d] ", i);
@@ -239,7 +240,7 @@ bool PatchParser::apply() {
 	    change.val[change.names[i]] = val;
 	  }
 	}
-	patcher->changeRow(change);
+	ok = patcher->changeRow(change);
       } else if (cmd1=="insert") {
 	dbg_printf("Inserting %s\n", names2.toString().c_str());
 	change.mode = ROW_CHANGE_INSERT;
@@ -250,6 +251,16 @@ bool PatchParser::apply() {
 	  }
 	}
 	patcher->changeRow(change);	
+      } else if (cmd1=="delete") {
+	dbg_printf("Deleting %s\n", names2.toString().c_str());
+	change.mode = ROW_CHANGE_DELETE;
+	for (int i=0; i<len; i++) {
+	  string val = names2.lst[i];
+	  if (val!="*") {
+	    change.cond[change.names[i]] = val;
+	  }
+	}
+	ok = patcher->changeRow(change);	
       } else {
 	fail = true;
       }
@@ -260,6 +271,12 @@ bool PatchParser::apply() {
       dbg_printf("%s %s ?\n", cmd0.c_str(), cmd1.c_str());
       if (!coopy_is_verbose()) {
 	fprintf(stderr,"%s %s ?\n", cmd0.c_str(), cmd1.c_str());
+      }
+      fail = false;
+    } else if (!ok) {
+      dbg_printf("*** %s %s failed\n", cmd0.c_str(), cmd1.c_str());
+      if (!coopy_is_verbose()) {
+	fprintf(stderr,"*** %s %s failed\n", cmd0.c_str(), cmd1.c_str());
       }
       fail = false;
     }

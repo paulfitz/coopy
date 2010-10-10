@@ -1,0 +1,6 @@
+dtbl,csv,version,0.2,,
+config,empty_tag,*,,,
+config,row_tag,ROW,,,
+column,name,ROW,[0],[1],
+column,move,ROW,[1],[0],
+column,insert,ROW,[1],[0],{4}

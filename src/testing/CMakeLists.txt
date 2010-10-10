@@ -336,3 +336,9 @@ ENDMACRO()
 
 ADD_TEST2(tail_merge ${TESTS}/result_trimmer_merge.csv ssmerge --tail-trim
   ${TESTS}/trimmer_base.csv ${TESTS}/trimmer_base.csv ${TESTS}/trimmer_more.csv)
+
+foreach(patcher patch_001_col_move patch_002_col_insert patch_003_col_insert patch_004_col_delete patch_005_row_update patch_006_row_insert patch_007_row_delete)
+#  ADD_TEST2(${patcher} ${TESTS}/result_${patcher}.csv sspatch --output ${TESTS}/result_${patcher}.csv ${TESTS}/numbers.csv ${TESTS}/${patcher}.txt)
+  ADD_TEST2(${patcher} ${TESTS}/result_${patcher}.csv sspatch ${TESTS}/numbers.csv ${TESTS}/${patcher}.txt)
+
+endforeach()

@@ -79,6 +79,30 @@ bool CsvPatcher::changeRow(const RowChange& change) {
       }
     }
     break;
+  case ROW_CHANGE_DELETE:
+    {
+      bool success = false;
+      int r;
+      for (r=0; r<sheet->height(); r++) {
+	bool match = true;
+	for (int c=0; c<sheet->width(); c++) {
+	  if (active_cond[c]) {
+	    if (sheet->cellString(c,r)!=cond[c]) {
+	      match = false;
+	      break;
+	    }
+	  }
+	}
+	if (match) {
+	  RowRef row(r);
+	  sheet->deleteRow(row);
+	  success = true;
+	  break;
+	}
+      }
+      return success;
+    }
+    break;
   case ROW_CHANGE_UPDATE:
     {
       bool success = false;
@@ -88,20 +112,18 @@ bool CsvPatcher::changeRow(const RowChange& change) {
 	for (int c=0; c<sheet->width(); c++) {
 	  if (active_cond[c]) {
 	    if (sheet->cellString(c,r)!=cond[c]) {
-	      //printf("NO GOOD %s %s\n", sheet->cellString(c,r).c_str(),
-	      //     cond[c].c_str());
 	      match = false;
 	      break;
 	    }
 	  }
 	}
 	if (match) {
-	  //printf("MATCH on row %d\n", r);
 	  for (int c=0; c<sheet->width(); c++) {
 	    if (active_val[c]) {
 	      sheet->cellString(c,r,val[c]);
 	    }
-	  }	  
+	  }
+	  success = true;
 	  break;
 	}
       }
