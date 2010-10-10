@@ -1,7 +1,18 @@
 #include <coopy/MeasureMan.h>
+#include <coopy/Viterbi.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
+
+using namespace std;
+
+#include <math.h>
+
+static float costify(float x) {
+  //if (x<0.01) x = 0.01;
+  //return 1/x;
+  return -x;
+}
 
 void MeasureMan::setup() {
   main.setup(main_pass);
@@ -93,6 +104,110 @@ void MeasureMan::compare1(int ctrl) {
   TextSheet& a = main_pass.a;
   TextSheet& b = main_pass.b;
 
+  Viterbi v;
+  /*
+    state interpretation:
+       x: "matches against remote column x-1" (or lingering without match)
+       0: an unmatching state
+   */
+  v.setSize(match.width()+1,match.height());
+  for (int i=0; i<match.height(); i++) {
+    const set<int>& idx0 = match.getCellsInRow(i-1);
+    const set<int>& idx1 = match.getCellsInRow(i);
+    const set<int> *pidx0 = &idx0;
+    v.beginTransitions();
+    for (set<int>::const_iterator it1=idx1.begin(); it1!=idx1.end(); it1++) {
+      int i1 = (*it1);
+      float c = costify(match.cell(i1,i));
+      for (set<int>::const_iterator it0=pidx0->begin(); it0!=pidx0->end(); 
+	   it0++) {
+	int i0 = (*it0);
+	double mod = 0.1*log(1+fabs((double)(i-i1)))/log(2);
+	v.addTransition(i0+1,i1+1,c+mod);
+	//if (match.width()<100) {
+	//printf("<%d;%d:%d>%g/%g|%g // ", i,i0+1, i1+1, c, match.cell(i1,i),mod);
+	//}
+      }
+      //if (match.width()<100) {
+      //printf("\n");
+      //}
+      v.addTransition(0,i1+1,c);
+      //if (match.width()<100) {
+      //printf("--> <%d;0:%d>%g\n", i, i1+1, c);
+      //}
+    }
+    for (set<int>::const_iterator it0=pidx0->begin(); it0!=pidx0->end(); 
+	 it0++) {
+      int i0 = (*it0);
+      v.addTransition(i0+1,0,0);
+    }
+    v.addTransition(0,0,0);
+    v.endTransitions();
+  }
+  if (_csv_verbose) {
+    dbg_printf("Viterbi calculation:\n");
+    v.showPath();
+  }
+
+  for (int y=0; y<match.height(); y++) {
+    if (bsel.cell(0,y)==-1) {
+      int bestIndex = v(y)-1;
+      double bestValue = 0;
+      if (bestIndex>=0) {
+	bestValue = match.cell(bestIndex,y);
+      }
+      double ref = bnorm_pass.match.cell(0,y);
+      bool ok = false;
+      if (bestValue>ref/4 && bestIndex>=0) {
+	//if (bestInc>bestValue/2 && bestIndex>=0) {
+	ok = true;
+	  //}
+      }
+      if (!ok) {
+	if (bestIndex>=0 && y>=0) {
+	  // let's examine the best match in detail
+	  dbg_printf("Detail check... %d->%d\n",y,bestIndex);
+	  if (cellLength(a)==cellLength(b)) {
+	    int misses = 0;
+	    for (int kk=0; kk<cellLength(a); kk++) {
+	      if (cell(a,kk,bestIndex)!=cell(b,kk,y)) {
+		misses++;
+	      }
+	    }
+	    dbg_printf("Detailed examination gives %d misses for best match\n", 
+		       misses);
+	    if (misses==0) {
+	      // perfect match, let it through
+	      ok = true;
+	    }
+	  }
+	}
+      }
+      if (ok) {
+	dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
+		   y,bestIndex,y,bestIndex,
+		   bestIndex, bestValue, -1, ref);
+	dbg_printf("  [remote/local] %s %s\n", cell(b,0,y).c_str(), cell(a,0,bestIndex).c_str());
+	if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
+	  dbg_printf("COLLISION! Ignoring unavailable match\n");
+	  dbg_printf("This case has not been optimized\n");
+	} else {
+	  bsel.cell(0,y) = bestIndex;
+	  asel.cell(0,bestIndex) = y;
+	}
+      }
+      if (!ok) {
+	dbg_printf("%d->?, do not know what to make of remote unit %d (%d %g %g : %g)\n",
+		   y, y, bestIndex, bestValue, -1, ref);
+	dbg_printf("  [remote] %s\n", cell(b,0,y).c_str());
+	if (bestIndex>=0) {
+	  dbg_printf("  [local] [MISS] %s\n", cell(a,0,bestIndex).c_str());
+	}
+      }
+    }
+  }
+
+  /*
   IntSheet bestIndices;
   FloatSheet bestValues, bestIncs;
   dbg_printf("Find best\n");
@@ -154,5 +269,6 @@ void MeasureMan::compare1(int ctrl) {
       }
     }
   }
+  */
   dbg_printf("Done in MeasureMan::compare1\n");
 }

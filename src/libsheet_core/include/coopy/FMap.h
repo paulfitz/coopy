@@ -81,13 +81,14 @@ public:
 
   void add(std::string txt, bool query, int ctrl = 0) {
     this->query = query;
-    if (ctrl==0) {
+    //if (ctrl==0) {
       if (query) {
 	queryBit(txt);
       } else {
 	addBit(txt);
       }
-    } else {
+      //} else {
+      if (ctrl!=0) {
       int len = txt.length();
       for (int k=8-ctrl*2; k<10; k++) {
 	for (int i=0; i<len-k; i++){

@@ -84,12 +84,13 @@ public:
     return it->second;
   }
 
-  const std::set<int>& getCellsOnRow(int y) const {
-    std::set<int>::const_iterator it = row.find(y);
-    if (it==data.end()) {
+  const std::set<int>& getCellsInRow(int y) const {
+    typename efficient_map<long, std::set<int> >::const_iterator it = 
+      row.find(y);
+    if (it==row.end()) {
       return empty_set;
     }
-    return *it;
+    return it->second;
   }
 };
 
