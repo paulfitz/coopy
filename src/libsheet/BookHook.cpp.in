@@ -14,11 +14,15 @@ TextBook *readHelper(const char *fname,
 		     const char *data) {
   TextBook *result = NULL;
 #ifdef GNUMERIC
+  printf("Checking with Gnumeric...\n");
   GnumericTextBookFactory fact;
   if (fact.check(fname,ext,data)) {
     result = fact.load(fname);
   }
-  if (result!=NULL) return result;
+  if (result!=NULL) {
+    printf("Got a Gnumeric-readable file\n");
+    return result;
+  }
 #endif
   return result;
 }

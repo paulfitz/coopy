@@ -19,6 +19,12 @@ public:
   virtual std::vector<std::string> getNames() = 0;
 
   virtual PolySheet readSheet(const std::string& name) = 0;
+
+  virtual PolySheet readSheetByIndex(int index) {
+    std::vector<std::string> names = getNames();
+    if (index>=(int)names.size()) return PolySheet();
+    return readSheet(names[index]);
+  }
 };
 
 #endif

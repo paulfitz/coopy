@@ -93,7 +93,11 @@ bool PolyBook::write(const char *fname) {
   }
   vector<string> names = getNames();
   string name = fname;
-  string ext = name.substr(name.rfind("."));
+  size_t eid = name.rfind(".");
+  string ext = ".csv";
+  if (eid!=string::npos) {
+    name.substr(eid);
+  }
   for (size_t i=0; i<ext.length(); i++) {
     ext[i] = tolower(ext[i]);
   }

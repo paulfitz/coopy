@@ -7,7 +7,7 @@ bool GnumericTextBookFactory::check(const char *fname,
 				    const char *ext,
 				    const char *data) {
   // toy test
-  return (string(ext)=="xls");
+  return (string(ext)==".xls");
 }
 
 TextBook *GnumericTextBookFactory::load(const char *fname) {

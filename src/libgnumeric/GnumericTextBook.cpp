@@ -1,4 +1,5 @@
 #include <coopy/GnumericTextBook.h>
+#include <coopy/GnumericSheet.h>
 
 using namespace std;
 using namespace coopy::store;
@@ -26,6 +27,7 @@ void GnumericTextBook::clear() {
   
 bool GnumericTextBook::load(const char *fname) {
   clear();
+  printf("Trying for gnumeric %s\n", fname);
   implementation = gnumeric_load(fname);
   return (implementation!=NULL);
 }
@@ -37,6 +39,11 @@ std::vector<std::string> GnumericTextBook::getNames() {
 }
 
 PolySheet GnumericTextBook::readSheet(const std::string& name) {
+  if (name=="fake") {
+    GnumericSheet *sheet = 
+      new GnumericSheet(gnumeric_get_sheet((GnumericWorkbookPtr)implementation,0));
+    return PolySheet(sheet,true);
+  }
   return PolySheet();
 }
 

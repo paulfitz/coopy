@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <getopt.h>
 
+#include <coopy/PolyBook.h>
 #include <coopy/CsvFile.h>
 #include <coopy/CsvPatch.h>
 #include <coopy/FormatSniffer.h>
@@ -62,50 +63,38 @@ int main(int argc, char *argv[]) {
     coopy_set_verbose(verbose);
   }
 
-  CsvSheet local, patch;
-  if (CsvFile::read(argv[0],local)!=0) {
+  PolyBook local;
+  CsvSheet patch;
+  if (!local.read(argv[0])) {
+    fprintf(stderr,"Failed to read %s\n", argv[0]);
     return 1;
   }
   
   FormatSniffer sniffer;
   sniffer.open(argv[1]);
   Format format = sniffer.getFormat();
-  if (format.id == FORMAT_UNKNOWN) {
-    // fall back on old, deprecated patch behavior
-    
-    if (CsvFile::read(argv[1],patch)!=0) {
-      return 1;
-    }
-    CsvPatch patcher;
-    patcher.apply(local,patch);
-    const CsvSheet& result = patcher.get();
-    if (argc>=4) {
-      if (CsvFile::write(result,output.c_str())!=0) {
-	return 1;
-      }
-    } else {
-      SheetStyle style;
-      std::string out = result.encode(style);
-      printf("%s",out.c_str());
-    }
-    return 0;
-  }
 
-  // new behavior
   if (format.id!=FORMAT_PATCH_CSV) {
     fprintf(stderr,"Only CSV format patches are supported right now\n");
     fprintf(stderr,"Use ssdiff with --format-csv option.\n");
     return 1;
   }
 
-  CsvPatcher patcher(&local);
+  PolySheet sheet = local.readSheetByIndex(0);
+  if (!sheet.isValid()) {
+    fprintf(stderr, "No sheet found\n");
+    return 1;
+  }
+  CsvPatcher patcher(&sheet);
   PatchParser parser(&patcher,&sniffer);
   if (!parser.apply()) {
     fprintf(stderr,"Patch application failed\n");
     return 1;
   }
   
-  if (CsvFile::write(local,output.c_str())!=0) {
+  //if (CsvFile::write(local,output.c_str())!=0) {
+  if (!local.write(output.c_str())) {
+    fprintf(stderr,"Failed to write %s\n", output.c_str());
     return 1;
   }
   return 0;
