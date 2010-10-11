@@ -5,10 +5,11 @@
 
 namespace coopy {
   namespace store {
-    class TextSheet;
+    typedef DataSheet TextSheet;
   }
 }
 
+/*
 class coopy::store::TextSheet : public TypedSheet<std::string> {
 public:
   virtual std::string cellString(int x, int y) const {
@@ -28,6 +29,6 @@ public:
     return *this;
   }
 };
-
+*/
 
 #endif

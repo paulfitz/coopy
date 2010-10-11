@@ -24,7 +24,7 @@ public:
 
   virtual std::vector<std::string> getNames();
 
-  virtual bool readSheet(const std::string& name, TextSheet& sheet);
+  virtual PolySheet readSheet(const std::string& name);
 };
 
 

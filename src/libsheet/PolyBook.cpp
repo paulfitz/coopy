@@ -98,15 +98,14 @@ bool PolyBook::write(const char *fname) {
     ext[i] = tolower(ext[i]);
   }
   if (ext==".sql") {
-    CsvSheet sheet;
     FILE *fout = fopen(fname,"w");
     if (fout==NULL) {
       fprintf(stderr,"Could not open %s for writing\n", fname);
       return false;
     }
     for (size_t i=0; i<names.size(); i++) {
-      bool ok = readSheet(names[i],sheet);
-      if (!ok) { 
+      PolySheet sheet = readSheet(names[i]);
+      if (!sheet.isValid()) { 
 	fprintf(stderr,"Could not access sheet %s\n", names[i].c_str());
 	return false;
       }
@@ -118,7 +117,7 @@ bool PolyBook::write(const char *fname) {
       fprintf(fout,"CREATE TABLE \"%s\" (\n", table.c_str());
       if (sheet.height()>=1) {
 	for (int x=0; x<sheet.width(); x++) {
-	  fprintf(fout,"   \"%s\"%s\n", namer2.name(sheet.cell(x,0)).c_str(),
+	  fprintf(fout,"   \"%s\"%s\n", namer2.name(sheet.cellString(x,0)).c_str(),
 		  (x==sheet.width()-1)?"":",");
 	}
       }
@@ -126,7 +125,7 @@ bool PolyBook::write(const char *fname) {
       for (int y=1; y<sheet.height(); y++) {
 	fprintf(fout, "INSERT INTO \"%s\" VALUES ( ", table.c_str());
 	for (int x=0; x<sheet.width(); x++) {
-	  fprintf(fout,"\'%s\'%s ", val.name(sheet.cell(x,y)).c_str(),
+	  fprintf(fout,"\'%s\'%s ", val.name(sheet.cellString(x,y)).c_str(),
 		  (x==sheet.width()-1)?"":",");
 	}
 	fprintf(fout, ");\n");
@@ -141,9 +140,8 @@ bool PolyBook::write(const char *fname) {
 	    (int)names.size());
     return false;
   }
-  CsvSheet sheet;
-  bool ok = readSheet(names[0],sheet);
-  if (!ok) { 
+  PolySheet sheet = readSheet(names[0]);
+  if (!sheet.isValid()) { 
     fprintf(stderr,"Could not access sheet %s\n", names[0].c_str());
     return false;
   }

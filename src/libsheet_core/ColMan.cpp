@@ -25,13 +25,13 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
 	for (int i=0; i<wa; i++) {
 	  if (1) { //pass.asel.cell(0,i)==-1) {
 	    m.setCurr(i,i);
-	    m.add(pass.a.cell(i,ra),false,c);
+	    m.add(pass.a.cellString(i,ra),false,c);
 	  }
 	}
 	for (int j=0; j<wb; j++) {
 	  if (1) { //pass.bsel.cell(0,j)==-1) {
 	    m.setCurr(j,j);
-	    m.add(pass.b.cell(j,rb),true,c);
+	    m.add(pass.b.cellString(j,rb),true,c);
 	  }
 	}
       }

@@ -49,26 +49,26 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
       if (lRow>=0 && lCol>=0) {
 	//printf("access local %d %d (size %d %d)\n", lCol, lRow, 
 	//local.width(), local.height());
-	expandLocal.push_back(local.cell(lCol,lRow));
+	expandLocal.push_back(local.cellString(lCol,lRow));
       } else {
 	expandLocal.push_back(blank);
       }
       if (rRow>=0 && rCol>=0) {
 	//printf("access remote %d %d\n", rCol, rRow);
-	expandRemote.push_back(remote.cell(rCol,rRow));
+	expandRemote.push_back(remote.cellString(rCol,rRow));
       } else {
 	expandRemote.push_back(blank);
       }
       if (pRow>=0 && pCol>=0) {
 	//printf("access pivot %d %d\n", pCol, pRow);
-	expandPivot.push_back(pivot.cell(pCol,pRow));
+	expandPivot.push_back(pivot.cellString(pCol,pRow));
       } else {
 	expandPivot.push_back(blank);
       }
     }
     if (lRow>=0 && lCol>=0 && !deleted) {
       if (diff) {
-	cond[names[at]] = local.cell(lCol,lRow);
+	cond[names[at]] = local.cellString(lCol,lRow);
       }
     }
     if (!deleted) {
@@ -196,7 +196,7 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 	size_t i;
 	for (i=0; i<expandMerge.size(); i++) {
 	  string data = expandMerge[i];
-	  string was = local.cell(i,current_row);
+	  string was = local.cellString(i,current_row);
 	  if (was!=data && data!=blank) {
 	    break;
 	  }

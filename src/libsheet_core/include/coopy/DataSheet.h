@@ -1,10 +1,12 @@
 #ifndef COOPY_DATASHEET
 #define COOPY_DATASHEET
 
+#include <coopy/Dbg.h>
 #include <coopy/SheetStyle.h>
 #include <coopy/SheetSchema.h>
 #include <coopy/RowRef.h>
 #include <coopy/ColumnRef.h>
+#include <coopy/RefCount.h>
 
 #include <string>
 
@@ -14,7 +16,7 @@ namespace coopy {
   }
 }
 
-class coopy::store::DataSheet {
+class coopy::store::DataSheet : public RefCount {
 public:
   virtual ~DataSheet() {}
 

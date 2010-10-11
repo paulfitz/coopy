@@ -20,13 +20,11 @@ public:
     return result;
   }
 
-  virtual bool readSheet(const std::string& name, TextSheet& sheet) {
+  virtual PolySheet readSheet(const std::string& name) {
     if (name=="single") {
-      sheet.copy(this->sheet);
-      return true;
+      return PolySheet(&sheet,false);
     }
-    sheet.clear();
-    return false;
+    return PolySheet();
   }
 };
 

@@ -45,9 +45,9 @@ public:
 
   std::string cell(coopy::store::TextSheet& a, int x, int y) {
     if (rowLike) {
-      return a.cell(x,y);
+      return a.cellString(x,y);
     }
-    return a.cell(y,x);
+    return a.cellString(y,x);
   }
 
   void setup();

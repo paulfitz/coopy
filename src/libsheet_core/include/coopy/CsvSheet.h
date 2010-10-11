@@ -12,7 +12,7 @@ namespace coopy {
   }
 }
 
-class coopy::store::CsvSheet : public TextSheet {
+class coopy::store::CsvSheet : public TypedSheet<std::string> {
 private:
   std::vector<std::string> rec;
   int th, tw;
@@ -117,6 +117,18 @@ public:
       return cell(x,y);
     }
     return "";
+  }
+
+  virtual bool cellString(int x, int y, const std::string& str) {
+    cell(x,y) = str;
+    return true;
+  }
+
+  const CsvSheet& copy(const CsvSheet& alt) {
+    arr = alt.arr;
+    h = alt.h;
+    w = alt.w;
+    return *this;
   }
 };
 

@@ -2,6 +2,7 @@
 #define COOPY_POLYBOOK
 
 #include <coopy/TextBook.h>
+#include <coopy/PolySheet.h>
 
 namespace coopy {
   namespace store {
@@ -35,11 +36,11 @@ public:
     return std::vector<std::string>();
   }
 
-  virtual bool readSheet(const std::string& name, TextSheet& sheet) {
+  virtual PolySheet readSheet(const std::string& name) {
     if (book) {
-      return book->readSheet(name,sheet);
+      return book->readSheet(name);
     }
-    return false;
+    return PolySheet();
   }
 
   bool isValid() { return book!=NULL; }

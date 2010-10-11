@@ -42,7 +42,7 @@ public:
 	if (at<top) {
 	  at++;
 	  for (int x=0; x<w; x++) {
-	    std::string txt = a.cell(x,y);
+	    std::string txt = a.cellString(x,y);
 	    m.setCurr(x,y);
 	    m.add(txt,query,ctrl);
 	  }
@@ -55,8 +55,8 @@ public:
       for (int y=0; y<h; y++) {
 	if (asel.cell(0,y)>=-1) {
 	  for (int x=0; x<w-1; x++) {
-	    std::string txt = a.cell(x,y);
-	    txt += a.cell(x+1,y);
+	    std::string txt = a.cellString(x,y);
+	    txt += a.cellString(x+1,y);
 	    m.setCurr(x,y);
 	    m.add(txt,query,ctrl);
 	  }

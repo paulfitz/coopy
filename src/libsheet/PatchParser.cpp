@@ -31,7 +31,7 @@ public:
       last = x+len-1;
     }
     for (int i=x; i<=last; i++) {
-      string v = sheet.cell(i,y);
+      string v = sheet.cellString(i,y);
       if (v==""&&len==-1) break;
       lst.push_back(v);
       indices.push_back(i-x);

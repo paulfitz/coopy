@@ -50,12 +50,15 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
   for (set<string>::const_iterator it=name_set.begin();
        it!=name_set.end();
        it++) {
-    TextSheet pivot_sheet, local_sheet, remote_sheet;
     string name = *it;
     dbg_printf("  Working on \"%s\"\n", name.c_str());
-    pivot.readSheet(name.c_str(),pivot_sheet);
-    local.readSheet(name.c_str(),local_sheet);
-    remote.readSheet(name.c_str(),remote_sheet);
+    //TextSheet pivot_sheet, local_sheet, remote_sheet;
+    //pivot.readSheet(name.c_str(),pivot_sheet);
+    //local.readSheet(name.c_str(),local_sheet);
+    //remote.readSheet(name.c_str(),remote_sheet);
+    PolySheet pivot_sheet = pivot.readSheet(name.c_str());
+    PolySheet local_sheet = local.readSheet(name.c_str());
+    PolySheet remote_sheet = remote.readSheet(name.c_str());
     SheetCompare cmp;
     bool ok = output.setSheet(name.c_str());
     if (!ok) {

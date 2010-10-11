@@ -6,15 +6,17 @@
 
 namespace coopy {
   namespace store {
-    class TextBook;
+    typedef DataBook TextBook;
   }
 }
 
+/*
 class coopy::store::TextBook : public DataBook {
 public:
   virtual std::vector<std::string> getNames() = 0;
 
   virtual bool readSheet(const std::string& name, TextSheet& sheet) = 0;
 };
+*/
 
 #endif

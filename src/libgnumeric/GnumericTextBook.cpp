@@ -36,9 +36,8 @@ std::vector<std::string> GnumericTextBook::getNames() {
   return fake;
 }
 
-bool GnumericTextBook::readSheet(const std::string& name, 
-				 TextSheet& sheet) {
-  return false;
+PolySheet GnumericTextBook::readSheet(const std::string& name) {
+  return PolySheet();
 }
 
 

@@ -35,7 +35,7 @@ public:
       bool fail = false;
       for (int r=0; r<pass.a.height() && !fail; r++) {
 	for (int c=0; c<pass.a.width(); c++) {
-	  if (pass.a.cell(c,r)!=pass.b.cell(c,r)) {
+	  if (pass.a.cellString(c,r)!=pass.b.cellString(c,r)) {
 	    fail = true;
 	    break;
 	  }
