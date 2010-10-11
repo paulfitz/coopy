@@ -10,6 +10,6 @@ vector<string> SqliteTextBook::getNames() {
   return result;
 }
 
-bool SqliteTextBook::readSheet(const string& name, TextSheet& sheet) {
-  return false;
+PolySheet SqliteTextBook::readSheet(const string& name) {
+  return PolySheet();
 }

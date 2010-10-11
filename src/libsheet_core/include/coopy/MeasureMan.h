@@ -43,7 +43,7 @@ public:
     return a.height();
   }
 
-  std::string cell(coopy::store::TextSheet& a, int x, int y) {
+  std::string cell(coopy::store::DataSheet& a, int x, int y) {
     if (rowLike) {
       return a.cellString(x,y);
     }

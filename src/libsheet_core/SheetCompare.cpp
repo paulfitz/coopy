@@ -94,7 +94,7 @@ public:
 };
 */
 
-int SheetCompare::compare(TextSheet& pivot, TextSheet& local, TextSheet& remote,
+int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 			  MergeOutput& output, const CompareFlags& flags) {
   IdentityOrderResult id;
 

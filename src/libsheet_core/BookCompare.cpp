@@ -52,10 +52,6 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
        it++) {
     string name = *it;
     dbg_printf("  Working on \"%s\"\n", name.c_str());
-    //TextSheet pivot_sheet, local_sheet, remote_sheet;
-    //pivot.readSheet(name.c_str(),pivot_sheet);
-    //local.readSheet(name.c_str(),local_sheet);
-    //remote.readSheet(name.c_str(),remote_sheet);
     PolySheet pivot_sheet = pivot.readSheet(name.c_str());
     PolySheet local_sheet = local.readSheet(name.c_str());
     PolySheet remote_sheet = remote.readSheet(name.c_str());

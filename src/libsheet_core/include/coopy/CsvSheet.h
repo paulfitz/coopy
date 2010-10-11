@@ -1,7 +1,7 @@
 #ifndef SSFOSSIL_CSVSHEET
 #define SSFOSSIL_CSVSHEET
 
-#include <coopy/TextSheet.h>
+#include <coopy/TypedSheet.h>
 
 #include <vector>
 #include <string>

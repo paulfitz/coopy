@@ -3,7 +3,7 @@
 
 #include <coopy/OrderMerge.h>
 #include <coopy/OrderResult.h>
-#include <coopy/TextSheet.h>
+#include <coopy/DataSheet.h>
 #include <coopy/MergeOutput.h>
 #include <coopy/CompareFlags.h>
 
@@ -21,9 +21,9 @@ public:
   Merger() {
   }
 
-  void merge(coopy::store::TextSheet& pivot, 
-	     coopy::store::TextSheet& local, 
-	     coopy::store::TextSheet& remote,
+  void merge(coopy::store::DataSheet& pivot, 
+	     coopy::store::DataSheet& local, 
+	     coopy::store::DataSheet& remote,
 	     const OrderResult& nrow_local,
 	     const OrderResult& nrow_remote,
 	     const OrderResult& ncol_local,
@@ -31,9 +31,9 @@ public:
 	     MergeOutput& output,
 	     const CompareFlags& flags);
 
-  void mergeRow(coopy::store::TextSheet& pivot, 
-		coopy::store::TextSheet& local, 
-		coopy::store::TextSheet& remote,
+  void mergeRow(coopy::store::DataSheet& pivot, 
+		coopy::store::DataSheet& local, 
+		coopy::store::DataSheet& remote,
 		MatchUnit& row_unit, MergeOutput& output,
 		const CompareFlags& flags);
 

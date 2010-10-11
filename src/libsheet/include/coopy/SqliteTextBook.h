@@ -13,7 +13,7 @@ class coopy::store::SqliteTextBook : public TextBook {
 public:
   std::vector<std::string> getNames();
 
-  bool readSheet(const std::string& name, TextSheet& sheet);
+  PolySheet readSheet(const std::string& name);
 };
 
 #endif

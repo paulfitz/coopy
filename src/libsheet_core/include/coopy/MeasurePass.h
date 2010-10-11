@@ -1,7 +1,7 @@
 #ifndef COOPY_MEASUREPASS
 #define COOPY_MEASUREPASS
 
-#include <coopy/TextSheet.h>
+#include <coopy/DataSheet.h>
 #include <coopy/OrderResult.h>
 #include <coopy/Dbg.h>
 #include <coopy/SparseSheet.h>
@@ -14,14 +14,14 @@ namespace coopy {
 
 class coopy::cmp::MeasurePass {
 public:
-  coopy::store::TextSheet& a;
-  coopy::store::TextSheet& b;
+  coopy::store::DataSheet& a;
+  coopy::store::DataSheet& b;
   coopy::store::IntSheet asel, bsel;
   coopy::store::SparseFloatSheet match;
   int bound;
 
-  MeasurePass(coopy::store::TextSheet& a, 
-	      coopy::store::TextSheet& b) : a(a), b(b) {
+  MeasurePass(coopy::store::DataSheet& a, 
+	      coopy::store::DataSheet& b) : a(a), b(b) {
     bound = -1;
   }
 

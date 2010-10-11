@@ -1,7 +1,7 @@
 #ifndef COOPY_BOOKCOMPARE
 #define COOPY_BOOKCOMPARE
 
-#include <coopy/TextSheet.h>
+#include <coopy/DataSheet.h>
 #include <coopy/MergeOutput.h>
 #include <coopy/TextBook.h>
 #include <coopy/CompareFlags.h>

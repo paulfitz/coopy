@@ -23,7 +23,7 @@ public:
   vector<string> lst;
   vector<int> indices;
 
-  void read(const TextSheet& sheet, int x, int y, int len = -1) {
+  void read(const DataSheet& sheet, int x, int y, int len = -1) {
     lst.clear();
     indices.clear();
     int last = sheet.width()-1;

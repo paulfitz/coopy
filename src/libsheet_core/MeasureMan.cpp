@@ -101,8 +101,8 @@ void MeasureMan::compare1(int ctrl) {
   SparseFloatSheet match = main_pass.match;
   IntSheet& asel = main_pass.asel;
   IntSheet& bsel = main_pass.bsel;
-  TextSheet& a = main_pass.a;
-  TextSheet& b = main_pass.b;
+  DataSheet& a = main_pass.a;
+  DataSheet& b = main_pass.b;
 
   Viterbi v;
   /*

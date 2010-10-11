@@ -30,7 +30,7 @@ public:
     pass.setSize(pass.a.height(),pass.b.height());
   }
 
-  void apply(coopy::store::TextSheet& a, 
+  void apply(coopy::store::DataSheet& a, 
 	     coopy::store::IntSheet& asel, bool query, int ctrl) {
     int w = a.width();
     int h = a.height();
@@ -66,8 +66,8 @@ public:
     m.summarize(true);
   }
 
-  void apply(coopy::store::TextSheet& a, 
-	     coopy::store::TextSheet& b, 
+  void apply(coopy::store::DataSheet& a, 
+	     coopy::store::DataSheet& b, 
 	     coopy::store::IntSheet& asel, 
 	     coopy::store::IntSheet& bsel,
 	     int ctrl) {

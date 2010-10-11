@@ -15,7 +15,7 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 
-void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
+void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 		      MatchUnit& row_unit, MergeOutput& output,
 		      const CompareFlags& flags) {
   
@@ -255,7 +255,7 @@ void Merger::mergeRow(TextSheet& pivot, TextSheet& local, TextSheet& remote,
 }
 
 
-void Merger::merge(TextSheet& pivot, TextSheet& local, TextSheet& remote,
+void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 		   const OrderResult& row_local,
 		   const OrderResult& row_remote,
 		   const OrderResult& col_local,
