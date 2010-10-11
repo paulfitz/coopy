@@ -141,10 +141,36 @@ int gnumeric_overlay_csv(GnumericWorkbookPtr workbook,
   return 0;
 }
 
-/*
-GnumericSheetPtr gnumeric_sheet(GnumericWorkbookPtr workbook, int index) {
+GnumericSheetPtr gnumeric_get_sheet(GnumericWorkbookPtr workbook, int index) {
   WorkbookView *wbv = (WorkbookView *)workbook;
   Sheet *sheet = workbook_sheet_by_index (wb_view_get_workbook (wbv), 0);
-  return sheet;
+  return (GnumericSheetPtr*)sheet;
 }
-*/
+
+int gnumeric_sheet_get_size(GnumericSheetPtr sheet, int *w, int *h) {
+  Sheet *s = (Sheet *)sheet;
+  //GnmSheetSize const *size = gnm_sheet_get_size(sheet);
+  GnmRange range = sheet_get_extent(s,FALSE);
+  if (w!=NULL) *w = range.end.col+1;
+  if (h!=NULL) *h = range.end.row+1;
+}
+
+char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
+  GnmValue const *value = sheet_cell_get_value((Sheet*)sheet,x, y);
+  if (value==NULL) return "";
+  return value_get_as_string(value);
+}
+
+int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
+				      const char *str) {
+  GnmCell *cell = sheet_cell_get((Sheet*)sheet,x,y);
+  if (cell==NULL) {
+    cell = sheet_cell_create((Sheet*)sheet,x,y);
+  }
+  sheet_cell_set_text(cell,str,NULL);
+  return 0;
+}
+
+void gnumeric_free_string(char *str) {
+  g_free(str);
+}

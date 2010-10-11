@@ -35,7 +35,11 @@ if (GNUMERIC)
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
   add_library(gnumeric include/coopy/gnumeric_link.h gnumeric_link.c 
-		       GnumericTextBook.cpp GnumericTextBookFactory.cpp)
+		       GnumericTextBook.cpp GnumericTextBookFactory.cpp
+		       GnumericSheet.cpp)
   target_link_libraries(gnumeric sheet_core)
+
+  add_executable(test_gnumeric test_gnumeric.cpp)
+  target_link_libraries(test_gnumeric gnumeric)
 
 endif ()

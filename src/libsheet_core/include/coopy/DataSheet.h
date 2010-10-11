@@ -16,6 +16,8 @@ namespace coopy {
 
 class coopy::store::DataSheet {
 public:
+  virtual ~DataSheet() {}
+
   virtual int width() const = 0;
   virtual int height() const = 0;
 

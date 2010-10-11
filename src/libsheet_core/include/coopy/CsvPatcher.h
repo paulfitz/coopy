@@ -2,7 +2,7 @@
 #define COOPY_CSVPATCHER
 
 #include <coopy/Patcher.h>
-#include <coopy/CsvSheet.h>
+#include <coopy/DataSheet.h>
 
 namespace coopy {
   namespace cmp {
