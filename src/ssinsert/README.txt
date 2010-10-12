@@ -1,4 +1,10 @@
 
+This directory is no longer needed.  Functionality has been
+integrated into sspatch command.
+-P
+
+===========
+
 How to compile:
 
 * Limitation: be on a Linux machine

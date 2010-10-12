@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
   }
-  gnumeric_save(book,target_name);
+  gnumeric_save(book,target_name,NULL);
   gnumeric_free(book);
   gnumeric_fini();
   return 0;

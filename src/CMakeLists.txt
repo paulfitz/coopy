@@ -1,3 +1,4 @@
+option(GNUMERIC OFF "Enable gnumeric integration (For XLS, ODF, etc)")
 option(CREATE_SHARED_LIBRARIES "Compile shared libraries rather than static")
 if (CREATE_SHARED_LIBRARIES)
   set(BUILD_SHARED_LIBS ON)
@@ -33,7 +34,3 @@ IF (PROFILING)
   ENDFOREACH()
 ENDIF (PROFILING)
 
-option(GNUMERIC OFF "Turn on gnumeric integration")
-if (GNUMERIC)
-  ADD_SUBDIRECTORY(ssinsert)
-ENDIF ()
