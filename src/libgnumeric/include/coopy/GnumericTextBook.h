@@ -22,6 +22,8 @@ public:
   
   virtual bool load(const char *fname);
 
+  virtual bool save(const char *fname, const char *format);
+
   virtual std::vector<std::string> getNames();
 
   virtual PolySheet readSheet(const std::string& name);

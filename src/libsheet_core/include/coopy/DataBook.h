@@ -25,6 +25,10 @@ public:
     if (index>=(int)names.size()) return PolySheet();
     return readSheet(names[index]);
   }
+
+  virtual bool save(const char *fname, const char *format) {
+    return false;
+  }
 };
 
 #endif

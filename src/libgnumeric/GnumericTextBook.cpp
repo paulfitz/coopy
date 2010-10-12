@@ -47,4 +47,18 @@ PolySheet GnumericTextBook::readSheet(const std::string& name) {
   return PolySheet();
 }
 
+bool GnumericTextBook::save(const char *fname, const char *format) {
+  if (implementation==NULL) return false;
+  const char *fmt = NULL;
+  if (format!=NULL) {
+    if (string(format)!="-") {
+      fmt = format;
+    }
+  }
+  return gnumeric_save((GnumericWorkbookPtr)implementation,
+		       fname,
+		       fmt) == 0;
+}
+
+
 

@@ -86,10 +86,19 @@ public:
   }
 };
 
-bool PolyBook::write(const char *fname) {
+bool PolyBook::write(const char *fname, const char *format) {
   if (book==NULL) {
     fprintf(stderr,"Nothing to write\n");
     return false;
+  }
+  if (book->save(fname,format)) {
+    return true;
+  }
+  if (format!=NULL) {
+    if (string(format)!=""&&string(format)!="-") {
+      fprintf(stderr,"Setting output format is not yet supported\n");
+      exit(1);
+    }
   }
   vector<string> names = getNames();
   string name = fname;

@@ -42,4 +42,7 @@ if (GNUMERIC)
   add_executable(test_gnumeric test_gnumeric.cpp)
   target_link_libraries(test_gnumeric gnumeric)
 
+  add_executable(ss2html ss2html.cpp)
+  target_link_libraries(ss2html gnumeric)
+
 endif ()

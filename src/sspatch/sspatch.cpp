@@ -19,11 +19,13 @@ using namespace std;
 int main(int argc, char *argv[]) {
   bool verbose = false;
   string output = "-";
+  string outputFormat = "-";
   while (true) {
     int option_index = 0;
     static struct option long_options[] = {
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
+      {"output-format", 1, 0, 'f'},
       {0, 0, 0, 0}
     };
 
@@ -36,6 +38,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'o':
       output = optarg;
+      break;
+    case 'f':
+      outputFormat = optarg;
       break;
     default:
       fprintf(stderr, "Unrecognized option\n");
@@ -53,6 +58,7 @@ int main(int argc, char *argv[]) {
   if (argc<2) {
     printf("Apply patch to a spreadsheet.\n");
     printf("  sspatch [--verbose] [--output output.csv] sheet.csv patch.txt\n");
+    //printf("  sspatch [--output-format FORMAT] sheet.csv patch.txt\n");
     printf("Output defaults to standard output.\n");
     printf("Write output to original file by doing:\n");
     printf("  sspatch --output sheet.csv sheet.csv patch.txt\n");
@@ -93,7 +99,7 @@ int main(int argc, char *argv[]) {
   }
   
   //if (CsvFile::write(local,output.c_str())!=0) {
-  if (!local.write(output.c_str())) {
+  if (!local.write(output.c_str(),outputFormat.c_str())) {
     fprintf(stderr,"Failed to write %s\n", output.c_str());
     return 1;
   }

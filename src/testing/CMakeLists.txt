@@ -342,3 +342,29 @@ foreach(patcher patch_001_col_move patch_002_col_insert patch_003_col_insert pat
   ADD_TEST2(${patcher} ${TESTS}/result_${patcher}.csv sspatch ${TESTS}/numbers.csv ${TESTS}/${patcher}.txt)
 
 endforeach()
+
+
+#######################################################################
+#######################################################################
+
+# EXCEL testing
+
+IF (GNUMERIC)
+
+MACRO(TEST_XLS name ref target)
+  ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
+    --output test_out_${name}.xls
+    ${ARGN})
+  ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ss2html${EXE_EXT} 
+     --compare
+    test_out_${name}.xls ${ref} ${ref})
+#    test_out_${name}.xls test_out_${name}.html ${ref})
+ENDMACRO()
+
+foreach(patcher patch_000_nothing)
+  TEST_XLS(excel_${patcher} ${TESTS}/result_excel_${patcher}.html sspatch ${TESTS}/numbers.xls ${TESTS}/${patcher}.txt)
+
+endforeach()
+
+
+ENDIF()

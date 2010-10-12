@@ -47,7 +47,7 @@ public:
 
   bool read(const char *fname);
 
-  bool write(const char *fname);
+  bool write(const char *fname, const char *format = NULL);
 };
 
 #endif

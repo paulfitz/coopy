@@ -102,17 +102,29 @@ GnumericWorkbookPtr gnumeric_load(const char *fname) {
   return wbv;
 }
 
-int gnumeric_save(GnumericWorkbookPtr workbook, const char *fname) {
+int gnumeric_save(GnumericWorkbookPtr workbook, const char *fname,
+		  const char *format) {
   WorkbookView *wbv = (WorkbookView *)workbook;
   int res = 0;
   GOFileSaver *fs = NULL;
-  fs = go_file_saver_for_file_name (fname);
-  if (fs == NULL) {
-    res = 2;
-    g_printerr (_("Unable to guess exporter to use for '%s'.\n"
-		  "Try --list-exporters to see a list of possibilities.\n"),
-		fname);
-    return 1;
+
+  if (format!=NULL) {
+    fs = go_file_saver_for_id(format);
+    if (fs == NULL) {
+      res = 1;
+      g_printerr (_("Unknown exporter '%s'.\n"), format);
+      return 1;
+    }
+  }
+  if (fs==NULL) {
+    fs = go_file_saver_for_file_name (fname);
+    if (fs == NULL) {
+      res = 2;
+      g_printerr (_("Unable to guess exporter to use for '%s'.\n"
+		    "Try --list-exporters to see a list of possibilities.\n"),
+		  fname);
+      return 1;
+    }
   }
   g_print ("Using exporter %s\n",
 	   go_file_saver_get_id (fs));
