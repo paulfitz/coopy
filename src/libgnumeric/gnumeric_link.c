@@ -44,6 +44,7 @@
 #define go_io_context_new gnumeric_io_context_new
 #define wb_view_get_workbook wb_view_workbook
 #define sheet_cell_create sheet_cell_new
+#define PASTE_CONTENTS PASTE_CONTENT
 #endif
 
 static GOErrorInfo	*plugin_errs = NULL;
@@ -210,7 +211,7 @@ int gnumeric_move_column(GnumericSheetPtr sheet, int src, int dest) {
 
   GnmPasteTarget pt;
   pt.sheet = sheet;
-  pt.paste_flags = PASTE_CONTENT | PASTE_COMMENTS | PASTE_NO_RECALC;
+  pt.paste_flags = PASTE_CONTENTS | PASTE_COMMENTS | PASTE_NO_RECALC;
   pt.paste_flags = pt.paste_flags | PASTE_FORMATS;
 
   GnmRange range1, range2;
