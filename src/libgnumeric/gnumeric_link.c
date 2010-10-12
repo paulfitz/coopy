@@ -42,6 +42,7 @@
 #define go_get_file_openers get_file_openers
 #define go_io_context_new gnumeric_io_context_new
 #define wb_view_get_workbook wb_view_workbook
+#define sheet_cell_create sheet_cell_new
 #endif
 
 static GOErrorInfo	*plugin_errs = NULL;
