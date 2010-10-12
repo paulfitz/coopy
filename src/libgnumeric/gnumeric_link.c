@@ -26,6 +26,7 @@
 #include <gsf/gsf-utils.h>
 #include <string.h>
 #include "stf-parse.h"
+#include "clipboard.h"
 
 #include "coopy/gnumeric_link.h"
 
@@ -186,4 +187,69 @@ int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
 
 void gnumeric_free_string(char *str) {
   g_free(str);
+}
+
+
+int gnumeric_move_column(GnumericSheetPtr sheet, int src, int dest) {
+  int w, h;
+  gnumeric_sheet_get_size(sheet,&w,&h);
+
+  /*
+    If dest<src:
+       copy the src column
+       copy from dest to src-1
+         paste that offset to right by 1
+       paste to dest column
+
+    If dest>src:
+       copy the src column
+       copy from src+1 to dest
+         paste that offset to left by 1
+       paste to dest column
+   */
+
+  GnmPasteTarget pt;
+  pt.sheet = sheet;
+  pt.paste_flags = PASTE_CONTENT | PASTE_COMMENTS | PASTE_NO_RECALC;
+  pt.paste_flags = pt.paste_flags | PASTE_FORMATS;
+
+  GnmRange range1, range2;
+  GnmCellRegion *rcopy1, *rcopy2 = NULL;
+  if (src==dest) return 0;
+
+  // copy src column
+  range1.start.row = 0;
+  range1.end.row = h-1;
+  range1.start.col = src;
+  range1.end.col = src;
+  rcopy1 = clipboard_copy_range(sheet,&range1);
+
+  // copy src-dest range
+  range2.start.row = 0;
+  range2.end.row = h-1;
+  if (dest<src) {
+    range2.start.col = dest;
+    range2.end.col = src-1;
+  } else {
+    range2.start.col = src+1;
+    range2.end.col = dest;
+  }
+  rcopy2 = clipboard_copy_range(sheet,&range2);
+  if (dest<src) {
+    range2.start.col++;
+    range2.end.col++;
+  } else {
+    range2.start.col--;
+    range2.end.col--;
+  }
+  pt.range = range2;
+  clipboard_paste_region(rcopy2, &pt, cc);
+  cellregion_unref(rcopy2);
+
+  range1.start.col = dest;
+  range1.end.col = dest;
+  pt.range = range1;
+  clipboard_paste_region(rcopy1, &pt, cc);
+  cellregion_unref(rcopy1);
+  return 0;
 }

@@ -27,3 +27,5 @@ int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
 				      const char *str);
 
 void gnumeric_free_string(char *str);
+
+int gnumeric_move_column(GnumericSheetPtr sheet, int src, int dest);

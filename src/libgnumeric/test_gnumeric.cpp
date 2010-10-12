@@ -60,6 +60,14 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
   }
+  printf("\n");
+  gnumeric_move_column(gnumeric_get_sheet(book,0),0,1);
+  for (int y=0; y<sheet.height(); y++) {
+    for (int x=0; x<sheet.width(); x++) {
+      printf("[%s] ", sheet.cellString(x,y).c_str());
+    }
+    printf("\n");
+  }
   gnumeric_save(book,target_name,NULL);
   gnumeric_free(book);
   gnumeric_fini();
