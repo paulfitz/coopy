@@ -40,3 +40,19 @@ bool GnumericSheet::cellString(int x, int y, const std::string& str) {
 }
 
 
+ColumnRef GnumericSheet::moveColumn(const ColumnRef& src, 
+				    const ColumnRef& base) {
+  int i0 = src.getIndex();
+  int i1 = base.getIndex();
+  if (i0<0) return ColumnRef();
+  if (i1<0) i1 = width();
+  int i2 = i1;
+  if (i2>i0) {
+    i2--;
+  }
+  gnumeric_move_column(SHEET(implementation),i0,i2);
+
+  return ColumnRef(i2);
+}
+
+

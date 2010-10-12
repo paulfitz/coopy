@@ -357,11 +357,11 @@ MACRO(TEST_XLS name ref target)
     ${ARGN})
   ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ss2html${EXE_EXT} 
      --compare
-    test_out_${name}.xls ${ref} ${ref})
-#    test_out_${name}.xls test_out_${name}.html ${ref})
+#    test_out_${name}.xls ${ref} ${ref})
+    test_out_${name}.xls test_out_${name}.html ${ref})
 ENDMACRO()
 
-foreach(patcher patch_000_nothing)
+foreach(patcher patch_000_nothing patch_001_col_move)
   TEST_XLS(excel_${patcher} ${TESTS}/result_excel_${patcher}.html sspatch ${TESTS}/numbers.xls ${TESTS}/${patcher}.txt)
 
 endforeach()

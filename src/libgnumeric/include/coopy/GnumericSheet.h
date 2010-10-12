@@ -22,6 +22,8 @@ public:
 
   virtual bool cellString(int x, int y, const std::string& str);
 
+  virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base);
+
 private:
   void *implementation;
   int w, h;
