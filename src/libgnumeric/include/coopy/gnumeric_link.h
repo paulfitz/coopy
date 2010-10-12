@@ -33,3 +33,7 @@ int gnumeric_move_column(GnumericSheetPtr sheet, int src, int dest);
 int gnumeric_insert_column(GnumericSheetPtr sheet, int before);
 
 int gnumeric_delete_column(GnumericSheetPtr sheet, int at);
+
+int gnumeric_insert_row(GnumericSheetPtr sheet, int before);
+
+int gnumeric_delete_row(GnumericSheetPtr sheet, int at);

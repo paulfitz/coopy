@@ -357,11 +357,13 @@ MACRO(TEST_XLS name ref target)
     ${ARGN})
   ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ss2html${EXE_EXT} 
      --compare
-#    test_out_${name}.xls ${ref} ${ref})
-    test_out_${name}.xls test_out_${name}.html ${ref})
+    test_out_${name}.xls ${ref} ${ref})
+#    test_out_${name}.xls test_out_${name}.html ${ref})
 ENDMACRO()
 
-foreach(patcher patch_000_nothing patch_001_col_move)
+# Blank columns don't get exported by gnumeric, so some tests are not
+# that useful
+foreach(patcher patch_000_nothing patch_001_col_move patch_002_col_insert patch_003_col_insert patch_004_col_delete patch_005_row_update patch_006_row_insert patch_007_row_delete)
   TEST_XLS(excel_${patcher} ${TESTS}/result_excel_${patcher}.html sspatch ${TESTS}/numbers.xls ${TESTS}/${patcher}.txt)
 
 endforeach()

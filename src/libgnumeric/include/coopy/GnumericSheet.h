@@ -24,6 +24,14 @@ public:
 
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base);
 
+  virtual bool deleteColumn(const ColumnRef& column);
+
+  virtual ColumnRef insertColumn(const ColumnRef& base);
+
+  virtual RowRef insertRow(const RowRef& base);
+
+  virtual bool deleteRow(const RowRef& src);
+
 private:
   void *implementation;
   int w, h;

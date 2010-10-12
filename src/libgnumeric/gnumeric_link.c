@@ -256,14 +256,21 @@ int gnumeric_move_column(GnumericSheetPtr sheet, int src, int dest) {
 }
 
 int gnumeric_insert_column(GnumericSheetPtr sheet, int before) {
-  printf("not implemented\n");
-  // see sheet_insert_cols
-  return 1;
+  sheet_insert_cols(sheet,before,1,NULL,cc);
+  return 0;
 }
 
 int gnumeric_delete_column(GnumericSheetPtr sheet, int at) {
-  printf("not implemented\n");
-  // see sheet_delete_cols
-  return 1;
+  sheet_delete_cols(sheet,at,1,NULL,cc);
+  return 0;
 }
 
+int gnumeric_insert_row(GnumericSheetPtr sheet, int before) {
+  sheet_insert_rows(sheet,before,1,NULL,cc);
+  return 0;
+}
+
+int gnumeric_delete_row(GnumericSheetPtr sheet, int at) {
+  sheet_delete_rows(sheet,at,1,NULL,cc);
+  return 0;
+}

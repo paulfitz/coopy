@@ -56,3 +56,51 @@ ColumnRef GnumericSheet::moveColumn(const ColumnRef& src,
 }
 
 
+bool GnumericSheet::deleteColumn(const ColumnRef& column) {
+  int index = column.getIndex();
+  if (index>=w) return true;
+  bool ok = gnumeric_delete_column(SHEET(implementation),index) == 0;
+  if (!ok) return false;
+  w--;
+  return true;
+}
+
+ColumnRef GnumericSheet::insertColumn(const ColumnRef& base) {
+  int index = base.getIndex();
+  if (index==-1) { 
+    index = width();
+  }
+  if (index>=w) {
+    w = index+1;
+    return ColumnRef(index);
+  }
+  bool ok = gnumeric_insert_column(SHEET(implementation),index) == 0;
+  if (!ok) { return ColumnRef(); }
+  w++;
+  return ColumnRef(index);
+}
+
+RowRef GnumericSheet::insertRow(const RowRef& base) {
+  int index = base.getIndex();
+  if (index==-1) {
+    h++;
+    return RowRef(h-1);
+  }
+  if (index>=h) {
+    h = index+1;
+    return RowRef(index);
+  }
+  bool ok = gnumeric_insert_row(SHEET(implementation),index) == 0;
+  if (!ok) { return RowRef(); }
+  h++;
+  return RowRef(index);  
+}
+
+bool GnumericSheet::deleteRow(const RowRef& src) {
+  int index = src.getIndex();
+  if (index>=h) return true;
+  bool ok = gnumeric_delete_row(SHEET(implementation),index) == 0;
+  if (!ok) return false;
+  h--;
+  return true;
+}
