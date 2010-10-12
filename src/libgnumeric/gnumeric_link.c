@@ -253,3 +253,16 @@ int gnumeric_move_column(GnumericSheetPtr sheet, int src, int dest) {
   cellregion_unref(rcopy1);
   return 0;
 }
+
+int gnumeric_insert_column(GnumericSheetPtr sheet, int before) {
+  printf("not implemented\n");
+  // see sheet_insert_cols
+  return 1;
+}
+
+int gnumeric_delete_column(GnumericSheetPtr sheet, int at) {
+  printf("not implemented\n");
+  // see sheet_delete_cols
+  return 1;
+}
+
