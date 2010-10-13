@@ -45,6 +45,13 @@
 #define wb_view_get_workbook wb_view_workbook
 #define sheet_cell_create sheet_cell_new
 #define PASTE_CONTENTS PASTE_CONTENT
+#define DO_UNDO NULL, &tmp
+#define BEGIN_UNDO GnmRelocUndo tmp;
+#define END_UNDO dependents_unrelocate_free (tmp.exprs);
+#else
+#define DO_UNDO NULL
+#define BEGIN_UNDO
+#define END_UNDO
 #endif
 
 static GOErrorInfo	*plugin_errs = NULL;
@@ -256,21 +263,29 @@ int gnumeric_move_column(GnumericSheetPtr sheet, int src, int dest) {
 }
 
 int gnumeric_insert_column(GnumericSheetPtr sheet, int before) {
-  sheet_insert_cols(sheet,before,1,NULL,cc);
+  BEGIN_UNDO;
+  sheet_insert_cols(sheet,before,1,DO_UNDO,cc);
+  END_UNDO;
   return 0;
 }
 
 int gnumeric_delete_column(GnumericSheetPtr sheet, int at) {
-  sheet_delete_cols(sheet,at,1,NULL,cc);
+  BEGIN_UNDO;
+  sheet_delete_cols(sheet,at,1,DO_UNDO,cc);
+  END_UNDO;
   return 0;
 }
 
 int gnumeric_insert_row(GnumericSheetPtr sheet, int before) {
-  sheet_insert_rows(sheet,before,1,NULL,cc);
+  BEGIN_UNDO;
+  sheet_insert_rows(sheet,before,1,DO_UNDO,cc);
+  END_UNDO;
   return 0;
 }
 
 int gnumeric_delete_row(GnumericSheetPtr sheet, int at) {
-  sheet_delete_rows(sheet,at,1,NULL,cc);
+  BEGIN_UNDO;
+  sheet_delete_rows(sheet,at,1,DO_UNDO,cc);
+  END_UNDO;
   return 0;
 }
