@@ -11,6 +11,9 @@ INCLUDE_DIRECTORIES(${SQLITE_DIR})
 
 ADD_LIBRARY(sqlite ${SQLITE_DIR}/sqlite3.c SqliteTextBook.cpp SqliteSheet.cpp)
 TARGET_LINK_LIBRARIES(sqlite sheet_core)
+IF (UNIX)
+  TARGET_LINK_LIBRARIES(sqlite dl pthread)
+ENDIF (UNIX)
 
 ADD_EXECUTABLE(test_sqlite test_sqlite.cpp)
 TARGET_LINK_LIBRARIES(test_sqlite sqlite)
