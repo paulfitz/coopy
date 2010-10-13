@@ -7,6 +7,10 @@ if (CREATE_SHARED_LIBRARIES)
   endif()
 endif()
 
+if (GNUMERIC)
+  set (COMPILE_PLAIN_EXECUTABLES TRUE)
+endif ()
+
 add_subdirectory(libsheet_core)
 add_subdirectory(libcsv)
 add_subdirectory(libgnumeric)

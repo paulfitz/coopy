@@ -3,9 +3,9 @@
 
 using namespace coopy::store;
 
-#cmakedefine GNUMERIC
+#cmakedefine USE_GNUMERIC
 
-#ifdef GNUMERIC
+#ifdef USE_GNUMERIC
 #include <coopy/GnumericTextBookFactory.h>
 #endif
 
@@ -13,7 +13,7 @@ TextBook *readHelper(const char *fname,
 		     const char *ext,
 		     const char *data) {
   TextBook *result = NULL;
-#ifdef GNUMERIC
+#ifdef USE_GNUMERIC
   printf("Checking with Gnumeric...\n");
   GnumericTextBookFactory fact;
   if (fact.check(fname,ext,data)) {
