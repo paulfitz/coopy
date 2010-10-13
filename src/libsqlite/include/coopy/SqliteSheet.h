@@ -3,6 +3,8 @@
 
 #include <coopy/DataSheet.h>
 
+#include <vector>
+
 namespace coopy {
   namespace store {
     class SqliteSheet;
@@ -36,6 +38,8 @@ private:
   void *implementation;
   std::string name;
   int w, h;
+  std::vector<int> row2sql;
+  std::vector<std::string> col2sql;
 };
 
 #endif

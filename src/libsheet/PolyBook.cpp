@@ -1,6 +1,8 @@
 #include <coopy/PolyBook.h>
 #include <coopy/ShortTextBook.h>
+#include <coopy/SqliteTextBook.h>
 #include <coopy/CsvFile.h>
+#include <coopy/FormatSniffer.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,6 +11,7 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::format;
 
 extern TextBook *readHelper(const char *fname,
 			    const char *ext,
@@ -24,8 +27,16 @@ bool PolyBook::read(const char *fname) {
     }
     book = readHelper(fname,ext.c_str(),NULL);
     if (book!=NULL) return true;
-    if (ext==".db") {
-      // try to load an sqlite book
+    FormatSniffer sniffer;
+    sniffer.open(fname);
+    Format f = sniffer.getFormat();
+    if (f.id==FORMAT_BOOK_SQLITE) {
+      SqliteTextBook *book0 = new SqliteTextBook();
+      if (!book0->read(fname)) {
+	delete book0;
+      } else {
+	book = book0;
+      }
     }
     if (book==NULL) {
       ShortTextBook *b = new ShortTextBook();

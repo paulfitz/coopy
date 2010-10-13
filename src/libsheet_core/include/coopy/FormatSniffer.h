@@ -28,7 +28,7 @@ public:
     close();
   }
 
-  bool open(const char *fname);
+  bool open(const char *fname, bool caching = true);
   bool close();
 
   Format getFormat();
