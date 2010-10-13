@@ -5,17 +5,6 @@ IF (COMPILE_GUI)
   SET(COOPY_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
   SET(CMAKE_MODULE_PATH ${COOPY_MODULE_PATH})
 
-  # for binary builds -- completely optional
-  SET (STATLIB "${CMAKE_BINARY_DIR}/static_libs")
-  IF (EXISTS ${STATLIB})
-      MESSAGE(STATUS "static_libs directory present: ${STATLIB}")
-      LINK_DIRECTORIES(${STATLIB})
-      ADD_DEFINITIONS(-static-libgcc)
-      SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
-      FILE(GLOB statlibs ${STATLIB}/*.a)
-      LINK_LIBRARIES(${statlibs})
-  ENDIF (EXISTS ${STATLIB})
-
   INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssrender/include)

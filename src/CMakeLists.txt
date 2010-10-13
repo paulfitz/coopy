@@ -11,6 +11,19 @@ if (GNUMERIC)
   set (COMPILE_PLAIN_EXECUTABLES TRUE)
 endif ()
 
+# for binary builds -- completely optional
+SET (STATLIB "${CMAKE_BINARY_DIR}/static_libs")
+IF (EXISTS ${STATLIB})
+    MESSAGE(STATUS "static_libs directory present: ${STATLIB}")
+    LINK_DIRECTORIES(${STATLIB})
+    ADD_DEFINITIONS(-static-libgcc)
+    SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
+    FILE(GLOB statlibs ${STATLIB}/*.a)
+    LINK_LIBRARIES(${statlibs})
+ENDIF (EXISTS ${STATLIB})
+
+
+
 add_subdirectory(libsheet_core)
 add_subdirectory(libcsv)
 add_subdirectory(libgnumeric)
