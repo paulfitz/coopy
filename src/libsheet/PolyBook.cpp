@@ -21,10 +21,11 @@ bool PolyBook::read(const char *fname) {
   clear();
   string name = fname;
   if (name.length()>=4) {
-    string ext = name.substr(name.length()-4);
+    string ext = name.substr(name.rfind('.'),name.length());
     for (size_t i=0; i<ext.length(); i++) {
       ext[i] = tolower(ext[i]);
     }
+    printf("Extension %s\n", ext.c_str());
     book = readHelper(fname,ext.c_str(),NULL);
     if (book!=NULL) return true;
     FormatSniffer sniffer;

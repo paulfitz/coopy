@@ -29,7 +29,11 @@ std::string GnumericSheet::cellString(int x, int y) const {
 						x, y);
   if (txt==NULL) return "";
   string result = txt;
-  gnumeric_free_string(txt);
+  //printf("GOT [%s]\n", result.c_str());
+  // if txt is blank, it seems like we should not free it?
+  if (txt[0]!='\0') {
+    gnumeric_free_string(txt);
+  }
   return result;
 }
 
