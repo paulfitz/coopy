@@ -58,6 +58,7 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
     const char *msg = sqlite3_errmsg(db);
     if (msg!=NULL) {
       fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
     }
     sqlite3_finalize(statement);
     sqlite3_free(query);
@@ -83,6 +84,7 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
     const char *msg = sqlite3_errmsg(db);
     if (msg!=NULL) {
       fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
     }
     sqlite3_finalize(statement);
     sqlite3_free(query);
@@ -107,6 +109,7 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
     const char *msg = sqlite3_errmsg(db);
     if (msg!=NULL) {
       fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
     }
     sqlite3_finalize(statement);
     sqlite3_free(query);
@@ -179,6 +182,7 @@ bool SqliteSheet::cellString(int x, int y, const std::string& str) {
     const char *msg = sqlite3_errmsg(db);
     if (msg!=NULL) {
       fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
     }
     sqlite3_free(query);
     return false;
@@ -249,7 +253,7 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
   for (int i=0; i<(int)col2sql.size(); i++) {
     string n = col2sql[i];
     if (n.substr(0,3)=="ins") {
-      if (n.length()>suggest.length()) {
+      if (n.length()>=suggest.length()) {
 	suggest = n;
 	found = true;
       }
@@ -259,6 +263,27 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
     suggest += "_";
   }
   string col_name = suggest;
+
+  if (index==-1) {
+    char *query = sqlite3_mprintf("ALTER TABLE %Q ADD COLUMN %Q",
+				  name.c_str(), col_name.c_str());
+
+    int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
+    if (iresult!=SQLITE_OK) {
+      const char *msg = sqlite3_errmsg(db);
+      if (msg!=NULL) {
+	fprintf(stderr,"Error: %s\n", msg);
+	fprintf(stderr,"Query was: %s\n", query);
+      }
+      sqlite3_free(query);
+      return ColumnRef();
+    }
+    sqlite3_free(query);
+    col2sql.push_back(col_name);
+    w++;
+    return ColumnRef(w-1);
+  }
+
   string col_sql = suggest;
 
   SqliteSchema schema;
@@ -280,11 +305,64 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
 }
 
 RowRef SqliteSheet::insertRow(const RowRef& base) {
-  return RowRef(-1);  
+  // Relies on having default values, to insert "blank row".
+  // This is suboptimal.
+
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return false;
+  int index = base.getIndex();
+  
+  if (index!=-1) {
+    fprintf(stderr,"*** WARNING: Row insertion order ignored for Sqlite\n");
+  }
+
+  char *query = sqlite3_mprintf("INSERT INTO %Q DEFAULT VALUES",
+				name.c_str());
+
+  int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
+  if (iresult!=SQLITE_OK) {
+    const char *msg = sqlite3_errmsg(db);
+    if (msg!=NULL) {
+      fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
+    }
+    sqlite3_free(query);
+    return false;
+  }
+  sqlite3_free(query);
+
+  int rid = (int)sqlite3_last_insert_rowid(db);
+
+  // inconsistent ordering
+  row2sql.push_back(rid);
+  h++;
+  return RowRef(h-1);
 }
 
 bool SqliteSheet::deleteRow(const RowRef& src) {
-  return false;
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return false;
+
+  int index = src.getIndex();
+  if (index==-1) return false;
+  int rid = row2sql[index];
+  char *query = sqlite3_mprintf("DELETE FROM %Q WHERE ROWID=%d",
+				name.c_str(), rid);
+
+  int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
+  if (iresult!=SQLITE_OK) {
+    const char *msg = sqlite3_errmsg(db);
+    if (msg!=NULL) {
+      fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
+    }
+    sqlite3_free(query);
+    return false;
+  }
+  sqlite3_free(query);
+  row2sql.erase(row2sql.begin()+index);
+  h--;
+  return true;
 }
 
 
@@ -379,6 +457,7 @@ string SqliteSchema::fetch(sqlite3 *db, const char *table) {
     const char *msg = sqlite3_errmsg(db);
     if (msg!=NULL) {
       fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
     }
     sqlite3_finalize(statement);
     sqlite3_free(query);
@@ -446,6 +525,7 @@ COMMIT;						    \
     const char *msg = sqlite3_errmsg(db);
     if (msg!=NULL) {
       fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
     }
     sqlite3_free(query);
     return false;

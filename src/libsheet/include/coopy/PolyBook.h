@@ -48,6 +48,13 @@ public:
   bool read(const char *fname);
 
   bool write(const char *fname, const char *format = NULL);
+
+  bool inplace() const {
+    if (book) {
+      return book->inplace();
+    }
+    return false;
+  }
 };
 
 #endif

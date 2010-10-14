@@ -29,6 +29,10 @@ public:
   virtual bool save(const char *fname, const char *format) {
     return false;
   }
+
+  virtual bool inplace() const {
+    return false;
+  }
 };
 
 #endif

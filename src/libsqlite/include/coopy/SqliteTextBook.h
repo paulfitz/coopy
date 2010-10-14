@@ -22,6 +22,10 @@ public:
 
   PolySheet readSheet(const std::string& name);
 
+  virtual bool inplace() const {
+    return true;
+  }
+
 private:
   void *implementation;
 };

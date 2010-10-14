@@ -16,15 +16,37 @@ using namespace coopy::format;
 
 using namespace std;
 
+bool copy_file(const char *src, const char *dest) {
+  FILE *fin = NULL;
+  FILE *fout = NULL;
+  fin = fopen(src,"rb");
+  if (fin==NULL) return false;
+  fout = fopen(dest,"wb");
+  if (fout==NULL) {
+    fclose(fin);
+    return false;
+  }
+  char buf[32768];
+  int bytes_read = 0;
+  while ((bytes_read=fread(buf,1,sizeof(buf),fin))>0) {
+    fwrite(buf,1,bytes_read,fout);
+  }
+  fclose(fout);
+  fclose(fin);
+  return true;
+}
+
 int main(int argc, char *argv[]) {
   bool verbose = false;
   string output = "-";
+  string tmp = "-";
   string outputFormat = "-";
   while (true) {
     int option_index = 0;
     static struct option long_options[] = {
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
+      {"tmp", 1, 0, 't'},
       {"output-format", 1, 0, 'f'},
       {0, 0, 0, 0}
     };
@@ -38,6 +60,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'o':
       output = optarg;
+      break;
+    case 't':
+      tmp = optarg;
       break;
     case 'f':
       outputFormat = optarg;
@@ -58,6 +83,7 @@ int main(int argc, char *argv[]) {
   if (argc<2) {
     printf("Apply patch to a spreadsheet.\n");
     printf("  sspatch [--verbose] [--output output.csv] sheet.csv patch.txt\n");
+    printf("  sspatch [--output output.sqlite] [--tmp tmp.sqlite] db.sqlite patch.txt\n");
     //printf("  sspatch [--output-format FORMAT] sheet.csv patch.txt\n");
     printf("Output defaults to standard output.\n");
     printf("Write output to original file by doing:\n");
@@ -74,6 +100,24 @@ int main(int argc, char *argv[]) {
   if (!local.read(argv[0])) {
     fprintf(stderr,"Failed to read %s\n", argv[0]);
     return 1;
+  }
+
+  if (local.inplace()&&output!=argv[0]) {
+    if (output=="-"&&tmp=="-") {
+      fprintf(stderr,"Inplace operation; please confirm output or specify a 'tmp' location\n");
+      return 1;
+    }
+    if (tmp=="-") {
+      tmp = output;
+    }
+    if (!copy_file(argv[0],tmp.c_str())) {
+      fprintf(stderr,"Failed to write %s\n", output.c_str());
+      return 1;
+    }
+    if (!local.read(tmp.c_str())) {
+      fprintf(stderr,"Failed to switch to %s\n", output.c_str());
+      return 1;
+    }
   }
   
   FormatSniffer sniffer;
@@ -99,9 +143,11 @@ int main(int argc, char *argv[]) {
   }
   
   //if (CsvFile::write(local,output.c_str())!=0) {
-  if (!local.write(output.c_str(),outputFormat.c_str())) {
-    fprintf(stderr,"Failed to write %s\n", output.c_str());
-    return 1;
+  if ((!local.inplace())||(tmp!=output)) {
+    if (!local.write(output.c_str(),outputFormat.c_str())) {
+      fprintf(stderr,"Failed to write %s\n", output.c_str());
+      return 1;
+    }
   }
   return 0;
 }
