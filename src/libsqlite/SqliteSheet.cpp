@@ -5,6 +5,33 @@
 using namespace coopy::store;
 using namespace std;
 
+namespace coopy {
+  namespace store {
+    class SqliteSchema;
+  }
+}
+
+class coopy::store::SqliteSchema {
+public:
+  string preamble;
+  vector<string> parts;
+  sqlite3 *db;
+  string table_name;
+
+  SqliteSchema() {
+    db = NULL;
+  }
+
+  string fetch(sqlite3 *db, const char *table);
+
+  void parse(const char *str);
+
+  string toString() const;
+
+  bool apply(const vector<string>& names, const string& novel = "");
+};
+
+
 #define DB(x) ((sqlite3 *)(x))
 
 SqliteSheet::SqliteSheet(void *db1, const char *name) {
@@ -120,7 +147,11 @@ std::string SqliteSheet::cellString(int x, int y) const {
   if (sqlite3_step(statement) == SQLITE_ROW) {
     char *txt = (char *)sqlite3_column_text(statement,x);
     //printf("Got field %s\n", txt);
-    result = txt;
+    if (txt!=NULL) {
+      result = txt;
+    } else { 
+      result = "";
+    }
   }
   sqlite3_finalize(statement);
   sqlite3_free(query);
@@ -160,57 +191,111 @@ bool SqliteSheet::cellString(int x, int y, const std::string& str) {
 
 ColumnRef SqliteSheet::moveColumn(const ColumnRef& src, 
 				    const ColumnRef& base) {
-  return ColumnRef();
+  int src_index = src.getIndex();
+  int base_index = base.getIndex();
+
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return ColumnRef();
+
+  SqliteSchema schema;
+  string sql_pre = schema.fetch(db,name.c_str());
+  schema.parse(sql_pre.c_str());
+  string cache_sql = schema.parts[src_index];
+  string cache_name = col2sql[src_index];
+  schema.parts.erase(schema.parts.begin()+src_index);
+  col2sql.erase(col2sql.begin()+src_index);
+  if (base_index>src_index) {
+    base_index--;
+  }
+  if (base_index==-1) {
+    schema.parts.push_back(cache_sql);
+    col2sql.push_back(cache_name);
+  } else {
+    schema.parts.insert(schema.parts.begin()+base_index,cache_sql);
+    col2sql.insert(col2sql.begin()+base_index,cache_name);
+  }
+  
+  return schema.apply(col2sql)?ColumnRef(base_index):ColumnRef();
 }
 
 
 bool SqliteSheet::deleteColumn(const ColumnRef& column) {
   int deadbeat_index = column.getIndex();
-  string deadbeat = col2sql[deadbeat_index];
-  dbg_printf("sqlite: eliminating column %s\n", deadbeat.c_str());
 
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
 
-  sqlite3_stmt *statement = NULL;
-  char *query = NULL;
+  SqliteSchema schema;
+  string sql_pre = schema.fetch(db,name.c_str());
+  schema.parse(sql_pre.c_str());
+  schema.parts.erase(schema.parts.begin()+deadbeat_index);
+  col2sql.erase(col2sql.begin()+deadbeat_index);
+  w--;
+  
+  return schema.apply(col2sql);
+}
 
-  //////////////////////////////////////////////////////////////////
-  // Check schema
+ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
+  // we will need to pass in type hints in future, for better merges.
+  // also, hint for column name.
 
-  query = sqlite3_mprintf("SELECT sql FROM SQLITE_MASTER WHERE name = %Q",
-			  this->name.c_str());
- 
-  int iresult = sqlite3_prepare_v2(db, query, -1, 
-				   &statement, NULL);
-  if (iresult!=SQLITE_OK) {
-    const char *msg = sqlite3_errmsg(db);
-    if (msg!=NULL) {
-      fprintf(stderr,"Error: %s\n", msg);
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return ColumnRef();
+
+  int index = base.getIndex();
+
+  string suggest = "ins";
+  bool found = false;
+  for (int i=0; i<(int)col2sql.size(); i++) {
+    string n = col2sql[i];
+    if (n.substr(0,3)=="ins") {
+      if (n.length()>suggest.length()) {
+	suggest = n;
+	found = true;
+      }
     }
-    sqlite3_finalize(statement);
-    sqlite3_free(query);
-  } 
-  string sql;
-  if (sqlite3_step(statement) == SQLITE_ROW) {
-    sql = (const char *)sqlite3_column_text(statement,0);
   }
-  sqlite3_finalize(statement);
-  sqlite3_free(query);
+  if (found) {
+    suggest += "_";
+  }
+  string col_name = suggest;
+  string col_sql = suggest;
 
-  //////////////////////////////////////////////////////////////////
-  // Modify schema
+  SqliteSchema schema;
+  string sql_pre = schema.fetch(db,name.c_str());
+  schema.parse(sql_pre.c_str());
+  if (index<0) {
+    schema.parts.push_back(col_sql);
+    col2sql.push_back(col_name);
+    index = w;
+  } else {
+    schema.parts.insert(schema.parts.begin()+index,col_sql);
+    col2sql.insert(col2sql.begin()+index,col_name);
+  }
+  if (schema.apply(col2sql,col_name)) {
+    w++;
+    return ColumnRef(index);
+  }
+  return ColumnRef();
+}
 
-  dbg_printf("Original table SQL is %s\n", sql.c_str());
+RowRef SqliteSheet::insertRow(const RowRef& base) {
+  return RowRef(-1);  
+}
+
+bool SqliteSheet::deleteRow(const RowRef& src) {
+  return false;
+}
+
+
+void SqliteSchema::parse(const char *str) {
+  string sql = str;
+  preamble = "";
+  parts.clear();
 
   bool double_quote = false;
   bool single_quote = false;
   string token = "";
-  string key = "";
-  int key_state = 1;
-  string output = "";
-  string mod = "";
-  int offset = 0;
   int nesting = 0;
   for (int i=0; i<(int)sql.length(); i++) {
     char ch = sql[i];
@@ -241,84 +326,122 @@ bool SqliteSheet::deleteColumn(const ColumnRef& column) {
       if (nesting==1) {
       }
     }
-    if (key_state==0) {
-      if ((ch==' '||brk)&&token!="") {
-	key = token;
-	if (key[0]==' ') {
-	  key = key.substr(1,key.length());
-	}
-	if (key[0]=='\''||key[0]=='\"') {
-	  key = key.substr(1,key.length()-2);
-	}
-	key_state = 1;
-      }
-    }
     if (brk) {
-      output += "[";
-      output += key;
-      output += ":";
-      output += token;
-      output += "]";
-      output += ch;
-      if (key!=deadbeat) {
-	mod += token;
-	mod += ch;
+      if (token[0]==' ') {
+	token = token.substr(1,token.length());
+      }
+      if (preamble=="") {
+	preamble = token;
       } else {
-	if (ch!=',') {
-	  mod += ch;
-	}
+	parts.push_back(token);
       }
       token = "";
-      key = "";
-      key_state = 0;
     } else {
       token += ch;
     }
   }
 
-  dbg_printf("parsed SQL is %s\n", output.c_str());
-  dbg_printf("modified SQL is %s\n", mod.c_str());
+  dbg_printf("preamble %s\n", preamble.c_str());
+  for (int i=0; i<(int)parts.size(); i++) {
+    dbg_printf(" part %s\n", parts[i].c_str());
+  }
+}
+
+
+string SqliteSchema::toString() const {
+  string result = preamble;
+  result += "(";
+  for (int i=0; i<(int)parts.size(); i++) {
+    if (i>0) {
+      result += ", ";
+    }
+    result += parts[i];
+  }
+  result += ")";
+  dbg_printf("modified SQL is %s\n", result.c_str());
+  return result;
+}
+
+
+string SqliteSchema::fetch(sqlite3 *db, const char *table) {
+  this->db = db;
+  this->table_name = table;
+  string sql = "";
+  sqlite3_stmt *statement = NULL;
+  char *query = NULL;
+
+  query = sqlite3_mprintf("SELECT sql FROM SQLITE_MASTER WHERE name = %Q",
+			  table);
+ 
+  int iresult = sqlite3_prepare_v2(db, query, -1, 
+				   &statement, NULL);
+  if (iresult!=SQLITE_OK) {
+    const char *msg = sqlite3_errmsg(db);
+    if (msg!=NULL) {
+      fprintf(stderr,"Error: %s\n", msg);
+    }
+    sqlite3_finalize(statement);
+    sqlite3_free(query);
+    return "";
+  } 
+  if (sqlite3_step(statement) == SQLITE_ROW) {
+    sql = (const char *)sqlite3_column_text(statement,0);
+  }
+  sqlite3_finalize(statement);
+  sqlite3_free(query);
+  return sql;
+}
+
+
+bool SqliteSchema::apply(const vector<string>& names, const string& novel) {
+  string sql_mod = toString();
 
   //////////////////////////////////////////////////////////////////
   // Apply schema
 
   string new_column_list = "";
-  for (int i=0; i<w; i++) {
-    if (i!=deadbeat_index) {
-      if (i>0) {
-	new_column_list += ',';
+  string ins_column_list = "";
+  for (int i=0; i<(int)names.size(); i++) {
+    string base = names[i].c_str();
+    string add = base;
+    if (add.find('\"')!=string::npos) {
+      printf("Quoting of sql column names not done yet\n");
+      exit(1);
+    }
+    add = string("\"") + add + "\"";
+    if (i>0) {
+      new_column_list += ',';
+    }
+    new_column_list += add;
+    if (base!=novel) {
+      if (ins_column_list!="") {
+	ins_column_list += ',';
       }
-      string add = col2sql[i].c_str();
-      if (add.find('\"')!=string::npos) {
-	printf("Quoting of sql column names not done yet\n");
-	exit(1);
-      }
-      new_column_list += "\"";
-      new_column_list += add;
-      new_column_list += "\"";
+      ins_column_list += add;
     }
   }
 
-  query = sqlite3_mprintf("BEGIN TRANSACTION; \
-CREATE TEMPORARY TABLE __coopy_backup(%s); \
-INSERT INTO __coopy_backup(%s) SELECT %s FROM %Q; \
-DROP TABLE %Q; \
-%s; \
-INSERT INTO %Q SELECT * FROM __coopy_backup; \
-DROP TABLE __coopy_backup; \
-COMMIT; \
+  char *query = sqlite3_mprintf("BEGIN TRANSACTION; \
+CREATE TEMPORARY TABLE __coopy_backup(%s);	    \
+INSERT INTO __coopy_backup (%s) SELECT %s FROM %Q;   \
+DROP TABLE %Q;					    \
+%s;						    \
+INSERT INTO %Q (%s) SELECT * FROM __coopy_backup;   \
+DROP TABLE __coopy_backup;			    \
+COMMIT;						    \
 ", 
-			  new_column_list.c_str(),
-			  new_column_list.c_str(),
-			  new_column_list.c_str(),
-			  name.c_str(),
-			  name.c_str(),
-			  mod.c_str(),
-			  name.c_str());
+				ins_column_list.c_str(),
+				ins_column_list.c_str(),
+				ins_column_list.c_str(),
+				table_name.c_str(),
+				table_name.c_str(),
+				sql_mod.c_str(),
+				table_name.c_str(),
+				ins_column_list.c_str());
 
   dbg_printf("Operation %s\n", query);
 
-  iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
+  int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
   if (iresult!=SQLITE_OK) {
     const char *msg = sqlite3_errmsg(db);
     if (msg!=NULL) {
@@ -329,18 +452,5 @@ COMMIT; \
   }
 
   sqlite3_free(query);
-
-  return false;
-}
-
-ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
-  return ColumnRef(-1);
-}
-
-RowRef SqliteSheet::insertRow(const RowRef& base) {
-  return RowRef(-1);  
-}
-
-bool SqliteSheet::deleteRow(const RowRef& src) {
-  return false;
+  return true;
 }
