@@ -14,7 +14,7 @@ set(BOOK_HOOK0 ${CMAKE_BINARY_DIR}/generated_code/BookHook0.cpp)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/BookHook.cpp.in ${BOOK_HOOK0}
                 IMMEDIATE)
 
-ADD_LIBRARY(sheet_plus_csv_sql CsvFile.cpp PatchParser.cpp)
+ADD_LIBRARY(sheet_plus_csv_sql CsvFile.cpp PatchParser.cpp CsvTextBook.cpp)
 TARGET_LINK_LIBRARIES(sheet_plus_csv_sql sheet_core sqlite csv)
 
 ADD_LIBRARY(sheet PolyBook.cpp ${BOOK_HOOK0})

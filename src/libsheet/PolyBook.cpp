@@ -1,6 +1,7 @@
 #include <coopy/PolyBook.h>
 #include <coopy/ShortTextBook.h>
 #include <coopy/SqliteTextBook.h>
+#include <coopy/CsvTextBook.h>
 #include <coopy/CsvFile.h>
 #include <coopy/FormatSniffer.h>
 
@@ -26,6 +27,15 @@ bool PolyBook::read(const char *fname) {
       ext[i] = tolower(ext[i]);
     }
     printf("Extension %s\n", ext.c_str());
+    if (ext==".list") {
+      CsvTextBook *book0 = new CsvTextBook();
+      if (!book0->read(fname)) {
+	delete book0;
+      } else {
+	book = book0;
+      }
+      if (book!=NULL) return true;
+    }
     book = readHelper(fname,ext.c_str(),NULL);
     if (book!=NULL) return true;
     FormatSniffer sniffer;
