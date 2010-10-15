@@ -2,6 +2,7 @@
 #define COOPY_SHEETSCHEMA
 
 #include <coopy/ColumnInfo.h>
+#include <coopy/RefCount.h>
 
 namespace coopy {
   namespace store {
@@ -9,10 +10,13 @@ namespace coopy {
   }
 }
 
-class coopy::store::SheetSchema {
+class coopy::store::SheetSchema : public RefCount {
 public:
+  virtual ~SheetSchema() {
+  }
+
   virtual ColumnInfo getColumnInfo(int x) {
-    return ColumnInfo(x);
+    return ColumnInfo();
   }
 
   virtual int headerHeight() {

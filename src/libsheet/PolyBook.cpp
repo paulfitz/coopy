@@ -27,7 +27,7 @@ bool PolyBook::read(const char *fname) {
       ext[i] = tolower(ext[i]);
     }
     printf("Extension %s\n", ext.c_str());
-    if (ext==".list") {
+    if (ext==".book") {
       CsvTextBook *book0 = new CsvTextBook();
       if (!book0->read(fname)) {
 	delete book0;

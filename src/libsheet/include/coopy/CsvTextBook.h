@@ -15,7 +15,7 @@ namespace coopy {
 
 class coopy::store::CsvTextBook : public TextBook {
 public:
-  std::vector<CsvSheet> sheets;
+  std::vector<PolySheet> sheets;
   std::vector<std::string> names;
   std::map<std::string,int> name2index;
 
@@ -25,7 +25,7 @@ public:
 
   virtual PolySheet readSheet(const std::string& name) {
     if (name2index.find(name)!=name2index.end()) {
-      return PolySheet(&(sheets[name2index[name]]),false);
+      return sheets[name2index[name]];
     }
     return PolySheet();
   }

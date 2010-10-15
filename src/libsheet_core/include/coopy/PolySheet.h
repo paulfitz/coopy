@@ -2,6 +2,7 @@
 #define COOPY_POLYSHEET
 
 #include <coopy/DataSheet.h>
+#include <coopy/SheetSchema.h>
 
 namespace coopy {
   namespace store {
@@ -13,23 +14,34 @@ class coopy::store::PolySheet : public DataSheet {
 private:
   DataSheet *sheet;
   bool owned;
+  SheetSchema *schema;
+  bool owned_schema;
 public:
   PolySheet() {
     sheet = 0/*NULL*/;
     owned = false;
+    schema = 0/*NULL*/;
+    owned_schema = false;
   }
 
   PolySheet(DataSheet *sheet, bool owned) : sheet(sheet), owned(owned) {
     if (sheet!=0/*NULL*/&&owned) {
       sheet->addReference();
     }
+    schema = 0/*NULL*/;
+    owned_schema = false;
   }
 
   PolySheet(const PolySheet& alt) {
     owned = alt.owned;
     sheet = alt.sheet;
-    if (sheet!=NULL&&owned) {
+    if (sheet!=0/*NULL*/&&owned) {
       sheet->addReference();
+    }
+    schema = alt.schema;
+    owned_schema = alt.owned_schema;
+    if (schema!=0/*NULL*/&&owned_schema) {
+      schema->addReference();
     }
   }
 
@@ -40,6 +52,11 @@ public:
     if (sheet!=0/*NULL*/&&owned) {
       sheet->addReference();
     }
+    schema = alt.schema;
+    owned_schema = alt.owned_schema;
+    if (schema!=0/*NULL*/&&owned_schema) {
+      schema->addReference();
+    }
     return *this;
   }
 
@@ -47,7 +64,27 @@ public:
     clear();
   }
 
+  void setSchema(SheetSchema *schema, bool owned) {
+    clearSchema();
+    this->schema = schema;
+    this->owned_schema = owned;
+    if (schema!=0/*NULL*/&&owned_schema) {
+      schema->addReference();
+    }
+  }
+
+  virtual SheetSchema *getSchema() {
+    if (schema!=0/*NULL*/) return schema;
+    if (sheet==0/*NULL*/) return 0/*NULL*/;
+    return sheet->getSchema();
+  }
+
   void clear() {
+    clearSheet();
+    clearSchema();
+  }
+
+  void clearSheet() {
     if (sheet==0/*NULL*/) return;
     if (owned) {
       int ref = sheet->removeReference();
@@ -56,6 +93,17 @@ public:
       }
     }
     sheet = 0/*NULL*/;
+  }
+  
+  void clearSchema() {
+    if (schema==0/*NULL*/) return;
+    if (owned_schema) {
+      int ref = schema->removeReference();
+      if (ref==0) {
+	delete schema;
+      }
+    }
+    schema = 0/*NULL*/;
   }
 
   bool isValid() const {
@@ -82,9 +130,9 @@ public:
     return sheet->encode(style);
   }
 
-  virtual SheetSchema *getSchema() {
-    return sheet->getSchema();
-  }
+  //virtual SheetSchema *getSchema() {
+  //return sheet->getSchema();
+  //}
 
   virtual bool deleteColumn(const ColumnRef& column) {
     return sheet->deleteColumn(column);

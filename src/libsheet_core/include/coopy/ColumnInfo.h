@@ -10,10 +10,10 @@ namespace coopy {
 }
 
 class coopy::store::ColumnInfo {
-private:
-  int index;
 public:
-  ColumnInfo(int index=-1) : index(index) {}
+  ColumnInfo() {}
+
+  virtual ~ColumnInfo() {}
 
   virtual bool hasName() const { return false; }
 

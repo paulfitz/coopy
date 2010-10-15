@@ -19,18 +19,28 @@ bool CsvTextBook::read(const char *fname) {
     root = "";
   }
   for (int y=0; y<index.height(); y++) {
-    string key = index.cell(0,y);
-    printf("key %s\n", key.c_str());
-    string f = root + key + ".csv";
-    printf("key %s -> %s\n", key.c_str(), f.c_str());
-    name2index[key] = (int)sheets.size();
-    sheets.push_back(CsvSheet());
-    if (CsvFile::read(f.c_str(),sheets.back())!=0) {
-      fprintf(stderr,"Failed to read %s referenced from %s\n", f.c_str(),
-	      fname);
-      return false;
+    string cmd = index.cell(0,y);
+    if (cmd=="table") {
+      string key = index.cell(1,y);
+      //printf("key %s\n", key.c_str());
+      string f = root + key + ".csv";
+      dbg_printf("Adding %s [%s]\n", key.c_str(), f.c_str());
+      name2index[key] = (int)sheets.size();
+      CsvSheet *data = new CsvSheet;
+      if (data==NULL) {
+	fprintf(stderr,"Failed to allocated data sheet\n");
+	return false;
+      }
+      if (CsvFile::read(f.c_str(),*data)!=0) {
+	fprintf(stderr,"Failed to read %s referenced from %s\n", f.c_str(),
+		fname);
+	delete data;
+	return false;
+      }
+      PolySheet sheet(data,true);
+      sheets.push_back(sheet);
+      names.push_back(key);
     }
-    names.push_back(key);
   }
   return true;
 }

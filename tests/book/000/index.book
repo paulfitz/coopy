@@ -1,0 +1,14 @@
+table,people,
+table,organizations,
+table,locations,
+table,org2loc,
+table,ppl2org,
+key,people,0
+ref,ppl2org,1
+key,organizations,
+ref,org2loc,1
+ref,ppl2org,2
+key,locations,0
+ref,org2loc,2
+key,org2loc,0
+key,ppl2org,0
