@@ -71,11 +71,11 @@ The sqlite conversion is not very polished, and makes some assumptions.
 sspatch
 -------
 
-This is currently vaporware, but will be very important to how coopy
-supports spreadsheet formats with typing and presentation information
-in them (i.e. all "real" formats like Excel's formats or those of
-OpenOffice).  The idea is to take a description of how the data in a
-spreadsheet should be modified, like those produced by ssdiff, and
-apply them in a type/presentation-preserving way to the full
-spreadsheet.  In other words, as columns or rows of data are moved 
-around, their type/presentation information should follow them.
+This is currently at an early stage of development, but will be very
+important to how coopy supports spreadsheet formats with typing and
+presentation information in them (i.e. all "real" formats like Excel's
+formats or those of OpenOffice).  The idea is to take a description of
+how the data in a spreadsheet should be modified, like those produced
+by ssdiff, and apply them in a type/presentation-preserving way to the
+full spreadsheet.  In other words, as columns or rows of data are
+moved around, their type/presentation information should follow them.

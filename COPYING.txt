@@ -7,6 +7,9 @@ Coopy uses "fossil" under the GPL:
 Coopy uses "libcsv" under the GPL:
 + See src/libcsv
 
+Coopy *optionally* uses "sqlxx" under the LGPL:
++ See src/libremotesql/sqlxx
+
 The remaining code is:
   Copyright: (c) 2010 Paul Fitzpatrick <paulfitz@alum.mit.edu>
   CopyPolicy: Released under the GPLv2 (see GPL.TXT)

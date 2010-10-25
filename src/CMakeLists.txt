@@ -28,6 +28,7 @@ add_subdirectory(libsheet_core)
 add_subdirectory(libcsv)
 add_subdirectory(libsqlite)
 add_subdirectory(libgnumeric)
+add_subdirectory(libremotesql)
 add_subdirectory(libsheet)
 set(SHEET_INCLUDE_DIRS 
   ${CMAKE_SOURCE_DIR}/src/libsheet_core/include 
