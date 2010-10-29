@@ -21,6 +21,7 @@ RemoteSqlTextBook::~RemoteSqlTextBook() {
 
 void RemoteSqlTextBook::clear() {
   if (implementation!=NULL) {
+    HELPER(implmentation).disconnect();
     delete &HELPER(implementation);
     implementation = NULL;
   }
@@ -56,11 +57,16 @@ bool RemoteSqlTextBook::read(const Property& config) {
     }
     SQL.closeQuery(Result);
     */
-    SQL.disconnect();
+    //SQL.disconnect();
+    printf("Connected ok!\n");
+    return true;
   }
   catch (sqlxx_error E) {
     cerr << E.what() << endl;
-    clear();
+    if (implementation!=NULL) {
+      delete &HELPER(implementation);
+      implementation = NULL;
+    }
     return false;
   }
   printf("RemoteSqlTextBook is a stub\n");
