@@ -33,18 +33,17 @@ public:
 bool PolyValue::setInt(int x) {
   setNull();
   value = new IntValue(x);
+  if (value!=NULL) value->addReference();
   return value!=NULL;
 }
 
 bool PolyValue::setString(const char *str) {
   setNull();
   value = new StringValue(str);
+  if (value!=NULL) value->addReference();
   return value!=NULL;
 }
 
 bool PolyValue::setNull() {
-  if (value!=0/*NULL*/) {
-    delete value;
-    value = 0/*NULL*/;
-  }
+  clear();
 }

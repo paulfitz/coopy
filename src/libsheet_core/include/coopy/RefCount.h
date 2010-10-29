@@ -15,6 +15,9 @@ public:
     ref_ct = 0;
   }
 
+  virtual ~RefCount() {
+  }
+
   int addReference() {
     ref_ct++;
     return ref_ct;

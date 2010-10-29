@@ -1,8 +1,12 @@
 #ifndef COOPY_PROPERTY
 #define COOPY_PROPERTY
 
+#include <coopy/RefCount.h>
+
 #include <map>
 #include <string>
+
+#include <stdio.h>
 
 namespace coopy {
   namespace store {
@@ -12,7 +16,7 @@ namespace coopy {
   }
 }
 
-class coopy::store::Value {
+class coopy::store::Value : public RefCount {
 public:
   virtual ~Value() {}
 
@@ -26,20 +30,43 @@ public:
 };
 
 class coopy::store::PolyValue : public Value {
-public:
+private:
   Value *value;
+public:
 
   PolyValue() {
     value = 0/*NULL*/;
   }
 
-  virtual ~PolyValue() {
+  PolyValue(const PolyValue& alt) {
+    value = alt.value;
     if (value!=0/*NULL*/) {
-      delete value;
-      value = 0/*NULL*/;
+      value->addReference();
     }
   }
 
+  virtual ~PolyValue() {
+    clear();
+  }
+
+  const PolyValue& operator=(const PolyValue& alt) {
+    clear();
+    value = alt.value;
+    if (value!=0/*NULL*/) {
+      value->addReference();
+    }
+    return *this;
+  }
+
+  void clear() {
+    if (value==0/*NULL*/) return;
+    int ref = value->removeReference();
+    if (ref==0) {
+      delete value;
+    }
+    value = 0/*NULL*/;
+  }
+  
   bool setInt(int x);
   bool setString(const char *str);
   bool setNull();
@@ -69,6 +96,17 @@ public:
     return true; 
   }
 
+  static PolyValue makeInt(int x) {
+    PolyValue v;
+    v.setInt(x);
+    return v;
+  }
+
+  static PolyValue makeString(const char *str) {
+    PolyValue v;
+    v.setString(str);
+    return v;
+  }
 };
 
 class coopy::store::Property {
@@ -95,6 +133,12 @@ public:
   const Value& get(const char *key) const {
     std::map<std::string,PolyValue>::const_iterator it = data.find(key);    
     if (it==data.end()) return nullValue;
+    return it->second;
+  }
+
+  PolyValue get(const char *key, PolyValue default_value) const {
+    std::map<std::string,PolyValue>::const_iterator it = data.find(key);    
+    if (it==data.end()) return default_value;
     return it->second;
   }
 };
