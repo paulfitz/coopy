@@ -1,4 +1,7 @@
-option(USE_MYSQL OFF "Enable mysql access")
+option(USE_REMOTE_SQL OFF "Enable remote sql access")
+if (USE_REMOTE_SQL)
+
+option(USE_MYSQL ON "Enable mysql access")
 
 # option(USE_POSTGRES OFF "Enable postgres access")
 # option(USE_ODBC OFF "Enable odbc access")
@@ -52,3 +55,5 @@ IF (USE_MYSQL OR USE_POSTGRES OR USE_ODBC)
   TARGET_LINK_LIBRARIES(test_remotesql remotesql)
 
 ENDIF ()
+
+endif()

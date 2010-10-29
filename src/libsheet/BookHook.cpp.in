@@ -1,18 +1,57 @@
 
 #include <coopy/PolyBook.h>
 
+#include <fstream>
+
+using namespace std;
 using namespace coopy::store;
 
+#cmakedefine USE_NONE
+
+#ifndef USE_NONE
 #cmakedefine USE_GNUMERIC
+#cmakedefine USE_REMOTE_SQL
+#endif
 
 #ifdef USE_GNUMERIC
 #include <coopy/GnumericTextBookFactory.h>
+#endif
+
+#ifdef USE_REMOTE_SQL
+#include <coopy/RemoteSqlTextBook.h>
+#include <json/json.h>
 #endif
 
 TextBook *readHelper(const char *fname,
 		     const char *ext,
 		     const char *data) {
   TextBook *result = NULL;
+#ifdef USE_REMOTE_SQL
+  if (string(ext)==".json") {
+    ifstream in(fname);
+    Json::Value root;
+    Json::Reader reader;
+    if (!reader.parse(in,root,false)) {
+      fprintf(stderr,"Failed to parse %s\n", fname);
+      return NULL;
+    }
+    Property p;
+    for (Json::Value::iterator it=root.begin(); it!=root.end(); it++) {
+      printf("Got %s -> %s\n", it.memberName(),
+	     (*it).asCString());
+      p.put(it.memberName(),(*it).asCString());
+    }
+    RemoteSqlTextBook *book = new RemoteSqlTextBook();
+    if (book!=NULL) {
+      if (!book->read(p)) {
+	fprintf(stderr,"Failed to configure database\n");
+	delete book;
+      } else {
+	result = book;
+      }
+    }
+  }
+#endif
 #ifdef USE_GNUMERIC
   //printf("Checking with Gnumeric...\n");
   GnumericTextBookFactory fact;

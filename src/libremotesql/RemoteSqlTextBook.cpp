@@ -48,6 +48,11 @@ bool RemoteSqlTextBook::read(const Property& config) {
     //SQL.setType(SQLXX_ODBC);
     //SQL.setDriver("/usr/lib/libmyodbc.so");
     SQL.connect();
+    if (config.check("table")) {
+      names_cache.clear();
+      names_cache.push_back(config.get("table").asString());
+      dirty = false;
+    }
     return true;
   }
   catch (sqlxx_error E) {
