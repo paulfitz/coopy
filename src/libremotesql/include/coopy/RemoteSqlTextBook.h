@@ -27,8 +27,19 @@ public:
     return true;
   }
 
+  void *getSqlInterface() {
+    return implementation;
+  }
+
+  std::string getDatabaseName() {
+    return database_name;
+  }
+
 private:
   void *implementation;
+  std::string database_name;
+  std::vector<std::string> names_cache;
+  bool dirty;
 };
 
 #endif

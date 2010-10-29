@@ -9,16 +9,15 @@
 namespace coopy {
   namespace store {
     class RemoteSqlSheet;
+    class RemoteSqlTextBook;
   }
 }
 
 class coopy::store::RemoteSqlSheet : public DataSheet {
 public:
-  RemoteSqlSheet();
+  RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name);
 
   virtual ~RemoteSqlSheet();
-
-  bool open(const Property& config);
 
   virtual int width() const  { return w; }
   virtual int height() const { return h; }
@@ -38,11 +37,16 @@ public:
   virtual bool deleteRow(const RowRef& src);
 
 private:
+  RemoteSqlTextBook *book;
   void *implementation;
   std::string name;
   int w, h;
-  std::vector<int> row2sql;
+  // row2sql is complicated without rowid equivalent.
+  // see sqlitesheet for simpler implementation with rowid.
+  std::vector<std::vector<std::string> > row2sql;
   std::vector<std::string> col2sql;
+  std::vector<std::string> keys;
+  std::vector<int> key_cols;
 };
 
 #endif
