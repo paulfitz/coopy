@@ -25,7 +25,18 @@ public:
 
   virtual std::string cellString(int x, int y) const = 0;
 
+  virtual std::string cellString(int x, int y, bool& isNull) const {
+    return cellString(x,y);
+  }
+
   virtual bool cellString(int x, int y, const std::string& str) {
+    return false;
+  }
+
+  virtual bool cellString(int x, int y, const std::string& str, bool isNull) {
+    if (!isNull) {
+      return cellString(x,y,str);
+    }
     return false;
   }
 
