@@ -1,3 +1,7 @@
+if (HAVE_TR1)
+  ADD_DEFINITIONS("-std=c++0x" -DHAVE_TR1)
+endif ()
+
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
 
 ADD_EXECUTABLE(test_sheet test_sheet.cpp)

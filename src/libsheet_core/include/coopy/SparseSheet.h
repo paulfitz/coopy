@@ -14,6 +14,7 @@ namespace coopy {
     template <class T> class SparseSheet;
     class SparseFloatSheet;
     class SparseIntSheet;
+    class SparseStringSheet;
   }
 }
 
@@ -49,12 +50,39 @@ public:
     this->w = w;
   }
 
+  void reheight(int h) {
+    if (h>=this->h) {
+      this->h = h;
+    }
+  }
+
+  void clear() {
+    data.clear();
+    row.clear();
+  }
+
   int width() const {
     return w;
   }
 
   int height() const {
     return h;
+  }
+
+  const T *pcell_const(int x, int y) const {
+    typename efficient_map<long long,T>::const_iterator it = data.find(((long long)y)*w+x);
+    if (it==data.end()) {
+      return 0/*NULL*/;
+    }
+    return &(it->second);
+  }
+
+  T *pcell(int x, int y) {
+    typename efficient_map<long long,T>::const_iterator it = data.find(((long long)y)*w+x);
+    if (it==data.end()) {
+      return 0/*NULL*/;
+    }
+    return &(it->second);
   }
 
   const T& cell(int x, int y) const {
@@ -91,6 +119,16 @@ public:
       return empty_set;
     }
     return it->second;
+  }
+};
+
+
+class coopy::store::SparseStringSheet : public SparseSheet<std::string> {
+public:
+  using SparseSheet<std::string>::resize;
+
+  virtual std::string cellString(int x, int y) const {
+    return cell(x,y);
   }
 };
 

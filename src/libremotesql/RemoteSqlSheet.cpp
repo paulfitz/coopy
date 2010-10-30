@@ -72,15 +72,23 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
   }
   int k = (int)keys.size();
 
+  cache.resize(w,0,"");
+
   {
-    string query = string("SELECT ") + key_list  + " FROM "+ name + " ORDER BY " + key_list;
+    string query = string("SELECT * FROM ") + name + " ORDER BY " + key_list;
     //printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     while (result->fetch()) {
       vector<string> accum;
+      cache.reheight(h+1);
+      for (int i=0; i<w; i++) {
+	//printf("Got %d,%d: ", i, h);
+	//printf("Got %d,%d %s\n", i, h, result->get(i).c_str());
+	cache.cell(i,h) = result->get(i);
+      }
       for (int i=0; i<k; i++) {
 	//printf("Got %s\n", result->get(i).c_str());
-	accum.push_back(result->get(i));
+	accum.push_back(result->get(key_cols[i]));
       }
       row2sql.push_back(accum);
       h++;
@@ -93,6 +101,11 @@ RemoteSqlSheet::~RemoteSqlSheet() {
 }
 
 std::string RemoteSqlSheet::cellString(int x, int y) const {
+  const string *c = cache.pcell_const(x,y);
+  if (c!=NULL) {
+    return *c;
+  }
+
   // starting with a COMPLETELY brain-dead implementation
 
   CSQL& SQL = SQL_CONNECTION(book);
@@ -120,6 +133,8 @@ std::string RemoteSqlSheet::cellString(int x, int y) const {
 
 bool RemoteSqlSheet::cellString(int x, int y, const std::string& str) {
   // starting with a COMPLETELY brain-dead implementation
+
+  cache.cell(x,y) = str;
 
   CSQL& SQL = SQL_CONNECTION(book);
 

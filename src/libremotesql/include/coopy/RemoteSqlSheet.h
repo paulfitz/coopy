@@ -3,6 +3,7 @@
 
 #include <coopy/DataSheet.h>
 #include <coopy/Property.h>
+#include <coopy/SparseSheet.h>
 
 #include <vector>
 
@@ -36,9 +37,15 @@ public:
 
   virtual bool deleteRow(const RowRef& src);
 
+  virtual bool clearCache() { 
+    cache.clear();
+    return true;
+  }
+
 private:
   RemoteSqlTextBook *book;
   void *implementation;
+  SparseStringSheet cache;
   std::string name;
   int w, h;
   // row2sql is complicated without rowid equivalent.

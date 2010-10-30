@@ -34,6 +34,9 @@ public:
   static std::string encodeCell(const std::string& str, 
 				const SheetStyle& style);
 
+  // remove any cached values, e.g. in remote connections.
+  virtual bool clearCache() { return true; }
+
   virtual SheetSchema *getSchema() {
     return 0 /*NULL*/;
   }

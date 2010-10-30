@@ -1,3 +1,6 @@
+if (HAVE_TR1)
+  ADD_DEFINITIONS("-std=c++0x" -DHAVE_TR1)
+endif ()
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 

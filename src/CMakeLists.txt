@@ -1,3 +1,17 @@
+option(PROFILING OFF "Turn on profiling")
+IF (PROFILING)
+#  FOREACH(target ssformat ssmerge csv sheet sheet_full remotesql remotesql_sqlxx sheet_core)
+#    SET_TARGET_PROPERTIES(${target} PROPERTIES COMPILE_FLAGS -pg LINK_FLAGS -pg)
+#  ENDFOREACH()
+  ADD_DEFINITIONS(-pg)
+  SET(CMAKE_EXE_LINKER_FLAGS "-pg")
+  SET(CMAKE_SHARED_LINKER_FLAGS "-pg")
+  SET(CMAKE_MODULE_LINKER_FLAGS "-pg")
+ENDIF (PROFILING)
+
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" HAVE_TR1)
+
 option(GNUMERIC OFF "Enable gnumeric integration (For XLS, ODF, etc)")
 option(CREATE_SHARED_LIBRARIES "Compile shared libraries rather than static")
 if (CREATE_SHARED_LIBRARIES)
@@ -24,10 +38,11 @@ ENDIF (EXISTS ${STATLIB})
 
 
 
-add_subdirectory(libsheet_core)
 add_subdirectory(libcsv)
 add_subdirectory(libsqlite)
 add_subdirectory(libgnumeric)
+
+add_subdirectory(libsheet_core)
 add_subdirectory(libremotesql)
 add_subdirectory(jsoncpp)
 add_subdirectory(libsheet)
@@ -45,11 +60,4 @@ add_subdirectory(ssfossil)
 add_subdirectory(gui)
 
 add_subdirectory(testing)
-
-option(PROFILING OFF "Turn on profiling")
-IF (PROFILING)
-  FOREACH(target ssmerge csv sheet sheet_core)
-    SET_TARGET_PROPERTIES(${target} PROPERTIES COMPILE_FLAGS -pg LINK_FLAGS -pg)
-  ENDFOREACH()
-ENDIF (PROFILING)
 

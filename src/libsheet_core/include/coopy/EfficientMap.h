@@ -2,6 +2,11 @@
 #define COOPY_EFFICIENTMAP
 
 #ifdef __GNUC__
+
+#include <unordered_map>
+#define efficient_map std::unordered_map
+
+/*
 #include <ext/hash_map>
 
 #define efficient_map __gnu_cxx::hash_map
@@ -21,6 +26,8 @@ namespace __gnu_cxx {
     }
   };
 }
+*/
+
 #else
 #warning "Unfamiliar compiler, compiling without a hash map chosen - fix this"
 #include <map>

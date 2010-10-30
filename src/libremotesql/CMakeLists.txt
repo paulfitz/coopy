@@ -1,3 +1,7 @@
+if (HAVE_TR1)
+  ADD_DEFINITIONS("-std=c++0x" -DHAVE_TR1)
+endif ()
+
 option(USE_REMOTE_SQL OFF "Enable remote sql access")
 if (USE_REMOTE_SQL)
 
