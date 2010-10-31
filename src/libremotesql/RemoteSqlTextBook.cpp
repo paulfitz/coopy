@@ -31,7 +31,7 @@ void RemoteSqlTextBook::clear() {
   }
 }
 
-bool RemoteSqlTextBook::read(const Property& config) {
+bool RemoteSqlTextBook::open(const Property& config) {
   dirty = true;
   try {
     implementation = new CSQL();

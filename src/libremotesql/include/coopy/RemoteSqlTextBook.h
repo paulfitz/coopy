@@ -17,7 +17,7 @@ public:
 
   void clear();
 
-  bool read(const Property& config);
+  bool open(const Property& config);
 
   std::vector<std::string> getNames();
 

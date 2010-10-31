@@ -1,5 +1,6 @@
 
 #include <coopy/PolyBook.h>
+#include <coopy/ShortTextBook.h>
 
 #include <fstream>
 
@@ -17,16 +18,16 @@ using namespace coopy::store;
 #include <coopy/GnumericTextBookFactory.h>
 #endif
 
+#include <json/json.h>
+
 #ifdef USE_REMOTE_SQL
 #include <coopy/RemoteSqlTextBook.h>
-#include <json/json.h>
 #endif
 
 TextBook *readHelper(const char *fname,
 		     const char *ext,
 		     const char *data) {
   TextBook *result = NULL;
-#ifdef USE_REMOTE_SQL
   if (string(ext)==".json") {
     ifstream in(fname);
     Json::Value root;
@@ -37,21 +38,28 @@ TextBook *readHelper(const char *fname,
     }
     Property p;
     for (Json::Value::iterator it=root.begin(); it!=root.end(); it++) {
-      printf("Got %s -> %s\n", it.memberName(),
-	     (*it).asCString());
+      //printf("Got %s -> %s\n", it.memberName(),
+      //(*it).asCString());
       p.put(it.memberName(),(*it).asCString());
     }
-    RemoteSqlTextBook *book = new RemoteSqlTextBook();
+    DataBook *book = NULL;
+    string key = p.get("type",PolyValue::makeString("none")).asString();
+    if (key=="mysql") {
+#ifdef USE_REMOTE_SQL
+      book = new RemoteSqlTextBook();
+#endif
+    } else if (key=="csv") {
+      book = new ShortTextBook();
+    }
     if (book!=NULL) {
-      if (!book->read(p)) {
-	fprintf(stderr,"Failed to configure database\n");
+      if (!book->open(p)) {
+	fprintf(stderr,"Failed to read data source\n");
 	delete book;
       } else {
 	result = book;
       }
-    }
+    }  
   }
-#endif
 #ifdef USE_GNUMERIC
   //printf("Checking with Gnumeric...\n");
   GnumericTextBookFactory fact;

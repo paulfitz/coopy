@@ -26,6 +26,8 @@ public:
     }
     return PolySheet();
   }
+
+  virtual bool open(const Property& config);
 };
 
 #endif

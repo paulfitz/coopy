@@ -31,6 +31,8 @@ public:
   }
   
   bool read(const char *fname);
+
+  virtual bool open(const Property& config);
 };
 
 #endif

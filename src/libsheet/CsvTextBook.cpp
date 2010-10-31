@@ -8,6 +8,7 @@ using namespace std;
 bool CsvTextBook::read(const char *fname) {
   CsvSheet index;
   if (CsvFile::read(fname,index)!=0) {
+    fprintf(stderr,"Failed to read %s\n", fname);
     return false;
   }
   string root = fname;
@@ -43,5 +44,10 @@ bool CsvTextBook::read(const char *fname) {
     }
   }
   return true;
+}
+
+bool CsvTextBook::open(const Property& config) {
+  if (!config.check("file")) return false;
+  return read(config.get("file").asString().c_str());
 }
 

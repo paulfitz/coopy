@@ -4,6 +4,7 @@
 #include <coopy/CsvTextBook.h>
 #include <coopy/CsvFile.h>
 #include <coopy/FormatSniffer.h>
+#include <coopy/Dbg.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,7 +27,7 @@ bool PolyBook::read(const char *fname) {
     for (size_t i=0; i<ext.length(); i++) {
       ext[i] = tolower(ext[i]);
     }
-    printf("Extension %s\n", ext.c_str());
+    dbg_printf("Extension %s\n", ext.c_str());
     if (ext==".book") {
       CsvTextBook *book0 = new CsvTextBook();
       if (!book0->read(fname)) {

@@ -2,6 +2,7 @@
 #define COOPY_DATABOOK
 
 #include <coopy/PolySheet.h>
+#include <coopy/Property.h>
 
 #include <vector>
 #include <string>
@@ -17,6 +18,10 @@ public:
   virtual ~DataBook() {}
 
   virtual std::vector<std::string> getNames() = 0;
+
+  virtual bool open(const Property& config) {
+    return false;
+  }
 
   virtual PolySheet readSheet(const std::string& name) = 0;
 

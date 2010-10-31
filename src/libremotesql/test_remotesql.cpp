@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   p.put("lostname","localhost");
   p.put("port",3128);
   p.put("database",(argc>1)?argv[1]:"mysql");
-  if (!book.read(p)) {
+  if (!book.open(p)) {
     printf("Could not open database\n");
     return 1;
   }
