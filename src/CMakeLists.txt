@@ -12,7 +12,7 @@ ENDIF (PROFILING)
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" HAVE_TR1)
 
-option(GNUMERIC OFF "Enable gnumeric integration (For XLS, ODF, etc)")
+option(USE_GNUMERIC OFF "Enable gnumeric integration (For XLS, ODF, etc)")
 option(CREATE_SHARED_LIBRARIES "Compile shared libraries rather than static")
 if (CREATE_SHARED_LIBRARIES)
   set(BUILD_SHARED_LIBS ON)
@@ -21,7 +21,7 @@ if (CREATE_SHARED_LIBRARIES)
   endif()
 endif()
 
-if (GNUMERIC)
+if (USE_GNUMERIC)
   set (COMPILE_PLAIN_EXECUTABLES TRUE)
 endif ()
 

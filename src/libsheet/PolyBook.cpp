@@ -29,6 +29,7 @@ bool PolyBook::read(const char *fname) {
     }
     dbg_printf("Extension %s\n", ext.c_str());
     if (ext==".book") {
+      dbg_printf("Trying %s out as CsvTextBook\n", ext.c_str());
       CsvTextBook *book0 = new CsvTextBook();
       if (!book0->read(fname)) {
 	delete book0;
@@ -43,6 +44,7 @@ bool PolyBook::read(const char *fname) {
     sniffer.open(fname);
     Format f = sniffer.getFormat();
     if (f.id==FORMAT_BOOK_SQLITE) {
+      dbg_printf("Trying %s out as Sqlite\n", ext.c_str());
       SqliteTextBook *book0 = new SqliteTextBook();
       if (!book0->read(fname)) {
 	delete book0;
@@ -51,6 +53,7 @@ bool PolyBook::read(const char *fname) {
       }
     }
     if (book==NULL) {
+      dbg_printf("Trying %s out as CSV\n", ext.c_str());
       ShortTextBook *b = new ShortTextBook();
       if (b==NULL) {
 	fprintf(stderr,"Failed to allocate ShortTextBook\n");

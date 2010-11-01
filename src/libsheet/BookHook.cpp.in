@@ -27,8 +27,10 @@ using namespace coopy::store;
 TextBook *readHelper(const char *fname,
 		     const char *ext,
 		     const char *data) {
+  dbg_printf("Trying plugin data formats...\n");
   TextBook *result = NULL;
   if (string(ext)==".json") {
+    dbg_printf("Trying with JSON...\n");
     ifstream in(fname);
     Json::Value root;
     Json::Reader reader;
@@ -61,14 +63,16 @@ TextBook *readHelper(const char *fname,
     }  
   }
 #ifdef USE_GNUMERIC
-  //printf("Checking with Gnumeric...\n");
+  dbg_printf("Trying with Gnumeric...\n");
   GnumericTextBookFactory fact;
   if (fact.check(fname,ext,data)) {
     result = fact.load(fname);
   }
   if (result!=NULL) {
-    //printf("Got a Gnumeric-readable file\n");
+    dbg_printf("Got a Gnumeric-readable file\n");
     return result;
+  } else {
+    dbg_printf("Not a Gnumeric-readable file\n");
   }
 #endif
   return result;

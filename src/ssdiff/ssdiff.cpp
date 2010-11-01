@@ -97,7 +97,9 @@ int main(int argc, char *argv[]) {
   BookCompare cmp;
   cmp.setVerbose(verbose);
 
-  PolyBook local, remote, pivot;
+  PolyBook local, remote;
+  PolyBook _pivot;
+  PolyBook *pivot;
   
   if (!local.read(argv[0])) {
     fprintf(stderr,"Failed to read %s\n", argv[0]);
@@ -108,29 +110,30 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   if (parent_file!="") {
-    if (!pivot.read(parent_file.c_str())) {
+    if (!_pivot.read(parent_file.c_str())) {
       fprintf(stderr,"Failed to read %s\n", parent_file.c_str());
       return 1;
     }
+    pivot = &_pivot;
   } else {
-    pivot.read(argv[0]);
+    pivot = &local;
   }
   CompareFlags flags;
   if (mode=="sql") {
     MergeOutputSqlDiff sqldiff;
-    cmp.compare(pivot,local,remote,sqldiff,flags);
+    cmp.compare(*pivot,local,remote,sqldiff,flags);
   } else if (mode=="human") {
     MergeOutputHumanDiff humandiff;
-    cmp.compare(pivot,local,remote,humandiff,flags);
+    cmp.compare(*pivot,local,remote,humandiff,flags);
   } else if (mode=="raw") {
     MergeOutputVerboseDiff verbosediff;
-    cmp.compare(pivot,local,remote,verbosediff,flags);
+    cmp.compare(*pivot,local,remote,verbosediff,flags);
   } else if (mode=="csv") {
     MergeOutputCsvDiff diff;
-    cmp.compare(pivot,local,remote,diff,flags);
+    cmp.compare(*pivot,local,remote,diff,flags);
   } else if (mode=="csv0") {
     MergeOutputPatch patch;
-    cmp.compare(pivot,local,remote,patch,flags);
+    cmp.compare(*pivot,local,remote,patch,flags);
     const CsvSheet& result = patch.get();
     if (output!="") {
       if (CsvFile::write(result,output.c_str())!=0) {

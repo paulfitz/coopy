@@ -5,11 +5,12 @@
 
 The Coopy project contains programs and libraries to help you:
 
-\li Merge CSV files that came from the same source but have been
+\li Merge tables (CSV files, database tables, spreadsheet sheets)
+  that came from the same source but have been
   modified independently (see \ref ssmerge).
-\li Analyze the difference between two or three CSV files
+\li Analyze the difference between two or three tables
   (see \ref ssdiff).
-\li Maintain a repository of CSV files with multiple active contributors
+\li Maintain a repository of tables with multiple active contributors
   (see \ref ssfossil and \ref coopy).
 
 Here are some tips on how to use these programs:
@@ -30,13 +31,14 @@ Here are some tips on how to use these programs:
 \li <a href="annotated.html">Classes</a> used in implementation.
 \endif
 
-Code in the Coopy project is all free and open source (licensed under the GPL).
+Code in the Coopy project is all free and open source (licensed under the GPL;
+LGPL port in the works).
 The \ref ssmerge and \ref ssdiff programs currently make use of 
 <a href="https://sourceforge.net/projects/libcsv/">libcsv</a>.
 The ssfossil program 
 is a thin wrapper around <a href='http://www.fossil-scm.org'>fossil</a>.
 The \ref coopy program uses <a href='http://www.wxwidgets.org'>wxWidgets</a>.
-The experimental (and undocumented) ssinsert program makes use of
+Optionally, programs also make use of
 the spreadsheet library
 within <a href="http://projects.gnome.org/gnumeric/">Gnumeric</a>.
 

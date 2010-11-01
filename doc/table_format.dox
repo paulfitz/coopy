@@ -1,0 +1,14 @@
+/**
+ *
+
+@page table_format Supported table formats
+
+Coopy programs can work with tables represented in the following formats:
+ \li CSV (or other delimiter-separated formats).
+ \li Sqlite tables.
+ \li Mysql tables (partial support at the time of writing).
+ \li Spreadsheet sheets, via Gnumeric (.xls, .xlsx, .ods, etc).
+
+
+ *
+ */

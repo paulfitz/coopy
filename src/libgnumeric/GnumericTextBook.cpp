@@ -27,7 +27,7 @@ void GnumericTextBook::clear() {
   
 bool GnumericTextBook::load(const char *fname) {
   clear();
-  printf("Trying for gnumeric %s\n", fname);
+  dbg_printf("Trying for gnumeric %s\n", fname);
   implementation = gnumeric_load(fname);
   return (implementation!=NULL);
 }

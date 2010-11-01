@@ -102,11 +102,11 @@ int gnumeric_free(GnumericWorkbookPtr workbook) {
 GnumericWorkbookPtr gnumeric_load(const char *fname) {
   GOIOContext *io_context = go_io_context_new (cc);
   char *uri = go_filename_to_uri (fname);
-  printf("Have uri %s\n", uri);
+  //printf("Have uri %s\n", uri);
   WorkbookView *wbv = wb_view_new_from_uri (uri, NULL,
 					    io_context, NULL);
   g_free (uri);
-  printf("Have workbook view\n");
+  //printf("Have workbook view\n");
   g_object_unref (io_context);
   return wbv;
 }

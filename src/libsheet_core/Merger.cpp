@@ -1,6 +1,7 @@
 #include <coopy/Merger.h>
 #include <coopy/Dbg.h>
 #include <coopy/Mover.h>
+#include <coopy/NameSniffer.h>
 
 #include <stdlib.h>
 
@@ -281,13 +282,19 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     lastAddress.clear();
     lastAction.clear();
 
+    NameSniffer localName(local);
+    NameSniffer remoteName(remote);
+
     vector<int> local_cols;
     vector<string> local_col_names;
     for (int i=0; i<local.width(); i++) {
       local_cols.push_back(i);
-      char buf[256];
-      sprintf(buf,"[%d]",i);
-      local_col_names.push_back(buf);
+
+      string name = localName.suggestColumnName(i);
+      if (name[0]>='0'&&name[0]<='9') {
+	name = string("[") + name + "]";
+      }
+      local_col_names.push_back(name);
     }
 
     output.declareNames(local_col_names, false);
@@ -414,9 +421,12 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	change.subject = at;
 	change.mode = ORDER_CHANGE_INSERT;
 	local_cols.insert(local_cols.begin()+at,-rCol-1);
-	char buf[256];
-	sprintf(buf,"{%d}",rCol);
-	local_col_names.insert(local_col_names.begin()+at,buf);
+
+	string name = remoteName.suggestColumnName(rCol);
+	if (name[0]>='0'&&name[0]<='9') {
+	  name = string("{") + name + "}";
+	}
+	local_col_names.insert(local_col_names.begin()+at,name);
 	change.indicesAfter = local_cols;
 	change.namesAfter = local_col_names;
 	output.changeColumn(change);
