@@ -121,9 +121,12 @@ static string cond(const vector<string>& names) {
 }
 
 MergeOutputHumanDiff::MergeOutputHumanDiff() {
-  printf("dtbl: table difference format version 0.2, human-readable flavor\n");
-  printf("This format should be considered unstable until 1.0\n\n");
+}
+
+bool MergeOutputHumanDiff::mergeStart() {
+  fprintf(out,"dtbl: human-readable table difference format version 0.3\n\n");
   showed_initial_columns = false;
+  return true;
 }
 
 bool MergeOutputHumanDiff::mergeDone() {
@@ -137,25 +140,25 @@ bool MergeOutputHumanDiff::changeColumn(const OrderChange& change) {
   //vector2string(change.namesAfter).c_str());
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
-    printf("delete column: %s\n  before %s\n  after  %s\n\n", 
+    fprintf(out,"delete column: %s\n  before %s\n  after  %s\n\n", 
 	   change.namesBefore[change.subject].c_str(),
 	   vector2string(change.namesBefore).c_str(),
 	   vector2string(change.namesAfter).c_str());
     break;
   case ORDER_CHANGE_INSERT:
-    printf("insert column: %s\n  before %s\n  after  %s\n\n", 
+    fprintf(out,"insert column: %s\n  before %s\n  after  %s\n\n", 
 	   change.namesAfter[change.subject].c_str(),
 	   vector2string(change.namesBefore).c_str(),
 	   vector2string(change.namesAfter).c_str());
     break;
   case ORDER_CHANGE_MOVE:
-    printf("move column: %s\n  before %s\n  after  %s\n\n", 
+    fprintf(out,"move column: %s\n  before %s\n  after  %s\n\n", 
 	   change.namesBefore[change.subject].c_str(),
 	   vector2string(change.namesBefore).c_str(),
 	   vector2string(change.namesAfter).c_str());
     break;
   default:
-    printf("  Unknown column operation\n\n");
+    fprintf(out,"  Unknown column operation\n\n");
     exit(1);
     break;
   }
@@ -169,20 +172,20 @@ bool MergeOutputHumanDiff::changeRow(const RowChange& change) {
   // map2string(change.val).c_str());
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
-    printf("insert row:\n%s\n\n",
+    fprintf(out,"insert row:\n%s\n\n",
 	   cond(change.names,change.val,"add","where").c_str());
     break;
   case ROW_CHANGE_DELETE:
-    printf("delete row:\n%s\n\n",
+    fprintf(out,"delete row:\n%s\n\n",
 	   cond(change.names,change.cond,"remove","where").c_str());
     break;
   case ROW_CHANGE_UPDATE:
-    printf("update row:\n  where %s\n  set   %s\n\n",
+    fprintf(out,"update row:\n  where %s\n  set   %s\n\n",
 	   cond(change.names,change.cond,change.val,false).c_str(),
 	   cond(change.names,change.cond,change.val,true).c_str());
     break;
   default:
-    printf("  Unknown row operation\n\n");
+    fprintf(out,"  Unknown row operation\n\n");
     exit(1);
     break;
   }
@@ -210,7 +213,7 @@ bool MergeOutputHumanDiff::declareNames(const vector<string>& names,
 
 void MergeOutputHumanDiff::checkMessage() {
   if (pending_message!="") {
-    printf("%s\n\n", pending_message.c_str());
+    fprintf(out,"%s\n\n", pending_message.c_str());
     pending_message = "";
   }
 }

@@ -423,9 +423,19 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	local_cols.insert(local_cols.begin()+at,-rCol-1);
 
 	string name = remoteName.suggestColumnName(rCol);
+	bool collision = false;
 	if (name[0]>='0'&&name[0]<='9') {
 	  name = string("{") + name + "}";
 	}
+	do {
+	  for (int i=0; i<(int)local_col_names.size(); i++) {
+	    if (local_col_names[i]==name) {
+	      collision = true;
+	      name = name + "_";
+	      break;
+	    }
+	  }
+	} while (collision);
 	local_col_names.insert(local_col_names.begin()+at,name);
 	change.indicesAfter = local_cols;
 	change.namesAfter = local_col_names;

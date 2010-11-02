@@ -111,22 +111,27 @@ public:
   }
 
   virtual int width() const {
+    COOPY_ASSERT(sheet);
     return sheet->width();
   }
 
   virtual int height() const {
+    COOPY_ASSERT(sheet);
     return sheet->height();
   }
 
   virtual std::string cellString(int x, int y) const {
+    COOPY_ASSERT(sheet);
     return sheet->cellString(x,y);
   }
 
   virtual bool cellString(int x, int y, const std::string& str) {
+    COOPY_ASSERT(sheet);
     return sheet->cellString(x,y,str);
   }
 
   std::string encode(const SheetStyle& style) const {
+    COOPY_ASSERT(sheet);
     return sheet->encode(style);
   }
 
@@ -135,29 +140,35 @@ public:
   //}
 
   virtual bool deleteColumn(const ColumnRef& column) {
+    COOPY_ASSERT(sheet);
     return sheet->deleteColumn(column);
   }
 
   virtual ColumnRef insertColumn(const ColumnRef& base) {
+    COOPY_ASSERT(sheet);
     return sheet->insertColumn(base);
   }
 
   // move a column before base; if base is invalid move after all columns
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {
+    COOPY_ASSERT(sheet);
     return sheet->moveColumn(src,base);
   }
 
   virtual bool deleteRow(const RowRef& src) {
+    COOPY_ASSERT(sheet);
     return sheet->deleteRow(src);
   }
 
   // insert a row before base; if base is invalid insert after all rows
   virtual RowRef insertRow(const RowRef& base) {
+    COOPY_ASSERT(sheet);
     return sheet->insertRow(base);
   }
 
   // move a row before base; if base is invalid move after all rows
   virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
+    COOPY_ASSERT(sheet);
     return sheet->moveRow(src,base);
   }
 

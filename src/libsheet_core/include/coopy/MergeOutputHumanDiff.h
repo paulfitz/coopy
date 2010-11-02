@@ -25,6 +25,7 @@ public:
   virtual bool changeColumn(const OrderChange& change);
   virtual bool changeRow(const RowChange& change);
 
+  virtual bool mergeStart();
   virtual bool mergeDone();
 
   virtual bool setSheet(const char *name) { 

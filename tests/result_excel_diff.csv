@@ -1,0 +1,6 @@
+dtbl,csv,version,0.2,
+config,empty_tag,*,,
+config,row_tag,ROW,,
+column,name,ROW,Name,Number
+row,select,*,five,5
+row,update,*,fyffe,*

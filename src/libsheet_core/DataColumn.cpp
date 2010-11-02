@@ -70,6 +70,7 @@ void Nature::evaluate(const char *txt) {
 
   // How number-like are we?
   int numbery = 0;
+  int nonnumbery = 0;
   for (size_t j=0; j<s.length(); j++) {
     char ch = s[j];
     if (ch>='0'&&ch<='9') {
@@ -77,11 +78,16 @@ void Nature::evaluate(const char *txt) {
     } else {
       if (ch!='.'&&ch!='-'&&ch!='e'&&ch!='E') {
 	numbery--;
+	nonnumbery++;
       }
     }
   }
   if (numbery>0) {
-    number.vote(1,numbery/4.0);
+    if (nonnumbery==0) {
+      number.vote(1,1);
+    } else {
+      number.vote(1,numbery/4.0);
+    }
   } else {
     number.vote(-1,0.1);
   }
@@ -89,11 +95,12 @@ void Nature::evaluate(const char *txt) {
   text.vote(1,0.1);
 
   /*
-  printf("Results: web %g email %g text %g number %g\n",
-	 web.result(),
-	 email.result(),
-	 text.result(),
-	 number.result());
+  dbg_printf("%s: web %g email %g text %g number %g\n",
+	     txt,
+	     web.result(),
+	     email.result(),
+	     text.result(),
+	     number.result());
   */
 }
 
@@ -117,18 +124,9 @@ float Nature::confidence() {
 
 void DataColumn::evaluate() {
   nmean.clear();
-  for (int i=0; i<sheet->height(); i++) {
+  for (int i=0; i<height(); i++) {
     nmean.evaluate(sheet->cellString(index,i).c_str());
   }
-  /*
-  if (nmean.confidence()>0.3) {
-    for (int i=0; i<sheet->height(); i++) {
-      Nature nmean;
-    }
-  } else {
-    printf("No confidence\n");
-  }
-  */
 }
 
 

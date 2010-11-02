@@ -2,6 +2,7 @@
 #define COOPY_MERGEOUTPUT
 
 #include <coopy/Patcher.h>
+#include <coopy/CompareFlags.h>
 
 namespace coopy {
   namespace cmp {
@@ -19,12 +20,21 @@ namespace coopy {
 class coopy::cmp::MergeOutput : public Patcher {
 private:
   int ct;
+protected:
+  CompareFlags flags;
+  FILE *out;
 public:
   MergeOutput() {
     ct = 0;
+    out = stdout;
   }
 
   virtual ~MergeOutput() {}
+
+  virtual bool setFlags(const CompareFlags& flags) {
+    this->flags = flags;
+    out = flags.out;
+  }
 
   virtual bool wantDiff() { return false; }
 
@@ -56,6 +66,10 @@ public:
    */
   virtual bool declareNames(const std::vector<std::string>& names, bool final) {
     return false;
+  }
+
+  virtual bool mergeStart() {
+    return true;
   }
 
   virtual bool mergeDone() {

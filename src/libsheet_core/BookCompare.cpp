@@ -1,6 +1,7 @@
 #include <coopy/BookCompare.h>
 #include <coopy/SheetCompare.h>
 #include <coopy/Dbg.h>
+#include <coopy/CsvWrite.h>
 
 #include <set>
 #include <algorithm>
@@ -17,6 +18,9 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
   // Hence a sheet rename cannot be guessed at yet.
 
   dbg_printf("BookCompare begins\n");
+
+  output.setFlags(flags);
+  output.mergeStart();
 
   vector<string> pivot_names = pivot.getNames();
   vector<string> local_names = local.getNames();
@@ -52,9 +56,27 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
        it++) {
     string name = *it;
     dbg_printf("  Working on \"%s\"\n", name.c_str());
-    PolySheet pivot_sheet = pivot.readSheet(name.c_str());
-    PolySheet local_sheet = local.readSheet(name.c_str());
-    PolySheet remote_sheet = remote.readSheet(name.c_str());
+    PolySheet pivot_sheet;
+    PolySheet local_sheet;
+    PolySheet remote_sheet;
+    if (pivot_names.size()==1 && 
+	local_names.size()==1 && 
+	remote_names.size()==1) {
+      pivot_sheet = pivot.readSheetByIndex(0);
+      local_sheet = local.readSheetByIndex(0);
+      remote_sheet = remote.readSheetByIndex(0);
+    } else {
+      pivot_sheet = pivot.readSheet(name.c_str());
+      local_sheet = local.readSheet(name.c_str());
+      remote_sheet = remote.readSheet(name.c_str());
+    }
+    if (!(pivot_sheet.isValid()&&
+	  local_sheet.isValid()&&
+	  remote_sheet.isValid())) {
+      fprintf(stderr,"Could not find matching sheets - no big deal, but not ready for this yet\n");
+      exit(1);
+    }
+
     SheetCompare cmp;
     bool ok = output.setSheet(name.c_str());
     if (!ok) {

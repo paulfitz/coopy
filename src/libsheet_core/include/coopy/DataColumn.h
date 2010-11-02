@@ -73,10 +73,12 @@ private:
   coopy::store::DataSheet *sheet;
   int index;
   Nature nmean;
+  int hh;
 public:
-  DataColumn(coopy::store::DataSheet& owner, int index) {
+  DataColumn(coopy::store::DataSheet& owner, int index, int height) {
     sheet = &owner;
     this->index = index;
+    hh = height;
   }
 
   void evaluate();
@@ -84,11 +86,11 @@ public:
   Nature getNature() { return nmean; }
 
   int height() {
-    return sheet->height();
+    return hh;
   }
 
   int size() {
-    return sheet->height();
+    return hh;
   }
 
   std::string cell(int x) {

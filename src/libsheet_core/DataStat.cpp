@@ -8,14 +8,16 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 void DataStat::evaluate(DataSheet& sheet) {
+  int hh = 50;
+  if (sheet.height()<hh) hh = sheet.height();
   clear();
   col.clear();
-  oddness.resize(sheet.width(),sheet.height(),0);
-  oddness_accum.resize(1,sheet.height(),0);
   if (sheet.width()==0) return;
-  if (sheet.height()==0) return;
+  if (hh==0) return;
+  oddness.resize(sheet.width(),hh,0);
+  oddness_accum.resize(1,hh,0);
   for (int j=0; j<sheet.width(); j++) {
-    col.push_back(DataColumn(sheet,j));
+    col.push_back(DataColumn(sheet,j,hh));
   }
   for (int j=0; j<sheet.width(); j++) {
     col[j].evaluate();
@@ -26,7 +28,7 @@ void DataStat::evaluate(DataSheet& sheet) {
     vector<float> cmp;
     float tot = 0;
     float tot2 = 0;
-    for (int i=0; i<sheet.height(); i++) {
+    for (int i=0; i<hh; i++) {
       float r = n.compare(sheet.cellString(j,i).c_str());
       cmp.push_back(r);
       tot += r;
@@ -34,9 +36,9 @@ void DataStat::evaluate(DataSheet& sheet) {
     }
     float mean = tot;
     float dev = 1;
-    if (sheet.height()>0) {
-      mean /= sheet.height();
-      dev = tot2 / sheet.height() - mean*mean;
+    if (hh>0) {
+      mean /= hh;
+      dev = tot2 / hh - mean*mean;
       // occasionally dev is just slightly less than zero due to round-offs
       if (dev<0) { 
 	dev = 0; 
@@ -45,7 +47,7 @@ void DataStat::evaluate(DataSheet& sheet) {
       }
     }
     if (dev<0.1) dev = 0.1;
-    for (int i=0; i<sheet.height(); i++) {
+    for (int i=0; i<hh; i++) {
       float v = (cmp[i]-mean)/dev;
       v = -v;
       if (v<0) v = 0;
@@ -61,7 +63,7 @@ void DataStat::evaluate(DataSheet& sheet) {
 
   int top = -1;
   int evidence = 0;
-  for (int i=0; i<sheet.height(); i++) {
+  for (int i=0; i<hh; i++) {
     float v = oddness_accum.cell(0,i);
     if (v>=1) {
       if (i<10) {
@@ -82,13 +84,13 @@ void DataStat::evaluate(DataSheet& sheet) {
   }
   */
   if (top>=0) {
-    printf("Header guess: [%d]", top);
+    dbg_printf("Header guess: [%d]", top);
     for (int j=0; j<sheet.width(); j++) {
-      printf(" [%s]", sheet.cellString(j,top).c_str());
+      dbg_printf(" [%s]", sheet.cellString(j,top).c_str());
     }
-    printf("\n");
+    dbg_printf("\n");
   } else {
-    printf("Cannot guess header\n");
+    dbg_printf("Cannot guess header\n");
   }
   rowDivider = top;
 }

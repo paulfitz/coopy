@@ -34,35 +34,35 @@ string verbose_encoder(const std::vector<std::string>& lst,
 
 
 bool MergeOutputVerboseDiff::changeColumn(const OrderChange& change) {
-  printf("changeColumn: %s\n", change.modeString().c_str());
-  printf("     subject: %d\n", change.subject);
-  printf(" indexBefore: %s\n", vector2string(change.indicesBefore).c_str());
-  printf("  indexAfter: %s\n", vector2string(change.indicesAfter).c_str());
-  printf(" namesBefore: %s\n", vector2string(change.namesBefore).c_str());
-  printf("  namesAfter: %s\n", vector2string(change.namesAfter).c_str());
-  printf("\n");
+  fprintf(out,"changeColumn: %s\n", change.modeString().c_str());
+  fprintf(out,"     subject: %d\n", change.subject);
+  fprintf(out," indexBefore: %s\n", vector2string(change.indicesBefore).c_str());
+  fprintf(out,"  indexAfter: %s\n", vector2string(change.indicesAfter).c_str());
+  fprintf(out," namesBefore: %s\n", vector2string(change.namesBefore).c_str());
+  fprintf(out,"  namesAfter: %s\n", vector2string(change.namesAfter).c_str());
+  fprintf(out,"\n");
   return true;
 }
 
 bool MergeOutputVerboseDiff::changeRow(const RowChange& change) {
-  printf("changeRow: %s\n", change.modeString().c_str());
-  printf("    conds: %s\n", verbose_encoder(change.names,change.cond).c_str());
-  printf("     vals: %s\n", verbose_encoder(change.names,change.val).c_str());
-  printf("\n");
+  fprintf(out,"changeRow: %s\n", change.modeString().c_str());
+  fprintf(out,"    conds: %s\n", verbose_encoder(change.names,change.cond).c_str());
+  fprintf(out,"     vals: %s\n", verbose_encoder(change.names,change.val).c_str());
+  fprintf(out,"\n");
   return true;
 }
 
 
 bool MergeOutputVerboseDiff::declareNames(const vector<string>& names, 
 					  bool final) {
-  printf("declareNames: %s (%s)\n",
+  fprintf(out,"declareNames: %s (%s)\n",
 	 vector2string(names).c_str(),
 	 final?"final":"not final");
-  printf("\n");
+  fprintf(out,"\n");
   return true;
 }
 
 bool MergeOutputVerboseDiff::setSheet(const char *name) { 
-  printf("setSheet [%s]\n\n", stringer_encoder(name).c_str());
+  fprintf(out,"setSheet [%s]\n\n", stringer_encoder(name).c_str());
   return true;
 }

@@ -140,7 +140,7 @@ MergeOutputCsvDiff::MergeOutputCsvDiff() {
 
 bool MergeOutputCsvDiff::mergeDone() {
   SheetStyle style;
-  printf("%s",result.encode(style).c_str());
+  fprintf(out,"%s",result.encode(style).c_str());
 }
 
 bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
@@ -173,7 +173,7 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
     result.addRecord();
     break;
   default:
-    printf("  Unknown column operation\n\n");
+    fprintf(stderr,"  Unknown column operation\n\n");
     exit(1);
     break;
   }
@@ -225,7 +225,7 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
     describeRow(change,"update");
     break;
   default:
-    printf("  Unknown row operation\n\n");
+    fprintf(stderr,"  Unknown row operation\n\n");
     exit(1);
     break;
   }

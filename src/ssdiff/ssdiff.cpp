@@ -13,6 +13,23 @@
 
 using namespace coopy::store;
 using namespace coopy::cmp;
+using namespace std;
+
+static void start_output(string output, CompareFlags& flags) {
+  FILE *fout = fopen(output.c_str(),"wb");
+  if (fout==NULL) {
+    fprintf(stderr,"Could not open %s for writing\n", output.c_str());
+    exit(1);
+  }
+  flags.out = fout;
+}
+
+static void stop_output(string output, CompareFlags& flags) {
+  if (flags.out!=stdout) {
+    fclose(flags.out);
+    flags.out = stdout;
+  }
+}
 
 int main(int argc, char *argv[]) {
   std::string output = "";
@@ -121,16 +138,24 @@ int main(int argc, char *argv[]) {
   CompareFlags flags;
   if (mode=="sql") {
     MergeOutputSqlDiff sqldiff;
+    start_output(output,flags);
     cmp.compare(*pivot,local,remote,sqldiff,flags);
+    stop_output(output,flags);
   } else if (mode=="human") {
     MergeOutputHumanDiff humandiff;
+    start_output(output,flags);
     cmp.compare(*pivot,local,remote,humandiff,flags);
+    stop_output(output,flags);
   } else if (mode=="raw") {
     MergeOutputVerboseDiff verbosediff;
+    start_output(output,flags);
     cmp.compare(*pivot,local,remote,verbosediff,flags);
+    stop_output(output,flags);
   } else if (mode=="csv") {
     MergeOutputCsvDiff diff;
+    start_output(output,flags);
     cmp.compare(*pivot,local,remote,diff,flags);
+    stop_output(output,flags);
   } else if (mode=="csv0") {
     MergeOutputPatch patch;
     cmp.compare(*pivot,local,remote,patch,flags);
@@ -143,6 +168,20 @@ int main(int argc, char *argv[]) {
       SheetStyle style;
       std::string out = result.encode(style);
       printf("%s",out.c_str());
+      /*
+      if (output==""||output=="-") {
+	printf("%s",out.c_str());
+      } else {
+	FILE *fout = fopen(output.c_str(),"wb");
+	if (fout==NULL) {
+	  fprintf(stderr,"Could not open %s for writing\n", output.c_str());
+	  return 1;
+	}
+	fprintf(fout,"%s",out.c_str());
+	fclose(fout);
+	fout = NULL;
+      }
+      */
     }
   } else {
     fprintf(stderr,"Patch mode not recognized\n");

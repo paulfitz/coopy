@@ -3,6 +3,9 @@
 
 #include <coopy/DataSheet.h>
 
+#include <vector>
+#include <string>
+
 namespace coopy {
   namespace store {
     class NameSniffer;
@@ -12,6 +15,7 @@ namespace coopy {
 class coopy::store::NameSniffer {
 private:
   DataSheet& sheet;
+  std::vector<std::string> names;
 public:
   NameSniffer(DataSheet& sheet) : sheet(sheet) {
     sniff();
