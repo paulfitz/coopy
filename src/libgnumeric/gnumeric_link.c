@@ -1,5 +1,5 @@
-
-#include <gnumeric-config.h>
+#include <stdio.h>
+//#include <gnumeric-config.h>
 #include <glib/gi18n.h>
 #include "gnumeric.h"
 #include "position.h"
@@ -12,14 +12,14 @@
 #include "expr-name.h"
 #include "libgnumeric.h"
 #include "gutils.h"
-#include "gnumeric-paths.h"
+//#include "gnumeric-paths.h"
 #include "gnm-plugin.h"
 #include "command-context.h"
 #include "command-context-stderr.h"
 #include "workbook-view.h"
 #include "cell.h"
 #include "value.h"
-#include <dialogs/dialogs.h>
+//#include <dialogs/dialogs.h>
 #include <goffice/goffice.h>
 #include <goffice/utils/go-file.h>
 #include <goffice/app/io-context.h>

@@ -20,13 +20,19 @@ if (USE_GNUMERIC)
 
   include_directories(${GNUMERIC_ROOT})
   include_directories(${GNUMERIC_ROOT}/src)
-  #include_directories(${GNUMERIC_INSTALL}/libspreadsheet-1.10/spreadsheet/)
-  #link_directories(${GNUMERIC_INSTALL}/bin)
+  # accept also mingw cross-compiling install directory
+  include_directories(${GNUMERIC_ROOT}/include)
+  include_directories(${GNUMERIC_ROOT}/include/libspreadsheet-1.10/spreadsheet/)
+  link_directories(${GNUMERIC_ROOT}/bin ${GNUMERIC_ROOT}/lib)
   link_libraries(spreadsheet)
 
   # tweak for mingw build
+  if (MINGW)
+    option(NEED_FAKE_RT "create a fake rt library (may be needed with MINGW)" TRUE)
+  endif()
   if (NEED_FAKE_RT)
     add_library(rt dummy.c)
+    link_libraries(intl)
   endif()
 
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libsheet_core/include)
