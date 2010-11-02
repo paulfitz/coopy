@@ -22,8 +22,8 @@ void coopy_print_trace(FILE *out, const char *file, int line) {
     fflush(out);
 }
 #else
-void yarp_print_trace(FILE *out, const char *file, int line) {
-    // Not implemented on this platform
+void coopy_print_trace(FILE *out, const char *file, int line) {
+    fprintf(out, "Assertion thrown at %s:%d, cannot trace on this platform\n", file, line);
 }
 #endif
 
