@@ -7,7 +7,7 @@
 
 #include <coopy/CsvMerge.h>
 #include <coopy/CsvFile.h>
-#include <coopy/CsvStat.h>
+#include <coopy/DataStat.h>
 #include <coopy/SheetCompare.h>
 #include <coopy/CsvPatch.h>
 #include <coopy/MergeOutputAccum.h>
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   CsvSheet remote;
   CsvSheet parent;
   CsvSheet *ss = &local;
-  CsvStat stat;
+  DataStat stat;
   bool dirty = true;
   int diffs = 0;
   

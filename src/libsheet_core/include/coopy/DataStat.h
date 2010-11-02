@@ -1,24 +1,24 @@
-#ifndef SSFOSSIL_CSVSTAT
-#define SSFOSSIL_CSVSTAT
+#ifndef SSFOSSIL_DATASTAT
+#define SSFOSSIL_DATASTAT
 
-#include <coopy/CsvColumn.h>
+#include <coopy/DataColumn.h>
 #include <coopy/FloatSheet.h>
 
 namespace coopy {
   namespace cmp {
-    class CsvStat;
+    class DataStat;
   }
 }
 
-class coopy::cmp::CsvStat {
+class coopy::cmp::DataStat {
 private:
   int rowDivider;
 public:
-  CsvStat() {
+  DataStat() {
     clear();
   }
 
-  std::vector<CsvColumn> col;
+  std::vector<DataColumn> col;
   coopy::store::FloatSheet oddness;
   coopy::store::FloatSheet oddness_accum;
 
@@ -26,7 +26,7 @@ public:
     rowDivider = -1;
   }
 
-  void evaluate(coopy::store::CsvSheet& sheet);
+  void evaluate(coopy::store::DataSheet& sheet);
 
   int getRowDivider() {
     return rowDivider;

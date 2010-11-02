@@ -1,5 +1,5 @@
 
-#include <coopy/CsvColumn.h>
+#include <coopy/DataColumn.h>
 
 using namespace std;
 using namespace coopy::store;
@@ -115,10 +115,10 @@ float Nature::confidence() {
 }
 
 
-void CsvColumn::evaluate() {
+void DataColumn::evaluate() {
   nmean.clear();
   for (int i=0; i<sheet->height(); i++) {
-    nmean.evaluate(sheet->cell(index,i).c_str());
+    nmean.evaluate(sheet->cellString(index,i).c_str());
   }
   /*
   if (nmean.confidence()>0.3) {
@@ -133,7 +133,7 @@ void CsvColumn::evaluate() {
 
 
 
-void CsvColumnPair::compare(CsvColumn& a, CsvColumn& b) {
+void DataColumnPair::compare(DataColumn& a, DataColumn& b) {
 }
 
 

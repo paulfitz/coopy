@@ -1,14 +1,14 @@
-#ifndef SSFOSSIL_CSVCOLUMN
-#define SSFOSSIL_CSVCOLUMN
+#ifndef SSFOSSIL_DATACOLUMN
+#define SSFOSSIL_DATACOLUMN
 
-#include <coopy/CsvSheet.h>
+#include <coopy/DataSheet.h>
 
 namespace coopy {
   namespace cmp {
     class Vote;
     class Nature;
-    class CsvColumn;
-    class CsvColumnPair;
+    class DataColumn;
+    class DataColumnPair;
   }
 }
 
@@ -68,13 +68,13 @@ public:
   }
 };
 
-class coopy::cmp::CsvColumn {
+class coopy::cmp::DataColumn {
 private:
-  coopy::store::CsvSheet *sheet;
+  coopy::store::DataSheet *sheet;
   int index;
   Nature nmean;
 public:
-  CsvColumn(coopy::store::CsvSheet& owner, int index) {
+  DataColumn(coopy::store::DataSheet& owner, int index) {
     sheet = &owner;
     this->index = index;
   }
@@ -92,14 +92,14 @@ public:
   }
 
   std::string cell(int x) {
-    return sheet->cell(index,x);
+    return sheet->cellString(index,x);
   }
 };
 
-class coopy::cmp::CsvColumnPair {
+class coopy::cmp::DataColumnPair {
 private:
 public:
-  void compare(CsvColumn& a, CsvColumn& b);
+  void compare(DataColumn& a, DataColumn& b);
 };
 
 

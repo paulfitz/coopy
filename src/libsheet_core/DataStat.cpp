@@ -1,13 +1,13 @@
 #include <math.h>
 
-#include <coopy/CsvStat.h>
+#include <coopy/DataStat.h>
 #include <coopy/CsvWrite.h>
 
 using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
-void CsvStat::evaluate(CsvSheet& sheet) {
+void DataStat::evaluate(DataSheet& sheet) {
   clear();
   col.clear();
   oddness.resize(sheet.width(),sheet.height(),0);
@@ -15,19 +15,19 @@ void CsvStat::evaluate(CsvSheet& sheet) {
   if (sheet.width()==0) return;
   if (sheet.height()==0) return;
   for (int j=0; j<sheet.width(); j++) {
-    col.push_back(CsvColumn(sheet,j));
+    col.push_back(DataColumn(sheet,j));
   }
   for (int j=0; j<sheet.width(); j++) {
     col[j].evaluate();
   }
   for (int j=0; j<sheet.width(); j++) {
-    CsvColumn& c = col[j];
+    DataColumn& c = col[j];
     Nature n = c.getNature();
     vector<float> cmp;
     float tot = 0;
     float tot2 = 0;
     for (int i=0; i<sheet.height(); i++) {
-      float r = n.compare(sheet.cell(j,i).c_str());
+      float r = n.compare(sheet.cellString(j,i).c_str());
       cmp.push_back(r);
       tot += r;
       tot2 += r*r;
@@ -56,8 +56,8 @@ void CsvStat::evaluate(CsvSheet& sheet) {
 
   oddness_accum.normalize(-1,-1,1);
 
-  CsvFile::write(oddness,"oddness.csv");
-  CsvFile::write(oddness_accum,"oddness_accum.csv");
+  //CsvFile::write(oddness,"oddness.csv");
+  //CsvFile::write(oddness_accum,"oddness_accum.csv");
 
   int top = -1;
   int evidence = 0;
