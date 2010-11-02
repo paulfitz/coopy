@@ -22,6 +22,10 @@ public:
   virtual int headerHeight() {
     return 0;
   }
+
+  int getColumnIndexByName(const char *name) {
+    return -1;
+  }
 };
 
 #endif

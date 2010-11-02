@@ -7,6 +7,7 @@
 
 namespace coopy {
   namespace cmp {
+    class ConfigChange;
     class OrderChange;
     class RowChange;
     class Patcher;
@@ -27,7 +28,18 @@ namespace coopy {
   }
 }
 
+class coopy::cmp::ConfigChange {
+public:
+  bool ordered;
+  bool complete;
+  bool trustNames;
 
+  ConfigChange() {
+    ordered = true;
+    complete = true;
+    trustNames = false;
+  }
+};
 
 class coopy::cmp::OrderChange {
 public:
@@ -97,6 +109,8 @@ public:
   }
 
   virtual ~Patcher() {}
+
+  virtual bool changeConfig(const ConfigChange& change) { return false; }
 
   virtual bool changeColumn(const OrderChange& change) { return false; }
 

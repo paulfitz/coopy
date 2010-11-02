@@ -163,17 +163,39 @@ bool PatchParser::apply() {
   int row_index = -1;
   bool ok = true;
 
+  bool configSent = false;
+  bool configSet = false;
+  ConfigChange cc;
   for (int i=0; i<patch.height(); i++) {
     dbg_printf("[%d] ", i);
     string cmd0 = patch.cell(0,i);
     string cmd1 = patch.cell(1,i);
     bool fail = false;
+    if (cmd0!="config" && configSet && !configSent) {
+      patcher->changeConfig(cc);
+    }
     if (cmd0=="dtbl") {
       dbg_printf("Processed header\n");
     } else if (cmd0=="config") {
       string key = patch.cell(1,i);
       string val = patch.cell(2,i);
+      config.put(key.c_str(),val.c_str());
       dbg_printf("Set config variable %s -> %s\n", key.c_str(), val.c_str());
+      if (key=="order") {
+	if (val=="named") {
+	  cc.ordered = false;
+	  cc.complete = false;
+	  cc.trustNames = true;
+	} else if (val=="map") {
+	  cc.ordered = true;
+	  cc.complete = true;
+	  cc.trustNames = false;
+	} else {
+	  fprintf(stderr,"key configuration unrecognized\n");
+	  exit(1);
+	}
+	configSet = true;
+      }
     } else if (cmd0=="column") {
       OrderChange change;
       PatchColumnNames names2;

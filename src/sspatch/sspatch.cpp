@@ -7,7 +7,7 @@
 #include <coopy/CsvPatch.h>
 #include <coopy/FormatSniffer.h>
 #include <coopy/PatchParser.h>
-#include <coopy/CsvPatcher.h>
+#include <coopy/SheetPatcher.h>
 #include <coopy/Dbg.h>
 
 using namespace coopy::store;
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "No sheet found\n");
     return 1;
   }
-  CsvPatcher patcher(&sheet);
+  SheetPatcher patcher(&sheet);
   PatchParser parser(&patcher,&sniffer);
   if (!parser.apply()) {
     fprintf(stderr,"Patch application failed\n");

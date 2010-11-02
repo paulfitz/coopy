@@ -362,7 +362,7 @@ endforeach()
 
 # EXCEL testing
 
-IF (GNUMERIC)
+IF (USE_GNUMERIC)
 
 MACRO(TEST_XLS name ref target)
   ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 

@@ -1,4 +1,4 @@
-#include <coopy/CsvPatcher.h>
+#include <coopy/SheetPatcher.h>
 
 #include <map>
 #include <algorithm>
@@ -9,7 +9,7 @@ using namespace std;
 using namespace coopy::cmp;
 using namespace coopy::store;
 
-bool CsvPatcher::changeColumn(const OrderChange& change) {
+bool SheetPatcher::changeColumn(const OrderChange& change) {
   if (sheet==NULL) return false;
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
@@ -34,7 +34,7 @@ bool CsvPatcher::changeColumn(const OrderChange& change) {
   return false;
 }
 
-bool CsvPatcher::changeRow(const RowChange& change) {
+bool SheetPatcher::changeRow(const RowChange& change) {
   if (sheet==NULL) return false;
   map<string,int> dir;
   vector<int> active_cond;
@@ -138,12 +138,20 @@ bool CsvPatcher::changeRow(const RowChange& change) {
   return true;
 }
 
-bool CsvPatcher::declareNames(const std::vector<std::string>& names, 
-			      bool final) {
+bool SheetPatcher::declareNames(const std::vector<std::string>& names, 
+				bool final) {
   if (sheet==NULL) return false;
-  if ((int)names.size()!=sheet->width()) {
-    fprintf(stderr,"* ERROR: name mismatch\n");
-    return false;
+  if (config.trustNames==false) {
+    if ((int)names.size()!=sheet->width()) {
+      fprintf(stderr,"* ERROR: name mismatch\n");
+      return false;
+    }
+  } else {
+    for (int i=0; i<(int)names.size(); i++) {
+      printf("Checking %s\n", names[i].c_str());
+    }
+    fprintf(stderr,"Named columns not implemented yet\n");
+    exit(1);
   }
   return true;
 }
