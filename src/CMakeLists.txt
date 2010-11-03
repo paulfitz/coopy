@@ -27,7 +27,7 @@ endif ()
 
 if (COMPILE_PLAIN_EXECUTABLES)
   # un-plain, executables with gnumeric dependencies go in special component
-  set (BIGBIN excel_utilities)
+  set (BIGBIN spreadsheet_utilities)
   set (CSVBIN csv_utilities)
   set (BASEBIN shared_utilities)
 else ()

@@ -554,7 +554,14 @@ FunctionEnd
 ;Pages
   !insertmacro MUI_PAGE_WELCOME
 
+  !define MUI_WELCOMEPAGE_TITLE "On the shoulders of giants"
+  !define MUI_WELCOMEPAGE_TEXT "Coopy contains material from Gnumeric, fossil, and other projects, used under the GPL license.  You can learn more about it at http://share.find.coop.  If you experience problems, please let the authors of Coopy know.  Please don't bother the Gnumeric and fossil folks, since any problems you see are likely to be due to our misconfiguration of their excellent software.  Thanks!\r\n\r\nCoopy is free software.  Share and enjoy.\r\n\r\nClick Next to continue."
+  !insertmacro MUI_PAGE_WELCOME
+
+  !define  MUI_LICENSEPAGE_TEXT_BOTTOM "You do not have to agree to the terms of this license in order to use Coopy yourself.  The license, if you follow its terms, gives you additional rights to modify and distribute Coopy."
+  !define MUI_LICENSEPAGE_BUTTON $(^NextBtn)
   !insertmacro MUI_PAGE_LICENSE "@AT@CPACK_RESOURCE_FILE_LICENSE@AT@"
+
   Page custom InstallOptionsPage
   !insertmacro MUI_PAGE_DIRECTORY
   
