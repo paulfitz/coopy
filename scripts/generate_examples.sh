@@ -76,12 +76,12 @@ function diff_base_apply {
 	echo " "
 	echo "## SECTION ref1 $f1"
 	echo "\verbatim"
-	cat $TEST/$f1
+	ssformat $TEST/$f1 - 2> /dev/null
 	echo "\endverbatim"
 	echo " "
 	echo "## SECTION ref2 $f2"
 	echo "\verbatim"
-	cat $TEST/$f2
+	ssformat $TEST/$f2 - 2> /dev/null
 	echo "\endverbatim"
     ) > $out
     echo "* Generated $out"
@@ -97,7 +97,7 @@ function diff_apply {
     namer=$3
     diff_base_apply human $f1 $f2 $namer
     diff_base_apply csv $f1 $f2 ${namer}_csv
-    diff_base_apply raw $f1 $f2 ${namer}_raw
+    #diff_base_apply raw $f1 $f2 ${namer}_raw
 }
 
 function merge_apply {
@@ -125,17 +125,17 @@ function merge_apply {
 	echo " "
 	echo "## SECTION parent parent/pivot file: $f1"
 	echo "\verbatim"
-	cat $TEST/$f1
+	ssformat $TEST/$f1 - 2> /dev/null
 	echo "\endverbatim"
 	echo " "
 	echo "## SECTION local local/left file: $f2"
 	echo "\verbatim"
-	cat $TEST/$f2
+	ssformat $TEST/$f2 - 2> /dev/null
 	echo "\endverbatim"
 	echo " "
 	echo "## SECTION remote remote/right file: $f3"
 	echo "\verbatim"
-	cat $TEST/$f3
+	ssformat $TEST/$f3 - 2> /dev/null
 	echo "\endverbatim"
     ) > $out
     echo "* Generated $out"
@@ -147,6 +147,7 @@ function merge_apply {
 
 diff_apply numbers.csv numbers_flip_column.csv move_column
 diff_apply numbers.csv numbers_change_five.csv update_cell
+diff_apply numbers.xls numbers_change_five.xls xls_update_cell
 diff_apply numbers.csv numbers_add_row.csv insert_row
 diff_apply numbers_add_row.csv numbers.csv delete_row
 diff_apply numbers.csv numbers_wide.csv insert_column

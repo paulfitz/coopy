@@ -280,11 +280,10 @@ http://www.nobawc.org/article.php?id=56,"Worker Cooperatives in the Bay Area"
  
 \section merge_example_big_merge_with_lots_of_changes_local local/left file: test001_spell.csv
 \verbatim
-This is a modified version, with typos
-The letter e, has been dropped for example
-and http, has been removed
-and everything, is lowercased
-
+"This is a modified version","with typos"
+"The letter e","has been dropped for example"
+"and http","has been removed"
+"and everything","is lowercased"
 "link to dirctory","nam of dirctory"
 dirctory.coop/,".coop dirctory"
 www.agrnrindiana.com/groups,"a grnr indiana ntwork groups"

@@ -15,8 +15,7 @@
  
 \section diff_example_insert_row_output output
 \verbatim
-dtbl: table difference format version 0.2, human-readable flavor
-This format should be considered unstable until 1.0
+dtbl: human-readable table difference format version 0.3
 
 column names are: [0] [1]
 

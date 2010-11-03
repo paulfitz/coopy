@@ -27,6 +27,7 @@ Here are some tips on how to use these programs:
 \li \ref ssfossil reference.
 \li \ref coopy graphical interface reference.
 \li \ref patch_format.
+\li \ref table_format.
 \if link_code
 \li <a href="annotated.html">Classes</a> used in implementation.
 \endif

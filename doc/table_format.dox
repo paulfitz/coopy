@@ -6,9 +6,12 @@
 Coopy programs can work with tables represented in the following formats:
  \li CSV (or other delimiter-separated formats).
  \li Sqlite tables.
- \li Mysql tables (partial support at the time of writing).
+ \li MySQL tables (partial support at the time of writing).
  \li Spreadsheet sheets, via Gnumeric (.xls, .xlsx, .ods, etc).
 
+CSV support is most complete, followed by Gnumeric, followed by Sqlite,
+followed by MySQL.  Good support for all four formats is targeted for
+Coopy 1.0.
 
  *
  */

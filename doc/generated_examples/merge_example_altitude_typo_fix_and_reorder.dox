@@ -27,7 +27,7 @@ ssmerge test005_base.csv test005_fix_typo_add.csv test005_replace_column_and_reo
  
 \section merge_example_altitude_typo_fix_and_reorder_parent parent/pivot file: test005_base.csv
 \verbatim
-Altitude,Probe A,Probe B,Probe C,Comment
+Altitude,"Probe A","Probe B","Probe C",Comment
 1000,10,20,30,"Wing vibration"
 2000,15,25,52,"Wing vibration"
 3000,3,66,89,"Ominous silense"
@@ -36,7 +36,7 @@ Altitude,Probe A,Probe B,Probe C,Comment
  
 \section merge_example_altitude_typo_fix_and_reorder_local local/left file: test005_fix_typo_add.csv
 \verbatim
-Altitude,Probe A,Probe B,Probe C,Comment
+Altitude,"Probe A","Probe B","Probe C",Comment
 500,5,10,7,"Smooth flight"
 1000,10,20,30,"Wing vibration"
 2000,15,25,52,"Wing vibration"
@@ -46,7 +46,7 @@ Altitude,Probe A,Probe B,Probe C,Comment
  
 \section merge_example_altitude_typo_fix_and_reorder_remote remote/right file: test005_replace_column_and_reorder.csv
 \verbatim
-Probe A,Probe C,Probe D,Comment,Altitude
+"Probe A","Probe C","Probe D",Comment,Altitude
 10,30,5,"Wing vibration",1000
 15,52,10,"Wing vibration",2000
 3,89,15,"Ominous silense",3000
