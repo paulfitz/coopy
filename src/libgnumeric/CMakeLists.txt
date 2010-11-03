@@ -26,6 +26,23 @@ if (USE_GNUMERIC)
   link_directories(${GNUMERIC_ROOT}/bin ${GNUMERIC_ROOT}/lib)
   link_libraries(spreadsheet)
 
+  option(INSTALL_GNUMERIC "Add components of gnumeric to install (for packaging)" OFF)
+  
+  if (INSTALL_GNUMERIC)
+    install(DIRECTORY ${GNUMERIC_ROOT}/bin/ DESTINATION bin COMPONENT ${BIGBIN} FILES_MATCHING PATTERN "*.dll")
+    install(DIRECTORY ${GNUMERIC_ROOT}/bin/ DESTINATION bin COMPONENT ${BIGBIN} FILES_MATCHING PATTERN "ss*.exe")
+    install(DIRECTORY ${GNUMERIC_ROOT}/bin/ DESTINATION bin COMPONENT ${BIGBIN} FILES_MATCHING PATTERN "gnumeric.exe")
+    install(DIRECTORY ${GNUMERIC_ROOT}/bin/ DESTINATION bin COMPONENT ${BIGBIN} FILES_MATCHING PATTERN "g-spawn*.exe")
+    install(DIRECTORY ${GNUMERIC_ROOT}/bin/ DESTINATION bin COMPONENT ${BIGBIN} FILES_MATCHING PATTERN "gtk*.exe")
+    install(DIRECTORY ${GNUMERIC_ROOT}/bin/ DESTINATION bin COMPONENT ${BIGBIN} FILES_MATCHING PATTERN "gdk*.exe")
+    install(DIRECTORY ${GNUMERIC_ROOT}/etc/ DESTINATION etc COMPONENT ${BIGBIN})
+    install(DIRECTORY ${GNUMERIC_ROOT}/share/gtk-2.0 DESTINATION share COMPONENT ${BIGBIN})
+    install(DIRECTORY ${GNUMERIC_ROOT}/share/gnumeric DESTINATION share COMPONENT ${BIGBIN})
+    install(DIRECTORY ${GNUMERIC_ROOT}/lib/gnumeric DESTINATION lib COMPONENT ${BIGBIN})
+    install(DIRECTORY ${GNUMERIC_ROOT}/lib/goffice DESTINATION lib COMPONENT ${BIGBIN})
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/tests/ DESTINATION share/coopy/examples COMPONENT examples FILES_MATCHING PATTERN "*.xls")
+  endif ()
+
   # tweak for mingw build
   if (MINGW)
     option(NEED_FAKE_RT "create a fake rt library (may be needed with MINGW)" TRUE)

@@ -14,4 +14,4 @@ ADD_LIBRARY(ssrender include/coopy/CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BIN
 
 ADD_EXECUTABLE(csv2html csv2html.cpp)
 TARGET_LINK_LIBRARIES(csv2html sheet ssrender)
-INSTALL(TARGETS csv2html COMPONENT utilities DESTINATION bin)
+INSTALL(TARGETS csv2html COMPONENT ${CSVBIN} DESTINATION bin)

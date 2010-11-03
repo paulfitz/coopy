@@ -25,6 +25,17 @@ if (USE_GNUMERIC)
   set (COMPILE_PLAIN_EXECUTABLES TRUE)
 endif ()
 
+if (COMPILE_PLAIN_EXECUTABLES)
+  # un-plain, executables with gnumeric dependencies go in special component
+  set (BIGBIN excel_utilities)
+  set (CSVBIN csv_utilities)
+  set (BASEBIN shared_utilities)
+else ()
+  set (BIGBIN utilities)
+  set (CSVBIN utilities)
+  set (BASEBIN utilities)
+endif()
+
 # for binary builds -- completely optional
 SET (STATLIB "${CMAKE_BINARY_DIR}/static_libs")
 IF (EXISTS ${STATLIB})

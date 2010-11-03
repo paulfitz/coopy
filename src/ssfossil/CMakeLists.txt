@@ -83,4 +83,4 @@ TARGET_LINK_LIBRARIES(coopy_fossil csv)
 
 ADD_EXECUTABLE(ssfossil ${WORKING_DIR}/src/main.cpp)
 TARGET_LINK_LIBRARIES(ssfossil coopy_fossil)
-INSTALL(TARGETS ssfossil COMPONENT utilities DESTINATION bin)
+INSTALL(TARGETS ssfossil COMPONENT ${BASEBIN} DESTINATION bin)

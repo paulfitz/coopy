@@ -16,6 +16,10 @@ using namespace coopy::cmp;
 using namespace std;
 
 static void start_output(string output, CompareFlags& flags) {
+  if (output=="" || output=="-") {
+    flags.out = stdout;
+    return;
+  }
   FILE *fout = fopen(output.c_str(),"wb");
   if (fout==NULL) {
     fprintf(stderr,"Could not open %s for writing\n", output.c_str());
