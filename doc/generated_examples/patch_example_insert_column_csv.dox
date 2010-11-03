@@ -1,0 +1,53 @@
+/**
+ *
+
+\ingroup patch_example
+
+\defgroup patch_example_insert_column_csv insert_column_csv example for sspatch
+
+\section patch_example_insert_column_csv_command command
+\verbatim
+ sspatch numbers.csv patch.csv
+\endverbatim
+\li \ref patch_example_insert_column_csv_output "output"
+\li \ref patch_example_insert_column_csv_ref1 "numbers.csv"
+\li \ref patch_example_insert_column_csv_ref2 "patch.csv"
+ 
+\section patch_example_insert_column_csv_output output
+\verbatim
+one,1,un,.
+two,2,deux,..
+three,3,trois,...
+four,4,quatre,....
+five,5,cinq,.....
+\endverbatim
+ 
+\section patch_example_insert_column_csv_ref1 numbers.csv
+\verbatim
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+ 
+\section patch_example_insert_column_csv_ref2 patch.csv
+\verbatim
+dtbl,csv,version,0.2,,,
+column,name,ROW,[0],[1],,
+column,insert,ROW,[0],[1],{2},
+column,insert,ROW,[0],[1],{2},{3}
+row,select,*,one,1,*,*
+row,update,*,*,*,un,.
+row,select,*,two,2,*,*
+row,update,*,*,*,deux,..
+row,select,*,three,3,*,*
+row,update,*,*,*,trois,...
+row,select,*,four,4,*,*
+row,update,*,*,*,quatre,....
+row,select,*,five,5,*,*
+row,update,*,*,*,cinq,.....
+\endverbatim
+
+ *
+ */
