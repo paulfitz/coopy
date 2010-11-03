@@ -1,0 +1,7 @@
+Welcome to Coopy!  Coopy contains material from Gnumeric, fossil,
+and other projects, used under the GPL license.  
+You can learn more about it at http://share.find.coop.  If you 
+experience problems, please let the authors of Coopy know.
+Please don't bother the Gnumeric and fossil folks, since any problems
+you see are likely to be due to our misconfiguration of their excellent
+software.  Thanks!

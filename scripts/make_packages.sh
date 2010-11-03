@@ -45,9 +45,10 @@ while [ ! "k$1" = "k" ]; do
 	rm -f *.exe
 	make package || exit 1
 	cp -v *.exe $OUTPUT
+	cp -v *.zip $OUTPUT
 
 	# Give a no-install version
-	cp -v bin/coopy.exe $OUTPUT/`echo coopy-*.exe | sed "s/.exe/-direct.exe/"`
+	#cp -v bin/coopy.exe $OUTPUT/`echo coopy-*.exe | sed "s/.exe/-direct.exe/"`
     fi
 
     if [ "k$1" = "klinux" ]; then
