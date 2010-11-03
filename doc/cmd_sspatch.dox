@@ -11,6 +11,7 @@ Here are the ways you can use sspatch:
 - \ref sspatch_base
 - \ref sspatch_common_usage
 - \ref sspatch_direct_output
+- \ref sspatch_xls
 \endif
 
 @section sspatch_base sspatch
@@ -58,7 +59,7 @@ Supported patch operations are column insertion, deletion, and moving, and
 row updating, insertion, and deletion.
 
 \if link_examples
-See \ref diff_example for examples of patch files (currently, only csv format
+See \ref patch_example for examples of patch files (currently, only csv format
 patches are supported).
 \endif
 
@@ -66,6 +67,13 @@ patches are supported).
 
 The output of sspatch is by default standard output.  It can be redirected
 to a file using the "--output" option.
+
+@section sspatch_xls sspatch --output out.xls sheet.xls patch.txt
+
+If compiled with Gnumeric support, then sspatch can be used to modify
+Excel files.  Where possible, formatting will be preserved.
+For example, for a patch that switches the order of two columns,
+the formatting of those columns will follow their content.
 
  *
  */

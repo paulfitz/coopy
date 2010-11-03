@@ -14,6 +14,7 @@ TEST="$SRC/tests"
 echo "TESTS in $TEST"
 OUT="diffs"
 DIFF="./bin/ssdiff"
+PATCH="./bin/sspatch"
 MERGE="./bin/ssmerge"
 
 mkdir -p $OUT
@@ -91,12 +92,57 @@ function diff_base_apply {
     fi
 }
 
+function patch_base_apply {
+    format="$1"
+    shift
+    f1=$1
+    f2=$2
+    name=$3
+    echo $name > /tmp/_gen_name.txt
+    if grep -q "$key" /tmp/_gen_name.txt; then
+    out=$OUT/patch_example_$name.txt
+    DF=/tmp/_gen_diff.txt
+    rm -f $DF $DF.tmp
+    $DIFF --format-$format --output $DF.tmp $TEST/$f1 $TEST/$f2
+    grep -v "^config" $DF.tmp > $DF
+    (
+	echo "## SECTION command command"
+	echo "\verbatim"
+	echo " sspatch $f1 patch.$format"
+	echo "\endverbatim"
+	echo "## LINK output \"output\""
+	echo "## LINK ref1 \"$f1\""
+	echo "## LINK ref2 \"patch.$format\""
+	echo " "
+	echo "## SECTION output output"
+	echo "\verbatim"
+	$PATCH $TEST/$f1 $DF
+	echo "\endverbatim"
+	echo " "
+	echo "## SECTION ref1 $f1"
+	echo "\verbatim"
+	ssformat $TEST/$f1 - 2> /dev/null
+	echo "\endverbatim"
+	echo " "
+	echo "## SECTION ref2 patch.$format"
+	echo "\verbatim"
+	cat $DF
+	echo "\endverbatim"
+    ) > $out
+    echo "* Generated $out"
+    dox patch_example $name "$name example for sspatch"
+    else
+	echo "skipped $name"
+    fi
+}
+
 function diff_apply {
     f1=$1
     f2=$2
     namer=$3
     diff_base_apply human $f1 $f2 $namer
     diff_base_apply csv $f1 $f2 ${namer}_csv
+    patch_base_apply csv $f1 $f2 ${namer}_csv
     #diff_base_apply raw $f1 $f2 ${namer}_raw
 }
 
