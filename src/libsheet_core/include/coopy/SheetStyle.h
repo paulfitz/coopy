@@ -17,7 +17,7 @@ public:
     delim = ",";
   }
 
-  void setFromFilename(const char *fname);
+  bool setFromFilename(const char *fname);
 
   void setFromInspection(const char *buffer, int len);
 

@@ -1,5 +1,6 @@
 #include <coopy/RemoteSqlSheet.h>
 #include <coopy/RemoteSqlTextBook.h>
+#include <coopy/Dbg.h>
 
 #include <sqlxx.h>
 #include <strutilsxx.h>
@@ -17,6 +18,9 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
   w = h = 0;
   book = owner;
   this->name = name;
+  schema = new RemoteSqlSheetSchema;
+  COOPY_MEMORY(schema);
+  schema->sheet = this;
 
   //////////////////////////////////////////////////////////////////
   // Check columns
@@ -98,7 +102,13 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
 }
 
 RemoteSqlSheet::~RemoteSqlSheet() {
+  if (schema!=NULL) delete schema;
 }
+
+SheetSchema *RemoteSqlSheet::getSchema() const {
+  return schema;
+}
+
 
 std::string RemoteSqlSheet::cellString(int x, int y) const {
   const string *c = cache.pcell_const(x,y);

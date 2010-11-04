@@ -73,7 +73,7 @@ public:
     }
   }
 
-  virtual SheetSchema *getSchema() {
+  virtual SheetSchema *getSchema() const {
     if (schema!=0/*NULL*/) return schema;
     if (sheet==0/*NULL*/) return 0/*NULL*/;
     return sheet->getSchema();

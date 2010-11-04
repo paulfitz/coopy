@@ -70,12 +70,12 @@ public:
 
 class coopy::cmp::DataColumn {
 private:
-  coopy::store::DataSheet *sheet;
+  const coopy::store::DataSheet *sheet;
   int index;
   Nature nmean;
   int hh;
 public:
-  DataColumn(coopy::store::DataSheet& owner, int index, int height) {
+  DataColumn(const coopy::store::DataSheet& owner, int index, int height) {
     sheet = &owner;
     this->index = index;
     hh = height;

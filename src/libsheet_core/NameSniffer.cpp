@@ -8,7 +8,26 @@ using namespace coopy::cmp;
 using namespace std;
 
 void NameSniffer::sniff() {
+  embed = false;
   names.clear();
+
+  SheetSchema *schema = sheet.getSchema();
+  if (schema!=NULL) {
+    dbg_printf("Sniffing... found schema!\n");
+    for (int i=0; i<sheet.width(); i++) {
+      ColumnInfo info = schema->getColumnInfo(i);
+      if (!info.hasName()) {
+	names.clear();
+	break;
+      }
+      names.push_back(info.getName());
+    }
+    if (names.size()>0) {
+      dbg_printf("Found names in schema\n");
+      return;
+    }
+  }
+
   DataStat stat;
   stat.evaluate(sheet);
   int div = stat.getRowDivider();
@@ -36,6 +55,8 @@ void NameSniffer::sniff() {
   }
   if (failure) {
     names.clear();
+  } else {
+    embed = true;
   }
 }
 

@@ -10,6 +10,7 @@
 namespace coopy {
   namespace store {
     class RemoteSqlSheet;
+    class RemoteSqlSheetSchema;
     class RemoteSqlTextBook;
   }
 }
@@ -42,7 +43,14 @@ public:
     return true;
   }
 
+  virtual ColumnInfo getColumnInfo(int x) {
+    return ColumnInfo(col2sql[x]);
+  }
+
+  virtual SheetSchema *getSchema() const;
+
 private:
+  RemoteSqlSheetSchema *schema;
   RemoteSqlTextBook *book;
   void *implementation;
   SparseStringSheet cache;
@@ -55,5 +63,15 @@ private:
   std::vector<std::string> keys;
   std::vector<int> key_cols;
 };
+
+class coopy::store::RemoteSqlSheetSchema : public SheetSchema {
+public:
+  RemoteSqlSheet *sheet;
+
+  virtual ColumnInfo getColumnInfo(int x) {
+    return sheet->getColumnInfo(x);
+  }
+};
+
 
 #endif

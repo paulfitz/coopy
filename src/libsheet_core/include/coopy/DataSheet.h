@@ -48,7 +48,7 @@ public:
   // remove any cached values, e.g. in remote connections.
   virtual bool clearCache() { return true; }
 
-  virtual SheetSchema *getSchema() {
+  virtual SheetSchema *getSchema() const {
     return 0 /*NULL*/;
   }
 

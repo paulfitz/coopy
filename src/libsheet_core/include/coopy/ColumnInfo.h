@@ -10,14 +10,18 @@ namespace coopy {
 }
 
 class coopy::store::ColumnInfo {
+private:
+  std::string name;
+  bool nameSet;
 public:
-  ColumnInfo() {}
+ ColumnInfo() : nameSet(false) {}
+ ColumnInfo(std::string name) : name(name), nameSet(true) {}
 
   virtual ~ColumnInfo() {}
 
-  virtual bool hasName() const { return false; }
+  virtual bool hasName() const { return nameSet; }
 
-  virtual std::string getName() const;
+  virtual std::string getName() const { return name; }
 };
 
 #endif

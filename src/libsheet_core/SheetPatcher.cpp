@@ -111,6 +111,9 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	bool match = true;
 	for (int c=0; c<sheet->width(); c++) {
 	  if (active_cond[c]) {
+	    dbg_printf("compare %s and %s\n",
+		       sheet->cellString(c,r).c_str(),
+		       cond[c].c_str());
 	    if (sheet->cellString(c,r)!=cond[c]) {
 	      match = false;
 	      break;
@@ -118,6 +121,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  }
 	}
 	if (match) {
+	  dbg_printf("Match\n");
 	  for (int c=0; c<sheet->width(); c++) {
 	    if (active_val[c]) {
 	      sheet->cellString(c,r,val[c]);
@@ -125,6 +129,8 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  }
 	  success = true;
 	  break;
+	} else {
+	  dbg_printf("No match\n");
 	}
       }
       return success;

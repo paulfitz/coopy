@@ -23,7 +23,7 @@ public:
     return 0;
   }
 
-  int getColumnIndexByName(const char *name) {
+  virtual int getColumnIndexByName(const char *name) {
     return -1;
   }
 };

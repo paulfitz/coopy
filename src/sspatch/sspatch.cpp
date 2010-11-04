@@ -144,9 +144,11 @@ int main(int argc, char *argv[]) {
   
   //if (CsvFile::write(local,output.c_str())!=0) {
   if ((!local.inplace())||(tmp!=output)) {
-    if (!local.write(output.c_str(),outputFormat.c_str())) {
-      fprintf(stderr,"Failed to write %s\n", output.c_str());
-      return 1;
+    if (output!=argv[0] || !local.inplace()) {
+      if (!local.write(output.c_str(),outputFormat.c_str())) {
+	fprintf(stderr,"Failed to write %s\n", output.c_str());
+	return 1;
+      }
     }
   }
   return 0;

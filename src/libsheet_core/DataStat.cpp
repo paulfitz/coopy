@@ -7,7 +7,7 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
-void DataStat::evaluate(DataSheet& sheet) {
+void DataStat::evaluate(const DataSheet& sheet) {
   int hh = 50;
   if (sheet.height()<hh) hh = sheet.height();
   clear();

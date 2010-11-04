@@ -2,6 +2,7 @@
 #define SSFOSSIL_CSVFILE_INC
 
 #include <coopy/CsvWrite.h>
+#include <coopy/CsvSheet.h>
 #include <coopy/Reader.h>
 
 namespace coopy {

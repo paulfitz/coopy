@@ -9,7 +9,7 @@ using namespace coopy::store;
 
 const SheetStyle SheetStyle::defaultStyle;
 
-void SheetStyle::setFromFilename(const char *fname) {
+bool SheetStyle::setFromFilename(const char *fname) {
   string name = fname;
   delim = ",";
   if (name.length()>=4) {
@@ -25,8 +25,15 @@ void SheetStyle::setFromFilename(const char *fname) {
       delim = ",";
     } else if (ext==".wsv") {
       delim = " ";
+    } else if (ext==".list") {
+      delim = ",";
+    } else {
+      return false;
     }
+  } else {
+    return false;
   }
+  return true;
 }
 
 void SheetStyle::setFromInspection(const char *buffer, int len) {

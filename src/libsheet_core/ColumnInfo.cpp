@@ -4,10 +4,6 @@
 
 using namespace coopy::store;
 
-std::string ColumnInfo::getName() const {
-  //char buf[256];
-  //sprintf(buf,"%d",index);
-  //return buf;
-  return "";
+int ColumnInfo_has_no_symbols_any_more() {
+  return 42;
 }
-

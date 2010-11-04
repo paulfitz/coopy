@@ -1,5 +1,6 @@
 
 #include <coopy/PolyBook.h>
+#include <coopy/JsonProperty.h>
 #include <coopy/ShortTextBook.h>
 
 #include <fstream>
@@ -31,19 +32,8 @@ TextBook *readHelper(const char *fname,
   TextBook *result = NULL;
   if (string(ext)==".json") {
     dbg_printf("Trying with JSON...\n");
-    ifstream in(fname);
-    Json::Value root;
-    Json::Reader reader;
-    if (!reader.parse(in,root,false)) {
-      fprintf(stderr,"Failed to parse %s\n", fname);
-      return NULL;
-    }
     Property p;
-    for (Json::Value::iterator it=root.begin(); it!=root.end(); it++) {
-      //printf("Got %s -> %s\n", it.memberName(),
-      //(*it).asCString());
-      p.put(it.memberName(),(*it).asCString());
-    }
+    if (!JsonProperty::add(p,fname)) return NULL;
     DataBook *book = NULL;
     string key = p.get("type",PolyValue::makeString("none")).asString();
     if (key=="mysql") {
@@ -52,6 +42,9 @@ TextBook *readHelper(const char *fname,
 #endif
     } else if (key=="csv") {
       book = new ShortTextBook();
+    } else {
+      fprintf(stderr,"Type not recognized: %s\n", key.c_str());
+      return NULL;
     }
     if (book!=NULL) {
       if (!book->open(p)) {

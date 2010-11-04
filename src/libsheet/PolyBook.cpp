@@ -5,11 +5,15 @@
 #include <coopy/CsvFile.h>
 #include <coopy/FormatSniffer.h>
 #include <coopy/Dbg.h>
+#include <coopy/JsonProperty.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <map>
+#include <fstream>
+
+#include <json/json.h>
 
 using namespace std;
 using namespace coopy::store;
@@ -53,17 +57,20 @@ bool PolyBook::read(const char *fname) {
       }
     }
     if (book==NULL) {
-      dbg_printf("Trying %s out as CSV\n", ext.c_str());
-      ShortTextBook *b = new ShortTextBook();
-      if (b==NULL) {
-	fprintf(stderr,"Failed to allocate ShortTextBook\n");
-	exit(1);
-      }
-      if (CsvFile::read(fname,b->sheet)!=0) {
-	delete b;
-	b = NULL;
-      } else {
-	book = b;
+      SheetStyle style;
+      if (style.setFromFilename(fname)) {
+	dbg_printf("Trying %s out as CSV\n", ext.c_str());
+	ShortTextBook *b = new ShortTextBook();
+	if (b==NULL) {
+	  fprintf(stderr,"Failed to allocate ShortTextBook\n");
+	  exit(1);
+	}
+	if (CsvFile::read(fname,b->sheet)!=0) {
+	  delete b;
+	  b = NULL;
+	} else {
+	  book = b;
+	}
       }
     }
   }
@@ -113,9 +120,46 @@ public:
 };
 
 bool PolyBook::write(const char *fname, const char *format) {
+  string name = fname;
+  size_t eid = name.rfind(".");
+  string ext = ".csv";
+  if (eid!=string::npos) {
+    ext = name.substr(eid);
+  }
+  for (size_t i=0; i<ext.length(); i++) {
+    ext[i] = tolower(ext[i]);
+  }
+  dbg_printf("Write: extension is %s\n", ext.c_str());
   if (book==NULL) {
     fprintf(stderr,"Nothing to write\n");
     return false;
+  }
+  vector<string> names = getNames();
+  if (ext == ".json") {
+    dbg_printf("Asked to write, with json configuration\n");
+    ifstream in(fname);
+    Property p;
+    if (!JsonProperty::add(p,fname)) {
+      return false;
+    }
+    string key = p.get("type",PolyValue::makeString("none")).asString();
+    string fname2 = p.get("file",PolyValue::makeString("-")).asString();
+    if (key=="csv") {
+      if (names.size()!=1) {
+	fprintf(stderr,"Unsupported number of sheets during write: %d\n",
+		(int)names.size());
+	return false;
+      }
+      PolySheet sheet = readSheet(names[0]);
+      if (!sheet.isValid()) { 
+	fprintf(stderr,"Could not access sheet %s\n", names[0].c_str());
+	return false;
+      }
+      return CsvFile::write(sheet,p)==0;
+    } else {
+     fprintf(stderr,"Output type not recognized: %s\n", key.c_str());
+     return false;
+    }
   }
   if (book->save(fname,format)) {
     return true;
@@ -125,16 +169,6 @@ bool PolyBook::write(const char *fname, const char *format) {
       fprintf(stderr,"Setting output format is not yet supported\n");
       exit(1);
     }
-  }
-  vector<string> names = getNames();
-  string name = fname;
-  size_t eid = name.rfind(".");
-  string ext = ".csv";
-  if (eid!=string::npos) {
-    name.substr(eid);
-  }
-  for (size_t i=0; i<ext.length(); i++) {
-    ext[i] = tolower(ext[i]);
   }
   if (ext==".sql") {
     FILE *fout = fopen(fname,"w");

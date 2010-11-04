@@ -14,16 +14,21 @@ namespace coopy {
 
 class coopy::store::NameSniffer {
 private:
-  DataSheet& sheet;
+  const DataSheet& sheet;
   std::vector<std::string> names;
+  bool embed;
 public:
-  NameSniffer(DataSheet& sheet) : sheet(sheet) {
+  NameSniffer(const DataSheet& sheet) : sheet(sheet) {
     sniff();
   }
 
   void sniff(); 
 
   virtual std::string suggestColumnName(int col);
+
+  bool isEmbedded() {
+    return embed;
+  }
 };
 
 #endif

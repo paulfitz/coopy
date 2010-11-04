@@ -26,7 +26,7 @@ public:
     rowDivider = -1;
   }
 
-  void evaluate(coopy::store::DataSheet& sheet);
+  void evaluate(const coopy::store::DataSheet& sheet);
 
   int getRowDivider() {
     return rowDivider;
