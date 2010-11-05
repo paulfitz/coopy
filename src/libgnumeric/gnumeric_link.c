@@ -179,7 +179,8 @@ int gnumeric_sheet_get_size(GnumericSheetPtr sheet, int *w, int *h) {
 
 char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
   GnmValue const *value = sheet_cell_get_value((Sheet*)sheet,x, y);
-  if (value==NULL) return "";
+  if (value==NULL) return NULL;
+  if (value->type == VALUE_EMPTY) return NULL;
   return value_get_as_string(value);
 }
 

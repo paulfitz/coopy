@@ -55,8 +55,11 @@ public:
 
   std::string encode(const SheetStyle& style) const;
 
-  static std::string encodeCell(const std::string& str, 
+  static std::string encodeCell(const SheetCell& str, 
 				const SheetStyle& style);
+
+  //static std::string encodeCell(const std::string& str, 
+  //				const SheetStyle& style);
 
   // remove any cached values, e.g. in remote connections.
   virtual bool clearCache() { return true; }

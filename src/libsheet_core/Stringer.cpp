@@ -18,12 +18,15 @@ string stringer_encoder(int x) {
 
 string stringer_encoder(const string& x) {
   SheetStyle style;
-  string result = DataSheet::encodeCell(x,style);
+  string result = DataSheet::encodeCell(SheetCell(x,false),style);
   return (result!="")?result:"\"\"";
 }
 
 string stringer_encoder(const coopy::store::SheetCell& x) {
-  return stringer_encoder(x.toString());
+  SheetStyle style;
+  string result = DataSheet::encodeCell(x,style);
+  //printf("Encoding %s as %s\n", x.text.c_str(), result.c_str());
+  return (result!="")?result:"\"\"";
 }
 
 std::string stringify(const std::string& x) {

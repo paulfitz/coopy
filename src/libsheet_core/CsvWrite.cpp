@@ -30,7 +30,7 @@ int CsvFile::write(const DataSheet& src, const Property& config) {
     }
     style.setFromFilename(fname.c_str());
   }
-
+  style.setFromProperty(config);
   if (config.check("header")) {
     int n = config.get("header").asInt();
     if (n>=0) {

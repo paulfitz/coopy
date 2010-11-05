@@ -125,17 +125,18 @@ public:
   }
 
   virtual std::string cellString(int x, int y, bool& escaped) const {
-    if (!valid) { 
-      escaped = true;
-      return ""; 
+    if (valid) {
+      const pairCellType& c = pcell(x,y);
+      escaped = c.second;
+      return c.first;
     }
-    if (s.arr[y].size()<=x) {
-      escaped = true;
-      return "";
+    if (s.arr[y].size()>x) {
+      const pairCellType& c = pcell(x,y);
+      escaped = c.second;
+      return c.first;
     }
-    const pairCellType& c = pcell(x,y);
-    escaped = c.second;
-    return c.first;
+    escaped = true;
+    return ""; 
   }
 
   virtual bool cellString(int x, int y, const std::string& str) {

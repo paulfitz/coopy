@@ -25,17 +25,26 @@ GnumericSheet::~GnumericSheet() {
 }
 
 std::string GnumericSheet::cellString(int x, int y) const {
+  bool tmp;
+  return cellString(x,y,tmp);
+}
+
+
+std::string GnumericSheet::cellString(int x, int y, 
+				      bool& escaped) const {
   char *txt = gnumeric_sheet_get_cell_as_string(SHEET(implementation),
 						x, y);
+  escaped = (txt==NULL);
   if (txt==NULL) return "";
   string result = txt;
   //printf("GOT [%s]\n", result.c_str());
   // if txt is blank, it seems like we should not free it?
-  if (txt[0]!='\0') {
-    gnumeric_free_string(txt);
-  }
-  return result;
+  //if (txt[0]!='\0') {
+  gnumeric_free_string(txt);
+  //}
+  return result;  
 }
+
 
 bool GnumericSheet::cellString(int x, int y, const std::string& str) {
   return gnumeric_sheet_set_cell_as_string(SHEET(implementation),

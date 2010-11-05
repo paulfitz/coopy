@@ -140,6 +140,7 @@ MergeOutputCsvDiff::MergeOutputCsvDiff() {
 
 bool MergeOutputCsvDiff::mergeDone() {
   SheetStyle style;
+  SheetCell c = result.cellSummary(0,0);
   fprintf(out,"%s",result.encode(style).c_str());
 }
 

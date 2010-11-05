@@ -365,7 +365,7 @@ endforeach()
 IF (USE_GNUMERIC)
 
   ADD_TEST2(excel_diff ${TESTS}/result_excel_diff.csv
-    ssdiff --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
+    ssdiff --verbose --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
 
   MACRO(TEST_XLS name ref target)
     ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 

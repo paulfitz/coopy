@@ -27,6 +27,10 @@ bool JsonProperty::add(Property& prop, Json::Value& root) {
        dbg_printf("Got %s -> %d\n", it.memberName(),
 		  (*it).asInt());
        prop.put(it.memberName(),(*it).asInt());
+     } else if ((*it).isBool()) {
+       dbg_printf("Got %s -> %d\n", it.memberName(),
+		  (*it).asBool()?1:0);
+       prop.put(it.memberName(),(*it).asBool()?1:0);
      } else {
        fprintf(stderr, "JSON: unsupported type\n");
        return false;

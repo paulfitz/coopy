@@ -11,15 +11,16 @@ std::string DataSheet::encode(const SheetStyle& style) const {
       if (x>0) {
 	result += delim;
       }
-      result += encodeCell(cellString(x,y),style);
+      result += encodeCell(cellSummary(x,y),style);
     }
     result += "\r\n"; // use Windows encoding, since UNIX is more forgiving
   }
   return result;
 }
 
-std::string DataSheet::encodeCell(const std::string& str, 
+std::string DataSheet::encodeCell(const SheetCell& c, 
 				  const SheetStyle& style) {
+  std::string str = c.text;
   std::string delim = style.getDelimiter();
   bool need_quote = false;
   for (size_t i=0; i<str.length(); i++) {
@@ -27,6 +28,15 @@ std::string DataSheet::encodeCell(const std::string& str,
     if (ch=='"'||ch=='\''||ch==delim[0]||ch=='\r'||ch=='\n'||ch=='\t'||ch==' ') {
       need_quote = true;
       break;
+    }
+  }
+  if (str==style.getNullToken()) {
+    need_quote = !c.escaped;
+  }
+  //printf("encoding [%s] [%d]\n", str.c_str(), c.escaped);
+  if (str=="" && c.escaped) {
+    if (style.haveNullToken()) {
+      return style.getNullToken();
     }
   }
   std::string result = "";

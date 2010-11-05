@@ -125,9 +125,19 @@ public:
     return sheet->cellString(x,y);
   }
 
+  virtual std::string cellString(int x, int y, bool& escaped) const {
+    COOPY_ASSERT(sheet);
+    return sheet->cellString(x,y,escaped);
+  } 
+
   virtual bool cellString(int x, int y, const std::string& str) {
     COOPY_ASSERT(sheet);
     return sheet->cellString(x,y,str);
+  }
+
+  virtual bool cellString(int x, int y, const std::string& str, bool escaped) {
+    COOPY_ASSERT(sheet);
+    return sheet->cellString(x,y,str,escaped);
   }
 
   std::string encode(const SheetStyle& style) const {

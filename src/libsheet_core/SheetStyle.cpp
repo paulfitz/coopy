@@ -36,6 +36,18 @@ bool SheetStyle::setFromFilename(const char *fname) {
   return true;
 }
 
+void SheetStyle::setFromProperty(const Property& config) {
+  if (config.check("delimiter")) {
+    delim = config.get("delimiter").asString();
+  }
+  if (config.check("null_token")) {
+    nullToken = config.get("null_token").asString();
+  }
+  if (config.check("have_null")) {
+    haveNull = config.get("have_null").asInt()!=0;
+  }
+}
+
 void SheetStyle::setFromInspection(const char *buffer, int len) {
   int comma_ct = 0;
   int comma_prev = -1;
