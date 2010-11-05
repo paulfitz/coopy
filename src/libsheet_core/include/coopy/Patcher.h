@@ -12,6 +12,7 @@ namespace coopy {
     class ConfigChange;
     class OrderChange;
     class RowChange;
+    class NameChange;
     class Patcher;
 
     enum {
@@ -26,6 +27,12 @@ namespace coopy {
       ROW_CHANGE_DELETE,
       ROW_CHANGE_INSERT,
       ROW_CHANGE_UPDATE,
+    };
+
+    enum {
+      NAME_CHANGE_NONE,
+      NAME_CHANGE_DECLARE,
+      NAME_CHANGE_SELECT,
     };
   }
 }
@@ -105,6 +112,29 @@ public:
   }
 };
 
+class coopy::cmp::NameChange {
+public:
+  int mode;
+  bool final;
+  std::vector<std::string> names;
+
+  NameChange() {
+    mode = -1;
+    final = false;
+  }
+
+  std::string modeString() const {
+    switch (mode) {
+    case NAME_CHANGE_NONE:
+      return "none";
+    case NAME_CHANGE_DECLARE:
+      return "declare";
+    case NAME_CHANGE_SELECT:
+      return "select";
+    }
+    return "unknown";
+  }
+};
 
 class coopy::cmp::Patcher {
 public:
@@ -121,6 +151,8 @@ public:
 
   /**
    *
+   * This method is headed toward deprecation in favor of changeName.
+   *
    * Called with a sequence of column names.  It is called twice.
    * First, with final=false, giving an initial sequence.
    * Then, a series of changeColumn() calls may happen, specifying
@@ -131,6 +163,13 @@ public:
    */
   virtual bool declareNames(const std::vector<std::string>& names, bool final) {
     return false;
+  }
+
+  virtual bool changeName(const NameChange& change) { 
+    if (change.mode==NAME_CHANGE_DECLARE) {
+      return declareNames(change.names,change.final);
+    }
+    return false; 
   }
 
   virtual bool mergeDone() {

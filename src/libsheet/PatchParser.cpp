@@ -219,7 +219,12 @@ bool PatchParser::apply() {
       change.namesAfter = names2.lst;
       if (cmd1=="name") {
 	dbg_printf("Set column names to %s\n", names2.toString().c_str());
-	patcher->declareNames(names2.lst,false);
+	NameChange nc;
+	nc.mode = NAME_CHANGE_DECLARE;
+	nc.final = false;
+	nc.names = names2.lst;
+	patcher->changeName(nc);
+	//patcher->declareNames(names2.lst,false);
       } else if (cmd1=="move") {
 	string mover = names2.inferMove(names,&change.subject,&change.object);
 	dbg_printf("Moving columns to %s (%s moves // subj %d obj %d)\n", 

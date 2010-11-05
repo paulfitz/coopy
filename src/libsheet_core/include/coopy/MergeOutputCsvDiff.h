@@ -8,12 +8,15 @@ namespace coopy {
   namespace cmp {
     class MergeOutputCsvDiff;
     class MergeOutputCsvDiffV0p2;
+    typedef MergeOutputCsvDiffV0p2 MergeOutputCsvDiffStable;
+    typedef MergeOutputCsvDiff MergeOutputCsvDiffUnstable;
   }
 }
 
 class coopy::cmp::MergeOutputCsvDiff : public MergeOutput {
 public:
   coopy::store::CsvSheet result;
+  std::vector<std::string> ops;
 
   MergeOutputCsvDiff();
 
@@ -22,6 +25,7 @@ public:
   virtual bool changeColumn(const OrderChange& change);
   virtual bool changeRow(const RowChange& change);
 
+  bool operateRow(const RowChange& change, const char *tag);
   bool selectRow(const RowChange& change, const char *tag);
   bool describeRow(const RowChange& change, const char *tag);
 

@@ -106,7 +106,8 @@ int main(int argc, char *argv[]) {
     printf("  ssdiff --format-human local.csv modified.csv # human readable output\n");
     printf("  ssdiff --format-csv local.csv modified.csv   # format that sspatch can read\n");
     printf("  ssdiff --format-raw local.csv modified.csv   # full information\n");
-    printf("  ssdiff --version 0.2 --format-csv local.csv modified.csv  # old version\n");
+    printf("  ssdiff --version 0.2 --format-csv local.csv modified.csv  # change version\n");
+    printf("  ssdiff --version 0.4 --format-csv local.csv modified.csv  # change version\n");
     printf("Output defaults to standard output.\n");
     return 1;
   }
@@ -163,16 +164,19 @@ int main(int argc, char *argv[]) {
     cmp.compare(*pivot,*local,*remote,verbosediff,flags);
     stop_output(output,flags);
   } else if (mode=="csv") {
-    if (version=="0.2") {
+    if (version=="0.2"||version=="") {
       MergeOutputCsvDiffV0p2 diff;
       start_output(output,flags);
       cmp.compare(*pivot,*local,*remote,diff,flags);
       stop_output(output,flags);
-    } else {
+    } else if (version=="0.4") {
       MergeOutputCsvDiff diff;
       start_output(output,flags);
       cmp.compare(*pivot,*local,*remote,diff,flags);
       stop_output(output,flags);
+    } else {
+      fprintf(stderr,"Unrecognized diff version\n");
+      exit(1);
     }
   } else if (mode=="csv0") {
     MergeOutputPatch patch;

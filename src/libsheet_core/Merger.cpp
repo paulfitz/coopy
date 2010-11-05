@@ -299,7 +299,13 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       local_col_names.push_back(name);
     }
 
-    output.declareNames(local_col_names, false);
+    {
+      NameChange nc;
+      nc.mode = NAME_CHANGE_DECLARE;
+      nc.final = false;
+      nc.names = local_col_names;
+      output.changeName(nc);
+    }
 
     // Pass 1: signal any column deletions
     for (list<MatchUnit>::iterator it=col_merge.accum.begin();
@@ -451,7 +457,13 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 
     names = local_col_names;
 
-    output.declareNames(local_col_names, true);
+    {
+      NameChange nc;
+      nc.mode = NAME_CHANGE_DECLARE;
+      nc.final = true;
+      nc.names = local_col_names;
+      output.changeName(nc);
+    }
 
     // Now process rows
     for (list<MatchUnit>::iterator it=row_merge.accum.begin();

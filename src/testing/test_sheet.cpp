@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
 	CompareFlags flags;
 	if (diffMode!="") {
 	  if (diffMode=="csv") {
-	    MergeOutputCsvDiff output;
+	    MergeOutputCsvDiffStable output;
 	    cmp.compare(parent,local,remote,output,flags);
 	    local = output.get();
 	  } else {

@@ -23,127 +23,18 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
-static string encoder(const string& x) {
-  //SheetStyle style;
-  //string result = DataSheet::encodeCell(x,style);
-  //return (result!="")?result:"\"\"";
-  string result = stringer_encoder(x);
-  if (result.find("=")!=result.npos) {
-    if (result[0]!='"') {
-      // force quoting of any material containing the "=" symbol
-      result = string("\"")+result+string("\"");
-    }
-  }
-  return result;
-}
-
-static string cond(const vector<string>& names,
-		   const map<string,string>& conds,
-		   const map<string,string>& vals,
-		   bool act) {
-  string c = "";
-  string pv = "";
-  string v = "";
-  bool nontrivial_past = false;
-  for (vector<string>::const_iterator it = names.begin();
-       it!=names.end();
-       it++) {
-    string name = *it;
-    if (act) {
-      //if (conds.find(name)!=conds.end()) {
-	//fprintf(stderr,"Missing condition for %s\n", name.c_str());
-	//exit(1);
-      if (vals.find(name)!=vals.end()) {
-	string pval;
-	string val = vals.find(name)->second;
-	if (conds.find(name)!=conds.end()) {
-	  pval = conds.find(name)->second;
-	  if (pval!="") {
-	    nontrivial_past = true;
-	  }
-	}
-	if (pv!="") pv += ",";
-	pv += encoder(pval);
-	if (v!="") v += ",";
-	v += encoder(val);
-	if (c!="") c += ",";
-	c += encoder(name);
-      }
-	//}
-    } else {
-      if (conds.find(name)!=conds.end()) {
-	if (vals.find(name)==vals.end()) {
-	  string val = conds.find(name)->second;
-	  if (c!="") c += ",";
-	  c += encoder(name);
-	  if (v!="") v += ",";
-	  v += encoder(val);
-	}
-      }
-    }
-  }
-  if (act) {
-    if (pv == "" || !nontrivial_past) {
-      return c + " = " + v;
-    }
-    return c + " = " + pv + " -> " + v;
-  }
-  return c + " = " + v;
-}
-
-static string cond(const vector<string>& names,
-		   const map<string,string>& vals,
-		   string val_label, string cond_label) {
-  SheetStyle style;
-  string c = "";
-  string v = "";
-  size_t ct = 0;
-  for (vector<string>::const_iterator it = names.begin();
-       it!=names.end();
-       it++) {
-    string name = *it;
-    if (vals.find(name)!=vals.end()) {
-      ct++;
-      string val = vals.find(name)->second;
-      if (c!="") c += " ";
-      c += encoder(name);
-      if (v!="") v += " ";
-      v += encoder(val);
-    }
-  }
-  if (ct==names.size()) {
-    c = "*";
-    return string("  ") + val_label + " " + v;
-  }
-  return string("  ") + cond_label + " " + c + "\n  " + val_label + " " + v;
-}
-
-static string cond(const vector<string>& names) {
-  string c = "";
-  for (vector<string>::const_iterator it = names.begin();
-       it!=names.end();
-       it++) {
-    string name = *it;
-    if (c!="") c += " ";
-    c += encoder(name);
-  }
-  return c;
-}
+#define OP_MATCH "="
+#define OP_ASSIGN ">"
+#define OP_MATCH_ASSIGN "=>"
+#define OP_CONTEXT "#"
+#define OP_NONE ""
 
 MergeOutputCsvDiff::MergeOutputCsvDiff() {
   result.setStrict(0);
   result.addField("dtbl",false);
   result.addField("csv",false);
   result.addField("version",false);
-  result.addField("0.2",false);
-  result.addRecord();
-  result.addField("config",false);
-  result.addField("empty_tag",false);
-  result.addField("*",false);
-  result.addRecord();
-  result.addField("config",false);
-  result.addField("row_tag",false);
-  result.addField(ROW_COL,false);
+  result.addField("0.4",false);
   result.addRecord();
 }
 
@@ -190,16 +81,27 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
   return true;
 }
 
+bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
+  result.addField("row",false);
+  result.addField(tag,false);
+  result.addField(OP_NONE,false);
+  for (int i=0; i<(int)change.names.size(); i++) {
+    result.addField(ops[i].c_str(),false);
+  }
+  result.addRecord();
+  return true;
+}
+
 bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
   result.addField("row",false);
   result.addField(tag,false);
-  result.addField("*",false);
+  result.addField("",false);
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     if (change.cond.find(name)!=change.cond.end()) {
       result.addField(change.cond.find(name)->second);
     } else {
-      result.addField("*",false);
+      result.addField("",false);
     }
   }
   result.addRecord();
@@ -209,13 +111,13 @@ bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
 bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
   result.addField("row",false);
   result.addField(tag,false);
-  result.addField("*",false);
+  result.addField("",false);
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     if (change.val.find(name)!=change.val.end()) {
       result.addField(change.val.find(name)->second);
     } else {
-      result.addField("*",false);
+      result.addField("",false);
     }
   }
   result.addRecord();
@@ -223,6 +125,38 @@ bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
 }
 
 bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
+  vector<string> lops;
+  for (int i=0; i<(int)change.names.size(); i++) {
+    string name = change.names[i];
+    bool condActive = false;
+    bool valueActive = false;
+    if (change.cond.find(name)!=change.cond.end()) {
+      condActive = true;
+    }
+    if (change.val.find(name)!=change.val.end()) {
+      valueActive = true;
+    }
+    string op = "";
+    if (condActive) {
+      if (valueActive) {
+	op = OP_MATCH_ASSIGN;
+      } else {
+	op = OP_MATCH;
+      }
+    } else {
+      if (valueActive) {
+	op = OP_ASSIGN;
+      } else {
+	op = OP_NONE;
+      }
+    }
+    // no way yet to communicate CONTEXT request
+    lops.push_back(op);
+  }
+  if (lops!=ops) {
+    ops = lops;
+    operateRow(change,"operate");
+  }
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
     describeRow(change,"insert");
