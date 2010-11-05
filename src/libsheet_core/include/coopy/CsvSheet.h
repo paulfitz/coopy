@@ -135,7 +135,10 @@ public:
       escaped = c.second;
       return c.first;
     }
-    escaped = true;
+    // for CSV-friendliness, return "" instead of NULL
+    // for cells that did not get appended.  This "feature"
+    // is only used by the patch generator.
+    escaped = false;
     return ""; 
   }
 
