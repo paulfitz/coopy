@@ -26,6 +26,8 @@ public:
 
   virtual std::string cellString(int x, int y) const;
 
+  virtual std::string cellString(int x, int y, bool& escaped) const;
+
   virtual bool cellString(int x, int y, const std::string& str);
 
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base);
@@ -40,6 +42,7 @@ public:
 
   virtual bool clearCache() { 
     cache.clear();
+    cacheFlag.clear();
     return true;
   }
 
@@ -54,6 +57,7 @@ private:
   RemoteSqlTextBook *book;
   void *implementation;
   SparseStringSheet cache;
+  SparseByteSheet cacheFlag;
   std::string name;
   int w, h;
   // row2sql is complicated without rowid equivalent.

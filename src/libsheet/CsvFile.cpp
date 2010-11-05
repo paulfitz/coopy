@@ -11,18 +11,31 @@ extern "C" {
 #include <coopy/CsvFile.h>
 #include <coopy/CsvSheet.h>
 
+#include <string.h>
+
 using namespace std;
 using namespace coopy::store;
 
 extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
-  ((CsvSheet*)p)->addField((char *)s, i, false);
+  CsvSheet *sheet = (CsvSheet*)p;
+  if (sheet->getStyle().haveNullToken()) {
+    string token = sheet->getStyle().getNullToken();
+    if (token.length()==i){
+      if (memcmp(s,token.c_str(),i)==0) {
+	sheet->addField((char *)s, i, true);
+	return;
+      }
+    }
+  }
+  sheet->addField((char *)s, i, false);
 }
 
 extern "C" void csvfile_merge_cb2 (int c, void *p) {
   ((CsvSheet*)p)->addRecord();
 }
 
-int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest) {
+int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest, 
+		  const Property& config) {
   string cache = "";
   struct csv_parser p;
   if (csv_init(&p,0)!=0) {
@@ -32,6 +45,7 @@ int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest) {
   SheetStyle style;
   dest.clear();
   dest.setStyle(style);
+  style.setFromProperty(config);
   csv_set_delim(&p,style.getDelimiter()[0]);
 
   do {
@@ -56,7 +70,7 @@ int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest) {
   return 0;
 }
 
-int CsvFile::read(const char *src, CsvSheet& dest) {
+int CsvFile::read(const char *src, CsvSheet& dest, const Property& config) {
   FILE *fp;
   char buf[32768];
   size_t bytes_read;
@@ -68,6 +82,7 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
   }
   SheetStyle style;
   style.setFromFilename(src);
+  style.setFromProperty(config);
   dest.setStyle(style);
   csv_set_delim(&p,style.getDelimiter()[0]);
 
@@ -125,3 +140,12 @@ int CsvFile::read(const char *src, CsvSheet& dest) {
   return 0;
 }
 
+int CsvFile::read(const char *src, CsvSheet& dest) {
+  Property config;
+  return read(src,dest,config);
+}
+
+int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest) {
+  Property config;
+  return read(reader,dest,config);
+}

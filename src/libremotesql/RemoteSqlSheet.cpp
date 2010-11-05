@@ -77,6 +77,7 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
   int k = (int)keys.size();
 
   cache.resize(w,0,"");
+  cacheFlag.resize(w,0,0);
 
   {
     string query = string("SELECT * FROM ") + name + " ORDER BY " + key_list;
@@ -85,9 +86,13 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
     while (result->fetch()) {
       vector<string> accum;
       cache.reheight(h+1);
+      cacheFlag.reheight(h+1);
       for (int i=0; i<w; i++) {
 	//printf("Got %d,%d: ", i, h);
 	//printf("Got %d,%d %s\n", i, h, result->get(i).c_str());
+	if (result->isNull(i)) {
+	  cacheFlag.cell(i,h) = 1;
+	}
 	cache.cell(i,h) = result->get(i);
       }
       for (int i=0; i<k; i++) {
@@ -111,6 +116,17 @@ SheetSchema *RemoteSqlSheet::getSchema() const {
 
 
 std::string RemoteSqlSheet::cellString(int x, int y) const {
+  bool tmp;
+  return cellString(x,y,tmp);
+}
+
+std::string RemoteSqlSheet::cellString(int x, int y, bool& escaped) const {
+  escaped = false;
+  const unsigned char *f = cacheFlag.pcell_const(x,y);
+  if (f!=NULL) {
+    escaped = true;
+    return "";
+  }
   const string *c = cache.pcell_const(x,y);
   if (c!=NULL) {
     return *c;

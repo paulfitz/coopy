@@ -14,6 +14,7 @@ namespace coopy {
     template <class T> class SparseSheet;
     class SparseFloatSheet;
     class SparseIntSheet;
+    class SparseByteSheet;
     class SparseStringSheet;
   }
 }
@@ -186,6 +187,30 @@ public:
   }
 
   int& operator()(int x, int y) {
+    return cell(x,y);
+  }
+};
+
+
+class coopy::store::SparseByteSheet : public SparseSheet<unsigned char> {
+public:
+  using SparseSheet<unsigned char>::resize;
+
+  virtual std::string cellString(int x, int y) const {
+    const unsigned char& v = cell(x,y);
+    return IntSheet::int2string(v);
+  }
+
+  void resize(int w, int h) {
+    unsigned char zero = 0;
+    resize(w,h,zero);
+  }
+
+  const unsigned char& operator()(int x, int y) const {
+    return cell(x,y);
+  }
+
+  unsigned char& operator()(int x, int y) {
     return cell(x,y);
   }
 };

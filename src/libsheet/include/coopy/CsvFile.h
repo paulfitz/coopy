@@ -8,9 +8,12 @@
 namespace coopy {
   namespace store {
     namespace CsvFile {
+      int read(const char *src, CsvSheet& dest, const Property& config);
+      int read(coopy::format::Reader& reader, CsvSheet& dest,
+	       const Property& config);
+
       int read(const char *src, CsvSheet& dest);
       int read(coopy::format::Reader& reader, CsvSheet& dest);
-      //int write(DataSheet& src, const char *fname);
     }
   }
 }
