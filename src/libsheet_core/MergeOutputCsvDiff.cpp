@@ -123,18 +123,18 @@ static string cond(const vector<string>& names) {
 
 MergeOutputCsvDiff::MergeOutputCsvDiff() {
   result.setStrict(0);
-  result.addField("dtbl");
-  result.addField("csv");
-  result.addField("version");
-  result.addField("0.2");
+  result.addField("dtbl",false);
+  result.addField("csv",false);
+  result.addField("version",false);
+  result.addField("0.2",false);
   result.addRecord();
-  result.addField("config");
-  result.addField("empty_tag");
-  result.addField("*");
+  result.addField("config",false);
+  result.addField("empty_tag",false);
+  result.addField("*",false);
   result.addRecord();
-  result.addField("config");
-  result.addField("row_tag");
-  result.addField(ROW_COL);
+  result.addField("config",false);
+  result.addField("row_tag",false);
+  result.addField(ROW_COL,false);
   result.addRecord();
 }
 
@@ -146,29 +146,29 @@ bool MergeOutputCsvDiff::mergeDone() {
 bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
-    result.addField("column");
-    result.addField("delete");
-    result.addField(ROW_COL);
+    result.addField("column",false);
+    result.addField("delete",false);
+    result.addField(ROW_COL,false);
     for (int i=0; i<(int)change.namesAfter.size(); i++) {
-      result.addField(change.namesAfter[i].c_str());
+      result.addField(change.namesAfter[i].c_str(),false);
     }
     result.addRecord();
     break;
   case ORDER_CHANGE_INSERT:
-    result.addField("column");
-    result.addField("insert");
-    result.addField(ROW_COL);
+    result.addField("column",false);
+    result.addField("insert",false);
+    result.addField(ROW_COL,false);
     for (int i=0; i<(int)change.namesAfter.size(); i++) {
-      result.addField(change.namesAfter[i].c_str());
+      result.addField(change.namesAfter[i].c_str(),false);
     }
     result.addRecord();
     break;
   case ORDER_CHANGE_MOVE:
-    result.addField("column");
-    result.addField("move");
-    result.addField(ROW_COL);
+    result.addField("column",false);
+    result.addField("move",false);
+    result.addField(ROW_COL,false);
     for (int i=0; i<(int)change.namesAfter.size(); i++) {
-      result.addField(change.namesAfter[i].c_str());
+      result.addField(change.namesAfter[i].c_str(),false);
     }
     result.addRecord();
     break;
@@ -181,15 +181,15 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
 }
 
 bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
-  result.addField("row");
-  result.addField(tag);
-  result.addField("*");
+  result.addField("row",false);
+  result.addField(tag,false);
+  result.addField("*",false);
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     if (change.cond.find(name)!=change.cond.end()) {
-      result.addField(change.cond.find(name)->second.c_str());
+      result.addField(change.cond.find(name)->second);
     } else {
-      result.addField("*");
+      result.addField("*",false);
     }
   }
   result.addRecord();
@@ -197,15 +197,15 @@ bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
 }
 
 bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
-  result.addField("row");
-  result.addField(tag);
-  result.addField("*");
+  result.addField("row",false);
+  result.addField(tag,false);
+  result.addField("*",false);
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     if (change.val.find(name)!=change.val.end()) {
-      result.addField(change.val.find(name)->second.c_str());
+      result.addField(change.val.find(name)->second);
     } else {
-      result.addField("*");
+      result.addField("*",false);
     }
   }
   result.addRecord();
@@ -236,11 +236,11 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
 bool MergeOutputCsvDiff::declareNames(const vector<string>& names, 
 					  bool final) {
   if (!final) {
-    result.addField("column");
-    result.addField("name");
-    result.addField(ROW_COL);
+    result.addField("column",false);
+    result.addField("name",false);
+    result.addField(ROW_COL,false);
     for (int i=0; i<(int)names.size(); i++) {
-      result.addField(names[i].c_str());
+      result.addField(names[i].c_str(),false);
     }
     result.addRecord();
   }

@@ -22,3 +22,16 @@ string stringer_encoder(const string& x) {
   return (result!="")?result:"\"\"";
 }
 
+string stringer_encoder(const coopy::store::SheetCell& x) {
+  return stringer_encoder(x.toString());
+}
+
+std::string stringify(const std::string& x) {
+  return x;
+}
+
+std::string stringify(const coopy::store::SheetCell& x) {
+  return x.toString();
+}
+
+

@@ -11,6 +11,7 @@
 namespace coopy {
   namespace store {
     template <class T> class TypedSheet;
+    template <class T> class EscapedTypedSheet;
   }
 }
 
@@ -19,6 +20,7 @@ class coopy::store::TypedSheet : public DataSheet {
 public:
   std::vector<std::vector<T> > arr;
   int h, w;
+  T zero;
 
   TypedSheet() {
     h = w = 0;
@@ -40,6 +42,7 @@ public:
     }
     this->h = h;
     this->w = w;
+    this->zero = zero;
   }
 
   int width() const {
@@ -59,7 +62,9 @@ public:
   }
 
   // still need to define how T is serialized 
-  virtual std::string cellString(int x, int y) const = 0;
+  virtual std::string cellString(int x, int y) const {
+    return "IMPLEMENT SERIALIZATION";
+  }
 
   virtual bool deleteColumn(const ColumnRef& column) {
     int offset = column.getIndex();
@@ -74,12 +79,11 @@ public:
   virtual ColumnRef insertColumn(const ColumnRef& base) {
     int offset = base.getIndex();
     if (offset>=w) return ColumnRef();
-    T t;
     for (int i=0; i<(int)arr.size(); i++) {
       if (offset>=0) {
-	arr[i].insert(arr[i].begin()+offset,t);
+	arr[i].insert(arr[i].begin()+offset,zero);
       } else {
-	arr[i].push_back(t);
+	arr[i].push_back(zero);
       }
     }
     w++;
@@ -98,7 +102,6 @@ public:
     } else {
       final--;
     }
-    T t;
     //printf("Move col: insert %d from %d offset_del %d final %d\n", 
     //offset, offset_src, offset_del, final);
     for (int i=0; i<(int)arr.size(); i++) {
@@ -126,7 +129,6 @@ public:
 
   virtual RowRef insertRow(const RowRef& base) {
     int offset = base.getIndex();
-    T t;
     if (offset>=h) return RowRef();
     if (offset<0) {
       arr.push_back(std::vector<T>());
@@ -136,7 +138,7 @@ public:
     }
     h++;
     for (int i=0; i<w; i++) {
-      arr[offset].push_back(t);
+      arr[offset].push_back(zero);
     }
     return RowRef(offset);
   }
@@ -144,6 +146,97 @@ public:
   // move a row before base; if base is invalid move after all rows
   virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
     return RowRef(); // NOT IMPLEMENTED
+  }
+};
+
+
+
+template <class T>
+class coopy::store::EscapedTypedSheet : public DataSheet {
+public:
+  typedef std::pair<T,bool> pairCellType;
+  typedef T cellType;
+
+  TypedSheet<std::pair<T,bool> > s;
+  //std::vector<std::vector<pairCellType> >& arr;
+  //int& h;
+  //int& w;
+  
+  //EscapedTypedSheet() : arr(s.arr), h(s.h), w(s.w) {
+  EscapedTypedSheet() {
+  }
+
+  void clear() {
+    s.clear();
+  }
+  
+  void resize(int w, int h, const T& zero) {
+    std::pair<T,bool> pzero(zero,true);
+    s.resize(w,h,pzero);
+  }
+
+  int width() const {
+    return s.width();
+  }
+
+  int height() const {
+    return s.height();
+  }
+
+  T& cell(int x, int y) {
+    return s.cell(x,y).first;
+  }
+
+  const T& cell(int x, int y) const {
+    return s.cell(x,y).first;
+  }
+
+  std::pair<T,bool>& pcell(int x, int y) {
+    return s.cell(x,y);
+  }
+
+  const std::pair<T,bool>& pcell(int x, int y) const {
+    return s.cell(x,y);
+  }
+
+  // still need to define how T is serialized 
+  //virtual std::string serializeCell(const T& cell) const = 0;
+
+  virtual std::string cellString(int x, int y) const = 0;
+  //return serializeCell(s.cell(x,y).first);
+  //}
+
+  virtual std::string cellString(int x, int y, bool& escaped) const = 0;
+  /*
+    const std::pair<T,bool>& p = s.cell(x,y);
+    escaped = p.second;
+    return serializeCell(p.first);
+  }
+  */
+
+  virtual bool deleteColumn(const ColumnRef& column) {
+    return s.deleteColumn(column);
+  }
+
+  virtual ColumnRef insertColumn(const ColumnRef& base) {
+    return s.insertColumn(base);
+  }
+
+  virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {
+    return s.moveColumn(src,base);
+  }
+
+  virtual bool deleteRow(const RowRef& src) {
+    return s.deleteRow(src);
+  }
+
+  virtual RowRef insertRow(const RowRef& base) {
+    return s.insertRow(base);
+  }
+
+  // move a row before base; if base is invalid move after all rows
+  virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
+    return s.moveRow(src,base);
   }
 };
 

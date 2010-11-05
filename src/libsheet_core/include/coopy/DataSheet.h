@@ -7,6 +7,7 @@
 #include <coopy/RowRef.h>
 #include <coopy/ColumnRef.h>
 #include <coopy/RefCount.h>
+#include <coopy/SheetCell.h>
 
 #include <string>
 
@@ -25,18 +26,30 @@ public:
 
   virtual std::string cellString(int x, int y) const = 0;
 
-  virtual std::string cellString(int x, int y, bool& isNull) const {
+  virtual std::string cellString(int x, int y, bool& escaped) const {
+    escaped = false;
     return cellString(x,y);
+  }
+
+  virtual SheetCell cellSummary(int x, int y) const {
+    SheetCell c;
+    c.text = cellString(x,y,c.escaped);
+    return c;
   }
 
   virtual bool cellString(int x, int y, const std::string& str) {
     return false;
   }
 
-  virtual bool cellString(int x, int y, const std::string& str, bool isNull) {
-    if (!isNull) {
-      return cellString(x,y,str);
-    }
+  virtual bool cellString(int x, int y, const std::string& str, bool escaped) {
+    return cellString(x,y,str);
+  }
+
+  virtual bool cellSummary(int x, int y, const SheetCell& c) {
+    return cellString(x,y,c.text,c.escaped);
+  }
+
+  virtual bool canEscape() const {
     return false;
   }
 

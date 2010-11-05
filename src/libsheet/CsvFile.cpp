@@ -15,7 +15,7 @@ using namespace std;
 using namespace coopy::store;
 
 extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
-  ((CsvSheet*)p)->addField((char *)s, i);
+  ((CsvSheet*)p)->addField((char *)s, i, false);
 }
 
 extern "C" void csvfile_merge_cb2 (int c, void *p) {

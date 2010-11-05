@@ -3,6 +3,7 @@
 
 #include <coopy/Patcher.h>
 #include <coopy/CompareFlags.h>
+#include <coopy/SheetCell.h>
 
 namespace coopy {
   namespace cmp {
@@ -39,13 +40,33 @@ public:
   virtual bool wantDiff() { return false; }
 
   virtual bool addRow(const char *tag,
-		      const std::vector<std::string>& row,
+		      const std::vector<coopy::store::SheetCell>& row,
 		      const std::string& blank) { return false; }
 
+  virtual bool addRow(const char *tag,
+		      const std::vector<std::string>& row,
+		      const std::string& blank) { 
+    std::vector<coopy::store::SheetCell> row2;
+    for (int i=0; i<(int)row.size(); i++) {
+      row2.push_back(coopy::store::SheetCell(row[i],false));
+    }
+    return addRow(tag,row2,blank);
+  }
+
   virtual bool addHeader(const char *tag,
-			 const std::vector<std::string>& row,
+			 const std::vector<coopy::store::SheetCell>& row,
 			 const std::string& blank) {
     return addRow(tag,row,blank);
+  }
+
+  virtual bool addHeader(const char *tag,
+		         const std::vector<std::string>& row,
+		         const std::string& blank) { 
+    std::vector<coopy::store::SheetCell> row2;
+    for (int i=0; i<(int)row.size(); i++) {
+      row2.push_back(coopy::store::SheetCell(row[i],false));
+    }
+    return addHeader(tag,row2,blank);
   }
 
   virtual bool stripMarkup() { return false; }

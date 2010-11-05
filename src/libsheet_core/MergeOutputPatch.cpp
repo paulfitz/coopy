@@ -5,14 +5,14 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 bool MergeOutputPatch::addRow(const char *tag,
-			      const vector<string>& row,
+			      const vector<SheetCell>& row,
 			      const string& blank) {
-  result.addField(tag);
+  result.addField(tag,false);
   for (size_t i=0; i<row.size(); i++) {
-    if (row[i]!=blank) {
-      result.addField(row[i].c_str());
+    if (row[i].text!=blank) {
+      result.addField(row[i].text.c_str(),row[i].escaped);
     } else {
-      result.addField("");
+      result.addField("",true);
     }
   }
   result.addRecord();

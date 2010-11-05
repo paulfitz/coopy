@@ -26,9 +26,10 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   int rRow = row_unit.remoteUnit;
   bool delRow = row_unit.deleted;
   string blank = "__NOT_SET__CSVCOMPARE_SSFOSSIL";
-  vector<string> expandLocal, expandRemote, expandPivot, expandMerge;
+  SheetCell blankCell;
+  vector<SheetCell> expandLocal, expandRemote, expandPivot, expandMerge;
   vector<int> expandDel;
-  map<string,string> cond, value, value0;
+  map<string,SheetCell> cond, value, value0;
   vector<string> address;
   vector<string> action;
   int lastCol = -1;
@@ -50,26 +51,26 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       if (lRow>=0 && lCol>=0) {
 	//printf("access local %d %d (size %d %d)\n", lCol, lRow, 
 	//local.width(), local.height());
-	expandLocal.push_back(local.cellString(lCol,lRow));
+	expandLocal.push_back(local.cellSummary(lCol,lRow));
       } else {
-	expandLocal.push_back(blank);
+	expandLocal.push_back(blankCell);
       }
       if (rRow>=0 && rCol>=0) {
 	//printf("access remote %d %d\n", rCol, rRow);
-	expandRemote.push_back(remote.cellString(rCol,rRow));
+	expandRemote.push_back(remote.cellSummary(rCol,rRow));
       } else {
-	expandRemote.push_back(blank);
+	expandRemote.push_back(blankCell);
       }
       if (pRow>=0 && pCol>=0) {
 	//printf("access pivot %d %d\n", pCol, pRow);
-	expandPivot.push_back(pivot.cellString(pCol,pRow));
+	expandPivot.push_back(pivot.cellSummary(pCol,pRow));
       } else {
-	expandPivot.push_back(blank);
+	expandPivot.push_back(blankCell);
       }
     }
     if (lRow>=0 && lCol>=0 && !deleted) {
       if (diff) {
-	cond[names[at]] = local.cellString(lCol,lRow);
+	cond[names[at]] = local.cellSummary(lCol,lRow);
       }
     }
     if (!deleted) {
@@ -104,17 +105,17 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   expandMerge = expandLocal;
   at = 0;
   for (size_t i=0; i<expandLocal.size(); i++) {
-    string& _l = expandMerge[i];
-    string& _r = expandRemote[i];
-    string& _p = expandPivot[i];
+    SheetCell& _l = expandMerge[i];
+    SheetCell& _r = expandRemote[i];
+    SheetCell& _p = expandPivot[i];
     bool novel = false;
     bool deleted = (bool)expandDel[i];
     if (_l!=_r) {
-      if (_l==blank) {
+      if (_l==blankCell) {
 	_l = _r;
 	novel = true;
       } else {
-	if (_r!=blank) {
+	if (_r!=blankCell) {
 	  // two assertions, do they conflict?
 	  // if pivot is the same as either, then no.
 	  if (_p==_l||_p==_r) {
@@ -149,10 +150,10 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     }
     if (diff&&!novel) {
       if (!delRow) {
-	_l = blank;
-	_r = blank;
-	_p = blank;
-	expandLocal[i] = blank;
+	_l = blankCell;
+	_r = blankCell;
+	_p = blankCell;
+	expandLocal[i] = blankCell;
       }
     }
   }
@@ -196,9 +197,9 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       if (current_row<local.height()) {
 	size_t i;
 	for (i=0; i<expandMerge.size(); i++) {
-	  string data = expandMerge[i];
-	  string was = local.cellString(i,current_row);
-	  if (was!=data && data!=blank) {
+	  SheetCell data = expandMerge[i];
+	  SheetCell was = local.cellSummary(i,current_row);
+	  if (was!=data && data!=blankCell) {
 	    break;
 	  }
 	}
@@ -221,9 +222,10 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	snprintf(buf,sizeof(buf),"%d",lRow+1);
 	addition = 0;
       }
-      expandMerge.insert(expandMerge.begin(),buf);
-      expandLocal.insert(expandLocal.begin(),buf);
-      expandRemote.insert(expandRemote.begin(),buf);
+      SheetCell cbuf(buf,false);
+      expandMerge.insert(expandMerge.begin(),cbuf);
+      expandLocal.insert(expandLocal.begin(),cbuf);
+      expandRemote.insert(expandRemote.begin(),cbuf);
       if (change) {
 	output.addRow("[-]",expandLocal,blank);
       }

@@ -14,8 +14,9 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 
+template <class T>
 string verbose_encoder(const std::vector<std::string>& lst,
-		       const std::map<std::string,std::string> & mp) {
+		       const std::map<std::string,T> & mp) {
   string x;
   for (vector<string>::const_iterator it = lst.begin();
        it!=lst.end();

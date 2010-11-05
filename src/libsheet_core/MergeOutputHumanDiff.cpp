@@ -27,9 +27,13 @@ static string encoder(const string& x) {
   return result;
 }
 
+static string encoder(const SheetCell& x) {
+  return encoder(x.text);
+}
+
 static string cond(const vector<string>& names,
-		   const map<string,string>& conds,
-		   const map<string,string>& vals,
+		   const map<string,SheetCell>& conds,
+		   const map<string,SheetCell>& vals,
 		   bool act) {
   string c = "";
   string pv = "";
@@ -44,11 +48,11 @@ static string cond(const vector<string>& names,
 	//fprintf(stderr,"Missing condition for %s\n", name.c_str());
 	//exit(1);
       if (vals.find(name)!=vals.end()) {
-	string pval;
-	string val = vals.find(name)->second;
+	SheetCell pval;
+	SheetCell val = vals.find(name)->second;
 	if (conds.find(name)!=conds.end()) {
 	  pval = conds.find(name)->second;
-	  if (pval!="") {
+	  if (pval.text!="") {
 	    nontrivial_past = true;
 	  }
 	}
@@ -63,7 +67,7 @@ static string cond(const vector<string>& names,
     } else {
       if (conds.find(name)!=conds.end()) {
 	if (vals.find(name)==vals.end()) {
-	  string val = conds.find(name)->second;
+	  SheetCell val = conds.find(name)->second;
 	  if (c!="") c += ",";
 	  c += encoder(name);
 	  if (v!="") v += ",";
@@ -82,7 +86,7 @@ static string cond(const vector<string>& names,
 }
 
 static string cond(const vector<string>& names,
-		   const map<string,string>& vals,
+		   const map<string,SheetCell>& vals,
 		   string val_label, string cond_label) {
   SheetStyle style;
   string c = "";
@@ -94,7 +98,7 @@ static string cond(const vector<string>& names,
     string name = *it;
     if (vals.find(name)!=vals.end()) {
       ct++;
-      string val = vals.find(name)->second;
+      SheetCell val = vals.find(name)->second;
       if (c!="") c += " ";
       c += encoder(name);
       if (v!="") v += " ";

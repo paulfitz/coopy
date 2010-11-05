@@ -21,6 +21,7 @@ using namespace std;
 class PatchColumnNames {
 public:
   vector<string> lst;
+  vector<SheetCell> data;
   vector<int> indices;
 
   void read(const DataSheet& sheet, int x, int y, int len = -1) {
@@ -38,8 +39,20 @@ public:
     }
   }
   
+  void readData(const DataSheet& sheet, int x, int y, int len) {
+    data.clear();
+    for (int i=x; i<x+len; i++) {
+      SheetCell v = sheet.cellSummary(i,y);
+      data.push_back(v);
+    }
+  }
+  
   string toString() {
     return vector2string(lst);
+  }
+
+  string dataString() {
+    return vector2string(data);
   }
 
   string inferInsert(const PatchColumnNames& prior,
@@ -158,7 +171,7 @@ bool PatchParser::apply() {
   }
 
   PatchColumnNames names;
-  vector<string> selector;
+  vector<SheetCell> selector;
   int len = 0;
   int row_index = -1;
   bool ok = true;
@@ -245,40 +258,40 @@ bool PatchParser::apply() {
       RowChange change;
       change.names = names.lst;
       PatchColumnNames names2;
-      names2.read(patch,3,i,len);
+      names2.readData(patch,3,i,len);
       if (cmd1=="select") {
-	dbg_printf("Selecting %s\n", names2.toString().c_str());
-	selector = names2.lst;
+	dbg_printf("Selecting %s\n", names2.dataString().c_str());
+	selector = names2.data;
       } else if (cmd1=="update") {
-	dbg_printf("Updating to %s\n", names2.toString().c_str());	
+	dbg_printf("Updating to %s\n", names2.dataString().c_str());	
 	change.mode = ROW_CHANGE_UPDATE;
 	for (int i=0; i<len; i++) {
-	  string sel = selector[i];
-	  if (sel!="*") {
+	  const SheetCell& sel = selector[i];
+	  if (sel.text!="*") {
 	    change.cond[change.names[i]] = sel;
 	  }
-	  string val = names2.lst[i];
-	  if (val!="*") {
+	  const SheetCell& val = names2.data[i];
+	  if (val.text!="*") {
 	    change.val[change.names[i]] = val;
 	  }
 	}
 	ok = patcher->changeRow(change);
       } else if (cmd1=="insert") {
-	dbg_printf("Inserting %s\n", names2.toString().c_str());
+	dbg_printf("Inserting %s\n", names2.dataString().c_str());
 	change.mode = ROW_CHANGE_INSERT;
 	for (int i=0; i<len; i++) {
-	  string val = names2.lst[i];
-	  if (val!="*") {
+	  const SheetCell& val = names2.data[i];
+	  if (val.text!="*") {
 	    change.val[change.names[i]] = val;
 	  }
 	}
 	patcher->changeRow(change);	
       } else if (cmd1=="delete") {
-	dbg_printf("Deleting %s\n", names2.toString().c_str());
+	dbg_printf("Deleting %s\n", names2.dataString().c_str());
 	change.mode = ROW_CHANGE_DELETE;
 	for (int i=0; i<len; i++) {
-	  string val = names2.lst[i];
-	  if (val!="*") {
+	  const SheetCell& val = names2.data[i];
+	  if (val.text!="*") {
 	    change.cond[change.names[i]] = val;
 	  }
 	}

@@ -38,24 +38,24 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   if (sheet==NULL) return false;
   map<string,int> dir;
   vector<int> active_cond;
-  vector<string> cond;
+  vector<SheetCell> cond;
   vector<int> active_val;
-  vector<string> val;
+  vector<SheetCell> val;
   for (int i=0; i<(int)change.names.size(); i++) {
     dir[change.names[i]] = i;
     active_cond.push_back(0);
-    cond.push_back("");
+    cond.push_back(SheetCell());
     active_val.push_back(0);
-    val.push_back("");
+    val.push_back(SheetCell());
   }
-  for (RowChange::txt2txt::const_iterator it = change.cond.begin();
+  for (RowChange::txt2cell::const_iterator it = change.cond.begin();
        it!=change.cond.end(); it++) {
     int idx = dir[it->first];
     //printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.c_str());
     active_cond[idx] = 1;
     cond[idx] = it->second;
   }
-  for (RowChange::txt2txt::const_iterator it = change.val.begin();
+  for (RowChange::txt2cell::const_iterator it = change.val.begin();
        it!=change.val.end(); it++) {
     int idx = dir[it->first];
     //printf("  [val] %d %s -> %s\n", idx, it->first.c_str(), it->second.c_str());
@@ -73,7 +73,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	for (int c=0; c<sheet->width(); c++) {
 	  if (active_val[c]) {
 	    //printf("  %d %d %s\n", c, r, val[c].c_str());
-	    sheet->cellString(c,r,val[c]);
+	    sheet->cellSummary(c,r,val[c]);
 	  }
 	}
       }
@@ -87,7 +87,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	bool match = true;
 	for (int c=0; c<sheet->width(); c++) {
 	  if (active_cond[c]) {
-	    if (sheet->cellString(c,r)!=cond[c]) {
+	    if (sheet->cellSummary(c,r)!=cond[c]) {
 	      match = false;
 	      break;
 	    }
@@ -112,9 +112,9 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	for (int c=0; c<sheet->width(); c++) {
 	  if (active_cond[c]) {
 	    dbg_printf("compare %s and %s\n",
-		       sheet->cellString(c,r).c_str(),
-		       cond[c].c_str());
-	    if (sheet->cellString(c,r)!=cond[c]) {
+		       sheet->cellSummary(c,r).toString().c_str(),
+		       cond[c].toString().c_str());
+	    if (sheet->cellSummary(c,r)!=cond[c]) {
 	      match = false;
 	      break;
 	    }
@@ -124,7 +124,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  dbg_printf("Match\n");
 	  for (int c=0; c<sheet->width(); c++) {
 	    if (active_val[c]) {
-	      sheet->cellString(c,r,val[c]);
+	      sheet->cellSummary(c,r,val[c]);
 	    }
 	  }
 	  success = true;

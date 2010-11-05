@@ -3,20 +3,23 @@
 
 #include <string>
 #include <list>
+#include <coopy/SheetCell.h>
 
 #ifdef WANT_MAP2STRING
 #include <map>
 #include <string>
-template <class T>
-std::string map2string(const std::map<T,T>& src) {
+std::string stringify(const std::string& x);
+std::string stringify(const coopy::store::SheetCell& x);
+template <class T1, class T2>
+std::string map2string(const std::map<T1,T2>& src) {
   std::string result = "";
-  for (typename std::map<T,T>::const_iterator it=src.begin(); it!=src.end(); it++) {
+  for (typename std::map<T1,T2>::const_iterator it=src.begin(); it!=src.end(); it++) {
     if (it!=src.begin()) {
       result += " ";
     }
     result += it->first;
     result += ":";
-    result += it->second;
+    result += stringify(it->second);
   }
   return result;
 }
@@ -27,6 +30,7 @@ std::string map2string(const std::map<T,T>& src) {
 #include <string>
 std::string stringer_encoder(int x);
 std::string stringer_encoder(const std::string& x);
+std::string stringer_encoder(const coopy::store::SheetCell& x);
 template <class T>
 std::string vector2string(const std::vector<T>& src) {
   std::string result = "";

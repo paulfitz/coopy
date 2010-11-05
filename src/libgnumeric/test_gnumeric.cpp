@@ -31,11 +31,11 @@ int main(int argc, char *argv[]) {
   gnumeric_init();
   GnumericWorkbookPtr book = gnumeric_load(template_name);
   CsvSheet data;
-  data.addField("1");
-  data.addField("2");
+  data.addField("1",false);
+  data.addField("2",false);
   data.addRecord();
-  data.addField("3");
-  data.addField("4");
+  data.addField("3",false);
+  data.addField("4",false);
   data.addRecord();
   SheetStyle style;
   string sdata = data.encode(style);

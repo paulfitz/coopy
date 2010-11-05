@@ -12,9 +12,9 @@ namespace coopy {
   }
 }
 
-class coopy::store::CsvSheet : public TypedSheet<std::string> {
+class coopy::store::CsvSheet : public EscapedTypedSheet<std::string> {
 private:
-  std::vector<std::string> rec;
+  std::vector<pairCellType> rec;
   int th, tw;
   bool valid;
   SheetStyle style;
@@ -45,9 +45,9 @@ public:
 
   // Deprecated, should migrate to deleteRow
   bool removeRow(int index) {
-    arr.erase(arr.begin()+index);
-    if (arr.size()<(size_t)h) {
-      th = h = arr.size();
+    s.arr.erase(s.arr.begin()+index);
+    if (s.arr.size()<(size_t)s.h) {
+      th = s.h = s.arr.size();
       return true;
     }
     return false;
@@ -55,54 +55,59 @@ public:
 
   // Deprecated
   bool insertRow(int index, int width = -1) {
-    std::vector<std::string> rec;
-    if (width == -1) { width = w; }
+    std::vector<pairCellType> rec;
+    if (width == -1) { width = s.w; }
     for (int i=0; i<width; i++) {
-      rec.push_back("");
+      rec.push_back(pairCellType("",true));
     }
     if (index == -1 || index>=height()) {
-      arr.push_back(rec);
+      s.arr.push_back(rec);
     } else {
-      arr.insert(arr.begin()+index,rec);
+      s.arr.insert(s.arr.begin()+index,rec);
     }
-    th = h = arr.size();
-    tw = w = rec.size();
+    th = s.h = s.arr.size();
+    tw = s.w = rec.size();
     return true;
   }
 
-  void addField(const char *s);
+  void addField(const char *s, bool escaped);
 
-  void addField(const char *s, int len) {
+  void addField(const coopy::store::SheetCell& c) {
+    addField(c.text.c_str(),c.escaped);
+  }
+
+  void addField(const char *s, int len, bool escaped) {
     std::string str(s,len);
     str += "\0";
-    addField(str.c_str());
+    addField(str.c_str(),escaped);
   }
 
   void addRecord() {
-    arr.push_back(rec);
+    s.arr.push_back(rec);
     rec.clear();
-    if (w!=tw && w!=0) {
+    if (s.w!=tw && s.w!=0) {
       valid = false;
     }
-    if (tw>w) {
-      w = tw;
+    if (tw>s.w) {
+      s.w = tw;
     }
     tw = 0;
     th++;
-    h = th;
+    s.h = th;
   }
 
   void addRow(CsvSheet& alt, int row) {
     for (int i=0; i<alt.width(); i++) {
-      addField(alt.cell(i,row).c_str());
+      const pairCellType& p = alt.pcell(i,row);
+      addField(p.first.c_str(),p.second);
     }
     addRecord();
   }
 
   void clear() {
     tw = th = 0;
-    w = h = 0;
-    arr.clear();
+    s.w = s.h = 0;
+    s.arr.clear();
     rec.clear();
     valid = true;
   }
@@ -113,10 +118,24 @@ public:
 
   virtual std::string cellString(int x, int y) const {
     if (valid) { return cell(x,y); }
-    if (arr[y].size()>x) {
+    if (s.arr[y].size()>x) {
       return cell(x,y);
     }
     return "";
+  }
+
+  virtual std::string cellString(int x, int y, bool& escaped) const {
+    if (!valid) { 
+      escaped = true;
+      return ""; 
+    }
+    if (s.arr[y].size()<=x) {
+      escaped = true;
+      return "";
+    }
+    const pairCellType& c = pcell(x,y);
+    escaped = c.second;
+    return c.first;
   }
 
   virtual bool cellString(int x, int y, const std::string& str) {
@@ -125,9 +144,9 @@ public:
   }
 
   const CsvSheet& copy(const CsvSheet& alt) {
-    arr = alt.arr;
-    h = alt.h;
-    w = alt.w;
+    s.arr = alt.s.arr;
+    s.h = alt.s.h;
+    s.w = alt.s.w;
     return *this;
   }
 };

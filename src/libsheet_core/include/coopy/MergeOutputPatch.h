@@ -17,7 +17,7 @@ public:
   virtual bool wantDiff() { return true; }
 
   virtual bool addRow(const char *tag,
-		      const std::vector<std::string>& row,
+		      const std::vector<coopy::store::SheetCell>& row,
 		      const std::string& blank);
 
   const coopy::store::CsvSheet& get() { return result; }

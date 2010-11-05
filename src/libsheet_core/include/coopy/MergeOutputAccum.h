@@ -17,7 +17,7 @@ public:
   virtual bool wantDiff() { return false; }
 
   virtual bool addRow(const char *tag,
-		      const std::vector<std::string>& row,
+		      const std::vector<coopy::store::SheetCell>& row,
 		      const std::string& blank);
 
   virtual bool stripMarkup();

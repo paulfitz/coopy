@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 
+#include <coopy/SheetCell.h>
+
 namespace coopy {
   namespace cmp {
     class ConfigChange;
@@ -80,9 +82,10 @@ public:
 class coopy::cmp::RowChange {
 public:
   int mode;
-  typedef std::map<std::string,std::string> txt2txt;
-  std::map<std::string,std::string> cond;
-  std::map<std::string,std::string> val;
+  //typedef std::map<std::string,std::string> txt2txt;
+  typedef std::map<std::string,coopy::store::SheetCell> txt2cell;
+  txt2cell cond;
+  txt2cell val;
   std::vector<std::string> names;
 
   std::string modeString() const {
