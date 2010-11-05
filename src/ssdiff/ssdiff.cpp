@@ -122,15 +122,18 @@ int main(int argc, char *argv[]) {
   BookCompare cmp;
   cmp.setVerbose(verbose);
 
-  PolyBook local, remote;
   PolyBook _pivot;
   PolyBook *pivot;
+  PolyBook _local;
+  PolyBook *local = &_local;
+  PolyBook _remote;
+  PolyBook *remote = &_remote;
   
-  if (!local.read(argv[0])) {
+  if (!_local.read(argv[0])) {
     fprintf(stderr,"Failed to read %s\n", argv[0]);
     return 1;
   }
-  if (!remote.read(argv[1])) {
+  if (!_remote.read(argv[1])) {
     fprintf(stderr,"Failed to read %s\n", argv[1]);
     return 1;
   }
@@ -141,39 +144,39 @@ int main(int argc, char *argv[]) {
     }
     pivot = &_pivot;
   } else {
-    pivot = &local;
+    pivot = &_local;
   }
   CompareFlags flags;
   if (mode=="sql") {
     MergeOutputSqlDiff sqldiff;
     start_output(output,flags);
-    cmp.compare(*pivot,local,remote,sqldiff,flags);
+    cmp.compare(*pivot,*local,*remote,sqldiff,flags);
     stop_output(output,flags);
   } else if (mode=="human") {
     MergeOutputHumanDiff humandiff;
     start_output(output,flags);
-    cmp.compare(*pivot,local,remote,humandiff,flags);
+    cmp.compare(*pivot,*local,*remote,humandiff,flags);
     stop_output(output,flags);
   } else if (mode=="raw") {
     MergeOutputVerboseDiff verbosediff;
     start_output(output,flags);
-    cmp.compare(*pivot,local,remote,verbosediff,flags);
+    cmp.compare(*pivot,*local,*remote,verbosediff,flags);
     stop_output(output,flags);
   } else if (mode=="csv") {
     if (version=="0.2") {
       MergeOutputCsvDiffV0p2 diff;
       start_output(output,flags);
-      cmp.compare(*pivot,local,remote,diff,flags);
+      cmp.compare(*pivot,*local,*remote,diff,flags);
       stop_output(output,flags);
     } else {
       MergeOutputCsvDiff diff;
       start_output(output,flags);
-      cmp.compare(*pivot,local,remote,diff,flags);
+      cmp.compare(*pivot,*local,*remote,diff,flags);
       stop_output(output,flags);
     }
   } else if (mode=="csv0") {
     MergeOutputPatch patch;
-    cmp.compare(*pivot,local,remote,patch,flags);
+    cmp.compare(*pivot,*local,*remote,patch,flags);
     const CsvSheet& result = patch.get();
     if (output!="") {
       if (CsvFile::write(result,output.c_str())!=0) {

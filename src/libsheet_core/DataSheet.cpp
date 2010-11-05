@@ -57,12 +57,25 @@ std::string DataSheet::encodeCell(const SheetCell& c,
     }
   }
   if (need_quote) { result += '"'; }
+  std::string line_buf = "";
   for (size_t i=0; i<str.length(); i++) {
     char ch = str[i];
     if (ch=='"') {
       result += '"';
     }
-    result += ch;
+    if (ch!='\r'&&ch!='\n') {
+      if (line_buf.length()>0) {
+	result += line_buf;
+	line_buf = "";
+      }
+      result += ch;
+    } else {
+      if (style.shouldTrimEnd()) {
+	line_buf+=ch;
+      } else {
+	result+=ch;
+      }
+    }
   }
   if (need_quote) { result += '"'; }
   return result;
