@@ -15,12 +15,18 @@ class coopy::store::SheetStyle {
 private:
   std::string delim;
   std::string nullToken;
+  //std::string notApplicableToken;
   bool haveNull;
+  //bool haveNotApplicable;
+  bool quoteCollision;
 public:
   SheetStyle() {
     delim = ",";
     nullToken = "NULL";
-    haveNull = false;
+    //notApplicableToken = "_";
+    haveNull = true;
+    //haveNotApplicable = true;
+    quoteCollision = true;
   }
 
   bool setFromFilename(const char *fname);
@@ -39,6 +45,10 @@ public:
 
   bool haveNullToken() const {
     return haveNull;
+  }
+
+  bool quoteCollidingText() const {
+    return quoteCollision;
   }
 
   static const SheetStyle defaultStyle;

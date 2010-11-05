@@ -46,6 +46,9 @@ void SheetStyle::setFromProperty(const Property& config) {
   if (config.check("have_null")) {
     haveNull = config.get("have_null").asInt()!=0;
   }
+  if (config.check("avoid_collision")) {
+    quoteCollision = config.get("avoid_collision").asInt()!=0;
+  }
 }
 
 void SheetStyle::setFromInspection(const char *buffer, int len) {

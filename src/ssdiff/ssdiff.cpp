@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
   std::string output = "";
   std::string mode = "human";
   std::string parent_file = "";
+  std::string version = "";
   bool verbose = false;
   while (true) {
     int option_index = 0;
@@ -50,6 +51,7 @@ int main(int argc, char *argv[]) {
       {"format-raw", 0, 0, 'r'},
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
+      {"version", 1, 0, 'V'},
       {"parent", 1, 0, 'p'},
       {0, 0, 0, 0}
     };
@@ -82,6 +84,9 @@ int main(int argc, char *argv[]) {
     case 'p':
       parent_file = optarg;
       break;
+    case 'V':
+      version = optarg;
+      break;
     default:
       fprintf(stderr, "Unrecognized option\n");
       return 1;
@@ -100,9 +105,8 @@ int main(int argc, char *argv[]) {
     printf("  ssdiff [--output <filename>] [--parent parent.csv] reference.csv modified.csv\n");
     printf("  ssdiff --format-human local.csv modified.csv # human readable output\n");
     printf("  ssdiff --format-csv local.csv modified.csv   # format that sspatch can read\n");
-    printf("  ssdiff --format-csv-old local.csv modified.csv   # older format that sspatch can read\n");
-    printf("  ssdiff --format-sql local.csv modified.csv   # not working yet\n");
     printf("  ssdiff --format-raw local.csv modified.csv   # full information\n");
+    printf("  ssdiff --version 0.2 --format-csv local.csv modified.csv  # old version\n");
     printf("Output defaults to standard output.\n");
     return 1;
   }
@@ -156,10 +160,17 @@ int main(int argc, char *argv[]) {
     cmp.compare(*pivot,local,remote,verbosediff,flags);
     stop_output(output,flags);
   } else if (mode=="csv") {
-    MergeOutputCsvDiff diff;
-    start_output(output,flags);
-    cmp.compare(*pivot,local,remote,diff,flags);
-    stop_output(output,flags);
+    if (version=="0.2") {
+      MergeOutputCsvDiffV0p2 diff;
+      start_output(output,flags);
+      cmp.compare(*pivot,local,remote,diff,flags);
+      stop_output(output,flags);
+    } else {
+      MergeOutputCsvDiff diff;
+      start_output(output,flags);
+      cmp.compare(*pivot,local,remote,diff,flags);
+      stop_output(output,flags);
+    }
   } else if (mode=="csv0") {
     MergeOutputPatch patch;
     cmp.compare(*pivot,local,remote,patch,flags);

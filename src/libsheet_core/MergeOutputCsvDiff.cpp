@@ -1,3 +1,12 @@
+
+
+/*
+  (Planned) changes since 0.2:
+  Version number change.
+  The special "*" character goes away.
+  A "row transform" operation is added.
+ */
+
 #include <coopy/MergeOutputCsvDiff.h>
 #include <coopy/SheetStyle.h>
 #include <coopy/DataSheet.h>

@@ -26,6 +26,20 @@ extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
 	return;
       }
     }
+    if (sheet->getStyle().quoteCollidingText()) {
+      int score = 0;
+      for (score=0; score<(int)i; score++) {
+	if (((char*)s)[score]!='_') {
+	  break;
+	}
+      }
+      if (score>0) {
+	if (memcmp(((char*)s)+score,token.c_str(),i-score)==0) {
+	  sheet->addField((char*)s+1,i-1,false);
+	  return;
+	}
+      }
+    }
   }
   sheet->addField((char *)s, i, false);
 }

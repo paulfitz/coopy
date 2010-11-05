@@ -30,9 +30,12 @@ std::string DataSheet::encodeCell(const SheetCell& c,
       break;
     }
   }
-  if (str==style.getNullToken()) {
+  std::string nil = style.getNullToken();
+  /*
+  if (str==nil) {
     need_quote = !c.escaped;
   }
+  */
   //printf("encoding [%s] [%d]\n", str.c_str(), c.escaped);
   if (str=="" && c.escaped) {
     if (style.haveNullToken()) {
@@ -40,6 +43,19 @@ std::string DataSheet::encodeCell(const SheetCell& c,
     }
   }
   std::string result = "";
+  if (!c.escaped) {
+    if (style.quoteCollidingText()) {
+      int score = 0;
+      for (score=0; score<(int)str.length(); score++) {
+	if (str[score]!='_') {
+	  break;
+	}
+      }
+      if (str.substr(score,str.length())==nil) {
+	str = std::string("_") + str;
+      }
+    }
+  }
   if (need_quote) { result += '"'; }
   for (size_t i=0; i<str.length(); i++) {
     char ch = str[i];
