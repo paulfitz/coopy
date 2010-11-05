@@ -38,6 +38,9 @@ Here are some tips on how to use these programs:
 \li <a href="annotated.html">Classes</a> used in implementation.
 \endif
 
+And if Coopy isn't quite right for you?
+\li \ref related.
+
 Code in the Coopy project is all free and open source (licensed under the GPL;
 LGPL port in the works).
 The \ref ssmerge and \ref ssdiff programs currently make use of 
