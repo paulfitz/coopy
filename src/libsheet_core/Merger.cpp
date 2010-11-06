@@ -18,7 +18,7 @@ using namespace coopy::cmp;
 
 void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 		      MatchUnit& row_unit, MergeOutput& output,
-		      const CompareFlags& flags) {
+		      const CompareFlags& flags, vector<RowChange>& rc) {
   
   bool diff = output.wantDiff();
   int pRow = row_unit.pivotUnit;
@@ -236,16 +236,19 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       if (lRow==-1) {
 	output.addRow("[+++]",expandMerge,blank);
 	rowChange.mode = ROW_CHANGE_INSERT;
-	output.changeRow(rowChange);
+	//output.changeRow(rowChange);
+	rc.push_back(rowChange);
       } else {
 	if (rRow==-1) {
 	  output.addRow("[---]",expandLocal,blank);
 	  rowChange.mode = ROW_CHANGE_DELETE;
-	  output.changeRow(rowChange);
+	  //output.changeRow(rowChange);
+	  rc.push_back(rowChange);
 	} else {
 	  output.addRow("[+]",expandMerge,blank);
 	  rowChange.mode = ROW_CHANGE_UPDATE;
-	  output.changeRow(rowChange);
+	  //output.changeRow(rowChange);
+	  rc.push_back(rowChange);
 	}
       }
     }
@@ -456,7 +459,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     }
 
     names = local_col_names;
-
+    
     {
       NameChange nc;
       nc.mode = NAME_CHANGE_DECLARE;
@@ -465,13 +468,25 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       output.changeName(nc);
     }
 
+    vector<RowChange> rc;
     // Now process rows
     for (list<MatchUnit>::iterator it=row_merge.accum.begin();
 	 it!=row_merge.accum.end(); 
 	 it++) {
       MatchUnit& unit = *it;
       // ignoring row order for now ...
-      mergeRow(pivot,local,remote,unit,output,flags);
+      mergeRow(pivot,local,remote,unit,output,flags,rc);
+    }
+
+    for (int i=0; i<(int)rc.size(); i++) {
+      /*
+	should skim the cond and val, and if appropriate issue a
+	column selection operation.  The cond is currently issued
+	is complete - for all columns - but this may be excessively
+	verbose.
+       */
+
+      output.changeRow(rc[i]);
     }
 
     output.mergeDone();
@@ -512,7 +527,11 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     //int _r = unit.remoteUnit;
     bool deleted = unit.deleted;
     if (!deleted) {
-      mergeRow(pivot,local,remote,unit,output,flags);
+      vector<RowChange> rc;
+      mergeRow(pivot,local,remote,unit,output,flags,rc);
+      for (int i=0; i<(int)rc.size(); i++) {
+	output.changeRow(rc[i]);
+      }
     }
   }
 

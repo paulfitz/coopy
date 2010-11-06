@@ -35,7 +35,8 @@ public:
 		coopy::store::DataSheet& local, 
 		coopy::store::DataSheet& remote,
 		MatchUnit& row_unit, MergeOutput& output,
-		const CompareFlags& flags);
+		const CompareFlags& flags,
+		std::vector<coopy::cmp::RowChange>& rc);
 
 private:
   OrderMerge row_merge;
