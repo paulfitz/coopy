@@ -1,14 +1,24 @@
 #include <stdio.h>
 
 #include <coopy/PolyBook.h>
+#include <coopy/NameSniffer.h>
+#include <coopy/ShortTextBook.h>
 #include <coopy/Dbg.h>
 
 using namespace coopy::store;
 
 int main(int argc, char *argv[]) {
-  if (argc>1) {
+  bool extractHeader = false;
+  while (argc>1) {
+    if (argv[1][0]!='-') break;
+    if (argv[1][1]!='-') break;
     if (std::string(argv[1])=="--verbose") {
       coopy_set_verbose(true);
+      argc--;
+      argv++;
+    }
+    if (std::string(argv[1])=="--header") {
+      extractHeader = true;
       argc--;
       argv++;
     }
@@ -27,6 +37,20 @@ int main(int argc, char *argv[]) {
   if (!src.read(argv[1])) {
     fprintf(stderr,"Failed to read %s\n", argv[1]);
     return 1;
+  }
+  if (extractHeader) {
+    PolySheet sheet = src.readSheetByIndex(0);
+    NameSniffer sniff(sheet);
+    ShortTextBook *book = new ShortTextBook();
+    if (book==NULL) {
+      fprintf(stderr,"Failed to allocate output\n");
+      return 1;
+    }
+    for (int i=0; i<sheet.width(); i++) {
+      book->sheet.addField(sniff.suggestColumnName(i).c_str(),false);
+    }
+    book->sheet.addRecord();
+    src.take(book);
   }
   if (!src.write(argv[2])) {
     fprintf(stderr,"Failed to write %s\n", argv[2]);

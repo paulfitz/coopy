@@ -29,6 +29,11 @@ public:
     }
   }
 
+  void take(TextBook *book) {
+    clear();
+    this->book = book;
+  }
+
   virtual std::vector<std::string> getNames() {
     if (book) {
       return book->getNames();

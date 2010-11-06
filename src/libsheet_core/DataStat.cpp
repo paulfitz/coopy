@@ -51,6 +51,9 @@ void DataStat::evaluate(const DataSheet& sheet) {
       float v = (cmp[i]-mean)/dev;
       v = -v;
       if (v<0) v = 0;
+      if (sheet.cellString(j,i)=="") {
+	v = 0;
+      }
       oddness.cell(j,i) = v;
       oddness_accum.cell(0,i) += v;
     }
@@ -58,7 +61,7 @@ void DataStat::evaluate(const DataSheet& sheet) {
 
   oddness_accum.normalize(-1,-1,1);
 
-  //CsvFile::write(oddness,"oddness.csv");
+  //CsvFile::write(oddness,"-");
   //CsvFile::write(oddness_accum,"oddness_accum.csv");
 
   int top = -1;
