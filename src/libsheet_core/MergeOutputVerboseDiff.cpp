@@ -33,6 +33,24 @@ string verbose_encoder(const std::vector<std::string>& lst,
   return x;
 }
 
+string index_encoder(const std::vector<std::string>& lst,
+		     const std::vector<int> & mp) {
+  string x;
+  int at = 0;
+  for (vector<string>::const_iterator it = lst.begin();
+       it!=lst.end();
+       it++) {
+    if (mp[at]) {
+      if (x.length()>0) {
+	x += " ";
+      }
+      x += *it;
+    }
+    at++;
+  }
+  return x;
+}
+
 
 bool MergeOutputVerboseDiff::changeColumn(const OrderChange& change) {
   fprintf(out,"changeColumn: %s\n", change.modeString().c_str());
@@ -49,16 +67,20 @@ bool MergeOutputVerboseDiff::changeRow(const RowChange& change) {
   fprintf(out,"changeRow: %s\n", change.modeString().c_str());
   fprintf(out,"    conds: %s\n", verbose_encoder(change.names,change.cond).c_str());
   fprintf(out,"     vals: %s\n", verbose_encoder(change.names,change.val).c_str());
+  fprintf(out,"  indexes: %s\n", index_encoder(change.names,change.indexes).c_str());
   fprintf(out,"\n");
   return true;
 }
 
 
-bool MergeOutputVerboseDiff::declareNames(const vector<string>& names, 
-					  bool final) {
-  fprintf(out,"declareNames: %s (%s)\n",
-	 vector2string(names).c_str(),
-	 final?"final":"not final");
+bool MergeOutputVerboseDiff::changeName(const NameChange& change) {
+  const vector<string>& names = change.names;
+  bool final = change.final;
+  bool constant = change.constant;
+  fprintf(out,"declareNames: %s\n",
+	  vector2string(names).c_str());
+  fprintf(out,"       final: %d\n", final?1:0);
+  fprintf(out,"    constant: %d\n", constant?1:0);
   fprintf(out,"\n");
   return true;
 }

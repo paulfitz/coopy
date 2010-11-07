@@ -2,6 +2,7 @@
 #include <coopy/Dbg.h>
 #include <coopy/Mover.h>
 #include <coopy/NameSniffer.h>
+#include <coopy/IndexSniffer.h>
 
 #include <stdlib.h>
 
@@ -290,6 +291,12 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     NameSniffer localName(local);
     NameSniffer remoteName(remote);
 
+    // for now, we will only use filtered index if column manipulations
+    // are non-existent or trivial
+    IndexSniffer localIndex(local);
+    bool usableIndex = true;
+    bool constantColumns = true;
+
     vector<int> local_cols;
     vector<string> local_col_names;
     for (int i=0; i<local.width(); i++) {
@@ -302,13 +309,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       local_col_names.push_back(name);
     }
 
-    {
-      NameChange nc;
-      nc.mode = NAME_CHANGE_DECLARE;
-      nc.final = false;
-      nc.names = local_col_names;
-      output.changeName(nc);
-    }
+    vector<OrderChange> cc;
 
     // Pass 1: signal any column deletions
     for (list<MatchUnit>::iterator it=col_merge.accum.begin();
@@ -337,7 +338,8 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	local_col_names.erase(local_col_names.begin()+idx);
 	change.indicesAfter = local_cols;
 	change.namesAfter = local_col_names;
-	output.changeColumn(change);
+	//output.changeColumn(change);
+	cc.push_back(change);
       }
     }
 
@@ -411,7 +413,8 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	local_col_names.insert(local_col_names.begin()+idx2,name);
 	change.indicesAfter = local_cols;
 	change.namesAfter = local_col_names;
-	output.changeColumn(change);
+	//output.changeColumn(change);
+	cc.push_back(change);
       }
     }
 
@@ -450,12 +453,31 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	local_col_names.insert(local_col_names.begin()+at,name);
 	change.indicesAfter = local_cols;
 	change.namesAfter = local_col_names;
-	output.changeColumn(change);
+	//output.changeColumn(change);
+	cc.push_back(change);
 	at++;
       }
       if (lCol!=-1 && !deleted) {
 	at++;
       }
+    }
+
+    if (cc.size()>0) {
+      constantColumns = false;
+    }
+
+    {
+      NameChange nc;
+      nc.mode = NAME_CHANGE_DECLARE;
+      nc.final = false;
+      nc.constant = constantColumns;
+      nc.names = local_col_names;
+      output.changeName(nc);
+    }
+
+    for (int i=0; i<(int)cc.size(); i++) {
+      OrderChange& change = cc[i];
+      output.changeColumn(change);
     }
 
     names = local_col_names;
@@ -465,6 +487,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       nc.mode = NAME_CHANGE_DECLARE;
       nc.final = true;
       nc.names = local_col_names;
+      nc.constant = constantColumns;
       output.changeName(nc);
     }
 
@@ -478,6 +501,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       mergeRow(pivot,local,remote,unit,output,flags,rc);
     }
 
+    usableIndex = constantColumns;
     for (int i=0; i<(int)rc.size(); i++) {
       /*
 	should skim the cond and val, and if appropriate issue a
@@ -486,7 +510,13 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	verbose.
        */
 
-      output.changeRow(rc[i]);
+      RowChange& change = rc[i];
+      if (usableIndex) {
+	change.indexes = localIndex.suggestIndexes();
+      } else {
+	change.indexes.clear();
+      }
+      output.changeRow(change);
     }
 
     output.mergeDone();

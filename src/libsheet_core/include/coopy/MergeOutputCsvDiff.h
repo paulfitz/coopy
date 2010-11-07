@@ -4,6 +4,8 @@
 #include <coopy/MergeOutput.h>
 #include <coopy/CsvSheet.h>
 
+#include <map>
+
 namespace coopy {
   namespace cmp {
     class MergeOutputCsvDiff;
@@ -17,6 +19,9 @@ class coopy::cmp::MergeOutputCsvDiff : public MergeOutput {
 public:
   coopy::store::CsvSheet result;
   std::vector<std::string> ops;
+  std::vector<bool> showForSelect;
+  std::vector<bool> showForDescribe;
+  std::map<std::string,bool> activeColumn;
 
   MergeOutputCsvDiff();
 
@@ -30,7 +35,8 @@ public:
   bool describeRow(const RowChange& change, const char *tag);
 
   virtual bool mergeDone();
-  virtual bool declareNames(const std::vector<std::string>& names, bool final);
+
+  virtual bool changeName(const NameChange& change);
 
   const coopy::store::CsvSheet& get() { return result; }
 
@@ -51,6 +57,7 @@ public:
   bool describeRow(const RowChange& change, const char *tag);
 
   virtual bool mergeDone();
+
   virtual bool declareNames(const std::vector<std::string>& names, bool final);
 
   const coopy::store::CsvSheet& get() { return result; }

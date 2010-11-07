@@ -94,6 +94,7 @@ public:
   txt2cell cond;
   txt2cell val;
   std::vector<std::string> names;
+  std::vector<int> indexes;
 
   std::string modeString() const {
     switch (mode) {
@@ -116,11 +117,13 @@ class coopy::cmp::NameChange {
 public:
   int mode;
   bool final;
+  bool constant;
   std::vector<std::string> names;
 
   NameChange() {
     mode = -1;
     final = false;
+    constant = false;
   }
 
   std::string modeString() const {
