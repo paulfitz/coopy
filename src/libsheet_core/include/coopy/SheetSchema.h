@@ -26,6 +26,10 @@ public:
   virtual int getColumnIndexByName(const char *name) {
     return -1;
   }
+
+  virtual bool providesPrimaryKeys() const {
+    return false;
+  }
 };
 
 #endif

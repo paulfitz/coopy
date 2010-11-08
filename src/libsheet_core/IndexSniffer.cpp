@@ -9,9 +9,24 @@ void IndexSniffer::sniff() {
 
   int w = sheet.width();
   int h = sheet.height();
-  len = w;
+  int len = w;
   guessed = true;
 
+  SheetSchema *schema = sheet.getSchema();
+  if (schema!=NULL) {
+    if (schema->providesPrimaryKeys()) {
+      flags.clear();
+      len = w;
+      for (int i=0; i<w; i++) {
+	ColumnInfo info = schema->getColumnInfo(i);
+	flags.push_back(info.isPrimaryKey()?1:0);
+      }
+      guessed = false;
+      return;
+    }
+  }
+
+  // no useful schema? on to guesswork.
   vector<string> sofar;
   sofar.resize(h);
   for (int i=0; i<w; i++) {
@@ -36,9 +51,9 @@ void IndexSniffer::sniff() {
       dbg_printf("%d collisions for %d\n", collide, i);
     }
   }
-  offsets.clear();
+  flags.clear();
   if (len==0) len = w;
   for (int i=0; i<w; i++) {
-    offsets.push_back((i<len)?1:0);
+    flags.push_back((i<len)?1:0);
   }
 }

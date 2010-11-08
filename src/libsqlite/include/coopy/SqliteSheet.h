@@ -36,7 +36,7 @@ public:
   virtual bool deleteRow(const RowRef& src);
 
   virtual ColumnInfo getColumnInfo(int x) {
-    return ColumnInfo(col2sql[x]);
+    return ColumnInfo(col2sql[x],col2pk[x]);
   }
 
   virtual SheetSchema *getSchema() const;
@@ -48,6 +48,9 @@ private:
   int w, h;
   std::vector<int> row2sql;
   std::vector<std::string> col2sql;
+  std::vector<std::string> primaryKeys;
+  std::vector<bool> col2pk;
+  void checkKeys();
 };
 
 class coopy::store::SqliteSheetSchema : public SheetSchema {
@@ -56,6 +59,10 @@ public:
 
   virtual ColumnInfo getColumnInfo(int x) {
     return sheet->getColumnInfo(x);
+  }
+
+  virtual bool providesPrimaryKeys() const {
+    return true;
   }
 };
 

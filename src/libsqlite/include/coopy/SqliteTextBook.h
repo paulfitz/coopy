@@ -32,7 +32,6 @@ public:
 
 private:
   void *implementation;
-  bool tableSet;
   std::vector<std::string> names;
 
   std::vector<std::string> getNamesSql();

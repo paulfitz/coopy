@@ -125,6 +125,7 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
   sqlite3_finalize(statement);
   sqlite3_free(query);
 
+  checkKeys();
 }
 
 SqliteSheet::~SqliteSheet() {
@@ -376,6 +377,36 @@ bool SqliteSheet::deleteRow(const RowRef& src) {
   return true;
 }
 
+
+void SqliteSheet::checkKeys() {
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return;
+
+  sqlite3_stmt *statement = NULL;
+  char *query = NULL;
+
+  query = sqlite3_mprintf("PRAGMA table_info(%Q)", 
+			  name.c_str());
+ 
+  int iresult = sqlite3_prepare_v2(db, query, -1, 
+				   &statement, NULL);
+  if (iresult!=SQLITE_OK) {
+    sqlite3_finalize(statement);
+    sqlite3_free(query);
+    return;
+  }
+  col2pk.clear();
+  while (sqlite3_step(statement) == SQLITE_ROW) {
+    char *col = (char *)sqlite3_column_text(statement,1);
+    int pk = sqlite3_column_int(statement,5);
+    if (pk) {
+      primaryKeys.push_back(string(col));
+    }
+    col2pk.push_back(pk!=0);
+  }
+  sqlite3_finalize(statement);
+  sqlite3_free(query);
+}
 
 void SqliteSchema::parse(const char *str) {
   string sql = str;

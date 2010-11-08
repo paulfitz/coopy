@@ -153,6 +153,17 @@ public:
     s.w = alt.s.w;
     return *this;
   }
+
+  const CsvSheet& copy(const DataSheet& alt) {
+    clear();
+    for (int i=0; i<alt.height(); i++) {
+      for (int j=0; j<alt.width(); j++) {
+	addField(alt.cellSummary(j,i));
+      }
+      addRecord();
+    }
+    return *this;
+  }
 };
 
 

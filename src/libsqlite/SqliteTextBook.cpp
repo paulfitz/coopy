@@ -36,6 +36,7 @@ bool SqliteTextBook::read(const char *fname) {
     clear();
     return false;
   }  
+  names = getNamesSql();
   return true;
 }
 
@@ -49,7 +50,6 @@ bool SqliteTextBook::open(const Property& config) {
     return false;
   }
   if (!config.check("table")) {
-    names = getNamesSql();
     return true;
   }
   names.clear();

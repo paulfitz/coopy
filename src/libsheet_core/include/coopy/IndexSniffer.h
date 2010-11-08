@@ -15,8 +15,7 @@ namespace coopy {
 class coopy::store::IndexSniffer {
 private:
   const DataSheet& sheet;
-  std::vector<int> offsets;
-  int len;
+  std::vector<int> flags;
   bool guessed;
 public:
   IndexSniffer(const DataSheet& sheet) : sheet(sheet) {
@@ -25,16 +24,9 @@ public:
 
   void sniff(); 
 
-  int length() {
-    return len;
-  }
-
-  int suggestIndex(int at) const {
-    return offsets[at];
-  }
-
+  // this is a poorly-named vector of primary key flags
   std::vector<int> suggestIndexes() const {
-    return offsets;
+    return flags;
   }
 
   bool isGuessed() {

@@ -2,13 +2,16 @@
 
 #include <coopy/PolyBook.h>
 #include <coopy/NameSniffer.h>
+#include <coopy/IndexSniffer.h>
 #include <coopy/ShortTextBook.h>
 #include <coopy/Dbg.h>
 
 using namespace coopy::store;
+using namespace std;
 
 int main(int argc, char *argv[]) {
   bool extractHeader = false;
+  bool extractIndex = false;
   while (argc>1) {
     if (argv[1][0]!='-') break;
     if (argv[1][1]!='-') break;
@@ -19,6 +22,11 @@ int main(int argc, char *argv[]) {
     }
     if (std::string(argv[1])=="--header") {
       extractHeader = true;
+      argc--;
+      argv++;
+    }
+    if (std::string(argv[1])=="--index") {
+      extractIndex = true;
       argc--;
       argv++;
     }
@@ -50,6 +58,29 @@ int main(int argc, char *argv[]) {
       book->sheet.addField(sniff.suggestColumnName(i).c_str(),false);
     }
     book->sheet.addRecord();
+    src.take(book);
+  }
+  if (extractIndex) {
+    PolySheet sheet = src.readSheetByIndex(0);
+    IndexSniffer sniff(sheet);
+    vector<int> indexes = sniff.suggestIndexes();
+    dbg_printf("Index count %d\n", (int)indexes.size());
+    ShortTextBook *book = new ShortTextBook();
+    if (book==NULL) {
+      fprintf(stderr,"Failed to allocate output\n");
+      return 1;
+    }
+    book->sheet.copy(sheet);
+    int at = 0;
+    for (int i=0; i<sheet.width(); i++) {
+      if (indexes[i]==0) {
+	dbg_printf("Trimming %d (%d)\n", i, book->sheet.width());
+	book->sheet.deleteColumn(at);
+	dbg_printf("Trimmed %d (%d)\n", i, book->sheet.width());
+      } else {
+	at++;
+      }
+    }
     src.take(book);
   }
   if (!src.write(argv[2])) {
