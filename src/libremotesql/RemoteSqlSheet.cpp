@@ -29,7 +29,7 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
 
   {
     string query = string("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=")+quote(name);
-    //printf("Query is %s\n", query.c_str());
+    dbg_printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     if (result==NULL) return;
     while (result->fetch()) {
@@ -38,6 +38,22 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
       w++;
     }
     SQL.closeQuery(result);
+  }
+
+  {
+    string query = string("SELECT k.column_name FROM information_schema.table_constraints t JOIN information_schema.key_column_usage k USING(constraint_name,table_schema,table_name) WHERE t.constraint_type='PRIMARY KEY' AND t.table_schema=") + quote(book->getDatabaseName()) + " AND t.table_name=" + quote(name);
+    dbg_printf("Query is %s\n", query.c_str());
+    CSQLResult *result = SQL.openQuery(query);
+    if (result==NULL) return;
+    map<string,int> pks;
+    while (result->fetch()) {
+      //printf("Got %s\n", result->get(0).c_str());
+      pks[result->get(0)] = 1;
+    }
+    SQL.closeQuery(result);
+    for (int i=0; i<(int)col2sql.size(); i++) {
+      col2pk.push_back(pks.find(col2sql[i])!=pks.end());
+    }
   }
 
   /*

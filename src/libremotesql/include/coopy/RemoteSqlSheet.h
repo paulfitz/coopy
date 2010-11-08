@@ -47,7 +47,7 @@ public:
   }
 
   virtual ColumnInfo getColumnInfo(int x) {
-    return ColumnInfo(col2sql[x]);
+    return ColumnInfo(col2sql[x],col2pk[x]);
   }
 
   virtual SheetSchema *getSchema() const;
@@ -64,6 +64,7 @@ private:
   // see sqlitesheet for simpler implementation with rowid.
   std::vector<std::vector<std::string> > row2sql;
   std::vector<std::string> col2sql;
+  std::vector<bool> col2pk;
   std::vector<std::string> keys;
   std::vector<int> key_cols;
 };
@@ -74,6 +75,10 @@ public:
 
   virtual ColumnInfo getColumnInfo(int x) {
     return sheet->getColumnInfo(x);
+  }
+
+  virtual bool providesPrimaryKeys() const {
+    return true;
   }
 };
 

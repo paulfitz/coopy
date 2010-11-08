@@ -74,9 +74,7 @@ int main(int argc, char *argv[]) {
     int at = 0;
     for (int i=0; i<sheet.width(); i++) {
       if (indexes[i]==0) {
-	dbg_printf("Trimming %d (%d)\n", i, book->sheet.width());
 	book->sheet.deleteColumn(at);
-	dbg_printf("Trimmed %d (%d)\n", i, book->sheet.width());
       } else {
 	at++;
       }

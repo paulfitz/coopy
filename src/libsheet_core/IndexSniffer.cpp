@@ -36,9 +36,10 @@ void IndexSniffer::sniff() {
       bool escaped = false;
       string v = sheet.cellString(i,j,escaped);
       v += escaped?"*":" ";
-      sofar[i] += v;
-      if (ct.find(sofar[i])==ct.end()) {
-	ct[sofar[i]] = 1;
+      sofar[j] += v;
+      dbg_printf("checking %d %s\n", j, sofar[j].c_str());
+      if (ct.find(sofar[j])==ct.end()) {
+	ct[sofar[j]] = 1;
       } else {
 	collide++;
       }
