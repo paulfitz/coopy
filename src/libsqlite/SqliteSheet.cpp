@@ -42,6 +42,10 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
   sqlite3 *db = DB(implementation);
   if (db==NULL) return;
 
+  schema = new SqliteSheetSchema;
+  COOPY_MEMORY(schema);
+  schema->sheet = this;
+
   sqlite3_stmt *statement = NULL;
   char *query = NULL;
 
@@ -124,7 +128,14 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
 }
 
 SqliteSheet::~SqliteSheet() {
+  if (schema!=NULL) delete schema;
+  schema = NULL;
 }
+
+SheetSchema *SqliteSheet::getSchema() const {
+  return schema;
+}
+
 
 std::string SqliteSheet::cellString(int x, int y) const {
   // starting with a COMPLETELY brain-dead implementation
@@ -201,25 +212,25 @@ ColumnRef SqliteSheet::moveColumn(const ColumnRef& src,
   sqlite3 *db = DB(implementation);
   if (db==NULL) return ColumnRef();
 
-  SqliteSchema schema;
-  string sql_pre = schema.fetch(db,name.c_str());
-  schema.parse(sql_pre.c_str());
-  string cache_sql = schema.parts[src_index];
+  SqliteSchema ischema;
+  string sql_pre = ischema.fetch(db,name.c_str());
+  ischema.parse(sql_pre.c_str());
+  string cache_sql = ischema.parts[src_index];
   string cache_name = col2sql[src_index];
-  schema.parts.erase(schema.parts.begin()+src_index);
+  ischema.parts.erase(ischema.parts.begin()+src_index);
   col2sql.erase(col2sql.begin()+src_index);
   if (base_index>src_index) {
     base_index--;
   }
   if (base_index==-1) {
-    schema.parts.push_back(cache_sql);
+    ischema.parts.push_back(cache_sql);
     col2sql.push_back(cache_name);
   } else {
-    schema.parts.insert(schema.parts.begin()+base_index,cache_sql);
+    ischema.parts.insert(ischema.parts.begin()+base_index,cache_sql);
     col2sql.insert(col2sql.begin()+base_index,cache_name);
   }
   
-  return schema.apply(col2sql)?ColumnRef(base_index):ColumnRef();
+  return ischema.apply(col2sql)?ColumnRef(base_index):ColumnRef();
 }
 
 
@@ -229,14 +240,14 @@ bool SqliteSheet::deleteColumn(const ColumnRef& column) {
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
 
-  SqliteSchema schema;
-  string sql_pre = schema.fetch(db,name.c_str());
-  schema.parse(sql_pre.c_str());
-  schema.parts.erase(schema.parts.begin()+deadbeat_index);
+  SqliteSchema ischema;
+  string sql_pre = ischema.fetch(db,name.c_str());
+  ischema.parse(sql_pre.c_str());
+  ischema.parts.erase(ischema.parts.begin()+deadbeat_index);
   col2sql.erase(col2sql.begin()+deadbeat_index);
   w--;
   
-  return schema.apply(col2sql);
+  return ischema.apply(col2sql);
 }
 
 ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
@@ -286,18 +297,18 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
 
   string col_sql = suggest;
 
-  SqliteSchema schema;
-  string sql_pre = schema.fetch(db,name.c_str());
-  schema.parse(sql_pre.c_str());
+  SqliteSchema ischema;
+  string sql_pre = ischema.fetch(db,name.c_str());
+  ischema.parse(sql_pre.c_str());
   if (index<0) {
-    schema.parts.push_back(col_sql);
+    ischema.parts.push_back(col_sql);
     col2sql.push_back(col_name);
     index = w;
   } else {
-    schema.parts.insert(schema.parts.begin()+index,col_sql);
+    ischema.parts.insert(ischema.parts.begin()+index,col_sql);
     col2sql.insert(col2sql.begin()+index,col_name);
   }
-  if (schema.apply(col2sql,col_name)) {
+  if (ischema.apply(col2sql,col_name)) {
     w++;
     return ColumnRef(index);
   }

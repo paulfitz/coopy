@@ -25,6 +25,8 @@ using namespace coopy::store;
 #include <coopy/RemoteSqlTextBook.h>
 #endif
 
+#include <coopy/SqliteTextBook.h>
+
 TextBook *readHelper(const char *fname,
 		     const char *ext,
 		     const char *data) {
@@ -42,6 +44,8 @@ TextBook *readHelper(const char *fname,
 #endif
     } else if (key=="csv") {
       book = new ShortTextBook();
+    } else if (key=="sqlite") {
+      book = new SqliteTextBook();
     } else {
       fprintf(stderr,"Type not recognized: %s\n", key.c_str());
       return NULL;

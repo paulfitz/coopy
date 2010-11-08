@@ -108,6 +108,7 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
 
 RemoteSqlSheet::~RemoteSqlSheet() {
   if (schema!=NULL) delete schema;
+  schema = NULL;
 }
 
 SheetSchema *RemoteSqlSheet::getSchema() const {

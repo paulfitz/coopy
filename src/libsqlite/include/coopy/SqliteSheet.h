@@ -8,6 +8,7 @@
 namespace coopy {
   namespace store {
     class SqliteSheet;
+    class SqliteSheetSchema;
   }
 }
 
@@ -34,12 +35,28 @@ public:
 
   virtual bool deleteRow(const RowRef& src);
 
+  virtual ColumnInfo getColumnInfo(int x) {
+    return ColumnInfo(col2sql[x]);
+  }
+
+  virtual SheetSchema *getSchema() const;
+  
 private:
+  SqliteSheetSchema *schema;
   void *implementation;
   std::string name;
   int w, h;
   std::vector<int> row2sql;
   std::vector<std::string> col2sql;
+};
+
+class coopy::store::SqliteSheetSchema : public SheetSchema {
+public:
+  SqliteSheet *sheet;
+
+  virtual ColumnInfo getColumnInfo(int x) {
+    return sheet->getColumnInfo(x);
+  }
 };
 
 #endif

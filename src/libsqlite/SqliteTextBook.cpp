@@ -39,7 +39,26 @@ bool SqliteTextBook::read(const char *fname) {
   return true;
 }
 
-vector<string> SqliteTextBook::getNames() {
+bool SqliteTextBook::open(const Property& config) {
+  clear();
+  if (!config.check("file")) {
+    fprintf(stderr,"file parameter needed\n");
+    return false;
+  }
+  if (!read(config.get("file").asString().c_str())) {
+    return false;
+  }
+  if (!config.check("table")) {
+    names = getNamesSql();
+    return true;
+  }
+  names.clear();
+  names.push_back(config.get("table").asString().c_str());
+  return true;
+}
+
+
+vector<string> SqliteTextBook::getNamesSql() {
   vector<string> result;
   sqlite3 *db = DB(implementation);
   if (db==NULL) return result;

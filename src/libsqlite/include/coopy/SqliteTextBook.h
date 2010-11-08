@@ -18,7 +18,11 @@ public:
 
   bool read(const char *fname);
 
-  std::vector<std::string> getNames();
+  virtual bool open(const Property& config);
+  
+  std::vector<std::string> getNames() {
+    return names;
+  }
 
   PolySheet readSheet(const std::string& name);
 
@@ -28,6 +32,11 @@ public:
 
 private:
   void *implementation;
+  bool tableSet;
+  std::vector<std::string> names;
+
+  std::vector<std::string> getNamesSql();
+
 };
 
 #endif
