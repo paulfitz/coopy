@@ -343,7 +343,7 @@ ADD_TEST2(tail_merge ${TESTS}/result_trimmer_merge.csv ssmerge --tail-trim
 
 foreach(patcher patch_001_col_move patch_002_col_insert patch_003_col_insert patch_004_col_delete patch_005_row_update patch_006_row_insert patch_007_row_delete)
 #  ADD_TEST2(${patcher} ${TESTS}/result_${patcher}.csv sspatch --output ${TESTS}/result_${patcher}.csv ${TESTS}/numbers.csv ${TESTS}/${patcher}.txt)
-  ADD_TEST2(${patcher} ${TESTS}/result_${patcher}.csv sspatch ${TESTS}/numbers.csv ${TESTS}/${patcher}.txt)
+  ADD_TEST2(${patcher} ${TESTS}/result_${patcher}.csv sspatch ${TESTS}/numbers.csv ${TESTS}/patch_v_0_2/${patcher}.txt)
 
 endforeach()
 
@@ -353,7 +353,7 @@ endforeach()
 # SQLITE testing
 
 foreach(patcher patch_001_col_move patch_002_col_insert patch_003_col_insert patch_004_col_delete patch_005_row_update patch_006_row_insert patch_007_row_delete)
-  ADD_TEST2(sqlite_${patcher} ${TESTS}/result_${patcher}.csv sspatch --tmp tmp.sqlite ${TESTS}/numbers.sqlite ${TESTS}/${patcher}.txt)
+  ADD_TEST2(sqlite_${patcher} ${TESTS}/result_${patcher}.csv sspatch --tmp tmp.sqlite ${TESTS}/numbers.sqlite ${TESTS}/patch_v_0_2/${patcher}.txt)
 endforeach()
 
 
@@ -380,7 +380,7 @@ IF (USE_GNUMERIC)
   # Blank columns don't get exported by gnumeric, so some tests are not
   # that useful
   foreach(patcher patch_000_nothing patch_001_col_move patch_002_col_insert patch_003_col_insert patch_004_col_delete patch_005_row_update patch_006_row_insert patch_007_row_delete)
-    TEST_XLS(excel_${patcher} ${TESTS}/result_excel_${patcher}.html sspatch ${TESTS}/numbers.xls ${TESTS}/${patcher}.txt)
+    TEST_XLS(excel_${patcher} ${TESTS}/result_excel_${patcher}.html sspatch ${TESTS}/numbers.xls ${TESTS}/patch_v_0_2/${patcher}.txt)
     
   endforeach()
 
