@@ -171,6 +171,10 @@ bool PatchParser::apply() {
   }
 
   PatchColumnNames names;
+
+  map<string,bool> match_column;
+  map<string,bool> assign_column;
+
   vector<SheetCell> selector;
   int len = 0;
   int row_index = -1;
@@ -179,6 +183,9 @@ bool PatchParser::apply() {
   bool configSent = false;
   bool configSet = false;
   ConfigChange cc;
+  bool support_name_ROW = false;
+  bool support_name_star = false;
+  int name_start = 2;
   for (int i=0; i<patch.height(); i++) {
     dbg_printf("[%d] ", i);
     string cmd0 = patch.cell(0,i);
@@ -188,7 +195,12 @@ bool PatchParser::apply() {
       patcher->changeConfig(cc);
     }
     if (cmd0=="dtbl") {
-      dbg_printf("Processed header\n");
+      string ver = patch.cell(3,i);
+      dbg_printf("Processed header version %s\n", ver.c_str());
+      if (ver == "0.2") {
+	support_name_ROW = true;
+	support_name_star = true;
+      }
     } else if (cmd0=="config") {
       string key = patch.cell(1,i);
       string val = patch.cell(2,i);
@@ -212,11 +224,22 @@ bool PatchParser::apply() {
     } else if (cmd0=="column") {
       OrderChange change;
       PatchColumnNames names2;
-      names2.read(patch,3,i);
+      names2.read(patch,name_start,i);
       len = (int)names2.lst.size();
+      if (names2.lst[0]=="ROW" && support_name_ROW && name_start == 2) {
+	name_start = 3;
+	names2.read(patch,name_start,i);
+	len = (int)names2.lst.size();
+      }
       change.indicesBefore = names.indices;
       change.namesBefore = names.lst;
       change.namesAfter = names2.lst;
+      match_column.clear();
+      assign_column.clear();
+      for (int i=0; i<len; i++) {
+	match_column[names2.lst[i]] = true;
+	assign_column[names2.lst[i]] = true;
+      }
       if (cmd1=="name") {
 	dbg_printf("Set column names to %s\n", names2.toString().c_str());
 	NameChange nc;
@@ -262,22 +285,55 @@ bool PatchParser::apply() {
     } else if (cmd0=="row") {
       RowChange change;
       change.names = names.lst;
+      for (int k=0; k<(int)change.names.size(); k++) {
+	change.indexes.push_back(true);
+      }
       PatchColumnNames names2;
-      names2.readData(patch,3,i,len);
-      if (cmd1=="select") {
+      if (cmd1=="columns"||cmd1=="operate") {
+	names2.read(patch,name_start,i);
+      } else {
+	names2.readData(patch,name_start,i,len);
+      }
+      if (cmd1=="columns") {
+	dbg_printf("Active columns %s\n", names2.toString().c_str());
+	names.lst = names2.lst;
+	len = (int)names2.lst.size();
+	match_column.clear();
+	assign_column.clear();
+	for (int i=0; i<len; i++) {
+	  match_column[names.lst[i]] = true;
+	  assign_column[names.lst[i]] = true;
+	}
+      } else if (cmd1=="operate") {
+	dbg_printf("Operate columns %s: ", names2.toString().c_str());
+	for (int i=0; i<len; i++) {
+	  string code = names2.lst[i];
+	  match_column[names.lst[i]] = code.find('=')!=string::npos;
+	  assign_column[names.lst[i]] = code.find('>')!=string::npos;
+	  dbg_printf("%d:%d ", match_column[names.lst[i]],
+		     assign_column[names.lst[i]]);
+	}
+	dbg_printf("\n");
+      } else if (cmd1=="select"||cmd1=="=") {
 	dbg_printf("Selecting %s\n", names2.dataString().c_str());
 	selector = names2.data;
-      } else if (cmd1=="update") {
+      } else if (cmd1=="update"||cmd1==">") {
 	dbg_printf("Updating to %s\n", names2.dataString().c_str());	
 	change.mode = ROW_CHANGE_UPDATE;
 	for (int i=0; i<len; i++) {
 	  const SheetCell& sel = selector[i];
-	  if (sel.text!="*") {
+	  string name = names.lst[i];
+	  bool ok = match_column[name];
+	  if (support_name_star && sel.text=="*") ok = false;	
+	  if (ok) {
 	    change.cond[change.names[i]] = sel;
 	  }
 	  const SheetCell& val = names2.data[i];
-	  if (val.text!="*") {
+	  ok = assign_column[name];
+	  if (support_name_star && val.text=="*") ok = false;
+	  if (ok) {
 	    change.val[change.names[i]] = val;
+	    //printf("assign %s %s\n", change.names[i].c_str(), val.toString().c_str());
 	  }
 	}
 	ok = patcher->changeRow(change);
@@ -285,8 +341,11 @@ bool PatchParser::apply() {
 	dbg_printf("Inserting %s\n", names2.dataString().c_str());
 	change.mode = ROW_CHANGE_INSERT;
 	for (int i=0; i<len; i++) {
+	  string name = names.lst[i];
 	  const SheetCell& val = names2.data[i];
-	  if (val.text!="*") {
+	  bool ok = assign_column[name];
+	  if (support_name_star && val.text=="*") ok = false;
+	  if (ok) {
 	    change.val[change.names[i]] = val;
 	  }
 	}
@@ -295,8 +354,11 @@ bool PatchParser::apply() {
 	dbg_printf("Deleting %s\n", names2.dataString().c_str());
 	change.mode = ROW_CHANGE_DELETE;
 	for (int i=0; i<len; i++) {
+	  string name = names.lst[i];
 	  const SheetCell& val = names2.data[i];
-	  if (val.text!="*") {
+	  bool ok = match_column[name];
+	  if (support_name_star && val.text=="*") ok = false;
+	  if (ok) {
 	    change.cond[change.names[i]] = val;
 	  }
 	}

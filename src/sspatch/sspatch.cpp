@@ -8,6 +8,7 @@
 #include <coopy/FormatSniffer.h>
 #include <coopy/PatchParser.h>
 #include <coopy/SheetPatcher.h>
+#include <coopy/MergeOutputVerboseDiff.h>
 #include <coopy/Dbg.h>
 
 using namespace coopy::store;
@@ -38,6 +39,7 @@ bool copy_file(const char *src, const char *dest) {
 
 int main(int argc, char *argv[]) {
   bool verbose = false;
+  bool fake = false;
   string output = "-";
   string tmp = "-";
   string outputFormat = "-";
@@ -46,6 +48,7 @@ int main(int argc, char *argv[]) {
     static struct option long_options[] = {
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
+      {"fake", 0, 0, 'k'},
       {"tmp", 1, 0, 't'},
       {"output-format", 1, 0, 'f'},
       {0, 0, 0, 0}
@@ -57,6 +60,9 @@ int main(int argc, char *argv[]) {
     switch (c) {
     case 'v':
       verbose = true;
+      break;
+    case 'k':
+      fake = true;
       break;
     case 'o':
       output = optarg;
@@ -136,10 +142,16 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   SheetPatcher patcher(&sheet);
-  PatchParser parser(&patcher,&sniffer);
+  MergeOutputVerboseDiff fakePatcher;
+  PatchParser parser(fake?((Patcher*)(&fakePatcher)):((Patcher*)(&patcher)),
+		     &sniffer);
   if (!parser.apply()) {
     fprintf(stderr,"Patch application failed\n");
     return 1;
+  }
+
+  if (fake) {
+    return 0;
   }
   
   //if (CsvFile::write(local,output.c_str())!=0) {
