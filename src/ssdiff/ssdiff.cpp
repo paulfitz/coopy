@@ -164,12 +164,12 @@ int main(int argc, char *argv[]) {
     cmp.compare(*pivot,*local,*remote,verbosediff,flags);
     stop_output(output,flags);
   } else if (mode=="csv") {
-    if (version=="0.2"||version=="") {
+    if (version=="0.2") {
       MergeOutputCsvDiffV0p2 diff;
       start_output(output,flags);
       cmp.compare(*pivot,*local,*remote,diff,flags);
       stop_output(output,flags);
-    } else if (version=="0.4") {
+    } else if (version=="0.4"||version=="") {
       MergeOutputCsvDiff diff;
       start_output(output,flags);
       cmp.compare(*pivot,*local,*remote,diff,flags);

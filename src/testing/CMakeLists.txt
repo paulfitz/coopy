@@ -365,7 +365,7 @@ endforeach()
 IF (USE_GNUMERIC)
 
   ADD_TEST2(excel_diff ${TESTS}/result_excel_diff.csv
-    ssdiff --verbose --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
+    ssdiff --verbose --version 0.2 --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
 
   MACRO(TEST_XLS name ref target)
     ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
@@ -385,3 +385,16 @@ IF (USE_GNUMERIC)
   endforeach()
 
 ENDIF()
+
+
+#######################################################################
+#######################################################################
+
+# diff testing
+
+MACRO(ADD_DIFF_TEST name f1 f2)
+  ADD_TEST2(${name} ${TESTS}/results/${name}.csv
+            ssdiff --verbose --format-csv ${f1} ${f2})
+ENDMACRO ()
+
+ADD_DIFF_TEST(ssdiff_loc ${TESTS}/loc/loc.csv ${TESTS}/loc/loc_perturb.csv)

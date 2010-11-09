@@ -19,9 +19,9 @@ class coopy::cmp::MergeOutputCsvDiff : public MergeOutput {
 public:
   coopy::store::CsvSheet result;
   std::vector<std::string> ops;
-  std::vector<bool> showForSelect;
-  std::vector<bool> showForDescribe;
   std::map<std::string,bool> activeColumn;
+  std::map<std::string,bool> showForSelect;
+  std::map<std::string,bool> showForDescribe;
 
   MergeOutputCsvDiff();
 

@@ -55,6 +55,11 @@ public:
 
   std::string encode(const SheetStyle& style) const;
 
+  std::string toString() const {
+    SheetStyle style;
+    return encode(style);
+  }
+
   static std::string encodeCell(const SheetCell& str, 
 				const SheetStyle& style);
 

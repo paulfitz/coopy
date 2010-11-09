@@ -113,7 +113,8 @@ bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     if (activeColumn[name]) {
-      if (change.cond.find(name)!=change.cond.end() && showForSelect[i]) {
+      if (change.cond.find(name)!=change.cond.end() && 
+	  showForSelect[name]) {
 	result.addField(change.cond.find(name)->second);
       } else {
 	result.addField("",false);
@@ -130,7 +131,7 @@ bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     if (activeColumn[name]) {
-      if (change.val.find(name)!=change.val.end() && showForDescribe[i]) {
+      if (change.val.find(name)!=change.val.end() && showForDescribe[name]) {
 	result.addField(change.val.find(name)->second);
       } else {
 	result.addField("",false);
@@ -144,6 +145,8 @@ bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
 bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
   vector<string> lops;
   activeColumn.clear();
+  showForSelect.clear();
+  showForDescribe.clear();
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     bool condActive = false;
@@ -177,8 +180,10 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
 
     // no way yet to communicate CONTEXT request
     lops.push_back(op);
-    showForSelect.push_back(shouldMatch);
-    showForDescribe.push_back(shouldAssign);
+    //showForSelect.push_back(shouldMatch);
+    //showForDescribe.push_back(shouldAssign);
+    showForSelect[name] = shouldMatch;
+    showForDescribe[name] = shouldAssign;
   }
   if (lops!=ops) {
     ops = lops;

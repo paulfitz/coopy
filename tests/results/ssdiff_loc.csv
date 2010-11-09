@@ -1,0 +1,15 @@
+dtbl,csv,version,0.4
+row,columns,address1,state
+row,operate,=,=>
+row,=,"99 Marston Ave",NJ
+row,>,,"New Jersey"
+row,=,"22 Seventh St",MA
+row,>,,Massachusetts
+row,columns,address1,country
+row,operate,=,=>
+row,=,"Via Morego 30",Italia
+row,>,,Italy
+row,columns,address1,state
+row,operate,=,=>
+row,=,"San Manzonoti",Co.Laois
+row,>,,"Co. Laois"
