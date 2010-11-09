@@ -16,6 +16,9 @@ OUT="diffs"
 DIFF="./bin/ssdiff"
 PATCH="./bin/sspatch"
 MERGE="./bin/ssmerge"
+SSFORMAT="./bin/ssformat"
+CSV2HTML="./bin/csv2html"
+TMPF=/tmp/eg_coopy_tmp.csv
 
 mkdir -p $OUT
 echo "EXAMPLES in $OUT"
@@ -52,6 +55,18 @@ EOF
     echo "* Generated $SRC/doc/generated_examples/${grp}_$name.dox"
 }
 
+function show_file {
+    fname="$1"
+    format="$2"
+    if [ "k$format" = "kcsv" ]; then
+	$CSV2HTML $fname | sed "s/&rt;/>/g"
+    else
+	echo "\verbatim"
+	cat $fname || exit 1
+	echo "\endverbatim"
+    fi
+}
+
 function diff_base_apply {
     format="$1"
     shift
@@ -61,7 +76,8 @@ function diff_base_apply {
     echo $name > /tmp/_gen_name.txt
     if grep -q "$key" /tmp/_gen_name.txt; then
     out=$OUT/diff_example_$name.txt
-    (
+    echo "### $DIFF --format-$format $TEST/$f1 $TEST/$f2"
+    {
 	echo "## SECTION command command"
 	echo "\verbatim"
 	echo " ssdiff --format-$format $f1 $f2"
@@ -71,20 +87,17 @@ function diff_base_apply {
 	echo "## LINK ref2 \"$f2\""
 	echo " "
 	echo "## SECTION output output"
-	echo "\verbatim"
-	$DIFF --format-$format $TEST/$f1 $TEST/$f2
-	echo "\endverbatim"
+	$DIFF --output $TMPF --format-$format $TEST/$f1 $TEST/$f2 || exit 1
+	show_file $TMPF $format
 	echo " "
 	echo "## SECTION ref1 $f1"
-	echo "\verbatim"
-	ssformat $TEST/$f1 - 2> /dev/null
-	echo "\endverbatim"
+	$SSFORMAT $TEST/$f1 $TMPF.2.csv 2> /dev/null
+	show_file $TMPF.2.csv csv
 	echo " "
 	echo "## SECTION ref2 $f2"
-	echo "\verbatim"
-	ssformat $TEST/$f2 - 2> /dev/null
-	echo "\endverbatim"
-    ) > $out
+	$SSFORMAT $TEST/$f2 $TMPF.3.csv 2> /dev/null
+	show_file $TMPF.3.csv csv
+    } > $out
     echo "* Generated $out"
     dox diff_example $name "$name example for ssdiff"
     else
@@ -101,11 +114,12 @@ function patch_base_apply {
     echo $name > /tmp/_gen_name.txt
     if grep -q "$key" /tmp/_gen_name.txt; then
     out=$OUT/patch_example_$name.txt
-    DF=/tmp/_gen_diff.txt
+    DF=$TMPF
     rm -f $DF $DF.tmp
     $DIFF --format-$format --output $DF.tmp $TEST/$f1 $TEST/$f2
     grep -v "^config" $DF.tmp > $DF
-    (
+    echo "### $PATCH $TEST/$f1 $DF"
+    {
 	echo "## SECTION command command"
 	echo "\verbatim"
 	echo " sspatch $f1 patch.$format"
@@ -115,20 +129,16 @@ function patch_base_apply {
 	echo "## LINK ref2 \"patch.$format\""
 	echo " "
 	echo "## SECTION output output"
-	echo "\verbatim"
-	$PATCH $TEST/$f1 $DF
-	echo "\endverbatim"
+	$PATCH --output $TMPF.2.csv $TEST/$f1 $DF || exit 1
+	show_file $TMPF.2.csv csv || exit 1
 	echo " "
 	echo "## SECTION ref1 $f1"
-	echo "\verbatim"
-	ssformat $TEST/$f1 - 2> /dev/null
-	echo "\endverbatim"
+	$SSFORMAT $TEST/$f1 $TMPF.3.csv 2> /dev/null
+	show_file $TMPF.3.csv csv
 	echo " "
 	echo "## SECTION ref2 patch.$format"
-	echo "\verbatim"
-	cat $DF
-	echo "\endverbatim"
-    ) > $out
+	show_file $DF $format
+    } > $out
     echo "* Generated $out"
     dox patch_example $name "$name example for sspatch"
     else
@@ -140,9 +150,9 @@ function diff_apply {
     f1=$1
     f2=$2
     namer=$3
-    diff_base_apply human $f1 $f2 $namer
-    diff_base_apply csv $f1 $f2 ${namer}_csv
-    patch_base_apply csv $f1 $f2 ${namer}_csv
+    #diff_base_apply human $f1 $f2 $namer
+    diff_base_apply csv $f1 $f2 ${namer}
+    patch_base_apply csv $f1 $f2 ${namer}
     #diff_base_apply raw $f1 $f2 ${namer}_raw
 }
 
@@ -154,7 +164,7 @@ function merge_apply {
     echo $name > /tmp/_gen_name.txt
     if grep -q "$key" /tmp/_gen_name.txt; then
     out=$OUT/merge_example_$name.txt
-    (
+    {
 	echo "## SECTION command command"
 	echo "\verbatim"
 	echo "ssmerge $f1 $f2 $f3"
@@ -165,25 +175,21 @@ function merge_apply {
 	echo "## LINK remote \"input: $f3\""
 	echo " "
 	echo "## SECTION output output"
-	echo "\verbatim"
-	./bin/ssmerge $TEST/$f1 $TEST/$f2 $TEST/$f3
-	echo "\endverbatim"
+	./bin/ssmerge --output $TMPF $TEST/$f1 $TEST/$f2 $TEST/$f3 || exit 1
+	show_file $TMPF csv
 	echo " "
 	echo "## SECTION parent parent/pivot file: $f1"
-	echo "\verbatim"
-	ssformat $TEST/$f1 - 2> /dev/null
-	echo "\endverbatim"
+	ssformat $TEST/$f1 $TMPF.1.csv 2> /dev/null
+	show_file $TMPF.1.csv csv
 	echo " "
 	echo "## SECTION local local/left file: $f2"
-	echo "\verbatim"
-	ssformat $TEST/$f2 - 2> /dev/null
-	echo "\endverbatim"
+	ssformat $TEST/$f2 $TMPF.2.csv 2> /dev/null
+	show_file $TMPF.2.csv csv
 	echo " "
 	echo "## SECTION remote remote/right file: $f3"
-	echo "\verbatim"
-	ssformat $TEST/$f3 - 2> /dev/null
-	echo "\endverbatim"
-    ) > $out
+	ssformat $TEST/$f3 $TMPF.3.csv 2> /dev/null
+	show_file $TMPF.3.csv csv
+    } > $out
     echo "* Generated $out"
     dox merge_example $name "$name example for ssmerge"
     else
@@ -191,13 +197,16 @@ function merge_apply {
     fi
 }
 
-diff_apply numbers.csv numbers_flip_column.csv move_column
-diff_apply numbers.csv numbers_change_five.csv update_cell
+for pre in "" "named_"; do
+  diff_apply ${pre}numbers.csv ${pre}numbers_flip_column.csv ${pre}move_column
+  diff_apply ${pre}numbers.csv ${pre}numbers_change_five.csv update_cell
+  diff_apply ${pre}numbers.csv ${pre}numbers_add_row.csv ${pre}insert_row
+  diff_apply ${pre}numbers_add_row.csv ${pre}numbers.csv ${pre}delete_row
+  diff_apply ${pre}numbers.csv ${pre}numbers_wide.csv ${pre}insert_column
+  diff_apply ${pre}numbers_three_23.csv ${pre}numbers.csv ${pre}fix_a_cell
+done
 diff_apply numbers.xls numbers_change_five.xls xls_update_cell
-diff_apply numbers.csv numbers_add_row.csv insert_row
-diff_apply numbers_add_row.csv numbers.csv delete_row
-diff_apply numbers.csv numbers_wide.csv insert_column
-diff_apply numbers_three_23.csv numbers.csv fix_a_cell
+
 merge_apply numbers.csv numbers_change_five.csv numbers_flip_column.csv change_cell_and_flip_columns
 merge_apply numbers_wide.csv numbers_wide_flip_pair1.csv numbers_wide_flip_pair2.csv flip_columns_locally_and_remotely
 merge_apply test001_base.csv test001_spell.csv test001_col.csv big_merge_with_lots_of_changes

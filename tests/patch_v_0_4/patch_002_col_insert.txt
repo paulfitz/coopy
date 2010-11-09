@@ -1,0 +1,4 @@
+dtbl,csv,version,0.4,
+column,name,[0],[1],
+column,move,[1],[0],
+column,insert,[1],[0],{4}

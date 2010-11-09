@@ -10,6 +10,12 @@
 using namespace std;
 using namespace coopy::store;
 
+string stringer_encoder(bool x) {
+  char buf[256];
+  sprintf(buf,"%s",x?"true":"false");
+  return buf;
+}
+
 string stringer_encoder(int x) {
   char buf[256];
   sprintf(buf,"%d",x);

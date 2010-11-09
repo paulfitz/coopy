@@ -1,7 +1,7 @@
 
 
 /*
-  (Planned) changes since 0.2:
+  Changes since 0.2:
   Version number change.
   The special "*" character goes away.
   A "row transform" operation is added.
@@ -18,7 +18,6 @@
 #define WANT_MAP2STRING
 #define WANT_VECTOR2STRING
 #include <coopy/Stringer.h>
-#define ROW_COL "ROW"
 
 using namespace std;
 using namespace coopy::store;
@@ -31,6 +30,8 @@ using namespace coopy::cmp;
 #define OP_NONE ""
 
 MergeOutputCsvDiff::MergeOutputCsvDiff() {
+  constantColumns = true;
+  showedColumns = false;
   result.setStrict(0);
   result.addField("dtbl",false);
   result.addField("csv",false);
@@ -46,11 +47,12 @@ bool MergeOutputCsvDiff::mergeDone() {
 }
 
 bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
+  constantColumns = false;
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
     result.addField("column",false);
     result.addField("delete",false);
-    result.addField(ROW_COL,false);
+    //result.addField(ROW_COL,false);
     for (int i=0; i<(int)change.namesAfter.size(); i++) {
       result.addField(change.namesAfter[i].c_str(),false);
     }
@@ -59,7 +61,7 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
   case ORDER_CHANGE_INSERT:
     result.addField("column",false);
     result.addField("insert",false);
-    result.addField(ROW_COL,false);
+    //result.addField(ROW_COL,false);
     for (int i=0; i<(int)change.namesAfter.size(); i++) {
       result.addField(change.namesAfter[i].c_str(),false);
     }
@@ -68,7 +70,7 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
   case ORDER_CHANGE_MOVE:
     result.addField("column",false);
     result.addField("move",false);
-    result.addField(ROW_COL,false);
+    //result.addField(ROW_COL,false);
     for (int i=0; i<(int)change.namesAfter.size(); i++) {
       result.addField(change.namesAfter[i].c_str(),false);
     }
@@ -83,27 +85,50 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
   for (int i=0; i<(int)change.namesAfter.size(); i++) {
     activeColumn[change.namesAfter[i]] = true;
   }
+  nops = change.namesAfter;
   return true;
 }
 
 bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
-  result.addField("row",false);
-  result.addField("columns",false);
+  vector<string> lnops;
   for (int i=0; i<(int)change.names.size(); i++) {
     if (activeColumn[change.names[i]]) {
-      result.addField(change.names[i].c_str(),false);
+      lnops.push_back(change.names[i]);
     }
   }
-  result.addRecord();
+  if (lnops!=nops) {
+    if (!showedColumns) {
+      result.addField("column",false);
+      result.addField("name",false);
+      for (int i=0; i<(int)columns.size(); i++) {
+	result.addField(columns[i].c_str(),false);
+      }
+      result.addRecord();
+      showedColumns = true;
+    }
+    if (columns!=lnops) {
+      result.addField("row",false);
+      result.addField("columns",false);
+      for (int i=0; i<(int)change.names.size(); i++) {
+	if (activeColumn[change.names[i]]) {
+	  result.addField(change.names[i].c_str(),false);
+	}
+      }
+      result.addRecord();
+    }
+    nops = lnops;
+  }
 
-  result.addField("row",false);
-  result.addField(tag,false);
-  for (int i=0; i<(int)change.names.size(); i++) {
-    if (activeColumn[change.names[i]]) {
-      result.addField(ops[i].c_str(),false);
+  if (prevSelect!=showForSelect || prevDescribe!=showForDescribe) {
+    result.addField("row",false);
+    result.addField(tag,false);
+    for (int i=0; i<(int)change.names.size(); i++) {
+      if (activeColumn[change.names[i]]) {
+	result.addField(ops[i].c_str(),false);
+      }
     }
+    result.addRecord();
   }
-  result.addRecord();
   return true;
 }
 
@@ -145,6 +170,8 @@ bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
 bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
   vector<string> lops;
   activeColumn.clear();
+  prevSelect = showForSelect;
+  prevDescribe = showForDescribe;
   showForSelect.clear();
   showForDescribe.clear();
   for (int i=0; i<(int)change.names.size(); i++) {
@@ -157,13 +184,23 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
     if (change.val.find(name)!=change.val.end()) {
       valueActive = true;
     }
-    bool shouldMatch = condActive && change.indexes[i];
+    bool shouldMatch = condActive && change.indexes.find(name)->second;
     bool shouldAssign = valueActive;
     if (shouldAssign) {
       // conservative choice, should be optional
       shouldMatch = true;
     }
     bool shouldShow = shouldMatch || shouldAssign;
+
+    if (change.mode==ROW_CHANGE_INSERT) {
+      // we do not care about matching
+      shouldMatch = prevSelect[name];
+    }
+    if (change.mode==ROW_CHANGE_DELETE) {
+      // we do not care about assigning
+      shouldAssign = prevDescribe[name];
+    }
+
     // ignoring shouldShow for now.
     int opidx = (shouldMatch?2:0) + (shouldAssign?1:0);
     string opi[4] = {
@@ -185,6 +222,7 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
     showForSelect[name] = shouldMatch;
     showForDescribe[name] = shouldAssign;
   }
+
   if (lops!=ops) {
     ops = lops;
     operateRow(change,"operate");
@@ -217,17 +255,21 @@ bool MergeOutputCsvDiff::changeName(const NameChange& change) {
     activeColumn.clear();
     for (int i=0; i<(int)names.size(); i++) {
       activeColumn[names[i]] = true;
+      showForSelect[names[i]] = true;
+      showForDescribe[names[i]] = true;
     }
     if (!constant) {
       result.addField("column",false);
       result.addField("name",false);
-      result.addField(ROW_COL,false);
+      //result.addField(ROW_COL,false);
       for (int i=0; i<(int)names.size(); i++) {
 	result.addField(names[i].c_str(),false);
       }
       result.addRecord();
+      showedColumns = true;
     }
   }
+  columns = names;
   return true;
 }
 

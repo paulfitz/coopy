@@ -15,40 +15,40 @@ ssmerge numbers_wide.csv numbers_wide_flip_pair1.csv numbers_wide_flip_pair2.csv
 \li \ref merge_example_flip_columns_locally_and_remotely_remote "input: numbers_wide_flip_pair2.csv"
  
 \section merge_example_flip_columns_locally_and_remotely_output output
-\verbatim
-1,one,.,un
-2,two,..,deux
-3,three,...,trois
-4,four,....,quatre
-5,five,.....,cinq
-\endverbatim
+<table>
+  <tr><td>1</td><td>one</td><td>.</td><td>un</td></tr>
+  <tr><td>2</td><td>two</td><td>..</td><td>deux</td></tr>
+  <tr><td>3</td><td>three</td><td>...</td><td>trois</td></tr>
+  <tr><td>4</td><td>four</td><td>....</td><td>quatre</td></tr>
+  <tr><td>5</td><td>five</td><td>.....</td><td>cinq</td></tr>
+</table>
  
 \section merge_example_flip_columns_locally_and_remotely_parent parent/pivot file: numbers_wide.csv
-\verbatim
-one,1,un,.
-two,2,deux,..
-three,3,trois,...
-four,4,quatre,....
-five,5,cinq,.....
-\endverbatim
+<table>
+  <tr><td>one</td><td>1</td><td>un</td><td>.</td></tr>
+  <tr><td>two</td><td>2</td><td>deux</td><td>..</td></tr>
+  <tr><td>three</td><td>3</td><td>trois</td><td>...</td></tr>
+  <tr><td>four</td><td>4</td><td>quatre</td><td>....</td></tr>
+  <tr><td>five</td><td>5</td><td>cinq</td><td>.....</td></tr>
+</table>
  
 \section merge_example_flip_columns_locally_and_remotely_local local/left file: numbers_wide_flip_pair1.csv
-\verbatim
-1,one,un,.
-2,two,deux,..
-3,three,trois,...
-4,four,quatre,....
-5,five,cinq,.....
-\endverbatim
+<table>
+  <tr><td>1</td><td>one</td><td>un</td><td>.</td></tr>
+  <tr><td>2</td><td>two</td><td>deux</td><td>..</td></tr>
+  <tr><td>3</td><td>three</td><td>trois</td><td>...</td></tr>
+  <tr><td>4</td><td>four</td><td>quatre</td><td>....</td></tr>
+  <tr><td>5</td><td>five</td><td>cinq</td><td>.....</td></tr>
+</table>
  
 \section merge_example_flip_columns_locally_and_remotely_remote remote/right file: numbers_wide_flip_pair2.csv
-\verbatim
-one,1,.,un
-two,2,..,deux
-three,3,...,trois
-four,4,....,quatre
-five,5,.....,cinq
-\endverbatim
+<table>
+  <tr><td>one</td><td>1</td><td>.</td><td>un</td></tr>
+  <tr><td>two</td><td>2</td><td>..</td><td>deux</td></tr>
+  <tr><td>three</td><td>3</td><td>...</td><td>trois</td></tr>
+  <tr><td>four</td><td>4</td><td>....</td><td>quatre</td></tr>
+  <tr><td>five</td><td>5</td><td>.....</td><td>cinq</td></tr>
+</table>
 
  *
  */

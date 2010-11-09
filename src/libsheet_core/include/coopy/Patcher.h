@@ -91,10 +91,11 @@ public:
   int mode;
   //typedef std::map<std::string,std::string> txt2txt;
   typedef std::map<std::string,coopy::store::SheetCell> txt2cell;
+  typedef std::map<std::string,bool> txt2bool;
   txt2cell cond;
   txt2cell val;
   std::vector<std::string> names;
-  std::vector<int> indexes;
+  txt2bool indexes;
 
   std::string modeString() const {
     switch (mode) {

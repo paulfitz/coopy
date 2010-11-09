@@ -15,40 +15,40 @@ ssmerge numbers.csv numbers_change_five.csv numbers_flip_column.csv
 \li \ref merge_example_change_cell_and_flip_columns_remote "input: numbers_flip_column.csv"
  
 \section merge_example_change_cell_and_flip_columns_output output
-\verbatim
-1,one
-2,two
-3,three
-4,four
-5,fyffe
-\endverbatim
+<table>
+  <tr><td>1</td><td>one</td></tr>
+  <tr><td>2</td><td>two</td></tr>
+  <tr><td>3</td><td>three</td></tr>
+  <tr><td>4</td><td>four</td></tr>
+  <tr><td>5</td><td>fyffe</td></tr>
+</table>
  
 \section merge_example_change_cell_and_flip_columns_parent parent/pivot file: numbers.csv
-\verbatim
-one,1
-two,2
-three,3
-four,4
-five,5
-\endverbatim
+<table>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>five</td><td>5</td></tr>
+</table>
  
 \section merge_example_change_cell_and_flip_columns_local local/left file: numbers_change_five.csv
-\verbatim
-one,1
-two,2
-three,3
-four,4
-fyffe,5
-\endverbatim
+<table>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>fyffe</td><td>5</td></tr>
+</table>
  
 \section merge_example_change_cell_and_flip_columns_remote remote/right file: numbers_flip_column.csv
-\verbatim
-1,one
-2,two
-3,three
-4,four
-5,five
-\endverbatim
+<table>
+  <tr><td>1</td><td>one</td></tr>
+  <tr><td>2</td><td>two</td></tr>
+  <tr><td>3</td><td>three</td></tr>
+  <tr><td>4</td><td>four</td></tr>
+  <tr><td>5</td><td>five</td></tr>
+</table>
 
  *
  */

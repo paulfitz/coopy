@@ -28,6 +28,7 @@ std::string map2string(const std::map<T1,T2>& src) {
 #ifdef WANT_VECTOR2STRING
 #include <vector>
 #include <string>
+std::string stringer_encoder(bool x);
 std::string stringer_encoder(int x);
 std::string stringer_encoder(const std::string& x);
 std::string stringer_encoder(const coopy::store::SheetCell& x);

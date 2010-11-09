@@ -286,10 +286,10 @@ bool PatchParser::apply() {
       RowChange change;
       change.names = names.lst;
       for (int k=0; k<(int)change.names.size(); k++) {
-	change.indexes.push_back(true);
+	change.indexes[names.lst[k]] = true;
       }
       PatchColumnNames names2;
-      if (cmd1=="columns"||cmd1=="operate") {
+      if (cmd1=="columns") {
 	names2.read(patch,name_start,i);
       } else {
 	names2.readData(patch,name_start,i,len);
@@ -305,13 +305,14 @@ bool PatchParser::apply() {
 	  assign_column[names.lst[i]] = true;
 	}
       } else if (cmd1=="operate") {
-	dbg_printf("Operate columns %s: ", names2.toString().c_str());
+	dbg_printf("Operate columns %s: ", names2.dataString().c_str());
 	for (int i=0; i<len; i++) {
-	  string code = names2.lst[i];
-	  match_column[names.lst[i]] = code.find('=')!=string::npos;
-	  assign_column[names.lst[i]] = code.find('>')!=string::npos;
-	  dbg_printf("%d:%d ", match_column[names.lst[i]],
-		     assign_column[names.lst[i]]);
+	  string name = names.lst[i];
+	  string code = names2.data[i].text;
+	  match_column[name] = code.find('=')!=string::npos;
+	  assign_column[name] = code.find('>')!=string::npos;
+	  dbg_printf("%d:%d ", match_column[name],
+		     assign_column[name]);
 	}
 	dbg_printf("\n");
       } else if (cmd1=="select"||cmd1=="=") {

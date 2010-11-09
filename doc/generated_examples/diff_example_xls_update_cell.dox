@@ -7,43 +7,43 @@
 
 \section diff_example_xls_update_cell_command command
 \verbatim
- ssdiff --format-human numbers.xls numbers_change_five.xls
+ ssdiff --format-csv numbers.xls numbers_change_five.xls
 \endverbatim
 \li \ref diff_example_xls_update_cell_output "output"
 \li \ref diff_example_xls_update_cell_ref1 "numbers.xls"
 \li \ref diff_example_xls_update_cell_ref2 "numbers_change_five.xls"
  
 \section diff_example_xls_update_cell_output output
-\verbatim
-dtbl: human-readable table difference format version 0.3
-
-column names are: Name Number
-
-update row:
-  where Number = 5
-  set   Name = five -> fyffe
-
-\endverbatim
+<table>
+  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.4</td></tr>
+  <tr><td>column</td><td>name</td><td>Name</td><td>Number</td></tr>
+  <tr><td>row</td><td>columns</td><td>Name</td><td></td></tr>
+  <tr><td>row</td><td>operate</td><td>=></td><td></td></tr>
+  <tr><td>row</td><td>=</td><td>five</td><td></td></tr>
+  <tr><td>row</td><td>></td><td>fyffe</td><td></td></tr>
+</table>
  
 \section diff_example_xls_update_cell_ref1 numbers.xls
-\verbatim
-Name,Number
-one,1
-two,2
-three,3
-four,4
-five,5
-\endverbatim
+Using exporter Gnumeric_stf:stf_csv
+<table>
+  <tr><td>Name</td><td>Number</td></tr>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>five</td><td>5</td></tr>
+</table>
  
 \section diff_example_xls_update_cell_ref2 numbers_change_five.xls
-\verbatim
-Name,Number
-one,1
-two,2
-three,3
-four,4
-fyffe,5
-\endverbatim
+Using exporter Gnumeric_stf:stf_csv
+<table>
+  <tr><td>Name</td><td>Number</td></tr>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>fyffe</td><td>5</td></tr>
+</table>
 
  *
  */

@@ -33,6 +33,7 @@ string verbose_encoder(const std::vector<std::string>& lst,
   return x;
 }
 
+/*
 string index_encoder(const std::vector<std::string>& lst,
 		     const std::vector<int> & mp) {
   string x;
@@ -50,6 +51,7 @@ string index_encoder(const std::vector<std::string>& lst,
   }
   return x;
 }
+*/
 
 
 bool MergeOutputVerboseDiff::changeColumn(const OrderChange& change) {
@@ -67,7 +69,7 @@ bool MergeOutputVerboseDiff::changeRow(const RowChange& change) {
   fprintf(out,"changeRow: %s\n", change.modeString().c_str());
   fprintf(out,"    conds: %s\n", verbose_encoder(change.names,change.cond).c_str());
   fprintf(out,"     vals: %s\n", verbose_encoder(change.names,change.val).c_str());
-  fprintf(out,"  indexes: %s\n", index_encoder(change.names,change.indexes).c_str());
+  fprintf(out,"  indexes: %s\n", verbose_encoder(change.names,change.indexes).c_str());
   fprintf(out,"\n");
   return true;
 }

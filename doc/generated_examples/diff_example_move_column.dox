@@ -7,43 +7,36 @@
 
 \section diff_example_move_column_command command
 \verbatim
- ssdiff --format-human numbers.csv numbers_flip_column.csv
+ ssdiff --format-csv numbers.csv numbers_flip_column.csv
 \endverbatim
 \li \ref diff_example_move_column_output "output"
 \li \ref diff_example_move_column_ref1 "numbers.csv"
 \li \ref diff_example_move_column_ref2 "numbers_flip_column.csv"
  
 \section diff_example_move_column_output output
-\verbatim
-dtbl: human-readable table difference format version 0.3
-
-original column names are: [0] [1]
-
-move column: [0]
-  before [0] [1]
-  after  [1] [0]
-
-column names are now: [1] [0]
-
-\endverbatim
+<table>
+  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.4</td></tr>
+  <tr><td>column</td><td>name</td><td>[0]</td><td>[1]</td></tr>
+  <tr><td>column</td><td>move</td><td>[1]</td><td>[0]</td></tr>
+</table>
  
 \section diff_example_move_column_ref1 numbers.csv
-\verbatim
-one,1
-two,2
-three,3
-four,4
-five,5
-\endverbatim
+<table>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>five</td><td>5</td></tr>
+</table>
  
 \section diff_example_move_column_ref2 numbers_flip_column.csv
-\verbatim
-1,one
-2,two
-3,three
-4,four
-5,five
-\endverbatim
+<table>
+  <tr><td>1</td><td>one</td></tr>
+  <tr><td>2</td><td>two</td></tr>
+  <tr><td>3</td><td>three</td></tr>
+  <tr><td>4</td><td>four</td></tr>
+  <tr><td>5</td><td>five</td></tr>
+</table>
 
  *
  */

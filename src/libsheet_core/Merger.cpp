@@ -299,6 +299,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 
     vector<int> local_cols;
     vector<string> local_col_names;
+    vector<string> original_col_names;
     for (int i=0; i<local.width(); i++) {
       local_cols.push_back(i);
 
@@ -308,6 +309,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       }
       local_col_names.push_back(name);
     }
+    original_col_names = local_col_names;
 
     vector<OrderChange> cc;
 
@@ -471,7 +473,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       nc.mode = NAME_CHANGE_DECLARE;
       nc.final = false;
       nc.constant = constantColumns;
-      nc.names = local_col_names;
+      nc.names = original_col_names;
       output.changeName(nc);
     }
 
@@ -502,20 +504,22 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     }
 
     usableIndex = constantColumns;
+    vector<int> flags = localIndex.suggestIndexes();
+    RowChange::txt2bool indexes;
+    for (int i=0; i<(int)original_col_names.size(); i++) {
+      string name = original_col_names[i];
+      if (usableIndex) {
+	indexes[name] = (flags[i]>0);
+	} else {
+	indexes[name] = true;
+      }
+    }
     for (int i=0; i<(int)rc.size(); i++) {
       /*
-	should skim the cond and val, and if appropriate issue a
-	column selection operation.  The cond is currently issued
-	is complete - for all columns - but this may be excessively
-	verbose.
+	scope for being smarter here about what gets scoped in.
        */
-
       RowChange& change = rc[i];
-      if (usableIndex) {
-	change.indexes = localIndex.suggestIndexes();
-      } else {
-	change.indexes.clear();
-      }
+      change.indexes = indexes;
       output.changeRow(change);
     }
 

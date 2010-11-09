@@ -15,44 +15,44 @@ ssmerge test005_base.csv test005_fix_typo_add.csv test005_replace_column_and_reo
 \li \ref merge_example_altitude_typo_fix_and_reorder_remote "input: test005_replace_column_and_reorder.csv"
  
 \section merge_example_altitude_typo_fix_and_reorder_output output
-\verbatim
-"Probe A","Probe C","Probe D",Comment,Altitude
-5,7,,"Smooth flight",500
-10,30,5,"Wing vibration",1000
-15,52,10,"Wing vibration",2000
-3,89,15,"Ominous silence",3000
-3,12,20,"Ominous silence",4000
-3,16,100,"Severe vibration",5000
-\endverbatim
+<table>
+  <tr><td>Probe A</td><td>Probe C</td><td>Probe D</td><td>Comment</td><td>Altitude</td></tr>
+  <tr><td>5</td><td>7</td><td>NULL</td><td>Smooth flight</td><td>500</td></tr>
+  <tr><td>10</td><td>30</td><td>5</td><td>Wing vibration</td><td>1000</td></tr>
+  <tr><td>15</td><td>52</td><td>10</td><td>Wing vibration</td><td>2000</td></tr>
+  <tr><td>3</td><td>89</td><td>15</td><td>Ominous silence</td><td>3000</td></tr>
+  <tr><td>3</td><td>12</td><td>20</td><td>Ominous silence</td><td>4000</td></tr>
+  <tr><td>3</td><td>16</td><td>100</td><td>Severe vibration</td><td>5000</td></tr>
+</table>
  
 \section merge_example_altitude_typo_fix_and_reorder_parent parent/pivot file: test005_base.csv
-\verbatim
-Altitude,"Probe A","Probe B","Probe C",Comment
-1000,10,20,30,"Wing vibration"
-2000,15,25,52,"Wing vibration"
-3000,3,66,89,"Ominous silense"
-4000,3,42,12,"Ominous silense"
-\endverbatim
+<table>
+  <tr><td>Altitude</td><td>Probe A</td><td>Probe B</td><td>Probe C</td><td>Comment</td></tr>
+  <tr><td>1000</td><td>10</td><td>20</td><td>30</td><td>Wing vibration</td></tr>
+  <tr><td>2000</td><td>15</td><td>25</td><td>52</td><td>Wing vibration</td></tr>
+  <tr><td>3000</td><td>3</td><td>66</td><td>89</td><td>Ominous silense</td></tr>
+  <tr><td>4000</td><td>3</td><td>42</td><td>12</td><td>Ominous silense</td></tr>
+</table>
  
 \section merge_example_altitude_typo_fix_and_reorder_local local/left file: test005_fix_typo_add.csv
-\verbatim
-Altitude,"Probe A","Probe B","Probe C",Comment
-500,5,10,7,"Smooth flight"
-1000,10,20,30,"Wing vibration"
-2000,15,25,52,"Wing vibration"
-3000,3,66,89,"Ominous silence"
-4000,3,42,12,"Ominous silence"
-\endverbatim
+<table>
+  <tr><td>Altitude</td><td>Probe A</td><td>Probe B</td><td>Probe C</td><td>Comment</td></tr>
+  <tr><td>500</td><td>5</td><td>10</td><td>7</td><td>Smooth flight</td></tr>
+  <tr><td>1000</td><td>10</td><td>20</td><td>30</td><td>Wing vibration</td></tr>
+  <tr><td>2000</td><td>15</td><td>25</td><td>52</td><td>Wing vibration</td></tr>
+  <tr><td>3000</td><td>3</td><td>66</td><td>89</td><td>Ominous silence</td></tr>
+  <tr><td>4000</td><td>3</td><td>42</td><td>12</td><td>Ominous silence</td></tr>
+</table>
  
 \section merge_example_altitude_typo_fix_and_reorder_remote remote/right file: test005_replace_column_and_reorder.csv
-\verbatim
-"Probe A","Probe C","Probe D",Comment,Altitude
-10,30,5,"Wing vibration",1000
-15,52,10,"Wing vibration",2000
-3,89,15,"Ominous silense",3000
-3,12,20,"Ominous silense",4000
-3,16,100,"Severe vibration",5000
-\endverbatim
+<table>
+  <tr><td>Probe A</td><td>Probe C</td><td>Probe D</td><td>Comment</td><td>Altitude</td></tr>
+  <tr><td>10</td><td>30</td><td>5</td><td>Wing vibration</td><td>1000</td></tr>
+  <tr><td>15</td><td>52</td><td>10</td><td>Wing vibration</td><td>2000</td></tr>
+  <tr><td>3</td><td>89</td><td>15</td><td>Ominous silense</td><td>3000</td></tr>
+  <tr><td>3</td><td>12</td><td>20</td><td>Ominous silense</td><td>4000</td></tr>
+  <tr><td>3</td><td>16</td><td>100</td><td>Severe vibration</td><td>5000</td></tr>
+</table>
 
  *
  */
