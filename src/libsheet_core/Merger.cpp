@@ -520,6 +520,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
        */
       RowChange& change = rc[i];
       change.indexes = indexes;
+      change.allNames = local_col_names;
       output.changeRow(change);
     }
 

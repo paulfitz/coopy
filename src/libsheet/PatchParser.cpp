@@ -171,6 +171,7 @@ bool PatchParser::apply() {
   }
 
   PatchColumnNames names;
+  vector<string> allNames;
 
   map<string,bool> match_column;
   map<string,bool> assign_column;
@@ -226,14 +227,17 @@ bool PatchParser::apply() {
       PatchColumnNames names2;
       names2.read(patch,name_start,i);
       len = (int)names2.lst.size();
-      if (names2.lst[0]=="ROW" && support_name_ROW && name_start == 2) {
-	name_start = 3;
-	names2.read(patch,name_start,i);
-	len = (int)names2.lst.size();
+      if (names2.lst.size()>=1) {
+	if (names2.lst[0]=="ROW" && support_name_ROW && name_start == 2) {
+	  name_start = 3;
+	  names2.read(patch,name_start,i);
+	  len = (int)names2.lst.size();
+	}
       }
       change.indicesBefore = names.indices;
       change.namesBefore = names.lst;
       change.namesAfter = names2.lst;
+      allNames = names2.lst;
       match_column.clear();
       assign_column.clear();
       for (int i=0; i<len; i++) {
@@ -246,6 +250,7 @@ bool PatchParser::apply() {
 	nc.mode = NAME_CHANGE_DECLARE;
 	nc.final = false;
 	nc.names = names2.lst;
+	allNames = nc.names;
 	patcher->changeName(nc);
 	//patcher->declareNames(names2.lst,false);
       } else if (cmd1=="move") {
@@ -285,6 +290,7 @@ bool PatchParser::apply() {
     } else if (cmd0=="row") {
       RowChange change;
       change.names = names.lst;
+      change.allNames = allNames;
       for (int k=0; k<(int)change.names.size(); k++) {
 	change.indexes[names.lst[k]] = true;
       }

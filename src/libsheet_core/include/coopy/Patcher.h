@@ -95,6 +95,7 @@ public:
   txt2cell cond;
   txt2cell val;
   std::vector<std::string> names;
+  std::vector<std::string> allNames;
   txt2bool indexes;
 
   std::string modeString() const {

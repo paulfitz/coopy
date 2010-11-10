@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
   std::string parent_file = "";
   std::string version = "";
   bool verbose = false;
+  bool equality = false;
   while (true) {
     int option_index = 0;
     static struct option long_options[] = {
@@ -49,6 +50,7 @@ int main(int argc, char *argv[]) {
       {"format-sql", 0, 0, 's'},
       {"format-human", 0, 0, 'h'},
       {"format-raw", 0, 0, 'r'},
+      {"equals", 0, 0, 'e'},
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
       {"version", 1, 0, 'V'},
@@ -77,6 +79,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'v':
       verbose = true;
+      break;
+    case 'e':
+      equality = true;
       break;
     case 'o':
       output = optarg;
@@ -147,6 +152,14 @@ int main(int argc, char *argv[]) {
   } else {
     pivot = &_local;
   }
+
+  if (equality) {
+    if (*local == *remote) {
+      return 0;
+    }
+    return 1;
+  }
+
   CompareFlags flags;
   if (mode=="sql") {
     MergeOutputSqlDiff sqldiff;

@@ -41,8 +41,9 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   vector<SheetCell> cond;
   vector<int> active_val;
   vector<SheetCell> val;
-  for (int i=0; i<(int)change.names.size(); i++) {
-    dir[change.names[i]] = i;
+  int width = (int)change.allNames.size();
+  for (int i=0; i<(int)change.allNames.size(); i++) {
+    dir[change.allNames[i]] = i;
     active_cond.push_back(0);
     cond.push_back(SheetCell());
     active_val.push_back(0);
@@ -70,7 +71,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       int r = sheet->insertRow(tail).getIndex();
       if (r>=0) {
 	//printf("Row %d -- %d\n", r, sheet->height());
-	for (int c=0; c<sheet->width(); c++) {
+	for (int c=0; c<width; c++) {
 	  if (active_val[c]) {
 	    //printf("  %d %d %s\n", c, r, val[c].c_str());
 	    sheet->cellSummary(c,r,val[c]);
@@ -85,7 +86,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       int r;
       for (r=0; r<sheet->height(); r++) {
 	bool match = true;
-	for (int c=0; c<sheet->width(); c++) {
+	for (int c=0; c<width; c++) {
 	  if (active_cond[c]) {
 	    if (sheet->cellSummary(c,r)!=cond[c]) {
 	      match = false;
@@ -109,7 +110,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       int r;
       for (r=0; r<sheet->height(); r++) {
 	bool match = true;
-	for (int c=0; c<sheet->width(); c++) {
+	for (int c=0; c<width; c++) {
 	  if (active_cond[c]) {
 	    dbg_printf("compare %s and %s\n",
 		       sheet->cellSummary(c,r).toString().c_str(),
@@ -122,7 +123,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	}
 	if (match) {
 	  dbg_printf("Match\n");
-	  for (int c=0; c<sheet->width(); c++) {
+	  for (int c=0; c<width; c++) {
 	    if (active_val[c]) {
 	      sheet->cellSummary(c,r,val[c]);
 	    }

@@ -38,6 +38,8 @@ public:
   virtual bool inplace() const {
     return false;
   }
+
+  bool operator==(const DataBook& alt) const;
 };
 
 #endif

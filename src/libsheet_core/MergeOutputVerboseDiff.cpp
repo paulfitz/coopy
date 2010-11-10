@@ -70,6 +70,8 @@ bool MergeOutputVerboseDiff::changeRow(const RowChange& change) {
   fprintf(out,"    conds: %s\n", verbose_encoder(change.names,change.cond).c_str());
   fprintf(out,"     vals: %s\n", verbose_encoder(change.names,change.val).c_str());
   fprintf(out,"  indexes: %s\n", verbose_encoder(change.names,change.indexes).c_str());
+  fprintf(out,"    names: %s\n", vector2string(change.names).c_str());
+  fprintf(out,"      all: %s\n", vector2string(change.allNames).c_str());
   fprintf(out,"\n");
   return true;
 }

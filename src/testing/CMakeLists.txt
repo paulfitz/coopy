@@ -397,3 +397,29 @@ MACRO(ADD_DIFF_TEST name f1 f2)
 ENDMACRO ()
 
 ADD_DIFF_TEST(ssdiff_loc ${TESTS}/loc/loc.csv ${TESTS}/loc/loc_perturb.csv)
+
+if (false)
+  # NOT READY FOR THIS YET
+
+  # a set of random csv files
+  SET(POOL ${TESTS}/numbers.csv
+    ${TESTS}/test001_base.csv
+    ${TESTS}/test005_base.csv)
+
+  foreach(P1 ${POOL})
+   foreach(P2 ${POOL})
+    get_filename_component(F1 ${P1} NAME_WE)
+    get_filename_component(F2 ${P2} NAME_WE)
+    set(name "diffnpatch_${F1}_${F2}")
+    set(fname "test_out_patch_${name}.csv")
+    set(fname2 "test_out_result_${name}.csv")
+    ADD_TEST(${name}_diff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+      --output ${fname} --format-csv ${P1} ${P2})
+    ADD_TEST(${name}_patch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+      --output ${fname2} ${P1} ${fname})
+    ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+      --equals ${fname2} ${P2})
+   endforeach()
+  endforeach()
+endif ()
+
