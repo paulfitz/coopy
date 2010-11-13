@@ -177,6 +177,7 @@ bool PatchParser::apply() {
   map<string,bool> assign_column;
 
   vector<SheetCell> selector;
+  bool needSelector = true;
   int len = 0;
   int row_index = -1;
   bool ok = true;
@@ -287,7 +288,7 @@ bool PatchParser::apply() {
       if (!fail) {
 	names = names2;
       }
-    } else if (cmd0=="row") {
+    } else if (cmd0=="row"||cmd0=="link") {
       RowChange change;
       change.names = names.lst;
       change.allNames = allNames;
@@ -295,12 +296,12 @@ bool PatchParser::apply() {
 	change.indexes[names.lst[k]] = true;
       }
       PatchColumnNames names2;
-      if (cmd1=="columns") {
+      if (cmd1=="columns"||cmd1=="name") {
 	names2.read(patch,name_start,i);
       } else {
 	names2.readData(patch,name_start,i,len);
       }
-      if (cmd1=="columns") {
+      if (cmd1=="columns"||cmd1=="name") {
 	dbg_printf("Active columns %s\n", names2.toString().c_str());
 	names.lst = names2.lst;
 	len = (int)names2.lst.size();
@@ -310,21 +311,25 @@ bool PatchParser::apply() {
 	  match_column[names.lst[i]] = true;
 	  assign_column[names.lst[i]] = true;
 	}
-      } else if (cmd1=="operate") {
+      } else if (cmd1=="operate"||cmd1=="act") {
 	dbg_printf("Operate columns %s: ", names2.dataString().c_str());
 	for (int i=0; i<len; i++) {
 	  string name = names.lst[i];
 	  string code = names2.data[i].text;
-	  match_column[name] = code.find('=')!=string::npos;
-	  assign_column[name] = code.find('>')!=string::npos;
+	  match_column[name] = code.find('*')!=string::npos;
+	  assign_column[name] = code.find('=')!=string::npos;
 	  dbg_printf("%d:%d ", match_column[name],
 		     assign_column[name]);
 	}
 	dbg_printf("\n");
-      } else if (cmd1=="select"||cmd1=="=") {
+      } else if (cmd1=="select"||cmd1=="*") {
 	dbg_printf("Selecting %s\n", names2.dataString().c_str());
 	selector = names2.data;
-      } else if (cmd1=="update"||cmd1==">") {
+	needSelector = false;
+      } else if (cmd1=="update"||cmd1=="=") {
+	if (needSelector) {
+	  selector = names2.data;
+	}
 	dbg_printf("Updating to %s\n", names2.dataString().c_str());	
 	change.mode = ROW_CHANGE_UPDATE;
 	for (int i=0; i<len; i++) {
@@ -344,7 +349,11 @@ bool PatchParser::apply() {
 	  }
 	}
 	ok = patcher->changeRow(change);
+	needSelector = true;
       } else if (cmd1=="insert") {
+	if (needSelector) {
+	  selector = names2.data;
+	}
 	dbg_printf("Inserting %s\n", names2.dataString().c_str());
 	change.mode = ROW_CHANGE_INSERT;
 	for (int i=0; i<len; i++) {
@@ -357,7 +366,11 @@ bool PatchParser::apply() {
 	  }
 	}
 	patcher->changeRow(change);	
+	needSelector = true;
       } else if (cmd1=="delete") {
+	if (needSelector) {
+	  selector = names2.data;
+	}
 	dbg_printf("Deleting %s\n", names2.dataString().c_str());
 	change.mode = ROW_CHANGE_DELETE;
 	for (int i=0; i<len; i++) {
@@ -370,6 +383,7 @@ bool PatchParser::apply() {
 	  }
 	}
 	ok = patcher->changeRow(change);	
+	needSelector = true;
       } else {
 	fail = true;
       }

@@ -37,7 +37,7 @@ static void stop_output(string output, CompareFlags& flags) {
 
 int main(int argc, char *argv[]) {
   std::string output = "";
-  std::string mode = "human";
+  std::string mode = "csv";
   std::string parent_file = "";
   std::string version = "";
   bool verbose = false;
@@ -108,9 +108,9 @@ int main(int argc, char *argv[]) {
   if (argc<2) {
     printf("Show difference between two spreadsheets. Call as:\n");
     printf("  ssdiff [--output <filename>] [--parent parent.csv] reference.csv modified.csv\n");
-    printf("  ssdiff --format-human local.csv modified.csv # human readable output\n");
     printf("  ssdiff --format-csv local.csv modified.csv   # format that sspatch can read\n");
     printf("  ssdiff --format-raw local.csv modified.csv   # full information\n");
+    printf("  ssdiff --format-human local.csv modified.csv # human readable output\n");
     printf("  ssdiff --version 0.2 --format-csv local.csv modified.csv  # change version\n");
     printf("  ssdiff --version 0.4 --format-csv local.csv modified.csv  # change version\n");
     printf("Output defaults to standard output.\n");

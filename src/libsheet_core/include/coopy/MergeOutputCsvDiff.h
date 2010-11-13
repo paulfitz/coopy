@@ -37,7 +37,8 @@ public:
   virtual bool changeRow(const RowChange& change);
 
   bool operateRow(const RowChange& change, const char *tag);
-  bool selectRow(const RowChange& change, const char *tag);
+  bool updateRow(const RowChange& change, const char *tag, bool select, 
+		 bool update, bool practice);
   bool describeRow(const RowChange& change, const char *tag);
 
   virtual bool mergeDone();

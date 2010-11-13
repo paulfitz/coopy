@@ -1,20 +1,21 @@
 /**
  * 
 
-@mainpage Coopy Documentation
+@mainpage COOPY Manual
 
 The Coopy project contains programs and libraries to help you:
 
-\li Merge tables (CSV files, database tables, spreadsheet sheets)
+\li Merge tables
   that came from the same source but have been
   modified independently (see \ref ssmerge).  Two- and three-way
   merges supported.
-\li Describe the difference between two tables
-  (see \ref ssdiff).
+\li Describe the difference between two tables (see \ref ssdiff).
 \li Apply the difference between two tables to a table
   (see \ref sspatch).
 \li Maintain a repository of tables with multiple active contributors
-  (see \ref ssfossil and \ref coopy).
+  (see \ref ssfossil and the \ref coopy program).
+\li Supported table formats include CSV files, database tables, and 
+  spreadsheet sheets.
 
 Here are some tips on how to use these programs:
 

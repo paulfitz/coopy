@@ -1,10 +1,11 @@
 /**
  *
 
-@page patch_format Patch format
+@page patch_format Diff format
 
-\li \ref patch_format_csv (this is the best supported format)
-\li \ref patch_format_human (a verbose format)
+\li \ref patch_format_csv - this is the main supported format.
+\li \ref patch_format_csv_v_0_2 - an older format, deprecated but still supported.
+\li \ref patch_format_human - a textual format, developed when the CSV format was less readable.
 
  *
  */

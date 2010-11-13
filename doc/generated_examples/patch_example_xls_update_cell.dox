@@ -39,10 +39,10 @@ Using exporter Gnumeric_stf:stf_csv
 <table>
   <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.4</td></tr>
   <tr><td>column</td><td>name</td><td>Name</td><td>Number</td></tr>
-  <tr><td>row</td><td>columns</td><td>Name</td><td></td></tr>
-  <tr><td>row</td><td>operate</td><td>=></td><td></td></tr>
-  <tr><td>row</td><td>=</td><td>five</td><td></td></tr>
-  <tr><td>row</td><td>></td><td>fyffe</td><td></td></tr>
+  <tr><td>link</td><td>name</td><td>Name</td><td></td></tr>
+  <tr><td>link</td><td>act</td><td>*=</td><td></td></tr>
+  <tr><td>row</td><td>select</td><td>five</td><td></td></tr>
+  <tr><td>row</td><td>update</td><td>fyffe</td><td></td></tr>
 </table>
 
  *

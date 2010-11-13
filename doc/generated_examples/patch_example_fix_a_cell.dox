@@ -35,9 +35,9 @@
 <table>
   <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.4</td></tr>
   <tr><td>column</td><td>name</td><td>[0]</td><td>[1]</td></tr>
-  <tr><td>row</td><td>operate</td><td>=</td><td>=></td></tr>
-  <tr><td>row</td><td>=</td><td>three</td><td>23</td></tr>
-  <tr><td>row</td><td>></td><td></td><td>3</td></tr>
+  <tr><td>link</td><td>act</td><td>*</td><td>*=</td></tr>
+  <tr><td>row</td><td>select</td><td>three</td><td>23</td></tr>
+  <tr><td>row</td><td>update</td><td></td><td>3</td></tr>
 </table>
 
  *

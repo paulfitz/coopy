@@ -17,7 +17,7 @@
 <table>
   <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.4</td></tr>
   <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
-  <tr><td>row</td><td>operate</td><td>=></td><td>></td></tr>
+  <tr><td>link</td><td>act</td><td>*=</td><td>=</td></tr>
   <tr><td>row</td><td>delete</td><td>six</td><td></td></tr>
 </table>
  

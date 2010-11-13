@@ -294,8 +294,8 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     // for now, we will only use filtered index if column manipulations
     // are non-existent or trivial
     IndexSniffer localIndex(local);
-    bool usableIndex = true;
     bool constantColumns = true;
+    bool constantIndex = true;
 
     vector<int> local_cols;
     vector<string> local_col_names;
@@ -310,6 +310,13 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       local_col_names.push_back(name);
     }
     original_col_names = local_col_names;
+
+    vector<int> index_flags = localIndex.suggestIndexes();
+    RowChange::txt2bool indexes;
+    for (int i=0; i<(int)original_col_names.size(); i++) {
+      string name = original_col_names[i];
+      indexes[name] = (index_flags[i]>0);
+    }
 
     vector<OrderChange> cc;
 
@@ -334,6 +341,11 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	  exit(1);
 	}
 	int idx = it-local_cols.begin();
+	if (indexes.find(change.namesBefore[idx])!=indexes.end()) {
+	  if (indexes[change.namesBefore[idx]]) {
+	    constantIndex = false;
+	  }
+	}
 	change.mode = ORDER_CHANGE_DELETE;
 	change.subject = idx;
 	local_cols.erase(it);
@@ -503,14 +515,9 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       mergeRow(pivot,local,remote,unit,output,flags,rc);
     }
 
-    usableIndex = constantColumns;
-    vector<int> flags = localIndex.suggestIndexes();
-    RowChange::txt2bool indexes;
-    for (int i=0; i<(int)original_col_names.size(); i++) {
-      string name = original_col_names[i];
-      if (usableIndex) {
-	indexes[name] = (flags[i]>0);
-	} else {
+    if (!constantIndex) {
+      for (int i=0; i<(int)original_col_names.size(); i++) {
+	string name = original_col_names[i];
 	indexes[name] = true;
       }
     }

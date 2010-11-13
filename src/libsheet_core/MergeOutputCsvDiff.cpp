@@ -23,9 +23,9 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
-#define OP_MATCH "="
-#define OP_ASSIGN ">"
-#define OP_MATCH_ASSIGN "=>"
+#define OP_MATCH "*"
+#define OP_ASSIGN "="
+#define OP_MATCH_ASSIGN "*="
 #define OP_CONTEXT "#"
 #define OP_NONE ""
 
@@ -107,8 +107,8 @@ bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
       showedColumns = true;
     }
     if (columns!=lnops) {
-      result.addField("row",false);
-      result.addField("columns",false);
+      result.addField("link",false);
+      result.addField("name",false);
       for (int i=0; i<(int)change.names.size(); i++) {
 	if (activeColumn[change.names[i]]) {
 	  result.addField(change.names[i].c_str(),false);
@@ -120,7 +120,7 @@ bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
   }
 
   if (prevSelect!=showForSelect || prevDescribe!=showForDescribe) {
-    result.addField("row",false);
+    result.addField((tag=="act")?"link":"row",false);
     result.addField(tag,false);
     for (int i=0; i<(int)change.names.size(); i++) {
       if (activeColumn[change.names[i]]) {
@@ -132,39 +132,44 @@ bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
   return true;
 }
 
-bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
-  result.addField("row",false);
-  result.addField(tag,false);
-  for (int i=0; i<(int)change.names.size(); i++) {
-    string name = change.names[i];
-    if (activeColumn[name]) {
-      if (change.cond.find(name)!=change.cond.end() && 
-	  showForSelect[name]) {
-	result.addField(change.cond.find(name)->second);
-      } else {
-	result.addField("",false);
-      }
-    }
-  }
-  result.addRecord();
-  return true;
-}
+bool MergeOutputCsvDiff::updateRow(const RowChange& change, const char *tag,
+				   bool select, bool update, bool practice) {
+  bool ok = true;
 
-bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
-  result.addField("row",false);
-  result.addField(tag,false);
+  if (!practice) {
+    result.addField("row",false);
+    result.addField(tag,false);
+  }
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     if (activeColumn[name]) {
-      if (change.val.find(name)!=change.val.end() && showForDescribe[name]) {
-	result.addField(change.val.find(name)->second);
-      } else {
-	result.addField("",false);
+      bool shown = false;
+      if (change.cond.find(name)!=change.cond.end() && 
+	  showForSelect[name] && select) {
+	if (!practice) {
+	  result.addField(change.cond.find(name)->second);
+	}
+	shown = true;
+      }
+      if (change.val.find(name)!=change.val.end() && 
+	  showForDescribe[name] && update) {
+	if (!practice) {
+	  result.addField(change.val.find(name)->second);
+	}
+	if (shown) ok = false; // collision
+	shown = true;
+      }
+      if (!shown) {
+	if (!practice) {
+	  result.addField("",false);
+	}
       }
     }
   }
-  result.addRecord();
-  return true;
+  if (!practice) {
+    result.addRecord();
+  }
+  return ok;
 }
 
 bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
@@ -188,9 +193,13 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
     bool shouldAssign = valueActive;
     if (shouldAssign) {
       // conservative choice, should be optional
-      shouldMatch = true;
+      if (change.cond.find(name)!=change.cond.end()) {
+	shouldMatch = true;
+      }
     }
-    bool shouldShow = shouldMatch || shouldAssign;
+    //printf("==> %s %d %d %d %d\n", name.c_str(), condActive, valueActive,
+    //shouldMatch, shouldAssign);
+    //bool shouldShow = shouldMatch || shouldAssign;
 
     if (change.mode==ROW_CHANGE_INSERT) {
       // we do not care about matching
@@ -225,18 +234,25 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
 
   if (lops!=ops) {
     ops = lops;
-    operateRow(change,"operate");
+    operateRow(change,"act");
   }
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
-    describeRow(change,"insert");
+    updateRow(change,"insert",false,true,false);
     break;
   case ROW_CHANGE_DELETE:
-    selectRow(change,"delete");
+    updateRow(change,"delete",true,false,false);
     break;
   case ROW_CHANGE_UPDATE:
-    selectRow(change,"=");
-    describeRow(change,">");
+    {
+      bool terse = updateRow(change,"practice",true,true,true);
+      if (terse) {
+	updateRow(change,"update",true,true,false);
+      } else {
+	updateRow(change,"select",true,false,false);
+	updateRow(change,"update",false,true,false);
+      }
+    }
     break;
   default:
     fprintf(stderr,"  Unknown row operation\n\n");
