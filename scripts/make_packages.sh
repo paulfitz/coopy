@@ -84,6 +84,8 @@ while [ ! "k$1" = "k" ]; do
 	ver=`cat coopy_version.txt`
 	echo $ver
 	cd gendoc/latex
+	## % workaround \hyperlink bug (see Debian #580912)
+	sed -i "s|\\\\usepackage{doxygen}|\\\\renewcommand{\\\\hyperlink}[2]{%\n\\\\hyperref[#1]{#2}%\n}\n\\\\usepackage{doxygen}|" refman.tex
 	rm -f refman.dvi refman.ps refman.pdf
 	latex refman && latex refman && latex refman && dvips refman.dvi && ps2pdf refman.ps
 	cp -v refman.pdf $OUTPUT/coopy-$ver.pdf
