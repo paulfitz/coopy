@@ -3,7 +3,8 @@
 
 @page table_format Supported table formats
 
-Coopy programs can work with tables represented in the following formats:
+Programs in the COOPY toolbox can work with tables represented in the 
+following formats:
  \li CSV (or other delimiter-separated formats).
  \li Sqlite tables.
  \li MySQL tables (partial support at the time of writing).
@@ -11,7 +12,32 @@ Coopy programs can work with tables represented in the following formats:
 
 CSV support is most complete, followed by Gnumeric, followed by Sqlite,
 followed by MySQL.  Good support for all four formats is targeted for
-Coopy 1.0.
+version 1.0 of the toolbox.
+
+\section table_format_spec Specifying sources
+
+The COOPY tools expects to work with files as inputs and outputs.
+To use a database as an input or output, or to add configuration
+options on how a file should be interpreted, special "proxy" files
+are used.  These proxies are given the extension .json, and their
+content is in the <a href="http://www.json.org/">JSON</a> format.
+
+Here is a file users.json to refer to a table called "users" in
+a mysql database called "db":
+\verbatim
+{
+  "type": "mysql",
+  "database": "db",
+  "username": "testy",
+  "password": "*****",
+  "host": "127.0.0.1",
+  "port": 3333,
+  "table": "users"
+}
+\endverbatim
+
+The programs \ref ssdiff and \ref sspatch will accept 
+and operate on .json files.
 
  *
  */

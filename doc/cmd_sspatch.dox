@@ -3,8 +3,9 @@
 
 @page sspatch sspatch
 
-This makes changes to a spreadsheet, based on instructions in a "patch"
-file (see \ref ssdiff_format_csv for the format of that file).
+This makes changes to a spreadsheet, based on instructions in a "diff"
+file (see \ref ssdiff for instructions on generating such a file,
+and for the format itself see \ref patch_format_csv).
 
 \if link_internal
 Here are the ways you can use sspatch:
@@ -22,13 +23,13 @@ using it.  At the time of writing, that output is:
 
 \verbatim
 Apply patch to a spreadsheet.
-  sspatch [--verbose] [--output output.csv] sheet.csv patch.txt
+  sspatch [--verbose] [--output output.csv] sheet.csv patch.csv
 Output defaults to standard output.
 Write output to original file by doing:
-  sspatch --output sheet.csv sheet.csv patch.txt
+  sspatch --output sheet.csv sheet.csv patch.csv
 \endverbatim
 
-@section sspatch_common_usage sspatch sheet.csv patch.txt
+@section sspatch_common_usage sspatch sheet.csv patch.csv
 Suppose sheet.csv is:
 \verbatim
 one,1
@@ -39,12 +40,11 @@ five,5
 \endverbatim
 And patch.txt is:
 \verbatim
-dtbl,csv,version,0.2,
-config,empty_tag,*,,
-config,row_tag,ROW,,
-column,name,ROW,[0],[1]
-row,select,*,three,23
-row,update,*,*,3
+dtbl,csv,version,0.4
+column,name,[0],[1]
+link,act,*,*=
+row,select,three,23
+row,update,,3
 \endverbatim
 Then the output will correct "23" to "3":
 \verbatim
@@ -68,7 +68,7 @@ patches are supported).
 The output of sspatch is by default standard output.  It can be redirected
 to a file using the "--output" option.
 
-@section sspatch_xls sspatch --output out.xls sheet.xls patch.txt
+@section sspatch_xls sspatch --output out.xls sheet.xls patch.csv
 
 If compiled with Gnumeric support, then sspatch can be used to modify
 Excel files.  Where possible, formatting will be preserved.
