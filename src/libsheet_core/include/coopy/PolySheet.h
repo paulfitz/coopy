@@ -182,6 +182,26 @@ public:
     return sheet->moveRow(src,base);
   }
 
+  virtual bool copyData(const DataSheet& src) {
+    COOPY_ASSERT(sheet);
+    return sheet->copyData(src);
+  }
+
+  virtual bool canWrite() { 
+    COOPY_ASSERT(sheet);
+    return sheet->canWrite();
+  }
+
+  virtual bool canResize() {
+    COOPY_ASSERT(sheet);
+    return sheet->canResize();
+  }
+
+  virtual bool resize(int w, int h) {
+    COOPY_ASSERT(sheet);
+    return sheet->resize(w,h);
+  }
+
 };
 
 #endif

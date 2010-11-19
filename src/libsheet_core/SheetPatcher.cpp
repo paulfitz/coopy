@@ -1,4 +1,5 @@
 #include <coopy/SheetPatcher.h>
+#include <coopy/NameSniffer.h>
 
 #include <map>
 #include <algorithm>
@@ -41,9 +42,18 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   vector<SheetCell> cond;
   vector<int> active_val;
   vector<SheetCell> val;
+  vector<string> allNames = change.allNames;
   int width = (int)change.allNames.size();
-  for (int i=0; i<(int)change.allNames.size(); i++) {
-    dir[change.allNames[i]] = i;
+  if (width==0) {
+    if (column_names.size()==0) {
+      NameSniffer sniffer(*sheet);
+      column_names = sniffer.suggestNames();
+    }
+    allNames = column_names;
+    width = (int)allNames.size();
+  }
+  for (int i=0; i<width; i++) {
+    dir[allNames[i]] = i;
     active_cond.push_back(0);
     cond.push_back(SheetCell());
     active_val.push_back(0);

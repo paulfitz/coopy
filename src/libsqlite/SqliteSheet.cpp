@@ -139,9 +139,16 @@ SheetSchema *SqliteSheet::getSchema() const {
 
 
 std::string SqliteSheet::cellString(int x, int y) const {
+  bool tmp;
+  return cellString(x,y,tmp);
+}
+
+std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
+
   // starting with a COMPLETELY brain-dead implementation
 
   sqlite3 *db = DB(implementation);
+  escaped = true;
   if (db==NULL) return "";
 
   sqlite3_stmt *statement = NULL;
@@ -164,8 +171,10 @@ std::string SqliteSheet::cellString(int x, int y) const {
     //printf("Got field %s\n", txt);
     if (txt!=NULL) {
       result = txt;
+      escaped = false;
     } else { 
       result = "";
+      escaped = true;
     }
   }
   sqlite3_finalize(statement);
@@ -173,6 +182,7 @@ std::string SqliteSheet::cellString(int x, int y) const {
   
   return result;
 }
+
 
 bool SqliteSheet::cellString(int x, int y, const std::string& str) {
   // starting with a COMPLETELY brain-dead implementation

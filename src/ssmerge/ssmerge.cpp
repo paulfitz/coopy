@@ -15,11 +15,13 @@ int main(int argc, char *argv[]) {
   bool tail_trimmed = false;
   std::string output = "-";
   bool verbose = false;
+  bool indexed = false;
   while (true) {
     int option_index = 0;
     static struct option long_options[] = {
       {"head-trimmed", 0, 0, 'h'},
       {"tail-trimmed", 0, 0, 't'},
+      {"index", 0, 0, 'i'},
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
       {0, 0, 0, 0}
@@ -37,6 +39,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'v':
       verbose = true;
+      break;
+    case 'i':
+      indexed = true;
       break;
     case 'o':
       output = optarg;
@@ -64,7 +69,6 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   PolyBook local, remote, parent;
-  MergeOutputAccum accum;
   if (!parent.read(argv[0])) {
     fprintf(stderr,"Failed to read %s\n", argv[0]);
     return 1;
@@ -82,9 +86,15 @@ int main(int argc, char *argv[]) {
   flags.tail_trimmed = tail_trimmed;
   BookCompare cmp;
   cmp.setVerbose(verbose);
-  cmp.compare(parent,local,remote,accum,flags);
-  if (CsvFile::write(accum.get(),output.c_str())!=0) {
-    return 1;
+
+  if (!indexed) {
+    MergeOutputAccum accum;
+    cmp.compare(parent,local,remote,accum,flags);
+    if (CsvFile::write(accum.getSheet(),output.c_str())!=0) {
+      return 1;
+    }
+  } else {
+    printf("Indexed results not yet available\n");
   }
   return 0;
 }

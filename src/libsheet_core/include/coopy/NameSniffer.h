@@ -26,6 +26,10 @@ public:
 
   virtual std::string suggestColumnName(int col);
 
+  virtual std::vector<std::string> suggestNames() const {
+    return names;
+  }
+
   bool isEmbedded() {
     return embed;
   }

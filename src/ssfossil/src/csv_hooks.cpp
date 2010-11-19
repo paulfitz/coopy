@@ -58,7 +58,7 @@ int blob_to_csv(Blob *pIn, CsvSheet& csv) {
 }
 
 
-void blob_show_csv(const CsvSheet& csv, const SheetStyle& style, Blob *pOut) {
+void blob_show_csv(const DataSheet& csv, const SheetStyle& style, Blob *pOut) {
   //blob_appendf(pOut,"CSV: %dx%d\n",csv.width(),csv.height());
   //for (int y=0;y<csv.height();y++) {
   //for (int x=0;x<csv.width();x++) {
@@ -91,7 +91,7 @@ int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut) {
       blob_zero(pOut);
       //blob_appendf(pOut,"Hello from %s:%d\n", __FILE__, __LINE__);
       //blob_appendf(pOut,"Conflict resolution is being modified.\n");
-      blob_show_csv(result.get(),csv1.getStyle(),pOut);
+      blob_show_csv(result.getSheet(),csv1.getStyle(),pOut);
       return 1;
     }
   }

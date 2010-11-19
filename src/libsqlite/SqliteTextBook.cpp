@@ -4,6 +4,9 @@
 #include <sqlite3.h>
 #include <stdio.h>
 
+#define WANT_VECTOR2STRING
+#include <coopy/Stringer.h>
+
 using namespace std;
 using namespace coopy::store;
 
@@ -47,13 +50,17 @@ bool SqliteTextBook::open(const Property& config) {
     return false;
   }
   if (!read(config.get("file").asString().c_str())) {
+    fprintf(stderr,"failed to read %s\n", config.get("file").asString().c_str());
     return false;
   }
   if (!config.check("table")) {
+    dbg_printf("Loaded sqlite workbook\n");
     return true;
   }
   names.clear();
   names.push_back(config.get("table").asString().c_str());
+  dbg_printf("Loaded sqlite workbook, table: %s\n",
+	     vector2string(names).c_str());
   return true;
 }
 

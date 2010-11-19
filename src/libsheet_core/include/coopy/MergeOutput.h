@@ -4,6 +4,8 @@
 #include <coopy/Patcher.h>
 #include <coopy/CompareFlags.h>
 #include <coopy/SheetCell.h>
+#include <coopy/PolySheet.h>
+#include <coopy/TextBook.h>
 
 namespace coopy {
   namespace cmp {
@@ -24,10 +26,28 @@ private:
 protected:
   CompareFlags flags;
   FILE *out;
+  coopy::store::PolySheet output_sheet;
+  coopy::store::TextBook *output_book;
 public:
   MergeOutput() {
     ct = 0;
     out = stdout;
+  }
+
+  virtual void attachSheet(coopy::store::PolySheet sheet) {
+    output_sheet = sheet;
+  }
+
+  void attachBook(coopy::store::TextBook& book) {
+    output_book = &book;
+  }
+  
+  virtual coopy::store::PolySheet getSheet() {
+    return output_sheet;
+  }
+
+  coopy::store::TextBook *getBook() {
+    return output_book;
   }
 
   virtual ~MergeOutput() {}

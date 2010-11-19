@@ -20,6 +20,7 @@ private:
   SheetStyle style;
   bool strict;
 public:
+  using EscapedTypedSheet<std::string>::resize;
 
   CsvSheet() {
     tw = th = 0;
@@ -163,6 +164,20 @@ public:
       addRecord();
     }
     return *this;
+  }
+
+  virtual bool canResize() { return true; }
+
+  virtual bool resize(int w, int h) {
+    clear();
+    SheetCell cell;
+    for (int i=0; i<h; i++) {
+      for (int j=0; j<w; j++) {
+	addField(cell);
+      }
+      addRecord();
+    }
+    return true;
   }
 };
 

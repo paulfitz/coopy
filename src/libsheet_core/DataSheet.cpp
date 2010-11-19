@@ -80,3 +80,26 @@ std::string DataSheet::encodeCell(const SheetCell& c,
   if (need_quote) { result += '"'; }
   return result;
 }
+
+
+bool DataSheet::copyData(const DataSheet& src) {
+  if (!canWrite()) {
+    fprintf(stderr,"Copy failed, cannot write to target\n");
+    return false;
+  }
+  if (width()!=src.width()||height()!=src.height()) {
+    if (canResize()) {
+      resize(src.width(),src.height());
+    }
+  }
+  if (width()!=src.width()||height()!=src.height()) {
+    fprintf(stderr,"Copy failed, src and target are not the same size\n");
+    return false;
+  }
+  for (int i=0; i<src.height(); i++) {
+    for (int j=0; j<src.width(); j++) {
+      setCell(j,i,src.getCell(j,i));
+    }
+  }
+  return true;
+}

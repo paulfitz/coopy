@@ -45,6 +45,7 @@ TextBook *readHelper(const char *fname,
     } else if (key=="csv") {
       book = new ShortTextBook();
     } else if (key=="sqlite") {
+      dbg_printf("Trying sqlite\n");
       book = new SqliteTextBook();
     } else {
       fprintf(stderr,"Type not recognized: %s\n", key.c_str());
@@ -56,6 +57,7 @@ TextBook *readHelper(const char *fname,
 	delete book;
       } else {
 	result = book;
+	return result;
       }
     }  
   }

@@ -23,6 +23,8 @@ public:
 
   virtual std::string cellString(int x, int y) const;
 
+  virtual std::string cellString(int x, int y, bool& escaped) const;
+
   virtual bool cellString(int x, int y, const std::string& str);
 
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base);

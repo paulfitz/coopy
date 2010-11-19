@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
 	} else {
 	  MergeOutputAccum output;
 	  cmp.compare(parent,local,remote,output,flags);
-	  local = output.get();
+	  local.copyData(output.getSheet());
 	}
 	ss = &local;
       }

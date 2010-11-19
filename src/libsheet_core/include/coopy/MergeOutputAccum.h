@@ -11,8 +11,27 @@ namespace coopy {
 }
 
 class coopy::cmp::MergeOutputAccum : public MergeOutput {
-public:
+private:
   coopy::store::CsvSheet result;
+  coopy::store::PolySheet fallback;
+  bool sync;
+  bool useFallback;
+public:
+ MergeOutputAccum() : fallback(&result,false) {
+    sync = false;
+    MergeOutput::attachSheet(fallback);
+    useFallback = true;
+  }
+
+  virtual void attachSheet(coopy::store::PolySheet sheet) {
+    MergeOutput::attachSheet(sheet);
+    useFallback = false;
+  }
+
+  virtual bool mergeStart() {
+    sync = false;
+    return true;
+  }
 
   virtual bool wantDiff() { return false; }
 
@@ -22,7 +41,20 @@ public:
 
   virtual bool stripMarkup();
 
-  const coopy::store::CsvSheet& get() { return result; }
+  //const coopy::store::CsvSheet& get() { return result; }
+
+  virtual coopy::store::PolySheet getSheet() {
+    if (useFallback) {
+      return fallback;
+    }
+    if (!sync) {
+      coopy::store::PolySheet s = MergeOutput::getSheet();
+      s.copyData(result);
+      sync = true;
+    }
+    return output_sheet;
+  }
+
 };
 
 #endif

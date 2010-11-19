@@ -16,6 +16,7 @@ class coopy::cmp::SheetPatcher : public Patcher {
 private:
   ConfigChange config;
   std::vector<int> columns;
+  std::vector<std::string> column_names;
 public:
   coopy::store::DataSheet *sheet;
 

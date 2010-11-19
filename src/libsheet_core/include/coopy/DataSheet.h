@@ -53,6 +53,14 @@ public:
     return false;
   }
 
+  virtual SheetCell getCell(int x, int y) const {
+    return cellSummary(x,y);
+  }
+
+  virtual bool setCell(int x, int  y, const SheetCell& c) {
+    return cellSummary(x,y,c);
+  }
+
   std::string encode(const SheetStyle& style) const;
 
   std::string toString() const {
@@ -99,6 +107,16 @@ public:
   // move a row before base; if base is invalid move after all rows
   virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
     return RowRef(); // invalid column
+  }
+
+  virtual bool copyData(const DataSheet& src);
+
+  virtual bool canWrite() { return true; }
+
+  virtual bool canResize() { return false; }
+
+  virtual bool resize(int w, int h) {
+    return false;
   }
 };
 

@@ -43,12 +43,13 @@ public:
     return *this;
   }
 
-  void resize(int w, int h, const T& zero) {
+  bool resize(int w, int h, const T& zero) {
     data.clear();
     row.clear();
     this->zero = zero;
     this->h = h;
     this->w = w;
+    return true;
   }
 
   void reheight(int h) {
@@ -154,9 +155,13 @@ public:
 
   void findBest(IntSheet& bestIndex, FloatSheet& bestValue, FloatSheet& bestInc);
 
-  void resize(int w, int h) {
+  bool resize(int w, int h) {
     float zero = 0;
-    resize(w,h,zero);
+    return resize(w,h,zero);
+  }
+
+  bool canResize() {
+    return true;
   }
 
   const float& operator()(int x, int y) const {
@@ -177,9 +182,13 @@ public:
     return IntSheet::int2string(v);
   }
 
-  void resize(int w, int h) {
+  bool resize(int w, int h) {
     int zero = 0;
-    resize(w,h,zero);
+    return resize(w,h,zero);
+  }
+
+  bool canResize() {
+    return true;
   }
 
   const int& operator()(int x, int y) const {
@@ -201,9 +210,13 @@ public:
     return IntSheet::int2string(v);
   }
 
-  void resize(int w, int h) {
+  bool resize(int w, int h) {
     unsigned char zero = 0;
-    resize(w,h,zero);
+    return resize(w,h,zero);
+  }
+
+  bool canResize() {
+    return true;
   }
 
   const unsigned char& operator()(int x, int y) const {

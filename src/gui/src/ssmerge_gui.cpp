@@ -258,7 +258,7 @@ void MergeFrame::OnMerge(wxCommandEvent& event) {
     BookCompare cmp;
     MergeOutputAccum accum;
     cmp.compare(parent_sheet,local_sheet,remote_sheet,accum,flags);
-    const CsvSheet& result = accum.get();
+    const DataSheet& result = accum.getSheet();
     printf("Result of dimensions %dx%d\n", result.width(), result.height());
 
     if (result.width()==0||result.height()==0) {
