@@ -103,3 +103,11 @@ bool DataSheet::copyData(const DataSheet& src) {
   }
   return true;
 }
+
+Poly<SheetRow> DataSheet::insertRow() {
+  //printf("attaching sheet for insertion %s\n", desc().c_str());
+  SheetRow *row = new SheetRow(this,height());
+  COOPY_ASSERT(row);
+  return Poly<SheetRow>(row,true);
+}
+

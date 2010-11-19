@@ -18,6 +18,7 @@ namespace coopy {
 template <class T>
 class coopy::store::TypedSheet : public DataSheet {
 public:
+  using DataSheet::insertRow;
   std::vector<std::vector<T> > arr;
   int h, w;
   T zero;
@@ -147,6 +148,37 @@ public:
   virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
     return RowRef(); // NOT IMPLEMENTED
   }
+
+  virtual Poly<SheetRow> insertRow() {
+    Poly<SheetRow> pRow = DataSheet::insertRow();
+    arr.push_back(std::vector<T>());
+    std::vector<T>& lst = arr.back();
+    for (int j=0; j<w; j++) {
+      lst.push_back(zero);
+    }
+    h++;
+    return pRow;
+  }
+
+  void insertRowHelper() {
+    arr.push_back(std::vector<T>());
+    std::vector<T>& lst = arr.back();
+    for (int j=0; j<w; j++) {
+      lst.push_back(zero);
+    }
+    h++;
+  }
+
+  virtual bool applySchema(const SheetSchema& ss) {
+    arr.clear();
+    h = 0;
+    w = ss.getColumnCount();
+    return true;
+  }
+
+  virtual std::string getDescription() const {
+    return "typed";
+  }
 };
 
 
@@ -154,6 +186,7 @@ public:
 template <class T>
 class coopy::store::EscapedTypedSheet : public DataSheet {
 public:
+  using DataSheet::insertRow;
   typedef std::pair<T,bool> pairCellType;
   typedef T cellType;
 
@@ -207,6 +240,12 @@ public:
   //}
 
   virtual std::string cellString(int x, int y, bool& escaped) const = 0;
+
+
+  virtual bool cellString(int x, int y, const std::string& str, 
+			  bool escaped) = 0;
+
+
   /*
     const std::pair<T,bool>& p = s.cell(x,y);
     escaped = p.second;
@@ -237,6 +276,20 @@ public:
   // move a row before base; if base is invalid move after all rows
   virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
     return s.moveRow(src,base);
+  }
+
+  virtual Poly<SheetRow> insertRow() {
+    Poly<SheetRow> pRow = DataSheet::insertRow();
+    s.insertRowHelper();
+    return pRow;
+  }
+
+  virtual bool applySchema(const SheetSchema& ss) {
+    return s.applySchema(ss);
+  }
+
+  virtual std::string getDescription() const {
+    return "escaped";
   }
 };
 

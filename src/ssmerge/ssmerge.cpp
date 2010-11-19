@@ -5,6 +5,7 @@
 #include <coopy/CsvFile.h>
 #include <coopy/BookCompare.h>
 #include <coopy/MergeOutputAccum.h>
+#include <coopy/MergeOutputIndex.h>
 #include <coopy/PolyBook.h>
 
 using namespace coopy::store;
@@ -94,7 +95,14 @@ int main(int argc, char *argv[]) {
       return 1;
     }
   } else {
-    printf("Indexed results not yet available\n");
+    MergeOutputIndex accum;
+    CsvSheet result;
+    PolySheet pResult(&result,false);
+    accum.attachSheet(pResult);
+    cmp.compare(parent,local,remote,accum,flags);
+    if (CsvFile::write(accum.getSheet(),output.c_str())!=0) {
+      return 1;
+    }
   }
   return 0;
 }

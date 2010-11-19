@@ -122,6 +122,10 @@ public:
     }
     return it->second;
   }
+
+  virtual std::string getDescription() const {
+    return "sparse";
+  }
 };
 
 

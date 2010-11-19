@@ -59,6 +59,8 @@ public:
 
   virtual bool wantDiff() { return false; }
 
+  virtual bool wantLinks() { return false; }
+
   virtual bool addRow(const char *tag,
 		      const std::vector<coopy::store::SheetCell>& row,
 		      const std::string& blank) { return false; }

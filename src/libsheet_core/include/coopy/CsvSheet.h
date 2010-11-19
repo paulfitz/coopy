@@ -21,6 +21,7 @@ private:
   bool strict;
 public:
   using EscapedTypedSheet<std::string>::resize;
+  using EscapedTypedSheet<std::string>::insertRow;
 
   CsvSheet() {
     tw = th = 0;
@@ -148,6 +149,14 @@ public:
     return true;
   }
 
+  virtual bool cellString(int x, int y, const std::string& str, 
+			  bool escaped) {
+    pairCellType& p = pcell(x,y);
+    p.first = str;
+    p.second = escaped;
+    return true;
+  }
+
   const CsvSheet& copy(const CsvSheet& alt) {
     s.arr = alt.s.arr;
     s.h = alt.s.h;
@@ -178,6 +187,10 @@ public:
       addRecord();
     }
     return true;
+  }
+
+  virtual std::string getDescription() const {
+    return "csv";
   }
 };
 

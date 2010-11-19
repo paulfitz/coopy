@@ -202,6 +202,27 @@ public:
     return sheet->resize(w,h);
   }
 
+  virtual Poly<SheetRow> insertRow() {
+    COOPY_ASSERT(sheet);
+    return sheet->insertRow();
+  }
+
+  virtual bool applySchema(const SheetSchema& ss) {
+    COOPY_ASSERT(sheet);
+    return sheet->applySchema(ss);
+  }
+
+  virtual std::string getDescription() const {
+    return "poly";
+  }
+
+  virtual std::vector<std::string> getNestedDescription() const {
+    COOPY_ASSERT(sheet);
+    std::vector<std::string> v = sheet->getNestedDescription();
+    std::string name = getDescription();
+    v.insert(v.begin(),name);
+    return v;
+  }
 };
 
 #endif

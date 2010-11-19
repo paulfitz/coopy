@@ -10,10 +10,12 @@
 #include <coopy/SheetCell.h>
 
 #include <string>
+#include <vector>
 
 namespace coopy {
   namespace store {
     class DataSheet;
+    class SheetRow;
   }
 }
 
@@ -117,6 +119,62 @@ public:
 
   virtual bool resize(int w, int h) {
     return false;
+  }
+
+  virtual Poly<SheetRow> insertRow();
+
+  virtual bool applySchema(const SheetSchema& ss) {
+    return false;
+  }
+
+  virtual std::string getDescription() const {
+    return "data";
+  }
+
+  virtual std::vector<std::string> getNestedDescription() const {
+    std::string name = getDescription();
+    std::vector<std::string> v;
+    v.push_back(name);
+    return v;
+  }
+
+  virtual std::string desc() const {
+    std::vector<std::string> v = getNestedDescription();
+    std::string output;
+    for (int i=0; i<(int)v.size(); i++) {
+      if (output!="") {
+	output += ".";
+      }
+      output += v[i];
+    }
+    return output;
+  }
+};
+
+class coopy::store::SheetRow : public RefCount {
+private:
+  int y;
+  DataSheet *sheet;
+public:
+  SheetRow() {
+    y = -1;
+    sheet = 0 /*NULL*/;
+  }
+
+  // only relevant if not subclassed
+  SheetRow(DataSheet *sheet, int y) : sheet(sheet), y(y) {
+  }
+
+  virtual SheetCell getCell(int x) const {
+    return sheet->cellSummary(x,y);
+  }
+  
+  virtual bool setCell(int x, const SheetCell& c) {
+    return sheet->cellSummary(x,y,c);
+  }
+
+  virtual bool flush() {
+    return true;
   }
 };
 

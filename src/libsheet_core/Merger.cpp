@@ -22,6 +22,7 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 		      const CompareFlags& flags, vector<RowChange>& rc) {
   
   bool diff = output.wantDiff();
+  bool link = output.wantLinks();
   int pRow = row_unit.pivotUnit;
   int lRow = row_unit.localUnit;
   int rRow = row_unit.remoteUnit;
@@ -164,6 +165,15 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	     (int)expandLocal.size(),
 	     (int)expandRemote.size());
 
+  if (link) {
+    LinkDeclare decl;
+    decl.mode = LINK_DECLARE_ROW;
+    decl.rc_id_pivot = pRow;
+    decl.rc_id_local = lRow;
+    decl.rc_id_remote = rRow;
+    output.declareLink(decl);
+  }
+
   if (!diff) {
     if (conflict) {
       conflicts++;
@@ -270,6 +280,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 		   MergeOutput& output,
 		   const CompareFlags& flags) {
   bool diff = output.wantDiff();
+  bool link = output.wantLinks();
 
   dbg_printf("Merging row order...\n");
   row_merge.merge(row_local,row_remote,flags);
@@ -280,6 +291,24 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   col_merge.merge(col_local,col_remote,cflags);
   conflicts = 0;
   dbg_printf("Order merges are done...\n");
+
+  if (link) {
+    for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+	 it!=col_merge.accum.end(); 
+	 it++) {
+      MatchUnit& unit = *it;
+      int pCol = unit.localUnit;
+      int lCol = unit.pivotUnit;
+      int rCol = unit.remoteUnit;
+      bool deleted = unit.deleted;
+      LinkDeclare decl;
+      decl.mode = LINK_DECLARE_COLUMN;
+      decl.rc_id_pivot = pCol;
+      decl.rc_id_local = lCol;
+      decl.rc_id_remote = rCol;
+      output.declareLink(decl);
+    }
+  }
 
   if (diff) {
     current_row = 0;

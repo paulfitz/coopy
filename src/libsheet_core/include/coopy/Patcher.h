@@ -13,6 +13,7 @@ namespace coopy {
     class OrderChange;
     class RowChange;
     class NameChange;
+    class LinkDeclare;
     class Patcher;
 
     enum {
@@ -33,6 +34,12 @@ namespace coopy {
       NAME_CHANGE_NONE,
       NAME_CHANGE_DECLARE,
       NAME_CHANGE_SELECT,
+    };
+
+    enum {
+      LINK_DECLARE_NONE,
+      LINK_DECLARE_ROW,
+      LINK_DECLARE_COLUMN,
     };
   }
 }
@@ -141,6 +148,17 @@ public:
   }
 };
 
+class coopy::cmp::LinkDeclare {
+public:
+  int mode;
+
+  int rc_id_pivot;
+  int rc_id_local;
+  int rc_id_remote;
+
+  // should also give all necessary info to show indexes
+};
+
 class coopy::cmp::Patcher {
 public:
   Patcher() {
@@ -153,6 +171,8 @@ public:
   virtual bool changeColumn(const OrderChange& change) { return false; }
 
   virtual bool changeRow(const RowChange& change) { return false; }
+
+  virtual bool declareLink(const LinkDeclare& decl) { return false; }
 
   /**
    *

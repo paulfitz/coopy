@@ -25,6 +25,8 @@ public:
     escaped(escaped) {
   }
 
+  SheetCell(int x);
+
   bool operator==(const SheetCell& alt) const {
     return text==alt.text && escaped==alt.escaped;
   }
