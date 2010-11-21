@@ -160,10 +160,12 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     }
   }
 
+  /*
   dbg_printf("row lens merge local remote %d %d %d\n",
 	     (int)expandMerge.size(), 
 	     (int)expandLocal.size(),
 	     (int)expandRemote.size());
+  */
 
   if (link) {
     LinkDeclare decl;
@@ -205,24 +207,27 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     }
 
     bool activity = true;
-    if ((int)expandMerge.size()==local.width()) {
-      if (current_row<local.height()) {
-	size_t i;
-	for (i=0; i<expandMerge.size(); i++) {
-	  SheetCell data = expandMerge[i];
-	  SheetCell was = local.cellSummary(i,current_row);
-	  if (was!=data && data!=blankCell) {
-	    break;
+    if (lRow!=-1) {
+      if ((int)expandMerge.size()==local.width()) {
+	if (current_row<local.height()) {
+	  size_t i;
+	  for (i=0; i<expandMerge.size(); i++) {
+	    SheetCell data = expandMerge[i];
+	    SheetCell was = local.cellSummary(i,current_row);
+	    if (was!=data && data!=blankCell) {
+	      break;
+	    }
 	  }
-	}
-	if (i==expandMerge.size()) {
-	  activity = false;
+	  if (i==expandMerge.size()) {
+	    activity = false;
+	  }
 	}
       }
     }
 
-    dbg_printf("diff %d (%d %d %d) %d\n", activity, 
-	       lRow, rRow, pRow, 
+    dbg_printf("Row: (index p/l/r %d %d %d) act %d del %d\n",
+	       pRow, lRow, rRow, 
+	       activity, 
 	       delRow);
 
     if (activity||delRow) {
