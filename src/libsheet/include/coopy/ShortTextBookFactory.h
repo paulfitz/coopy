@@ -37,11 +37,13 @@ class coopy::store::ShortTextBookFactory : public TextBookFactory {
     if (book==NULL) return NULL;
 
     if (config.shouldRead) {
-      dbg_printf("reading csv file %s\n", config.options.get("file").asString().c_str());
-      int r = CsvFile::read(config.fname.c_str(),book->sheet,config.options);
-      if (r!=0) {
-	delete book;
-	book = NULL;
+      if (!config.options.check("should_attach")) {
+	dbg_printf("reading csv file %s\n", config.options.get("file").asString().c_str());
+	int r = CsvFile::read(config.fname.c_str(),book->sheet,config.options);
+	if (r!=0) {
+	  delete book;
+	  book = NULL;
+	}
       }
     }
 

@@ -101,18 +101,8 @@ int main(int argc, char *argv[]) {
     PolyBook book;
     book.attach(output.c_str());
     accum.attachBook(book);
-    /*
-    //CsvSheet result;
-    //PolySheet pResult(&result,false);
-    
-    accum.attachSheet(pResult);
-    */
     cmp.compare(parent,local,remote,accum,flags);
-    /*
-    if (CsvFile::write(accum.getSheet(),output.c_str())!=0) {
-      return 1;
-    }
-    */
+    book.flush();
   }
   return 0;
 }

@@ -364,6 +364,16 @@ bool PolyBook::attach(Property& config) {
   return book!=NULL;
 }
 
+bool PolyBook::flush() {
+  if (!inplace()) {
+    options.put("can_create",true);
+    options.put("should_read",false);
+    options.put("should_write",true);
+    return attach(options);
+  }
+  return true;
+}
+
 /*
 bool PolyBook::load() {
   if (filename=="") {

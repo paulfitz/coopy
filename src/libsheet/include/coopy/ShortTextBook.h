@@ -14,9 +14,11 @@ namespace coopy {
 class coopy::store::ShortTextBook : public TextBook {
 public:
   std::string name;
+  int provides;
   CsvSheet sheet;
 
   ShortTextBook() : name("sheet") {
+    provides = 0;
   }
 
   virtual std::vector<std::string> getNames() {
@@ -34,6 +36,16 @@ public:
 
   virtual bool open(const Property& config);
 
+  virtual PolySheet provideSheet(const SheetSchema& schema) {
+    if (provides==0) {
+      provides++;
+      name = schema.getSheetName();
+      if (sheet.applySchema(schema)) {
+	return readSheet(name);
+      }
+    }
+    return PolySheet();
+  }
 
   virtual std::string desc() const {
     return "CsvBook";

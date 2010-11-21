@@ -66,6 +66,7 @@ public:
     p.put("file",fname);
     p.put("can_create",true);
     p.put("should_read",true);
+    p.put("should_attach",true);
     p.put("should_write",false);
     return attach(p);
   }
@@ -81,7 +82,7 @@ public:
 
   bool attach(coopy::store::Property& config);
 
-  bool write();
+  bool flush();
 
   bool inplace() const {
     if (book) {
