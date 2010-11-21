@@ -17,10 +17,12 @@ private:
   const DataSheet& sheet;
   std::vector<std::string> names;
   bool embed;
+  bool fake;
   int div;
 public:
   NameSniffer(const DataSheet& sheet) : sheet(sheet) {
     div = -1;
+    fake = true;
     sniff();
   }
 
@@ -39,6 +41,10 @@ public:
 
   bool isEmbedded() {
     return embed;
+  }
+
+  bool isFake() {
+    return fake;
   }
 };
 

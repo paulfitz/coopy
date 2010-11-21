@@ -38,8 +38,9 @@ namespace coopy {
 
     enum {
       LINK_DECLARE_NONE,
-      LINK_DECLARE_ROW,
-      LINK_DECLARE_COLUMN,
+      LINK_DECLARE_LOCAL,
+      LINK_DECLARE_REMOTE,
+      LINK_DECLARE_MERGE,
     };
   }
 }
@@ -151,10 +152,12 @@ public:
 class coopy::cmp::LinkDeclare {
 public:
   int mode;
+  bool column;
 
   int rc_id_pivot;
   int rc_id_local;
   int rc_id_remote;
+  bool rc_deleted;
 
   // should also give all necessary info to show indexes
 };

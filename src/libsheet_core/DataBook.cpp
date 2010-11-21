@@ -51,15 +51,15 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
     SheetSchema *schema = sheet.getSchema();
     SchemaSniffer sniffer(sheet,name.c_str());
     if (schema==NULL) {
-      dbg_printf(" - No schema available\n");
+      dbg_printf(" - No schema available, sniffing...\n");
       schema = sniffer.suggestSchema();
-      dbg_printf("  - Have a schema guess with %d columns\n", 
-		 schema->getColumnCount());
     }
     if (schema==NULL) {
       fprintf(stderr, "Cannot determine sheet schema: %s\n", name.c_str());
       return false;
     }
+    dbg_printf("  - Have a schema with %d columns\n", 
+	       schema->getColumnCount());
     PolySheet target = readSheet(target_name);
     if (!target.isValid()) {
       if (!addSheet(*schema)) {

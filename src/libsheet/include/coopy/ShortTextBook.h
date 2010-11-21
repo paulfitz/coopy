@@ -41,7 +41,12 @@ public:
       provides++;
       name = schema.getSheetName();
       if (sheet.applySchema(schema)) {
-	return readSheet(name);
+	PolySheet s = readSheet(name);
+	if (s.isValid()) {
+	  sheet.setSchema(Poly<SheetSchema>(schema.clone(),true));
+	  return s;
+	}
+	return s;
       }
     }
     return PolySheet();

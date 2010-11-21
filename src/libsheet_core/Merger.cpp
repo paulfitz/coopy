@@ -167,10 +167,11 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 
   if (link) {
     LinkDeclare decl;
-    decl.mode = LINK_DECLARE_ROW;
+    decl.mode = LINK_DECLARE_MERGE;
     decl.rc_id_pivot = pRow;
     decl.rc_id_local = lRow;
     decl.rc_id_remote = rRow;
+    decl.rc_deleted = delRow;
     output.declareLink(decl);
   }
 
@@ -293,6 +294,37 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   dbg_printf("Order merges are done...\n");
 
   if (link) {
+    // perspective: LOCAL, COLUMN
+    for (int i=0; i<local.width(); i++) {
+      LinkDeclare decl;
+      decl.mode = LINK_DECLARE_LOCAL;
+      decl.column = true;
+      decl.rc_id_pivot = col_local.a2b(i);
+      decl.rc_id_local = i;
+      decl.rc_id_remote = -1;
+      if (decl.rc_id_pivot!=-1) {
+	decl.rc_id_remote = col_remote.b2a(decl.rc_id_pivot);
+      }
+      decl.rc_deleted = 0;
+      output.declareLink(decl);      
+    }
+
+    // perspective: REMOTE, COLUMN
+    for (int i=0; i<remote.width(); i++) {
+      LinkDeclare decl;
+      decl.mode = LINK_DECLARE_REMOTE;
+      decl.column = true;
+      decl.rc_id_pivot = col_remote.a2b(i);
+      decl.rc_id_local = -1;
+      if (decl.rc_id_pivot!=-1) {
+	decl.rc_id_local = col_local.b2a(decl.rc_id_pivot);
+      }
+      decl.rc_id_remote = i;
+      decl.rc_deleted = 0;
+      output.declareLink(decl);      
+    }
+
+    // perspective: MERGE, COLUMN
     for (list<MatchUnit>::iterator it=col_merge.accum.begin();
 	 it!=col_merge.accum.end(); 
 	 it++) {
@@ -302,11 +334,43 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       int rCol = unit.remoteUnit;
       bool deleted = unit.deleted;
       LinkDeclare decl;
-      decl.mode = LINK_DECLARE_COLUMN;
+      decl.mode = LINK_DECLARE_MERGE;
+      decl.column = true;
       decl.rc_id_pivot = pCol;
       decl.rc_id_local = lCol;
       decl.rc_id_remote = rCol;
+      decl.rc_deleted = deleted;
       output.declareLink(decl);
+    }
+
+    // perspective: LOCAL, ROW
+    for (int i=0; i<local.height(); i++) {
+      LinkDeclare decl;
+      decl.mode = LINK_DECLARE_LOCAL;
+      decl.column = false;
+      decl.rc_id_pivot = row_local.a2b(i);
+      decl.rc_id_local = i;
+      decl.rc_id_remote = -1;
+      if (decl.rc_id_pivot!=-1) {
+	decl.rc_id_remote = row_remote.b2a(decl.rc_id_pivot);
+      }
+      decl.rc_deleted = 0;
+      output.declareLink(decl);      
+    }
+
+    // perspective: REMOTE, ROW
+    for (int i=0; i<remote.height(); i++) {
+      LinkDeclare decl;
+      decl.mode = LINK_DECLARE_REMOTE;
+      decl.column = false;
+      decl.rc_id_pivot = row_remote.a2b(i);
+      decl.rc_id_local = -1;
+      if (decl.rc_id_pivot!=-1) {
+	decl.rc_id_local = row_local.b2a(decl.rc_id_pivot);
+      }
+      decl.rc_id_remote = i;
+      decl.rc_deleted = 0;
+      output.declareLink(decl);      
     }
   }
 

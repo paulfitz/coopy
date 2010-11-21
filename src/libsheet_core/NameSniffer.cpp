@@ -9,6 +9,7 @@ using namespace std;
 
 void NameSniffer::sniff() {
   embed = false;
+  fake = false;
   names.clear();
 
   SheetSchema *schema = sheet.getSchema();
@@ -33,6 +34,7 @@ void NameSniffer::sniff() {
   div = stat.getRowDivider();
   if (div<0) {
     // no obvious header
+    fake = true;
     return;
   }
 
@@ -55,6 +57,7 @@ void NameSniffer::sniff() {
   }
   if (failure) {
     names.clear();
+    fake = true;
   } else {
     embed = true;
   }

@@ -44,7 +44,12 @@ public:
     ColumnType t;
     t.primaryKey = col2pk[x];
     t.primaryKeySet = true;
+    printf(">> %d %s\n", x, col2sql[x].c_str());
     return ColumnInfo(col2sql[x],t);
+  }
+
+  virtual int getColumnCount() const {
+    return (int)col2sql.size();
   }
 
   virtual SheetSchema *getSchema() const;
@@ -75,6 +80,10 @@ public:
 
   virtual ColumnInfo getColumnInfo(int x) {
     return sheet->getColumnInfo(x);
+  }
+
+  virtual int getColumnCount() const {
+    return sheet->getColumnCount();
   }
 
   virtual bool providesPrimaryKeys() const {

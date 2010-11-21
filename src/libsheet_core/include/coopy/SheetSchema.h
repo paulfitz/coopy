@@ -42,6 +42,8 @@ public:
   virtual std::string getSheetName() const {
     return "";
   }
+
+  virtual SheetSchema *clone() const;
 };
 
 class coopy::store::SimpleSheetSchema : public SheetSchema {

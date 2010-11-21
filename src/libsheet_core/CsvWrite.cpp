@@ -32,11 +32,20 @@ int CsvFile::write(const DataSheet& src, const Property& config) {
     style.setFromFilename(fname.c_str());
   }
   style.setFromProperty(config);
+  bool wantHeader = true;
+  bool wantFakeHeader = false;
   if (config.check("header")) {
     int n = config.get("header").asInt();
-    if (n>=0) {
-      NameSniffer sniffer(src);
-      if (!sniffer.isEmbedded()) {
+    if (n<0) {
+      wantHeader = false;
+    } else {
+      wantFakeHeader = true;
+    }
+  }
+  if (wantHeader) {
+    NameSniffer sniffer(src);
+    if (!sniffer.isEmbedded()) {
+      if (wantFakeHeader||!sniffer.isFake()) {
 	CsvSheet header;
 	header.resize(src.width(),1,"");
 	for (int i=0; i<src.width(); i++) {

@@ -59,6 +59,15 @@ public:
     }
   }
 
+  const Poly& operator = (const Poly& alt) {
+    clear();
+    owned = alt.owned;
+    ref = alt.ref;
+    if (ref!=0/*NULL*/&&owned) {
+      ref->addReference();
+    }
+  }
+
   virtual ~Poly() {
     clear();
   }
@@ -78,15 +87,15 @@ public:
     return ref!=0/*NULL*/;
   }
 
-  T& operator *() {
+  T& operator *() const {
     return *ref;
   }
 
-  T *operator ->() {
+  T *operator ->() const {
     return ref;
   }
 
-  T *getContent() {
+  T *getContent() const {
     return ref;
   }
 

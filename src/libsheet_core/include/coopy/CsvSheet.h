@@ -19,6 +19,7 @@ private:
   bool valid;
   SheetStyle style;
   bool strict;
+  Poly<SheetSchema> pSchema;
 public:
   using EscapedTypedSheet<std::string>::resize;
   using EscapedTypedSheet<std::string>::insertRow;
@@ -27,6 +28,14 @@ public:
     tw = th = 0;
     valid = true;
     strict = true;
+  }
+
+  virtual SheetSchema *getSchema() const {
+    return pSchema.getContent();
+  }
+
+  void setSchema(Poly<SheetSchema> pSchema) {
+    this->pSchema = pSchema;
   }
 
   const SheetStyle& getStyle() {
