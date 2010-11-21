@@ -212,6 +212,22 @@ public:
     return sheet->applySchema(ss);
   }
 
+  virtual bool applyRowCache(const RowCache& cache, int row) {
+    COOPY_ASSERT(sheet);
+    return sheet->applyRowCache(cache,row);
+  }
+
+  virtual bool deleteData() {
+    COOPY_ASSERT(sheet);
+    return sheet->deleteData();
+  }
+
+  virtual bool hasExternalColumnNames() const {
+    COOPY_ASSERT(sheet);
+    return sheet->hasExternalColumnNames();
+  }
+
+
   virtual std::string getDescription() const {
     return "poly";
   }

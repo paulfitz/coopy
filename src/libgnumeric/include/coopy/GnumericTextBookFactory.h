@@ -16,11 +16,7 @@ public:
     return "gnumeric";
   }
 
-  virtual bool check(const char *fname, 
-		     const char *ext,
-		     const char *data);
-
-  virtual TextBook *load(const char *fname);
+  virtual TextBook *open(AttachConfig& config, AttachReport& report);
 };
 
 #endif

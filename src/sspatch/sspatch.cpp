@@ -42,7 +42,6 @@ int main(int argc, char *argv[]) {
   bool fake = false;
   string output = "-";
   string tmp = "-";
-  string outputFormat = "-";
   while (true) {
     int option_index = 0;
     static struct option long_options[] = {
@@ -69,9 +68,6 @@ int main(int argc, char *argv[]) {
       break;
     case 't':
       tmp = optarg;
-      break;
-    case 'f':
-      outputFormat = optarg;
       break;
     default:
       fprintf(stderr, "Unrecognized option\n");
@@ -157,7 +153,7 @@ int main(int argc, char *argv[]) {
   //if (CsvFile::write(local,output.c_str())!=0) {
   if ((!local.inplace())||(tmp!=output)) {
     if (output!=argv[0] || !local.inplace()) {
-      if (!local.write(output.c_str(),outputFormat.c_str())) {
+      if (!local.write(output.c_str())) {
 	fprintf(stderr,"Failed to write %s\n", output.c_str());
 	return 1;
       }

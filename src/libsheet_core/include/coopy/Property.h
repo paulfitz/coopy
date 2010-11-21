@@ -21,10 +21,15 @@ public:
   virtual ~Value() {}
 
   virtual int asInt() const { return 0; }
+  virtual bool asBoolean() const { return false; }
   virtual std::string asString() const { return ""; }
+  virtual Property& asMap();
+  virtual const Property& asMap() const;
 
   virtual bool isInt() const { return false; }
+  virtual bool isBoolean() const { return false; }
   virtual bool isString() const { return false; }    
+  virtual bool isMap() const { return false; }    
 
   virtual bool isNull() const { return true; }
 };
@@ -68,11 +73,19 @@ public:
   }
   
   bool setInt(int x);
+  bool setBoolean(bool x);
   bool setString(const char *str);
+  bool setString(const std::string& str);
   bool setNull();
+  bool setMap();
 
   virtual int asInt() const { 
     if (value!=0/*NULL*/) return value->asInt();
+    return 0; 
+  }
+
+  virtual bool asBoolean() const { 
+    if (value!=0/*NULL*/) return value->asBoolean();
     return 0; 
   }
 
@@ -83,6 +96,11 @@ public:
 
   virtual bool isInt() const { 
     if (value!=0/*NULL*/) return value->isInt();
+    return false; 
+  }
+
+  virtual bool isBoolean() const { 
+    if (value!=0/*NULL*/) return value->isBoolean();
     return false; 
   }
 
@@ -102,27 +120,69 @@ public:
     return v;
   }
 
+  static PolyValue makeBoolean(bool x) {
+    PolyValue v;
+    v.setBoolean(x);
+    return v;
+  }
+
   static PolyValue makeString(const char *str) {
     PolyValue v;
     v.setString(str);
     return v;
   }
+
+  static PolyValue makeString(const std::string& str) {
+    PolyValue v;
+    v.setString(str);
+    return v;
+  }
+
+  static PolyValue makeMap() {
+    PolyValue v;
+    v.setMap();
+    return v;
+  }
 };
 
-class coopy::store::Property {
+class coopy::store::Property : public Value {
 private:
   std::map<std::string,PolyValue> data;
   PolyValue nullValue;
+  static Property nullProperty;
 
 public:
+  virtual bool isMap() const { return true; }
+  virtual bool isNull() const { return false; }
+  virtual Property& asMap() { return *this; }
+  virtual const Property& asMap() const { return *this; }
+
   bool put(const char *key, int val) {
     data[key] = PolyValue();
     return data[key].setInt(val);
   }
 
+  bool put(const char *key, bool val) {
+    data[key] = PolyValue();
+    return data[key].setBoolean(val);
+  }
+
   bool put(const char *key, const char *str) {
     data[key] = PolyValue();
     return data[key].setString(str);
+  }
+
+  bool put(const char *key, const std::string& str) {
+    data[key] = PolyValue();
+    return data[key].setString(str);
+  }
+
+  Property& nest(const char *key) {
+    data[key] = PolyValue();
+    if (!data[key].setMap()) {
+      return nullProperty;
+    }
+    return data[key].asMap();
   }
 
   bool check(const char *key) const {
@@ -140,6 +200,10 @@ public:
     std::map<std::string,PolyValue>::const_iterator it = data.find(key);    
     if (it==data.end()) return default_value;
     return it->second;
+  }
+
+  static Property& getNullProperty() {
+    return nullProperty;
   }
 };
 

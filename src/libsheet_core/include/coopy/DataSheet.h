@@ -14,10 +14,24 @@
 
 namespace coopy {
   namespace store {
+    class RowCache;
     class DataSheet;
     class SheetRow;
+    class CacheSheetRow;
   }
 }
+
+class coopy::store::RowCache {
+public:
+  std::vector<bool> flags;
+  std::vector<SheetCell> cells;
+
+  RowCache(int len) {
+    flags.resize(len,false);
+    cells.resize(len);
+  }
+};
+
 
 class coopy::store::DataSheet : public RefCount {
 public:
@@ -101,6 +115,10 @@ public:
     return false;
   }
 
+  virtual bool deleteData() {
+    return false;
+  }
+
   // insert a row before base; if base is invalid insert after all rows
   virtual RowRef insertRow(const RowRef& base) {
     return RowRef(); // invalid row
@@ -117,11 +135,17 @@ public:
 
   virtual bool canResize() { return false; }
 
+  virtual bool hasExternalColumnNames() const {
+    return false;
+  }
+
   virtual bool resize(int w, int h) {
     return false;
   }
 
   virtual Poly<SheetRow> insertRow();
+
+  virtual bool applyRowCache(const RowCache& cache, int row = -1);
 
   virtual bool applySchema(const SheetSchema& ss) {
     return false;
@@ -152,7 +176,7 @@ public:
 };
 
 class coopy::store::SheetRow : public RefCount {
-private:
+protected:
   int y;
   DataSheet *sheet;
 public:
@@ -175,6 +199,30 @@ public:
 
   virtual bool flush() {
     return true;
+  }
+};
+
+
+class coopy::store::CacheSheetRow : public SheetRow {
+protected:
+  RowCache cache;
+public:
+  CacheSheetRow(DataSheet *sheet, int y) : SheetRow(sheet,y), 
+    cache(sheet->width()) {
+  }
+
+  virtual SheetCell getCell(int x) const {
+    return sheet->cellSummary(x,y);
+  }
+  
+  virtual bool setCell(int x, const SheetCell& c) {
+    cache.cells[x] = c;
+    cache.flags[x] = true;
+    return true;
+  }
+
+  virtual bool flush() {
+    return sheet->applyRowCache(cache,y);
   }
 };
 

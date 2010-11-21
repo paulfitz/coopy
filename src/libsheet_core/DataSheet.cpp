@@ -104,9 +104,23 @@ bool DataSheet::copyData(const DataSheet& src) {
   return true;
 }
 
+bool DataSheet::applyRowCache(const RowCache& cache, int row) {
+  if (row==-1) {
+    fprintf(stderr,"Sheet requires a row\n");
+    return false;
+  }
+  for (int i=0; i<(int)cache.cells.size(); i++) {
+    if (cache.flags[i]) {
+      setCell(i,row,cache.cells[i]);
+    }
+  }
+  return true;
+}
+
+
 Poly<SheetRow> DataSheet::insertRow() {
   //printf("attaching sheet for insertion %s\n", desc().c_str());
-  SheetRow *row = new SheetRow(this,height());
+  SheetRow *row = new CacheSheetRow(this,height());
   COOPY_ASSERT(row);
   return Poly<SheetRow>(row,true);
 }

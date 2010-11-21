@@ -38,18 +38,47 @@ public:
   virtual bool providesPrimaryKeys() const {
     return false;
   }
+
+  virtual std::string getSheetName() const {
+    return "";
+  }
 };
 
 class coopy::store::SimpleSheetSchema : public SheetSchema {
 private:
+  std::string sheetName;
   std::vector<std::string> columns;
+  std::vector<ColumnType> kinds;
+  int hh;
 public:
+  SimpleSheetSchema() {
+    hh = 0;
+  }
+
+  void setHeaderHeight(int hh) {
+    this->hh = hh;
+  }
+
+  virtual int headerHeight() const {
+    return hh;
+  }
+
+  void setSheetName(const char *name) {
+    sheetName = name;
+  }
+
   void addColumn(const char *name) {
     columns.push_back(name);
+    kinds.push_back(ColumnType());
+  }
+
+  void addColumn(const char *name, const ColumnType& kind) {
+    columns.push_back(name);
+    kinds.push_back(kind);
   }
 
   virtual ColumnInfo getColumnInfo(int x) const {
-    return ColumnInfo(columns[x]);
+    return ColumnInfo(columns[x],kinds[x]);
   }
 
   virtual int getColumnCount() const {
@@ -62,6 +91,10 @@ public:
 
   virtual bool providesPrimaryKeys() const {
     return false;
+  }
+
+  virtual std::string getSheetName() const {
+    return sheetName;
   }
 };
 

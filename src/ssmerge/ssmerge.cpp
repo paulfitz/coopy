@@ -7,6 +7,7 @@
 #include <coopy/MergeOutputAccum.h>
 #include <coopy/MergeOutputIndex.h>
 #include <coopy/PolyBook.h>
+#include <coopy/Dbg.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -69,6 +70,7 @@ int main(int argc, char *argv[]) {
     printf("  ssmerge [--head-trimmed] [--tail-trimmed] parent.csv local.csv remote.csv\n");
     return 1;
   }
+  coopy_set_verbose(verbose);
   PolyBook local, remote, parent;
   if (!parent.read(argv[0])) {
     fprintf(stderr,"Failed to read %s\n", argv[0]);
@@ -96,13 +98,21 @@ int main(int argc, char *argv[]) {
     }
   } else {
     MergeOutputIndex accum;
-    CsvSheet result;
-    PolySheet pResult(&result,false);
+    PolyBook book;
+    book.attach(output.c_str());
+    accum.attachBook(book);
+    /*
+    //CsvSheet result;
+    //PolySheet pResult(&result,false);
+    
     accum.attachSheet(pResult);
+    */
     cmp.compare(parent,local,remote,accum,flags);
+    /*
     if (CsvFile::write(accum.getSheet(),output.c_str())!=0) {
       return 1;
     }
+    */
   }
   return 0;
 }

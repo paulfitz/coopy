@@ -1,7 +1,10 @@
 #include <coopy/DataBook.h>
+#include <coopy/SchemaSniffer.h>
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <algorithm>
 
 using namespace std;
 using namespace coopy::store;
@@ -35,3 +38,79 @@ bool DataBook::operator==(const DataBook& alt) const {
 }
 
 
+bool DataBook::copy(const DataBook& alt, const Property& options) {
+  DataBook& src = (DataBook &) alt;
+  vector<string> names = src.getNames();
+  vector<string> names0 = getNames();
+  for (int i=0; i<(int)names.size(); i++) {
+    string name = names[i];
+    dbg_printf("Working on %s\n", name.c_str());
+    vector<string>::const_iterator it = find(names0.begin(),names0.end(),name);
+    PolySheet sheet = src.readSheet(name);
+    string target_name = name;
+    SheetSchema *schema = sheet.getSchema();
+    SchemaSniffer sniffer(sheet,name.c_str());
+    if (schema==NULL) {
+      dbg_printf(" - No schema available\n");
+      schema = sniffer.suggestSchema();
+      dbg_printf("  - Have a schema guess with %d columns\n", 
+		 schema->getColumnCount());
+    }
+    if (schema==NULL) {
+      fprintf(stderr, "Cannot determine sheet schema: %s\n", name.c_str());
+      return false;
+    }
+    PolySheet target = readSheet(target_name);
+    if (!target.isValid()) {
+      if (!addSheet(*schema)) {
+	fprintf(stderr, "Failed to create sheet %s\n", name.c_str());
+	return false;
+      }
+      target = readSheet(target_name);
+    }
+    if (!target.isValid()) {
+      fprintf(stderr, "Failed to localize sheet %s\n", name.c_str());
+      return false;
+    }
+    if (target.width()!=sheet.width()) {
+      fprintf(stderr, "Column mismatch %s\n", name.c_str());
+      return false;
+    }
+    if (target.height()!=0) {
+      target.deleteData();
+    }
+    if (target.height()!=0) {
+      fprintf(stderr, "Could not remove existing data: %s\n", name.c_str());
+      return false;
+    }
+    int start = 0;
+    if (schema->headerHeight()>0) {
+      if (target.hasExternalColumnNames()) {
+	start += schema->headerHeight();
+      }
+    }
+    for (int i=start; i<sheet.height(); i++) {
+      Poly<SheetRow> pRow = target.insertRow();
+      SheetRow& row = *pRow;
+      for (int j=0; j<sheet.width(); j++) {
+	row.setCell(j,sheet.getCell(j,i));
+      }
+      row.flush();
+    }
+  }
+  return true;
+}
+
+
+PolySheet DataBook::provideSheet(const SheetSchema& schema) {
+  dbg_printf("provideSheet %s for %s\n", schema.getSheetName().c_str(),
+	     desc().c_str());
+  PolySheet result = readSheet(schema.getSheetName());
+  if (result.isValid()) {
+    return result;
+  }
+  if (addSheet(schema)) {
+    return readSheet(schema.getSheetName());
+  }
+  return result;
+}

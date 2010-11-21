@@ -7,6 +7,8 @@
 #define WANT_VECTOR2STRING
 #include <coopy/Stringer.h>
 
+#include <algorithm>
+
 using namespace std;
 using namespace coopy::store;
 
@@ -93,6 +95,27 @@ vector<string> SqliteTextBook::getNamesSql() {
 }
 
 PolySheet SqliteTextBook::readSheet(const string& name) {
+  getNames();
+  if (find(names.begin(),names.end(),name)==names.end()) {
+    return PolySheet();
+  }
   SqliteSheet *sheet = new SqliteSheet(implementation,name.c_str());
+  if (sheet!=NULL) sheet->connect();
   return PolySheet(sheet,true);
 }
+
+bool SqliteTextBook::addSheet(const SheetSchema& schema) {
+  dbg_printf("sqlitetextbook::addsheet %s\n", schema.getSheetName().c_str());
+  string name = schema.getSheetName();
+  getNames();
+  if (find(names.begin(),names.end(),name)!=names.end()) {
+    return false;
+  }
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return false;
+  SqliteSheet sheet(db,schema.getSheetName().c_str());
+  bool ok = sheet.create(schema);
+  names.push_back(name);
+  return ok;
+}
+

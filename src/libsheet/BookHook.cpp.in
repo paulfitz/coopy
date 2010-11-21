@@ -27,6 +27,15 @@ using namespace coopy::store;
 
 #include <coopy/SqliteTextBook.h>
 
+void getFactories(vector<TextBookFactory *>& lst) {
+#ifdef USE_GNUMERIC
+  lst.push_back(new GnumericTextBookFactory());
+#endif  
+#ifdef USE_REMOTE_SQL
+  lst.push_back(new RemoteSqlTextBookFactory("mysql"));
+#endif
+}
+
 TextBook *readHelper(const char *fname,
 		     const char *ext,
 		     const char *data) {
@@ -62,6 +71,7 @@ TextBook *readHelper(const char *fname,
     }  
   }
 #ifdef USE_GNUMERIC
+  /*
   dbg_printf("Trying with Gnumeric...\n");
   GnumericTextBookFactory fact;
   if (fact.check(fname,ext,data)) {
@@ -73,6 +83,7 @@ TextBook *readHelper(const char *fname,
   } else {
     dbg_printf("Not a Gnumeric-readable file\n");
   }
+  */
 #endif
   return result;
 }

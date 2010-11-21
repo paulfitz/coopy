@@ -47,7 +47,11 @@ public:
   }
 
   virtual ColumnInfo getColumnInfo(int x) {
-    return ColumnInfo(col2sql[x],col2pk[x]);
+    ColumnType t;
+    t.primaryKey = col2pk[x];
+    t.primaryKeySet = true;
+    return ColumnInfo(col2sql[x],t);
+    //return ColumnInfo(col2sql[x],col2pk[x]);
   }
 
   virtual SheetSchema *getSchema() const;

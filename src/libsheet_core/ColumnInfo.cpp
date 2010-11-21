@@ -4,6 +4,29 @@
 
 using namespace coopy::store;
 
-int ColumnInfo_has_no_symbols_any_more() {
-  return 42;
+bool ColumnType::setType(const std::string& name, 
+			 const std::string& lang) {
+  reset();
+  if (name=="INT"||name=="INTEGER") {
+    family = COLUMN_FAMILY_INTEGER;
+  } else if (name=="TEXT") {
+    family = COLUMN_FAMILY_TEXT;
+  }
+  return family!=COLUMN_FAMILY_NONE;
 }
+
+
+std::string ColumnType::asSqlite() const {
+  std::string result = "";
+  switch (family) {
+  case COLUMN_FAMILY_INTEGER:
+    result = "INTEGER";
+    break;
+  case COLUMN_FAMILY_TEXT:
+    result = "TEXT";
+    break;
+  }
+  return result;
+}
+
+

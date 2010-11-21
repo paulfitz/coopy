@@ -40,6 +40,18 @@ public:
   }
 
   bool operator==(const DataBook& alt) const;
+
+  virtual bool copy(const DataBook& alt, const Property& options);
+
+  virtual bool addSheet(const SheetSchema& schema) {
+    return false;
+  }
+
+  virtual PolySheet provideSheet(const SheetSchema& schema);
+
+  virtual std::string desc() const {
+    return "DataBook";
+  }
 };
 
 #endif

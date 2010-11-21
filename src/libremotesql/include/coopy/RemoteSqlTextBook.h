@@ -3,10 +3,12 @@
 
 #include <coopy/TextBook.h>
 #include <coopy/Property.h>
+#include <coopy/TextBookFactory.h>
 
 namespace coopy {
   namespace store {
     class RemoteSqlTextBook;
+    class RemoteSqlTextBookFactory;
   }
 }
 
@@ -40,6 +42,35 @@ private:
   std::string database_name;
   std::vector<std::string> names_cache;
   bool dirty;
+};
+
+
+class coopy::store::RemoteSqlTextBookFactory : public TextBookFactory {
+private:
+  std::string name;
+public:
+  RemoteSqlTextBookFactory(const char *name = "mysql") : name(name) {
+  }
+  
+  virtual std::string getName() {
+    return name;
+  }
+
+  virtual TextBook *open(AttachConfig& config, AttachReport& report) {
+    if (config.shouldCreate||config.shouldWrite) {
+      return NULL;
+    }
+    RemoteSqlTextBook *book = new RemoteSqlTextBook();
+    if (book==NULL) return NULL;
+    if (!book->open(config.options)) {
+      delete book;
+      book = NULL;
+    }
+    if (book!=NULL) {
+      report.success = true;
+    }
+    return book;
+  }
 };
 
 #endif

@@ -6,8 +6,19 @@ using namespace std;
 namespace coopy {
   namespace store {
     class IntValue;
+    class BooleanValue;
     class StringValue;
   }
+}
+
+Property Property::nullProperty;
+
+Property& Value::asMap() {
+  return Property::getNullProperty();
+}
+
+const Property& Value::asMap() const {
+  return Property::getNullProperty();
 }
 
 class coopy::store::IntValue : public Value {
@@ -18,6 +29,19 @@ public:
   virtual bool isInt() const { return true; }
   virtual bool isNull() const { return false; }
   virtual int asInt() const { return x; }  
+  virtual bool asBoolean() const { return (x!=0); }  
+};
+
+class coopy::store::BooleanValue : public Value {
+public:
+
+  bool x;
+  BooleanValue(bool x): x(x) {}
+
+  virtual bool isBoolean() const { return true; }
+  virtual bool isNull() const { return false; }
+  virtual int asInt() const { return x?1:0; }  
+  virtual bool asBoolean() const { return x; }  
 };
 
 class coopy::store::StringValue : public Value {
@@ -37,7 +61,21 @@ bool PolyValue::setInt(int x) {
   return value!=NULL;
 }
 
+bool PolyValue::setBoolean(bool x) {
+  setNull();
+  value = new BooleanValue(x);
+  if (value!=NULL) value->addReference();
+  return value!=NULL;
+}
+
 bool PolyValue::setString(const char *str) {
+  setNull();
+  value = new StringValue(str);
+  if (value!=NULL) value->addReference();
+  return value!=NULL;
+}
+
+bool PolyValue::setString(const std::string& str) {
   setNull();
   value = new StringValue(str);
   if (value!=NULL) value->addReference();
@@ -47,3 +85,11 @@ bool PolyValue::setString(const char *str) {
 bool PolyValue::setNull() {
   clear();
 }
+
+bool PolyValue::setMap() {
+  setNull();
+  value = new Property();
+  if (value!=NULL) value->addReference();
+  return value!=NULL;
+}
+

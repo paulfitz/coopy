@@ -4,19 +4,30 @@
 using namespace coopy::store;
 using namespace coopy::cmp;
 
-bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
-  PolySheet sheet = getSheet();
+bool MergeOutputIndex::mergeStart() {
+  SimpleSheetSchema ss;
+  ss.setSheetName("links");
+  ss.addColumn("category",ColumnType("TEXT"));
+  ss.addColumn("pivot",ColumnType("INTEGER"));
+  ss.addColumn("local",ColumnType("INTEGER"));
+  ss.addColumn("remote",ColumnType("INTEGER"));
+  links = getBook()->provideSheet(ss);
 
-  if (sheet.width()==0) {
-    SimpleSheetSchema ss;
-    ss.addColumn("category");
-    ss.addColumn("pivot");
-    ss.addColumn("local");
-    ss.addColumn("remote");
-    sheet.applySchema(ss);
+  if (!links.isValid()) {
+    fprintf(stderr,"* Could not generate links sheet\n");
+    exit(1);
+    return false;
   }
 
-  Poly<SheetRow> pRow = sheet.insertRow();
+  return true;
+}
+
+bool MergeOutputIndex::mergeDone() {
+  return true;
+}
+
+bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
+  Poly<SheetRow> pRow = links.insertRow();
   
   dbg_printf("LINK %d %d %d %d\n",
 	     decl.mode,

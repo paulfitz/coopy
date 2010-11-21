@@ -31,6 +31,12 @@ bool JsonProperty::add(Property& prop, Json::Value& root) {
        dbg_printf("Got %s -> %d\n", it.memberName(),
 		  (*it).asBool()?1:0);
        prop.put(it.memberName(),(*it).asBool()?1:0);
+     } else if ((*it).isObject()) {
+       Property& sub = prop.nest(it.memberName());
+       if (!JsonProperty::add(sub,*it)) {
+	 fprintf(stderr, "JSON: nesting failed\n");
+	 return false;
+       }
      } else {
        fprintf(stderr, "JSON: unsupported type\n");
        return false;

@@ -6,9 +6,14 @@
 #include <coopy/FormatSniffer.h>
 #include <coopy/Dbg.h>
 #include <coopy/JsonProperty.h>
+#include <coopy/TextBookFactory.h>
+#include <coopy/ShortTextBookFactory.h>
+#include <coopy/SqliteTextBook.h>
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <map>
 #include <fstream>
@@ -19,10 +24,63 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::format;
 
+static bool exists(const char *fname) {
+  struct stat s;
+  int result = stat(fname,&s);
+  return (result==0);
+}
+
 extern TextBook *readHelper(const char *fname,
 			    const char *ext,
 			    const char *data);
 
+extern void getFactories(vector<TextBookFactory *>& lst);
+
+class Factories {
+public:
+  vector<TextBookFactory *> all;
+
+  Factories() {
+    all.push_back(new ShortTextBookFactory);
+    all.push_back(new SqliteTextBookFactory);
+    getFactories(all);
+  }
+
+  ~Factories() {
+    for (int i=0; i<(int)all.size(); i++) {
+      if (all[i]==NULL) {
+	delete all[i];
+      }
+    }
+  }
+
+  TextBook *open(AttachConfig& config, AttachReport& report) {
+    string key = config.options.get("type").asString();
+    for (int i=0; i<(int)all.size(); i++) {
+      if (all[i]==NULL) {
+	fprintf(stderr,"Failed to allocate a factory\n");
+	return NULL;
+      }
+      if (all[i]->getName()==key) {
+	dbg_printf("operating on %s\n", key.c_str());
+	TextBook *result = all[i]->open(config,report);
+	dbg_printf("success %d msg %s\n", (int)report.success,
+		   report.msg.c_str());
+	if (!report.success) {
+	  fprintf(stderr,"* %s%s%s\n", 
+		  key.c_str(),
+		  (report.msg!="")?": ":" operation failed.",
+		  report.msg.c_str());
+	}
+	return result;
+      }
+    }
+    fprintf(stderr,"* Book type not known (%s)\n", key.c_str());
+    return NULL;
+  }
+};
+
+/*
 bool PolyBook::read(const char *fname) {
   clear();
   string name = fname;
@@ -76,7 +134,7 @@ bool PolyBook::read(const char *fname) {
   }
   return book!=NULL;
 }
-
+*/
 
 class Namer {
 public:
@@ -119,6 +177,7 @@ public:
   }
 };
 
+/*
 bool PolyBook::write(const char *fname, const char *format) {
   string name = fname;
   size_t eid = name.rfind(".");
@@ -221,3 +280,111 @@ bool PolyBook::write(const char *fname, const char *format) {
   return CsvFile::write(sheet,fname)==0;
 }
 
+*/
+
+bool PolyBook::attach(Property& config) {
+  if (config.check("should_clear")) {
+    if (config.get("should_clear").asBoolean()) {
+      clear();
+    }
+  }
+  string filename = config.get("file").asString();
+  string name = filename;
+  size_t eid = name.rfind(".");
+  string ext = ".csv";
+  if (eid!=string::npos) {
+    ext = name.substr(eid);
+  }
+  for (size_t i=0; i<ext.length(); i++) {
+    ext[i] = tolower(ext[i]);
+  }
+  dbg_printf("Attach: extension is %s\n", ext.c_str());
+
+  if (ext == ".json") {
+    dbg_printf("Asked to attach, with json configuration\n");
+    if (!JsonProperty::add(config,filename)) {
+      return false;
+    }
+    filename = config.get("file",PolyValue::makeString("-")).asString();
+    ext = "";
+    config.put("ext","");
+  } else {
+    config.put("ext",ext);
+  }
+
+  string key = config.get("type",PolyValue::makeString("")).asString();
+
+  if (key=="") {
+    if (ext==".csv"||ext==".ssv"||ext==".tsv"||ext==".txt") {
+      key = "csv";
+    }
+    if (ext==".xls"||ext==".xlsx"||ext==".gnumeric") {
+      key = "gnumeric";
+    }
+    if (ext==".sqlite") {
+      key = "sqlite";
+    }
+  }
+  if (key==""&&filename=="-") {
+    key = "csv";
+  }
+
+  dbg_printf("Attach: type %s file %s\n", key.c_str(), filename.c_str());
+
+  if (key=="") {
+    fprintf(stderr,"* Extension %s not known, maybe use a .json config file?\n",
+	    ext.c_str());
+    return false;
+  }
+  config.put("type",key);
+
+  Factories f;
+  AttachConfig ac;
+  AttachReport ar;
+  ac.fname = filename;
+  ac.ext = ext;
+  ac.data = "";
+  ac.options = config;
+  ac.canCreate = config.get("can_create").asBoolean();
+  ac.canOverwrite = true;
+  ac.shouldRead = config.get("should_read").asBoolean();
+  ac.shouldWrite = config.get("should_write").asBoolean();
+  ac.prevBook = book;
+  ac.prevOptions = options;
+  TextBook *nextBook = f.open(ac,ar);
+  if (nextBook!=NULL) {
+    if (book!=NULL) {
+      if (nextBook!=book) {
+	clear();
+      }
+    }
+  }
+  book = nextBook;
+  options = config;
+  return book!=NULL;
+}
+
+/*
+bool PolyBook::load() {
+  if (filename=="") {
+    fprintf(stderr, "No file to read.\n");
+    return false;
+  }
+  if (!exists(filename)) {
+    fprintf(stderr, "Cannot read %s\n", filename.c_str());
+    return false;
+  }
+  return false;
+}
+
+bool PolyBook::save() {
+  if (inplace) {
+    return true;
+  }
+  if (filename=="") {
+    fprintf(stderr,"No filename to save to.\n");
+    return false;
+  }
+  return false;
+}
+*/

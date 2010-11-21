@@ -2,6 +2,7 @@
 #define COOPY_MERGEOUTPUTINDEX
 
 #include <coopy/MergeOutput.h>
+#include <coopy/PolySheet.h>
 
 namespace coopy {
   namespace cmp {
@@ -11,9 +12,11 @@ namespace coopy {
 
 class coopy::cmp::MergeOutputIndex : public MergeOutput {
 public:
-  virtual bool mergeStart() {
-    return true;
-  }
+  coopy::store::PolySheet links;
+
+  virtual bool mergeStart();
+
+  virtual bool mergeDone();
 
   virtual bool declareLink(const LinkDeclare& decl);
 

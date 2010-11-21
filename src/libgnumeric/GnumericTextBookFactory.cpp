@@ -3,20 +3,24 @@
 using namespace coopy::store;
 using namespace std;
 
-bool GnumericTextBookFactory::check(const char *fname, 
-				    const char *ext,
-				    const char *data) {
-  // toy test
-  return (string(ext)==".xls"||string(ext)==".xlsx"||string(ext)==".gnumeric");
-}
-
-TextBook *GnumericTextBookFactory::load(const char *fname) {
+TextBook *GnumericTextBookFactory::open(AttachConfig& config, 
+					AttachReport& report) {
+  string ext = config.ext;
+  report.applicable = true;
+  if (config.shouldCreate) {
+    report.errorCreateNotImplemented("gnumeric");
+    return NULL;
+  }
   GnumericTextBook *book = new GnumericTextBook;
   if (book==NULL) return book;
-  if (!book->load(fname)) {
+  if (!book->load(config.fname.c_str())) {
     delete book;
     book = NULL;
   }
+  if (book!=NULL) {
+    report.success = true;
+  }
   return book;
 }
+
 

@@ -8,8 +8,10 @@ using namespace std;
 namespace coopy {
   namespace store {
     class SqliteSchema;
+    //class SqlSheetRow;
   }
 }
+
 
 class coopy::store::SqliteSchema {
 public:
@@ -39,12 +41,14 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
   this->name = name;
   w = h = 0;
 
-  sqlite3 *db = DB(implementation);
-  if (db==NULL) return;
-
   schema = new SqliteSheetSchema;
   COOPY_MEMORY(schema);
   schema->sheet = this;
+}
+
+bool SqliteSheet::connect() {
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return false;
 
   sqlite3_stmt *statement = NULL;
   char *query = NULL;
@@ -126,7 +130,63 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
   sqlite3_free(query);
 
   checkKeys();
+
+  return true;
 }
+
+bool SqliteSheet::create(const SheetSchema& schema) {
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return false;
+
+  name = schema.getSheetName();
+  dbg_printf("sqlitesheet::create %s\n", name.c_str());
+
+  sqlite3_stmt *statement = NULL;
+  char *query = NULL;
+
+  string cols = "";
+  for (int i=0; i<schema.getColumnCount(); i++) {
+    ColumnInfo ci = schema.getColumnInfo(i);
+    string cname = ci.getName();
+    if (cname=="" || cname=="*") {
+      fprintf(stderr,"Invalid/unknown column name\n");
+      return false;
+    }
+    if (cols!="") {
+      cols += ',';
+    }
+    char *squery = NULL;
+    squery = sqlite3_mprintf("%Q", cname.c_str());
+    cols += squery;
+    sqlite3_free(squery);
+    if (ci.hasType()) {
+      string t = ci.getColumnType().asSqlite();
+      if (t!="") {
+	cols += " ";
+	cols += t;
+      }
+    }
+  }
+
+  query = sqlite3_mprintf("CREATE TABLE %Q (%s)", 
+			  name.c_str(),
+			  cols.c_str());
+
+  int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
+  if (iresult!=SQLITE_OK) {
+    const char *msg = sqlite3_errmsg(db);
+    if (msg!=NULL) {
+      fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
+    }
+    sqlite3_free(query);
+    return false;
+  }
+  sqlite3_free(query);
+
+  return connect();
+}
+
 
 SqliteSheet::~SqliteSheet() {
   if (schema!=NULL) delete schema;
@@ -331,7 +391,7 @@ RowRef SqliteSheet::insertRow(const RowRef& base) {
   // This is suboptimal.
 
   sqlite3 *db = DB(implementation);
-  if (db==NULL) return false;
+  if (db==NULL) return RowRef(-1);
   int index = base.getIndex();
   
   if (index!=-1) {
@@ -384,6 +444,94 @@ bool SqliteSheet::deleteRow(const RowRef& src) {
   sqlite3_free(query);
   row2sql.erase(row2sql.begin()+index);
   h--;
+  return true;
+}
+
+
+bool SqliteSheet::applyRowCache(const RowCache& cache, int row) {
+  // Relies on having default values, to insert "blank row".
+  // This is suboptimal.
+
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return false;
+  
+  if (row!=-1 && row!=height()) {
+    fprintf(stderr,"*** WARNING: Row insertion order ignored for Sqlite\n");
+  }
+
+  string cols = "";
+  string vals = "";
+  for (int i=0; i<(int)col2sql.size(); i++) {
+    if (cache.flags[i]) {
+      string cname = col2sql[i];
+      if (cname=="" || cname=="*") {
+	fprintf(stderr,"Invalid/unknown column name\n");
+	return false;
+      }
+      if (cols!="") {
+	cols += ',';
+	vals += ',';
+      }
+      char *squery = NULL;
+      squery = sqlite3_mprintf("%Q", cname.c_str());
+      cols += squery;
+      sqlite3_free(squery);
+      squery = sqlite3_mprintf("%Q", cache.cells[i].escaped?NULL:cache.cells[i].text.c_str());
+      vals += squery;
+      sqlite3_free(squery);
+    }
+  }
+
+  if (cols=="") {
+    RowRef r = insertRow(RowRef(-1));
+    return r.isValid();
+  }
+
+  char *query = sqlite3_mprintf("INSERT INTO %Q (%s) VALUES (%s)",
+				name.c_str(),
+				cols.c_str(),
+				vals.c_str());
+
+  int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
+  if (iresult!=SQLITE_OK) {
+    const char *msg = sqlite3_errmsg(db);
+    if (msg!=NULL) {
+      fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
+    }
+    sqlite3_free(query);
+    return false;
+  }
+  sqlite3_free(query);
+
+  int rid = (int)sqlite3_last_insert_rowid(db);
+
+  // inconsistent ordering
+  row2sql.push_back(rid);
+  h++;
+  return true;
+}
+
+
+bool SqliteSheet::deleteData() {
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return false;
+
+  char *query = sqlite3_mprintf("DELETE FROM %Q WHERE 1", name.c_str());
+
+  int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
+  if (iresult!=SQLITE_OK) {
+    const char *msg = sqlite3_errmsg(db);
+    if (msg!=NULL) {
+      fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
+    }
+    sqlite3_free(query);
+    return false;
+  }
+  sqlite3_free(query);
+  row2sql.clear();
+  h = 0;
   return true;
 }
 

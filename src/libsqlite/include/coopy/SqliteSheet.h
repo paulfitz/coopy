@@ -16,6 +16,9 @@ class coopy::store::SqliteSheet : public DataSheet {
 public:
   SqliteSheet(void *db, const char *name);
 
+  bool connect();
+  bool create(const SheetSchema& schema);
+
   virtual ~SqliteSheet();
 
   virtual int width() const  { return w; }
@@ -38,11 +41,22 @@ public:
   virtual bool deleteRow(const RowRef& src);
 
   virtual ColumnInfo getColumnInfo(int x) {
-    return ColumnInfo(col2sql[x],col2pk[x]);
+    ColumnType t;
+    t.primaryKey = col2pk[x];
+    t.primaryKeySet = true;
+    return ColumnInfo(col2sql[x],t);
   }
 
   virtual SheetSchema *getSchema() const;
-  
+
+  virtual bool applyRowCache(const RowCache& cache, int row);
+
+  virtual bool deleteData();  
+
+  virtual bool hasExternalColumnNames() const {
+    return true;
+  }
+
 private:
   SqliteSheetSchema *schema;
   void *implementation;

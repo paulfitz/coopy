@@ -30,7 +30,7 @@ void NameSniffer::sniff() {
 
   DataStat stat;
   stat.evaluate(sheet);
-  int div = stat.getRowDivider();
+  div = stat.getRowDivider();
   if (div<0) {
     // no obvious header
     return;
