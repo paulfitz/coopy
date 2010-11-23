@@ -181,6 +181,7 @@ bool PatchParser::apply() {
   int len = 0;
   int row_index = -1;
   bool ok = true;
+  bool sequential = true;
 
   bool configSent = false;
   bool configSet = false;
@@ -290,6 +291,7 @@ bool PatchParser::apply() {
       }
     } else if (cmd0=="row"||cmd0=="link") {
       RowChange change;
+      change.sequential = sequential;
       change.names = names.lst;
       change.allNames = allNames;
       for (int k=0; k<(int)change.names.size(); k++) {
@@ -323,10 +325,14 @@ bool PatchParser::apply() {
 	}
 	dbg_printf("\n");
       } else if (cmd1=="select"||cmd1=="*") {
+	sequential = true;
 	dbg_printf("Selecting %s\n", names2.dataString().c_str());
 	selector = names2.data;
 	needSelector = false;
+      } else if (cmd1=="etc") {
+	sequential = false;
       } else if (cmd1=="update"||cmd1=="=") {
+	sequential = true;
 	if (needSelector) {
 	  selector = names2.data;
 	}
@@ -351,6 +357,7 @@ bool PatchParser::apply() {
 	ok = patcher->changeRow(change);
 	needSelector = true;
       } else if (cmd1=="insert") {
+	sequential = true;
 	if (needSelector) {
 	  selector = names2.data;
 	}
@@ -368,6 +375,7 @@ bool PatchParser::apply() {
 	patcher->changeRow(change);	
 	needSelector = true;
       } else if (cmd1=="delete") {
+	sequential = true;
 	if (needSelector) {
 	  selector = names2.data;
 	}

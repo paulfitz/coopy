@@ -37,6 +37,7 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 
 bool SheetPatcher::changeRow(const RowChange& change) {
   if (sheet==NULL) return false;
+  if (!change.sequential) rowCursor = -1;
   map<string,int> dir;
   vector<int> active_cond;
   vector<SheetCell> cond;
@@ -77,8 +78,11 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
     {
-      RowRef tail;
+      RowRef tail(rowCursor);
       int r = sheet->insertRow(tail).getIndex();
+      if (rowCursor!=-1) {
+	rowCursor++;
+      }
       if (r>=0) {
 	//printf("Row %d -- %d\n", r, sheet->height());
 	for (int c=0; c<width; c++) {
@@ -106,6 +110,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	}
 	if (match) {
 	  RowRef row(r);
+	  rowCursor = r;
 	  sheet->deleteRow(row);
 	  success = true;
 	  break;
@@ -132,6 +137,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  }
 	}
 	if (match) {
+	  rowCursor = r;
 	  dbg_printf("Match\n");
 	  for (int c=0; c<width; c++) {
 	    if (active_val[c]) {
@@ -142,6 +148,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  break;
 	} else {
 	  dbg_printf("No match\n");
+	  rowCursor = -1;
 	}
       }
       return success;

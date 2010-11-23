@@ -17,10 +17,12 @@ private:
   ConfigChange config;
   std::vector<int> columns;
   std::vector<std::string> column_names;
+  int rowCursor;
 public:
   coopy::store::DataSheet *sheet;
 
   SheetPatcher(coopy::store::DataSheet *sheet) : sheet(sheet) {
+    rowCursor = -1;
   }
 
   virtual bool changeConfig(const ConfigChange& change) { 

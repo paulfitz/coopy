@@ -105,9 +105,9 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   MeasurePass p2l_row_pass_norm1(pivot,pivot);
   MeasurePass p2l_row_pass_norm2(local,local);
 
-  RowMan p2l_row_local;
-  RowMan p2l_row_norm1;
-  RowMan p2l_row_norm2;
+  CombinedRowMan p2l_row_local;
+  CombinedRowMan p2l_row_norm1;
+  CombinedRowMan p2l_row_norm2;
 
   MeasureMan p2l_row_man(p2l_row_local,p2l_row_pass_local,
 			 p2l_row_norm1,p2l_row_pass_norm1,
@@ -127,9 +127,9 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   MeasurePass p2r_row_pass_norm1(pivot,pivot);
   MeasurePass p2r_row_pass_norm2(remote,remote);
 
-  RowMan p2r_row_local;
-  RowMan p2r_row_norm1;
-  RowMan p2r_row_norm2;
+  CombinedRowMan p2r_row_local;
+  CombinedRowMan p2r_row_norm1;
+  CombinedRowMan p2r_row_norm2;
 
   MeasureMan p2r_row_man(p2r_row_local,p2r_row_pass_local,
 			 p2r_row_norm1,p2r_row_pass_norm1,

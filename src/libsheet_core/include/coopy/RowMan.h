@@ -6,18 +6,22 @@
 
 namespace coopy {
   namespace cmp {
-    class RowMan;
+    template <class map_type> class RowManOf;
+    typedef RowManOf<FMap> RowMan;
+    typedef RowManOf<FMultiMap> RowMan2;
+    class CombinedRowMan;
   }
 }
 
-class coopy::cmp::RowMan : public Measure {
+template <class map_type> 
+class coopy::cmp::RowManOf : public Measure {
 public:
   int vigor;
   int bound;
-  FMap m;
+  map_type m;
   coopy::store::SparseFloatSheet match;
 
-  RowMan() : m(match) {
+  RowManOf() : m(match) {
     vigor = 0;
     bound = -1;
   }
@@ -83,8 +87,48 @@ public:
   }
 
   virtual int getCtrlMax() {
-    return FMap::getCtrlMax();
+    return map_type::getCtrlMax();
   }
+};
+
+class coopy::cmp::CombinedRowMan : public Measure {
+public:
+  RowMan man1;
+  RowMan2 man2;
+  int theta;
+  bool flip;
+
+  CombinedRowMan() {
+    theta = man1.getCtrlMax()/2;
+    flip = false;
+  }
+
+  virtual void setup(MeasurePass& pass) {
+    man1.setup(pass);
+  }
+
+  virtual void measure(MeasurePass& pass, int ctrl) {
+    if (ctrl==theta) {
+      int h = pass.asel.height();
+      int hits = 0;
+      for (int y=0; y<h; y++) {
+	if (pass.asel.cell(0,y)!=-1) hits++;
+      }
+      if (hits<h*0.25) {
+	flip = true;
+      }
+    }
+    if (!flip) {
+      man1.measure(pass,ctrl);
+    } else {
+      man2.measure(pass,ctrl);
+    }
+  }
+
+  virtual int getCtrlMax() {
+    return man1.getCtrlMax();
+  }
+
 };
 
 #endif

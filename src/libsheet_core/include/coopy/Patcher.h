@@ -105,6 +105,12 @@ public:
   std::vector<std::string> names;
   std::vector<std::string> allNames;
   txt2bool indexes;
+  bool sequential;
+
+  RowChange() {
+    mode = ROW_CHANGE_NONE;
+    sequential = true;
+  }
 
   std::string modeString() const {
     switch (mode) {
