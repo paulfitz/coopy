@@ -207,6 +207,8 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     }
 
     bool activity = true;
+
+    /*
     if (lRow!=-1) {
       if ((int)expandMerge.size()==local.width()) {
 	if (current_row<local.height()) {
@@ -224,11 +226,13 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	}
       }
     }
+    */
 
-    dbg_printf("Row: (index p/l/r %d %d %d) act %d del %d\n",
+    dbg_printf("Row: (index p/l/r %d %d %d) act %d del %d / sz %d %d %d %d\n",
 	       pRow, lRow, rRow, 
 	       activity, 
-	       delRow);
+	       delRow,
+	       expandMerge.size(), local.width(), current_row, local.height());
 
     if (activity||delRow) {
       char buf[256];
@@ -262,14 +266,16 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	  //output.changeRow(rowChange);
 	  rc.push_back(rowChange);
 	} else {
-	  output.addRow("[+]",expandMerge,blank);
-	  rowChange.mode = ROW_CHANGE_UPDATE;
-	  //output.changeRow(rowChange);
-	  rc.push_back(rowChange);
+	  if (value.size()!=0) {
+	    output.addRow("[+]",expandMerge,blank);
+	    rowChange.mode = ROW_CHANGE_UPDATE;
+	    //output.changeRow(rowChange);
+	    rc.push_back(rowChange);
+	  }
 	}
       }
     }
-    if (lRow!=-1) {
+    if (lRow!=-1 && !delRow) {
       current_row = lRow;
       last_row = lRow;
       current_row++;
