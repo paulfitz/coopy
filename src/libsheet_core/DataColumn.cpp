@@ -7,7 +7,7 @@ using namespace coopy::cmp;
 
 #define FMAX(x,y) (((x)>(y))?(x):(y))
 
-void Nature::evaluate(const char *txt) {
+void Nature::evaluate(const char *txt, bool forward) {
   string s = txt;
   size_t i;
 
@@ -99,9 +99,9 @@ void Nature::evaluate(const char *txt) {
     number.vote(-1,0.1);
   }
   if (integral&&!nonintegral) {
-    type_integer.vote(1,1);
+    type_integer.vote(1,1,forward);
   } else {
-    type_integer.vote(-1,1);
+    type_integer.vote(-1,1,forward);
   }
 
   text.vote(1,0.1);
@@ -116,9 +116,9 @@ void Nature::evaluate(const char *txt) {
   */
 }
 
-float Nature::compare(const char *txt) {
+float Nature::compare(const char *txt, bool forward) {
   Nature n;
-  n.evaluate(txt);
+  n.evaluate(txt,forward);
   float dot = n.web.result()*web.result() +
     n.email.result()*email.result() +
     n.text.result()*text.result() +
@@ -138,6 +138,12 @@ void DataColumn::evaluate() {
   nmean.clear();
   for (int i=0; i<height(); i++) {
     nmean.evaluate(sheet->cellString(index,i).c_str());
+  }
+}
+
+void DataColumn::unevaluate(int top) {
+  for (int i=0; i<=top; i++) {
+    nmean.evaluate(sheet->cellString(index,i).c_str(),false);
   }
 }
 

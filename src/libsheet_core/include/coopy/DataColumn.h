@@ -29,13 +29,15 @@ public:
     yes = no = 0;
   }
 
-  void vote(float vote, float confidence) {
+  void vote(float vote, float confidence, bool forward=true) {
     if (confidence>1) confidence = 1;
     if (confidence<0) confidence = 0;
-    if (vote>0) yes += vote*confidence;
-    if (vote<0) no += vote*confidence;
+    float vote2 = vote;
+    if (!forward) vote2*=-1;
+    if (vote>0) yes += vote2*confidence;
+    if (vote<0) no += vote2*confidence;
     this->confidence += confidence;
-    votes++;
+    if (forward) votes++; else votes--;
   }
 
   float result() {
@@ -55,9 +57,13 @@ public:
   Vote number;
   Vote type_integer;
 
-  void evaluate(const char *txt);  
+  void evaluate(const char *txt, bool forward = true);  
 
-  float compare(const char *txt);
+  float compare(const char *txt, bool forward = true);
+
+  float uncompare(const char *txt) {
+    return compare(txt,false);
+  }
 
   float confidence();
 
@@ -88,6 +94,8 @@ public:
   }
 
   void evaluate();
+
+  void unevaluate(int top);
   
   Nature getNature() { return nmean; }
 

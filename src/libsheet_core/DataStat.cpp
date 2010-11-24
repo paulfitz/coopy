@@ -58,12 +58,6 @@ void DataStat::evaluate(const DataSheet& sheet) {
       oddness.cell(j,i) = v;
       oddness_accum.cell(0,i) += v;
     }
-
-    ColumnType mct;
-    if (n.couldBeInteger()) {
-      mct.setType("INTEGER");
-    }
-    ct[j] = mct;
   }
 
   oddness_accum.normalize(-1,-1,1);
@@ -93,6 +87,25 @@ void DataStat::evaluate(const DataSheet& sheet) {
     }
   }
   */
+
+  if (top>=0) {
+    // correct type checking
+    for (int j=0; j<sheet.width(); j++) {
+      DataColumn& c = col[j];
+      c.unevaluate(top);
+    }
+  }
+
+  for (int j=0; j<sheet.width(); j++) {
+    DataColumn& c = col[j];
+    Nature n = c.getNature();
+    ColumnType mct;
+    if (n.couldBeInteger()) {
+      mct.setType("INTEGER");
+    }
+    ct[j] = mct;
+  }
+
   if (top>=0) {
     dbg_printf("Header guess: [%d]", top);
     for (int j=0; j<sheet.width(); j++) {
