@@ -410,6 +410,13 @@ MACRO(ADD_ROUND_TRIP_TEST name P1 P2)
       --output ${fname2} ${P1} ${fname})
     ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
       --equals ${fname2} ${P2})
+
+    ADD_TEST(${name}_diff_inv ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+      --output inv_${fname} --format-csv ${P2} ${P1})
+    ADD_TEST(${name}_patch_inv ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+      --output inv_${fname2} ${P2} inv_${fname})
+    ADD_TEST(${name}Compare_inv ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+      --equals inv_${fname2} ${P1})
 ENDMACRO ()
 
 ADD_ROUND_TRIP_TEST(joe_0000 ${TESTS}/bug/joe_0000/local.csv ${TESTS}/bug/joe_0000/remote.csv)

@@ -71,11 +71,18 @@ void Nature::evaluate(const char *txt) {
   // How number-like are we?
   int numbery = 0;
   int nonnumbery = 0;
+  int integral = 0;
+  int nonintegral = 0;
   for (size_t j=0; j<s.length(); j++) {
     char ch = s[j];
     if (ch>='0'&&ch<='9') {
       numbery++;
+      if (j==1&&s[0]=='0') {
+	nonintegral++;
+      }
+      integral++;
     } else {
+      nonintegral++;
       if (ch!='.'&&ch!='-'&&ch!='e'&&ch!='E') {
 	numbery--;
 	nonnumbery++;
@@ -90,6 +97,11 @@ void Nature::evaluate(const char *txt) {
     }
   } else {
     number.vote(-1,0.1);
+  }
+  if (integral&&!nonintegral) {
+    type_integer.vote(1,1);
+  } else {
+    type_integer.vote(-1,1);
   }
 
   text.vote(1,0.1);

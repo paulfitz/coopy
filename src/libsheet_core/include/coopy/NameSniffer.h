@@ -16,6 +16,7 @@ class coopy::store::NameSniffer {
 private:
   const DataSheet& sheet;
   std::vector<std::string> names;
+  std::vector<ColumnType> ct;
   bool embed;
   bool fake;
   int div;
@@ -37,6 +38,10 @@ public:
 
   virtual std::vector<std::string> suggestNames() const {
     return names;
+  }
+
+  virtual std::vector<ColumnType> suggestTypes() const {
+    return ct;
   }
 
   bool isEmbedded() {

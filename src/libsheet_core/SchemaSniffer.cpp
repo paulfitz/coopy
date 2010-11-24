@@ -2,6 +2,8 @@
 #include <coopy/NameSniffer.h>
 #include <coopy/IndexSniffer.h>
 
+#include <stdlib.h>
+
 using namespace coopy::store;
 
 using namespace std;
@@ -13,11 +15,20 @@ void SchemaSniffer::sniff() {
   }
   NameSniffer nameSniffer(sheet);
   vector<string> names = nameSniffer.suggestNames();
+  vector<ColumnType> ct = nameSniffer.suggestTypes();
   for (int i=0; i<(int)names.size(); i++) {
-    fallback.addColumn(names[i].c_str());
+    fallback.addColumn(names[i].c_str(),ct[i]);
   }
-  while ((int)names.size()<sheet.width()) {
-    fallback.addColumn("*");
+  char col[2] = "A";
+  int at = (int)names.size();
+  while ((int)fallback.getColumnCount()<sheet.width()) {
+    fallback.addColumn(col,ct[at]);
+    at++;
+    if (col[0]=='Z') {
+      fprintf(stderr,"SchemaSniffer.cpp is inadequately inventive\n");
+      exit(1);
+    }
+    col[0]++;
   }
   fallback.setSheetName(name.c_str());
   fallback.setHeaderHeight(nameSniffer.getHeaderHeight());

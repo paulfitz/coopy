@@ -18,6 +18,7 @@ void DataStat::evaluate(const DataSheet& sheet) {
   oddness_accum.resize(1,hh,0);
   for (int j=0; j<sheet.width(); j++) {
     col.push_back(DataColumn(sheet,j,hh));
+    ct.push_back(ColumnType());
   }
   for (int j=0; j<sheet.width(); j++) {
     col[j].evaluate();
@@ -57,6 +58,12 @@ void DataStat::evaluate(const DataSheet& sheet) {
       oddness.cell(j,i) = v;
       oddness_accum.cell(0,i) += v;
     }
+
+    ColumnType mct;
+    if (n.couldBeInteger()) {
+      mct.setType("INTEGER");
+    }
+    ct[j] = mct;
   }
 
   oddness_accum.normalize(-1,-1,1);

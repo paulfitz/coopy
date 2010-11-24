@@ -156,7 +156,7 @@ bool SqliteSheet::create(const SheetSchema& schema) {
       cols += ',';
     }
     char *squery = NULL;
-    squery = sqlite3_mprintf("%Q", cname.c_str());
+    squery = sqlite3_mprintf("%q", cname.c_str());
     cols += squery;
     sqlite3_free(squery);
     if (ci.hasType()) {
@@ -168,7 +168,7 @@ bool SqliteSheet::create(const SheetSchema& schema) {
     }
   }
 
-  query = sqlite3_mprintf("CREATE TABLE %Q (%s)", 
+  query = sqlite3_mprintf("CREATE TABLE %q (%s)", 
 			  name.c_str(),
 			  cols.c_str());
 

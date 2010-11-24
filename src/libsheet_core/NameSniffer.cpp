@@ -11,6 +11,7 @@ void NameSniffer::sniff() {
   embed = false;
   fake = false;
   names.clear();
+  ct.clear();
 
   SheetSchema *schema = sheet.getSchema();
   if (schema!=NULL) {
@@ -19,9 +20,11 @@ void NameSniffer::sniff() {
       ColumnInfo info = schema->getColumnInfo(i);
       if (!info.hasName()) {
 	names.clear();
+	ct.clear();
 	break;
       }
       names.push_back(info.getName());
+      ct.push_back(info.getColumnType());
     }
     if (names.size()>0) {
       dbg_printf("Found names in schema\n");
@@ -32,6 +35,7 @@ void NameSniffer::sniff() {
   DataStat stat;
   stat.evaluate(sheet);
   div = stat.getRowDivider();
+  ct = stat.suggestTypes();
   if (div<0) {
     // no obvious header
     fake = true;
@@ -57,6 +61,7 @@ void NameSniffer::sniff() {
   }
   if (failure) {
     names.clear();
+    ct.clear();
     fake = true;
   } else {
     embed = true;

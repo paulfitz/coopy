@@ -53,6 +53,7 @@ public:
   Vote email;
   Vote text;
   Vote number;
+  Vote type_integer;
 
   void evaluate(const char *txt);  
 
@@ -65,6 +66,11 @@ public:
     email.clear();
     text.clear();
     number.clear();
+    type_integer.clear();
+  }
+
+  bool couldBeInteger() {
+    return (type_integer.yes>0.5) && (type_integer.no>-0.5);
   }
 };
 
