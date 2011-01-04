@@ -8,6 +8,7 @@
 #include <coopy/MergeOutputHumanDiff.h>
 #include <coopy/MergeOutputVerboseDiff.h>
 #include <coopy/MergeOutputCsvDiff.h>
+#include <coopy/MergeOutputTdiff.h>
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
 
@@ -42,6 +43,7 @@ int main(int argc, char *argv[]) {
   std::string version = "";
   bool verbose = false;
   bool equality = false;
+
   while (true) {
     int option_index = 0;
     static struct option long_options[] = {
@@ -50,11 +52,13 @@ int main(int argc, char *argv[]) {
       {"format-sql", 0, 0, 's'},
       {"format-human", 0, 0, 'h'},
       {"format-raw", 0, 0, 'r'},
+      {"format-tdiff", 0, 0, 't'},
       {"equals", 0, 0, 'e'},
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
       {"version", 1, 0, 'V'},
       {"parent", 1, 0, 'p'},
+      {"list-formats", 0, 0, 'l'},
       {0, 0, 0, 0}
     };
 
@@ -74,6 +78,9 @@ int main(int argc, char *argv[]) {
     case 'h':
       mode = "human";
       break;
+    case 't':
+      mode = "tdiff";
+      break;
     case 'r':
       mode = "raw";
       break;
@@ -92,6 +99,10 @@ int main(int argc, char *argv[]) {
     case 'V':
       version = optarg;
       break;
+    case 'l':
+      PolyBook::showFormats();
+      return 0;
+      break;
     default:
       fprintf(stderr, "Unrecognized option\n");
       return 1;
@@ -106,25 +117,15 @@ int main(int argc, char *argv[]) {
   argv += optind;
 
   if (argc<2) {
-    printf("Show difference between two spreadsheets. Call as:\n");
-    printf("  ssdiff [--output <filename>] [--parent parent.csv] reference.csv modified.csv\n");
-    printf("  ssdiff --format-csv local.csv modified.csv   # format that sspatch can read\n");
-    printf("  ssdiff --format-raw local.csv modified.csv   # full information\n");
-    printf("  ssdiff --format-human local.csv modified.csv # human readable output\n");
-    printf("  ssdiff --version 0.2 --format-csv local.csv modified.csv  # change version\n");
-    printf("  ssdiff --version 0.4 --format-csv local.csv modified.csv  # change version\n");
-    printf("Output defaults to standard output.\n");
+    printf("Show the difference between two tables. Call as:\n");
+    printf("  ssdiff [--output <filename>] local.csv modified.csv\n");
+    printf("For differences in a verbose format, do:\n");
+    printf("  ssdiff --format-human local.csv modified.csv\n");
+    printf("Output defaults to standard output.  To list supported formats:\n");
+    printf("  ssdiff --list-formats\n");
     return 1;
   }
-  /*
-  CsvSheet local, remote;
-  if (CsvFile::read(argv[0],local)!=0) {
-    return 1;
-  }
-  if (CsvFile::read(argv[1],remote)!=0) {
-    return 1;
-  }
-  */
+
   BookCompare cmp;
   cmp.setVerbose(verbose);
 
@@ -175,6 +176,11 @@ int main(int argc, char *argv[]) {
     MergeOutputVerboseDiff verbosediff;
     start_output(output,flags);
     cmp.compare(*pivot,*local,*remote,verbosediff,flags);
+    stop_output(output,flags);
+  } else if (mode=="tdiff") {
+    MergeOutputTdiff diff;
+    start_output(output,flags);
+    cmp.compare(*pivot,*local,*remote,diff,flags);
     stop_output(output,flags);
   } else if (mode=="csv") {
     if (version=="0.2") {
