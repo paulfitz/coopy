@@ -9,6 +9,7 @@
 #include <coopy/TextBookFactory.h>
 #include <coopy/ShortTextBookFactory.h>
 #include <coopy/SqliteTextBook.h>
+#include <coopy/FormatDesc.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,7 +35,7 @@ extern TextBook *readHelper(const char *fname,
 			    const char *ext,
 			    const char *data);
 
-extern void getFactories(vector<TextBookFactory *>& lst);
+extern void getFactories(vector<TextBookFactory *>& lst, bool preview);
 
 class Factories {
 public:
@@ -43,7 +44,7 @@ public:
   Factories() {
     all.push_back(new ShortTextBookFactory);
     all.push_back(new SqliteTextBookFactory);
-    getFactories(all);
+    getFactories(all,false);
   }
 
   ~Factories() {
@@ -79,62 +80,6 @@ public:
     return NULL;
   }
 };
-
-/*
-bool PolyBook::read(const char *fname) {
-  clear();
-  string name = fname;
-  if (name.length()>=4) {
-    string ext = name.substr(name.rfind('.'),name.length());
-    for (size_t i=0; i<ext.length(); i++) {
-      ext[i] = tolower(ext[i]);
-    }
-    dbg_printf("Extension %s\n", ext.c_str());
-    if (ext==".book") {
-      dbg_printf("Trying %s out as CsvTextBook\n", ext.c_str());
-      CsvTextBook *book0 = new CsvTextBook();
-      if (!book0->read(fname)) {
-	delete book0;
-      } else {
-	book = book0;
-      }
-      if (book!=NULL) return true;
-    }
-    book = readHelper(fname,ext.c_str(),NULL);
-    if (book!=NULL) return true;
-    FormatSniffer sniffer;
-    sniffer.open(fname);
-    Format f = sniffer.getFormat();
-    if (f.id==FORMAT_BOOK_SQLITE) {
-      dbg_printf("Trying %s out as Sqlite\n", ext.c_str());
-      SqliteTextBook *book0 = new SqliteTextBook();
-      if (!book0->read(fname)) {
-	delete book0;
-      } else {
-	book = book0;
-      }
-    }
-    if (book==NULL) {
-      SheetStyle style;
-      if (style.setFromFilename(fname)) {
-	dbg_printf("Trying %s out as CSV\n", ext.c_str());
-	ShortTextBook *b = new ShortTextBook();
-	if (b==NULL) {
-	  fprintf(stderr,"Failed to allocate ShortTextBook\n");
-	  exit(1);
-	}
-	if (CsvFile::read(fname,b->sheet)!=0) {
-	  delete b;
-	  b = NULL;
-	} else {
-	  book = b;
-	}
-      }
-    }
-  }
-  return book!=NULL;
-}
-*/
 
 class Namer {
 public:
@@ -176,111 +121,6 @@ public:
     return sane;
   }
 };
-
-/*
-bool PolyBook::write(const char *fname, const char *format) {
-  string name = fname;
-  size_t eid = name.rfind(".");
-  string ext = ".csv";
-  if (eid!=string::npos) {
-    ext = name.substr(eid);
-  }
-  for (size_t i=0; i<ext.length(); i++) {
-    ext[i] = tolower(ext[i]);
-  }
-  dbg_printf("Write: extension is %s\n", ext.c_str());
-  if (book==NULL) {
-    fprintf(stderr,"Nothing to write\n");
-    return false;
-  }
-  vector<string> names = getNames();
-  if (ext == ".json") {
-    dbg_printf("Asked to write, with json configuration\n");
-    ifstream in(fname);
-    Property p;
-    if (!JsonProperty::add(p,fname)) {
-      return false;
-    }
-    string key = p.get("type",PolyValue::makeString("none")).asString();
-    string fname2 = p.get("file",PolyValue::makeString("-")).asString();
-    if (key=="csv") {
-      if (names.size()!=1) {
-	fprintf(stderr,"Unsupported number of sheets during write: %d\n",
-		(int)names.size());
-	return false;
-      }
-      PolySheet sheet = readSheet(names[0]);
-      if (!sheet.isValid()) { 
-	fprintf(stderr,"Could not access sheet %s\n", names[0].c_str());
-	return false;
-      }
-      return CsvFile::write(sheet,p)==0;
-    } else {
-     fprintf(stderr,"Output type not recognized: %s\n", key.c_str());
-     return false;
-    }
-  }
-  if (book->save(fname,format)) {
-    return true;
-  }
-  if (format!=NULL) {
-    if (string(format)!=""&&string(format)!="-") {
-      fprintf(stderr,"Setting output format is not yet supported\n");
-      exit(1);
-    }
-  }
-  if (ext==".sql") {
-    FILE *fout = fopen(fname,"w");
-    if (fout==NULL) {
-      fprintf(stderr,"Could not open %s for writing\n", fname);
-      return false;
-    }
-    for (size_t i=0; i<names.size(); i++) {
-      PolySheet sheet = readSheet(names[i]);
-      if (!sheet.isValid()) { 
-	fprintf(stderr,"Could not access sheet %s\n", names[i].c_str());
-	return false;
-      }
-      printf("Pumping out %s\n", names[i].c_str());
-      Namer namer;
-      Namer namer2;
-      Valuer val;
-      string table = namer.name(names[i]);
-      fprintf(fout,"CREATE TABLE \"%s\" (\n", table.c_str());
-      if (sheet.height()>=1) {
-	for (int x=0; x<sheet.width(); x++) {
-	  fprintf(fout,"   \"%s\"%s\n", namer2.name(sheet.cellString(x,0)).c_str(),
-		  (x==sheet.width()-1)?"":",");
-	}
-      }
-      fprintf(fout,");\n");
-      for (int y=1; y<sheet.height(); y++) {
-	fprintf(fout, "INSERT INTO \"%s\" VALUES ( ", table.c_str());
-	for (int x=0; x<sheet.width(); x++) {
-	  fprintf(fout,"\'%s\'%s ", val.name(sheet.cellString(x,y)).c_str(),
-		  (x==sheet.width()-1)?"":",");
-	}
-	fprintf(fout, ");\n");
-      }
-    }
-    fclose(fout);
-    return true;
-  }
-
-  if (names.size()!=1) {
-    fprintf(stderr,"Unsupported number of sheets during write: %d\n",
-	    (int)names.size());
-    return false;
-  }
-  PolySheet sheet = readSheet(names[0]);
-  if (!sheet.isValid()) { 
-    fprintf(stderr,"Could not access sheet %s\n", names[0].c_str());
-    return false;
-  }
-  return CsvFile::write(sheet,fname)==0;
-}
-
-*/
 
 bool PolyBook::attach(Property& config) {
   if (config.check("should_clear")) {
@@ -374,27 +214,22 @@ bool PolyBook::flush() {
   return true;
 }
 
-/*
-bool PolyBook::load() {
-  if (filename=="") {
-    fprintf(stderr, "No file to read.\n");
-    return false;
-  }
-  if (!exists(filename)) {
-    fprintf(stderr, "Cannot read %s\n", filename.c_str());
-    return false;
-  }
-  return false;
-}
 
-bool PolyBook::save() {
-  if (inplace) {
-    return true;
-  }
-  if (filename=="") {
-    fprintf(stderr,"No filename to save to.\n");
-    return false;
-  }
-  return false;
+#define STRVAL PolyValue::makeString
+
+void PolyBook::showFormats() {
+  printf("Supported formats:\n");
+  FormatDesc csv("CSV: plain-text delimiter-separated family of formats");
+  csv.addExtension(".csv","Comma-separated values");
+  csv.addExtension(".tsv","Tab-separated values");
+  csv.addExtension(".ssv","Semicolon-separated values");
+  csv.addOption("type",STRVAL("csv"),"CSV family",true);
+  csv.addOption("file",STRVAL("fname.csv"),"File name",true);
+  csv.show();
+
+  //printf("  file extensions: .csv .tsv .ssv\n");
+  //printf("  .json options:   { \"type\": \"csv\", \"file\": \"fname.csv\", \"delimiter\": \",\", \"header\": 0, }\n");
+  printf(".sqlite files (in Sqlite database format)\n");
+  vector<TextBookFactory *> all;
+  getFactories(all,true);
 }
-*/

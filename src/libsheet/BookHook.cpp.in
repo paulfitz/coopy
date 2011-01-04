@@ -27,12 +27,20 @@ using namespace coopy::store;
 
 #include <coopy/SqliteTextBook.h>
 
-void getFactories(vector<TextBookFactory *>& lst) {
+void getFactories(vector<TextBookFactory *>& lst,bool preview) {
 #ifdef USE_GNUMERIC
-  lst.push_back(new GnumericTextBookFactory());
+  if (preview) {
+    printf(".xls,.xlsx, and other Excel/Openoffice files (via Gnumeric)\n");
+  } else {
+    lst.push_back(new GnumericTextBookFactory());
+  }
 #endif  
 #ifdef USE_REMOTE_SQL
-  lst.push_back(new RemoteSqlTextBookFactory("mysql"));
+  if (preview) {
+    printf("mysql databases (use a .json file to specify a database)\n");
+  } else {
+    lst.push_back(new RemoteSqlTextBookFactory("mysql"));
+  }
 #endif
 }
 

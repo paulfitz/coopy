@@ -115,6 +115,8 @@ public:
     }
     return "PolyBook";
   }
+
+  static void showFormats();
 };
 
 #endif
