@@ -25,13 +25,14 @@ std::string map2string(const std::map<T1,T2>& src) {
 }
 #endif
 
-#ifdef WANT_VECTOR2STRING
-#include <vector>
-#include <string>
 std::string stringer_encoder(bool x);
 std::string stringer_encoder(int x);
 std::string stringer_encoder(const std::string& x);
 std::string stringer_encoder(const coopy::store::SheetCell& x);
+
+#ifdef WANT_VECTOR2STRING
+#include <vector>
+#include <string>
 template <class T>
 std::string vector2string(const std::vector<T>& src) {
   std::string result = "";

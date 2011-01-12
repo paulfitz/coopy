@@ -9,6 +9,7 @@
 #include <coopy/MergeOutputVerboseDiff.h>
 #include <coopy/MergeOutputCsvDiff.h>
 #include <coopy/MergeOutputTdiff.h>
+#include <coopy/MergeOutputIndex.h>
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
 
@@ -37,12 +38,13 @@ static void stop_output(string output, CompareFlags& flags) {
 }
 
 int main(int argc, char *argv[]) {
-  std::string output = "";
+  std::string output = "-";
   std::string mode = "csv";
   std::string parent_file = "";
   std::string version = "";
   bool verbose = false;
   bool equality = false;
+  bool indexed = false;
 
   while (true) {
     int option_index = 0;
@@ -53,7 +55,9 @@ int main(int argc, char *argv[]) {
       {"format-human", 0, 0, 'h'},
       {"format-raw", 0, 0, 'r'},
       {"format-tdiff", 0, 0, 't'},
+      {"format-index", 0, 0, 'i'},
       {"equals", 0, 0, 'e'},
+      {"index", 0, 0, 'i'},
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
       {"version", 1, 0, 'V'},
@@ -90,6 +94,9 @@ int main(int argc, char *argv[]) {
     case 'e':
       equality = true;
       break;
+    case 'i':
+      indexed = true;
+      break;
     case 'o':
       output = optarg;
       break;
@@ -121,6 +128,8 @@ int main(int argc, char *argv[]) {
     printf("  ssdiff [--output <filename>] local.csv modified.csv\n");
     printf("For differences in a verbose format, do:\n");
     printf("  ssdiff --format-human local.csv modified.csv\n");
+    printf("To extract the mapping from local to modified in tabular form, do:\n");
+    printf("  ssdiff --index local.csv modified.csv\n");
     printf("Output defaults to standard output.  To list supported formats:\n");
     printf("  ssdiff --list-formats\n");
     return 1;
@@ -162,7 +171,14 @@ int main(int argc, char *argv[]) {
   }
 
   CompareFlags flags;
-  if (mode=="sql") {
+  if (indexed) {
+    MergeOutputIndex diff;
+    PolyBook book;
+    book.attach(output.c_str());
+    diff.attachBook(book);
+    cmp.compare(*pivot,*local,*remote,diff,flags);
+    book.flush();
+  } else if (mode=="sql") {
     MergeOutputSqlDiff sqldiff;
     start_output(output,flags);
     cmp.compare(*pivot,*local,*remote,sqldiff,flags);

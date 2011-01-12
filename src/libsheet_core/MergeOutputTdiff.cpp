@@ -25,7 +25,7 @@ MergeOutputTdiff::MergeOutputTdiff() {
 }
 
 bool MergeOutputTdiff::mergeStart() {
-  fprintf(out,"@ tdiff | version=0.2\n\n");
+  fprintf(out,"# tdiff version 0.2\n\n");
   return true;
 }
 
@@ -65,73 +65,93 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
     }
   }
   if (lnops!=nops) {
+    /*
     if (!showedColumns) {
-      fprintf(out, "/* column name ");
+      fprintf(out, "%c* column name ",'/');
       for (int i=0; i<(int)columns.size(); i++) {
 	fprintf(out,"%s ",columns[i].c_str());
       }
-      fprintf(out,"*/\n\n");
+      fprintf(out,"*%c\n\n",'/');
       showedColumns = true;
     }
-    if (columns!=lnops) {
-      fprintf(out, "/* link name ");
+    */
+    if (columns!=lnops || !showedColumns) {
+      //fprintf(out, "/* link name ");
+      fprintf(out, "@ |");
       for (int i=0; i<(int)change.names.size(); i++) {
 	if (activeColumn[change.names[i]]) {
-	  fprintf(out,"%s ",change.names[i].c_str());
+	  fprintf(out,"%s|",change.names[i].c_str());
 	}
       }
-      fprintf(out,"*/\n\n");
+      fprintf(out,"\n");
+      showedColumns = true;
     }
     nops = lnops;
   }
 
   if (prevSelect!=showForSelect || prevDescribe!=showForDescribe) {
-    fprintf(out, "/* %s %s ",(tag=="act")?"link":"row",tag);
+    //fprintf(out, "/* %s %s ",(tag=="act")?"link":"row",tag);
+    /*
     for (int i=0; i<(int)change.names.size(); i++) {
       if (activeColumn[change.names[i]]) {
 	fprintf(out,"%s ",ops[i].c_str());
       }
     }
-    fprintf(out,"*/\n\n");
+    */
+    //fprintf(out,"*/\n\n");
   }
   return true;
 }
 
+// practice mode is unnecessary for this output style
 bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
 				   bool select, bool update, bool practice) {
   bool ok = true;
 
+  char ch = '?';
   if (!practice) {
-    fprintf(out, "/* %s %s ","row",tag);
+    if (string(tag)=="update") {
+      ch = '=';
+    } else if (string(tag)=="insert") {
+      ch = '+';
+    } else if (string(tag)=="delete") {
+      ch = '-';
+    }
+    fprintf(out, "%c |",ch);
   }
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     if (activeColumn[name]) {
       bool shown = false;
+      bool transition = false;
       if (change.cond.find(name)!=change.cond.end() && 
 	  showForSelect[name] && select) {
 	if (!practice) {
-	  fprintf(out,"%s ",change.cond.find(name)->second.toString().c_str());
+	  fprintf(out,"%s",change.cond.find(name)->second.toString().c_str());
+	  transition = true;
 	}
 	shown = true;
       }
       if (change.val.find(name)!=change.val.end() && 
 	  showForDescribe[name] && update) {
 	if (!practice) {
-	  fprintf(out,"%s ",change.val.find(name)->second.toString().c_str());
+	  fprintf(out,"%s%s",
+		  transition?"->":"",
+		  change.val.find(name)->second.toString().c_str());
 	}
 	if (shown) ok = false; // collision
 	shown = true;
       }
       if (!shown) {
 	if (!practice) {
-	  fprintf(out,"[] ");
+	  fprintf(out,"*");
 	}
       }
+      fprintf(out,"|");
     }
   }
   if (!practice) {
-    fprintf(out,"*/\n\n");
+    fprintf(out,"\n");
   }
   return ok;
 }
@@ -209,13 +229,13 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
     break;
   case ROW_CHANGE_UPDATE:
     {
-      bool terse = updateRow(change,"practice",true,true,true);
-      if (terse) {
-	updateRow(change,"update",true,true,false);
-      } else {
-	updateRow(change,"select",true,false,false);
-	updateRow(change,"update",false,true,false);
-      }
+      //bool terse = updateRow(change,"practice",true,true,true);
+      //if (terse) {
+      updateRow(change,"update",true,true,false);
+      //} else {
+      //updateRow(change,"select",true,false,false);
+      //updateRow(change,"update",false,true,false);
+      //}
     }
     break;
   default:

@@ -1,25 +1,60 @@
 #include <coopy/MergeOutputIndex.h>
 #include <coopy/Dbg.h>
 
+#include <coopy/EfficientMap.h>
+#include <coopy/Stringer.h>
+
 using namespace coopy::store;
 using namespace coopy::cmp;
+using namespace std;
+
+#define HELPER(x) (*((efficient_map<std::string,int> *)(x)))
+
+MergeOutputIndex::MergeOutputIndex() {
+  implementation = new efficient_map<std::string,int>;
+  COOPY_ASSERT(implementation);
+}
+
+MergeOutputIndex::~MergeOutputIndex() {
+  delete &HELPER(implementation);
+  implementation = NULL;
+}
 
 bool MergeOutputIndex::mergeStart() {
-  SimpleSheetSchema ss;
-  ss.setSheetName("links");
-  ss.addColumn("frame",ColumnType("TEXT"));
-  ss.addColumn("category",ColumnType("TEXT"));
-  ss.addColumn("pivot",ColumnType("INTEGER"));
-  ss.addColumn("local",ColumnType("INTEGER"));
-  ss.addColumn("remote",ColumnType("INTEGER"));
-  ss.addColumn("deleted",ColumnType("INTEGER"));
-  links = getBook()->provideSheet(ss);
-
-  if (!links.isValid()) {
-    fprintf(stderr,"* Could not generate links sheet\n");
-    exit(1);
-    return false;
+  {
+    SimpleSheetSchema ss;
+    ss.setSheetName("links");
+    //ss.addColumn("frame",ColumnType("TEXT"));
+    ss.addColumn("category",ColumnType("TEXT"));
+    ss.addColumn("pivot",ColumnType("INTEGER"));
+    ss.addColumn("local",ColumnType("INTEGER"));
+    ss.addColumn("remote",ColumnType("INTEGER"));
+    ss.addColumn("deleted",ColumnType("INTEGER"));
+    links = getBook()->provideSheet(ss);
+    
+    if (!links.isValid()) {
+      fprintf(stderr,"* Could not generate links sheet\n");
+      exit(1);
+      return false;
+    }
   }
+
+  /*
+  {
+    SimpleSheetSchema ss;
+    ss.setSheetName("identity");
+    ss.addColumn("frame",ColumnType("TEXT"));
+    ss.addColumn("column",ColumnType("TEXT"));
+    ss.addColumn("identity",ColumnType("INTEGER"));
+    identity = getBook()->provideSheet(ss);
+    
+    if (!identity.isValid()) {
+      fprintf(stderr,"* Could not generate identity sheet\n");
+      exit(1);
+      return false;
+    }
+  }
+  */
 
   return true;
 }
@@ -29,14 +64,12 @@ bool MergeOutputIndex::mergeDone() {
 }
 
 bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
-  Poly<SheetRow> pRow = links.insertRow();
   
   dbg_printf("LINK %d %d %d %d\n",
 	     decl.mode,
 	     decl.rc_id_pivot,
 	     decl.rc_id_local,
 	     decl.rc_id_remote);
-  SheetRow& row = *pRow;
   std::string mode = decl.column?"column":"row";
   std::string frame = "none";
   switch (decl.mode) {
@@ -50,6 +83,7 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
     frame = "remote";
     break;
   }
+  /*
   row.setCell(0,SheetCell(frame,false));
   row.setCell(1,SheetCell(mode,false));
   row.setCell(2,SheetCell(decl.rc_id_pivot));
@@ -57,5 +91,27 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
   row.setCell(4,SheetCell(decl.rc_id_remote));
   row.setCell(5,SheetCell(decl.rc_deleted?1:0));
   row.flush();
+  */
+
+  string s = mode + "_" +
+    stringer_encoder(decl.rc_id_pivot) + "_" +
+    stringer_encoder(decl.rc_id_local) + "_" +
+    stringer_encoder(decl.rc_id_remote) + "_" +
+    stringer_encoder(decl.rc_deleted);
+
+  //printf("string is %s\n", s.c_str());
+  efficient_map<string,int>& seen = HELPER(implementation);
+  if (seen.find(s)==seen.end()) {
+    Poly<SheetRow> pRow = links.insertRow();
+    SheetRow& row = *pRow;
+    seen[s] = 1;
+    int at = 0;
+    row.setCell(at,SheetCell(mode,false)); at++;
+    row.setCell(at,SheetCell(decl.rc_id_pivot)); at++;
+    row.setCell(at,SheetCell(decl.rc_id_local)); at++;
+    row.setCell(at,SheetCell(decl.rc_id_remote)); at++;
+    row.setCell(at,SheetCell(decl.rc_deleted?1:0)); at++;
+    row.flush();
+  }
   return true;
 }

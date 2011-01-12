@@ -11,8 +11,15 @@ namespace coopy {
 }
 
 class coopy::cmp::MergeOutputIndex : public MergeOutput {
+private:
+  void *implementation;
 public:
+  MergeOutputIndex();
+
+  virtual ~MergeOutputIndex();
+
   coopy::store::PolySheet links;
+  coopy::store::PolySheet identity;
 
   virtual bool mergeStart();
 
