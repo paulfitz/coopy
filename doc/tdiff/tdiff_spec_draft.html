@@ -1,0 +1,1094 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.3" />
+<title>tDiff Format Specification</title>
+<style type="text/css">
+/* Sans-serif font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+div#toctitle,
+span#author, span#revnumber, span#revdate, span#revremark,
+div#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+/* Serif font. */
+div.sectionbody {
+  font-family: Georgia,"Times New Roman",Times,serif;
+}
+
+/* Monospace font. */
+tt {
+  font-size: inherit;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+tt {
+  font-size: inherit;
+  color: navy;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+pre {
+  padding: 0;
+  margin: 0;
+}
+
+span#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+span#email {
+}
+span#revnumber, span#revdate, span#revremark {
+}
+
+div#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+div#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+div#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+div#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.tableblock, div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #777777;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  div#footer-badges { display: none; }
+}
+
+div#toc {
+  margin-bottom: 2.5em;
+}
+
+div#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+window.onload = function(){asciidoc.footnotes();}
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([2-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  var cont = document.getElementById("content");
+  var noteholder = document.getElementById("footnotes");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      // Use [\s\S] in place of . so multi-line matches work.
+      // Because JavaScript has no s (dotall) regex flag.
+      note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      spans[i].innerHTML =
+        "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+        "' title='View footnote' class='footnote'>" + n + "</a>]";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+}
+
+}
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1>tDiff Format Specification</h1>
+<span id="author">Paul Fitzpatrick, Joe Panico</span><br />
+<span id="email"><tt>&lt;<a href="mailto:paulfitz@alum.mit.edu, diffkit-user@googlegroups.com">paulfitz@alum.mit.edu, diffkit-user@googlegroups.com</a>&gt;</tt></span><br />
+<span id="revnumber">version 0.2,</span>
+<span id="revdate">2011-01-12</span>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_purpose">Purpose</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This document defines the tDiff format; a text encoding for describing
+the differences between two tables of data.</p></div>
+<div class="paragraph"><p>tDiff output is intended for two audiences: end-users who are looking
+for an easily readable report that describes the differences between
+two tables; and tools that will interpret tDiff output in order to
+perform further processing or analysis (e.g. "patch" tools).</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_scope">Scope</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>tDiff should be able to describe the differences between <strong>any types</strong>
+of data tables. That includes: tables that have an identifiable unique
+key (e.g. RDBMS tables with primary key) and tables that don&#8217;t (RDBMS
+tables without primary key, or heaps); tables where row ordering is
+meaningful, whether explicit or implied, such as spreadsheets or CSV
+files; and tables where row ordering has no inherent meaning (RDBMS
+tables). Further, tDiff should be able to represent the differences
+between two different <strong>types</strong> of table, e.g. an RDBMS table versus a
+spreadsheet table.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_limitations">Limitations</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>tDiff is designed to described the differences in <strong>content</strong> between
+two tables-- it does not have any facilities for describing the
+differences in <strong>structure</strong> between two tables. A future revision will
+expand the specification to include structure or schema information.</p></div>
+<div class="paragraph"><p>tDiff is designed to described text (character) content. It has no
+facilities to describe differences in content that does not have a
+natural default character representation. A future revision may expand
+the specification to include arbitrary binary data.</p></div>
+<div class="paragraph"><p>tDiff can represent the differences between exactly <strong>two</strong> tables. It
+cannot represent an n-way compare where n &gt; 2.  It also cannot
+represent the differences between collections of tables, such
+as multiple-sheet spreadsheets.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_representation">Representation</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>tDiff documents use the UTF-8 character encoding.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_top_level_structure">Top-level structure</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>tDiff documents comprise any number of <a href="#Comment">comment blocks</a>,
+<a href="#Control">control blocks</a>, and
+<a href="#Hunk">diff hunks</a>, interleaved in any order.
+Each diff hunk describes a related set of differences
+between two tables. Each hunk could stand on its own as
+an independent tDiff document.  When there is a choice
+in how to decompose differences between two tables as
+a sequence of hunks,
+generators are encouraged to choose a decomposition that
+minimizes ordering effects between hunks.</p></div>
+<div class="listingblock">
+<div class="title">Document example</div>
+<div class="content">
+<pre><tt># tdiff version 0.2
+
+/*
+ * this comment could describe the whole document
+ */
+
+/*
+ * this comment could describe the following hunk
+ */
+* |bridge=Brooklyn|designer:'J.A.Roebling'|length:1595|
+= |bridge=Williamsburg|designer:'D.D.Duck'-&gt;'L.L.Buck'|length:1600|
+* |bridge=Queensborough|designer:'Palmer &amp; Hornbostel'|length:1182|
+
+/*
+ * this comment could describe the following hunk, even
+ * though it's not immediately adjacent to the hunk (there is
+ * an intervening newline).
+ */
+
+- |bridge=Spamspan|designer:'S.Spamington'|length:10000|
++ |bridge=Manhattan|designer:'G.Lindenthal'|length:1470|
+
+/*
+ * final, wrap up, comment
+ */</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Comment">Comment blocks</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Comment blocks are delimited using: /* */ (C style). Any content can
+occur within a comment block.</p></div>
+<div class="listingblock">
+<div class="title">Example comment</div>
+<div class="content">
+<pre><tt>/* This is an example single-line comment */
+/* This is an
+   example multi-line
+   comment */</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Control">Control blocks</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Control blocks begin with "# ", and are delimited by a newline or
+linefeed.  Control blocks may hold meta information about diffs,
+or environmental information that might be useful to an interpreter.
+Apart from the special <a href="#Header">header control block</a>, they
+lie outside of the scope of this specification.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Header">Header</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>A tdiff document should begin with a special
+<a href="#Control">control block</a> called the header.
+The header begins with the characters "# tdiff".  It is there
+to aid in rapid identification of tdiff documents.  Documents
+<strong>without</strong> this block should be accepted by interpreters, but
+this block should always be included by generators.</p></div>
+<div class="listingblock">
+<div class="title">Example header</div>
+<div class="content">
+<pre><tt># tdiff version 0.2</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Hunk">Hunk</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>A hunk is a series of one or more adjacent <a href="#Line">diff lines</a>,
+optionally preceeded by a <a href="#Column">column line</a>, where each
+diff line represents the
+differences between the source tables for a single row. The
+lines within a hunk should be separated by only the newline
+characters that terminate each diff line, so that they all appear as
+adjacent lines within a text editor. Within a tDiff document,
+hunks are delimited from each other via intermediate filler
+or comment blocks.</p></div>
+<div class="listingblock">
+<div class="title">Example hunk</div>
+<div class="content">
+<pre><tt>- |bridge=Spamspan|designer:'S.Spamington'|length:10000|
+= |bridge=Williamsburg|designer:'D.D.Duck'-&gt;'L.L.Buck'|length:1600|
++ |bridge=Manhattan|designer:'G.Lindenthal'|length:1470|</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Line">Diff line</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>A diff line describes differences in a single row of the two tables that
+were compared. One table is designated the left or local table (called <strong>L</strong>)
+and the other table is designated the right or remote table (called <strong>R</strong>).</p></div>
+<div class="paragraph"><p>There are three types of diff lines:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+MISSING line: describes a row that is present in <strong>L</strong> but absent in <strong>R</strong>.
+</p>
+</li>
+<li>
+<p>
+EXTRA line: describes a row that is absent in <strong>L</strong> but present in <strong>R</strong>.
+</p>
+</li>
+<li>
+<p>
+CHANGE line: describes a row that is present in both tables, but differs
+in some specific column values.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Each diff line occupies its own line in the document, and begins with
+one of three characters. These three characters are called "line type"
+characters:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+MISSING lines begin with plus: <em>'+'</em>.  In order to make <strong>R</strong> look like <strong>L</strong> we would have to add the missing row to <strong>R</strong>.
+</p>
+</li>
+<li>
+<p>
+EXTRA lines begin with minus: <em>'-'</em>. In order to make <strong>R</strong> look like <strong>L</strong> we would remove the extra row from <strong>R</strong>.
+</p>
+</li>
+<li>
+<p>
+CHANGE lines begin with equals: <em>'='</em>. In order to make <strong>R</strong> look like <strong>L</strong> we would update some of its column values.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The line type character can be left or right padded with any amount of
+whitespace, for readability. The line type character is followed by
+any number of name-value pairs, where the names represent column
+names, and the values are the values for the corresponding column name
+in that particular row. The name is separated from the value by an
+equals (<em>=</em>) sign for identifying columns (usually part of the primary
+key, but see <a href="#Identity">Keys versus identity</a>)
+or a colon (<em>:</em>) sign for all other columns.
+The name-value pairs, as well as the line type
+character, are delimited with whitespace and/or a pipe <em>'|'</em> character.</p></div>
+<div class="listingblock">
+<div class="title">Example diff line</div>
+<div class="content">
+<pre><tt>= |bridge=Williamsburg|designer:'D.D.Duck'-&gt;'L.L.Buck'|length:1600|</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Column">Column line</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Optionally, key names can be removed from diff lines. To do this, a
+special column line may be given within a hunk.  This lists
+column names, followed by "=" for identifying columns.</p></div>
+<div class="listingblock">
+<div class="title">Column line example</div>
+<div class="content">
+<pre><tt>@ |bridge=|designer|length|</tt></pre>
+</div></div>
+<div class="paragraph"><p>This establishes bridge as an identifying column that appears first,
+followed by designer and length columns.  We can now rewrite this:</p></div>
+<div class="listingblock">
+<div class="title">before</div>
+<div class="content">
+<pre><tt>= |bridge=Williamsburg|designer:'D.D.Duck'-&gt;'L.L.Buck'|length:1600|</tt></pre>
+</div></div>
+<div class="paragraph"><p>as this:</p></div>
+<div class="listingblock">
+<div class="title">after</div>
+<div class="content">
+<pre><tt>= |Williamsburg|'D.D.Duck'-&gt;'L.L.Buck'|1600|</tt></pre>
+</div></div>
+<div class="paragraph"><p>The effect of column lines is limited to within a single hunk.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_row_pseudo_column">ROW Pseudo Column</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Some sources of table data have a meaningful notion of row or line
+number (e.g. spreadsheets, CSV files) but others do not (RDBMS
+tables). The representation of the row number may be
+external to the table data itself. In order to accommodate these
+sources, document generators can make use of the ROW pseudo
+column.</p></div>
+<div class="listingblock">
+<div class="title">pseudo column examples</div>
+<div class="content">
+<pre><tt>+ |ROW=3|name3:value3|name4:value4|
+- |ROW=4|
+= |ROW=5|name3:old-value9-&gt;new-value9|name4:old-value10-&gt;new-value10 |</tt></pre>
+</div></div>
+<div class="paragraph"><p>Note that a diff that uses ROW numbers may be less useful for applying to
+RDBMS tables, and alternate row identity choices may be considered by the
+generator (or specified to the generator by the user).  See
+<a href="#Identity">Keys versus identity</a>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_column_numbers">Column Numbers</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Some sources of table data do not use named columns-- for instance,
+CSV files that have not designated a column header row. In those
+cases, column names are replaced with column number designators. The
+designators follow this pattern:</p></div>
+<div class="paragraph"><p>1, 2, &#8230;</p></div>
+<div class="paragraph"><p>N.B. The ordinal numbers embedded within column number designators are
+1&#8217;s based, not 2&#8217;s based. In other words, counting starts at 1, not at
+zero.</p></div>
+<div class="listingblock">
+<div class="title">column number example</div>
+<div class="content">
+<pre><tt>= |1=value1|2=value2|3:old-value3-&gt;new-value3|</tt></pre>
+</div></div>
+<div class="paragraph"><p>If column names are omitted, and no <a href="#Column">column line</a> is given,
+then ordinal numbers are assumed.  All columns are assumed to be
+identifying, unless they are modified.
+The previous example
+can therefore be equivalently expressed as:</p></div>
+<div class="listingblock">
+<div class="title">column number example (rewritten)</div>
+<div class="content">
+<pre><tt>= |value1|value2|old-value3-&gt;new-value3|</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_context">Context</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Though not always strictly required to fully and accurately described
+differences between two tables, generators are allowed to include
+extra rows and extra column values as contextual information. These
+can help human readers oriented themselves within the data, and might
+help machine interpreters to resolve otherwise ambiguities in applying
+a tDiff document.</p></div>
+<div class="paragraph"><p>In the case of missing or extra row lines, extra
+column data can be included within the row as name-value pairs, just
+like any other name-value pairs. In the case of a change line,
+extra name-value pairs can be included within the line.
+These contextual name-value pairs should also
+include only the old value. In other words, contextual column values should
+not include "&#8594;new-value". In addition to contextual column
+information, a hunk may contain any number of contextual rows. These
+rows appear with the line type character <em>'*'</em>. Streaks of contextual
+rows can prefix and suffix the block of actual (+, -, =) real diff
+lines, but cannot be interspersed amongst them. In other words, a
+hunk is:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+&lt;streak of context lines&gt;
+</p>
+</li>
+<li>
+<p>
+&lt;streak of real (+ or - or =) diff lines&gt;
+</p>
+</li>
+<li>
+<p>
+&lt;streak of context lines&gt;
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">context example</div>
+<div class="content">
+<pre><tt>* |bridge=Brooklyn|designer:'J.A.Roebling'|length:1595|
+= |bridge=Williamsburg|designer:'D.D.Duck'-&gt;'L.L.Buck'|length:1600|
+* |bridge=Queensborough|designer:'Palmer &amp; Hornbostel'|length:1182|</tt></pre>
+</div></div>
+<div class="paragraph"><p>Some tables are ordered, some unordered.  The context features
+of tDiff make sense for ordered tables.  When a diff between
+ordered tables is applied as a patch to an unordered table,
+context features may be ignored.  When a diff between unordered
+tables is applied as a patch to an ordered table, the resulting
+order may be underspecified (but presumably does not matter).</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Identity">Keys versus identity</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Determining whether a row is present in <strong>L</strong> and <strong>R</strong> requires
+a judgment about row identity.  This judgment may be simple.
+For example, the identity of a row may simply be the value of
+its primary key.  However, it is possible that the identity
+of a row is distinct from its primary key.  Consider for
+example a table with an auto-incrementing integer primary key,
+rather than something derived from the row data.  Comparison
+of that key between separately maintained copies of that table
+will be meaningless.  For meaningful comparison, an alternate
+row identity would need to be constructed.</p></div>
+<div class="paragraph"><p>This issue lies outside the tDiff specification, but it is
+important that implementors be aware that columns used for
+identification may in some cases not be part of the primary key.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_appendix_quoting">Appendix: Quoting</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Names or values may be quoted in a tDiff document.  Quoting is done
+as follows:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+All instances of the single-quote character are duplicated into pairs.
+</p>
+</li>
+<li>
+<p>
+All control characters and the backslash character are escaped as for C literals.
+</p>
+</li>
+<li>
+<p>
+The name or value is wrapped in single-quotes
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>It is always safe to single-quote a name or value.  Names or values
+<strong>must</strong> by quoted in any of the following conditions:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+A name or value conflicts with a reserved word: NULL, ROW.
+</p>
+</li>
+<li>
+<p>
+A name or value contains any character in the 7-bit ASCII range that is <strong>not</strong> in the following set: [A-Za-z0-9+.]
+</p>
+</li>
+<li>
+<p>
+A <strong>name</strong> begins with any of the characters [0-9+.].
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>In the case of column diffs, for each cell that was different between
+<strong>L</strong> and <strong>R</strong>, both the old and new values are displayed. The
+old value must come first, followed by <em>&#8594;</em> (dash greater than),
+followed by the new value. For all three diff line types, the
+generator may include <strong>L</strong> name-value pairs that are not
+strictly needed, but may help with row identification.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_appendix_grammar">Appendix: Grammar</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Grammar</div>
+<div class="content">
+<pre><tt> document ::= header (block)*
+ block ::= hunk | control | comment | filler
+
+ hunk ::= (hunk_header)? (diff_line)+
+ hunk_header ::= '@' (divider name)* break
+ diff_line ::= ('-' | '+' | '=') (divider term)* break
+ term ::= (name ('='|':'))? (value '-&gt;')? value
+ break ::= divider? linebreak
+
+ control ::= "#" (divider value)* break
+
+ comment ::=  | ("/*" comment_body "*/")
+
+ filler ::= (linebreak | divider)+
+
+ header ::= '#' (divider term)* break
+
+ divider ::= (' ' | '\t')* ('|')? (' ' | '\t')*
+ linebreak ::= ('\r\n' | '\r' | '\n')
+
+ # unspecified in grammar: name, value, comment_body</tt></pre>
+</div></div>
+<div class="paragraph"><p>The linebreak non-terminal needs to be parsed greedily to work with all
+common end-of-line formats, since the number of linebreaks is
+significant in the grammar.  The comment_body non-terminal is
+as for C.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_appendix_complete_examples">Appendix: Complete examples</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>In example one, both tables are in an RDBMS, both tables have the same
+column names, and the rows are identified using column1.</p></div>
+<div class="listingblock">
+<div class="title">Example 1 tables</div>
+<div class="content">
+<pre><tt>L:                                  R:
+column1,column2,column3,column4     column1,column2,column3,column4
+1,      0000,   x,      aaaa        ----------------------------
+----------------------------        2,      1111,   x,      aaaa
+3,      2222,   x,      aaaa        3,      2222,   y,      aaaa
+4,      3333,   x,      aaaa        4,      0000,   z,      bbbb
+5,      4444,   x,      aaaa        5,      4444,   z,      bbbb
+6,      5555,   x,      aaaa        6,      5555,   u,      aaaa
+----------------------------        7,      0000,   v,      aaaa
+----------------------------        8,      1111,   x,      aaaa</tt></pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example 1 diff, variant 1</div>
+<div class="content">
+<pre><tt># tdiff version 0.2
+
+/*
+ * this is the tDiff document for example 1, using 1 hunk only and no context.
+ * Note the "|" usage varies from previous examples in this document.
+ * "|" plays the same role as spaces and tabs in the spec, so varying
+ * styles are possible.
+ */
+- | column1=1
++ | column1=2| column2:1111| column3:x| column4:aaaa
+= | column1=3| column3:x-&gt;y
+= | column1=4| column2:3333-&gt;0000| column3:x-&gt;z| column4:aaaa-&gt;bbbb
+= | column1=5| column3:x-&gt;z| column4:aaaa-&gt;bbbb
+= | column1=6| column3:x-&gt;u
++ | column1=7| column2:0000| column3:v| column4:aaaa
++ | column1=8| column2:1111| column3:x| column4:aaaa
+/*
+ * end of tDiff document
+ */</tt></pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example 1 diff, variant 2</div>
+<div class="content">
+<pre><tt># tdiff version 0.2
+
+/*
+ * here is a tDiff document that is equivalent to the document above, except
+ * that it uses 8 hunks, more comments, and adds in some context
+ */
+/*
+ * hunk 1: notice that columns 2,3,4 are context-- not strictly necessary
+ * to specify a remove
+ */
+- | column1=1| column2:0000| column3:x| column4:aaaa
+
+/*
+ * hunk 2: notice that the hunks are separated by standalone newline
+ */
++ | column1=2| column2:1111| column3:x| column4:aaaa
+
+/*
+ * hunk 3: notice that column2 and column4 are merely context
+ */
+= | column1=3| column2:2222| column3:x-&gt;y| column4:aaaa
+
+/*
+ * hunk 4: notice that the column diff line is surrounded by context rows, and
+ * that the context rows describe the values on the RHS.
+ */
+* | column1=3| column2:2222| column3:x| column4:aaaa
+= | column1=4| column2:3333-&gt;0000| column3:x-&gt;z| column4:aaaa-&gt;bbbb
+* | column1=5| column2:4444| column3:x| column4:aaaa
+
+/*
+ * hunk 5
+ */
+= | column1=5| column3:x-&gt;z| column4:aaaa-&gt;bbbb
+
+/*
+ * hunk 6
+ */
+= | column1=6| column3:x-&gt;u
+
+/*
+ * hunk 7
+ */
++ | column1=7| column2:0000| column3:v| column4:aaaa
+
+/*
+ * hunk 8
+ */
++ | column1=8| column2:1111| column3:x| column4:aaaa</tt></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Version 0.2<br />
+Last updated 2011-01-12 16:01:15 EST
+</div>
+</div>
+</body>
+</html>

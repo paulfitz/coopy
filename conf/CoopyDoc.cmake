@@ -35,3 +35,6 @@ if (DOXYGEN_EXE)
     add_custom_target(${mode} COMMAND ${DOXYGEN_EXE} ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf)
   endforeach ()
 endif ()
+
+configure_file(${CMAKE_SOURCE_DIR}/doc/tdiff/tdiff_spec_draft.html
+  ${CMAKE_BINARY_DIR}/gendoc/html/tdiff_spec_draft.html IMMEDIATE)

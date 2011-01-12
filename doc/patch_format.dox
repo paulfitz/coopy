@@ -7,5 +7,8 @@
 \li \ref patch_format_csv_v_0_2 - an older format, deprecated but still supported.
 \li \ref patch_format_human - a textual format, developed when the CSV format was less readable.
 
+Support for the following format is under consideration:
+\li <a href='tdiff_spec_draft.html'>tDiff</a>
+
  *
  */
