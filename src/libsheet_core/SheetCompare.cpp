@@ -24,11 +24,18 @@ namespace coopy {
 class coopy::cmp::FastMatch {
 public:
   MeasurePass& pass;
+  NameSniffer *local_names;
+  NameSniffer *remote_names;
 
   FastMatch(MeasurePass& pass) : pass(pass) {
+    local_names = remote_names = NULL;
   }
 
   void match(bool rowLike) {
+
+    // We check if the two things being compared are identical.
+    // If so, that's easy!
+
     // add matches for easy cases here
     if (pass.a.width()==pass.b.width() &&
 	pass.a.height()==pass.b.height()) {
@@ -48,54 +55,47 @@ public:
 	  pass.asel.cell(0,i) = i;
 	  pass.bsel.cell(0,i) = i;
 	}
+	return;
+      }
+    }
+
+    // Non identical eh?  Well, maybe we've been told to trust
+    // some identifying columns.
+
+    if (local_names!=NULL && remote_names!=NULL) {
+      if (local_names->hasSubset()&&remote_names->hasSubset()) {
+	// Great!  No need to do anything elaborate.  We've probably
+	// already wasted too much time sucking data into memory,
+	// oh well...
+	
+	// process subset here...
       }
     }
   }
 };
 
-/*
-class coopy::cmp::RedundancyMatch {
-public:
-  MeasurePass& pass;
-
-  RedundancyMatch(MeasurePass& pass) : pass(pass) {
-  }
-
-  void match(bool rowLike) {
-    // IN
-    // pass.a.width / pass.a.height / pass.a.cell(x,y) 
-    // pass.b.width / pass.b.height / pass.b.cell(x,y)
-    // OUT
-    // pass.asel.cell(0,q) = r
-    // pass.bsel.cell(0,r) = q
-   
-    // add matches for easy cases here
-    if (pass.a.width()==pass.b.width() &&
-	pass.a.height()==pass.b.height()) {
-      bool fail = false;
-      for (int r=0; r<pass.a.height() && !fail; r++) {
-	for (int c=0; c<pass.a.width(); c++) {
-	  if (pass.a.cell(c,r)!=pass.b.cell(c,r)) {
-	    fail = true;
-	    break;
-	  }
-	}
-      }
-      if (!fail) {
-	// sheets are identical!
-	dbg_printf("MATCH!\n");
-	for (int i=0; i<pass.asel.height(); i++) {
-	  pass.asel.cell(0,i) = i;
-	  pass.bsel.cell(0,i) = i;
-	}
-      }
-    }
-  }
-};
-*/
 
 int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 			  MergeOutput& output, const CompareFlags& flags) {
+  NameSniffer pivot_names(pivot,false);
+  NameSniffer local_names(local,false);
+  NameSniffer remote_names(remote,false);
+  CompareFlags eflags = flags;
+
+  if (eflags.trust_ids) {
+    dbg_printf("Checking IDs\n");
+    local_names.sniff();
+    bool ok = local_names.subset(eflags.ids);
+    remote_names.sniff();
+    ok = ok && remote_names.subset(eflags.ids);
+    pivot_names.sniff();
+    ok = ok && pivot_names.subset(eflags.ids);
+    if (!ok) {
+      fprintf(stderr,"Not all ID columns found\n");
+      return -1;
+    }
+  }
+
   IdentityOrderResult id;
 
   /////////////////////////////////////////////////////////////////////////
@@ -116,6 +116,8 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 
   p2l_row_man.setup();
   FastMatch p2l_row_fast_match(p2l_row_pass_local);
+  p2l_row_fast_match.local_names = &local_names;
+  p2l_row_fast_match.remote_names = &remote_names;
   p2l_row_fast_match.match(true);
   p2l_row_man.compare();
 
@@ -195,13 +197,16 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   OrderResult p2r_col_order = p2r_col_pass_local.getOrder();
 
   Merger merger;
-  merger.merge(pivot,local,remote,
-	       p2l_row_order,
-	       p2r_row_order,
-	       p2l_col_order,
-	       p2r_col_order,
-	       output,
-	       flags);
+  MergerState state(pivot,local,remote,
+		    p2l_row_order,
+		    p2r_row_order,
+		    p2l_col_order,
+		    p2r_col_order,
+		    output,
+		    eflags,
+		    local_names,
+		    remote_names);
+  merger.merge(state);
   return 0;
 }
 

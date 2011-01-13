@@ -22,4 +22,5 @@ apply $TDIR/named_numbers.csv $TDIR/named_numbers_change_five.csv
 apply $TDIR/named_numbers_change_five.csv $TDIR/named_numbers.csv 
 apply $TDIR/named_numbers.csv $TDIR/named_numbers_add_row.csv 
 apply $TDIR/named_numbers_add_row.csv $TDIR/named_numbers.csv 
+apply $TDIR/tdiff/joe002.csv $TDIR/tdiff/joe001.csv
 

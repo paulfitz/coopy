@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
   std::string mode = "csv";
   std::string parent_file = "";
   std::string version = "";
+  std::vector<std::string> ids;
   bool verbose = false;
   bool equality = false;
   bool indexed = false;
@@ -56,9 +57,13 @@ int main(int argc, char *argv[]) {
       {"format-raw", 0, 0, 'r'},
       {"format-tdiff", 0, 0, 't'},
       {"format-index", 0, 0, 'i'},
+
       {"equals", 0, 0, 'e'},
       {"index", 0, 0, 'i'},
       {"verbose", 0, 0, 'v'},
+
+      {"id", 1, 0, 'k'},
+
       {"output", 1, 0, 'o'},
       {"version", 1, 0, 'V'},
       {"parent", 1, 0, 'p'},
@@ -97,6 +102,11 @@ int main(int argc, char *argv[]) {
     case 'i':
       indexed = true;
       break;
+
+    case 'k':
+      ids.push_back(optarg);
+      break;
+
     case 'o':
       output = optarg;
       break;
@@ -171,6 +181,10 @@ int main(int argc, char *argv[]) {
   }
 
   CompareFlags flags;
+  if (ids.size()>0) {
+    flags.ids = ids;
+    flags.trust_ids = true;
+  }
   if (indexed) {
     MergeOutputIndex diff;
     PolyBook book;

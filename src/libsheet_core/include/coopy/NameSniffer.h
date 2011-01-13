@@ -16,15 +16,20 @@ class coopy::store::NameSniffer {
 private:
   const DataSheet& sheet;
   std::vector<std::string> names;
+  std::vector<int> subset_index;
   std::vector<ColumnType> ct;
   bool embed;
   bool fake;
+  bool sniffed;
   int div;
 public:
-  NameSniffer(const DataSheet& sheet) : sheet(sheet) {
+ NameSniffer(const DataSheet& sheet, bool autosniff=true) : sheet(sheet) {
     div = -1;
     fake = true;
-    sniff();
+    sniffed = false;
+    if (autosniff) {
+      sniff();
+    }
   }
 
   void sniff(); 
@@ -36,11 +41,15 @@ public:
 
   virtual std::string suggestColumnName(int col);
 
-  virtual std::vector<std::string> suggestNames() const {
+  virtual const std::vector<std::string>& suggestNames() const {
     return names;
   }
 
-  virtual std::vector<ColumnType> suggestTypes() const {
+  virtual const std::vector<int>& getSubset() const {
+    return subset_index;
+  }
+
+  virtual const std::vector<ColumnType>& suggestTypes() const {
     return ct;
   }
 
@@ -51,6 +60,12 @@ public:
   bool isFake() {
     return fake;
   }
+  
+  bool hasSubset() const {
+    return subset_index.size()>0;
+  }
+
+  bool subset(std::vector<std::string>& names);
 };
 
 #endif

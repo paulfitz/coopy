@@ -2,6 +2,8 @@
 #define COOPY_COMPAREFLAGS
 
 #include <stdio.h>
+#include <vector>
+#include <string>
 
 namespace coopy {
   namespace cmp {
@@ -14,11 +16,16 @@ public:
   bool head_trimmed;
   bool tail_trimmed;
   FILE *out;
+  std::vector<std::string> ids;
+  std::vector<int> ids_local;
+  std::vector<int> ids_remote;
+  bool trust_ids;
 
   CompareFlags() {
     head_trimmed = false;
     tail_trimmed = false;
     out = stdout;
+    trust_ids = false;
   }
 };
 

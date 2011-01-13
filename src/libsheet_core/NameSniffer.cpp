@@ -8,6 +8,8 @@ using namespace coopy::cmp;
 using namespace std;
 
 void NameSniffer::sniff() {
+  if (sniffed) return;
+  sniffed = true;
   embed = false;
   fake = false;
   names.clear();
@@ -76,4 +78,19 @@ std::string NameSniffer::suggestColumnName(int col) {
   char buf[256];
   sprintf(buf,"%d",col);
   return buf;
+}
+
+
+bool NameSniffer::subset(std::vector<std::string>& ext) {
+  subset_index.clear();
+  for (int i=0; i<(int)ext.size(); i++) {
+    for (int j=0; j<(int)names.size(); j++) {
+      if (ext[i]==names[j]) {
+	dbg_printf("pos %d %s\n", j, names[j].c_str());
+	subset_index.push_back(j);
+	break;
+      }
+    }
+  }
+  return subset_index.size()==ext.size();
 }

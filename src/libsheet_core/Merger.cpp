@@ -284,13 +284,19 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 }
 
 
-void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
-		   const OrderResult& row_local,
-		   const OrderResult& row_remote,
-		   const OrderResult& col_local,
-		   const OrderResult& col_remote,
-		   MergeOutput& output,
-		   const CompareFlags& flags) {
+void Merger::merge(MergerState& state) {
+  coopy::store::DataSheet& pivot = state.pivot;
+  coopy::store::DataSheet& local = state.local;
+  coopy::store::DataSheet& remote = state.remote;
+  const OrderResult& row_local = state.nrow_local;
+  const OrderResult& row_remote = state.nrow_remote;
+  const OrderResult& col_local = state.ncol_local;
+  const OrderResult& col_remote = state.ncol_remote;
+  MergeOutput& output = state.output;
+  const CompareFlags& flags = state.flags;
+  NameSniffer& local_names = state.local_names;
+  NameSniffer& remote_names = state.remote_names;
+
   bool diff = output.wantDiff();
   bool link = output.wantLinks();
 
@@ -392,8 +398,10 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     lastAddress.clear();
     lastAction.clear();
 
-    NameSniffer localName(local);
-    NameSniffer remoteName(remote);
+    local_names.sniff();
+    remote_names.sniff();
+    //NameSniffer localName(local);
+    //NameSniffer remoteName(remote);
 
     // for now, we will only use filtered index if column manipulations
     // are non-existent or trivial
@@ -407,7 +415,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     for (int i=0; i<local.width(); i++) {
       local_cols.push_back(i);
 
-      string name = localName.suggestColumnName(i);
+      string name = local_names.suggestColumnName(i);
       if (name[0]>='0'&&name[0]<='9') {
 	name = string("[") + name + "]";
       }
@@ -554,7 +562,7 @@ void Merger::merge(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	change.mode = ORDER_CHANGE_INSERT;
 	local_cols.insert(local_cols.begin()+at,-rCol-1);
 
-	string name = remoteName.suggestColumnName(rCol);
+	string name = remote_names.suggestColumnName(rCol);
 	bool collision = false;
 	if (name[0]>='0'&&name[0]<='9') {
 	  name = string("{") + name + "}";
