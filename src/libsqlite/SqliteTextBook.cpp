@@ -41,6 +41,10 @@ bool SqliteTextBook::read(const char *fname) {
     clear();
     return false;
   }  
+
+  const char *query = "PRAGMA synchronous = 0;";
+  sqlite3_exec((sqlite3*)implementation, query, NULL, NULL, NULL);
+
   names = getNamesSql();
   return true;
 }
