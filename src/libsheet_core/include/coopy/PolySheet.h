@@ -222,6 +222,21 @@ public:
     return sheet->deleteData();
   }
 
+  virtual bool hasDimension() const {
+    COOPY_ASSERT(sheet);
+    return sheet->hasDimension();
+  }
+
+  virtual bool forceWidth(int width) {
+    COOPY_ASSERT(sheet);
+    return sheet->forceWidth(width);
+  }
+
+  virtual bool forceHeight(int height) {
+    COOPY_ASSERT(sheet);
+    return sheet->forceHeight(height);
+  }
+
   virtual bool hasExternalColumnNames() const {
     COOPY_ASSERT(sheet);
     return sheet->hasExternalColumnNames();

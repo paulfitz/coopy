@@ -79,6 +79,7 @@ bool GnumericSheet::deleteColumn(const ColumnRef& column) {
 }
 
 ColumnRef GnumericSheet::insertColumn(const ColumnRef& base) {
+  //printf("inserting column...\n");
   int index = base.getIndex();
   if (index==-1) { 
     index = width();
@@ -88,12 +89,13 @@ ColumnRef GnumericSheet::insertColumn(const ColumnRef& base) {
     return ColumnRef(index);
   }
   bool ok = gnumeric_insert_column(SHEET(implementation),index) == 0;
-  if (!ok) { return ColumnRef(); }
+  if (!ok) { printf("fail\n"); return ColumnRef(); }
   w++;
   return ColumnRef(index);
 }
 
 RowRef GnumericSheet::insertRow(const RowRef& base) {
+  //printf("inserting row\n");
   int index = base.getIndex();
   if (index==-1) {
     h++;
@@ -104,8 +106,9 @@ RowRef GnumericSheet::insertRow(const RowRef& base) {
     return RowRef(index);
   }
   bool ok = gnumeric_insert_row(SHEET(implementation),index) == 0;
-  if (!ok) { return RowRef(); }
+  //if (!ok) { return RowRef(); }
   h++;
+  //printf("inserted row\n");
   return RowRef(index);  
 }
 
@@ -117,3 +120,10 @@ bool GnumericSheet::deleteRow(const RowRef& src) {
   h--;
   return true;
 }
+
+bool GnumericSheet::deleteData() {
+  bool ok = gnumeric_delete_data(SHEET(implementation)) == 0;
+  h = 0;
+  return ok;
+}
+

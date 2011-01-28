@@ -73,6 +73,11 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
       return false;
     }
     if (target.width()!=sheet.width()) {
+      if (!target.hasDimension()) {
+	target.forceWidth(sheet.width());
+      }
+    }
+    if (target.width()!=sheet.width()) {
       fprintf(stderr, "Column mismatch %s\n", name.c_str());
       return false;
     }
@@ -80,8 +85,10 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
       target.deleteData();
     }
     if (target.height()!=0) {
-      fprintf(stderr, "Could not remove existing data: %s\n", name.c_str());
-      return false;
+      if (target.hasDimension()) {
+	fprintf(stderr, "Could not remove existing data: %s\n", name.c_str());
+	return false;
+      }
     }
     int start = 0;
     if (schema->headerHeight()>0) {
@@ -90,6 +97,7 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
       }
     }
     for (int i=start; i<sheet.height(); i++) {
+      //printf("Row %d\n", i);
       Poly<SheetRow> pRow = target.insertRow();
       SheetRow& row = *pRow;
       for (int j=0; j<sheet.width(); j++) {

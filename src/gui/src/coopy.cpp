@@ -34,6 +34,7 @@
 #undef static
 
 #define SITE_NAME "share.find.coop"
+#define SITE_NAME_CREATE "http://share.find.coop/repo/new"
 
 using namespace std;
 
@@ -1014,7 +1015,7 @@ void CoopyFrame::OnUndo(wxCommandEvent& event) {
 
 void CoopyFrame::OnCreate(wxCommandEvent& event) {
     printf("Create!\n");
-    ::wxLaunchDefaultBrowser(wxT(SITE_NAME));
+    ::wxLaunchDefaultBrowser(wxT(SITE_NAME_CREATE));
 }
 
 

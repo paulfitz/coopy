@@ -43,6 +43,7 @@ public:
 
   Factories() {
     all.push_back(new ShortTextBookFactory);
+    all.push_back(new CsvTextBookFactory);
     all.push_back(new SqliteTextBookFactory);
     getFactories(all,false);
   }
@@ -65,7 +66,7 @@ public:
       if (all[i]->getName()==key) {
 	dbg_printf("operating on %s\n", key.c_str());
 	TextBook *result = all[i]->open(config,report);
-	dbg_printf("success %d msg %s\n", (int)report.success,
+	dbg_printf("success [%s] msg [%s]\n", report.success?"ok":"fail",
 		   report.msg.c_str());
 	if (!report.success) {
 	  fprintf(stderr,"* %s%s%s\n", 
@@ -164,12 +165,15 @@ bool PolyBook::attach(Property& config) {
     if (ext==".sqlite") {
       key = "sqlite";
     }
+    if (ext==".book") {
+      key = "book";
+    }
   }
   if (key==""&&filename=="-") {
     key = "csv";
   }
 
-  dbg_printf("Attach: type %s file %s\n", key.c_str(), filename.c_str());
+  dbg_printf("Attach: type [%s] file [%s]\n", key.c_str(), filename.c_str());
 
   if (key=="") {
     fprintf(stderr,"* Extension %s not known, maybe use a .json config file?\n",

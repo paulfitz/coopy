@@ -109,6 +109,10 @@ bool DataSheet::applyRowCache(const RowCache& cache, int row) {
     fprintf(stderr,"Sheet requires a row\n");
     return false;
   }
+  while (row>=height()) {
+    insertRow(RowRef(-1));
+    //dbg_printf("adding row..\n");
+  }
   for (int i=0; i<(int)cache.cells.size(); i++) {
     if (cache.flags[i]) {
       setCell(i,row,cache.cells[i]);

@@ -119,6 +119,18 @@ public:
     return false;
   }
 
+  virtual bool hasDimension() const {
+    return true;
+  }
+
+  virtual bool forceWidth(int width) {
+    return false;
+  }
+
+  virtual bool forceHeight(int height) {
+    return false;
+  }
+
   // insert a row before base; if base is invalid insert after all rows
   virtual RowRef insertRow(const RowRef& base) {
     return RowRef(); // invalid row

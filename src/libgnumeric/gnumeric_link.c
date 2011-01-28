@@ -103,6 +103,7 @@ GnumericWorkbookPtr gnumeric_load(const char *fname) {
   GOIOContext *io_context = go_io_context_new (cc);
   char *uri = go_filename_to_uri (fname);
   //printf("Have uri %s\n", uri);
+
   WorkbookView *wbv = wb_view_new_from_uri (uri, NULL,
 					    io_context, NULL);
   g_free (uri);
@@ -110,6 +111,12 @@ GnumericWorkbookPtr gnumeric_load(const char *fname) {
   g_object_unref (io_context);
   return wbv;
 }
+
+GnumericWorkbookPtr gnumeric_create() {
+  return workbook_view_new(NULL);
+
+}
+
 
 int gnumeric_save(GnumericWorkbookPtr workbook, const char *fname,
 		  const char *format) {
@@ -163,9 +170,48 @@ int gnumeric_overlay_csv(GnumericWorkbookPtr workbook,
   return 0;
 }
 
+int gnumeric_get_sheet_count(GnumericWorkbookPtr workbook) {
+  WorkbookView *wbv = (WorkbookView *)workbook;
+  return workbook_sheet_count(wb_view_get_workbook(wbv));
+}
+
 GnumericSheetPtr gnumeric_get_sheet(GnumericWorkbookPtr workbook, int index) {
   WorkbookView *wbv = (WorkbookView *)workbook;
-  Sheet *sheet = workbook_sheet_by_index (wb_view_get_workbook (wbv), 0);
+  Sheet *sheet = workbook_sheet_by_index (wb_view_get_workbook (wbv), index);
+  return (GnumericSheetPtr*)sheet;
+}
+
+GnumericSheetPtr gnumeric_get_sheet_by_name(GnumericWorkbookPtr workbook, 
+					    const char *name) {
+  WorkbookView *wbv = (WorkbookView *)workbook;
+  Sheet *sheet = workbook_sheet_by_name (wb_view_get_workbook (wbv), name);
+  return (GnumericSheetPtr*)sheet;
+}
+
+GnumericSheetPtr gnumeric_add_sheet(GnumericWorkbookPtr workbook,
+				    const char *name) {
+  WorkbookView *wbv = (WorkbookView *)workbook;
+  int cols = gnm_conf_get_core_workbook_n_cols ();
+  int rows = gnm_conf_get_core_workbook_n_rows ();
+  if (!gnm_sheet_valid_size (cols, rows)) {
+    gnm_sheet_suggest_size (&cols, &rows);
+  }
+
+  Sheet *sheet = workbook_sheet_add (wb_view_get_workbook (wbv), 
+				     -1, cols, rows);
+  if (name!=NULL) {
+    int idx = gnumeric_get_sheet_count(workbook)-1;
+    GSList *idxs = NULL;
+    GSList *names = NULL;
+    idxs = g_slist_append(idxs, GINT_TO_POINTER(idx));
+    names = g_slist_append(names, (gpointer)name);
+    workbook_sheet_rename(wb_view_get_workbook (wbv),
+			  idxs,
+			  names,
+			  cc);
+    g_slist_free(idxs);
+    g_slist_free(names);
+  }
   return (GnumericSheetPtr*)sheet;
 }
 
@@ -192,6 +238,11 @@ int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
   }
   sheet_cell_set_text(cell,str,NULL);
   return 0;
+}
+
+const char *gnumeric_sheet_get_name(GnumericSheetPtr sheet) {
+  Sheet *s = (Sheet *)sheet;
+  return s->name_unquoted;
 }
 
 void gnumeric_free_string(char *str) {
@@ -266,6 +317,7 @@ int gnumeric_move_column(GnumericSheetPtr sheet, int src, int dest) {
 int gnumeric_insert_column(GnumericSheetPtr sheet, int before) {
   BEGIN_UNDO;
   sheet_insert_cols(sheet,before,1,DO_UNDO,cc);
+  //gnumeric_sheet_get_size(sheet, &w, &h);
   END_UNDO;
   return 0;
 }
@@ -290,3 +342,13 @@ int gnumeric_delete_row(GnumericSheetPtr sheet, int at) {
   END_UNDO;
   return 0;
 }
+
+int gnumeric_delete_data(GnumericSheetPtr sheet) {
+  BEGIN_UNDO;
+  int w, h;
+  gnumeric_sheet_get_size(sheet, &w, &h);
+  sheet_delete_rows(sheet,0,h+1,DO_UNDO,cc);
+  END_UNDO;
+  return 0;
+}
+

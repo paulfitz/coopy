@@ -37,6 +37,8 @@ public:
     shouldWrite = false;
     prevBook = NULL;
   }
+
+  void show() const;
 };
 
 class coopy::store::AttachReport {

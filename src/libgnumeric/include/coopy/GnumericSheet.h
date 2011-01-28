@@ -34,6 +34,17 @@ public:
 
   virtual bool deleteRow(const RowRef& src);
 
+  virtual bool hasDimension() const {
+    return false;
+  }
+
+  virtual bool forceWidth(int width) {
+    w = width;
+    return true;
+  }
+
+  virtual bool deleteData();
+
 private:
   void *implementation;
   int w, h;
