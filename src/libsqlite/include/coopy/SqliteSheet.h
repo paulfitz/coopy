@@ -44,7 +44,7 @@ public:
     ColumnType t;
     t.primaryKey = col2pk[x];
     t.primaryKeySet = true;
-    printf(">> %d %s\n", x, col2sql[x].c_str());
+    //printf(">> %d %s\n", x, col2sql[x].c_str());
     return ColumnInfo(col2sql[x],t);
   }
 
@@ -60,6 +60,10 @@ public:
 
   virtual bool hasExternalColumnNames() const {
     return true;
+  }
+
+  std::string getName() const {
+    return name;
   }
 
 private:
@@ -78,7 +82,11 @@ class coopy::store::SqliteSheetSchema : public SheetSchema {
 public:
   SqliteSheet *sheet;
 
-  virtual ColumnInfo getColumnInfo(int x) {
+  virtual std::string getSheetName() const {
+    return sheet->getName();
+  }
+
+  virtual ColumnInfo getColumnInfo(int x) const {
     return sheet->getColumnInfo(x);
   }
 

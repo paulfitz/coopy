@@ -334,8 +334,10 @@ MACRO(ADD_TEST2 name ref target)
   ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
     --output test_out_${name}
     ${ARGN})
-  ADD_TEST(${name}Compare ${CMAKE_COMMAND} -E compare_files 
-    test_out_${name} ${ref})
+  ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+    --equals test_out_${name} ${ref})
+  #${CMAKE_COMMAND} -E compare_files 
+  # test_out_${name} ${ref})
 ENDMACRO()
 
 ADD_TEST2(tail_merge ${TESTS}/result_trimmer_merge.csv ssmerge --tail-trim
@@ -352,7 +354,7 @@ endforeach()
 # SQLITE testing
 
 foreach(patcher patch_001_col_move patch_002_col_insert patch_003_col_insert patch_004_col_delete patch_005_row_update patch_006_row_insert patch_007_row_delete)
-  ADD_TEST2(sqlite_${patcher} ${TESTS}/db/result_${patcher}.csv sspatch --tmp tmp.sqlite ${TESTS}/numbers.sqlite ${TESTS}/patch_v_0_2/${patcher}.txt)
+  ADD_TEST2(sqlite_${patcher} ${TESTS}/db/hdr_result_${patcher}.csv sspatch --tmp tmp.sqlite ${TESTS}/numbers.sqlite ${TESTS}/patch_v_0_2/${patcher}.txt)
 endforeach()
 
 

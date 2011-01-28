@@ -96,8 +96,25 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
 	start += schema->headerHeight();
       }
     }
+    if (!target.hasExternalColumnNames()) {
+      if (schema->headerHeight()<=0) {
+	bool named = false;
+	for (int j=0; j<schema->getColumnCount(); j++) {
+	  ColumnInfo info = schema->getColumnInfo(j);
+	  if (info.hasName()) { named = true; break; }
+	}
+	if (named) {
+	  Poly<SheetRow> pRow = target.insertRow();
+	  SheetRow& row = *pRow;
+	  for (int j=0; j<schema->getColumnCount(); j++) {
+	    ColumnInfo info = schema->getColumnInfo(j);
+	    row.setCell(j,SheetCell(info.getName(),false));
+	  }
+	  row.flush();
+	}
+      }
+    }
     for (int i=start; i<sheet.height(); i++) {
-      //printf("Row %d\n", i);
       Poly<SheetRow> pRow = target.insertRow();
       SheetRow& row = *pRow;
       for (int j=0; j<sheet.width(); j++) {

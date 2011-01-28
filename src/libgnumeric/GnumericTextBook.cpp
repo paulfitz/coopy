@@ -94,7 +94,7 @@ bool GnumericTextBook::save(const char *fname, const char *format) {
 
 bool GnumericTextBook::addSheet(const SheetSchema& schema) {
   if (implementation==NULL) return false;
-  dbg_printf("gnumerictextbook::addsheet %s\n", schema.getSheetName().c_str());
+  dbg_printf("gnumerictextbook::addsheet [%s]\n", schema.getSheetName().c_str());
   string name = schema.getSheetName();
   getNames();
   if (find(names.begin(),names.end(),name)!=names.end()) {
@@ -105,6 +105,7 @@ bool GnumericTextBook::addSheet(const SheetSchema& schema) {
   if (sheet==NULL) {
     return false;
   }
+  /*
   GnumericSheet s(sheet);
   for (int i=0; i<schema.getColumnCount(); i++) {
     ColumnInfo ci = schema.getColumnInfo(i);
@@ -115,6 +116,7 @@ bool GnumericTextBook::addSheet(const SheetSchema& schema) {
     }
     s.cellString(i,0,cname);
   }
+  */
 
   /*
   int ct = schema.getColumnCount();
