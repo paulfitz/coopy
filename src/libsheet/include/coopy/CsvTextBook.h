@@ -4,6 +4,7 @@
 #include <coopy/TextBook.h>
 #include <coopy/TextBookFactory.h>
 #include <coopy/CsvSheet.h>
+#include <coopy/CsvFile.h>
 
 #include <vector>
 #include <map>
@@ -34,6 +35,12 @@ public:
   
   bool read(const char *fname);
 
+  bool write(const char *fname) {
+    return write(fname,this);
+  }
+
+  static bool write(const char *fname, TextBook *book);
+
   virtual bool open(const Property& config);
 };
 
@@ -50,8 +57,8 @@ public:
 	dbg_printf("writing book file %s\n", config.options.get("file").asString().c_str());
 	//int r = CsvFile::write(config.prevBook->readSheetByIndex(0),
 	//config.options);
-	int r = -1;
-	if (r==0) {
+	if (CsvTextBook::write(config.options.get("file").asString().c_str(),
+			       config.prevBook)) {
 	  report.success = true;
 	  return config.prevBook;
 	}
@@ -59,7 +66,7 @@ public:
       return NULL;
     }
 
-    CsvTextBook *book = new CsvTextBook;
+    CsvTextBook *book = new CsvTextBook();
     if (book==NULL) return NULL;
 
     if (config.shouldRead) {

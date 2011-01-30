@@ -5,12 +5,7 @@
 using namespace coopy::store;
 using namespace std;
 
-bool CsvTextBook::read(const char *fname) {
-  CsvSheet index;
-  if (CsvFile::read(fname,index)!=0) {
-    fprintf(stderr,"Failed to read %s\n", fname);
-    return false;
-  }
+static string getRoot(const char *fname) {
   string root = fname;
   if (root.rfind("/")!=string::npos) {
     root = root.substr(0,root.rfind("/")+1);
@@ -19,6 +14,16 @@ bool CsvTextBook::read(const char *fname) {
   } else {
     root = "";
   }
+  return root;
+}
+
+bool CsvTextBook::read(const char *fname) {
+  CsvSheet index;
+  if (CsvFile::read(fname,index)!=0) {
+    fprintf(stderr,"Failed to read %s\n", fname);
+    return false;
+  }
+  string root = getRoot(fname);
   for (int y=0; y<index.height(); y++) {
     string cmd = index.cell(0,y);
     if (cmd=="table") {
@@ -44,6 +49,24 @@ bool CsvTextBook::read(const char *fname) {
     }
   }
   return true;
+}
+
+bool CsvTextBook::write(const char *fname, TextBook *book) {
+  string root = getRoot(fname);
+  vector<string> names = book->getNames();
+  CsvSheet idx;
+  bool ok = true;
+  for (int i=0; i<(int)names.size(); i++) {
+    idx.addField("table",false);
+    idx.addField(names[i].c_str(),false);
+    idx.addField("",false);
+    idx.addRecord();
+    string f = root + names[i] + ".csv";
+    //printf("%s\n", f.c_str());
+    CsvFile::write(book->readSheetByIndex(i),f.c_str());
+  }
+  ok = ok && (CsvFile::write(idx,fname)==0);
+  return ok;
 }
 
 bool CsvTextBook::open(const Property& config) {
