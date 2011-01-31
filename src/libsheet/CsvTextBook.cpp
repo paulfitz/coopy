@@ -77,16 +77,18 @@ bool CsvTextBook::write(const char *fname, TextBook *book, bool compact) {
 	if (string(fname)=="-") {
 	  fp = stdout;
 	} else {
-	  fp = fopen(fname,(i>0)?"a":"w");
+	  fp = fopen(fname,(i>0)?"ab":"wb");
 	  if (!fp) {
 	    fprintf(stderr,"could not open %s\n", fname);
 	    exit(1);
 	  }
 	}
 	if (i>0) {
-	  fprintf(fp," \n");
+	  // use Windows encoding, since UNIX is more forgiving
+	  fprintf(fp," \r\n");
 	}
-	fprintf(fp," == %s ==\n", names[i].c_str());
+	// use Windows encoding, since UNIX is more forgiving
+	fprintf(fp," == %s ==\r\n", names[i].c_str());
 	if (fp!=stdout) {
 	  fclose(fp);
 	  fp = NULL;
