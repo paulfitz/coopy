@@ -13,6 +13,31 @@ namespace coopy {
 }
 
 
+std::string _quoted(const std::string& x) {
+  bool quote = false;
+  bool easy = true;
+  std::string result = x;
+  for (int i=0; i<(int)x.length(); i++) {
+    char ch = x[i];
+    if ((ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z')||(ch>='0'&&ch<='9')||
+	ch=='_') {
+      // ok
+    } else {
+      if (ch=='"') {
+	easy = false;
+      }
+      quote = true;
+    }
+  }
+  if (quote&&easy) {
+    result = string("\"") + x + "\"";
+  } else {
+    printf("Fix %s:%d to quote correctly\n", __FILE__, __LINE__);
+    exit(1);
+  }
+  return result;
+}
+
 class coopy::store::SqliteSchema {
 public:
   string preamble;
@@ -157,7 +182,7 @@ bool SqliteSheet::create(const SheetSchema& schema) {
     }
     char *squery = NULL;
     squery = sqlite3_mprintf("%q", cname.c_str());
-    cols += squery;
+    cols += _quoted(squery);
     sqlite3_free(squery);
     if (ci.hasType()) {
       string t = ci.getColumnType().asSqlite();

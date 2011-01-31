@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
       {"header", 0, 0, 'h'},
       {"index", 0, 0, 'i'},
       {"sheet", 1, 0, 's'},
+      {"table", 1, 0, 't'},
       {0, 0, 0, 0}
     };
 
@@ -42,6 +43,7 @@ int main(int argc, char *argv[]) {
       extractIndex = true;
       break;
     case 's':
+    case 't':
       sheetSelection = optarg;
       break;
     default:
@@ -58,11 +60,12 @@ int main(int argc, char *argv[]) {
   argv += optind;
 
   if (argc<2) {
-    printf("Call with input file and desired output file.\n");
-    printf("E.G. to convert from comma-separated to tab-separated format, call as:\n");
-    printf("  ssformat input.csv output.tsv\n");
-    printf("E.G. to convert from comma-separated to sqlite-readable sql, call as:\n");
-    printf("  ssformat input.csv output.sql\n");
+    printf("Call with input file and desired output file. Examples:\n");
+    printf("  ssformat input.csv output.sqlite\n");
+    printf("  ssformat input.sqlite output.csvs\n");
+    printf("  ssformat input.sqlite -\n");
+    printf("A single sheet/table can be extracted if desired:\n");
+    printf("  ssformat --table people input.sqlite people.csv\n");
     return 1;
   }
 
