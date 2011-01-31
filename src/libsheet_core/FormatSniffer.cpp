@@ -78,6 +78,13 @@ Format FormatSniffer::getFormat() {
     return f;
   }
 
+  if (cache.substr(0,4)==" == ") {
+    Format f;
+    f.id = FORMAT_BOOK_CSVS;
+    f.name = "csvs";
+    return f;
+  }
+
   return Format();
 }
 

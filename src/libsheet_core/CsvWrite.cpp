@@ -24,7 +24,9 @@ int CsvFile::write(const DataSheet& src, const Property& config) {
     //std::string result = src.encode(style);
     //printf("%s",result.c_str());
   } else {
-    fp = fopen(fname.c_str(),"wb");
+    bool append = config.get("append",
+			     PolyValue::makeBoolean(false)).asBoolean();
+    fp = fopen(fname.c_str(),append?"ab":"wb");
     if (!fp) {
       fprintf(stderr,"could not open %s\n", fname.c_str());
       exit(1);

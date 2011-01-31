@@ -1,8 +1,12 @@
 
 #include <coopy/CsvTextBook.h>
 #include <coopy/CsvFile.h>
+#include <coopy/FormatSniffer.h>
+
+#include <algorithm>
 
 using namespace coopy::store;
+using namespace coopy::format;
 using namespace std;
 
 static string getRoot(const char *fname) {
@@ -18,6 +22,16 @@ static string getRoot(const char *fname) {
 }
 
 bool CsvTextBook::read(const char *fname) {
+  if (compact) {
+    clear();
+    Property p;
+    if (CsvFile::read(fname,*this,p)!=0) {
+      fprintf(stderr,"Failed to read %s\n", fname);
+      return false;
+    }
+    return true;
+  }
+
   CsvSheet index;
   if (CsvFile::read(fname,index)!=0) {
     fprintf(stderr,"Failed to read %s\n", fname);
@@ -54,15 +68,32 @@ bool CsvTextBook::read(const char *fname) {
 bool CsvTextBook::write(const char *fname, TextBook *book, bool compact) {
   vector<string> names = book->getNames();
   if (compact) {
+    Property p;
+    p.put("file",fname);
     int len = (int)names.size();
     for (int i=0; i<len; i++) {
       if (book->namedSheets() || len>1) {
-	if (i>0) {
-	  printf(" \n");
+	FILE *fp = NULL;
+	if (string(fname)=="-") {
+	  fp = stdout;
+	} else {
+	  fp = fopen(fname,(i>0)?"a":"w");
+	  if (!fp) {
+	    fprintf(stderr,"could not open %s\n", fname);
+	    exit(1);
+	  }
 	}
-	printf(" == %s ==\n", names[i].c_str());
+	if (i>0) {
+	  fprintf(fp," \n");
+	}
+	fprintf(fp," == %s ==\n", names[i].c_str());
+	if (fp!=stdout) {
+	  fclose(fp);
+	  fp = NULL;
+	}
+	p.put("append",true);
       }
-      CsvFile::write(book->readSheetByIndex(i),fname);
+      CsvFile::write(book->readSheetByIndex(i),p);
     }
     return true;
   }
@@ -86,5 +117,38 @@ bool CsvTextBook::write(const char *fname, TextBook *book, bool compact) {
 bool CsvTextBook::open(const Property& config) {
   if (!config.check("file")) return false;
   return read(config.get("file").asString().c_str());
+}
+
+bool CsvTextBook::addSheet(const SheetSchema& schema) {
+  dbg_printf("csvtextbook::addsheet %s\n", schema.getSheetName().c_str());
+  string name = schema.getSheetName();
+  if (find(names.begin(),names.end(),name)!=names.end()) {
+    return false;
+  }
+  CsvSheet *data = new CsvSheet;
+  if (data==NULL) {
+    fprintf(stderr,"Failed to allocated data sheet\n");
+    return false;
+  }
+  PolySheet sheet(data,true);
+  name2index[name] = (int)sheets.size();
+  sheets.push_back(sheet);
+  names.push_back(name);
+  data->setWidth(schema.getColumnCount());
+  return true;
+}
+
+
+CsvSheet *CsvTextBook::nextSheet(const char *name) {
+  CsvSheet *data = new CsvSheet;
+  if (data==NULL) {
+    fprintf(stderr,"Failed to allocated data sheet\n");
+    return false;
+  }
+  PolySheet sheet(data,true);
+  name2index[name] = (int)sheets.size();
+  sheets.push_back(sheet);
+  names.push_back(name);
+  return data;
 }
 

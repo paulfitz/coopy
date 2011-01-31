@@ -16,36 +16,104 @@ extern "C" {
 using namespace std;
 using namespace coopy::store;
 
+class CsvSheetReaderState {
+public:
+  CsvSheetReader *reader;
+  CsvSheet *sheet;
+  SheetStyle style;
+  bool expecting;
+  bool ignore;
+
+  CsvSheetReaderState() {
+    reader = NULL;
+    sheet = NULL;
+    expecting = true;
+    ignore = false;
+  }
+
+  void setStyle(const SheetStyle& style) {
+    this->style = style;
+    if (sheet!=NULL) {
+      sheet->setStyle(style);
+    }
+  }
+
+  void clear() {
+    if (sheet!=NULL) {
+      sheet->clear();
+    }
+  }
+
+  bool addSheet(const char *name) {
+    if (reader != NULL) {
+      sheet = reader->nextSheet(name);
+    }
+    return sheet!=NULL;
+  }
+};
+
+
 extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
-  CsvSheet *sheet = (CsvSheet*)p;
-  if (sheet->getStyle().haveNullToken()) {
-    string token = sheet->getStyle().getNullToken();
-    if (token.length()==i){
-      if (memcmp(s,token.c_str(),i)==0) {
-	sheet->addField((char *)s, i, true);
+  CsvSheetReaderState *state = (CsvSheetReaderState*)p;
+  CsvSheet *sheet = state->sheet;
+  if (state->expecting && state->reader!=NULL) {
+    char *str = (char *)s;
+    if (i>4) {
+      if (str[0]=='=' && str[1]=='=' && str[2]==' ') {
+	size_t j;
+	for (j=i-1; j>=3; j--) {
+	  if (str[j]==' '&&str[j+1]=='=') break;
+	}
+	str[j] = '\0';
+	char *name = str+3;
+	//printf("Name is perhaps [%s]\n", name);
+	state->addSheet(name);
+	state->ignore = true;
 	return;
       }
     }
-    if (sheet->getStyle().quoteCollidingText()) {
-      int score = 0;
-      for (score=0; score<(int)i; score++) {
-	if (((char*)s)[score]!='_') {
-	  break;
-	}
-      }
-      if (score>0) {
-	if (memcmp(((char*)s)+score,token.c_str(),i-score)==0) {
-	  sheet->addField((char*)s+1,i-1,false);
+  }
+  if (sheet!=NULL) {
+    state->expecting = false;
+    if (sheet->getStyle().haveNullToken()) {
+      string token = sheet->getStyle().getNullToken();
+      if (token.length()==i){
+	if (memcmp(s,token.c_str(),i)==0) {
+	  sheet->addField((char *)s, i, true);
 	  return;
 	}
       }
+      if (sheet->getStyle().quoteCollidingText()) {
+	int score = 0;
+	for (score=0; score<(int)i; score++) {
+	  if (((char*)s)[score]!='_') {
+	    break;
+	  }
+	}
+	if (score>0) {
+	  if (memcmp(((char*)s)+score,token.c_str(),i-score)==0) {
+	    sheet->addField((char*)s+1,i-1,false);
+	    return;
+	  }
+	}
+      }
     }
+    sheet->addField((char *)s, i, false);
   }
-  sheet->addField((char *)s, i, false);
 }
 
 extern "C" void csvfile_merge_cb2 (int c, void *p) {
-  ((CsvSheet*)p)->addRecord();
+  CsvSheetReaderState *state = (CsvSheetReaderState*)p;
+  CsvSheet *sheet = state->sheet;
+  state->expecting = true;
+  if (sheet==NULL) {
+    return;
+  }
+  if (state->ignore) {
+    state->ignore = false;
+    return;
+  }
+  sheet->addRecord();
 }
 
 int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest, 
@@ -62,6 +130,9 @@ int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest,
   style.setFromProperty(config);
   csv_set_delim(&p,style.getDelimiter()[0]);
 
+  CsvSheetReaderState state;
+  state.sheet = &dest;
+
   do {
     cache = reader.read();
     if (cache!="") {
@@ -70,7 +141,7 @@ int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest,
 		    cache.length(),
 		    csvfile_merge_cb1,
 		    csvfile_merge_cb2,
-		    (void*)(&dest)) != cache.length()) {
+		    (void*)(&state)) != cache.length()) {
 	fprintf(stderr,"error parsing standard input\n");
 	exit(1);
       }
@@ -79,12 +150,14 @@ int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest,
   csv_fini(&p,
 	   csvfile_merge_cb1,
 	   csvfile_merge_cb2,
-	   (void*)(&dest));
+	   (void*)(&state));
   csv_free(&p);
   return 0;
 }
 
-int CsvFile::read(const char *src, CsvSheet& dest, const Property& config) {
+
+int read(const char *src, CsvSheetReaderState& dest, 
+	 const Property& config) {
   FILE *fp;
   char buf[32768];
   size_t bytes_read;
@@ -154,6 +227,13 @@ int CsvFile::read(const char *src, CsvSheet& dest, const Property& config) {
   return 0;
 }
 
+int CsvFile::read(const char *src, CsvSheet& dest, const Property& config) {
+  CsvSheetReaderState state;
+  state.sheet = &dest;
+  return read(src,state,config);
+}
+
+
 int CsvFile::read(const char *src, CsvSheet& dest) {
   Property config;
   return read(src,dest,config);
@@ -163,3 +243,12 @@ int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest) {
   Property config;
   return read(reader,dest,config);
 }
+
+
+int CsvFile::read(const char *src, CsvSheetReader& dest, 
+		  const Property& config) {
+  CsvSheetReaderState state;
+  state.reader = &dest;
+  return read(src,state,config);  
+}
+

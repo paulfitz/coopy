@@ -161,6 +161,9 @@ bool PolyBook::attach(Property& config) {
     if (ext==".csv"||ext==".ssv"||ext==".tsv"||ext==".txt") {
       key = "csv";
     }
+    if (ext==".csvs") {
+      key = "csvs";
+    }
     if (ext==".xls"||ext==".xlsx"||ext==".gnumeric") {
       key = "gnumeric";
     }

@@ -12,6 +12,7 @@ namespace coopy {
       FORMAT_PATCH_CSV,
       FORMAT_PATCH_HUMAN,
       FORMAT_BOOK_SQLITE,
+      FORMAT_BOOK_CSVS,
     };
   }
 }

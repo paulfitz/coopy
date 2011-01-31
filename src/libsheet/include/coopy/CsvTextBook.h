@@ -16,7 +16,7 @@ namespace coopy {
   }
 }
 
-class coopy::store::CsvTextBook : public TextBook {
+class coopy::store::CsvTextBook : public TextBook, public CsvSheetReader {
 public:
   CsvTextBook(bool compact) : compact(compact) {
   }
@@ -35,6 +35,13 @@ public:
     }
     return PolySheet();
   }
+
+  bool clear() {
+    sheets.clear();
+    names.clear();
+    name2index.clear();
+    return true;
+  }
   
   bool read(const char *fname);
 
@@ -45,6 +52,10 @@ public:
   static bool write(const char *fname, TextBook *book, bool compact);
 
   virtual bool open(const Property& config);
+
+  bool addSheet(const SheetSchema& schema);
+
+  virtual CsvSheet *nextSheet(const char *name);
 
 private:
   bool compact;
@@ -107,5 +118,6 @@ public:
     return new CsvTextBookFactory(true);
   }
 };
+
 
 #endif

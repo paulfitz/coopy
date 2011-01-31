@@ -42,8 +42,17 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
   DataBook& src = (DataBook &) alt;
   vector<string> names = src.getNames();
   vector<string> names0 = getNames();
+
+  string sel = options.get("sheet",PolyValue::makeString("")).asString();
+
   for (int i=0; i<(int)names.size(); i++) {
     string name = names[i];
+    if (sel!="") {
+      dbg_printf("Comparing %s and %s\n", sel.c_str(), name.c_str());
+      if (sel!=name) {
+	continue;
+      }
+    }
     dbg_printf("Working on %s\n", name.c_str());
     vector<string>::const_iterator it = find(names0.begin(),names0.end(),name);
     PolySheet sheet = src.readSheet(name);
@@ -123,6 +132,7 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
       }
       row.flush();
     }
+    dbg_printf("Final size %dx%d\n", sheet.width(), sheet.height());
   }
   return true;
 }

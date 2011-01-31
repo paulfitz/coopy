@@ -5,6 +5,7 @@
 #include <coopy/NameSniffer.h>
 #include <coopy/IndexSniffer.h>
 #include <coopy/ShortTextBook.h>
+#include <coopy/CsvTextBook.h>
 #include <coopy/Dbg.h>
 
 using namespace coopy::store;
@@ -14,6 +15,7 @@ int main(int argc, char *argv[]) {
   bool extractHeader = false;
   bool extractIndex = false;
   bool verbose = false;
+  string sheetSelection = "";
 
   while (true) {
     int option_index = 0;
@@ -21,6 +23,7 @@ int main(int argc, char *argv[]) {
       {"verbose", 0, 0, 'v'},
       {"header", 0, 0, 'h'},
       {"index", 0, 0, 'i'},
+      {"sheet", 1, 0, 's'},
       {0, 0, 0, 0}
     };
 
@@ -37,6 +40,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'i':
       extractIndex = true;
+      break;
+    case 's':
+      sheetSelection = optarg;
       break;
     default:
       fprintf(stderr, "Unrecognized option\n");
@@ -99,6 +105,20 @@ int main(int argc, char *argv[]) {
       }
     }
     src.take(book);
+  }
+  if (sheetSelection!="") {
+    CsvTextBook *book = new CsvTextBook(true);
+    if (book==NULL) {
+      fprintf(stderr,"Failed to allocate output\n");
+      return 1;
+    }
+    Property p;
+    p.put("sheet",sheetSelection.c_str());
+    book->copy(src,p);
+    src.take(book);
+
+    vector<string> names = book->getNames();
+    //printf("have %d\n", names.size());
   }
   if (!src.write(argv[1])) {
     fprintf(stderr,"Failed to write %s\n", argv[1]);

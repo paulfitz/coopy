@@ -198,6 +198,11 @@ public:
     return true;
   }
 
+  bool setWidth(int w) {
+    s.w = w;
+    return true;
+  }
+
   virtual std::string getDescription() const {
     return "csv";
   }
