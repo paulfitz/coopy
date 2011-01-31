@@ -27,6 +27,7 @@ ELSE ()
 ENDIF()
 SET(testprg ${EXECUTABLE_OUTPUT_PATH}/test_sheet${EXE_EXT})
 SET(testprg_viterbi ${EXECUTABLE_OUTPUT_PATH}/test_viterbi${EXE_EXT})
+SET(ssformat ${EXECUTABLE_OUTPUT_PATH}/ssformat${EXE_EXT})
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -332,10 +333,10 @@ ADD_TEST(viterbi_check ${testprg_viterbi})
 
 MACRO(ADD_TEST2 name ref target)
   ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
-    --output test_out_${name}
+    --output test_out_${name}.csv
     ${ARGN})
   ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
-    --equals test_out_${name} ${ref})
+    --equals test_out_${name}.csv ${ref})
   #${CMAKE_COMMAND} -E compare_files 
   # test_out_${name} ${ref})
 ENDMACRO()
@@ -422,4 +423,13 @@ MACRO(ADD_ROUND_TRIP_TEST name P1 P2)
 ENDMACRO ()
 
 ADD_ROUND_TRIP_TEST(joe_0000 ${TESTS}/bug/joe_0000/local.csv ${TESTS}/bug/joe_0000/remote.csv)
+
+#######################################################################
+#######################################################################
+
+# conversion testing
+
+ADD_TEST(format_book_sqlite ${ssformat} ${TESTS}/book/000/index.book format_book_sqlite.sqlite)
+
+
 

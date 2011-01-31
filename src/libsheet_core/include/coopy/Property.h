@@ -32,6 +32,8 @@ public:
   virtual bool isMap() const { return false; }    
 
   virtual bool isNull() const { return true; }
+
+  virtual std::string toString() const = 0;
 };
 
 class coopy::store::PolyValue : public Value {
@@ -113,6 +115,12 @@ public:
     if (value!=0/*NULL*/) return value->isNull();
     return true; 
   }
+
+  virtual std::string toString() const {
+    if (value!=0/*NULL*/) return value->toString();
+    return "None"; 
+  }
+
 
   static PolyValue makeInt(int x) {
     PolyValue v;
@@ -201,6 +209,8 @@ public:
     if (it==data.end()) return default_value;
     return it->second;
   }
+
+  std::string toString() const;
 
   static Property& getNullProperty() {
     return nullProperty;

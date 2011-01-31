@@ -51,9 +51,23 @@ bool CsvTextBook::read(const char *fname) {
   return true;
 }
 
-bool CsvTextBook::write(const char *fname, TextBook *book) {
-  string root = getRoot(fname);
+bool CsvTextBook::write(const char *fname, TextBook *book, bool compact) {
   vector<string> names = book->getNames();
+  if (compact) {
+    int len = (int)names.size();
+    for (int i=0; i<len; i++) {
+      if (book->namedSheets() || len>1) {
+	if (i>0) {
+	  printf(" \n");
+	}
+	printf(" == %s ==\n", names[i].c_str());
+      }
+      CsvFile::write(book->readSheetByIndex(i),fname);
+    }
+    return true;
+  }
+
+  string root = getRoot(fname);
   CsvSheet idx;
   bool ok = true;
   for (int i=0; i<(int)names.size(); i++) {

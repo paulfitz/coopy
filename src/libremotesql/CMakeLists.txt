@@ -12,6 +12,10 @@ option(USE_MYSQL ON "Enable mysql access")
 set (USE_POSTGRES OFF)
 set (USE_ODBC OFF)
 
+IF (NOT USE_MYSQL)
+  MESSAGE(FATAL_ERROR "Please turn on USE_MYSQL")
+ENDIF ()
+
 IF (USE_MYSQL)
   ADD_DEFINITIONS(-DUSE_MYSQL)
   FIND_PATH(INCLUDE_MYSQL mysql/mysql.h)

@@ -43,7 +43,8 @@ public:
 
   Factories() {
     all.push_back(new ShortTextBookFactory);
-    all.push_back(new CsvTextBookFactory);
+    all.push_back(CsvTextBookFactory::makeFactory());
+    all.push_back(CsvTextBookFactory::makeCompactFactory());
     all.push_back(new SqliteTextBookFactory);
     getFactories(all,false);
   }
@@ -124,6 +125,7 @@ public:
 };
 
 bool PolyBook::attach(Property& config) {
+  dbg_printf("PolyBook::attach %s\n", config.toString().c_str());
   if (config.check("should_clear")) {
     if (config.get("should_clear").asBoolean()) {
       clear();
@@ -132,7 +134,7 @@ bool PolyBook::attach(Property& config) {
   string filename = config.get("file").asString();
   string name = filename;
   size_t eid = name.rfind(".");
-  string ext = ".csv";
+  string ext = "";
   if (eid!=string::npos) {
     ext = name.substr(eid);
   }
@@ -170,7 +172,7 @@ bool PolyBook::attach(Property& config) {
     }
   }
   if (key==""&&filename=="-") {
-    key = "csv";
+    key = "csvs";
   }
 
   dbg_printf("Attach: type [%s] file [%s]\n", key.c_str(), filename.c_str());

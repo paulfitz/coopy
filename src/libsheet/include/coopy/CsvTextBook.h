@@ -18,6 +18,9 @@ namespace coopy {
 
 class coopy::store::CsvTextBook : public TextBook {
 public:
+  CsvTextBook(bool compact) : compact(compact) {
+  }
+
   std::vector<PolySheet> sheets;
   std::vector<std::string> names;
   std::map<std::string,int> name2index;
@@ -36,19 +39,27 @@ public:
   bool read(const char *fname);
 
   bool write(const char *fname) {
-    return write(fname,this);
+    return write(fname,this,compact);
   }
 
-  static bool write(const char *fname, TextBook *book);
+  static bool write(const char *fname, TextBook *book, bool compact);
 
   virtual bool open(const Property& config);
+
+private:
+  bool compact;
 };
 
 
 class coopy::store::CsvTextBookFactory : public TextBookFactory {
+private:
+  bool compact;
 public:
+  CsvTextBookFactory(bool compact) : compact(compact) {
+  }
+
   virtual std::string getName() {
-    return "book";
+    return compact?"csvs":"book";
   }
 
   virtual TextBook *open(AttachConfig& config, AttachReport& report) {
@@ -58,7 +69,8 @@ public:
 	//int r = CsvFile::write(config.prevBook->readSheetByIndex(0),
 	//config.options);
 	if (CsvTextBook::write(config.options.get("file").asString().c_str(),
-			       config.prevBook)) {
+			       config.prevBook,
+			       compact)) {
 	  report.success = true;
 	  return config.prevBook;
 	}
@@ -66,7 +78,7 @@ public:
       return NULL;
     }
 
-    CsvTextBook *book = new CsvTextBook();
+    CsvTextBook *book = new CsvTextBook(compact);
     if (book==NULL) return NULL;
 
     if (config.shouldRead) {
@@ -85,6 +97,14 @@ public:
     }
 
     return book;
+  }
+
+  static CsvTextBookFactory *makeFactory() {
+    return new CsvTextBookFactory(false);
+  }
+
+  static CsvTextBookFactory *makeCompactFactory() {
+    return new CsvTextBookFactory(true);
   }
 };
 

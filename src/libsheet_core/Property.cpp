@@ -30,6 +30,12 @@ public:
   virtual bool isNull() const { return false; }
   virtual int asInt() const { return x; }  
   virtual bool asBoolean() const { return (x!=0); }  
+
+  virtual std::string toString() const {
+    char buf[256];
+    sprintf(buf,"%d",x);
+    return buf;
+  }
 };
 
 class coopy::store::BooleanValue : public Value {
@@ -42,6 +48,10 @@ public:
   virtual bool isNull() const { return false; }
   virtual int asInt() const { return x?1:0; }  
   virtual bool asBoolean() const { return x; }  
+
+  virtual std::string toString() const {
+    return x?"True":"False";
+  }
 };
 
 class coopy::store::StringValue : public Value {
@@ -52,6 +62,10 @@ public:
   virtual bool isString() const { return true; }
   virtual bool isNull() const { return false; }
   virtual std::string asString() const { return x; }  
+
+  virtual std::string toString() const {
+    return "[" + x + "]";
+  }
 };
 
 bool PolyValue::setInt(int x) {
@@ -91,5 +105,19 @@ bool PolyValue::setMap() {
   value = new Property();
   if (value!=NULL) value->addReference();
   return value!=NULL;
+}
+
+std::string Property::toString() const {
+  std::string result = "";
+  for (std::map<std::string,PolyValue>::const_iterator it = data.begin();
+       it != data.end(); 
+       it++) {
+    result += "(";
+    result += it->first;
+    result += " ";
+    result += it->second.toString();
+    result += ") ";
+  }
+  return result;
 }
 

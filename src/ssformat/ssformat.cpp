@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <getopt.h>
 
 #include <coopy/PolyBook.h>
 #include <coopy/NameSniffer.h>
@@ -12,27 +13,45 @@ using namespace std;
 int main(int argc, char *argv[]) {
   bool extractHeader = false;
   bool extractIndex = false;
-  while (argc>1) {
-    if (argv[1][0]!='-') break;
-    if (argv[1][1]!='-') break;
-    if (std::string(argv[1])=="--verbose") {
+  bool verbose = false;
+
+  while (true) {
+    int option_index = 0;
+    static struct option long_options[] = {
+      {"verbose", 0, 0, 'v'},
+      {"header", 0, 0, 'h'},
+      {"index", 0, 0, 'i'},
+      {0, 0, 0, 0}
+    };
+
+    int c = getopt_long(argc, argv, "",
+			long_options, &option_index);
+    if (c==-1) break;
+    switch (c) {
+    case 'v':
+      verbose = true;
       coopy_set_verbose(true);
-      argc--;
-      argv++;
-    }
-    if (std::string(argv[1])=="--header") {
+      break;
+    case 'h':
       extractHeader = true;
-      argc--;
-      argv++;
-    }
-    if (std::string(argv[1])=="--index") {
+      break;
+    case 'i':
       extractIndex = true;
-      argc--;
-      argv++;
+      break;
+    default:
+      fprintf(stderr, "Unrecognized option\n");
+      return 1;
     }
   }
 
-  if (argc!=3) {
+  if (optind<argc-2) {
+    fprintf(stderr, "Options not understood\n");
+    return 1;
+  }
+  argc -= optind;
+  argv += optind;
+
+  if (argc<2) {
     printf("Call with input file and desired output file.\n");
     printf("E.G. to convert from comma-separated to tab-separated format, call as:\n");
     printf("  ssformat input.csv output.tsv\n");
@@ -42,8 +61,8 @@ int main(int argc, char *argv[]) {
   }
 
   PolyBook src;
-  if (!src.read(argv[1])) {
-    fprintf(stderr,"Failed to read %s\n", argv[1]);
+  if (!src.read(argv[0])) {
+    fprintf(stderr,"Failed to read %s\n", argv[0]);
     return 1;
   }
   if (extractHeader) {
@@ -81,8 +100,8 @@ int main(int argc, char *argv[]) {
     }
     src.take(book);
   }
-  if (!src.write(argv[2])) {
-    fprintf(stderr,"Failed to write %s\n", argv[2]);
+  if (!src.write(argv[1])) {
+    fprintf(stderr,"Failed to write %s\n", argv[1]);
     return 1;
   }
 

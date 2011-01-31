@@ -52,6 +52,10 @@ public:
   virtual std::string desc() const {
     return "DataBook";
   }
+
+  virtual bool namedSheets() const {
+    return true;
+  }
 };
 
 #endif

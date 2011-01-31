@@ -55,6 +55,10 @@ public:
   virtual std::string desc() const {
     return "CsvBook";
   }
+
+  virtual bool namedSheets() const {
+    return false;
+  }
 };
 
 #endif
