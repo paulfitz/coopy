@@ -55,7 +55,7 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
        it!=name_set.end();
        it++) {
     string name = *it;
-    dbg_printf("  Working on \"%s\"\n", name.c_str());
+    dbg_printf("  COMPARE - Working on \"%s\"\n", name.c_str());
     PolySheet pivot_sheet;
     PolySheet local_sheet;
     PolySheet remote_sheet;
@@ -78,10 +78,12 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
     }
 
     SheetCompare cmp;
-    bool ok = output.setSheet(name.c_str());
-    if (!ok) {
-      fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());
-      return -1;
+    if (name_set.size()>1) {
+      bool ok = output.setSheet(name.c_str());
+      if (!ok) {
+	fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());
+	return -1;
+      }
     }
     cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags);
   }

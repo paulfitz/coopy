@@ -23,6 +23,8 @@ public:
   bool constantColumns;
   std::vector<std::string> columns;
   bool showedColumns;
+  std::string sheetName;
+  bool sheetNameShown;
 
   MergeOutputTdiff();
 
@@ -40,6 +42,10 @@ public:
   virtual bool mergeDone();
 
   virtual bool changeName(const NameChange& change);
+
+  virtual bool setSheet(const char *name);
+
+  void showSheet();
 
 };
 

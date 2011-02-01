@@ -20,19 +20,28 @@ using namespace coopy::cmp;
 #define OP_NONE ""
 
 MergeOutputTdiff::MergeOutputTdiff() {
-  constantColumns = true;
-  showedColumns = false;
+  setSheet("");
+  sheetNameShown = true;
 }
 
 bool MergeOutputTdiff::mergeStart() {
-  fprintf(out,"# tdiff version 0.2\n\n");
+  fprintf(out,"# tdiff version 0.2\n");
   return true;
 }
+
+void MergeOutputTdiff::showSheet() {
+  if (!sheetNameShown) {
+    fprintf(out,"\n# sheet %s\n\n", sheetName.c_str());
+    sheetNameShown = true;
+  }
+}
+
 
 bool MergeOutputTdiff::mergeDone() {
 }
 
 bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
+  showSheet();
   constantColumns = false;
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
@@ -157,6 +166,7 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
 }
 
 bool MergeOutputTdiff::changeRow(const RowChange& change) {
+  showSheet();
   vector<string> lops;
   activeColumn.clear();
   prevSelect = showForSelect;
@@ -259,6 +269,7 @@ bool MergeOutputTdiff::changeName(const NameChange& change) {
       showForDescribe[names[i]] = true;
     }
     if (!constant) {
+      showSheet();
       fprintf(out, "/* %s %s ","column","name");
       //result.addField(ROW_COL,false);
       for (int i=0; i<(int)names.size(); i++) {
@@ -271,4 +282,22 @@ bool MergeOutputTdiff::changeName(const NameChange& change) {
   columns = names;
   return true;
 }
+
+
+bool MergeOutputTdiff::setSheet(const char *name) {
+  sheetName = name;
+  sheetNameShown = false;
+  ops.clear();
+  nops.clear();
+  activeColumn.clear();
+  showForSelect.clear();
+  showForDescribe.clear();
+  prevSelect.clear();
+  prevDescribe.clear();
+  columns.clear();
+  constantColumns = true;
+  showedColumns = false;
+  return true;
+}
+
 
