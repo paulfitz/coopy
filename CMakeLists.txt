@@ -20,9 +20,10 @@ message(STATUS "Executables are placed in ${EXECUTABLE_OUTPUT_PATH}")
 make_directory(${LIBRARY_OUTPUT_PATH})
 make_directory(${EXECUTABLE_OUTPUT_PATH})
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/conf" ${CMAKE_MODULE_PATH})
+
 add_subdirectory(src)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/conf" ${CMAKE_MODULE_PATH})
 include(CoopyVersion)
 include(CoopyPack)
 include(CoopyDoc)
