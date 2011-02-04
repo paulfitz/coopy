@@ -1,3 +1,6 @@
+if (HAVE_TR1)
+  ADD_DEFINITIONS("-std=c++0x" -DHAVE_TR1)
+endif ()
 
 if (USE_ACCESS)
 
@@ -10,12 +13,12 @@ if (USE_ACCESS)
   INCLUDE_DIRECTORIES(${GLIB2_INCLUDE_DIRS})
   INCLUDE_DIRECTORIES(${Mdbtools_INCLUDE_DIRS})
 
-  #add_library(access include/coopy/gnumeric_link.h gnumeric_link.c 
-  #  GnumericTextBook.cpp GnumericTextBookFactory.cpp
-  #  GnumericSheet.cpp)
-  #target_link_libraries(gnumeric sheet_core)
+  add_library(access AccessTextBook.cpp AccessSheet.cpp)
+  target_link_libraries(access sheet_core)
+  target_link_libraries(access ${Mdbtools_LIBRARIES} ${GLIB2_LIBRARIES})
 
   add_executable(test_access test_access.cpp)
+  target_link_libraries(test_access access)
   target_link_libraries(test_access ${Mdbtools_LIBRARIES} ${GLIB2_LIBRARIES})
 
 endif ()

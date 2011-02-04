@@ -3,6 +3,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcsv)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libgnumeric/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libsqlite/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libremotesql/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libaccess/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/jsoncpp/include)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -35,5 +36,9 @@ endif ()
 
 if (USE_REMOTE_SQL)
   TARGET_LINK_LIBRARIES(sheet_full remotesql jsoncpp)
+endif ()
+
+IF (USE_ACCESS)
+  TARGET_LINK_LIBRARIES(sheet_full access)
 endif ()
 

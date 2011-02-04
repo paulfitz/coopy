@@ -2,8 +2,13 @@
 
 #include "mdbtools.h"
 
+#include <coopy/AccessTextBook.h>
+
 #include <vector>
 #include <string>
+
+using namespace coopy::store;
+using namespace std;
 
 /*
 static bool is_col_indexed(MdbTableDef *table, MdbColumn *col, int colnum) {
@@ -102,6 +107,17 @@ int main(int argc, char *argv[]) {
 
   mdb_close(mdb);
   mdb_exit();
+
+  AccessTextBook book;
+  book.read(argv[1]);
+  vector<string> names = book.getNames();
+  if (names.size()>0) {
+    PolySheet sheet = book.readSheet(names[0]);
+    if (sheet.isValid()) {
+      printf("Size %dx%d\n", sheet.width(), sheet.height());
+      printf("At (1,0): %s\n", sheet.cellString(1,0).c_str());
+    }
+  }
   
   return 0;
 }

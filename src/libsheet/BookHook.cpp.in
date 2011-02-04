@@ -13,10 +13,15 @@ using namespace coopy::store;
 #ifndef USE_NONE
 #cmakedefine USE_GNUMERIC
 #cmakedefine USE_REMOTE_SQL
+#cmakedefine USE_ACCESS
 #endif
 
 #ifdef USE_GNUMERIC
 #include <coopy/GnumericTextBookFactory.h>
+#endif
+
+#ifdef USE_ACCESS
+#include <coopy/AccessTextBook.h>
 #endif
 
 #include <json/json.h>
@@ -33,6 +38,13 @@ void getFactories(vector<TextBookFactory *>& lst,bool preview) {
     printf(".xls,.xlsx, and other Excel/Openoffice files (via Gnumeric)\n");
   } else {
     lst.push_back(new GnumericTextBookFactory());
+  }
+#endif  
+#ifdef USE_ACCESS
+  if (preview) {
+    printf(".mdb and other Access files (via Mdbtools)\n");
+  } else {
+    lst.push_back(new AccessTextBookFactory());
   }
 #endif  
 #ifdef USE_REMOTE_SQL

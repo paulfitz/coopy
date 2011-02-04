@@ -39,7 +39,7 @@ IF (COMPILE_GUI)
         TARGET_LINK_LIBRARIES(${targ} X11)
       ENDIF (NOT MINGW)
       INSTALL(TARGETS ${targ} COMPONENT wizard DESTINATION bin)
-    ENDFOREACH(targ coopy)
+    ENDFOREACH ()
     TARGET_LINK_LIBRARIES(ssmerge_gui sheet)
 
   ELSE (wxWidgets_FOUND)
