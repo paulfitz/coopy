@@ -29,7 +29,7 @@ public:
   virtual std::string cellString(int x, int y, bool& escaped) const;
 
   virtual ColumnInfo getColumnInfo(int x) {
-    ColumnType t;
+    ColumnType t(col2type[x]);
     t.primaryKey = col2pk[x];
     t.primaryKeySet = true;
     //printf(">> %d %s\n", x, col2sql[x].c_str());
@@ -57,7 +57,7 @@ private:
   std::string name;
   int w, h;
   std::vector<std::string> col2sql;
-  //std::vector<std::string> primaryKeys;
+  std::vector<std::string> col2type;
   std::vector<bool> col2pk;
   SparseStringSheet cache;
   SparseByteSheet cacheFlag;

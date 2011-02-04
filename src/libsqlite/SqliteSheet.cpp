@@ -187,6 +187,7 @@ bool SqliteSheet::create(const SheetSchema& schema) {
     sqlite3_free(squery);
     if (ci.hasType()) {
       string t = ci.getColumnType().asSqlite();
+      printf("TYPE %s (%s)\n", t.c_str(), ci.getColumnType().src_name.c_str());
       if (t!="") {
 	cols += " ";
 	cols += t;

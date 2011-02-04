@@ -26,9 +26,11 @@ public:
     COLUMN_SOURCE_MYSQL,
     COLUMN_SOURCE_EXCEL,
     COLUMN_SOURCE_CSV,
+    COLUMN_SOURCE_ACCESS,
   };
     
   std::string src_name;
+  std::string src_lang;
   bool allowNull;
   int family;
   int src;
@@ -53,6 +55,8 @@ public:
     size2 = 0;
     primaryKey = false;
     primaryKeySet = false;
+    src_lang = "";
+    src_name = "";
   }
 
   // do guess-work

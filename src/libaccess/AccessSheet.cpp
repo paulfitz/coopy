@@ -51,6 +51,8 @@ bool AccessSheet::connect() {
     MdbColumn *col=(MdbColumn *)g_ptr_array_index(table->columns,j);
     col2sql.push_back(col->name);
     col2pk.push_back(false);
+    char *kind = mdb_get_coltype_string(mdb->default_backend, col->col_type);
+    col2type.push_back(kind);
   }
 
   //////////////////////////////////////////////////////////////////

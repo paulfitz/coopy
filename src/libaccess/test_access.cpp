@@ -73,7 +73,9 @@ int main(int argc, char *argv[]) {
       MdbColumn *col=(MdbColumn *)g_ptr_array_index(table->columns,j);
       //bool idx = is_col_indexed(table,col,j);
       bool idx = false;
-      fprintf(stdout,"%s%s ",idx?"*":"",col->name);
+      char *kind = mdb_get_coltype_string(mdb->default_backend, col->col_type);
+      fprintf(stdout,"%s%s:%s ",idx?"*":"",col->name,
+	      kind);
     }
     printf("\n");
 
@@ -108,6 +110,7 @@ int main(int argc, char *argv[]) {
   mdb_close(mdb);
   mdb_exit();
 
+  /*
   AccessTextBook book;
   book.read(argv[1]);
   vector<string> names = book.getNames();
@@ -118,6 +121,7 @@ int main(int argc, char *argv[]) {
       printf("At (1,0): %s\n", sheet.cellString(1,0).c_str());
     }
   }
+  */
   
   return 0;
 }
