@@ -35,6 +35,7 @@ bool AccessSheet::connect() {
   if (!table) return false;
   table_implementation = table;
   mdb_read_columns(table);
+  mdb_read_indices(table);
   mdb_rewind_table(table);
 
   //////////////////////////////////////////////////////////////////
@@ -49,6 +50,20 @@ bool AccessSheet::connect() {
   for (int j=0; j<table->num_cols; j++) {
     MdbColumn *col=(MdbColumn *)g_ptr_array_index(table->columns,j);
     col2sql.push_back(col->name);
+    col2pk.push_back(false);
+  }
+
+  //////////////////////////////////////////////////////////////////
+  // Check keys
+
+  for (int i=0;i<table->num_idxs;i++) {
+    MdbIndex *idx = (MdbIndex *)g_ptr_array_index(table->indices,i);
+    if (idx->index_type==1) {
+      for (int j=0;j<idx->num_keys;j++) {
+	int off = idx->key_col_num[j]-1;
+	col2pk[off] = true;
+      }
+    }
   }
 
   //////////////////////////////////////////////////////////////////

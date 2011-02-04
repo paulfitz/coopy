@@ -31,8 +31,9 @@ std::string _quoted(const std::string& x) {
   }
   if (quote&&easy) {
     result = string("\"") + x + "\"";
-  } else {
-    printf("Fix %s:%d to quote correctly\n", __FILE__, __LINE__);
+  } else if (!easy) {
+    printf("Fix %s:%d to quote correctly (%s)\n", __FILE__, __LINE__,
+	   x.c_str());
     exit(1);
   }
   return result;
@@ -193,8 +194,31 @@ bool SqliteSheet::create(const SheetSchema& schema) {
     }
   }
 
+  vector<string> keys;
+  if (schema.providesPrimaryKeys()) {
+    for (int i=0; i<schema.getColumnCount(); i++) {
+      ColumnInfo ci = schema.getColumnInfo(i);
+      if (ci.isPrimaryKey()) {
+	keys.push_back(ci.getName());
+      }
+    }
+    if (keys.size()>0) {
+      cols += ", PRIMARY KEY(";
+      for (int i=0; i<(int)keys.size(); i++) {
+	if (i>0) {
+	  cols += ", ";
+	}
+	char *squery = NULL;
+	squery = sqlite3_mprintf("%q", keys[i].c_str());
+	cols += _quoted(squery);
+	sqlite3_free(squery);
+      }
+      cols += ")";
+    }
+  }
+
   query = sqlite3_mprintf("CREATE TABLE %q (%s)", 
-			  name.c_str(),
+			  _quoted(name).c_str(),
 			  cols.c_str());
 
   int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);

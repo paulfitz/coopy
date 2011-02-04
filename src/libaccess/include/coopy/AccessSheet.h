@@ -30,8 +30,8 @@ public:
 
   virtual ColumnInfo getColumnInfo(int x) {
     ColumnType t;
-    //t.primaryKey = col2pk[x];
-    //t.primaryKeySet = true;
+    t.primaryKey = col2pk[x];
+    t.primaryKeySet = true;
     //printf(">> %d %s\n", x, col2sql[x].c_str());
     return ColumnInfo(col2sql[x],t);
   }
@@ -58,7 +58,7 @@ private:
   int w, h;
   std::vector<std::string> col2sql;
   //std::vector<std::string> primaryKeys;
-  //std::vector<bool> col2pk;
+  std::vector<bool> col2pk;
   SparseStringSheet cache;
   SparseByteSheet cacheFlag;
  
@@ -81,7 +81,7 @@ public:
   }
 
   virtual bool providesPrimaryKeys() const {
-    return false; // FOR NOW
+    return true;
   }
 };
 

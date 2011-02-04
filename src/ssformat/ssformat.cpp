@@ -74,6 +74,20 @@ int main(int argc, char *argv[]) {
     fprintf(stderr,"Failed to read %s\n", argv[0]);
     return 1;
   }
+  if (sheetSelection!="") {
+    CsvTextBook *book = new CsvTextBook(true);
+    if (book==NULL) {
+      fprintf(stderr,"Failed to allocate output\n");
+      return 1;
+    }
+    Property p;
+    p.put("sheet",sheetSelection.c_str());
+    book->copy(src,p);
+    src.take(book);
+
+    //vector<string> names = book->getNames();
+    //printf("have %d\n", names.size());
+  }
   if (extractHeader) {
     PolySheet sheet = src.readSheetByIndex(0);
     NameSniffer sniff(sheet);
@@ -108,20 +122,6 @@ int main(int argc, char *argv[]) {
       }
     }
     src.take(book);
-  }
-  if (sheetSelection!="") {
-    CsvTextBook *book = new CsvTextBook(true);
-    if (book==NULL) {
-      fprintf(stderr,"Failed to allocate output\n");
-      return 1;
-    }
-    Property p;
-    p.put("sheet",sheetSelection.c_str());
-    book->copy(src,p);
-    src.take(book);
-
-    vector<string> names = book->getNames();
-    //printf("have %d\n", names.size());
   }
   if (!src.write(argv[1])) {
     fprintf(stderr,"Failed to write %s\n", argv[1]);
