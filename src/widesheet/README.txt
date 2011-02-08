@@ -1,4 +1,12 @@
 
+/<control>/<shareN>/local/...
+/<control>/<shareN>/remote/...
+/<control>/<shareN>/pivot/...
+/<control>/<shareN>/config.sqlite
+/<control>/shares.sqlite
+
+===
+
 Operation of widesheet:
 * Independent of version control method.
 * But still needs common ancestor (pivot), local and remote.
@@ -35,8 +43,10 @@ widesheet actions:
     Do VCS_PULL.  Should never be a merge-fail with widesheet's
     usage method.
     Compute patch from user's file to /USER/share1/repo/repo.csvs,
+    with pivot /USER/share1/pivot/repo.csvs,
     and report it to the user or apply it (if possible).
-    If applied, move on to APPLIED.
+    If applied, move on to APPLIED.  Note, can do direct merge
+    if the user allows us to touch their file.
 
   APPLIED
     Convert user's file to /USER/share1/tmp.csvs and
@@ -51,11 +61,13 @@ Problem:
   If APPLIED is not called, then common ancestor will normally
   be a generation earlier than needed - only gets updated
   upon a PUSH.
-* Not terrible, and anyway will be seeking patch application
-  automation.  This is an issue for complex formats that it 
+* Important to set up patch application automation.  This is an 
+  issue for complex formats that it 
   is best to patch via whatever application the user prefers,
   rather than inplace.  So e.g. using script plugin on Excel/
-  Access.
+  Access.  
+  For simpler formats, or when it is ok to process files through
+  other apps (e.g. coopy) merges can be made without patches.
   
 
 
