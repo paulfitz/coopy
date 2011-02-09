@@ -491,6 +491,13 @@ void Merger::merge(MergerState& state) {
     // 2 3 4 1
     Mover move;
     vector<int> move_order;
+    
+    if (local_cols.size()!=shuffled_cols.size()) {
+      fprintf(stderr,"Match failed, please report %s:%d\n",
+	      __FILE__, __LINE__);
+      exit(1);
+    }
+
     move.move(local_cols,shuffled_cols,move_order,0);
     
     if (move_order.size()>0) {

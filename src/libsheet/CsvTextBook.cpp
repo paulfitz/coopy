@@ -88,12 +88,13 @@ bool CsvTextBook::write(const char *fname, TextBook *book, bool compact) {
 	  fprintf(fp," \r\n");
 	}
 	// use Windows encoding, since UNIX is more forgiving
-	fprintf(fp," == %s ==\r\n", names[i].c_str());
+	fprintf(fp,"== %s ==\r\n", names[i].c_str());
 	if (fp!=stdout) {
 	  fclose(fp);
 	  fp = NULL;
 	}
 	p.put("append",true);
+	p.put("mark_header",true);
       }
       CsvFile::write(book->readSheetByIndex(i),p);
     }

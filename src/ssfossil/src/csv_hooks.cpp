@@ -21,7 +21,7 @@ using namespace coopy::cmp;
 extern "C" int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut);
 extern "C" int csv_render(Blob *in, Blob *out);
 
-extern "C" void cvs_merge_cb1 (void *s, size_t i, void *p) {
+extern "C" void cvs_merge_cb1 (void *s, size_t i, void *p, int quoted) {
   ((CsvSheet*)p)->addField((char *)s, i);
 }
 

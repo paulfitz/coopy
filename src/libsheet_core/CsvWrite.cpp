@@ -44,6 +44,8 @@ int CsvFile::write(const DataSheet& src, const Property& config) {
       wantFakeHeader = true;
     }
   }
+  bool markHeader = config.get("mark_header",
+			       PolyValue::makeBoolean(false)).asBoolean();
   if (wantHeader) {
     NameSniffer sniffer(src);
     if (!sniffer.isEmbedded()) {
@@ -54,6 +56,20 @@ int CsvFile::write(const DataSheet& src, const Property& config) {
 	  header.cell(i,0) = sniffer.suggestColumnName(i);
 	}
 	std::string result = header.encode(style);
+	if (markHeader) {
+	  int len = result.length();
+	  len--;
+	  while (len>0 && result[len-1]=='\r') {
+	    len--;
+	  }
+	  if (len<3) len = 3;
+	  if (len>79) len = 79;
+	  for (int i=0; i<len; i++) {
+	    result += '-';
+	  }
+	  result += "\r\n";
+	  style.setMarkHeader(false);
+	}
 	fwrite(result.c_str(),1,result.length(),fp);
       }
     }

@@ -57,11 +57,11 @@ struct csv_parser {
 
 /* Function Prototypes */
 int csv_init(struct csv_parser *p, unsigned char options);
-int csv_fini(struct csv_parser *p, void (*cb1)(void *, size_t, void *), void (*cb2)(int, void *), void *data);
+int csv_fini(struct csv_parser *p, void (*cb1)(void *, size_t, void *,int), void (*cb2)(int, void *), void *data);
 void csv_free(struct csv_parser *p);
 int csv_error(struct csv_parser *p);
 char * csv_strerror(int error);
-size_t csv_parse(struct csv_parser *p, const void *s, size_t len, void (*cb1)(void *, size_t, void *), void (*cb2)(int, void *), void *data);
+size_t csv_parse(struct csv_parser *p, const void *s, size_t len, void (*cb1)(void *, size_t, void *,int), void (*cb2)(int, void *), void *data);
 size_t csv_write(void *dest, size_t dest_size, const void *src, size_t src_size);
 int csv_fwrite(FILE *fp, const void *src, size_t src_size);
 size_t csv_write2(void *dest, size_t dest_size, const void *src, size_t src_size, unsigned char quote);

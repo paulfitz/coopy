@@ -16,28 +16,39 @@ void NameSniffer::sniff() {
   ct.clear();
 
   SheetSchema *schema = sheet.getSchema();
+  div = -1;
   if (schema!=NULL) {
-    dbg_printf("Sniffing... found schema!\n");
-    for (int i=0; i<sheet.width(); i++) {
-      ColumnInfo info = schema->getColumnInfo(i);
-      if (!info.hasName()) {
-	names.clear();
-	ct.clear();
-	break;
+    if (schema->getColumnCount()==0 && schema->headerHeight()>=0) {
+      // minimal schema, not complete
+      dbg_printf("Sniffing... minimal schema!\n");
+      div = schema->headerHeight();
+    } else {
+      dbg_printf("Sniffing... found schema!\n");
+      for (int i=0; i<sheet.width(); i++) {
+	ColumnInfo info = schema->getColumnInfo(i);
+	if (!info.hasName()) {
+	  names.clear();
+	  ct.clear();
+	  break;
+	}
+	names.push_back(info.getName());
+	ct.push_back(info.getColumnType());
       }
-      names.push_back(info.getName());
-      ct.push_back(info.getColumnType());
+      if (names.size()>0) {
+	dbg_printf("Found names in schema\n");
+	return;
+      }
     }
-    if (names.size()>0) {
-      dbg_printf("Found names in schema\n");
-      return;
-    }
+  } else {
+    dbg_printf("Full sniff\n");
   }
 
-  DataStat stat;
-  stat.evaluate(sheet);
-  div = stat.getRowDivider();
-  ct = stat.suggestTypes();
+  if (div<0) {
+    DataStat stat;
+    stat.evaluate(sheet);
+    div = stat.getRowDivider();
+    ct = stat.suggestTypes();
+  }
   if (div<0) {
     // no obvious header
     fake = true;
@@ -66,6 +77,9 @@ void NameSniffer::sniff() {
     ct.clear();
     fake = true;
   } else {
+    while (ct.size()<names.size()) {
+      ct.push_back(ColumnType());
+    }
     embed = true;
   }
 }

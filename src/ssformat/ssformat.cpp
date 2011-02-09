@@ -59,13 +59,14 @@ int main(int argc, char *argv[]) {
   argc -= optind;
   argv += optind;
 
-  if (argc<2) {
+  if (argc<1) {
     printf("Call with input file and desired output file. Examples:\n");
     printf("  ssformat input.csv output.sqlite\n");
     printf("  ssformat input.sqlite output.csvs\n");
     printf("  ssformat input.sqlite -\n");
     printf("A single sheet/table can be extracted if desired:\n");
     printf("  ssformat --table people input.sqlite people.csv\n");
+    printf("If the output file is omitted, it is set to standard output\n");
     return 1;
   }
 
@@ -123,8 +124,12 @@ int main(int argc, char *argv[]) {
     }
     src.take(book);
   }
-  if (!src.write(argv[1])) {
-    fprintf(stderr,"Failed to write %s\n", argv[1]);
+  string out_file = "-";
+  if (argc==2) {
+    out_file = argv[1];
+  }
+  if (!src.write(out_file.c_str())) {
+    fprintf(stderr,"Failed to write %s\n", out_file.c_str());
     return 1;
   }
 

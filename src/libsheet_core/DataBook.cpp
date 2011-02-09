@@ -59,10 +59,10 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
     string target_name = name;
     SheetSchema *schema = sheet.getSchema();
     SchemaSniffer sniffer(sheet,name.c_str());
-    if (schema==NULL) {
-      dbg_printf(" - No schema available, sniffing...\n");
-      schema = sniffer.suggestSchema();
-    }
+    //if (schema==NULL) {
+    //dbg_printf(" - No schema available, sniffing...\n");
+    schema = sniffer.suggestSchema();
+    //}
     if (schema==NULL) {
       fprintf(stderr, "Cannot determine sheet schema: %s\n", name.c_str());
       return false;

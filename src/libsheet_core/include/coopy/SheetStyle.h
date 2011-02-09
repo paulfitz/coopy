@@ -18,11 +18,13 @@ private:
   bool haveNull;
   bool quoteCollision;
   bool trimEnd;
+  bool markHeader;
 public:
   SheetStyle() {
     delim = ",";
     nullToken = "NULL";
     haveNull = true;
+    markHeader = false;
     quoteCollision = true;
     trimEnd = true; // needed for a Gnumeric bug in parsing CSV like this:
     //1,2,3
@@ -55,6 +57,14 @@ public:
 
   bool shouldTrimEnd() const {
     return trimEnd;
+  }
+
+  bool shouldMarkHeader() const {
+    return markHeader;
+  }
+
+  void setMarkHeader(bool flag) {
+    markHeader = flag;
   }
 
   static const SheetStyle defaultStyle;

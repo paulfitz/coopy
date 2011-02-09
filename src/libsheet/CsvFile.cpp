@@ -50,15 +50,25 @@ public:
     }
     return sheet!=NULL;
   }
+
+  void markBreak() {
+    if (sheet!=NULL) {
+      SimpleSheetSchema *schema = new SimpleSheetSchema;
+      COOPY_ASSERT(schema);
+      Poly<SheetSchema> pschema(schema,true);
+      schema->setHeaderHeight(sheet->height()-1);
+      sheet->setSchema(pschema);
+    }
+  }
 };
 
 
-extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
+extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p, int quoted) {
   CsvSheetReaderState *state = (CsvSheetReaderState*)p;
   CsvSheet *sheet = state->sheet;
   if (state->expecting && state->reader!=NULL) {
     char *str = (char *)s;
-    if (i>4) {
+    if (i>4 && !quoted) {
       if (str[0]=='=' && str[1]=='=' && str[2]==' ') {
 	size_t j;
 	for (j=i-1; j>=3; j--) {
@@ -68,6 +78,11 @@ extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p) {
 	char *name = str+3;
 	//printf("Name is perhaps [%s]\n", name);
 	state->addSheet(name);
+	state->ignore = true;
+	return;
+      }
+      if (str[0]=='-' && str[1]=='-' && str[2]=='-') {
+	state->markBreak();
 	state->ignore = true;
 	return;
       }

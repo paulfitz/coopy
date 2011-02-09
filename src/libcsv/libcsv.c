@@ -51,7 +51,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
    if (p->options & CSV_APPEND_NULL) \
      ((p)->entry_buf[entry_pos+1]) = '\0'; \
    if (cb1) \
-     cb1(p->entry_buf, entry_pos, data); \
+     cb1(p->entry_buf, entry_pos, data, quoted);	\
    pstate = FIELD_NOT_BEGUN; \
    entry_pos = quoted = spaces = 0; \
  } while (0)
@@ -154,7 +154,7 @@ csv_free(struct csv_parser *p)
 }
 
 int
-csv_fini(struct csv_parser *p, void (*cb1)(void *, size_t, void *), void (*cb2)(int c, void *), void *data)
+csv_fini(struct csv_parser *p, void (*cb1)(void *, size_t, void *, int), void (*cb2)(int c, void *), void *data)
 {
   /* Finalize parsing.  Needed, for example, when file does not end in a newline */
   int quoted = p->quoted;
@@ -300,7 +300,7 @@ csv_increase_buffer(struct csv_parser *p)
 }
  
 size_t
-csv_parse(struct csv_parser *p, const void *s, size_t len, void (*cb1)(void *, size_t, void *), void (*cb2)(int c, void *), void *data)
+csv_parse(struct csv_parser *p, const void *s, size_t len, void (*cb1)(void *, size_t, void *, int), void (*cb2)(int c, void *), void *data)
 {
   unsigned const char *us = s;  /* Access input data as array of unsigned char */
   unsigned char c;              /* The character we are currently processing */

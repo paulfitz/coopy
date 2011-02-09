@@ -7,13 +7,31 @@ std::string DataSheet::encode(const SheetStyle& style) const {
   std::string delim = style.getDelimiter();
   std::string result = "";
   for (int y=0;y<height();y++) {
+    std::string line = "";
     for (int x=0;x<width();x++) {
       if (x>0) {
-	result += delim;
+	line += delim;
       }
-      result += encodeCell(cellSummary(x,y),style);
+      line += encodeCell(cellSummary(x,y),style);
     }
-    result += "\r\n"; // use Windows encoding, since UNIX is more forgiving
+    int len = line.length();
+    line += "\r\n"; // use Windows encoding, since UNIX is more forgiving
+    if (style.shouldMarkHeader()) {
+      SheetSchema *schema = getSchema();
+      if (schema!=NULL) {
+	if (schema->headerHeight()>=0) {
+	  if (schema->headerHeight()==y) {
+	    if (len<3) len = 3;
+	    if (len>79) len = 79;
+	    for (int i=0; i<len; i++) {
+	      line += '-';
+	    }
+	    line += "\r\n";	    
+	  }
+	}
+      }
+    }
+    result += line;
   }
   return result;
 }

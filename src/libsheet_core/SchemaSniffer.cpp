@@ -9,9 +9,12 @@ using namespace coopy::store;
 using namespace std;
 
 void SchemaSniffer::sniff() {
+  dbg_printf("Sniff schema\n");
   if (sheet.getSchema()!=NULL) {
-    schema = sheet.getSchema();
-    return;
+    if (sheet.getSchema()->getColumnCount()!=0) {
+      schema = sheet.getSchema();
+      return;
+    }
   }
   NameSniffer nameSniffer(sheet);
   vector<string> names = nameSniffer.suggestNames();
