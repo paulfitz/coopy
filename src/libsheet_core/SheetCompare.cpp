@@ -10,6 +10,7 @@
 #include <coopy/ColMan.h>
 #include <coopy/MeasureMan.h>
 #include <coopy/Merger.h>
+#include <coopy/SchemaSniffer.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -42,7 +43,11 @@ public:
       bool fail = false;
       for (int r=0; r<pass.a.height() && !fail; r++) {
 	for (int c=0; c<pass.a.width(); c++) {
-	  if (pass.a.cellString(c,r)!=pass.b.cellString(c,r)) {
+	  if (pass.a.cellSummary(c,r)!=pass.b.cellSummary(c,r)) {
+	    dbg_printf("FastMatch::match mismatch at (%d,%d): [%s] vs [%s]\n",
+		       c,r,
+		       pass.a.cellSummary(c,r).toString().c_str(),
+		       pass.b.cellSummary(c,r).toString().c_str());
 	    fail = true;
 	    break;
 	  }
@@ -50,13 +55,20 @@ public:
       }
       if (!fail) {
 	// sheets are identical!
-	dbg_printf("MATCH!\n");
+	dbg_printf("FastMatch::match identical sheets found\n");
 	for (int i=0; i<pass.asel.height(); i++) {
 	  pass.asel.cell(0,i) = i;
 	  pass.bsel.cell(0,i) = i;
 	}
 	return;
+      } else {
+	dbg_printf("FastMatch::match sheets same size (%dx%d), but differ in content\n",
+		   pass.a.width(),pass.a.height());
       }
+    } else {
+      dbg_printf("FastMatch::match sheets differ in size, %dx%d vs %dx%d\n",
+		 pass.a.width(),pass.a.height(),
+		 pass.b.width(),pass.b.height());
     }
 
     // Non identical eh?  Well, maybe we've been told to trust
@@ -75,20 +87,66 @@ public:
 };
 
 
-int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
+int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local, 
+			  DataSheet& _remote,
 			  MergeOutput& output, const CompareFlags& flags) {
+  DataSheet *ppivot = &_pivot;
+  DataSheet *plocal = &_local;
+  DataSheet *premote = &_remote;
+
+  SchemaSniffer spivot(_pivot,NULL,true);
+  SchemaSniffer slocal(_local,NULL,true);
+  SchemaSniffer sremote(_remote,NULL,true);
+  PolySheet dpivot, dlocal, dremote;
+  bool appleOrange = false;
+  if (_local.hasExternalColumnNames()!=_remote.hasExternalColumnNames() ||
+      _local.hasExternalColumnNames()!=_pivot.hasExternalColumnNames()) {
+    appleOrange = true;
+    spivot.sniff();
+    slocal.sniff();
+    sremote.sniff();
+    if (!_local.hasExternalColumnNames()) {
+      dbg_printf("SheetCompare::compare wrap local sheet\n");
+      dlocal = PolySheet(&_local,false);
+      dlocal.setRowOffset(1);
+      dlocal.setSchema(slocal.suggestSchema(),false);
+      plocal = &dlocal;
+    }
+    if (!_remote.hasExternalColumnNames()) {
+      dbg_printf("SheetCompare::compare wrap remote sheet\n");
+      dremote = PolySheet(&_remote,false);
+      dremote.setRowOffset(1);
+      dremote.setSchema(sremote.suggestSchema(),false);
+      premote = &dremote;
+    }
+    if (!_pivot.hasExternalColumnNames()) {
+      dbg_printf("SheetCompare::compare wrap pivot sheet\n");
+      dpivot = PolySheet(&_pivot,false);
+      dpivot.setRowOffset(1);
+      dpivot.setSchema(spivot.suggestSchema(),false);
+      ppivot = &dpivot;
+    }
+  }
+
+  DataSheet& pivot = *ppivot;
+  DataSheet& local = *plocal;
+  DataSheet& remote = *premote;
+
   NameSniffer pivot_names(pivot,false);
   NameSniffer local_names(local,false);
   NameSniffer remote_names(remote,false);
   CompareFlags eflags = flags;
 
   if (eflags.trust_ids) {
-    dbg_printf("Checking IDs\n");
     local_names.sniff();
-    bool ok = local_names.subset(eflags.ids);
     remote_names.sniff();
-    ok = ok && remote_names.subset(eflags.ids);
     pivot_names.sniff();
+  }
+
+  if (eflags.trust_ids) {
+    dbg_printf("Checking IDs\n");
+    bool ok = local_names.subset(eflags.ids);
+    ok = ok && remote_names.subset(eflags.ids);
     ok = ok && pivot_names.subset(eflags.ids);
     if (!ok) {
       fprintf(stderr,"Not all ID columns found\n");
@@ -100,6 +158,8 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 
   /////////////////////////////////////////////////////////////////////////
   // PIVOT to LOCAL row mapping
+
+  dbg_printf("SheetCompare::compare pivot <-> local rows\n");
 
   MeasurePass p2l_row_pass_local(pivot,local);
   MeasurePass p2l_row_pass_norm1(pivot,pivot);
@@ -125,6 +185,8 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   /////////////////////////////////////////////////////////////////////////
   // PIVOT to REMOTE row mapping
 
+  dbg_printf("SheetCompare::compare pivot <-> remote rows\n");
+
   MeasurePass p2r_row_pass_local(pivot,remote);
   MeasurePass p2r_row_pass_norm1(pivot,pivot);
   MeasurePass p2r_row_pass_norm2(remote,remote);
@@ -146,6 +208,8 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 
   /////////////////////////////////////////////////////////////////////////
   // PIVOT to LOCAL column mapping
+
+  dbg_printf("SheetCompare::compare pivot <-> local columns\n");
 
   MeasurePass p2l_col_pass_local(pivot,local);
   MeasurePass p2l_col_pass_norm1(pivot,pivot);
@@ -170,6 +234,8 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   /////////////////////////////////////////////////////////////////////////
   // PIVOT to REMOTE column mapping
 
+  dbg_printf("SheetCompare::compare pivot <-> remote columns\n");
+
   MeasurePass p2r_col_pass_local(pivot,remote);
   MeasurePass p2r_col_pass_norm1(pivot,pivot);
   MeasurePass p2r_col_pass_norm2(remote,remote);
@@ -193,6 +259,8 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   /////////////////////////////////////////////////////////////////////////
   // Integrate results
 
+  dbg_printf("SheetCompare::compare integrate\n");
+
   OrderResult p2l_col_order = p2l_col_pass_local.getOrder();
   OrderResult p2r_col_order = p2r_col_pass_local.getOrder();
 
@@ -207,6 +275,9 @@ int SheetCompare::compare(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 		    local_names,
 		    remote_names);
   merger.merge(state);
+
+  dbg_printf("SheetCompare::compare done\n");
+
   return 0;
 }
 

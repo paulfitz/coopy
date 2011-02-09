@@ -493,6 +493,8 @@ void Merger::merge(MergerState& state) {
     vector<int> move_order;
     
     if (local_cols.size()!=shuffled_cols.size()) {
+      dbg_printf("Match failed %s:%d\n",
+	      __FILE__, __LINE__);
       fprintf(stderr,"Match failed, please report %s:%d\n",
 	      __FILE__, __LINE__);
       exit(1);

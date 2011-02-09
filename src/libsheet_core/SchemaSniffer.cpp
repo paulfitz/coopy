@@ -8,12 +8,14 @@ using namespace coopy::store;
 
 using namespace std;
 
-void SchemaSniffer::sniff() {
+void SchemaSniffer::sniff(bool force) {
   dbg_printf("Sniff schema\n");
-  if (sheet.getSchema()!=NULL) {
-    if (sheet.getSchema()->getColumnCount()!=0) {
-      schema = sheet.getSchema();
-      return;
+  if (!force) {
+    if (sheet.getSchema()!=NULL) {
+      if (sheet.getSchema()->getColumnCount()!=0) {
+	schema = sheet.getSchema();
+	return;
+      }
     }
   }
   NameSniffer nameSniffer(sheet);

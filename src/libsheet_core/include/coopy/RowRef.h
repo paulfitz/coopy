@@ -23,6 +23,10 @@ public:
   int getIndex() const {
     return index;
   }
+
+  RowRef delta(int dh) const {
+    return RowRef(index+dh);
+  }
 };
 
 #endif

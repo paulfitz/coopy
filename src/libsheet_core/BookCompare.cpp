@@ -17,7 +17,7 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
   // Merge currently based purely on names, no content comparison.
   // Hence a sheet rename cannot be guessed at yet.
 
-  dbg_printf("BookCompare begins\n");
+  dbg_printf("BookCompare::compare begins\n");
 
   output.setFlags(flags);
   output.mergeStart();
@@ -55,7 +55,7 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
        it!=name_set.end();
        it++) {
     string name = *it;
-    dbg_printf("  COMPARE - Working on \"%s\"\n", name.c_str());
+    dbg_printf("\n\nBookCompare::compare - Working on \"%s\"\n", name.c_str());
     PolySheet pivot_sheet;
     PolySheet local_sheet;
     PolySheet remote_sheet;
@@ -86,6 +86,7 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
       }
     }
     cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags);
+    dbg_printf("BookCompare::compare - Done with \"%s\"\n", name.c_str());
   }
 
   return -1;

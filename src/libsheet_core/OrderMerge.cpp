@@ -21,8 +21,8 @@ void OrderMerge::process(int ilocal, int iremote,
   //dbg_printf("process %d %d / %d %d / %d %d\n", ilocal, iremote, 
   //base_local, base_remote, stop_local, stop_remote);
   while (true) {
-    dbg_printf("--- process %d %d / %d %d / %d %d\n", ilocal, iremote, 
-	       base_local, base_remote, stop_local, stop_remote);
+    //dbg_printf("--- process %d %d / %d %d / %d %d\n", ilocal, iremote, 
+    //	       base_local, base_remote, stop_local, stop_remote);
     if (ilocal>=stop_local &&
 	iremote>=stop_remote) {
       break;

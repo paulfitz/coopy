@@ -39,6 +39,15 @@ public:
     return div+1;
   }
 
+  int dataWidth() const {
+    return sheet.width();
+  }
+
+  int dataHeight() const {
+    if (div<0) return sheet.height();
+    return sheet.height()-(div+1);
+  }
+
   virtual std::string suggestColumnName(int col);
 
   virtual const std::vector<std::string>& suggestNames() const {

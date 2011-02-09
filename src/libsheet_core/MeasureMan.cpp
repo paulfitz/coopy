@@ -32,12 +32,12 @@ void MeasureMan::compare() {
     }
   }
   if (remaining==0) {
-    dbg_printf("\n\nNothing to do\n");
+    dbg_printf("MeasureMan::compare finished\n");
     return;
   }
 
   for (int i=0; i<20; i++) {
-    dbg_printf("\n\nPass %d\n", i);
+    dbg_printf("MeasureMan::compare pass %d\n", i);
     compare1(ctrl);
     int processed = 0;
     remaining = 0;

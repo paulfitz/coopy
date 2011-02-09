@@ -17,14 +17,16 @@ private:
   const DataSheet& sheet;
   std::string name;
 public:
-  SchemaSniffer(const DataSheet& sheet, const char *name = NULL) : sheet(sheet) {
+  SchemaSniffer(const DataSheet& sheet, const char *name = NULL, bool delayed = false) : sheet(sheet) {
     if (name) {
       this->name = name;
     }
-    sniff();
+    if (!delayed) {
+      sniff();
+    }
   }
 
-  void sniff(); 
+  void sniff(bool force = false); 
 
   virtual SheetSchema *suggestSchema();
 };

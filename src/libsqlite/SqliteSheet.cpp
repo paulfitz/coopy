@@ -283,7 +283,7 @@ std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
       result = txt;
       escaped = false;
     } else { 
-      result = "";
+      result = "NULL";
       escaped = true;
     }
   }

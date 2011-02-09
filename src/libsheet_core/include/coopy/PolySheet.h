@@ -16,12 +16,14 @@ private:
   bool owned;
   SheetSchema *schema;
   bool owned_schema;
+  int dh;
 public:
   PolySheet() {
     sheet = 0/*NULL*/;
     owned = false;
     schema = 0/*NULL*/;
     owned_schema = false;
+    dh = 0;
   }
 
   PolySheet(DataSheet *sheet, bool owned) : sheet(sheet), owned(owned) {
@@ -30,11 +32,13 @@ public:
     }
     schema = 0/*NULL*/;
     owned_schema = false;
+    dh = 0;
   }
 
   PolySheet(const PolySheet& alt) {
     owned = alt.owned;
     sheet = alt.sheet;
+    dh = alt.dh;
     if (sheet!=0/*NULL*/&&owned) {
       sheet->addReference();
     }
@@ -49,6 +53,7 @@ public:
     clear();
     owned = alt.owned;
     sheet = alt.sheet;
+    dh = alt.dh;
     if (sheet!=0/*NULL*/&&owned) {
       sheet->addReference();
     }
@@ -117,27 +122,27 @@ public:
 
   virtual int height() const {
     COOPY_ASSERT(sheet);
-    return sheet->height();
+    return sheet->height()-dh;
   }
 
   virtual std::string cellString(int x, int y) const {
     COOPY_ASSERT(sheet);
-    return sheet->cellString(x,y);
+    return sheet->cellString(x,y+dh);
   }
 
   virtual std::string cellString(int x, int y, bool& escaped) const {
     COOPY_ASSERT(sheet);
-    return sheet->cellString(x,y,escaped);
+    return sheet->cellString(x,y+dh,escaped);
   } 
 
   virtual bool cellString(int x, int y, const std::string& str) {
     COOPY_ASSERT(sheet);
-    return sheet->cellString(x,y,str);
+    return sheet->cellString(x,y+dh,str);
   }
 
   virtual bool cellString(int x, int y, const std::string& str, bool escaped) {
     COOPY_ASSERT(sheet);
-    return sheet->cellString(x,y,str,escaped);
+    return sheet->cellString(x,y+dh,str,escaped);
   }
 
   std::string encode(const SheetStyle& style) const {
@@ -167,19 +172,19 @@ public:
 
   virtual bool deleteRow(const RowRef& src) {
     COOPY_ASSERT(sheet);
-    return sheet->deleteRow(src);
+    return sheet->deleteRow((dh==0)?src:src.delta(dh));
   }
 
   // insert a row before base; if base is invalid insert after all rows
   virtual RowRef insertRow(const RowRef& base) {
     COOPY_ASSERT(sheet);
-    return sheet->insertRow(base);
+    return sheet->insertRow((dh==0)?base:base.delta(dh));
   }
 
   // move a row before base; if base is invalid move after all rows
   virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
     COOPY_ASSERT(sheet);
-    return sheet->moveRow(src,base);
+    return sheet->moveRow(src,(dh==0)?base:base.delta(dh));
   }
 
   virtual bool copyData(const DataSheet& src) {
@@ -199,7 +204,7 @@ public:
 
   virtual bool resize(int w, int h) {
     COOPY_ASSERT(sheet);
-    return sheet->resize(w,h);
+    return sheet->resize(w,h+dh);
   }
 
   virtual Poly<SheetRow> insertRow() {
@@ -234,10 +239,11 @@ public:
 
   virtual bool forceHeight(int height) {
     COOPY_ASSERT(sheet);
-    return sheet->forceHeight(height);
+    return sheet->forceHeight(height+dh);
   }
 
   virtual bool hasExternalColumnNames() const {
+    if (dh!=0 && schema!=NULL) return true;
     COOPY_ASSERT(sheet);
     return sheet->hasExternalColumnNames();
   }
@@ -253,6 +259,11 @@ public:
     std::string name = getDescription();
     v.insert(v.begin(),name);
     return v;
+  }
+
+  bool setRowOffset(int dh) {
+    this->dh = dh;
+    return true;
   }
 };
 
