@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "k$1" = "k" ]; then
+    echo "Call with any of: mingw linux osx doc"
+    exit 1
+fi
+
 while [ ! "k$1" = "k" ]; do 
 
     cfg="$HOME/.COOPY_PATHS"
