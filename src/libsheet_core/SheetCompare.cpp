@@ -89,7 +89,7 @@ public:
 
 int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local, 
 			  DataSheet& _remote,
-			  MergeOutput& output, const CompareFlags& flags) {
+			  Patcher& output, const CompareFlags& flags) {
   DataSheet *ppivot = &_pivot;
   DataSheet *plocal = &_local;
   DataSheet *premote = &_remote;

@@ -74,18 +74,7 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
     }
   }
   if (lnops!=nops) {
-    /*
-    if (!showedColumns) {
-      fprintf(out, "%c* column name ",'/');
-      for (int i=0; i<(int)columns.size(); i++) {
-	fprintf(out,"%s ",columns[i].c_str());
-      }
-      fprintf(out,"*%c\n\n",'/');
-      showedColumns = true;
-    }
-    */
     if (columns!=lnops || !showedColumns) {
-      //fprintf(out, "/* link name ");
       fprintf(out, "@ |");
       for (int i=0; i<(int)change.names.size(); i++) {
 	if (activeColumn[change.names[i]]) {
@@ -98,17 +87,6 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
     nops = lnops;
   }
 
-  if (prevSelect!=showForSelect || prevDescribe!=showForDescribe) {
-    //fprintf(out, "/* %s %s ",(tag=="act")?"link":"row",tag);
-    /*
-    for (int i=0; i<(int)change.names.size(); i++) {
-      if (activeColumn[change.names[i]]) {
-	fprintf(out,"%s ",ops[i].c_str());
-      }
-    }
-    */
-    //fprintf(out,"*/\n\n");
-  }
   return true;
 }
 
@@ -191,9 +169,6 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
 	shouldMatch = true;
       }
     }
-    //printf("==> %s %d %d %d %d\n", name.c_str(), condActive, valueActive,
-    //shouldMatch, shouldAssign);
-    //bool shouldShow = shouldMatch || shouldAssign;
 
     if (change.mode==ROW_CHANGE_INSERT) {
       // we do not care about matching
@@ -220,8 +195,6 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
 
     // no way yet to communicate CONTEXT request
     lops.push_back(op);
-    //showForSelect.push_back(shouldMatch);
-    //showForDescribe.push_back(shouldAssign);
     showForSelect[name] = shouldMatch;
     showForDescribe[name] = shouldAssign;
   }
@@ -238,15 +211,7 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
     updateRow(change,"delete",true,false,false);
     break;
   case ROW_CHANGE_UPDATE:
-    {
-      //bool terse = updateRow(change,"practice",true,true,true);
-      //if (terse) {
-      updateRow(change,"update",true,true,false);
-      //} else {
-      //updateRow(change,"select",true,false,false);
-      //updateRow(change,"update",false,true,false);
-      //}
-    }
+    updateRow(change,"update",true,true,false);
     break;
   default:
     fprintf(stderr,"  Unknown row operation\n\n");

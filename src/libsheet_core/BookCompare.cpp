@@ -13,7 +13,7 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote, 
-			 MergeOutput& output, const CompareFlags& flags) {
+			 Patcher& output, const CompareFlags& flags) {
   // Merge currently based purely on names, no content comparison.
   // Hence a sheet rename cannot be guessed at yet.
 
@@ -78,12 +78,10 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
     }
 
     SheetCompare cmp;
-    if (name_set.size()>1) {
-      bool ok = output.setSheet(name.c_str());
-      if (!ok) {
-	fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());
-	return -1;
-      }
+    bool ok = output.setSheet(name.c_str());
+    if (!ok) {
+      fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());
+      return -1;
     }
     cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags);
     dbg_printf("BookCompare::compare - Done with \"%s\"\n", name.c_str());

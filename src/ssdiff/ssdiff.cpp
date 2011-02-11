@@ -12,6 +12,7 @@
 #include <coopy/MergeOutputIndex.h>
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
+#include <coopy/SheetPatcher.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -46,6 +47,7 @@ int main(int argc, char *argv[]) {
   bool verbose = false;
   bool equality = false;
   bool indexed = false;
+  bool apply = false;
 
   while (true) {
     int option_index = 0;
@@ -57,6 +59,8 @@ int main(int argc, char *argv[]) {
       {"format-raw", 0, 0, 'r'},
       {"format-tdiff", 0, 0, 't'},
       {"format-index", 0, 0, 'i'},
+
+      {"apply", 0, 0, 'a'},
 
       {"equals", 0, 0, 'e'},
       {"index", 0, 0, 'i'},
@@ -119,6 +123,10 @@ int main(int argc, char *argv[]) {
     case 'l':
       PolyBook::showFormats();
       return 0;
+      break;
+    case 'a':
+      apply = true;
+      mode = "apply";
       break;
     default:
       fprintf(stderr, "Unrecognized option\n");
@@ -239,20 +247,18 @@ int main(int argc, char *argv[]) {
       SheetStyle style;
       std::string out = result.encode(style);
       printf("%s",out.c_str());
-      /*
-      if (output==""||output=="-") {
-	printf("%s",out.c_str());
-      } else {
-	FILE *fout = fopen(output.c_str(),"wb");
-	if (fout==NULL) {
-	  fprintf(stderr,"Could not open %s for writing\n", output.c_str());
-	  return 1;
-	}
-	fprintf(fout,"%s",out.c_str());
-	fclose(fout);
-	fout = NULL;
+    }
+  } else if (mode=="apply") {
+    SheetPatcher diff(local);
+    diff.showSummary();
+    start_output(output,flags);
+    cmp.compare(*pivot,*local,*remote,diff,flags);
+    stop_output(output,flags);
+    if (!local->inplace()) {
+      if (!local->write(argv[0])) {
+	fprintf(stderr,"Failed to write %s\n", argv[0]);
+	return 1;
       }
-      */
     }
   } else {
     fprintf(stderr,"Patch mode not recognized\n");

@@ -26,7 +26,7 @@ public:
   const OrderResult& nrow_remote;
   const OrderResult& ncol_local;
   const OrderResult& ncol_remote;
-  MergeOutput& output;
+  Patcher& output;
   const CompareFlags& flags;
   coopy::store::NameSniffer& local_names;
   coopy::store::NameSniffer& remote_names;
@@ -38,7 +38,7 @@ public:
 	      const OrderResult& nrow_remote,
 	      const OrderResult& ncol_local,
 	      const OrderResult& ncol_remote,
-	      MergeOutput& output,
+	      Patcher& output,
 	      const CompareFlags& flags,
 	      coopy::store::NameSniffer& local_names,
 	      coopy::store::NameSniffer& remote_names) :
@@ -62,7 +62,7 @@ public:
   void mergeRow(coopy::store::DataSheet& pivot, 
 		coopy::store::DataSheet& local, 
 		coopy::store::DataSheet& remote,
-		MatchUnit& row_unit, MergeOutput& output,
+		MatchUnit& row_unit, Patcher& output,
 		const CompareFlags& flags,
 		std::vector<coopy::cmp::RowChange>& rc);
 

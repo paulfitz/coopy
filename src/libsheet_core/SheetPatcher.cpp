@@ -12,6 +12,7 @@ using namespace coopy::store;
 
 bool SheetPatcher::changeColumn(const OrderChange& change) {
   if (sheet==NULL) return false;
+  if (chain) chain->changeColumn(change);
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
     return sheet->deleteColumn(ColumnRef(change.subject));
@@ -37,6 +38,7 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 
 bool SheetPatcher::changeRow(const RowChange& change) {
   if (sheet==NULL) return false;
+  if (chain) chain->changeRow(change);
   if (!change.sequential) rowCursor = -1;
   map<string,int> dir;
   vector<int> active_cond;
@@ -165,6 +167,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 bool SheetPatcher::declareNames(const std::vector<std::string>& names, 
 				bool final) {
   if (sheet==NULL) return false;
+  if (chain) chain->declareNames(names,final);
   if (config.trustNames==false) {
     if ((int)names.size()!=sheet->width()) {
       fprintf(stderr,"* ERROR: name mismatch\n");
@@ -177,6 +180,27 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
     fprintf(stderr,"Named columns not implemented yet\n");
     exit(1);
   }
+  return true;
+}
+
+bool SheetPatcher::setSheet(const char *name) {
+  if (book==NULL) return false;
+  if (chain) chain->setSheet(name);
+
+  //reset
+  config = ConfigChange();
+  columns.clear();
+  column_names.clear();
+  rowCursor = -1;
+  sheet = NULL;
+
+  // load
+  psheet = book->readSheet(name);
+  if (!psheet.isValid()) {
+    fprintf(stderr,"Cannot find sheet %s\n", name);
+    return false;
+  }
+  sheet = &psheet;
   return true;
 }
 

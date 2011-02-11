@@ -6,6 +6,10 @@
 #include <map>
 
 #include <coopy/SheetCell.h>
+#include <coopy/CompareFlags.h>
+#include <coopy/SheetCell.h>
+#include <coopy/PolySheet.h>
+#include <coopy/TextBook.h>
 
 namespace coopy {
   namespace cmp {
@@ -169,11 +173,22 @@ public:
 };
 
 class coopy::cmp::Patcher {
+private:
+  int ct;
+protected:
+  CompareFlags flags;
+  FILE *out;
+  coopy::store::PolySheet output_sheet;
+  coopy::store::TextBook *output_book;
 public:
   Patcher() {
+    ct = 0;
+    out = stdout;
   }
 
   virtual ~Patcher() {}
+
+  virtual bool wantLinks() { return false; }
 
   virtual bool changeConfig(const ConfigChange& change) { return false; }
 
@@ -206,13 +221,80 @@ public:
     return false; 
   }
 
+  virtual bool mergeStart() {
+    return true;
+  }
+
   virtual bool mergeDone() {
     return true;
   }
 
   virtual bool setSheet(const char *name) {
-    return false;
+    ct++;
+    return (ct<=1); 
   }
+
+
+  virtual bool setFlags(const CompareFlags& flags) {
+    this->flags = flags;
+    out = flags.out;
+  }
+
+
+  // Old stuff, still used but not very important
+
+  virtual bool wantDiff() { return true; }
+
+  virtual bool addRow(const char *tag,
+		      const std::vector<coopy::store::SheetCell>& row,
+		      const std::string& blank) { return false; }
+
+  virtual bool addRow(const char *tag,
+		      const std::vector<std::string>& row,
+		      const std::string& blank) { 
+    std::vector<coopy::store::SheetCell> row2;
+    for (int i=0; i<(int)row.size(); i++) {
+      row2.push_back(coopy::store::SheetCell(row[i],false));
+    }
+    return addRow(tag,row2,blank);
+  }
+
+  virtual bool addHeader(const char *tag,
+			 const std::vector<coopy::store::SheetCell>& row,
+			 const std::string& blank) {
+    return addRow(tag,row,blank);
+  }
+
+  virtual bool addHeader(const char *tag,
+		         const std::vector<std::string>& row,
+		         const std::string& blank) { 
+    std::vector<coopy::store::SheetCell> row2;
+    for (int i=0; i<(int)row.size(); i++) {
+      row2.push_back(coopy::store::SheetCell(row[i],false));
+    }
+    return addHeader(tag,row2,blank);
+  }
+
+  virtual bool stripMarkup() { return false; }
+
+
+
+  virtual void attachSheet(coopy::store::PolySheet sheet) {
+    output_sheet = sheet;
+  }
+
+  void attachBook(coopy::store::TextBook& book) {
+    output_book = &book;
+  }
+  
+  virtual coopy::store::PolySheet getSheet() {
+    return output_sheet;
+  }
+
+  coopy::store::TextBook *getBook() {
+    return output_book;
+  }
+
 };
 
 

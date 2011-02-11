@@ -17,7 +17,7 @@ public:
   int compare(coopy::store::TextBook& pivot, 
 	      coopy::store::TextBook& local, 
 	      coopy::store::TextBook& remote, 
-	      MergeOutput& output, const CompareFlags& flags);
+	      Patcher& output, const CompareFlags& flags);
   
   void setVerbose(bool verbose);
 };

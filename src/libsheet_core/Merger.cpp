@@ -18,7 +18,7 @@ using namespace coopy::cmp;
 
 
 void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
-		      MatchUnit& row_unit, MergeOutput& output,
+		      MatchUnit& row_unit, Patcher& output,
 		      const CompareFlags& flags, vector<RowChange>& rc) {
   
   bool diff = output.wantDiff();
@@ -292,7 +292,7 @@ void Merger::merge(MergerState& state) {
   const OrderResult& row_remote = state.nrow_remote;
   const OrderResult& col_local = state.ncol_local;
   const OrderResult& col_remote = state.ncol_remote;
-  MergeOutput& output = state.output;
+  Patcher& output = state.output;
   const CompareFlags& flags = state.flags;
   NameSniffer& local_names = state.local_names;
   NameSniffer& remote_names = state.remote_names;
@@ -601,6 +601,18 @@ void Merger::merge(MergerState& state) {
       constantColumns = false;
     }
 
+    names = local_col_names;
+
+    vector<RowChange> rc;
+    // Now process rows
+    for (list<MatchUnit>::iterator it=row_merge.accum.begin();
+	 it!=row_merge.accum.end(); 
+	 it++) {
+      MatchUnit& unit = *it;
+      // ignoring row order for now ...
+      mergeRow(pivot,local,remote,unit,output,flags,rc);
+    }
+
     {
       NameChange nc;
       nc.mode = NAME_CHANGE_DECLARE;
@@ -614,8 +626,6 @@ void Merger::merge(MergerState& state) {
       OrderChange& change = cc[i];
       output.changeColumn(change);
     }
-
-    names = local_col_names;
     
     {
       NameChange nc;
@@ -624,16 +634,6 @@ void Merger::merge(MergerState& state) {
       nc.names = local_col_names;
       nc.constant = constantColumns;
       output.changeName(nc);
-    }
-
-    vector<RowChange> rc;
-    // Now process rows
-    for (list<MatchUnit>::iterator it=row_merge.accum.begin();
-	 it!=row_merge.accum.end(); 
-	 it++) {
-      MatchUnit& unit = *it;
-      // ignoring row order for now ...
-      mergeRow(pivot,local,remote,unit,output,flags,rc);
     }
 
     if (!constantIndex) {
