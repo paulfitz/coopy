@@ -5,7 +5,6 @@
 #include <coopy/DataSheet.h>
 #include <coopy/PolySheet.h>
 #include <coopy/TextBook.h>
-#include <coopy/MergeOutputTdiff.h>
 
 #include <vector>
 
@@ -23,7 +22,8 @@ private:
   int rowCursor;
   coopy::store::PolySheet psheet;
   bool summary;
-  MergeOutput *chain;
+  Patcher *chain;
+  int changeCount;
 public:
   coopy::store::DataSheet *sheet;
   coopy::store::TextBook *book;
@@ -33,6 +33,7 @@ public:
     book = NULL;
     summary = false;
     chain = NULL;
+    changeCount = 0;
   }
 
   SheetPatcher(coopy::store::TextBook *book) : book(book) {
@@ -40,18 +41,19 @@ public:
     sheet = NULL;
     summary = false;
     chain = NULL;
+    changeCount = 0;
   }
 
   virtual ~SheetPatcher() {
-    if (chain!=NULL) {
-      delete chain;
-      chain = NULL;
-    }
   }
 
-  void showSummary() {
+  void showSummary(Patcher *chain) {
     summary = true;
-    chain = new MergeOutputTdiff();
+    this->chain = chain;
+  }
+
+  int getChangeCount() {
+    return changeCount;
   }
 
   virtual bool changeConfig(const ConfigChange& change) { 

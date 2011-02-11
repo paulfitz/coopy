@@ -38,6 +38,26 @@ static void stop_output(string output, CompareFlags& flags) {
   }
 }
 
+Patcher *createTool(string mode, string version="") {
+  Patcher *result = NULL;
+  if (mode=="sql") {
+    result = new MergeOutputSqlDiff;
+  } else if (mode=="human") {
+    result = new MergeOutputHumanDiff;
+  } else if (mode=="raw") {
+    result = new MergeOutputVerboseDiff;
+  } else if (mode=="tdiff") {
+    result = new MergeOutputTdiff;
+  } else if (mode=="csv") {
+    if (version=="0.2") {
+      result = new MergeOutputCsvDiffV0p2;
+    } else if (version=="0.4"||version=="") {
+      result = new MergeOutputCsvDiff;
+    }
+  }
+  return result;
+}
+
 int main(int argc, char *argv[]) {
   std::string output = "-";
   std::string mode = "csv";
@@ -126,7 +146,7 @@ int main(int argc, char *argv[]) {
       break;
     case 'a':
       apply = true;
-      mode = "apply";
+      mode = "tdiff";
       break;
     default:
       fprintf(stderr, "Unrecognized option\n");
@@ -200,69 +220,50 @@ int main(int argc, char *argv[]) {
     diff.attachBook(book);
     cmp.compare(*pivot,*local,*remote,diff,flags);
     book.flush();
-  } else if (mode=="sql") {
-    MergeOutputSqlDiff sqldiff;
-    start_output(output,flags);
-    cmp.compare(*pivot,*local,*remote,sqldiff,flags);
-    stop_output(output,flags);
-  } else if (mode=="human") {
-    MergeOutputHumanDiff humandiff;
-    start_output(output,flags);
-    cmp.compare(*pivot,*local,*remote,humandiff,flags);
-    stop_output(output,flags);
-  } else if (mode=="raw") {
-    MergeOutputVerboseDiff verbosediff;
-    start_output(output,flags);
-    cmp.compare(*pivot,*local,*remote,verbosediff,flags);
-    stop_output(output,flags);
-  } else if (mode=="tdiff") {
-    MergeOutputTdiff diff;
-    start_output(output,flags);
-    cmp.compare(*pivot,*local,*remote,diff,flags);
-    stop_output(output,flags);
-  } else if (mode=="csv") {
-    if (version=="0.2") {
-      MergeOutputCsvDiffV0p2 diff;
+  } else if (!apply) {
+    Patcher *diff = createTool(mode,version);
+    if (diff!=NULL) {
       start_output(output,flags);
-      cmp.compare(*pivot,*local,*remote,diff,flags);
+      cmp.compare(*pivot,*local,*remote,*diff,flags);
       stop_output(output,flags);
-    } else if (version=="0.4"||version=="") {
-      MergeOutputCsvDiff diff;
-      start_output(output,flags);
-      cmp.compare(*pivot,*local,*remote,diff,flags);
-      stop_output(output,flags);
-    } else {
-      fprintf(stderr,"Unrecognized diff version\n");
-      exit(1);
-    }
-  } else if (mode=="csv0") {
-    MergeOutputPatch patch;
-    cmp.compare(*pivot,*local,*remote,patch,flags);
-    const CsvSheet& result = patch.get();
-    if (output!="") {
-      if (CsvFile::write(result,output.c_str())!=0) {
-	return 1;
+      delete diff;
+      diff = NULL;
+    } else if (mode=="csv0") {
+      MergeOutputPatch patch;
+      cmp.compare(*pivot,*local,*remote,patch,flags);
+      const CsvSheet& result = patch.get();
+      if (output!="") {
+	if (CsvFile::write(result,output.c_str())!=0) {
+	  return 1;
+	}
+      } else {
+	SheetStyle style;
+	std::string out = result.encode(style);
+	printf("%s",out.c_str());
       }
     } else {
-      SheetStyle style;
-      std::string out = result.encode(style);
-      printf("%s",out.c_str());
-    }
-  } else if (mode=="apply") {
-    SheetPatcher diff(local);
-    diff.showSummary();
-    start_output(output,flags);
-    cmp.compare(*pivot,*local,*remote,diff,flags);
-    stop_output(output,flags);
-    if (!local->inplace()) {
-      if (!local->write(argv[0])) {
-	fprintf(stderr,"Failed to write %s\n", argv[0]);
-	return 1;
-      }
+      fprintf(stderr,"Patch mode not recognized\n");
+      return 1;
     }
   } else {
-    fprintf(stderr,"Patch mode not recognized\n");
-    return 1;
+    Patcher *pdiff = createTool(mode,version);
+    SheetPatcher diff(local);
+    diff.showSummary(pdiff);
+    start_output(output,flags);
+    cmp.compare(*pivot,*local,*remote,diff,flags);
+    stop_output(output,flags);
+    if (pdiff!=NULL) {
+      delete pdiff;
+      pdiff = NULL;
+    }
+    if (diff.getChangeCount()>0) {
+      if (!local->inplace()) {
+	if (!local->write(argv[0])) {
+	  fprintf(stderr,"Failed to write %s\n", argv[0]);
+	  return 1;
+	}
+      }
+    }
   }
   return 0;
 }

@@ -57,6 +57,21 @@ public:
     hh = 0;
   }
 
+  bool copy(const SheetSchema& ss) {
+    sheetName = ss.getSheetName();
+    hh = ss.headerHeight();
+    int ct = ss.getColumnCount();
+    columns.clear();
+    kinds.clear();
+    for (int i=0; i<ct; i++) {
+      ColumnInfo c = ss.getColumnInfo(i);
+      columns.push_back(c.getName());
+      kinds.push_back(c.getColumnType());
+    }
+    return true;
+  }
+  
+
   void setHeaderHeight(int hh) {
     this->hh = hh;
   }

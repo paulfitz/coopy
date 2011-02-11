@@ -11,6 +11,7 @@ using namespace coopy::cmp;
 using namespace coopy::store;
 
 bool SheetPatcher::changeColumn(const OrderChange& change) {
+  changeCount++;
   if (sheet==NULL) return false;
   if (chain) chain->changeColumn(change);
   switch (change.mode) {
@@ -37,6 +38,7 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 }
 
 bool SheetPatcher::changeRow(const RowChange& change) {
+  changeCount++;
   if (sheet==NULL) return false;
   if (chain) chain->changeRow(change);
   if (!change.sequential) rowCursor = -1;
