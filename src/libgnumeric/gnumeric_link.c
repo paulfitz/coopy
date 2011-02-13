@@ -57,6 +57,15 @@
 static GOErrorInfo	*plugin_errs = NULL;
 static GOCmdContext	*cc = NULL;
 static int gnumeric_init_ct = 0;
+static int gnumeric_inited = 0;
+
+static void gnumeric_atexit(void) {
+  if (gnumeric_inited) {
+    g_object_unref (cc);
+    gnm_shutdown ();
+    gnumeric_inited = 0;
+  }
+}
 
 int gnumeric_init() {
   gnumeric_init_ct++;
@@ -77,17 +86,17 @@ int gnumeric_init() {
   gnm_plugins_init (GO_CMD_CONTEXT (cc));
   go_plugin_db_activate_plugin_list (
 				     go_plugins_get_available_plugins (), &plugin_errs);
+  atexit(gnumeric_atexit);
   return 0;
 }
 
 //static WorkbookView *wbv = NULL;
 
-
 int gnumeric_fini() {
-  gnumeric_init_ct--;
-  if (gnumeric_init_ct>0) return 0;
-  g_object_unref (cc);
-  gnm_shutdown ();
+  // moved to atexit()
+
+  //gnumeric_init_ct--;
+  //if (gnumeric_init_ct>0) return 0;
 }
 
 int gnumeric_free(GnumericWorkbookPtr workbook) {

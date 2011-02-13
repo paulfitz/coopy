@@ -8,6 +8,7 @@ IF (COMPILE_GUI)
   INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/ssrender/include)
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/widesheet)
 
   # May need icons for windows
   SET (DECOR)
@@ -41,6 +42,7 @@ IF (COMPILE_GUI)
       INSTALL(TARGETS ${targ} COMPONENT wizard DESTINATION bin)
     ENDFOREACH ()
     TARGET_LINK_LIBRARIES(ssmerge_gui sheet)
+    TARGET_LINK_LIBRARIES(coopy widesheet_management)
 
   ELSE (wxWidgets_FOUND)
     MESSAGE(STATUS "Skipping GUI, wxWidgets not found")

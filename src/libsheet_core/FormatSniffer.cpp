@@ -32,7 +32,8 @@ bool FormatSniffer::open(const char *fname, bool caching) {
       cache.append(buf,bytes_read);
     }
   } else {
-    fread(buf,1,sizeof(buf),fp);
+    bytes_read = fread(buf,1,sizeof(buf),fp);
+    cache.append(buf,bytes_read);
   }
   return true;
 }
@@ -71,6 +72,7 @@ Format FormatSniffer::getFormat() {
     return f;
   }
 
+  //printf("CACHE %s\n", (cache.substr(0,15)).c_str());
   if (cache.substr(0,15)=="SQLite format 3") {
     Format f;
     f.id = FORMAT_BOOK_SQLITE;
@@ -78,7 +80,7 @@ Format FormatSniffer::getFormat() {
     return f;
   }
 
-  if (cache.substr(0,4)==" == ") {
+  if (cache.substr(0,4)==" == "||cache.substr(0,3)=="== ") {
     Format f;
     f.id = FORMAT_BOOK_CSVS;
     f.name = "csvs";

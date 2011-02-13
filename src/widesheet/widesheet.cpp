@@ -5,11 +5,11 @@
 
 #include <string>
 
-#include "WideSheet.h"
+#include "WideSheetManager.h"
 
 using namespace std;
 
-void showStatus(WideSheet& ws, const char *key) {
+void showStatus(WideSheetManager& ws, const char *key) {
   string link = ws.getPropertyWithDefault(key);
   if (link=="") {
     printf("No %s setting.\n", key);
@@ -64,14 +64,14 @@ int main(int argc, char *argv[]) {
   argv++;
 
   if (arg=="init") {
-    WideSheet ws(true);
+    WideSheetManager ws(true);
     if (!ws.isValid()) {
       return 1;
     }
     return 0;
   }
 
-  WideSheet ws(false);
+  WideSheetManager ws(false);
   if (!ws.isValid()) {
     return 1;
   }

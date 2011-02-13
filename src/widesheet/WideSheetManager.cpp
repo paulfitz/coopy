@@ -1,4 +1,4 @@
-#include "WideSheet.h"
+#include "WideSheetManager.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,20 +38,14 @@ static bool sql_enact(sqlite3 *db, const char *cmd) {
     return true;
 }
 
-WideSheet::~WideSheet() {
-  if (db!=NULL) {
-    sqlite3_close(db);
-    db = NULL;
-  }
+WideSheetManager::~WideSheetManager() {
+  disconnect();
 }
 
-void WideSheet::connect(bool create) {
-  if (init) {
-    return;
-  }
-  init = true;
+bool WideSheetManager::connect(bool create, const char *fname) {
+  disconnect();
 
-  const char *filename = "widesheet.sqlite";
+  const char *filename = (fname!=NULL)?fname:"widesheet.sqlite";
   int result = sqlite3_open_v2(filename,
 			       &db,
 			       SQLITE_OPEN_READWRITE|
@@ -63,10 +57,11 @@ void WideSheet::connect(bool create) {
     if (db!=NULL) {
       sqlite3_close(db);
     }
-    return;
+    db = NULL;
+    return false;
   }
 
-  string create_main_table = "CREATE TABLE IF NOT EXISTS links (\n\
+  string create_main_table = "CREATE TABLE IF NOT EXISTS widesheet_links (\n\
 	filename TEXT,\n\
 	key TEXT);";
 
@@ -77,11 +72,12 @@ void WideSheet::connect(bool create) {
       fprintf(stderr,"Error in %s: %s\n", filename, msg);
     }
     sqlite3_close(db);
+    db = NULL;
     fprintf(stderr,"Failed to set up database tables\n");
-    exit(1);
+    return false;
   }
 
-  string create_prop_table = "CREATE TABLE IF NOT EXISTS props (\n\
+  string create_prop_table = "CREATE TABLE IF NOT EXISTS widesheet_props (\n\
 	key TEXT PRIMARY KEY,\n\
 	val TEXT);";
 
@@ -92,25 +88,36 @@ void WideSheet::connect(bool create) {
       fprintf(stderr,"Error in %s: %s\n", filename, msg);
     }
     sqlite3_close(db);
+    db = NULL;
     fprintf(stderr,"Failed to set up database tables\n");
-    exit(1);
+    return false;
   }
+  return true;
 }
 
 
-bool WideSheet::setProperty(const char *key, const char *val) {
+bool WideSheetManager::disconnect() {
+  if (db!=NULL) {
+    sqlite3_close(db);
+    db = NULL;
+  }
+  return true;
+}
+
+bool WideSheetManager::setProperty(const char *key, const char *val) {
   char *query = NULL;
-  query = sqlite3_mprintf("INSERT OR REPLACE INTO props (key,val) VALUES(%Q,%Q)",
+  query = sqlite3_mprintf("INSERT OR REPLACE INTO widesheet_props (key,val) VALUES(%Q,%Q)",
 			  key, val);
   sql_enact(db,query);
   sqlite3_free(query);
+  return true;
 }
 
 
-std::string WideSheet::getProperty(const char *key) {
+std::string WideSheetManager::getProperty(const char *key) {
   char *query = NULL;
   string out;
-  query = sqlite3_mprintf("SELECT val FROM props WHERE key = %Q",
+  query = sqlite3_mprintf("SELECT val FROM widesheet_props WHERE key = %Q",
 			  key);
   
   sqlite3_stmt *statement = NULL;
@@ -127,7 +134,7 @@ std::string WideSheet::getProperty(const char *key) {
 }
 
 
-std::string WideSheet::getPropertyWithDefault(const char *key) {
+std::string WideSheetManager::getPropertyWithDefault(const char *key) {
   string result = getProperty(key);
   if (result!="") return result;
   string str(key);
@@ -141,7 +148,7 @@ std::string WideSheet::getPropertyWithDefault(const char *key) {
 }
 
 
-bool WideSheet::exportSheet() {
+bool WideSheetManager::exportSheet() {
   string local = getProperty("local");
   if (local=="") {
     fprintf(stderr,"No local file.\n");
@@ -162,7 +169,7 @@ bool WideSheet::exportSheet() {
   return true;
 }
 
-bool WideSheet::acceptSheet() {
+bool WideSheetManager::acceptSheet() {
   string pivot = getPropertyWithDefault("pivot");
   string remote = getPropertyWithDefault("remote");
 
@@ -183,7 +190,7 @@ bool WideSheet::acceptSheet() {
 }
 
 
-bool WideSheet::diffSheet() {
+bool WideSheetManager::diffSheet() {
   string local = getProperty("local");
   if (local=="") {
     fprintf(stderr,"No local file.\n");
@@ -219,4 +226,67 @@ bool WideSheet::diffSheet() {
 
   return true;
 }
+
+
+
+bool WideSheetManager::setFile(const char *key, const char *val) {
+  char *query = NULL;
+  query = sqlite3_mprintf("INSERT OR REPLACE INTO widesheet_links (filename,key) VALUES(%Q,%Q)",
+			  val, key);
+  sql_enact(db,query);
+  sqlite3_free(query);
+  return true;
+}
+
+std::string WideSheetManager::getFile(const char *key) {
+  char *query = NULL;
+  string out;
+  query = sqlite3_mprintf("SELECT filename FROM widesheet_links WHERE key = %Q",
+			  key);
+  
+  sqlite3_stmt *statement = NULL;
+  int result = sqlite3_prepare_v2(db,query,-1,&statement,NULL);
+  if (result!=SQLITE_OK) {
+    printf("Error in query\n");
+  }
+  if (result == SQLITE_OK && sqlite3_step(statement) == SQLITE_ROW) {
+    out = (char *)sqlite3_column_text(statement,0);
+  }
+  sqlite3_finalize(statement);
+  sqlite3_free(query);
+  return out;
+}
+
+bool WideSheetManager::setDirectory(const char *dir, const char *sep) {
+  this->dir = dir;
+  this->sep = sep;
+}
+
+
+bool WideSheetManager::exportSheet(const char *key, bool reverse) {
+  string remote = getFile(key);
+  if (remote=="") {
+    return false;
+  }
+  string local = dir + sep + key + ".csvs";
+
+  if (reverse) {
+    string tmp = local;
+    local = remote;
+    remote = tmp;
+  }
+
+  PolyBook src;
+  if (!src.read(local.c_str())) {
+    fprintf(stderr,"Failed to read %s\n", local.c_str());
+    return false;
+  } 
+  if (!src.write(remote.c_str())) {
+    fprintf(stderr,"Failed to write %s\n", remote.c_str());
+    return false;
+  } 
+  printf("%s -> offer -> %s\n", local.c_str(), remote.c_str());
+  return true;
+}
+
 

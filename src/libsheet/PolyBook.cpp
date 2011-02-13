@@ -181,6 +181,21 @@ bool PolyBook::attach(Property& config) {
     key = "csvs";
   }
 
+  if (key=="") {
+    //printf("SNIFFING %s\n",filename.c_str());
+    FormatSniffer sniffer;
+    sniffer.open(filename.c_str(),false);
+    Format f = sniffer.getFormat();
+    switch (f.id) {
+    case FORMAT_BOOK_SQLITE:
+      key = "sqlite";
+      break;
+    case FORMAT_BOOK_CSVS:
+      key = "csvs";
+      break;
+    }
+  }
+
   dbg_printf("Attach: type [%s] file [%s]\n", key.c_str(), filename.c_str());
 
   if (key=="") {

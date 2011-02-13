@@ -15,6 +15,7 @@
 #include <wx/textdlg.h>
 #include <wx/filefn.h>
 #include <wx/filename.h>
+#include <wx/file.h>
 #include <wx/textctrl.h>
 #include <wx/url.h>
 #include <wx/filepicker.h>
@@ -23,9 +24,11 @@
 #include <wx/txtstrm.h>
 #include <wx/arrstr.h>
 #include <wx/dir.h>
+#include <wx/listctrl.h>
 
 #include <string>
 #include <list>
+#include <map>
 #include <iostream>
 
 // hack to remove warning
@@ -41,7 +44,7 @@ using namespace std;
 //long int g_hinstance = 0;
 //long int g_hwnd = 0;
 
-
+#include "WideSheetManager.h"
 
 static wxString conv_c(const char *s) {
     return wxString(s, wxConvUTF8);
@@ -54,6 +57,21 @@ static wxString conv(const std::string& s) {
 static std::string conv(const wxString& s) {
     return std::string(s.mb_str(wxConvUTF8));
 } 
+
+
+static void show(const wxString& view) {
+#ifndef WIN32
+    wxString view2 = wxT("file://") + view;
+    ::wxLaunchDefaultBrowser(view2);
+#else
+    ::wxLaunchDefaultBrowser(view);
+#endif
+}
+
+static void show(const std::string& view) {
+    wxString x = conv(view);
+    show(x);
+}
 
 
 class CoopyApp: public wxApp {
@@ -230,8 +248,11 @@ private:
     wxTextCtrl *dest_box;
     wxDirPickerCtrl *dir_box;
     wxTimer *timer;
+    wxListBox *list_box;
     wxInputStream *report;
     wxInputStream *reportErr;
+
+    WideSheetManager ws;
 
     //UiFossilHandler handler; 
 
@@ -247,7 +268,9 @@ private:
     ostream *stream;
     string next;
     bool logging;
+    bool showing;
     list<string> results;
+    list<string> fileCache;
 
     void split(const string& str, 
                const string& delimiters, 
@@ -339,15 +362,16 @@ public:
     void processSubInput(wxInputStream& in) {
         wxTextInputStream tis(in);
         wxString str = tis.ReadLine();
-        printf("Got %s\n", conv(str).c_str());
+        //printf("Got %s\n", conv(str).c_str());
         //replace(str,string("\r"),string(" * "));
         //replace(str,"Received:","\nReceived:");
         if (logging) { 
-            printf("Logging\n");
+            //printf("Logging\n");
             string cp(conv(str));
             split(cp,"\n",results);
-            printf("Logged\n");
+            //printf("Logged\n");
         }
+        //wxString n = conv(next);
         addLog(str);
     }
 
@@ -361,15 +385,26 @@ public:
     }
 
     void addLog(const wxString& str) {
-        log_box->AppendText(str);
-        log_box->AppendText(_T("\n"));
-        Update();
-        log_box->SetSelection(log_box->GetLastPosition(),-1);
-   }
+        if (showing) {
+            bool ok = true;
+            if ((str[0]>='0'&&str[0]<='9')||str[0]<32) {
+                ok = false;
+            }
+            if (ok) {
+                log_box->AppendText(str);
+                log_box->AppendText(_T("\n"));
+                Update();
+                log_box->SetSelection(log_box->GetLastPosition(),-1);
+            }
+        } 
+        string s = conv(str);
+        printf("   // %s\n", s.c_str());
+    }
 
     void OnTerminate(wxProcess *process, int status) {
         processInput();
         timer->Stop();
+        showing = true;
         if (status!=0) {
             printf(">>>>> PROCESS FAILED: next ignored [%s]\n", next.c_str());
             addLog(_T("\nSomething went wrong..."));
@@ -378,7 +413,14 @@ public:
         printf(">>>>> PROCESS COMPLETE: next is [%s]\n", next.c_str());
         string n = next;
         next = "";
-        if (n=="view") {
+        if (n=="view_sync") {
+            updateSettings(true);
+            updateListing();
+            pushListing(true);
+        } else if (n=="view") {
+            updateSettings(true);
+            updateListing();
+        } else if (n == "view2") {
             wxString view = conv(path);
 #ifndef WIN32
             view = wxT("file://") + view;
@@ -417,6 +459,20 @@ public:
             ssfossil(argc,argv,true);
         }
         return endLog();
+    }
+
+    list<string> getFiles() {
+        beginLog();
+        if (havePath()) {
+            int argc = 2;
+            char *argv[] = {
+                fossil(),
+                (char*)"ls",
+                NULL };
+            ssfossil(argc,argv,true);
+        }
+        fileCache = endLog();
+        return fileCache;
     }
 
     list<string> getMissing(const list<string>& report) {
@@ -464,23 +520,62 @@ public:
                 argv[0] = fossil();
                 argv[1] = (char*)act;
                 int i = 2;
+                int items = 0;
                 for (list<string>::const_iterator it = files.begin();
                      it != files.end();
                      it++) {
-                    argv[i] = (char*)(it->c_str());
-                    i++;
+                    if (it->rfind(".csvs")!=string::npos) {
+                        if (it->rfind(".mark")==string::npos) {
+                            argv[i] = (char*)(it->c_str());
+                            i++;
+                            items++;
+                        }
+                    }
                 }
-                ssfossil(argc,argv,true);
+                argc = i;
+                if (items>0) {
+                    ssfossil(argc,argv,true);
+                }
                 delete[] argv;
             }
         }
     }
+
+    void OnListBox(wxCommandEvent &event) {
+        wxString str = list_box->GetStringSelection();
+        if (str[0]!='.') {
+            addLog(wxT("Selected '") + event.GetString() + wxT("' (double-click to open)"));
+        }
+    }
+
+    void OnListBoxDoubleClick( wxCommandEvent &event ) {
+        wxString str = list_box->GetStringSelection();
+        if (str[0]!='.') {
+            addLog(wxT("Opening '") + event.GetString() + wxT("' ..."));
+            openFile(event.GetString());
+        } else {
+            createFile();
+        }
+    }
+
+    bool updateListing();
+
+    bool pushListing(bool reverse = false);
+
+    bool updateSettings(bool create);
+
+    bool openFile(const wxString& str);
+
+    bool createFile();
+
 enum
     {
         TEXT_Main = wxID_HIGHEST + 1,
         TEXT_Src,
         TEXT_Dest,
         TEXT_Dir,
+        ID_LISTBOX,
+
         ID_Quit,
         ID_Commit,
         ID_Sync,
@@ -495,8 +590,8 @@ enum
 class FossilProcess : public wxProcess
 {
 public:
-    FossilProcess(CoopyFrame *parent, const wxString& cmd)
-        : wxProcess(parent), m_cmd(cmd)
+    FossilProcess(CoopyFrame *parent, const wxString& cmd, bool sync)
+        : wxProcess(parent), m_cmd(cmd), sync(sync)
     {
         m_parent = parent;
     }
@@ -509,6 +604,7 @@ public:
 protected:
     CoopyFrame *m_parent;
     wxString m_cmd;
+    bool sync;
 };
 
 
@@ -520,7 +616,9 @@ void FossilProcess::OnTerminate(int pid, int status)
                 pid, m_cmd.c_str(), status);
     */
 
-    m_parent->OnTerminate(this,status);
+    if (!sync) {
+        m_parent->OnTerminate(this,status);
+    }
 }
 
 
@@ -553,6 +651,9 @@ IMPLEMENT_CLASS(CoopyFrame, wxFrame)
 
 BEGIN_EVENT_TABLE(CoopyFrame, wxFrame)
     EVT_MENU(ID_Quit, CoopyFrame::OnQuit)
+    EVT_MENU(ID_Sync, CoopyFrame::OnSync)
+    EVT_MENU(ID_Commit, CoopyFrame::OnCommit)
+    EVT_MENU(ID_Create, CoopyFrame::OnCreate)
     EVT_MENU(ID_About, CoopyFrame::OnAbout)
     EVT_BUTTON(wxID_OK, CoopyFrame::OnOK)
     EVT_BUTTON(ID_Quit, CoopyFrame::OnQuit)
@@ -562,21 +663,42 @@ BEGIN_EVENT_TABLE(CoopyFrame, wxFrame)
     EVT_BUTTON(ID_Create, CoopyFrame::OnCreate)
     EVT_CLOSE(CoopyFrame::OnExit)
     EVT_TIMER(ID_Tick, CoopyFrame::OnProgressTimer)
+    EVT_LISTBOX(ID_LISTBOX, CoopyFrame::OnListBox)
+    EVT_LISTBOX_DCLICK(ID_LISTBOX, CoopyFrame::OnListBoxDoubleClick)
 END_EVENT_TABLE()
 
 
 int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
-    printf("Calling fossil with %d arguments\n", argc);
+    printf("**** Calling fossil with %d arguments\n", argc);
     wxArrayString arr;
     wxChar *cmd[256];
+    wxString op;
+    wxString op1;
     for (int i=0; i<argc; i++) {
-        printf("Have %s\n", argv[i]);
-        arr.Add(conv(safetxt(argv[i])));
+        printf("[%s] ", argv[i]);
+        wxString p = conv(safetxt(argv[i]));
+        arr.Add(p);
+        if (i>0) {
+            op = op + p + wxT(" ");
+        }
+        if (i==1) {
+            op1 = p;
+        }
     }
+    //addLog(wxT("Command: ") + op);
+    if (op1 == wxT("update")) {
+        addLog(wxT(" \n \nLooking for changes online..."));
+    } else if (op1 == wxT("changes")) {
+        addLog(wxT(" \n \nChecking for changes on this computer..."));
+    } else if (op1 == wxT("commit")) {
+        addLog(wxT(" \n \nSending changes from your computer..."));
+    }
+    showing = (op1 == wxT("update")) || (op1 == wxT("commit"));
     for (int i=0; i<argc; i++) {
-        printf("* Have %s\n", conv(arr[i]).c_str());
+        //printf("[%s] ", conv(arr[i]).c_str());
         cmd[i] = (wxChar*)((const wxChar *)arr[i]);
     }
+    printf("\n");
     cmd[argc] = NULL;
     /*
     string cmd;
@@ -592,7 +714,7 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
     // Create the process string
     //wxEvtHandler *eventHandler = NULL;
     //wxProcess *proc = new wxProcess(eventHandler);
-    FossilProcess *proc = new FossilProcess(this,_T("ssfossil"));
+    FossilProcess *proc = new FossilProcess(this,_T("ssfossil"),sync);
     proc->Redirect();
     //if(::wxExecute(conv(cmd), wxEXEC_ASYNC, proc) == 0){
     if(::wxExecute(cmd, wxEXEC_ASYNC, proc) == 0){
@@ -611,6 +733,8 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
         while (!report->Eof()) {
             processInput();
         }
+        printf("Sync done\n");
+        showing = true;
     }
     
     return 0;
@@ -631,6 +755,7 @@ bool CoopyFrame::OnInit() {
     askPath = true;
     askSource = true;
     askDestination = true;
+    showing = true;
 
     timer = new wxTimer(this,ID_Tick);
 
@@ -707,6 +832,14 @@ bool CoopyFrame::OnInit() {
                                   wxDefaultPosition,
                                   wxSize(300,-1));
                                   //wxDIRP_USE_TEXTCTRL);
+
+    const wxString choices[] = {
+        wxT("... Add ..."),
+    };
+    list_box = new wxListBox(this,ID_LISTBOX, wxPoint(10,10), wxSize(250,70),
+                             1, choices, wxLB_SINGLE | wxLB_ALWAYS_SB |
+                             wxHSCROLL);
+
     //dir_box->SetTextCtrlProportion(0);
 
     if (CoopyApp::fossil_object!="") {
@@ -742,6 +875,7 @@ bool CoopyFrame::OnInit() {
     //handler.setCtrl(*log_box);
 
     topsizer->Add(log_box);
+    topsizer->Add(list_box);
     topsizer->Add(button_sizer,wxSizerFlags(0).Align(wxALIGN_RIGHT));
 
     SetSizer(topsizer);
@@ -754,6 +888,9 @@ bool CoopyFrame::OnInit() {
                                         wxConvUTF8));
     }
     */
+
+    updateSettings(false);
+    updateListing();
 
     return true;
 }
@@ -811,6 +948,12 @@ bool CoopyFrame::havePath() {
                 path = conv(result);
                 printf("Selected a directory %s\n", path.c_str());
                 askPath = false;
+
+                /*
+                if (path!="") {
+                    updateSettings(true);
+                }
+                */
             }
         }
     }
@@ -826,6 +969,160 @@ bool CoopyFrame::havePath() {
     }
 
     return path!="";
+}
+
+bool CoopyFrame::updateSettings(bool create) {
+    wxChar sep = wxFileName::GetPathSeparator();
+    wxString target = conv(path);
+    if (target.length()>0) {
+        target = target + sep;
+    }
+    target = target + wxT("local_settings.coopy");
+    ws.connect(create,conv(target).c_str());
+    string sep0 = conv(sep);
+    ws.setDirectory(path.c_str(),sep0.c_str());
+    //if (ws.isValid()) {
+    //updateListing();
+    //}
+}
+
+
+bool CoopyFrame::updateListing() {
+    printf("update listing\n");
+    list<string> files = getFiles();
+    map<string,int> present;
+    present["... Add ..."] = 1;
+    for (list<string>::const_iterator it = files.begin();
+         it != files.end();
+         it++) {
+        if (it->rfind(".csvs")!=string::npos) {
+            string str = it->substr(0,it->rfind(".csvs"));
+            printf("file of interest %s -> %s\n", it->c_str(), str.c_str());
+            wxString item = conv(str);
+            int result = list_box->FindString(item);
+            if (result==wxNOT_FOUND) {
+                list_box->InsertItems(1,&item,0);
+            }
+            present[str] = 1;
+        }
+    }
+
+    int ct = list_box->GetCount();
+    int offset = 0;
+    for (int i=0; i<ct; i++) {
+        wxString item = list_box->GetString(i);
+        string str = conv(item);
+        if (present.find(str)==present.end()) {
+            printf("cannot find %s\n", str.c_str());
+            list_box->Delete(i-offset);
+            offset++;
+        }
+    }
+    return true;
+}
+
+
+bool CoopyFrame::pushListing(bool reverse) {
+    printf("push listing %d\n", reverse);
+    list<string> files = fileCache;
+    for (list<string>::const_iterator it = files.begin();
+         it != files.end();
+         it++) {
+        printf("checking %s\n", it->c_str());
+        if (it->rfind(".csvs")!=string::npos) {
+            string str = it->substr(0,it->rfind(".csvs"));
+            printf("checking %s -> %s\n", it->c_str(), str.c_str());
+            string local = ws.getFile(str.c_str());
+            if (local=="") continue;
+            string remote = *it;
+
+            wxFileName localName = wxFileName::FileName(conv(local));
+            wxFileName remoteName = wxFileName::FileName(conv(remote));
+            wxFileName markName = wxFileName::FileName(conv(remote+".mark"));
+            wxDateTime localTime = localName.GetModificationTime();
+            wxDateTime remoteTime = remoteName.GetModificationTime();
+            wxDateTime markTime;
+            bool haveMark = false;
+            if (markName.FileExists()) {
+                markTime = markName.GetModificationTime();
+                haveMark = true;
+            }
+            bool act = false;
+            if (!reverse) {
+                act = localTime.IsLaterThan(remoteTime);
+                //if (haveMark) {
+                //    act = act && localTime.IsLaterThan(remoteTime);
+                //}
+            } else {
+                act = remoteTime.IsLaterThan(localTime);
+                if (haveMark) {
+                    act = act && remoteTime.IsLaterThan(markTime);
+                }
+            }
+            if (act) {
+                printf("  time to update (%s, %s)\n", local.c_str(), remote.c_str());
+                bool ok = false;
+                if (reverse) {
+                    ok = ws.exportSheet(str.c_str()); // should be patch based
+                } else {
+                    ok = ws.importSheet(str.c_str());
+                }
+                if (ok) {
+                    if (!haveMark) {
+                        wxFile f;
+                        f.Create(markName.GetFullPath());
+                    }
+                    markName.Touch();
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+
+bool CoopyFrame::createFile() {
+    string msg = "Sorry, you need to make new files manually just now.  Just add a blank file called demo.csvs in the same directory as repository.coopy";
+    wxMessageDialog dlg(NULL, conv(msg), wxT(""), 
+                        wxOK);
+    if (dlg.ShowModal()!=wxID_YES) {
+        return false;
+    }
+    return true;
+}
+
+
+bool CoopyFrame::openFile(const wxString& str) {
+    string key = conv(str);
+    string fname = ws.getFile(key.c_str());
+    if (fname=="") {
+        wxFileDialog SaveDialog(this, _("Save File As _?"), wxEmptyString, wxEmptyString,
+                                _("Excel files (*.xls)|*.xls|Sqlite files (*.sqlite)|*.sqlite|CSV files (*.csv)|*.csv"),
+                                wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
+ 
+        if (SaveDialog.ShowModal() == wxID_OK) {
+            //CurrentDocPath = SaveDialog.GetPath();
+            //MainEditBox->SaveFile(CurrentDocPath); // Save the file to the selected path
+            // Set the Title to reflect the file open
+            //SetTitle(wxString("Edit - ") << SaveDialog->GetFilename());
+            fname = conv(SaveDialog.GetFilename());
+            ws.setFile(key.c_str(),fname.c_str());
+            ws.exportSheet(key.c_str());
+        }
+    }
+    if (fname=="") return false;
+
+    wxFileName name = wxFileName::FileName(conv(fname));
+    if (!name.FileExists()) {
+        ws.exportSheet(key.c_str());
+    }
+    name.MakeAbsolute();
+    fname = conv(name.GetFullPath());
+
+    show(fname);
+
+    return true;
 }
 
 
@@ -990,11 +1287,12 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
                     fossil(),
                     (char*)"update",
                     NULL };
-                next = "view";
+                next = "view_sync";
                 ssfossil(argc,argv);
             }
         }
     }
+    //updateSettings(true);
     //endStream();
 }
 
@@ -1033,6 +1331,8 @@ void CoopyFrame::OnCommit(wxCommandEvent& event) {
     printf("Should commit\n");
     //startStream();
     if (havePath()) {
+        updateListing();
+        pushListing();
         //if (haveDestination()) {
             doFiles(getExtras(),"add");
             list<string> changes = getChanges();
@@ -1112,6 +1412,9 @@ CoopyFrame::CoopyFrame(const wxString& title, const wxPoint& pos, const wxSize& 
 
     wxMenu *menuFile = new wxMenu;
 
+    menuFile->Append( ID_Sync, _T("Pull &in...") );
+    menuFile->Append( ID_Commit, _T("Push &out...") );
+    menuFile->Append( ID_Create, _T("Create &repository...") );
     menuFile->Append( ID_About, _T("&About...") );
     menuFile->AppendSeparator();
     menuFile->Append( ID_Quit, _T("E&xit") );
