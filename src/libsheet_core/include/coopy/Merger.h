@@ -57,9 +57,9 @@ public:
   Merger() {
   }
 
-  void merge(MergerState& state);
+  bool merge(MergerState& state);
 
-  void mergeRow(coopy::store::DataSheet& pivot, 
+  bool mergeRow(coopy::store::DataSheet& pivot, 
 		coopy::store::DataSheet& local, 
 		coopy::store::DataSheet& remote,
 		MatchUnit& row_unit, Patcher& output,

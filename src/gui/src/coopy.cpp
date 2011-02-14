@@ -16,6 +16,7 @@
 #include <wx/filefn.h>
 #include <wx/filename.h>
 #include <wx/file.h>
+#include <wx/textfile.h>
 #include <wx/textctrl.h>
 #include <wx/url.h>
 #include <wx/filepicker.h>
@@ -271,6 +272,7 @@ private:
     bool showing;
     list<string> results;
     list<string> fileCache;
+    list<string> updateCache;
 
     void split(const string& str, 
                const string& delimiters, 
@@ -384,12 +386,13 @@ public:
         }
     }
 
-    void addLog(const wxString& str) {
-        if (showing) {
+    void addLog(const wxString& str, bool force = false) {
+        if (showing||force) {
             bool ok = true;
             if ((str[0]>='0'&&str[0]<='9')||str[0]<32) {
                 ok = false;
             }
+            if (force) ok = true;
             if (ok) {
                 log_box->AppendText(str);
                 log_box->AppendText(_T("\n"));
@@ -401,14 +404,30 @@ public:
         printf("   // %s\n", s.c_str());
     }
 
+    void addLogFile(const wxFileName& fn) {
+        string sfn = conv(fn.GetFullPath());
+        printf("Adding log file %s\n", sfn.c_str());
+        wxTextFile f;
+        if (!f.Open(fn.GetFullPath())) return;
+        for (wxString str = f.GetFirstLine(); 
+             !f.Eof(); 
+             str = f.GetNextLine()) {
+            addLog(str,true);
+        }
+    }
+
     void OnTerminate(wxProcess *process, int status) {
         processInput();
         timer->Stop();
         showing = true;
+        bool fail = false;
         if (status!=0) {
-            printf(">>>>> PROCESS FAILED: next ignored [%s]\n", next.c_str());
-            addLog(_T("\nSomething went wrong..."));
-            return;
+            printf(">>>>> PROCESS FAILED: next [%s]\n", next.c_str());
+            addLog(wxT("Something went wrong..."));
+            fail = true;
+            if (next!="revertable") {
+                return;
+            }
         }
         printf(">>>>> PROCESS COMPLETE: next is [%s]\n", next.c_str());
         string n = next;
@@ -432,6 +451,20 @@ public:
         } else if (n=="push") {
             wxCommandEvent ev;
             OnPush(ev);
+        } else if (n=="revertable") {
+            if (fail) {
+                addLog(wxT("Reverting..."));
+                int argc = 2;
+                char *argv[] = {
+                    fossil(),
+                    (char*)"revert",
+                    NULL };
+                ssfossil(argc,argv,true);
+                updatePivots(false);
+            } else {
+                updatePivots(true);
+                addLog(wxT("Online repository updated successfully."));
+            }
         }
     }
 
@@ -472,6 +505,7 @@ public:
             ssfossil(argc,argv,true);
         }
         fileCache = endLog();
+        updateCache = list<string>();
         return fileCache;
     }
 
@@ -526,9 +560,13 @@ public:
                      it++) {
                     if (it->rfind(".csvs")!=string::npos) {
                         if (it->rfind(".mark")==string::npos) {
-                            argv[i] = (char*)(it->c_str());
-                            i++;
-                            items++;
+                            if (it->rfind(".pivot")==string::npos) {
+                                if (it->rfind(".log")==string::npos) {
+                                    argv[i] = (char*)(it->c_str());
+                                    i++;
+                                    items++;
+                                }
+                            }
                         }
                     }
                 }
@@ -563,6 +601,8 @@ public:
     bool updateListing();
 
     bool pushListing(bool reverse = false);
+
+    bool updatePivots(bool success);
 
     bool updateSettings(bool create);
 
@@ -847,8 +887,12 @@ bool CoopyFrame::OnInit() {
     if (CoopyApp::fossil_object!="") {
         wxFileName name = wxFileName::FileName(conv(CoopyApp::fossil_object));
         name.MakeAbsolute();
-        path = conv(name.GetPath());
-        dir_box->SetPath(name.GetPath());
+        if (!wxFile::Exists(name.GetFullPath())) {
+            path = conv(name.GetFullPath());
+        } else {
+            path = conv(name.GetPath());
+        }
+        dir_box->SetPath(conv(path));
         askPath = false;
     } else {
 #ifdef __LINUX__
@@ -1053,7 +1097,10 @@ bool CoopyFrame::pushListing(bool reverse) {
             wxFileName localName = wxFileName::FileName(conv(local));
             wxFileName remoteName = wxFileName::FileName(conv(remote));
             if (!localName.FileExists()) continue;
+            if (!remoteName.FileExists()) continue;
+            wxFileName pivotName = wxFileName::FileName(conv(remote+".pivot"));
             wxFileName markName = wxFileName::FileName(conv(remote+".mark"));
+            wxFileName logName = wxFileName::FileName(conv(remote+".log"));
             wxDateTime localTime = localName.GetModificationTime();
             wxDateTime remoteTime = remoteName.GetModificationTime();
             wxDateTime markTime;
@@ -1064,35 +1111,95 @@ bool CoopyFrame::pushListing(bool reverse) {
             }
             bool act = false;
             if (!reverse) {
-                act = remoteTime.IsEarlierThan(localTime);
+                // local -> repository
+
                 if (haveMark) {
-                    act = act && markTime.IsEarlierThan(localTime);
-                }
-            } else {
-                act = localTime.IsEarlierThan(remoteTime);
-                if (haveMark) {
-                    act = act && markTime.IsEarlierThan(remoteTime);
-                }
-            }
-            if (act) {
-                printf("  time to update (%s, %s)\n", local.c_str(), remote.c_str());
-                bool ok = false;
-                if (reverse) {
-                    ok = ws.exportSheet(str.c_str()); // should be patch based
+                    act = markTime.IsEarlierThan(localTime);
                 } else {
-                    ok = ws.importSheet(str.c_str());
+                    act = remoteTime.IsEarlierThan(localTime);
                 }
-                if (ok) {
-                    if (!haveMark) {
-                        wxFile f;
-                        f.Create(markName.GetFullPath());
+                if (act) {
+                    printf("  local -> repository (%s, %s)\n", local.c_str(), remote.c_str());
+                    bool ok = ws.importSheet(str.c_str());
+                    if (ok) {
+                        updateCache.push_back(str);
                     }
-                    markName.Touch();
+                }
+
+            } else {
+                // repository -> local
+
+                if (haveMark) {
+                    act = markTime.IsEarlierThan(remoteTime);
+                } else {
+                    act = localTime.IsEarlierThan(remoteTime);
+                }
+                if (act) {
+                    printf("  repository -> local (%s, %s)\n", remote.c_str(), local.c_str());
+                    string l = conv(localName.GetFullPath());
+                    string r = conv(remoteName.GetFullPath());
+                    string p = conv(pivotName.GetFullPath());
+                    string lg = conv(logName.GetFullPath());
+                    bool pExists = pivotName.FileExists();
+                    bool ok = false;
+                    if (localName.FileExists()) {
+                        ok = ws.mergeToLocal(l.c_str(),r.c_str(),
+                                             pExists?p.c_str():NULL,
+                                             lg.c_str());
+                    } else {
+                        ok = ws.exportSheet(str.c_str());
+                    }
+                    if (ok) {
+                        wxCopyFile(remoteName.GetFullPath(),
+                                   pivotName.GetFullPath(),
+                                   true);
+                        if (!markName.FileExists()) {
+                            wxFile f;
+                            f.Create(markName.GetFullPath());
+                        }
+                        markName.Touch();
+                        addLogFile(logName);
+                    } else {
+                        addLog(wxT("Could not merge with online version, there is a conflicting change"));
+                        addLog(wxT("Not much help available for this condition yet, sorry, bug Paul about this"));
+                        localName.MakeAbsolute();
+                        addLog(wxT("Your file: ") + localName.GetFullPath());
+                        remoteName.MakeAbsolute();
+                        addLog(wxT("Online version: ") + remoteName.GetFullPath());
+                        if (pExists) {
+                            pivotName.MakeAbsolute();
+                            addLog(wxT("Common ancestor: ") + pivotName.GetFullPath());
+                        }
+                    }
                 }
             }
         }
     }
 
+    return true;
+}
+
+
+bool CoopyFrame::updatePivots(bool success) {
+    list<string> files = updateCache;
+    for (list<string>::const_iterator it = files.begin();
+         it != files.end();
+         it++) {
+        string str = (*it);
+        printf("update pivot for %s: %s\n", 
+               success?"success":"failure",
+               str.c_str());
+        string remote = str + ".csvs";
+        wxCopyFile(conv(remote),conv(remote+".pivot"),true);
+        if (success) {
+            wxFileName markName(conv(remote+".mark"));
+            if (!markName.FileExists()) {
+                wxFile f;
+                f.Create(markName.GetFullPath());
+            }
+            markName.Touch();
+        }
+    }
     return true;
 }
 
@@ -1425,7 +1532,7 @@ void CoopyFrame::OnCommit(wxCommandEvent& event) {
                         (char*)"-m",
                         (char*)commit_message.c_str(),
                         NULL };
-                    //next = "push";
+                    next = "revertable";
                     ssfossil(argc,argv);
                     return;
                 } else {

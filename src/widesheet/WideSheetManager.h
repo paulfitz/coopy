@@ -63,6 +63,12 @@ public:
   }
 
   bool setDirectory(const char *dir, const char *sep = "/");
+
+  bool mergeToLocal(const char *local,
+		    const char *remote,
+		    const char *pivot,
+		    const char *log);
+
 };
 
 #endif

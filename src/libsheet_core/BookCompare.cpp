@@ -74,7 +74,7 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
 	  local_sheet.isValid()&&
 	  remote_sheet.isValid())) {
       fprintf(stderr,"Could not find matching sheets - no big deal, but not ready for this yet\n");
-      exit(1);
+      return -1;
     }
 
     SheetCompare cmp;
@@ -83,11 +83,12 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
       fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());
       return -1;
     }
-    cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags);
+    int r = cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags);
+    if (r!=0) return r;
     dbg_printf("BookCompare::compare - Done with \"%s\"\n", name.c_str());
   }
 
-  return -1;
+  return 0;
 }
   
 void BookCompare::setVerbose(bool verbose) {

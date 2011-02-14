@@ -9,6 +9,7 @@
 #include <coopy/PolyBook.h>
 #include <coopy/MergeOutputTdiff.h>
 #include <coopy/BookCompare.h>
+#include <coopy/SheetPatcher.h>
 
 #ifndef WIN32
 #include <unistd.h>
@@ -296,4 +297,73 @@ bool WideSheetManager::exportSheet(const char *key, bool reverse) {
   return true;
 }
 
+static void start_output2(string output, CompareFlags& flags) {
+  if (output=="" || output=="-") {
+    flags.out = stdout;
+    return;
+  }
+  FILE *fout = fopen(output.c_str(),"wb");
+  if (fout==NULL) {
+    fprintf(stderr,"Could not open %s for writing\n", output.c_str());
+    exit(1);
+  }
+  flags.out = fout;
+}
 
+static void stop_output2(string output, CompareFlags& flags) {
+  if (flags.out!=stdout) {
+    fclose(flags.out);
+    flags.out = stdout;
+  }
+}
+
+bool WideSheetManager::mergeToLocal(const char *localName,
+				    const char *remoteName,
+				    const char *pivotName,
+				    const char *logName) {
+  PolyBook _pivot;
+  PolyBook *pivot;
+  PolyBook _local;
+  PolyBook *local = &_local;
+  PolyBook _remote;
+  PolyBook *remote = &_remote;
+  
+  if (!_local.read(localName)) {
+    fprintf(stderr,"Failed to read %s\n", localName);
+    return false;
+  }
+  if (!_remote.read(remoteName)) {
+    fprintf(stderr,"Failed to read %s\n", remoteName);
+    return 1;
+  }
+  if (pivotName!=NULL) {
+    if (!_pivot.read(pivotName)) {
+      fprintf(stderr,"Failed to read %s\n", pivotName);
+      return false;
+    }
+    pivot = &_pivot;
+  } else {
+    pivot = &_local;
+  }
+
+  MergeOutputTdiff nested_diff;
+  SheetPatcher diff(local);
+  diff.showSummary(&nested_diff);
+  BookCompare cmp;
+  CompareFlags flags;
+  string output = logName;
+  start_output2(output,flags);
+  nested_diff.setFlags(flags);
+  int r = cmp.compare(*pivot,*local,*remote,diff,flags);
+  stop_output2(output,flags);
+  if (r!=0) return false;
+  if (diff.getChangeCount()>0) {
+    if (!local->inplace()) {
+      if (!local->write(localName)) {
+	fprintf(stderr,"Failed to write %s\n", localName);
+	return false;
+      }
+    }
+  }
+  return true;
+}

@@ -17,7 +17,7 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 
-void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
+bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 		      MatchUnit& row_unit, Patcher& output,
 		      const CompareFlags& flags, vector<RowChange>& rc) {
   
@@ -195,7 +195,7 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 
     if (conflict) {
       printf("Cannot produce a diff when there are data conflicts\n");
-      exit(1);
+      return false;
     }
     if (address!=lastAddress) {
       output.addRow("[for]",address,blank);
@@ -281,10 +281,11 @@ void Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       current_row++;
     }
   }
+  return true;
 }
 
 
-void Merger::merge(MergerState& state) {
+bool Merger::merge(MergerState& state) {
   coopy::store::DataSheet& pivot = state.pivot;
   coopy::store::DataSheet& local = state.local;
   coopy::store::DataSheet& remote = state.remote;
@@ -610,7 +611,8 @@ void Merger::merge(MergerState& state) {
 	 it++) {
       MatchUnit& unit = *it;
       // ignoring row order for now ...
-      mergeRow(pivot,local,remote,unit,output,flags,rc);
+      bool ok = mergeRow(pivot,local,remote,unit,output,flags,rc);
+      if (!ok) { return false; }
     }
 
     {
@@ -653,7 +655,7 @@ void Merger::merge(MergerState& state) {
     }
 
     output.mergeDone();
-    return;
+    return true;
   }
 
   // MERGE
@@ -691,7 +693,8 @@ void Merger::merge(MergerState& state) {
     bool deleted = unit.deleted;
     if (!deleted) {
       vector<RowChange> rc;
-      mergeRow(pivot,local,remote,unit,output,flags,rc);
+      bool ok = mergeRow(pivot,local,remote,unit,output,flags,rc);
+      if (!ok) return false;
       for (int i=0; i<(int)rc.size(); i++) {
 	output.changeRow(rc[i]);
       }
@@ -707,6 +710,7 @@ void Merger::merge(MergerState& state) {
 
   //dbg_printf("Got merged result (%dx%d)\n", result.width(), result.height());
   //CsvFile::write(result,"result.csv");
+  return true;
 }
 
 

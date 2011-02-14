@@ -274,11 +274,11 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 		    eflags,
 		    local_names,
 		    remote_names);
-  merger.merge(state);
+  bool ok = merger.merge(state);
 
   dbg_printf("SheetCompare::compare done\n");
 
-  return 0;
+  return ok?0:-1;
 }
 
 
