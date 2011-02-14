@@ -1010,7 +1010,7 @@ bool CoopyFrame::updateListing() {
     int ct = list_box->GetCount();
     int offset = 0;
     for (int i=0; i<ct; i++) {
-        wxString item = list_box->GetString(i);
+        wxString item = list_box->GetString(i-offset);
         string str = conv(item);
         if (present.find(str)==present.end()) {
             printf("cannot find %s\n", str.c_str());
@@ -1038,6 +1038,7 @@ bool CoopyFrame::pushListing(bool reverse) {
 
             wxFileName localName = wxFileName::FileName(conv(local));
             wxFileName remoteName = wxFileName::FileName(conv(remote));
+            if (!localName.FileExists()) continue;
             wxFileName markName = wxFileName::FileName(conv(remote+".mark"));
             wxDateTime localTime = localName.GetModificationTime();
             wxDateTime remoteTime = remoteName.GetModificationTime();
@@ -1049,14 +1050,14 @@ bool CoopyFrame::pushListing(bool reverse) {
             }
             bool act = false;
             if (!reverse) {
-                act = localTime.IsLaterThan(remoteTime);
-                //if (haveMark) {
-                //    act = act && localTime.IsLaterThan(remoteTime);
-                //}
-            } else {
-                act = remoteTime.IsLaterThan(localTime);
+                act = remoteTime.IsEarlierThan(localTime);
                 if (haveMark) {
-                    act = act && remoteTime.IsLaterThan(markTime);
+                    act = act && markTime.IsEarlierThan(localTime);
+                }
+            } else {
+                act = localTime.IsEarlierThan(remoteTime);
+                if (haveMark) {
+                    act = act && markTime.IsEarlierThan(remoteTime);
                 }
             }
             if (act) {
@@ -1084,11 +1085,33 @@ bool CoopyFrame::pushListing(bool reverse) {
 
 bool CoopyFrame::createFile() {
     string msg = "Sorry, you need to make new files manually just now.  Just add a blank file called demo.csvs in the same directory as repository.coopy";
-    wxMessageDialog dlg(NULL, conv(msg), wxT(""), 
-                        wxOK);
-    if (dlg.ShowModal()!=wxID_YES) {
+
+    wxTextEntryDialog dlg(NULL, 
+                          wxT("Enter a simple name for the file in the repository.\nAny spaces or punctuation will be replaced by '_' characters.\nYou'll be able to save with a different name on your computer."),
+                          wxT("Set name"),
+                          wxT("example_name"));
+    if (dlg.ShowModal()!=wxID_OK) {
         return false;
     }
+    wxString actName = dlg.GetValue() + wxT(".csvs");
+    wxFileName name = wxFileName::FileName(actName);
+    if (!name.FileExists()) {
+        wxFile f;
+        f.Create(name.GetFullPath());
+        f.Write(wxT("== Main Sheet ==\n"));
+        f.Write(wxT("Name,Number\n"));
+        f.Write(wxT("-----------\n"));
+        f.Write(wxT("One,1\n"));
+        f.Write(wxT("Two,2\n"));
+        f.Write(wxT("Three,3\n"));
+        f.Write(wxT("Four,4\n"));
+        f.Write(wxT("Five,5\n"));
+        f.Close();
+    }
+    list<string> files;
+    files.push_back(conv(actName));
+    doFiles(files,"add");
+    updateListing();
     return true;
 }
 
@@ -1096,8 +1119,13 @@ bool CoopyFrame::createFile() {
 bool CoopyFrame::openFile(const wxString& str) {
     string key = conv(str);
     string fname = ws.getFile(key.c_str());
-    if (fname=="") {
-        wxFileDialog SaveDialog(this, _("Save File As _?"), wxEmptyString, wxEmptyString,
+    bool exists = false;
+    if (fname!="") {
+        wxFileName name = wxFileName::FileName(conv(fname));
+        exists = name.FileExists();
+    }
+    if (fname==""||!exists) {
+        wxFileDialog SaveDialog(this, _("Save File As _?"), wxEmptyString, conv(fname),
                                 _("Excel files (*.xls)|*.xls|Sqlite files (*.sqlite)|*.sqlite|CSV files (*.csv)|*.csv"),
                                 wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
  
@@ -1112,6 +1140,7 @@ bool CoopyFrame::openFile(const wxString& str) {
         }
     }
     if (fname=="") return false;
+    addLog(wxT("... local file is ") + conv(fname));
 
     wxFileName name = wxFileName::FileName(conv(fname));
     if (!name.FileExists()) {
