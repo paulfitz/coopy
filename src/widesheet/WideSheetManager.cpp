@@ -231,6 +231,13 @@ bool WideSheetManager::diffSheet() {
 
 bool WideSheetManager::setFile(const char *key, const char *val) {
   char *query = NULL;
+
+  query = sqlite3_mprintf("DELETE FROM widesheet_links WHERE key = %Q",
+			  key);
+  sql_enact(db,query);
+  sqlite3_free(query);
+  query = NULL;
+
   query = sqlite3_mprintf("INSERT OR REPLACE INTO widesheet_links (filename,key) VALUES(%Q,%Q)",
 			  val, key);
   sql_enact(db,query);

@@ -545,6 +545,8 @@ public:
         wxString str = list_box->GetStringSelection();
         if (str[0]!='.') {
             addLog(wxT("Selected '") + event.GetString() + wxT("' (double-click to open)"));
+        } else {
+            addLog(wxT("Double-click ADD option to start a new spreadsheet/table."));
         }
     }
 
@@ -834,10 +836,10 @@ bool CoopyFrame::OnInit() {
                                   //wxDIRP_USE_TEXTCTRL);
 
     const wxString choices[] = {
-        wxT("... Add ..."),
+        //wxT("... Add ..."),
     };
-    list_box = new wxListBox(this,ID_LISTBOX, wxPoint(10,10), wxSize(250,70),
-                             1, choices, wxLB_SINGLE | wxLB_ALWAYS_SB |
+    list_box = new wxListBox(this,ID_LISTBOX, wxPoint(10,10), wxSize(200,100),
+                             0, choices, wxLB_SINGLE | wxLB_ALWAYS_SB |
                              wxHSCROLL);
 
     //dir_box->SetTextCtrlProportion(0);
@@ -867,7 +869,7 @@ bool CoopyFrame::OnInit() {
     topsizer->Add(dir_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
 
     
-    log_box = new wxTextCtrl(this, TEXT_Main, conv(string("Welcome to Coopy!\n\nThe purpose of Coopy is to facilitate cooperative data-collection projects. \n\nSee http://") + SITE_NAME + " to get a repository link.\n\nWarning: this is pre-alpha software, keep backups of your data.\n"), 
+    log_box = new wxTextCtrl(this, TEXT_Main, conv(string("Coopy facilitates cooperative data-collection projects. \nSee http://") + SITE_NAME + " if you need a repository link.\nWarning: this is alpha software, keep backups of your data.\n"), 
                              wxDefaultPosition, wxSize(620,200),  
                              wxTE_MULTILINE | wxTE_RICH, 
                              wxDefaultValidator, wxTextCtrlNameStr);
@@ -875,6 +877,9 @@ bool CoopyFrame::OnInit() {
     //handler.setCtrl(*log_box);
 
     topsizer->Add(log_box);
+    topsizer->Add(new wxStaticText(this,-1,_T("Spreadsheets/Tables"),
+                                  wxDefaultPosition,
+                                  wxSize(200,-1)),lflags);
     topsizer->Add(list_box);
     topsizer->Add(button_sizer,wxSizerFlags(0).Align(wxALIGN_RIGHT));
 
@@ -889,9 +894,10 @@ bool CoopyFrame::OnInit() {
     }
     */
 
-    updateSettings(false);
-    updateListing();
-
+    if (!askPath) {
+        updateSettings(false);
+        updateListing();
+    }
     return true;
 }
 
@@ -991,7 +997,8 @@ bool CoopyFrame::updateListing() {
     printf("update listing\n");
     list<string> files = getFiles();
     map<string,int> present;
-    present["... Add ..."] = 1;
+    string adder = "... Add ...";
+    present[adder] = 1;
     for (list<string>::const_iterator it = files.begin();
          it != files.end();
          it++) {
@@ -1004,6 +1011,13 @@ bool CoopyFrame::updateListing() {
                 list_box->InsertItems(1,&item,0);
             }
             present[str] = 1;
+        }
+    }
+    {
+        wxString item = conv(adder);
+        int result = list_box->FindString(item);
+        if (result==wxNOT_FOUND) {
+            list_box->InsertItems(1,&item,0);
         }
     }
 
@@ -1084,8 +1098,6 @@ bool CoopyFrame::pushListing(bool reverse) {
 
 
 bool CoopyFrame::createFile() {
-    string msg = "Sorry, you need to make new files manually just now.  Just add a blank file called demo.csvs in the same directory as repository.coopy";
-
     wxTextEntryDialog dlg(NULL, 
                           wxT("Enter a simple name for the file in the repository.\nAny spaces or punctuation will be replaced by '_' characters.\nYou'll be able to save with a different name on your computer."),
                           wxT("Set name"),
@@ -1098,7 +1110,7 @@ bool CoopyFrame::createFile() {
     if (!name.FileExists()) {
         wxFile f;
         f.Create(name.GetFullPath());
-        f.Write(wxT("== Main Sheet ==\n"));
+        f.Write(wxT("== Main ==\n"));
         f.Write(wxT("Name,Number\n"));
         f.Write(wxT("-----------\n"));
         f.Write(wxT("One,1\n"));
