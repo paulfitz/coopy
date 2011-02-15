@@ -387,6 +387,16 @@ public:
     }
 
     void addLog(const wxString& str, bool force = false) {
+        /*
+        char buf[256];
+        sprintf(buf,"[%d]", (int)str[0]);
+        log_box->AppendText(wxT(">>>"));
+        log_box->AppendText(str);
+        log_box->AppendText(wxT("--"));
+        log_box->AppendText(conv(string(buf)));
+        log_box->AppendText(wxT("\n"));
+        */
+        
         if (showing||force) {
             bool ok = true;
             if ((str[0]>='0'&&str[0]<='9')||str[0]<32) {
@@ -724,10 +734,10 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
             op = op + p + wxT(" ");
         }
         if (i==1) {
-            op1 = p;
+            op1 = conv(string(argv[i]));
         }
     }
-    //addLog(wxT("Command: ") + op);
+    //addLog(wxT("Command: [") + op + wxT("]"));
     if (op1 == wxT("update")) {
         addLog(wxT(" \n \nLooking for changes online..."));
     } else if (op1 == wxT("changes")) {
