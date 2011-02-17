@@ -24,6 +24,7 @@ endif()
 
 if (USE_GNUMERIC)
   set (COMPILE_PLAIN_EXECUTABLES TRUE)
+  link_directories(${GNUMERIC_ROOT}/bin ${GNUMERIC_ROOT}/lib)
 endif ()
 
 if (COMPILE_PLAIN_EXECUTABLES)
@@ -63,10 +64,6 @@ set(SHEET_INCLUDE_DIRS
   ${CMAKE_SOURCE_DIR}/src/libsheet_core/include 
   ${CMAKE_SOURCE_DIR}/src/libcsv 
   ${CMAKE_SOURCE_DIR}/src/libsheet/include)
-
-if (USE_GNUMERIC)
-  link_directories(${GNUMERIC_ROOT}/bin ${GNUMERIC_ROOT}/lib)
-endif ()
 
 add_subdirectory(ssmerge)
 add_subdirectory(ssdiff)

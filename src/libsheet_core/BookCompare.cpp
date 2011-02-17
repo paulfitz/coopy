@@ -77,13 +77,22 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
       return -1;
     }
 
+    PolySheet mapping;
+    CompareFlags flags2 = flags;
+    if (flags.mapping_book) {
+      mapping = flags.mapping_book->readSheet(name.c_str());
+      if (mapping.isValid()) {
+	flags2.mapping = &mapping;
+      }
+    }
+
     SheetCompare cmp;
     bool ok = output.setSheet(name.c_str());
     if (!ok) {
       fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());
       return -1;
     }
-    int r = cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags);
+    int r = cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags2);
     if (r!=0) return r;
     dbg_printf("BookCompare::compare - Done with \"%s\"\n", name.c_str());
   }

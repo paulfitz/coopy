@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
   std::string mode = "csv";
   std::string parent_file = "";
   std::string version = "";
+  std::string map_file = "";
   std::vector<std::string> ids;
   bool verbose = false;
   bool equality = false;
@@ -87,6 +88,8 @@ int main(int argc, char *argv[]) {
       {"verbose", 0, 0, 'v'},
 
       {"id", 1, 0, 'k'},
+
+      {"map", 1, 0, 'm'},
 
       {"output", 1, 0, 'o'},
       {"version", 1, 0, 'V'},
@@ -131,6 +134,10 @@ int main(int argc, char *argv[]) {
       ids.push_back(optarg);
       break;
 
+    case 'm':
+      map_file = optarg;
+      break;
+
     case 'o':
       output = optarg;
       break;
@@ -173,6 +180,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  CompareFlags flags;
   BookCompare cmp;
   cmp.setVerbose(verbose);
 
@@ -199,6 +207,7 @@ int main(int argc, char *argv[]) {
     pivot = &_pivot;
   } else {
     pivot = &_local;
+    flags.pivot_sides_with_local = true;
   }
 
   if (equality) {
@@ -208,7 +217,15 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  CompareFlags flags;
+  PolyBook mapping;
+  if (map_file!="") {
+    if (!mapping.read(map_file.c_str())) {
+	fprintf(stderr,"Failed to read %s\n", map_file.c_str());
+	return 1;
+      }
+      flags.mapping_book = &mapping;
+  }
+
   if (ids.size()>0) {
     flags.ids = ids;
     flags.trust_ids = true;

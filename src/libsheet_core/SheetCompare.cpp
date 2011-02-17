@@ -12,8 +12,13 @@
 #include <coopy/Merger.h>
 #include <coopy/SchemaSniffer.h>
 
+#include <string>
+#include <map>
+
 using namespace coopy::store;
 using namespace coopy::cmp;
+
+using namespace std;
 
 namespace coopy {
   namespace cmp {
@@ -86,6 +91,17 @@ public:
   }
 };
 
+
+static string encodeKey(DataSheet& sheet, int x, int y, int len) {
+  string result = "";
+  for (int i=x; i<x+len; i++) {
+    if (i>x) {
+    result += "__";
+    }
+    result += sheet.cellSummary(i,y).toString();
+  }
+  return result;
+}
 
 int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local, 
 			  DataSheet& _remote,
@@ -161,50 +177,117 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
   dbg_printf("SheetCompare::compare pivot <-> local rows\n");
 
-  MeasurePass p2l_row_pass_local(pivot,local);
-  MeasurePass p2l_row_pass_norm1(pivot,pivot);
-  MeasurePass p2l_row_pass_norm2(local,local);
+  OrderResult p2l_row_order;
+  OrderResult p2r_row_order;
 
-  CombinedRowMan p2l_row_local;
-  CombinedRowMan p2l_row_norm1;
-  CombinedRowMan p2l_row_norm2;
+  bool valueBasedPivot = (flags.mapping==NULL);
 
-  MeasureMan p2l_row_man(p2l_row_local,p2l_row_pass_local,
-			 p2l_row_norm1,p2l_row_pass_norm1,
-			 p2l_row_norm2,p2l_row_pass_norm2,
-			 1);
+  if (valueBasedPivot) {
+    MeasurePass p2l_row_pass_local(pivot,local);
+    MeasurePass p2l_row_pass_norm1(pivot,pivot);
+    MeasurePass p2l_row_pass_norm2(local,local);
+    
+    CombinedRowMan p2l_row_local;
+    CombinedRowMan p2l_row_norm1;
+    CombinedRowMan p2l_row_norm2;
+    
+    MeasureMan p2l_row_man(p2l_row_local,p2l_row_pass_local,
+			   p2l_row_norm1,p2l_row_pass_norm1,
+			   p2l_row_norm2,p2l_row_pass_norm2,
+			   1);
+    
+    p2l_row_man.setup();
+    FastMatch p2l_row_fast_match(p2l_row_pass_local);
+    p2l_row_fast_match.local_names = &local_names;
+    p2l_row_fast_match.remote_names = &remote_names;
+    p2l_row_fast_match.match(true);
+    p2l_row_man.compare();
+    
+    /////////////////////////////////////////////////////////////////////////
+    // PIVOT to REMOTE row mapping
+    
+    dbg_printf("SheetCompare::compare pivot <-> remote rows\n");
+    
+    MeasurePass p2r_row_pass_local(pivot,remote);
+    MeasurePass p2r_row_pass_norm1(pivot,pivot);
+    MeasurePass p2r_row_pass_norm2(remote,remote);
+    
+    CombinedRowMan p2r_row_local;
+    CombinedRowMan p2r_row_norm1;
+    CombinedRowMan p2r_row_norm2;
+    
+    MeasureMan p2r_row_man(p2r_row_local,p2r_row_pass_local,
+			   p2r_row_norm1,p2r_row_pass_norm1,
+			   p2r_row_norm2,p2r_row_pass_norm2,
+			   1);
+    
+    p2r_row_man.setup();
+    FastMatch p2r_row_fast_match(p2r_row_pass_local);
+    p2r_row_fast_match.match(true);
+    p2r_row_man.compare();
+    
+    p2l_row_order = p2l_row_pass_local.getOrder();
+    p2r_row_order = p2r_row_pass_local.getOrder();
+  } else {
 
-  p2l_row_man.setup();
-  FastMatch p2l_row_fast_match(p2l_row_pass_local);
-  p2l_row_fast_match.local_names = &local_names;
-  p2l_row_fast_match.remote_names = &remote_names;
-  p2l_row_fast_match.match(true);
-  p2l_row_man.compare();
+    // set up links using mapping
 
+    bool local_pivot  = flags.pivot_sides_with_local;
 
-  /////////////////////////////////////////////////////////////////////////
-  // PIVOT to REMOTE row mapping
+    DataSheet& mapping = *(flags.mapping);
+    int n = mapping.width()/2;
+    map<string,int> local_index, remote_index, pivot_index;
+    IntSheet l2p, r2p, p2l, p2r;
+    l2p.resize(1,local.height(),-1);
+    r2p.resize(1,remote.height(),-1);
+    p2l.resize(1,pivot.height(),-1);
+    p2r.resize(1,pivot.height(),-1);
+    for (int i=0; i<local.height(); i++) {
+      // assume 0 offsetting - not true in general, need to fix
+      string k = encodeKey(local,0,i,n);
+      local_index[k] = i;
+    }
+    for (int i=0; i<remote.height(); i++) {
+      string k = encodeKey(remote,0,i,n);
+      remote_index[k] = i;
+    }
+    for (int i=0; i<pivot.height(); i++) {
+      string k = encodeKey(pivot,0,i,n);
+      pivot_index[k] = i;
+    }
 
-  dbg_printf("SheetCompare::compare pivot <-> remote rows\n");
-
-  MeasurePass p2r_row_pass_local(pivot,remote);
-  MeasurePass p2r_row_pass_norm1(pivot,pivot);
-  MeasurePass p2r_row_pass_norm2(remote,remote);
-
-  CombinedRowMan p2r_row_local;
-  CombinedRowMan p2r_row_norm1;
-  CombinedRowMan p2r_row_norm2;
-
-  MeasureMan p2r_row_man(p2r_row_local,p2r_row_pass_local,
-			 p2r_row_norm1,p2r_row_pass_norm1,
-			 p2r_row_norm2,p2r_row_pass_norm2,
-			 1);
-
-  p2r_row_man.setup();
-  FastMatch p2r_row_fast_match(p2r_row_pass_local);
-  p2r_row_fast_match.match(true);
-  p2r_row_man.compare();
-
+    for (int i=0; i<mapping.height(); i++) {
+      string klocal = encodeKey(mapping,0,i,n);
+      string kremote = encodeKey(mapping,n,i,n);
+      int l = -1;
+      int r = -1;
+      int p = -1;
+      map<string,int>::iterator it = local_index.find(klocal);
+      if (it!=local_index.end()) {
+	l = it->second;
+      }
+      it = remote_index.find(kremote);
+      if (it!=remote_index.end()) {
+	r = it->second;
+      }
+      it = pivot_index.find(local_pivot?klocal:kremote);
+      if (it!=pivot_index.end()) {
+	p = it->second;
+      }
+      if (p!=-1) {
+	if (l!=-1) {
+	  l2p.cell(0,l) = p;
+	  p2l.cell(0,p) = l;
+	}
+	if (r!=-1) {
+	  r2p.cell(0,r) = p;
+	  p2r.cell(0,p) = r;
+	}
+      }
+    }
+    p2l_row_order.setup(p2l,l2p);
+    p2r_row_order.setup(p2r,r2p);
+  }
 
   /////////////////////////////////////////////////////////////////////////
   // PIVOT to LOCAL column mapping
@@ -215,7 +298,6 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   MeasurePass p2l_col_pass_norm1(pivot,pivot);
   MeasurePass p2l_col_pass_norm2(local,local);
 
-  OrderResult p2l_row_order = p2l_row_pass_local.getOrder();
   ColMan p2l_col_local(p2l_row_order);
   ColMan p2l_col_norm1(id);
   ColMan p2l_col_norm2(id);
@@ -240,7 +322,6 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   MeasurePass p2r_col_pass_norm1(pivot,pivot);
   MeasurePass p2r_col_pass_norm2(remote,remote);
 
-  OrderResult p2r_row_order = p2r_row_pass_local.getOrder();
   ColMan p2r_col_local(p2r_row_order);
   ColMan p2r_col_norm1(id);
   ColMan p2r_col_norm2(id);

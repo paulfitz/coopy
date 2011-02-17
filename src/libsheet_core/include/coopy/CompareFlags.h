@@ -9,6 +9,11 @@ namespace coopy {
   namespace cmp {
     class CompareFlags;
   }
+  namespace store {
+    // forward declarations
+    class DataSheet;
+    class DataBook;
+  }
 }
 
 class coopy::cmp::CompareFlags {
@@ -20,12 +25,18 @@ public:
   std::vector<int> ids_local;
   std::vector<int> ids_remote;
   bool trust_ids;
+  coopy::store::DataSheet *mapping;
+  coopy::store::DataBook *mapping_book;
+  bool pivot_sides_with_local;
 
   CompareFlags() {
     head_trimmed = false;
     tail_trimmed = false;
     out = stdout;
     trust_ids = false;
+    mapping = 0 /*NULL*/;
+    mapping_book = 0 /*NULL*/;
+    pivot_sides_with_local = false;
   }
 };
 
