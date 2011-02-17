@@ -232,7 +232,7 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	       pRow, lRow, rRow, 
 	       activity, 
 	       delRow,
-	       expandMerge.size(), local.width(), current_row, local.height());
+	       (int)expandMerge.size(), local.width(), current_row, local.height());
 
     if (activity||delRow) {
       char buf[256];
