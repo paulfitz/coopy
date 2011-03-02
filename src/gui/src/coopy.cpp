@@ -89,9 +89,13 @@ public:
     virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
 
     static string fossil_object;
+    static string fossil_action;
+    static bool fossil_autoend;
 };
 
 string CoopyApp::fossil_object;
+string CoopyApp::fossil_action;
+bool CoopyApp::fossil_autoend;
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters"),
@@ -99,6 +103,8 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("s"), wxT("silent"), wxT("disables the GUI") },
     { wxCMD_LINE_OPTION, wxT("r"), wxT("res"), wxT("set resource location"),
       wxCMD_LINE_VAL_STRING, 0  },
+    { wxCMD_LINE_SWITCH, wxT("p"), wxT("pull"), wxT("pull in data") },
+    { wxCMD_LINE_SWITCH, wxT("c"), wxT("push"), wxT("push out data") },
     { wxCMD_LINE_PARAM, NULL, NULL, wxT("input file"), wxCMD_LINE_VAL_STRING,
       wxCMD_LINE_PARAM_OPTIONAL },
     { wxCMD_LINE_NONE },
@@ -113,11 +119,20 @@ void CoopyApp::OnInitCmdLine(wxCmdLineParser& parser) {
  
 bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     silent = parser.Found(wxT("s"));
+    if (silent) {
+        fossil_autoend = true;
+    }
 
     wxString location;
     if (parser.Found(wxT("r"),&location)) {
         string loc = conv(location);
         printf("*** should set location to [%s]\n", loc.c_str());
+    }
+    if (parser.Found(wxT("p"))) {
+        fossil_action = "pull";
+    }
+    if (parser.Found(wxT("c"))) {
+        fossil_action = "push";
     }
     
     // to get at your unnamed parameters use
@@ -142,97 +157,6 @@ IMPLEMENT_APP_NO_MAIN(CoopyApp);
 #else
 IMPLEMENT_APP(CoopyApp);
 #endif
-
-
-/*
-class UiFossilHandler : public FossilHandler {
-private:
-    bool logging;
-    list<string> results;
-    ostream *stream;
-    wxWindow *owner;
-    wxTextCtrl *ctrl;
-public:
-    UiFossilHandler() {
-        logging = false;
-        stream = NULL;
-        owner = NULL;
-        ctrl = NULL;
-    }
-
-    void setStream(ostream *stream) {
-        this->stream = stream;
-    }
-
-    void setOwner(wxWindow& owner) {
-        this->owner = &owner;
-    }
-
-    void setCtrl(wxTextCtrl& ctrl) {
-        this->ctrl = &ctrl;
-    }
-
-    virtual int exit(int result) {
-        throw result;
-    }
-
-
-    void split(const string& str, 
-               const string& delimiters, 
-               list<string>& tokens) {
-        size_t lastPos = str.find_first_not_of(delimiters, 0);
-        size_t pos = str.find_first_of(delimiters, lastPos);
-        while (string::npos != pos || string::npos != lastPos) {
-            tokens.push_back(str.substr(lastPos, pos - lastPos));
-            lastPos = str.find_first_not_of(delimiters, pos);
-            pos = str.find_first_of(delimiters, lastPos);
-        }
-    }
-
-
-    void replace(std::string& str, const std::string& old, 
-                 const std::string& rep) {
-        size_t pos = 0;
-        while((pos = str.find(old, pos)) != std::string::npos) {
-            str.replace(pos, old.length(), rep);
-            pos += rep.length();
-        }
-    }
-
-    virtual int printf(const char *txt) {
-        ::printf(">>> %s", txt);
-        if (logging) {
-            string cp(txt);
-            split(cp,"\n",results);
-        } else {
-            if (stream) {
-                string str(txt);
-                replace(str,string("\r"),string(" * "));
-                replace(str,"Received:","\nReceived:");
-                (*stream) << str;
-                (*stream).flush();
-                if (owner!=NULL) {
-                    owner->Update();
-                    ctrl->SetSelection(ctrl->GetLastPosition(),-1);
-                }
-            }
-        }
-        return 0;
-    }
-
-    void beginLog() {
-        results.clear();
-        logging = true;
-    }
-
-    list<string> endLog() {
-        list<string> r = results;
-        results.clear();
-        logging = false;
-        return r;
-    }
-};
-*/
 
 
 class CoopyFrame: public wxFrame
@@ -426,6 +350,15 @@ public:
         }
     }
 
+    void CheckEnd() {
+        if (CoopyApp::fossil_autoend) {
+            if (CoopyApp::fossil_action!="") {
+                wxCloseEvent ev;
+                OnExit(ev);
+            }
+        }
+    }
+
     void OnTerminate(wxProcess *process, int status) {
         processInput();
         timer->Stop();
@@ -436,6 +369,7 @@ public:
             addLog(wxT("Something went wrong..."));
             fail = true;
             if (next!="revertable") {
+                CheckEnd();
                 return;
             }
         }
@@ -446,9 +380,11 @@ public:
             updateSettings(true);
             updateListing();
             pushListing(true);
+            CheckEnd();
         } else if (n=="view") {
             updateSettings(true);
             updateListing();
+            CheckEnd();
         } else if (n == "view2") {
             wxString view = conv(path);
 #ifndef WIN32
@@ -474,6 +410,7 @@ public:
             } else {
                 updatePivots(true);
                 addLog(wxT("Online repository updated successfully."));
+                CheckEnd();
             }
         }
     }
@@ -811,17 +748,9 @@ bool CoopyFrame::OnInit() {
 
     timer = new wxTimer(this,ID_Tick);
 
-    //ssfossil_set_handler(&handler);
-    //handler.setOwner(*this);
-
     SetIcon(wxIcon((char**)appicon_xpm));
 
     topsizer = new wxBoxSizer( wxVERTICAL );
-
-    /*
-    m_textCtrl = new wxTextCtrl(this, -1, wxEmptyString,
-                                wxDefaultPosition, wxSize(320,30));
-    */
 
     wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
     
@@ -845,48 +774,14 @@ bool CoopyFrame::OnInit() {
     wxSizerFlags lflags = 
         wxSizerFlags(0).Align(wxALIGN_LEFT).Border(wxALL, 10);
 
-    /*
-    wxBoxSizer *source_bar = new wxBoxSizer( wxHORIZONTAL );
-    source_bar->Add(new wxStaticText(this,-1,_T("Repo"),
-                                     wxDefaultPosition,
-                                     wxSize(60,-1)),lflags);
-    src_box = new wxTextCtrl(this,TEXT_Src, wxT(""),
-                             wxDefaultPosition,
-                             wxSize(300,-1));
-    source_bar->Add(src_box,lflags);
-    */
-    //source_bar->Add(new wxButton( this, ID_Undo, _T("&Undo") ),
-    //lflags);
-    //topsizer->Add(source_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
-
-
-    /*
-    wxBoxSizer *dest_bar = new wxBoxSizer( wxHORIZONTAL );
-    dest_bar->Add(new wxStaticText(this,-1,_T("Push to"),
-                                   wxDefaultPosition,
-                                   wxSize(70,-1)),lflags);
-    dest_box = new wxTextCtrl(this,TEXT_Src, wxT(""),
-                              wxDefaultPosition,
-                              wxSize(300,-1));
-    dest_bar->Add(dest_box,lflags);
-    dest_bar->Add(new wxButton( this, ID_Commit, _T("Push &out") ),
-                  lflags);
-    topsizer->Add(dest_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
-    */
-
     
     wxBoxSizer *dir_bar = new wxBoxSizer( wxHORIZONTAL );
-    //dir_bar->Add(new wxStaticText(this,-1,_T("Store"),
-    //                             wxDefaultPosition,
-    //                             wxSize(60,-1)),lflags);
+
     dir_box = new wxDirPickerCtrl(this,TEXT_Dir, wxT(""),
                                   wxT("Select a folder"),
                                   wxDefaultPosition,
                                   wxSize(300,-1));
-                                  //wxDIRP_USE_TEXTCTRL);
-
     const wxString choices[] = {
-        //wxT("... Add ..."),
     };
     list_box = new wxListBox(this,ID_LISTBOX, wxPoint(10,10), wxSize(200,100),
                              0, choices, wxLB_SINGLE | wxLB_ALWAYS_SB |
@@ -940,17 +835,22 @@ bool CoopyFrame::OnInit() {
     SetSizer(topsizer);
     topsizer->SetSizeHints(this);
 
-    /*
-    if (m_textCtrl!=NULL) {
-        m_textCtrl->Clear();
-        m_textCtrl->AppendText(wxString(FOSSIL_REPO,
-                                        wxConvUTF8));
-    }
-    */
-
     if (!askPath) {
         updateSettings(false);
         updateListing();
+    }
+
+    if (CoopyApp::fossil_action!="") {
+        if (CoopyApp::fossil_action=="push") {
+            printf("Should push\n");
+            wxCommandEvent ev;
+            OnCommit(ev);
+        }
+        if (CoopyApp::fossil_action=="pull") {
+            printf("Should pull\n");
+            wxCommandEvent ev;
+            OnSync(ev);
+        }
     }
     return true;
 }
@@ -1551,6 +1451,7 @@ void CoopyFrame::OnCommit(wxCommandEvent& event) {
             } else {
                 msg = "No changes!";
                 addLog(_T("No changes to push"));
+                CheckEnd();
             }
             //}
     }
