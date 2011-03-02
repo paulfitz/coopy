@@ -76,8 +76,6 @@ static void show(const std::string& view) {
 
 
 class CoopyApp: public wxApp {
-private:
-    bool silent;
 public:
     CoopyApp() {
         silent = false;
@@ -90,21 +88,30 @@ public:
 
     static string fossil_object;
     static string fossil_action;
+    static string fossil_message;
     static bool fossil_autoend;
+    static bool silent;
+    static int fossil_result;
 };
 
 string CoopyApp::fossil_object;
 string CoopyApp::fossil_action;
-bool CoopyApp::fossil_autoend;
+string CoopyApp::fossil_message;
+bool CoopyApp::fossil_autoend = false;
+bool CoopyApp::silent = false;
+int CoopyApp::fossil_result = 0;
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters"),
       wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-    { wxCMD_LINE_SWITCH, wxT("s"), wxT("silent"), wxT("disables the GUI") },
-    { wxCMD_LINE_OPTION, wxT("r"), wxT("res"), wxT("set resource location"),
-      wxCMD_LINE_VAL_STRING, 0  },
+    { wxCMD_LINE_SWITCH, wxT("l"), wxT("commandline"), wxT("hides the GUI") },
+    //{ wxCMD_LINE_OPTION, wxT("r"), wxT("res"), wxT("set resource location"),
+    //wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_SWITCH, wxT("p"), wxT("pull"), wxT("pull in data") },
     { wxCMD_LINE_SWITCH, wxT("c"), wxT("push"), wxT("push out data") },
+    //{ wxCMD_LINE_SWITCH, wxT("k"), wxT("keep"), wxT("keep GUI open after action") },
+    { wxCMD_LINE_OPTION, wxT("m"), wxT("message"), wxT("message for log"),
+      wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_PARAM, NULL, NULL, wxT("input file"), wxCMD_LINE_VAL_STRING,
       wxCMD_LINE_PARAM_OPTIONAL },
     { wxCMD_LINE_NONE },
@@ -118,21 +125,26 @@ void CoopyApp::OnInitCmdLine(wxCmdLineParser& parser) {
 }
  
 bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
-    silent = parser.Found(wxT("s"));
-    if (silent) {
-        fossil_autoend = true;
-    }
+    silent = parser.Found(wxT("l"));
+    fossil_autoend = silent;
 
-    wxString location;
-    if (parser.Found(wxT("r"),&location)) {
-        string loc = conv(location);
-        printf("*** should set location to [%s]\n", loc.c_str());
+    //wxString location;
+    //if (parser.Found(wxT("r"),&location)) {
+    //string loc = conv(location);
+    //  printf("*** should set resource location to [%s]\n", loc.c_str());
+    //}
+    wxString message;
+    if (parser.Found(wxT("m"),&message)) {
+        fossil_message = conv(message);
     }
     if (parser.Found(wxT("p"))) {
         fossil_action = "pull";
     }
     if (parser.Found(wxT("c"))) {
         fossil_action = "push";
+    }
+    if (fossil_action=="") {
+        fossil_autoend = false;
     }
     
     // to get at your unnamed parameters use
@@ -252,7 +264,7 @@ public:
 
     void OnExit(wxCloseEvent& event) {
         Destroy();
-        printf("Exiting Coopy\n");
+        //printf("Exiting Coopy\n");
     }
 
     void OnOK(wxCommandEvent& event);
@@ -281,7 +293,7 @@ public:
     int ssfossil(int argc, char *argv[], bool sync=false);
 
     void OnProgressTimer(wxTimerEvent& WXUNUSED(event)) {
-        printf("Tick!\n");
+        //printf("Tick!\n");
         processInput();
     }
 
@@ -332,15 +344,17 @@ public:
                 log_box->AppendText(_T("\n"));
                 Update();
                 log_box->SetSelection(log_box->GetLastPosition(),-1);
+                string s = conv(str);
+                const char *at = s.c_str();
+                while (at[0]=='\n'||at[0]==' ') at++;
+                printf("%s\n", at);
             }
         } 
-        string s = conv(str);
-        printf("   // %s\n", s.c_str());
     }
 
     void addLogFile(const wxFileName& fn) {
         string sfn = conv(fn.GetFullPath());
-        printf("Adding log file %s\n", sfn.c_str());
+        //printf("Adding log file %s\n", sfn.c_str());
         wxTextFile f;
         if (!f.Open(fn.GetFullPath())) return;
         for (wxString str = f.GetFirstLine(); 
@@ -365,15 +379,15 @@ public:
         showing = true;
         bool fail = false;
         if (status!=0) {
-            printf(">>>>> PROCESS FAILED: next [%s]\n", next.c_str());
-            addLog(wxT("Something went wrong..."));
+            addLog(wxT("TROUBLE in CoopyTown..."));
             fail = true;
             if (next!="revertable") {
+                CoopyApp::fossil_result = 1;
                 CheckEnd();
                 return;
             }
         }
-        printf(">>>>> PROCESS COMPLETE: next is [%s]\n", next.c_str());
+        //printf(">>>>> PROCESS COMPLETE: next is [%s]\n", next.c_str());
         string n = next;
         next = "";
         if (n=="view_sync") {
@@ -495,7 +509,7 @@ public:
                 int argc = files.size()+2;
                 char **argv = new char *[argc];
                 if (argv==NULL) {
-                    printf("Out of memory while adding files\n");
+                    fprintf(stderr,"Out of memory while adding files\n");
                     exit(1);
                 }
                 argv[0] = fossil();
@@ -622,16 +636,14 @@ bool CoopyApp::OnInit()
         return false;
     }
 
-    if (!silent) {
-        if (!frame->OnInit()) {
-            return false;
-        }
-        frame->Show(TRUE);
-        SetTopWindow(frame);
-        return TRUE;
-    } else {
+    if (!frame->OnInit()) {
         return false;
     }
+    if (!silent) {
+        frame->Show(TRUE);
+        SetTopWindow(frame);
+    }
+    return (fossil_result==0)?TRUE:FALSE;
 };
 
 
@@ -658,13 +670,13 @@ END_EVENT_TABLE()
 
 
 int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
-    printf("**** Calling fossil with %d arguments\n", argc);
+    //printf("**** Calling fossil with %d arguments\n", argc);
     wxArrayString arr;
     wxChar *cmd[256];
     wxString op;
     wxString op1;
     for (int i=0; i<argc; i++) {
-        printf("[%s] ", argv[i]);
+        //printf("[%s] ", argv[i]);
         wxString p = conv(safetxt(argv[i]));
         arr.Add(p);
         if (i>0) {
@@ -687,7 +699,7 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
         //printf("[%s] ", conv(arr[i]).c_str());
         cmd[i] = (wxChar*)((const wxChar *)arr[i]);
     }
-    printf("\n");
+    //printf("\n");
     cmd[argc] = NULL;
     /*
     string cmd;
@@ -722,7 +734,7 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
         while (!report->Eof()) {
             processInput();
         }
-        printf("Sync done\n");
+        //printf("Sync done\n");
         showing = true;
     }
     
@@ -842,12 +854,12 @@ bool CoopyFrame::OnInit() {
 
     if (CoopyApp::fossil_action!="") {
         if (CoopyApp::fossil_action=="push") {
-            printf("Should push\n");
+            //printf("Should push\n");
             wxCommandEvent ev;
             OnCommit(ev);
         }
         if (CoopyApp::fossil_action=="pull") {
-            printf("Should pull\n");
+            //printf("Should pull\n");
             wxCommandEvent ev;
             OnSync(ev);
         }
@@ -881,8 +893,8 @@ bool CoopyFrame::havePath() {
                     bool cont = dir.GetFirst(&filename, wxEmptyString, 
                                              wxDIR_FILES|wxDIR_DIRS|wxDIR_HIDDEN);
                     while ( cont ) {
-			string fname = conv(filename);
-                        printf("%s\n", fname.c_str());
+                        string fname = conv(filename);
+                        //printf("%s\n", fname.c_str());
                         cont = dir.GetNext(&filename);
                         ct++;
                     }
@@ -906,7 +918,7 @@ bool CoopyFrame::havePath() {
                 }
 
                 path = conv(result);
-                printf("Selected a directory %s\n", path.c_str());
+                //printf("Selected a directory %s\n", path.c_str());
                 askPath = false;
 
                 /*
@@ -948,7 +960,7 @@ bool CoopyFrame::updateSettings(bool create) {
 
 
 bool CoopyFrame::updateListing() {
-    printf("update listing\n");
+    //printf("update listing\n");
     list<string> files = getFiles();
     map<string,int> present;
     string adder = "... Add ...";
@@ -958,7 +970,7 @@ bool CoopyFrame::updateListing() {
          it++) {
         if (it->rfind(".csvs")!=string::npos) {
             string str = it->substr(0,it->rfind(".csvs"));
-            printf("file of interest %s -> %s\n", it->c_str(), str.c_str());
+            //printf("file of interest %s -> %s\n", it->c_str(), str.c_str());
             wxString item = conv(str);
             int result = list_box->FindString(item);
             if (result==wxNOT_FOUND) {
@@ -981,7 +993,7 @@ bool CoopyFrame::updateListing() {
         wxString item = list_box->GetString(i-offset);
         string str = conv(item);
         if (present.find(str)==present.end()) {
-            printf("cannot find %s\n", str.c_str());
+            //printf("cannot find %s\n", str.c_str());
             list_box->Delete(i-offset);
             offset++;
         }
@@ -991,15 +1003,15 @@ bool CoopyFrame::updateListing() {
 
 
 bool CoopyFrame::pushListing(bool reverse) {
-    printf("push listing %d\n", reverse);
+    //printf("push listing %d\n", reverse);
     list<string> files = fileCache;
     for (list<string>::const_iterator it = files.begin();
          it != files.end();
          it++) {
-        printf("checking %s\n", it->c_str());
+        //printf("checking %s\n", it->c_str());
         if (it->rfind(".csvs")!=string::npos) {
             string str = it->substr(0,it->rfind(".csvs"));
-            printf("checking %s -> %s\n", it->c_str(), str.c_str());
+            //printf("checking %s -> %s\n", it->c_str(), str.c_str());
             string local = ws.getFile(str.c_str());
             if (local=="") continue;
             string remote = *it;
@@ -1029,7 +1041,7 @@ bool CoopyFrame::pushListing(bool reverse) {
                     act = remoteTime.IsEarlierThan(localTime);
                 }
                 if (act) {
-                    printf("  local -> repository (%s, %s)\n", local.c_str(), remote.c_str());
+                    //printf("  local -> repository (%s, %s)\n", local.c_str(), remote.c_str());
                     bool ok = ws.importSheet(str.c_str());
                     if (ok) {
                         updateCache.push_back(str);
@@ -1045,7 +1057,7 @@ bool CoopyFrame::pushListing(bool reverse) {
                     act = localTime.IsEarlierThan(remoteTime);
                 }
                 if (act) {
-                    printf("  repository -> local (%s, %s)\n", remote.c_str(), local.c_str());
+                    //printf("  repository -> local (%s, %s)\n", remote.c_str(), local.c_str());
                     string l = conv(localName.GetFullPath());
                     string r = conv(remoteName.GetFullPath());
                     string p = conv(pivotName.GetFullPath());
@@ -1096,9 +1108,11 @@ bool CoopyFrame::updatePivots(bool success) {
          it != files.end();
          it++) {
         string str = (*it);
+        /*
         printf("update pivot for %s: %s\n", 
                success?"success":"failure",
                str.c_str());
+        */
         string remote = str + ".csvs";
         wxCopyFile(conv(remote),conv(remote+".pivot"),true);
         if (success) {
@@ -1198,6 +1212,12 @@ bool CoopyFrame::haveSource() {
             suggest = ""; 
             //suggest = "http://coopy.sourceforge.net/cgi-bin/wiki/home";
         }
+        if (CoopyApp::silent) {
+            addLog(wxT("No repository found"));
+            CoopyApp::fossil_result = 1;
+            CheckEnd();
+            return false;
+        }
         wxTextEntryDialog dlg(NULL, 
                               wxT("Enter the link for the repository to pull in to your computer.\nIf you do not have a link, try creating a repository first."),
                               wxT("Enter repository link"),
@@ -1209,7 +1229,7 @@ string("http://") +
                 FOSSIL_USERNAME + ":" + conv(dlg.GetValue()) + "@" +
                 FOSSIL_ROOT + FOSSIL_REPO;
             */
-            printf("Source set to %s\n", source.c_str());
+            //printf("Source set to %s\n", source.c_str());
             askSource = false;
         } else {
             source = "";
@@ -1278,11 +1298,11 @@ void CoopyFrame::OnOK(wxCommandEvent& ev) {
 }
 
 void CoopyFrame::OnSync(wxCommandEvent& event) {
-    printf("Syncing...\n");
+    //printf("Syncing...\n");
     next = "";
     //startStream();
     if (havePath()) {
-        printf("Should pull %s\n", path.c_str());
+        //printf("Should pull %s\n", path.c_str());
         wxChar sep = wxFileName::GetPathSeparator();
         wxString target = conv(path) + sep + wxT("repository.coopy");
         if (!wxFileExists(target)) {
@@ -1293,9 +1313,9 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
         }
         string ctarget = conv(target);
         if (!wxFileExists(target)) {
-            printf("Could not find %s\n", ctarget.c_str());
+            //printf("Could not find %s\n", ctarget.c_str());
             if (haveSource()) {
-                printf("Need to clone %s\n", ctarget.c_str());
+                //printf("Need to clone %s\n", ctarget.c_str());
                 int argc = 4;
                 char *argv[] = {
                     fossil(),
@@ -1303,9 +1323,9 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
                     (char*)source.c_str(),
                     (char*)ctarget.c_str(),
                     NULL };
-                for (int i=0; i<argc; i++) {
-                    printf("HAVE %s\n", argv[i]);
-                }
+                //for (int i=0; i<argc; i++) {
+                    //printf("HAVE %s\n", argv[i]);
+                //}
                 next = "sync";
                 ssfossil(argc,argv);
                 return;
@@ -1316,7 +1336,7 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
         if (wxFileExists(target)) {
             wxString view_target = conv(path) + sep + wxT("_FOSSIL_");
             if (!wxFileExists(view_target)) {
-                printf("No view yet %s\n", conv(view_target).c_str());
+                //printf("No view yet %s\n", conv(view_target).c_str());
                 int argc = 3;
                 char *argv[] = {
                     fossil(),
@@ -1339,7 +1359,7 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
                 ssfossil(argc,argv,true);
             }
             if (wxFileExists(view_target)) {
-                printf("Simple sync\n");
+                //printf("Simple sync\n");
                 int argc = 2;
                 char *argv[] = {
                     fossil(),
@@ -1356,7 +1376,7 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
 
 
 void CoopyFrame::OnUndo(wxCommandEvent& event) {
-    printf("Should undo\n");
+    //printf("Should undo\n");
     startStream();
     if (havePath()) {
         int argc = 2;
@@ -1370,7 +1390,7 @@ void CoopyFrame::OnUndo(wxCommandEvent& event) {
 }
 
 void CoopyFrame::OnCreate(wxCommandEvent& event) {
-    printf("Create!\n");
+    //printf("Create!\n");
     ::wxLaunchDefaultBrowser(wxT(SITE_NAME_CREATE));
 }
 
@@ -1386,7 +1406,7 @@ void CoopyFrame::OnPush(wxCommandEvent& event) {
 }
 
 void CoopyFrame::OnCommit(wxCommandEvent& event) {
-    printf("Should commit\n");
+    //printf("Should commit\n");
     //startStream();
     if (havePath()) {
         updateListing();
@@ -1405,7 +1425,7 @@ void CoopyFrame::OnCommit(wxCommandEvent& event) {
                     msg += "\n";
                 }
                 msg += "Should this/these be removed in the repository?";
-                printf("Message is %s\n", msg.c_str());
+                //printf("Message is %s\n", msg.c_str());
                 wxMessageDialog dlg(NULL, conv(msg), wxT(""), 
                                     wxYES_NO|wxCANCEL);
                 if (dlg.ShowModal()!=wxID_YES) {
@@ -1424,10 +1444,18 @@ void CoopyFrame::OnCommit(wxCommandEvent& event) {
             }
             if (msg!="") {
                 msg += "Enter brief description of changes";
-                printf("Message is %s\n", msg.c_str());
-                wxTextEntryDialog dlg(NULL, conv(msg));
-                if (dlg.ShowModal()==wxID_OK) {
-                    commit_message = conv(dlg.GetValue());
+                //printf("Message is %s\n", msg.c_str());
+                wxString message = conv(CoopyApp::fossil_message);
+                bool ok = true;
+                if (message == wxT("")) {
+                    wxTextEntryDialog dlg(NULL, conv(msg));
+                    ok = (dlg.ShowModal()==wxID_OK);
+                    message = dlg.GetValue();
+                } else {
+                    CoopyApp::fossil_message = "";
+                }
+                if (ok) {
+                    commit_message = conv(message);
                     if (commit_message == "") {
                         commit_message = "[from coopy]";
                     }
@@ -1450,7 +1478,7 @@ void CoopyFrame::OnCommit(wxCommandEvent& event) {
                 }
             } else {
                 msg = "No changes!";
-                addLog(_T("No changes to push"));
+                addLog(wxT("No changes to push"));
                 CheckEnd();
             }
             //}
