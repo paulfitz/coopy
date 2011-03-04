@@ -171,12 +171,18 @@ int main(int argc, char *argv[]) {
   if (argc<2) {
     printf("Show the difference between two tables. Call as:\n");
     printf("  ssdiff [--output <filename>] local.csv modified.csv\n");
+    printf("For differences in a classic-diff-like format, do:\n");
+    printf("  ssdiff --format-tdiff local.csv modified.csv\n");
     printf("For differences in a verbose format, do:\n");
     printf("  ssdiff --format-human local.csv modified.csv\n");
     printf("To extract the mapping from local to modified in tabular form, do:\n");
     printf("  ssdiff --index local.csv modified.csv\n");
     printf("Output defaults to standard output.  To list supported formats:\n");
     printf("  ssdiff --list-formats\n");
+    printf("It is possible to immediately apply a difference to the local file:\n");
+    printf("  ssdiff --apply local.xls modified.csv\n");
+    printf("This will modify local.xls to bring it into alignment with modified.csv\n");
+    printf("Formatting information in local.xls will be left untouched.\n");
     return 1;
   }
 

@@ -196,8 +196,8 @@ int read(const char *src, CsvSheetReaderState& dest,
     fp = fopen(src,"rb");
   }
   if (!fp) {
-    fprintf(stderr,"could not open %s\n", src);
-    exit(1);
+    fprintf(stderr,"CsvRead: could not open %s\n", src);
+    return 1;
   }
 
   if (fp==stdin) {

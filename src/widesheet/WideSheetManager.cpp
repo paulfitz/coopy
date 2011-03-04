@@ -166,7 +166,7 @@ bool WideSheetManager::exportSheet() {
     fprintf(stderr,"Failed to write %s\n", remote.c_str());
     return false;
   } 
-  printf("%s -> offer -> %s\n", local.c_str(), remote.c_str());
+  printf("%s -> %s\n", local.c_str(), remote.c_str());
   return true;
 }
 
@@ -186,7 +186,7 @@ bool WideSheetManager::acceptSheet() {
     fprintf(stderr,"Failed to write %s\n", pivot.c_str());
     return false;
   } 
-  printf("%s -> accepted -> %s\n", remote.c_str(), pivot.c_str());
+  printf("%s -> %s\n", remote.c_str(), pivot.c_str());
   return true;
 }
 
@@ -272,6 +272,7 @@ bool WideSheetManager::setDirectory(const char *dir, const char *sep) {
 
 
 bool WideSheetManager::exportSheet(const char *key, bool reverse) {
+  //printf("Export key %s direction %s\n", key, reverse?"reversed":"forward");
   string remote = getFile(key);
   if (remote=="") {
     return false;
@@ -293,7 +294,7 @@ bool WideSheetManager::exportSheet(const char *key, bool reverse) {
     fprintf(stderr,"Failed to write %s\n", remote.c_str());
     return false;
   } 
-  printf("%s -> offer -> %s\n", local.c_str(), remote.c_str());
+  printf("%s -> %s\n", local.c_str(), remote.c_str());
   return true;
 }
 

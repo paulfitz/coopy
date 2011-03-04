@@ -26,6 +26,7 @@
 #include <wx/arrstr.h>
 #include <wx/dir.h>
 #include <wx/listctrl.h>
+#include <wx/regex.h>
 
 #include <string>
 #include <list>
@@ -89,6 +90,7 @@ public:
     static string fossil_object;
     static string fossil_action;
     static string fossil_message;
+    static string fossil_key;
     static bool fossil_autoend;
     static bool silent;
     static int fossil_result;
@@ -97,6 +99,7 @@ public:
 string CoopyApp::fossil_object;
 string CoopyApp::fossil_action;
 string CoopyApp::fossil_message;
+string CoopyApp::fossil_key;
 bool CoopyApp::fossil_autoend = false;
 bool CoopyApp::silent = false;
 int CoopyApp::fossil_result = 0;
@@ -104,12 +107,18 @@ int CoopyApp::fossil_result = 0;
 static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters"),
       wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-    { wxCMD_LINE_SWITCH, wxT("l"), wxT("commandline"), wxT("hides the GUI") },
+    { wxCMD_LINE_SWITCH, wxT("g"), wxT("gui"), wxT("force show GUI") },
     //{ wxCMD_LINE_OPTION, wxT("r"), wxT("res"), wxT("set resource location"),
     //wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_SWITCH, wxT("p"), wxT("pull"), wxT("pull in data") },
     { wxCMD_LINE_SWITCH, wxT("c"), wxT("push"), wxT("push out data") },
-    //{ wxCMD_LINE_SWITCH, wxT("k"), wxT("keep"), wxT("keep GUI open after action") },
+    { wxCMD_LINE_OPTION, wxT("k"), wxT("key"), wxT("key for adding/export"),
+      wxCMD_LINE_VAL_STRING, 0  },
+    { wxCMD_LINE_OPTION, wxT("a"), wxT("add"), wxT("add a spreadsheet/database"),
+      wxCMD_LINE_VAL_STRING, 0  },
+    { wxCMD_LINE_OPTION, wxT("e"), wxT("export"), wxT("export a spreadsheet/database"),
+      wxCMD_LINE_VAL_STRING, 0,
+    },
     { wxCMD_LINE_OPTION, wxT("m"), wxT("message"), wxT("message for log"),
       wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_PARAM, NULL, NULL, wxT("input file"), wxCMD_LINE_VAL_STRING,
@@ -126,16 +135,30 @@ void CoopyApp::OnInitCmdLine(wxCmdLineParser& parser) {
  
 bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     silent = parser.Found(wxT("l"));
-    fossil_autoend = silent;
 
     //wxString location;
     //if (parser.Found(wxT("r"),&location)) {
     //string loc = conv(location);
     //  printf("*** should set resource location to [%s]\n", loc.c_str());
     //}
-    wxString message;
+    wxString message, key;
+    if (parser.Found(wxT("k"),&key)) {
+        fossil_key = conv(key);
+    }
     if (parser.Found(wxT("m"),&message)) {
         fossil_message = conv(message);
+    }
+    if (parser.Found(wxT("a"),&message)) {
+        fossil_action = "add";
+        wxFileName name = wxFileName::FileName(message);
+        name.MakeAbsolute();
+        fossil_message = conv(name.GetFullPath());
+    }
+    if (parser.Found(wxT("e"),&message)) {
+        fossil_action = "export";
+        wxFileName name = wxFileName::FileName(message);
+        name.MakeAbsolute();
+        fossil_message = conv(name.GetFullPath());
     }
     if (parser.Found(wxT("p"))) {
         fossil_action = "pull";
@@ -143,8 +166,12 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     if (parser.Found(wxT("c"))) {
         fossil_action = "push";
     }
-    if (fossil_action=="") {
-        fossil_autoend = false;
+    fossil_autoend = false;
+    if (fossil_action!="") {
+        fossil_autoend = !parser.Found(wxT("g"));
+        if (fossil_autoend) {
+            silent = true;
+        }
     }
     
     // to get at your unnamed parameters use
@@ -175,6 +202,9 @@ class CoopyFrame: public wxFrame
 {
     DECLARE_CLASS(CoopyFrame)
     DECLARE_EVENT_TABLE()
+
+public:
+    bool background;
 
 private:
     wxBoxSizer *topsizer;
@@ -264,7 +294,6 @@ public:
 
     void OnExit(wxCloseEvent& event) {
         Destroy();
-        //printf("Exiting Coopy\n");
     }
 
     void OnOK(wxCommandEvent& event);
@@ -374,6 +403,7 @@ public:
     }
 
     void OnTerminate(wxProcess *process, int status) {
+        //printf("OnTerminate! next is [%s]\n", next.c_str());
         processInput();
         timer->Stop();
         showing = true;
@@ -382,6 +412,7 @@ public:
             addLog(wxT("TROUBLE in CoopyTown..."));
             fail = true;
             if (next!="revertable") {
+                background = false;
                 CoopyApp::fossil_result = 1;
                 CheckEnd();
                 return;
@@ -395,6 +426,7 @@ public:
             updateListing();
             pushListing(true);
             CheckEnd();
+            background = false;
         } else if (n=="view") {
             updateSettings(true);
             updateListing();
@@ -421,11 +453,13 @@ public:
                     NULL };
                 ssfossil(argc,argv,true);
                 updatePivots(false);
+                CheckEnd();
             } else {
                 updatePivots(true);
                 addLog(wxT("Online repository updated successfully."));
                 CheckEnd();
             }
+            background = false;
         }
     }
 
@@ -545,7 +579,7 @@ public:
         if (str[0]!='.') {
             addLog(wxT("Selected '") + event.GetString() + wxT("' (double-click to open)"));
         } else {
-            addLog(wxT("Double-click ADD option to start a new spreadsheet/table."));
+            addLog(wxT("Double-click ADD option to attach a new spreadsheet/table."));
         }
     }
 
@@ -555,7 +589,7 @@ public:
             addLog(wxT("Opening '") + event.GetString() + wxT("' ..."));
             openFile(event.GetString());
         } else {
-            createFile();
+            addFile();
         }
     }
 
@@ -567,9 +601,11 @@ public:
 
     bool updateSettings(bool create);
 
-    bool openFile(const wxString& str);
+    bool openFile(const wxString& str, bool export_only = false);
 
-    bool createFile();
+    bool createFile(const char *local_name = NULL);
+
+    bool addFile();
 
 enum
     {
@@ -642,6 +678,14 @@ bool CoopyApp::OnInit()
     if (!silent) {
         frame->Show(TRUE);
         SetTopWindow(frame);
+    } else {
+        if (!frame->background) {
+            //printf("Working in background...\n");
+            //wxThread::Sleep(100);
+            //}
+            frame->Destroy();
+            exit(fossil_result);
+        }
     }
     return (fossil_result==0)?TRUE:FALSE;
 };
@@ -670,7 +714,11 @@ END_EVENT_TABLE()
 
 
 int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
-    //printf("**** Calling fossil with %d arguments\n", argc);
+    //printf("**** Calling fossil with %d arguments, %s\n", argc,
+    //sync?"sync":"background");
+    if (!sync) {
+        background = true;
+    }
     wxArrayString arr;
     wxChar *cmd[256];
     wxString op;
@@ -801,6 +849,13 @@ bool CoopyFrame::OnInit() {
 
     //dir_box->SetTextCtrlProportion(0);
 
+    if (CoopyApp::fossil_object=="") {
+        if (CoopyApp::fossil_autoend) {
+            wxString name = wxFileName::GetCwd();
+            CoopyApp::fossil_object = conv(name);
+        }
+    }
+
     if (CoopyApp::fossil_object!="") {
         wxFileName name = wxFileName::FileName(conv(CoopyApp::fossil_object));
         name.MakeAbsolute();
@@ -848,7 +903,7 @@ bool CoopyFrame::OnInit() {
     topsizer->SetSizeHints(this);
 
     if (!askPath) {
-        updateSettings(false);
+        updateSettings(true);
         updateListing();
     }
 
@@ -862,6 +917,14 @@ bool CoopyFrame::OnInit() {
             //printf("Should pull\n");
             wxCommandEvent ev;
             OnSync(ev);
+        }
+        if (CoopyApp::fossil_action=="add") {
+            createFile(CoopyApp::fossil_message.c_str());
+            CheckEnd();
+        }
+        if (CoopyApp::fossil_action=="export") {
+            openFile(conv(CoopyApp::fossil_key),true);
+            CheckEnd();
         }
     }
     return true;
@@ -1011,7 +1074,7 @@ bool CoopyFrame::pushListing(bool reverse) {
         //printf("checking %s\n", it->c_str());
         if (it->rfind(".csvs")!=string::npos) {
             string str = it->substr(0,it->rfind(".csvs"));
-            //printf("checking %s -> %s\n", it->c_str(), str.c_str());
+            printf("checking %s -> %s\n", it->c_str(), str.c_str());
             string local = ws.getFile(str.c_str());
             if (local=="") continue;
             string remote = *it;
@@ -1128,38 +1191,75 @@ bool CoopyFrame::updatePivots(bool success) {
 }
 
 
-bool CoopyFrame::createFile() {
-    wxTextEntryDialog dlg(NULL, 
-                          wxT("Enter a simple name for the file in the repository.\nAny spaces or punctuation will be replaced by '_' characters.\nYou'll be able to save with a different name on your computer."),
-                          wxT("Set name"),
-                          wxT("example_name"));
-    if (dlg.ShowModal()!=wxID_OK) {
-        return false;
+bool CoopyFrame::createFile(const char *local_name) {
+    wxString meat = wxT("example_name");
+    wxRegEx re(wxT("[^a-zA-Z0-9]"));
+    if (local_name!=NULL) {
+        wxString n = conv(local_name);
+        wxFileName f = wxFileName::FileName(n);
+        meat = f.GetName();
+        re.ReplaceAll(&meat,wxT("_"));
     }
-    wxString actName = dlg.GetValue() + wxT(".csvs");
+    if (CoopyApp::fossil_action=="") {
+        wxTextEntryDialog dlg(NULL, 
+                              wxT("Enter a simple name for the file in the repository.\nAny spaces or punctuation will be replaced by '_' characters.\nYou'll be able to save with a different name on your computer."),
+                              wxT("Set name"),
+                              meat);
+        if (dlg.ShowModal()!=wxID_OK) {
+            return false;
+        }
+        meat = dlg.GetValue();
+        re.ReplaceAll(&meat,wxT("_"));
+    }
+    wxString actName = meat + wxT(".csvs");
+    string key = conv(meat);
     wxFileName name = wxFileName::FileName(actName);
     if (!name.FileExists()) {
-        wxFile f;
-        f.Create(name.GetFullPath());
-        f.Write(wxT("== Main ==\n"));
-        f.Write(wxT("Name,Number\n"));
-        f.Write(wxT("-----------\n"));
-        f.Write(wxT("One,1\n"));
-        f.Write(wxT("Two,2\n"));
-        f.Write(wxT("Three,3\n"));
-        f.Write(wxT("Four,4\n"));
-        f.Write(wxT("Five,5\n"));
-        f.Close();
+        if (local_name==NULL) {
+            wxFile f;
+            f.Create(name.GetFullPath());
+            f.Write(wxT("== Main ==\n"));
+            f.Write(wxT("Name,Number\n"));
+            f.Write(wxT("-----------\n"));
+            f.Write(wxT("One,1\n"));
+            f.Write(wxT("Two,2\n"));
+            f.Write(wxT("Three,3\n"));
+            f.Write(wxT("Four,4\n"));
+            f.Write(wxT("Five,5\n"));
+            f.Close();
+        } else {
+            wxFile f;
+            f.Create(name.GetFullPath());
+            f.Close();
+            ws.setFile(key.c_str(),local_name);
+            ws.exportSheet(key.c_str(),true);
+        }
     }
     list<string> files;
     files.push_back(conv(actName));
     doFiles(files,"add");
     updateListing();
+    CheckEnd();
     return true;
 }
 
+bool CoopyFrame::addFile() {
+    wxFileDialog LoadDialog(this, _("Add File"), wxEmptyString, wxEmptyString,
+                            _("Excel files (*.xls)|*.xls|Sqlite files (*.sqlite)|*.sqlite|CSV files (*.csv)|*.csv"),
+                            wxFD_OPEN | wxFD_FILE_MUST_EXIST, wxDefaultPosition);
+ 
+    if (LoadDialog.ShowModal() == wxID_OK) {
+        wxFileName name = wxFileName::FileName(LoadDialog.GetPath());
+        name.MakeAbsolute();
+        string fname = conv(name.GetFullPath());
+        return createFile(fname.c_str());
+    }
 
-bool CoopyFrame::openFile(const wxString& str) {
+    return false;
+}
+
+
+bool CoopyFrame::openFile(const wxString& str, bool export_only) {
     string key = conv(str);
     string fname = ws.getFile(key.c_str());
     bool exists = false;
@@ -1168,18 +1268,24 @@ bool CoopyFrame::openFile(const wxString& str) {
         exists = name.FileExists();
     }
     if (fname==""||!exists) {
-        wxFileDialog SaveDialog(this, _("Save File As _?"), wxEmptyString, conv(fname),
-                                _("Excel files (*.xls)|*.xls|Sqlite files (*.sqlite)|*.sqlite|CSV files (*.csv)|*.csv"),
-                                wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
- 
-        if (SaveDialog.ShowModal() == wxID_OK) {
-            //CurrentDocPath = SaveDialog.GetPath();
-            //MainEditBox->SaveFile(CurrentDocPath); // Save the file to the selected path
-            // Set the Title to reflect the file open
-            //SetTitle(wxString("Edit - ") << SaveDialog->GetFilename());
-            fname = conv(SaveDialog.GetFilename());
+        if (CoopyApp::fossil_message!="") {
+            fname = CoopyApp::fossil_message;
+        } else {
+            wxFileDialog SaveDialog(this, _("Save File As _?"), wxEmptyString, conv(fname),
+                                    _("Excel files (*.xls)|*.xls|Sqlite files (*.sqlite)|*.sqlite|CSV files (*.csv)|*.csv"),
+                                    wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
+            
+            if (SaveDialog.ShowModal() == wxID_OK) {
+                fname = conv(SaveDialog.GetFilename());
+            } else {
+                return false;
+            }
+        }
+        if (fname!="") {
             ws.setFile(key.c_str(),fname.c_str());
             ws.exportSheet(key.c_str());
+        } else {
+            return false;
         }
     }
     if (fname=="") return false;
@@ -1192,7 +1298,9 @@ bool CoopyFrame::openFile(const wxString& str) {
     name.MakeAbsolute();
     fname = conv(name.GetFullPath());
 
-    show(fname);
+    if (!export_only) {
+        show(fname);
+    }
 
     return true;
 }
@@ -1491,6 +1599,7 @@ CoopyFrame::CoopyFrame(const wxString& title, const wxPoint& pos, const wxSize& 
     : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
     //m_textCtrl = NULL;
+    background = false;
 
     logging = false;
     path = "";

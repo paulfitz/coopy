@@ -19,7 +19,7 @@ bool FormatSniffer::open(const char *fname, bool caching) {
     need_close = true;
   }
   if (!fp) {
-    fprintf(stderr,"could not open %s\n", fname);
+    fprintf(stderr,"FormatSniffer: could not open %s\n", fname);
     need_close = false;
     return false;
   }

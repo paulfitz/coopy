@@ -79,8 +79,8 @@ bool CsvTextBook::write(const char *fname, TextBook *book, bool compact) {
 	} else {
 	  fp = fopen(fname,(i>0)?"ab":"wb");
 	  if (!fp) {
-	    fprintf(stderr,"could not open %s\n", fname);
-	    exit(1);
+	    fprintf(stderr,"CsvTextBook: could not open %s\n", fname);
+	    return false;
 	  }
 	}
 	if (i>0) {
