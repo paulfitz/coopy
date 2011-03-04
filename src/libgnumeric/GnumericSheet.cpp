@@ -47,6 +47,7 @@ std::string GnumericSheet::cellString(int x, int y,
 
 
 bool GnumericSheet::cellString(int x, int y, const std::string& str) {
+  printf("Setting %d %d to %s\n", x, y, str.c_str());
   return gnumeric_sheet_set_cell_as_string(SHEET(implementation),
 					   x, y,
 					   str.c_str()) == 0;

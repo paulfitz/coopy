@@ -245,7 +245,14 @@ int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
   if (cell==NULL) {
     cell = sheet_cell_create((Sheet*)sheet,x,y);
   }
-  sheet_cell_set_text(cell,str,NULL);
+
+  // When we have set up cell types better, we can try this:
+  //   sheet_cell_set_text(cell,str,NULL);
+
+  // For now we quote everything as strings:
+  GnmValue *val = value_new_string(str);
+  sheet_cell_set_value(cell,val);
+
   return 0;
 }
 

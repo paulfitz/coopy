@@ -375,8 +375,8 @@ IF (USE_GNUMERIC)
       ${ARGN})
     ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ss2html${EXE_EXT} 
       --compare
-      #    test_out_${name}.xls ${ref} ${ref})
-      test_out_${name}.xls test_out_${name}.html ${ref})
+        #  test_out_${name}.xls ${ref} ${ref})
+	test_out_${name}.xls test_out_${name}.html ${ref})
   ENDMACRO()
   
   # Blank columns don't get exported by gnumeric, so some tests are not
