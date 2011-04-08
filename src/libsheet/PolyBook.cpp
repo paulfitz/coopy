@@ -155,6 +155,45 @@ bool PolyBook::attach(Property& config) {
     config.put("ext",ext);
   }
 
+  if (filename.substr(0,4)=="dbi:") {
+    string s = filename + ":";
+    int first = 0;
+    vector<string> words;
+    for (int i=0; i<(int)s.length(); i++) {
+      char ch = s[i];
+      if (ch==':'||ch==';') {
+	string word = s.substr(first,i-first);
+	size_t div = word.find('=');
+	if (div==string::npos) {
+	  words.push_back(word);
+	  dbg_printf("dbi: part %s\n", word.c_str());
+	} else {
+	  string key = word.substr(0,div);
+	  string val = word.substr(div+1,word.length());
+	  dbg_printf("dbi: %s->%s\n", key.c_str(), val.c_str());
+	  if (key=="port") {
+	    config.put(key.c_str(),atoi(val.c_str()));
+	  } else {
+	    config.put(key.c_str(),val);
+	  }
+	}
+	first = i+1;
+      }
+    }
+    if (words.size()>1) {
+      config.put("type",words[1]);
+    }
+    if (words.size()>2) {
+      config.put("database",words[2]);
+    }
+    if (words.size()>3) {
+      config.put("host",words[3]);
+    }
+    if (words.size()>4) {
+      config.put("port",atoi(words[4].c_str()));
+    }
+  }
+
   string key = config.get("type",PolyValue::makeString("")).asString();
 
   if (key=="") {
