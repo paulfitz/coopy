@@ -56,8 +56,15 @@ bool RemoteSqlTextBook::open(const Property& config) {
     return true;
   }
   catch (sqlxx_error E) {
-    cerr << E.what() << endl;
+    cerr << "remotesql: " << E.what() << endl;
     if (implementation!=NULL) {
+      CSQL& SQL = HELPER(implementation);
+      fprintf(stderr,"hostname %s database %s port %d username %s\n", 
+	      SQL.getHostname().c_str(),
+	      SQL.getDatabase().c_str(),
+	      SQL.getPortN(),
+	      SQL.getUsername().c_str());
+      fprintf(stderr,"password [%s]\n", SQL.getPassword().c_str());
       delete &HELPER(implementation);
       implementation = NULL;
     }
