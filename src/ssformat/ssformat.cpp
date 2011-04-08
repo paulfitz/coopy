@@ -63,7 +63,8 @@ int main(int argc, char *argv[]) {
     printf("Call with input file and desired output file. Examples:\n");
     printf("  ssformat input.csv output.sqlite\n");
     printf("  ssformat input.sqlite output.csvs\n");
-    printf("  ssformat input.sqlite -\n");
+    printf("  ssformat dbi:mysql:database_name:username=root output.sqlite\n");
+    printf("  ssformat input.sqlite\n");
     printf("A single sheet/table can be extracted if desired:\n");
     printf("  ssformat --table people input.sqlite people.csv\n");
     printf("If the output file is omitted, it is set to standard output\n");
