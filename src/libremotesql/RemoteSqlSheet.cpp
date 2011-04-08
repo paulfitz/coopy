@@ -28,13 +28,15 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
   CSQL& SQL = SQL_CONNECTION(book);
 
   {
-    string query = string("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=")+quote(name);
+    string query = string("SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=")+quote(name);
     dbg_printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     if (result==NULL) return;
     while (result->fetch()) {
       //printf("Got %s\n", result->get(0).c_str());
       col2sql.push_back(result->get(0));
+      col2type.push_back(result->get(1));
+      col2nullable.push_back(result->get(2)=="YES");
       w++;
     }
     SQL.closeQuery(result);
@@ -53,6 +55,7 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
     SQL.closeQuery(result);
     for (int i=0; i<(int)col2sql.size(); i++) {
       col2pk.push_back(pks.find(col2sql[i])!=pks.end());
+      //printf("Primary key? %s %d\n", col2sql[i].c_str(), (bool)col2pk[i]);
     }
   }
 

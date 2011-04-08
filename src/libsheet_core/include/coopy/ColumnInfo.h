@@ -48,7 +48,7 @@ public:
   }
 
   void reset() {
-    allowNull = false;
+    allowNull = true;
     family = COLUMN_FAMILY_NONE;
     src = COLUMN_SOURCE_NONE;
     size = 0;
@@ -62,7 +62,7 @@ public:
   // do guess-work
   bool setType(const std::string& name, const std::string& lang = "unknown");
 
-  std::string asSqlite() const;
+  std::string asSqlite(bool addPrimaryKey) const;
 };
 
 

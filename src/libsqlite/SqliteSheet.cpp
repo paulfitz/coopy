@@ -171,6 +171,16 @@ bool SqliteSheet::create(const SheetSchema& schema) {
   char *query = NULL;
 
   string cols = "";
+  vector<string> keys;
+  if (schema.providesPrimaryKeys()) {
+    for (int i=0; i<schema.getColumnCount(); i++) {
+      ColumnInfo ci = schema.getColumnInfo(i);
+      if (ci.isPrimaryKey()) {
+	keys.push_back(ci.getName());
+      }
+    }
+  }
+
   for (int i=0; i<schema.getColumnCount(); i++) {
     ColumnInfo ci = schema.getColumnInfo(i);
     string cname = ci.getName();
@@ -186,7 +196,7 @@ bool SqliteSheet::create(const SheetSchema& schema) {
     cols += _quoted(squery);
     sqlite3_free(squery);
     if (ci.hasType()) {
-      string t = ci.getColumnType().asSqlite();
+      string t = ci.getColumnType().asSqlite(keys.size()<=1);
       dbg_printf("TYPE %s (%s)\n", t.c_str(), ci.getColumnType().src_name.c_str());
       if (t!="") {
 	cols += " ";
@@ -194,29 +204,20 @@ bool SqliteSheet::create(const SheetSchema& schema) {
       }
     }
   }
-
-  vector<string> keys;
-  if (schema.providesPrimaryKeys()) {
-    for (int i=0; i<schema.getColumnCount(); i++) {
-      ColumnInfo ci = schema.getColumnInfo(i);
-      if (ci.isPrimaryKey()) {
-	keys.push_back(ci.getName());
+  if (keys.size()>1) {
+    cols += ", PRIMARY KEY(";
+    for (int i=0; i<(int)keys.size(); i++) {
+      if (i>0) {
+	cols += ", ";
       }
+      char *squery = NULL;
+      squery = sqlite3_mprintf("%q", keys[i].c_str());
+      cols += _quoted(squery);
+      sqlite3_free(squery);
     }
-    if (keys.size()>0) {
-      cols += ", PRIMARY KEY(";
-      for (int i=0; i<(int)keys.size(); i++) {
-	if (i>0) {
-	  cols += ", ";
-	}
-	char *squery = NULL;
-	squery = sqlite3_mprintf("%q", keys[i].c_str());
-	cols += _quoted(squery);
-	sqlite3_free(squery);
-      }
-      cols += ")";
-    }
+    cols += ")";
   }
+
 
   query = sqlite3_mprintf("CREATE TABLE %q (%s)", 
 			  _quoted(name).c_str(),

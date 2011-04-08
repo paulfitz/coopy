@@ -48,13 +48,23 @@ public:
 
   virtual ColumnInfo getColumnInfo(int x) {
     ColumnType t;
+    t.setType(col2type[x],"mysql");
     t.primaryKey = col2pk[x];
     t.primaryKeySet = true;
+    t.allowNull = col2nullable[x];
     return ColumnInfo(col2sql[x],t);
     //return ColumnInfo(col2sql[x],col2pk[x]);
   }
 
+  virtual int getColumnCount() const {
+    return (int)col2sql.size();
+  }
+
   virtual SheetSchema *getSchema() const;
+
+  std::string getName() const {
+    return name;
+  }
 
 private:
   RemoteSqlSheetSchema *schema;
@@ -68,7 +78,9 @@ private:
   // see sqlitesheet for simpler implementation with rowid.
   std::vector<std::vector<std::string> > row2sql;
   std::vector<std::string> col2sql;
+  std::vector<std::string> col2type;
   std::vector<bool> col2pk;
+  std::vector<bool> col2nullable;
   std::vector<std::string> keys;
   std::vector<int> key_cols;
 };
@@ -77,8 +89,16 @@ class coopy::store::RemoteSqlSheetSchema : public SheetSchema {
 public:
   RemoteSqlSheet *sheet;
 
-  virtual ColumnInfo getColumnInfo(int x) {
+  virtual std::string getSheetName() const {
+    return sheet->getName();
+  }
+
+  virtual ColumnInfo getColumnInfo(int x) const {
     return sheet->getColumnInfo(x);
+  }
+
+  virtual int getColumnCount() const {
+    return sheet->getColumnCount();
   }
 
   virtual bool providesPrimaryKeys() const {
