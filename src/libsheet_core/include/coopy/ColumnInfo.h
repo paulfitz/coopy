@@ -38,6 +38,8 @@ public:
   int size2;
   bool primaryKey;
   bool primaryKeySet;
+  bool autoIncrement;
+  bool autoIncrementSet;
 
   ColumnType() {
     reset();
@@ -57,6 +59,8 @@ public:
     primaryKeySet = false;
     src_lang = "";
     src_name = "";
+    autoIncrement = false;
+    autoIncrementSet = false;
   }
 
   // do guess-work

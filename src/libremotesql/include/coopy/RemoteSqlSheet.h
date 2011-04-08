@@ -52,6 +52,8 @@ public:
     t.primaryKey = col2pk[x];
     t.primaryKeySet = true;
     t.allowNull = col2nullable[x];
+    t.autoIncrement = col2autoinc[x];
+    t.autoIncrementSet = true;
     return ColumnInfo(col2sql[x],t);
     //return ColumnInfo(col2sql[x],col2pk[x]);
   }
@@ -81,6 +83,7 @@ private:
   std::vector<std::string> col2type;
   std::vector<bool> col2pk;
   std::vector<bool> col2nullable;
+  std::vector<bool> col2autoinc;
   std::vector<std::string> keys;
   std::vector<int> key_cols;
 };

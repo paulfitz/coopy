@@ -28,7 +28,7 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
   CSQL& SQL = SQL_CONNECTION(book);
 
   {
-    string query = string("SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=")+quote(name);
+    string query = string("SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, EXTRA, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=")+quote(name);
     dbg_printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     if (result==NULL) return;
@@ -37,6 +37,7 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
       col2sql.push_back(result->get(0));
       col2type.push_back(result->get(1));
       col2nullable.push_back(result->get(2)=="YES");
+      col2autoinc.push_back(result->get(3)=="auto_increment");
       w++;
     }
     SQL.closeQuery(result);
