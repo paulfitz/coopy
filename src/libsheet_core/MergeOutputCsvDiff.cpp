@@ -30,26 +30,56 @@ using namespace coopy::cmp;
 #define OP_NONE ""
 
 MergeOutputCsvDiff::MergeOutputCsvDiff() {
-  constantColumns = true;
-  showedColumns = false;
+}
+
+bool MergeOutputCsvDiff::mergeStart() {
+
+  currentSheetName = "";
+  pendingSheetName = "";
   result.setStrict(0);
+  mergeClear();
   result.addField("dtbl",false);
   result.addField("csv",false);
   result.addField("version",false);
   result.addField("0.4",false);
   result.addRecord();
+
+  return true;
 }
 
+bool MergeOutputCsvDiff::mergeClear() {
+  ops.clear();
+  nops.clear();
+  activeColumn.clear();
+  showForSelect.clear();
+  showForDescribe.clear();
+  prevSelect.clear();
+  prevDescribe.clear();
+  constantColumns = true;
+  columns.clear();
+  showedColumns = false;
+  return true;
+}
+
+
 bool MergeOutputCsvDiff::mergeDone() {
+  mergeClear();
+  return true;
+}
+
+bool MergeOutputCsvDiff::mergeAllDone() {
   SheetStyle style;
   SheetCell c = result.cellSummary(0,0);
   fprintf(out,"%s",result.encode(style).c_str());
+  return true;
 }
+
 
 bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
   constantColumns = false;
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
+    clearThroat();
     result.addField("column",false);
     result.addField("delete",false);
     //result.addField(ROW_COL,false);
@@ -59,6 +89,7 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
     result.addRecord();
     break;
   case ORDER_CHANGE_INSERT:
+    clearThroat();
     result.addField("column",false);
     result.addField("insert",false);
     //result.addField(ROW_COL,false);
@@ -68,6 +99,7 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
     result.addRecord();
     break;
   case ORDER_CHANGE_MOVE:
+    clearThroat();
     result.addField("column",false);
     result.addField("move",false);
     //result.addField(ROW_COL,false);
@@ -98,6 +130,7 @@ bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
   }
   if (lnops!=nops) {
     if (!showedColumns) {
+      clearThroat();
       result.addField("column",false);
       result.addField("name",false);
       for (int i=0; i<(int)columns.size(); i++) {
@@ -107,6 +140,7 @@ bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
       showedColumns = true;
     }
     if (columns!=lnops) {
+      clearThroat();
       result.addField("link",false);
       result.addField("name",false);
       for (int i=0; i<(int)change.names.size(); i++) {
@@ -120,6 +154,7 @@ bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
   }
 
   if (prevSelect!=showForSelect || prevDescribe!=showForDescribe) {
+    clearThroat();
     result.addField((tag=="act")?"link":"row",false);
     result.addField(tag,false);
     for (int i=0; i<(int)change.names.size(); i++) {
@@ -137,6 +172,7 @@ bool MergeOutputCsvDiff::updateRow(const RowChange& change, const char *tag,
   bool ok = true;
 
   if (!practice) {
+    clearThroat();
     result.addField("row",false);
     result.addField(tag,false);
   }
@@ -147,6 +183,7 @@ bool MergeOutputCsvDiff::updateRow(const RowChange& change, const char *tag,
       if (change.cond.find(name)!=change.cond.end() && 
 	  showForSelect[name] && select) {
 	if (!practice) {
+	  clearThroat();
 	  result.addField(change.cond.find(name)->second);
 	}
 	shown = true;
@@ -154,6 +191,7 @@ bool MergeOutputCsvDiff::updateRow(const RowChange& change, const char *tag,
       if (change.val.find(name)!=change.val.end() && 
 	  showForDescribe[name] && update) {
 	if (!practice) {
+	  clearThroat();
 	  result.addField(change.val.find(name)->second);
 	}
 	if (shown) ok = false; // collision
@@ -161,6 +199,7 @@ bool MergeOutputCsvDiff::updateRow(const RowChange& change, const char *tag,
       }
       if (!shown) {
 	if (!practice) {
+	  clearThroat();
 	  result.addField("",false);
 	}
       }
@@ -275,6 +314,7 @@ bool MergeOutputCsvDiff::changeName(const NameChange& change) {
       showForDescribe[names[i]] = true;
     }
     if (!constant) {
+      clearThroat();
       result.addField("column",false);
       result.addField("name",false);
       //result.addField(ROW_COL,false);
@@ -289,3 +329,18 @@ bool MergeOutputCsvDiff::changeName(const NameChange& change) {
   return true;
 }
 
+bool MergeOutputCsvDiff::setSheet(const char *name) {
+  pendingSheetName = name;
+  return true;
+}
+
+bool MergeOutputCsvDiff::clearThroat() {
+  if (currentSheetName!=pendingSheetName) {
+    result.addField("sheet",false);
+    result.addField("name",false);
+    result.addField(pendingSheetName.c_str(),false);
+    result.addRecord();
+    currentSheetName = pendingSheetName;
+  }
+  return true;
+}

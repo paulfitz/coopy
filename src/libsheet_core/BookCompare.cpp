@@ -111,6 +111,8 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
     dbg_printf("BookCompare::compare - Done with \"%s\"\n", name.c_str());
   }
 
+  output.mergeAllDone();
+
   return 0;
 }
   

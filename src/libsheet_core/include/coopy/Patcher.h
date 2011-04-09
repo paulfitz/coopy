@@ -229,6 +229,10 @@ public:
     return true;
   }
 
+  virtual bool mergeAllDone() {
+    return true;
+  }
+
   virtual bool setSheet(const char *name) {
     ct++;
     return (ct<=1); 

@@ -17,6 +17,8 @@ namespace coopy {
 
 class coopy::cmp::MergeOutputCsvDiff : public MergeOutput {
 public:
+  std::string currentSheetName;
+  std::string pendingSheetName;
   coopy::store::CsvSheet result;
   std::vector<std::string> ops;
   std::vector<std::string> nops;
@@ -41,12 +43,19 @@ public:
 		 bool update, bool practice);
   bool describeRow(const RowChange& change, const char *tag);
 
+  virtual bool mergeStart();
+  virtual bool mergeClear();
   virtual bool mergeDone();
+
+  virtual bool mergeAllDone();
 
   virtual bool changeName(const NameChange& change);
 
   const coopy::store::CsvSheet& get() { return result; }
 
+  virtual bool setSheet(const char *name);
+
+  bool clearThroat();
 };
 
 class coopy::cmp::MergeOutputCsvDiffV0p2 : public MergeOutput {
