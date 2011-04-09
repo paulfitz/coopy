@@ -30,6 +30,7 @@ public:
   const CompareFlags& flags;
   coopy::store::NameSniffer& local_names;
   coopy::store::NameSniffer& remote_names;
+  bool allIdentical;
 
   MergerState(coopy::store::DataSheet& pivot,
 	      coopy::store::DataSheet& local,
@@ -48,6 +49,7 @@ public:
     output(output),
     flags(flags),
     local_names(local_names), remote_names(remote_names) {
+      allIdentical = false;
   }
 };
 

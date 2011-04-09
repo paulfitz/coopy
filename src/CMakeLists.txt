@@ -7,6 +7,7 @@ IF (PROFILING)
   SET(CMAKE_EXE_LINKER_FLAGS "-pg")
   SET(CMAKE_SHARED_LINKER_FLAGS "-pg")
   SET(CMAKE_MODULE_LINKER_FLAGS "-pg")
+  LINK_LIBRARIES(profiler) # google-perftools
 ENDIF (PROFILING)
 
 include(CheckCXXCompilerFlag)

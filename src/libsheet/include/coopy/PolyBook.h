@@ -116,6 +116,14 @@ public:
     return "PolyBook";
   }
 
+  virtual DataBook& tail() {
+    if (book) {
+      return book->tail();
+    }
+    return *this;
+  }
+
+
   static void showFormats();
 };
 

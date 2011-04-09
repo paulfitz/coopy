@@ -228,11 +228,13 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     }
     */
 
+    /*
     dbg_printf("Row: (index p/l/r %d %d %d) act %d del %d / sz %d %d %d %d\n",
 	       pRow, lRow, rRow, 
 	       activity, 
 	       delRow,
 	       (int)expandMerge.size(), local.width(), current_row, local.height());
+    */
 
     if (activity||delRow) {
       char buf[256];
@@ -502,7 +504,8 @@ bool Merger::merge(MergerState& state) {
     }
 
     move.move(local_cols,shuffled_cols,move_order,0);
-    
+    dbg_printf("* move complete\n");
+ 
     if (move_order.size()>0) {
       // Should send messages for this case, but we're not ready
       // yet to exercise it.
@@ -554,6 +557,8 @@ bool Merger::merge(MergerState& state) {
       }
     }
 
+    //printf(">>> %s %d\n", __FILE__, __LINE__);
+
     // Pass 3: signal any column insertions
     int at = 0;
     for (list<MatchUnit>::iterator it=col_merge.accum.begin();
@@ -598,6 +603,8 @@ bool Merger::merge(MergerState& state) {
       }
     }
 
+    //printf(">>> %s %d\n", __FILE__, __LINE__);
+
     if (cc.size()>0) {
       constantColumns = false;
     }
@@ -606,14 +613,18 @@ bool Merger::merge(MergerState& state) {
 
     vector<RowChange> rc;
     // Now process rows
-    for (list<MatchUnit>::iterator it=row_merge.accum.begin();
-	 it!=row_merge.accum.end(); 
-	 it++) {
-      MatchUnit& unit = *it;
-      // ignoring row order for now ...
-      bool ok = mergeRow(pivot,local,remote,unit,output,flags,rc);
-      if (!ok) { return false; }
+    if (!state.allIdentical) {
+      for (list<MatchUnit>::iterator it=row_merge.accum.begin();
+	   it!=row_merge.accum.end(); 
+	   it++) {
+	MatchUnit& unit = *it;
+	// ignoring row order for now ...
+	bool ok = mergeRow(pivot,local,remote,unit,output,flags,rc);
+	if (!ok) { return false; }
+      }
     }
+
+    //printf(">>> %s %d\n", __FILE__, __LINE__);
 
     {
       NameChange nc;
@@ -623,6 +634,8 @@ bool Merger::merge(MergerState& state) {
       nc.names = original_col_names;
       output.changeName(nc);
     }
+
+    //printf(">>> %s %d\n", __FILE__, __LINE__);
 
     for (int i=0; i<(int)cc.size(); i++) {
       OrderChange& change = cc[i];
@@ -637,6 +650,8 @@ bool Merger::merge(MergerState& state) {
       nc.constant = constantColumns;
       output.changeName(nc);
     }
+
+    //printf(">>> %s %d\n", __FILE__, __LINE__);
 
     if (!constantIndex) {
       for (int i=0; i<(int)original_col_names.size(); i++) {
@@ -653,6 +668,8 @@ bool Merger::merge(MergerState& state) {
       change.allNames = local_col_names;
       output.changeRow(change);
     }
+
+    //printf(">>> %s %d\n", __FILE__, __LINE__);
 
     output.mergeDone();
     return true;

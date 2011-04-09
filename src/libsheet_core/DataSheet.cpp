@@ -1,5 +1,6 @@
 
 #include <coopy/DataSheet.h>
+#include <coopy/Sha1Generator.h>
 
 using namespace coopy::store;
 
@@ -145,5 +146,30 @@ Poly<SheetRow> DataSheet::insertRow() {
   SheetRow *row = new CacheSheetRow(this,height());
   COOPY_ASSERT(row);
   return Poly<SheetRow>(row,true);
+}
+
+std::string DataSheet::getHash(bool cache) const {
+  DataSheet *mod = (DataSheet *)this;
+  if (!cache) mod->hash_cache = "";
+  if (hash_cache!="") {
+    dbg_printf("(sha1 %ld %s %s)\n", (long int)this, hash_cache.c_str(), desc().c_str());
+    return hash_cache;
+  }
+  dbg_printf("Computing sha1\n");
+  Sha1Generator sha1;
+  for (int y=0;y<height();y++) {
+    std::string txt;
+    for (int x=0;x<width();x++) {
+      SheetCell cell = cellSummary(x,y);
+      txt += cell.toString();
+    }
+    sha1.add(txt);
+  }
+  std::string key = sha1.finish();
+  dbg_printf("sha1 %ld %s %s\n", (long int)this, key.c_str(), desc().c_str());
+  if (cache) {
+    mod->hash_cache = key;
+  }
+  return key;
 }
 

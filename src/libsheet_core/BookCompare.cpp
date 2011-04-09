@@ -17,6 +17,20 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
   // Merge currently based purely on names, no content comparison.
   // Hence a sheet rename cannot be guessed at yet.
 
+  bool pivot_is_local = false;
+  bool pivot_is_remote = false;
+  bool local_is_remote = false;
+  if (&pivot.tail()==&local.tail()) {
+    pivot_is_local = true;
+  }
+  if (&pivot.tail()==&remote.tail()) {
+    pivot_is_remote = true;
+  }
+  if (&local.tail()==&remote.tail()) {
+    local_is_remote = true;
+  }
+  //printf("%d %d %d\n", pivot_is_local, pivot_is_remote, local_is_remote);
+
   dbg_printf("BookCompare::compare begins\n");
 
   output.setFlags(flags);
@@ -63,12 +77,12 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
 	local_names.size()==1 && 
 	remote_names.size()==1) {
       pivot_sheet = pivot.readSheetByIndex(0);
-      local_sheet = local.readSheetByIndex(0);
-      remote_sheet = remote.readSheetByIndex(0);
+      local_sheet = pivot_is_local?pivot_sheet:local.readSheetByIndex(0);
+      remote_sheet = pivot_is_remote?pivot_sheet:(local_is_remote?local_sheet:remote.readSheetByIndex(0));
     } else {
       pivot_sheet = pivot.readSheet(name.c_str());
-      local_sheet = local.readSheet(name.c_str());
-      remote_sheet = remote.readSheet(name.c_str());
+      local_sheet =  pivot_is_local?pivot_sheet:local.readSheet(name.c_str());
+      remote_sheet = pivot_is_remote?pivot_sheet:(local_is_remote?local_sheet:remote.readSheet(name.c_str()));
     }
     if (!(pivot_sheet.isValid()&&
 	  local_sheet.isValid()&&

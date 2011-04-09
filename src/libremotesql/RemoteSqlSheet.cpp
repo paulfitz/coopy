@@ -178,16 +178,21 @@ std::string RemoteSqlSheet::cellString(int x, int y, bool& escaped) const {
   return out;
 }
 
-bool RemoteSqlSheet::cellString(int x, int y, const std::string& str) {
+bool RemoteSqlSheet::cellString(int x, int y, const std::string& str, bool escaped) {
   // starting with a COMPLETELY brain-dead implementation
 
   cache.cell(x,y) = str;
+  if (escaped) {
+    cacheFlag.cell(x,y) = true;
+  } else {
+    cacheFlag.remove(x,y);
+  }
 
   CSQL& SQL = SQL_CONNECTION(book);
 
   string query = string("UPDATE ") + name + " SET " +
     col2sql[x] + " = " +
-    quote(str) +
+    (escaped?"NULL":quote(str)) +
     " WHERE ";
   //printf("Making query %s\n", query.c_str());
   const vector<string>& idx = row2sql[y];

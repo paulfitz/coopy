@@ -261,6 +261,22 @@ public:
     return v;
   }
 
+  virtual std::string getHash(bool cache) const {
+    if (dh==0) {
+      COOPY_ASSERT(sheet);
+      return sheet->getHash(cache);
+    }
+    return DataSheet::getHash(cache);
+  }
+
+  virtual DataSheet& tail() {
+    if (dh!=0) {
+      return *this;
+    }
+     COOPY_ASSERT(sheet);
+     return sheet->tail();
+  }
+
   bool setRowOffset(int dh) {
     this->dh = dh;
     return true;

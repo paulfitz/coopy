@@ -36,7 +36,7 @@ void OrderMerge::process(int ilocal, int iremote,
 	    int _lpr = order_remote.a2b(_lp);
 	    if (_lpr!=-1) {
 	      process(base_local,base_remote,base_local,base_remote,ilocal,_lpr);
-	      dbg_printf("Local unit %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
+	      //dbg_printf("Local unit %d exists in pivot at %d and in remote at %d\n", _l, _lp, _lpr);
 	      accum.push_back(MatchUnit(_lp,_l,_lpr,false,MATCH_UNIT_PRESERVE));
 	      if (_lpr>=0) {
 		xremote.cell(0,_lpr) = 1;

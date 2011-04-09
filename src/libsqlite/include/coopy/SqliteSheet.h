@@ -2,6 +2,7 @@
 #define COOPY_SQLITESHEET
 
 #include <coopy/DataSheet.h>
+#include <coopy/SparseSheet.h>
 
 #include <vector>
 
@@ -28,7 +29,11 @@ public:
 
   virtual std::string cellString(int x, int y, bool& escaped) const;
 
-  virtual bool cellString(int x, int y, const std::string& str);
+  virtual bool cellString(int x, int y, const std::string& str) {
+    return cellString(x,y,str,false);
+  }
+
+  virtual bool cellString(int x, int y, const std::string& str, bool escaped);
 
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base);
 
@@ -66,6 +71,12 @@ public:
     return name;
   }
 
+  virtual bool clearCache() { 
+    cache.clear();
+    cacheFlag.clear();
+    return true;
+  }
+
 private:
   SqliteSheetSchema *schema;
   void *implementation;
@@ -75,6 +86,8 @@ private:
   std::vector<std::string> col2sql;
   std::vector<std::string> primaryKeys;
   std::vector<bool> col2pk;
+  SparseStringSheet cache;
+  SparseByteSheet cacheFlag;
   void checkKeys();
 };
 

@@ -56,6 +56,10 @@ public:
   virtual bool namedSheets() const {
     return true;
   }
+
+  virtual DataBook& tail() {
+    return *this;
+  }
 };
 
 #endif

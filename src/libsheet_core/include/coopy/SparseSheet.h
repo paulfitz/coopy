@@ -114,6 +114,15 @@ public:
     return it->second;
   }
 
+  bool remove(int x, int y) {
+    typename efficient_map<long long,T>::iterator it = data.find(((long long)y)*w+x);
+    if (it==data.end()) {
+      data.erase(it);
+      return true;
+    }
+    return false;
+  }
+
   const std::set<int>& getCellsInRow(int y) const {
     typename efficient_map<long, std::set<int> >::const_iterator it = 
       row.find(y);

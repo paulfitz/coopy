@@ -32,6 +32,8 @@ public:
   MeasurePass& pass;
   NameSniffer *local_names;
   NameSniffer *remote_names;
+  std::string local_hash;
+  std::string remote_hash;
 
   FastMatch(MeasurePass& pass) : pass(pass) {
     local_names = remote_names = NULL;
@@ -46,18 +48,24 @@ public:
     if (pass.a.width()==pass.b.width() &&
 	pass.a.height()==pass.b.height()) {
       bool fail = false;
-      for (int r=0; r<pass.a.height() && !fail; r++) {
-	for (int c=0; c<pass.a.width(); c++) {
-	  if (pass.a.cellSummary(c,r)!=pass.b.cellSummary(c,r)) {
-	    dbg_printf("FastMatch::match mismatch at (%d,%d): [%s] vs [%s]\n",
-		       c,r,
-		       pass.a.cellSummary(c,r).toString().c_str(),
-		       pass.b.cellSummary(c,r).toString().c_str());
-	    fail = true;
-	    break;
+
+      if (local_hash=="") {
+	for (int r=0; r<pass.a.height() && !fail; r++) {
+	  for (int c=0; c<pass.a.width(); c++) {
+	    if (pass.a.cellSummary(c,r)!=pass.b.cellSummary(c,r)) {
+	      dbg_printf("FastMatch::match mismatch at (%d,%d): [%s] vs [%s]\n",
+			 c,r,
+			 pass.a.cellSummary(c,r).toString().c_str(),
+			 pass.b.cellSummary(c,r).toString().c_str());
+	      fail = true;
+	      break;
+	    }
 	  }
 	}
+      } else {
+	fail = (local_hash!=remote_hash);
       }
+
       if (!fail) {
 	// sheets are identical!
 	dbg_printf("FastMatch::match identical sheets found\n");
@@ -151,6 +159,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   NameSniffer pivot_names(pivot,false);
   NameSniffer local_names(local,false);
   NameSniffer remote_names(remote,false);
+
   CompareFlags eflags = flags;
 
   if (eflags.trust_ids) {
@@ -169,6 +178,10 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
       return -1;
     }
   }
+
+  std::string local_hash = local.getHash(true);
+  std::string remote_hash = remote.getHash(true);
+  std::string pivot_hash = pivot.getHash(true);
 
   IdentityOrderResult id;
 
@@ -198,8 +211,10 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     
     p2l_row_man.setup();
     FastMatch p2l_row_fast_match(p2l_row_pass_local);
-    p2l_row_fast_match.local_names = &local_names;
-    p2l_row_fast_match.remote_names = &remote_names;
+    p2l_row_fast_match.local_names = &pivot_names;
+    p2l_row_fast_match.remote_names = &local_names;
+    p2l_row_fast_match.local_hash = pivot_hash;
+    p2l_row_fast_match.remote_hash = local_hash;
     p2l_row_fast_match.match(true);
     p2l_row_man.compare();
     
@@ -223,6 +238,10 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     
     p2r_row_man.setup();
     FastMatch p2r_row_fast_match(p2r_row_pass_local);
+    p2r_row_fast_match.local_names = &pivot_names;
+    p2r_row_fast_match.remote_names = &remote_names;
+    p2r_row_fast_match.local_hash = pivot_hash;
+    p2r_row_fast_match.remote_hash = remote_hash;
     p2r_row_fast_match.match(true);
     p2r_row_man.compare();
     
@@ -309,6 +328,8 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
   p2l_col_man.setup();
   FastMatch p2l_col_fast_match(p2l_col_pass_local);
+  p2l_col_fast_match.local_hash = pivot_hash;
+  p2l_col_fast_match.remote_hash = local_hash;
   p2l_col_fast_match.match(false);
   p2l_col_man.compare();
 
@@ -333,6 +354,8 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
   p2r_col_man.setup();
   FastMatch p2r_col_fast_match(p2r_col_pass_local);
+  p2r_col_fast_match.local_hash = pivot_hash;
+  p2r_col_fast_match.remote_hash = remote_hash;
   p2r_col_fast_match.match(false);
   p2r_col_man.compare();
 
@@ -355,6 +378,9 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 		    eflags,
 		    local_names,
 		    remote_names);
+  state.allIdentical = (pivot_hash == local_hash) && 
+    (pivot_hash == remote_hash) &&
+    (pivot_hash != "");
   bool ok = merger.merge(state);
 
   dbg_printf("SheetCompare::compare done\n");

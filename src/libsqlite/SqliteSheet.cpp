@@ -73,6 +73,9 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
 }
 
 bool SqliteSheet::connect() {
+
+  dbg_printf("Loading SqliteSheet\n");
+
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
 
@@ -156,6 +159,44 @@ bool SqliteSheet::connect() {
   sqlite3_free(query);
 
   checkKeys();
+
+  cache.resize(w,h,"");
+  cacheFlag.resize(w,h,0);
+
+  {
+    query = sqlite3_mprintf("SELECT * FROM %Q ORDER BY ROWID",
+			    this->name.c_str());
+    
+    iresult = sqlite3_prepare_v2(db, query, -1, 
+				 &statement, NULL);
+    if (iresult!=SQLITE_OK) {
+      const char *msg = sqlite3_errmsg(db);
+      if (msg!=NULL) {
+	fprintf(stderr,"Error: %s\n", msg);
+	fprintf(stderr,"Query was: %s\n", query);
+      }
+      sqlite3_finalize(statement);
+      sqlite3_free(query);
+    } 
+
+    int yy = 0;
+    while (sqlite3_step(statement) == SQLITE_ROW) {
+      for (int xx=0; xx<w; xx++) {
+	const unsigned char *r = sqlite3_column_text(statement,xx);
+	if (r==NULL) {
+	  cacheFlag.cell(xx,yy) = 1;
+	} else {
+	  //printf("[%s]\n", r);
+	  cache.cell(xx,yy) = (char *)r;
+	}
+      }
+      yy++;
+    }
+    sqlite3_finalize(statement);
+    sqlite3_free(query);
+  }
+
+  dbg_printf("Loaded SqliteSheet\n");
 
   return true;
 }
@@ -255,6 +296,16 @@ std::string SqliteSheet::cellString(int x, int y) const {
 }
 
 std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
+  escaped = false;
+  const unsigned char *f = cacheFlag.pcell_const(x,y);
+  if (f!=NULL) {
+    escaped = true;
+    return "";
+  }
+  const string *c = cache.pcell_const(x,y);
+  if (c!=NULL) {
+    return *c;
+  }
 
   // starting with a COMPLETELY brain-dead implementation
 
@@ -295,8 +346,15 @@ std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
 }
 
 
-bool SqliteSheet::cellString(int x, int y, const std::string& str) {
+bool SqliteSheet::cellString(int x, int y, const std::string& str, bool escaped) {
   // starting with a COMPLETELY brain-dead implementation
+
+  cache.cell(x,y) = str;
+  if (escaped) {
+    cacheFlag.cell(x,y) = true;
+  } else {
+    cacheFlag.remove(x,y);
+  }
 
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
@@ -304,11 +362,16 @@ bool SqliteSheet::cellString(int x, int y, const std::string& str) {
   sqlite3_stmt *statement = NULL;
   char *query = NULL;
 
+  const char *tstr = str.c_str();
+  if (escaped) { 
+    tstr = NULL;
+  }
   query = sqlite3_mprintf("UPDATE %Q SET %Q = %Q WHERE ROWID = %d", 
 			  name.c_str(),
 			  col2sql[x].c_str(),
-			  str.c_str(),
+			  tstr,
 			  row2sql[y]);
+  //printf(">>> %s\n", query);
 
   int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
   if (iresult!=SQLITE_OK) {
@@ -328,6 +391,8 @@ bool SqliteSheet::cellString(int x, int y, const std::string& str) {
 
 ColumnRef SqliteSheet::moveColumn(const ColumnRef& src, 
 				    const ColumnRef& base) {
+  clearCache();
+  
   int src_index = src.getIndex();
   int base_index = base.getIndex();
 
@@ -357,6 +422,8 @@ ColumnRef SqliteSheet::moveColumn(const ColumnRef& src,
 
 
 bool SqliteSheet::deleteColumn(const ColumnRef& column) {
+  clearCache();
+
   int deadbeat_index = column.getIndex();
 
   sqlite3 *db = DB(implementation);
@@ -373,6 +440,8 @@ bool SqliteSheet::deleteColumn(const ColumnRef& column) {
 }
 
 ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
+  clearCache();
+
   // we will need to pass in type hints in future, for better merges.
   // also, hint for column name.
 
@@ -438,6 +507,8 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
 }
 
 RowRef SqliteSheet::insertRow(const RowRef& base) {
+  clearCache();
+
   // Relies on having default values, to insert "blank row".
   // This is suboptimal.
 
@@ -473,6 +544,8 @@ RowRef SqliteSheet::insertRow(const RowRef& base) {
 }
 
 bool SqliteSheet::deleteRow(const RowRef& src) {
+  clearCache();
+
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
 
@@ -565,6 +638,8 @@ bool SqliteSheet::applyRowCache(const RowCache& cache, int row) {
 
 
 bool SqliteSheet::deleteData() {
+  clearCache();
+
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
 

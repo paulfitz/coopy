@@ -185,6 +185,15 @@ public:
     }
     return output;
   }
+
+  virtual std::string getHash(bool cache=false) const;
+
+  virtual DataSheet& tail() {
+    return *this;
+  }
+
+private:
+  std::string hash_cache;
 };
 
 class coopy::store::SheetRow : public RefCount {
