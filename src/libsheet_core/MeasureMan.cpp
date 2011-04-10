@@ -157,6 +157,8 @@ void MeasureMan::compare1(int ctrl) {
 	bestValue = match.cell(bestIndex,y);
       }
       double ref = bnorm_pass.match.cell(0,y);
+      double ref2 = anorm_pass.match.cell(0,y);
+      if (ref2<ref) ref = ref2;
       bool ok = false;
       if (bestValue>ref/4 && bestIndex>=0) {
 	//if (bestInc>bestValue/2 && bestIndex>=0) {

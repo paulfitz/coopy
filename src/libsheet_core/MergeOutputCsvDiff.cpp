@@ -149,6 +149,7 @@ bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
 	}
       }
       result.addRecord();
+      columns = lnops;
     }
     nops = lnops;
   }
@@ -243,10 +244,12 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
     if (change.mode==ROW_CHANGE_INSERT) {
       // we do not care about matching
       shouldMatch = prevSelect[name];
+      shouldAssign = true;
     }
     if (change.mode==ROW_CHANGE_DELETE) {
       // we do not care about assigning
       shouldAssign = prevDescribe[name];
+      shouldMatch = true;
     }
 
     // ignoring shouldShow for now.

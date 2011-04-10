@@ -5,6 +5,7 @@
 #include <coopy/OrderResult.h>
 #include <coopy/Dbg.h>
 #include <coopy/SparseSheet.h>
+#include <coopy/SheetView.h>
 
 namespace coopy {
   namespace cmp {
@@ -14,14 +15,17 @@ namespace coopy {
 
 class coopy::cmp::MeasurePass {
 public:
+  coopy::store::SheetView& va;
+  coopy::store::SheetView& vb;
   coopy::store::DataSheet& a;
   coopy::store::DataSheet& b;
   coopy::store::IntSheet asel, bsel;
   coopy::store::SparseFloatSheet match;
   int bound;
 
-  MeasurePass(coopy::store::DataSheet& a, 
-	      coopy::store::DataSheet& b) : a(a), b(b) {
+  MeasurePass(coopy::store::SheetView& va, 
+	      coopy::store::SheetView& vb) : va(va), vb(vb), 
+					     a(va.sheet), b(vb.sheet) {
     bound = -1;
   }
 

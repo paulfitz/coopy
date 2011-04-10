@@ -8,11 +8,32 @@ using namespace coopy::cmp;
 void ColMan::measure(MeasurePass& pass, int ctrl) {
     int wa = pass.a.width();
     int wb = pass.b.width();
-    //int ha = pass.a.height();
+    int ha = pass.a.height();
     int hb = pass.b.height();
 
     dbg_printf("Column comparison\n");
     pass.clearMatch();
+
+    if (ha<10 || hb<10) {
+      pass.va.meta.sniff();
+      pass.vb.meta.sniff();
+      const std::vector<std::string>& anames = pass.va.meta.suggestNames();
+      const std::vector<std::string>& bnames = pass.vb.meta.suggestNames();
+      if (anames.size()==wa && bnames.size()==wb) {
+	FMultiMap m(pass.match);
+	int c = m.getCtrlMax();
+	for (int i=0; i<wa; i++) {
+	  m.setCurr(i,i);
+	  m.add(anames[i],false,c);
+	}
+	for (int j=0; j<wb; j++) {
+	  m.setCurr(j,j);
+	  m.add(bnames[j],true,c);
+	}
+	dbg_printf("added column names to column comparison\n");
+      }
+    }
+
     int step = (int)(hb/pow(2,ctrl+4));
     if (step<1) step = 1;
     dbg_printf("Desperation %d, step size %d\n", ctrl, step);

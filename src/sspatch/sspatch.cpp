@@ -90,6 +90,8 @@ int main(int argc, char *argv[]) {
     printf("Output defaults to standard output.\n");
     printf("Write output to original file by doing:\n");
     printf("  sspatch --output sheet.csv sheet.csv patch.txt\n");
+    printf("Get debug info about what a patch would do:\n");
+    printf("  sspatch --fake sheet.csv patch.txt\n");
     return 1;
   }
 

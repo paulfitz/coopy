@@ -224,6 +224,8 @@ bool PatchParser::apply() {
 	}
 	configSet = true;
       }
+    } else if (cmd0=="sheet") {
+      dbg_printf("Ignoring sheet command for now\n");
     } else if (cmd0=="column") {
       OrderChange change;
       PatchColumnNames names2;

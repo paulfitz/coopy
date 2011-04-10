@@ -44,10 +44,21 @@ public:
   }
 
   std::string cell(coopy::store::DataSheet& a, int x, int y) {
+    if (!cellExists(a,x,y)) {
+      return "(no-cell)";
+    }
     if (rowLike) {
       return a.cellString(x,y);
     }
     return a.cellString(y,x);
+  }
+
+  bool cellExists(coopy::store::DataSheet& a, int x, int y) {
+    if (x<0||y<0) return false;
+    if (rowLike) {
+      return x<a.width()&&y<a.height();
+    }
+    return y<a.width()&&x<a.height();
   }
 
   void setup();

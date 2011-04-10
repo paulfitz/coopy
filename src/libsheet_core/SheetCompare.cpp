@@ -36,7 +36,11 @@ public:
   std::string remote_hash;
 
   FastMatch(MeasurePass& pass) : pass(pass) {
-    local_names = remote_names = NULL;
+    //local_names = remote_names = NULL;
+    local_names = &pass.va.meta;
+    remote_names = &pass.vb.meta;
+    local_hash = pass.va.sha1;
+    remote_hash = pass.vb.sha1;
   }
 
   void match(bool rowLike) {
@@ -183,6 +187,10 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   std::string remote_hash = remote.getHash(true);
   std::string pivot_hash = pivot.getHash(true);
 
+  SheetView vpivot(pivot,pivot_names,pivot_hash);
+  SheetView vlocal(local,local_names,local_hash);
+  SheetView vremote(remote,remote_names,remote_hash);
+
   IdentityOrderResult id;
 
   /////////////////////////////////////////////////////////////////////////
@@ -196,9 +204,9 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   bool valueBasedPivot = (flags.mapping==NULL);
 
   if (valueBasedPivot) {
-    MeasurePass p2l_row_pass_local(pivot,local);
-    MeasurePass p2l_row_pass_norm1(pivot,pivot);
-    MeasurePass p2l_row_pass_norm2(local,local);
+    MeasurePass p2l_row_pass_local(vpivot,vlocal);
+    MeasurePass p2l_row_pass_norm1(vpivot,vpivot);
+    MeasurePass p2l_row_pass_norm2(vlocal,vlocal);
     
     CombinedRowMan p2l_row_local;
     CombinedRowMan p2l_row_norm1;
@@ -211,10 +219,10 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     
     p2l_row_man.setup();
     FastMatch p2l_row_fast_match(p2l_row_pass_local);
-    p2l_row_fast_match.local_names = &pivot_names;
-    p2l_row_fast_match.remote_names = &local_names;
-    p2l_row_fast_match.local_hash = pivot_hash;
-    p2l_row_fast_match.remote_hash = local_hash;
+    //p2l_row_fast_match.local_names = &pivot_names;
+    //p2l_row_fast_match.remote_names = &local_names;
+    //p2l_row_fast_match.local_hash = pivot_hash;
+    //p2l_row_fast_match.remote_hash = local_hash;
     p2l_row_fast_match.match(true);
     p2l_row_man.compare();
     
@@ -223,9 +231,9 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     
     dbg_printf("SheetCompare::compare pivot <-> remote rows\n");
     
-    MeasurePass p2r_row_pass_local(pivot,remote);
-    MeasurePass p2r_row_pass_norm1(pivot,pivot);
-    MeasurePass p2r_row_pass_norm2(remote,remote);
+    MeasurePass p2r_row_pass_local(vpivot,vremote);
+    MeasurePass p2r_row_pass_norm1(vpivot,vpivot);
+    MeasurePass p2r_row_pass_norm2(vremote,vremote);
     
     CombinedRowMan p2r_row_local;
     CombinedRowMan p2r_row_norm1;
@@ -238,10 +246,10 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     
     p2r_row_man.setup();
     FastMatch p2r_row_fast_match(p2r_row_pass_local);
-    p2r_row_fast_match.local_names = &pivot_names;
-    p2r_row_fast_match.remote_names = &remote_names;
-    p2r_row_fast_match.local_hash = pivot_hash;
-    p2r_row_fast_match.remote_hash = remote_hash;
+    //p2r_row_fast_match.local_names = &pivot_names;
+    //p2r_row_fast_match.remote_names = &remote_names;
+    //p2r_row_fast_match.local_hash = pivot_hash;
+    //p2r_row_fast_match.remote_hash = remote_hash;
     p2r_row_fast_match.match(true);
     p2r_row_man.compare();
     
@@ -313,9 +321,9 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
   dbg_printf("SheetCompare::compare pivot <-> local columns\n");
 
-  MeasurePass p2l_col_pass_local(pivot,local);
-  MeasurePass p2l_col_pass_norm1(pivot,pivot);
-  MeasurePass p2l_col_pass_norm2(local,local);
+  MeasurePass p2l_col_pass_local(vpivot,vlocal);
+  MeasurePass p2l_col_pass_norm1(vpivot,vpivot);
+  MeasurePass p2l_col_pass_norm2(vlocal,vlocal);
 
   ColMan p2l_col_local(p2l_row_order);
   ColMan p2l_col_norm1(id);
@@ -328,8 +336,8 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
   p2l_col_man.setup();
   FastMatch p2l_col_fast_match(p2l_col_pass_local);
-  p2l_col_fast_match.local_hash = pivot_hash;
-  p2l_col_fast_match.remote_hash = local_hash;
+  //p2l_col_fast_match.local_hash = pivot_hash;
+  //p2l_col_fast_match.remote_hash = local_hash;
   p2l_col_fast_match.match(false);
   p2l_col_man.compare();
 
@@ -339,9 +347,9 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
   dbg_printf("SheetCompare::compare pivot <-> remote columns\n");
 
-  MeasurePass p2r_col_pass_local(pivot,remote);
-  MeasurePass p2r_col_pass_norm1(pivot,pivot);
-  MeasurePass p2r_col_pass_norm2(remote,remote);
+  MeasurePass p2r_col_pass_local(vpivot,vremote);
+  MeasurePass p2r_col_pass_norm1(vpivot,vpivot);
+  MeasurePass p2r_col_pass_norm2(vremote,vremote);
 
   ColMan p2r_col_local(p2r_row_order);
   ColMan p2r_col_norm1(id);
@@ -354,8 +362,8 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
   p2r_col_man.setup();
   FastMatch p2r_col_fast_match(p2r_col_pass_local);
-  p2r_col_fast_match.local_hash = pivot_hash;
-  p2r_col_fast_match.remote_hash = remote_hash;
+  //p2r_col_fast_match.local_hash = pivot_hash;
+  //p2r_col_fast_match.remote_hash = remote_hash;
   p2r_col_fast_match.match(false);
   p2r_col_man.compare();
 
