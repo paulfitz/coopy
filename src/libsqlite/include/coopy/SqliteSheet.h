@@ -77,6 +77,10 @@ public:
     return true;
   }
 
+ virtual bool isSequential() const {
+   return false;
+ }
+
 private:
   SqliteSheetSchema *schema;
   void *implementation;

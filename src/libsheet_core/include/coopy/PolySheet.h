@@ -277,6 +277,11 @@ public:
      return sheet->tail();
   }
 
+  virtual bool isSequential() const {
+    COOPY_ASSERT(sheet);
+    return sheet->isSequential();
+  }
+
   bool setRowOffset(int dh) {
     this->dh = dh;
     return true;

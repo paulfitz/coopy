@@ -108,6 +108,7 @@ public:
   }
 
   virtual void measure(MeasurePass& pass, int ctrl) {
+    /*
     if (ctrl==theta) {
       int h = pass.asel.height();
       int hits = 0;
@@ -118,11 +119,19 @@ public:
 	flip = true;
       }
     }
+    */
+    if (ctrl>=theta) {
+      man2.measure(pass,ctrl);
+    } else {
+      man1.measure(pass,ctrl);
+    }
+      /*
     if (!flip) {
       man1.measure(pass,ctrl);
     } else {
       man2.measure(pass,ctrl);
     }
+      */
   }
 
   virtual int getCtrlMax() {

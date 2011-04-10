@@ -135,11 +135,14 @@ int main(int argc, char *argv[]) {
   }
 
   PolySheet sheet = local.readSheetByIndex(0);
+  /*
   if (!sheet.isValid()) {
     fprintf(stderr, "No sheet found\n");
     return 1;
   }
+  */
   SheetPatcher patcher(&sheet);
+  patcher.book = &local;
   MergeOutputVerboseDiff fakePatcher;
   PatchParser parser(fake?((Patcher*)(&fakePatcher)):((Patcher*)(&patcher)),
 		     &sniffer);

@@ -72,6 +72,10 @@ public:
     return name;
   }
 
+ virtual bool isSequential() const {
+   return false;
+ }
+
 private:
   RemoteSqlSheetSchema *schema;
   RemoteSqlTextBook *book;

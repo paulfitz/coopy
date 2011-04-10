@@ -82,19 +82,27 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
     {
-      RowRef tail(rowCursor);
-      int r = sheet->insertRow(tail).getIndex();
-      if (rowCursor!=-1) {
-	rowCursor++;
-      }
-      if (r>=0) {
-	//printf("Row %d -- %d\n", r, sheet->height());
-	for (int c=0; c<width; c++) {
-	  if (active_val[c]) {
-	    //printf("  %d %d %s\n", c, r, val[c].c_str());
-	    sheet->cellSummary(c,r,val[c]);
+      if (sheet->isSequential()) {
+	RowRef tail(rowCursor);
+	int r = sheet->insertRow(tail).getIndex();
+	if (rowCursor!=-1) {
+	  rowCursor++;
+	}
+	if (r>=0) {
+	  for (int c=0; c<width; c++) {
+	    if (active_val[c]) {
+	      sheet->cellSummary(c,r,val[c]);
+	    }
 	  }
 	}
+      } else {
+	Poly<SheetRow> inserter = sheet->insertRow();
+	for (int c=0; c<width; c++) {
+	  if (active_val[c]) {
+	    inserter->setCell(c,val[c]);
+	  }
+	}
+	inserter->flush();
       }
     }
     break;
@@ -202,6 +210,7 @@ bool SheetPatcher::setSheet(const char *name) {
     fprintf(stderr,"Cannot find sheet %s\n", name);
     return false;
   }
+  dbg_printf("Moved to sheet %s\n", name);
   sheet = &psheet;
   return true;
 }

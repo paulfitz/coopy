@@ -192,6 +192,11 @@ public:
     return *this;
   }
 
+  // has spreadsheet-like ordering, inserts happen in a "place"
+  virtual bool isSequential() const {
+    return true;
+  }
+
 private:
   std::string hash_cache;
 };
