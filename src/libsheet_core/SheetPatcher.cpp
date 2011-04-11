@@ -180,7 +180,7 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
   if (chain) chain->declareNames(names,final);
   if (config.trustNames==false) {
     if ((int)names.size()!=sheet->width()) {
-      fprintf(stderr,"* ERROR: name mismatch\n");
+      fprintf(stderr,"* WARNING: name mismatch\n");
       return false;
     }
   } else {

@@ -14,7 +14,6 @@
 \li \ref patch_example_xls_update_cell_ref2 "patch.csv"
  
 \section patch_example_xls_update_cell_output output
-Using exporter Gnumeric_stf:stf_csv
 <table>
   <tr><td>Name</td><td>Number</td></tr>
   <tr><td>one</td><td>1</td></tr>
@@ -25,7 +24,6 @@ Using exporter Gnumeric_stf:stf_csv
 </table>
  
 \section patch_example_xls_update_cell_ref1 numbers.xls
-Using exporter Gnumeric_stf:stf_csv
 <table>
   <tr><td>Name</td><td>Number</td></tr>
   <tr><td>one</td><td>1</td></tr>
@@ -37,7 +35,8 @@ Using exporter Gnumeric_stf:stf_csv
  
 \section patch_example_xls_update_cell_ref2 patch.csv
 <table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.4</td></tr>
+  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
+  <tr><td>table</td><td>name</td><td>NumberSheet</td><td></td></tr>
   <tr><td>column</td><td>name</td><td>Name</td><td>Number</td></tr>
   <tr><td>link</td><td>name</td><td>Name</td><td></td></tr>
   <tr><td>link</td><td>act</td><td>*=</td><td></td></tr>

@@ -33,7 +33,8 @@
  
 \section patch_example_insert_column_ref2 patch.csv
 <table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.4</td><td></td><td></td></tr>
+  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td><td></td><td></td></tr>
+  <tr><td>table</td><td>name</td><td>sheet</td><td></td><td></td><td></td></tr>
   <tr><td>column</td><td>name</td><td>[0]</td><td>[1]</td><td></td><td></td></tr>
   <tr><td>column</td><td>insert</td><td>[0]</td><td>[1]</td><td>{2}</td><td></td></tr>
   <tr><td>column</td><td>insert</td><td>[0]</td><td>[1]</td><td>{2}</td><td>{3}</td></tr>

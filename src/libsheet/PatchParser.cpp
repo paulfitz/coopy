@@ -224,7 +224,7 @@ bool PatchParser::apply() {
 	}
 	configSet = true;
       }
-    } else if (cmd0=="sheet"&&cmd1=="name") {
+    } else if ((cmd0=="sheet"||cmd0=="table")&&cmd1=="name") {
       patcher->setSheet(patch.cell(2,i).c_str());
     } else if (cmd0=="column") {
       OrderChange change;

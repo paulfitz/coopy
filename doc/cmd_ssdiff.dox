@@ -26,13 +26,20 @@ to confirm that it exists, and to give tips on where to get started
 using it.  At the time of writing, that output is:
 
 \verbatim
-Show difference between two spreadsheets. Call as:
-  ssdiff [--output <filename>] [--parent parent.csv] reference.csv modified.csv
-  ssdiff --format-human local.csv modified.csv # human readable output
-  ssdiff --format-csv local.csv modified.csv   # format that sspatch can read
-  ssdiff --format-sql local.csv modified.csv   # not working yet
-  ssdiff --format-raw local.csv modified.csv   # full information
-Output defaults to standard output.
+Show the difference between two tables. Call as:
+  ssdiff [--output <filename>] local.csv modified.csv
+For differences in a classic-diff-like format, do:
+  ssdiff --format-tdiff local.csv modified.csv
+For differences in a verbose format, do:
+  ssdiff --format-human local.csv modified.csv
+To extract the mapping from local to modified in tabular form, do:
+  ssdiff --index local.csv modified.csv
+Output defaults to standard output.  To list supported formats:
+  ssdiff --list-formats
+It is possible to immediately apply a difference to the local file:
+  ssdiff --apply local.xls modified.csv
+This will modify local.xls to bring it into alignment with modified.csv
+Formatting information in local.xls will be left untouched.
 \endverbatim
 
 @section ssdiff_common_usage ssdiff orig.csv mod.csv

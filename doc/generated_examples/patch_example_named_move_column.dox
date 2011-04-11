@@ -35,7 +35,8 @@
  
 \section patch_example_named_move_column_ref2 patch.csv
 <table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.4</td></tr>
+  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
+  <tr><td>table</td><td>name</td><td>sheet</td><td></td></tr>
   <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
   <tr><td>column</td><td>move</td><td>DIGIT</td><td>NAME</td></tr>
 </table>

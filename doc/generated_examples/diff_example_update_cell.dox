@@ -15,7 +15,8 @@
  
 \section diff_example_update_cell_output output
 <table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.4</td></tr>
+  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
+  <tr><td>table</td><td>name</td><td>sheet</td><td></td></tr>
   <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
   <tr><td>link</td><td>name</td><td>NAME</td><td></td></tr>
   <tr><td>link</td><td>act</td><td>*=</td><td></td></tr>

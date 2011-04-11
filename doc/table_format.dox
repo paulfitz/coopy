@@ -8,20 +8,31 @@ following formats:
  \li CSV (or other delimiter-separated formats).
  \li Sqlite tables.
  \li MySQL tables (partial support at the time of writing).
- \li Spreadsheet sheets, via Gnumeric (.xls, .xlsx, .ods, etc).
+ \li Spreadsheet sheets (.xls, .xlsx, .ods, etc).
 
-CSV support is most complete, followed by Gnumeric, followed by Sqlite,
+CSV support is most complete, followed by Sqlite, followed by Gnumeric, 
 followed by MySQL.  Good support for all four formats is targeted for
 version 1.0 of the toolbox.
 
 \section table_format_spec Specifying sources
 
 The COOPY tools expects to work with files as inputs and outputs.
-To use a database as an input or output, or to add configuration
-options on how a file should be interpreted, special "proxy" files
-are used.  These proxies are given the extension .json, and their
-content is in the <a href="http://www.json.org/">JSON</a> format.
+For example:
+\verbatim
+ssdiff ver1.sqlite ver2.sqlite
+\endverbatim
 
+To use a database as an input or output, or to add configuration
+options on how a file should be interpreted, more information 
+needs to be supplied.  This can be done in two ways. 
+One is to use a "dbi:*" string.  For example:
+\verbatim
+ssdiff ver1.sqlite dbi:mysql:ver2:username=root
+\endverbatim
+This would compare the sqlite database in "ver1.sqlite" with the 
+mysql database called "ver2".  Alternatively, the extra information
+can be placed in a "proxy" file with a .json extension, in the 
+<a href="http://www.json.org/">JSON</a> format.
 Here is a file users.json to refer to a table called "users" in
 a mysql database called "db":
 \verbatim
@@ -35,9 +46,6 @@ a mysql database called "db":
   "table": "users"
 }
 \endverbatim
-
-The programs \ref ssdiff and \ref sspatch will accept 
-and operate on .json files.
 
  *
  */

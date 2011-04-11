@@ -23,10 +23,13 @@ using it.  At the time of writing, that output is:
 
 \verbatim
 Apply patch to a spreadsheet.
-  sspatch [--verbose] [--output output.csv] sheet.csv patch.csv
+  sspatch [--verbose] [--output output.csv] sheet.csv patch.txt
+  sspatch [--output output.sqlite] [--tmp tmp.sqlite] db.sqlite patch.txt
 Output defaults to standard output.
 Write output to original file by doing:
-  sspatch --output sheet.csv sheet.csv patch.csv
+  sspatch --output sheet.csv sheet.csv patch.txt
+Get debug info about what a patch would do:
+  sspatch --fake sheet.csv patch.txt
 \endverbatim
 
 @section sspatch_common_usage sspatch sheet.csv patch.csv

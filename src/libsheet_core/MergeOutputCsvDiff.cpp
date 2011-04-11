@@ -1,11 +1,15 @@
 
 
 /*
-  Changes since 0.2:
+  Changes in 0.4:
   Version number change.
   The special "*" character goes away.
   A "row transform" operation is added.
   Context distinguished from index
+
+  Changes in 0.5:
+  sheet command
+  
  */
 
 #include <coopy/MergeOutputCsvDiff.h>
@@ -41,7 +45,7 @@ bool MergeOutputCsvDiff::mergeStart() {
   result.addField("dtbl",false);
   result.addField("csv",false);
   result.addField("version",false);
-  result.addField("0.4",false);
+  result.addField("0.5",false);
   result.addRecord();
 
   return true;
@@ -339,7 +343,7 @@ bool MergeOutputCsvDiff::setSheet(const char *name) {
 
 bool MergeOutputCsvDiff::clearThroat() {
   if (currentSheetName!=pendingSheetName) {
-    result.addField("sheet",false);
+    result.addField("table",false);
     result.addField("name",false);
     result.addField(pendingSheetName.c_str(),false);
     result.addRecord();

@@ -51,7 +51,7 @@ Patcher *createTool(string mode, string version="") {
   } else if (mode=="csv") {
     if (version=="0.2") {
       result = new MergeOutputCsvDiffV0p2;
-    } else if (version=="0.4"||version=="") {
+    } else if (version=="0.4"||version=="0.5"||version=="") {
       result = new MergeOutputCsvDiff;
     }
   }

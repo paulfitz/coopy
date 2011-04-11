@@ -41,13 +41,13 @@ ssmerge test001_base.csv test001_spell.csv test001_col.csv
   <tr><td>www.coopmonth.coop/dirctory/submit.php</td><td>co-op month - co-op dirctory</td><td>2</td><td>18</td></tr>
   <tr><td>www.chfcanada.coop/ng/pags2007/about_3.asp</td><td>co-oprativ housing fdration of canada</td><td>2</td><td>19</td></tr>
   <tr><td>www.organiccolorado.org/mmbrs.html</td><td>colorado organic producrs association mmbrs</td><td>2</td><td>20</td></tr>
-  <tr><td>www.ibik.org/ncouragmnt/frbik/dirctory/indx.htm</td><td>community bik programs dirctory</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.ibik.org/ncouragmnt/frbik/dirctory/indx.htm</td><td>community bik programs dirctory</td><td>2</td><td>21</td></tr>
   <tr><td>acga.localharvst.org/</td><td>community gardn databas</td><td>2</td><td>22</td></tr>
   <tr><td>smallisbautiful.org/cltdirctory.html</td><td>community land trust dirctory</td><td>2</td><td>23</td></tr>
   <tr><td>namant.org/csf/locat</td><td>community supportd fishris locator</td><td>2</td><td>24</td></tr>
   <tr><td>www.complmntarycurrncy.org/ccdatabas/ls_public.html</td><td>complmntary currncy rsourc cntr</td><td>2</td><td>25</td></tr>
   <tr><td>www.ncdf.coop/mmbrship_nw.html</td><td>coop mmbrs of ncdf</td><td>2</td><td>26</td></tr>
-  <tr><td>www.cooprativgrocr.coop/coops/</td><td>cooprativ grocr food co-op dirctory</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.cooprativgrocr.coop/coops/</td><td>cooprativ grocr food co-op dirctory</td><td>2</td><td>27</td></tr>
   <tr><td>community.coop/davis/</td><td>cooprativs and nonprofits in davis and yolo countis</td><td>2</td><td>28</td></tr>
   <tr><td>popl.hofstra.du/faculty/martha_j_krisl/dirctory_of_craft_cooprativs.html</td><td>craft cooprativs dirctory</td><td>2</td><td>29</td></tr>
   <tr><td>www.crditunion.coop/cu_locator/quickfind.php</td><td>crdit union locator</td><td>2</td><td>30</td></tr>
@@ -55,15 +55,15 @@ ssmerge test001_base.csv test001_spell.csv test001_col.csv
   <tr><td>www.csi.coop/</td><td>csi support &amp; dvlopmnt srvics</td><td>2</td><td>32</td></tr>
   <tr><td>staylocal.org/biz/</td><td>dirctory of locally-ownd and opratd businsss in nw orlans</td><td>2</td><td>33</td></tr>
   <tr><td>www.rurdv.usda.gov/rbs/pub/sr22.htm</td><td>dirctory of rural farmr, ranchr, and fishry cooprativs</td><td>2</td><td>34</td></tr>
-  <tr><td>www.atwllguid.org/</td><td>at wll guid: local, sustainabl, organic food</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.atwllguid.org/</td><td>at wll guid: local, sustainabl, organic food</td><td>2</td><td>35</td></tr>
   <tr><td>www.cobusinsslinks.com/</td><td>cobusinsslinks grn dirctory</td><td>2</td><td>36</td></tr>
-  <tr><td>conomisocialqubc.ca/</td><td>conomi social qubc</td><td>NULL</td><td>NULL</td></tr>
-  <tr><td>massio.org/intractiv/indx.html</td><td>mploy ownd companis in massachustts</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>conomisocialqubc.ca/</td><td>conomi social qubc</td><td>2</td><td>37</td></tr>
+  <tr><td>massio.org/intractiv/indx.html</td><td>mploy ownd companis in massachustts</td><td>2</td><td>38</td></tr>
   <tr><td>www.kdc.coop/rsourcs/xampls_of_cooprativs_by_stat/?no_cach=1</td><td>xampls of mid-atlantic cooprativs</td><td>2</td><td>39</td></tr>
   <tr><td>www.suprmarktcoop.com/</td><td>fair trad and small farm producrs</td><td>2</td><td>40</td></tr>
   <tr><td>www.fairtradfdration.org/ht/d/mmdir/pid/1722</td><td>fair trad fdration mmbrs</td><td>2</td><td>41</td></tr>
   <tr><td>www.farmfrsh.org/</td><td>farm frsh - local food in ri, ct, ma</td><td>2</td><td>42</td></tr>
-  <tr><td>www.livingconomis.org/ntviw/local-ntworks-map</td><td>find a ball ntwork</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.livingconomis.org/ntviw/local-ntworks-map</td><td>find a ball ntwork</td><td>2</td><td>43</td></tr>
   <tr><td>www.amiba.nt/find/intrnational_indx.html</td><td>find an indpndnt businss allianc</td><td>2</td><td>44</td></tr>
   <tr><td>www.foginfo.org/dirctory.php</td><td>florida organic growrs dirctory</td><td>2</td><td>45</td></tr>
   <tr><td>www.gorgiaorganics.org/organic_dirctory/</td><td>gorgia organics dirctory</td><td>2</td><td>46</td></tr>
@@ -89,16 +89,16 @@ ssmerge test001_base.csv test001_spell.csv test001_col.csv
   <tr><td>www.coophousing.org/displaypag.aspx?id=108&amp;bmnu=56&amp;bitm=108</td><td>nahc mmbr associations</td><td>2</td><td>66</td></tr>
   <tr><td>www.nasco.coop/guid/</td><td>nasco guid to co-ops</td><td>2</td><td>67</td></tr>
   <tr><td>www.nationalco-opdirctory.com/</td><td>national co-op dirctory</td><td>2</td><td>68</td></tr>
-  <tr><td>www.nvironmntaldirctory.nt/</td><td>national nvironmntal dirctory</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.nvironmntaldirctory.nt/</td><td>national nvironmntal dirctory</td><td>2</td><td>69</td></tr>
   <tr><td>www.coopdirctory.org/</td><td>natural food coop dirctory srvic</td><td>2</td><td>70</td></tr>
   <tr><td>www.uitti.nt/nvp/nvp08dirctory.pdf</td><td>naugatuck vally projct dirctory (pdf)</td><td>2</td><td>71</td></tr>
   <tr><td>www.ncfc.org/mmbr-dirctory.html</td><td>ncfc mmbr dirctory</td><td>2</td><td>72</td></tr>
   <tr><td>www.ncga.coop/mmbr-stors</td><td>ncga mmbr co-op grocry stors</td><td>2</td><td>73</td></tr>
-  <tr><td>www.ncplnty.org/dirctory/dirctory.php</td><td>ncplnty mmbr dirctory</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.ncplnty.org/dirctory/dirctory.php</td><td>ncplnty mmbr dirctory</td><td>2</td><td>74</td></tr>
   <tr><td>www.ncrc.org/indx.php?option=com_contnt&amp;task=blogcatgory&amp;id=57&amp;itmid=121</td><td>ncrc mmbrs</td><td>2</td><td>75</td></tr>
   <tr><td>www.nbsusag.org/vnts/xhibitor%20list%20for%20program%20xhibitor%20copyfinal.pdf</td><td>nbraska sustainabl agricultur socity 2010 confrnc xhibitors</td><td>2</td><td>76</td></tr>
   <tr><td>www.nw.org/ntwork/utilitis/nwolookup.asp</td><td>nighborworks lookup</td><td>2</td><td>77</td></tr>
-  <tr><td>www.nppa.org/mmbrs/utilitymmbrs.php</td><td>nppa mmbrs list</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.nppa.org/mmbrs/utilitymmbrs.php</td><td>nppa mmbrs list</td><td>2</td><td>78</td></tr>
   <tr><td>www.citysd.org/city_markts/markts/indx.shtml</td><td>nw havn, ct farmrs' markts map</td><td>2</td><td>79</td></tr>
   <tr><td>www.ctnofa.org/linksbusinss.htm</td><td>nofa-ct businss mmbrs</td><td>2</td><td>80</td></tr>
   <tr><td>maps.googl.com/maps/ms?i=utf8&amp;hl=n&amp;om=0&amp;msa=0&amp;msid=115849143766969260830.0004458316f34d58a222&amp;z=9_&amp;mid=1217940919</td><td>nofa-ct farm and food guid (googl map)</td><td>2</td><td>81</td></tr>
@@ -114,18 +114,18 @@ ssmerge test001_base.csv test001_spell.csv test001_col.csv
   <tr><td>nofavt.org/find-organic-food</td><td>nofa-vt find organic food</td><td>2</td><td>91</td></tr>
   <tr><td>www.nyfarms.info/rstaurantsindx.html</td><td>ny farms! rstaurants buying local</td><td>2</td><td>92</td></tr>
   <tr><td>www.nypa.gov/nysrca/</td><td>ny stat rural lctric cooprativs</td><td>2</td><td>93</td></tr>
-  <tr><td>www.cnyc.org/grnmarkt/chfswhobuy</td><td>nyc chfs why buy from grnmarkt</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.cnyc.org/grnmarkt/chfswhobuy</td><td>nyc chfs why buy from grnmarkt</td><td>2</td><td>94</td></tr>
   <tr><td>www.justfood.org/csaloc</td><td>nyc csa locator - just food</td><td>2</td><td>95</td></tr>
   <tr><td>maps.googl.com/maps/ms?i=utf8&amp;hl=n&amp;o=utf8&amp;sourc=mbd&amp;msa=0&amp;msid=116730178006985764192.0004595340f30111d80f&amp;z=11</td><td>nyc fair trad coalition "whr to buy" map</td><td>2</td><td>96</td></tr>
   <tr><td>www.grnthumbnyc.org/gardnsarch.html</td><td>nyc grnthumb: find your community gardn</td><td>2</td><td>97</td></tr>
   <tr><td>www.oasisnyc.nt/gardn/gardnsarch.aspx</td><td>nyc opn accssibl spac information systm (oasis)</td><td>2</td><td>98</td></tr>
   <tr><td>www.mapsforamrica.com/solidarityconomy</td><td>nyc solidarity conomy map</td><td>2</td><td>99</td></tr>
   <tr><td>www.nycworkr.coop/</td><td>nyc workr cooprativs</td><td>2</td><td>100</td></tr>
-  <tr><td>dpt.knt.du/ooc/ntwork/ntworkcompanis.htm</td><td>ohio's mploy-ownd ntwork companis</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>dpt.knt.du/ooc/ntwork/ntworkcompanis.htm</td><td>ohio's mploy-ownd ntwork companis</td><td>2</td><td>101</td></tr>
   <tr><td>www.krrcntr.com/rsourcs/food-connction.htm</td><td>oklahoma food connction</td><td>2</td><td>102</td></tr>
   <tr><td>www.coopsontario.com/dirctory/</td><td>ontario co-op association -dirctory</td><td>2</td><td>103</td></tr>
   <tr><td>www.paorganic.org/pao_dirctory.htm</td><td>pnnsylvania crtifid organic dirctoris</td><td>2</td><td>104</td></tr>
-  <tr><td>www.pvsustain.com/</td><td>pionr vally sustainabl dvlopmnt invntory</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.pvsustain.com/</td><td>pionr vally sustainabl dvlopmnt invntory</td><td>2</td><td>105</td></tr>
   <tr><td>www.farmandfood.org/dirctory.html</td><td>rgional farm &amp; food projct dirctory</td><td>2</td><td>106</td></tr>
   <tr><td>find.coop/</td><td>rgional indx of coopration</td><td>2</td><td>107</td></tr>
   <tr><td>jascon.wik.is/</td><td>sf bay grassroots conomy wiki</td><td>2</td><td>108</td></tr>
@@ -133,18 +133,18 @@ ssmerge test001_base.csv test001_spell.csv test001_col.csv
   <tr><td>www.ifil.org/rdsolidaria/</td><td>solidarius</td><td>2</td><td>110</td></tr>
   <tr><td>sonomacounty.golocal.coop/businsss/indx/</td><td>sonoma county golocal cooprativ mmbr businss dirctory</td><td>2</td><td>111</td></tr>
   <tr><td>www.nccd.org/associations/associations.html</td><td>stat cd associations</td><td>2</td><td>112</td></tr>
-  <tr><td>www.cooprativmain.org/</td><td>strongr togthr: a dirctory of main's cooprativ conomy</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.cooprativmain.org/</td><td>strongr togthr: a dirctory of main's cooprativ conomy</td><td>2</td><td>113</td></tr>
   <tr><td>www.sustainabilityhub.nt/</td><td>sustainability hub for san mato county</td><td>2</td><td>114</td></tr>
   <tr><td>www.ibiblio.org/farming-connction/localcon/hom.htm</td><td>sustainabl farming connction</td><td>2</td><td>115</td></tr>
-  <tr><td>www.vgtarianhomstading.com/indx.html</td><td>th vgtarian homstadr's guid(tm)</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>www.vgtarianhomstading.com/indx.html</td><td>th vgtarian homstadr's guid(tm)</td><td>2</td><td>116</td></tr>
   <tr><td>www.tilthproducrs.org/dirctory/tpdirportal.htm</td><td>tilth producrs dirctory</td><td>2</td><td>117</td></tr>
   <tr><td>www.timbanks.org/dirctory.htm</td><td>tim banks dirctory</td><td>2</td><td>118</td></tr>
   <tr><td>www.tpl.org/tir3_cd.cfm?contnt_itm_id=20723&amp;foldr_id=628</td><td>trust for public land projct sits</td><td>2</td><td>119</td></tr>
   <tr><td>popularconomics.org/ussn/civicrm/profil?gid=2&amp;rst=1&amp;forc=1&amp;sarch=0</td><td>us solidarity conomy ntwork mmbr organizations</td><td>2</td><td>120</td></tr>
   <tr><td>www.usworkr.coop/about/mmbrlist</td><td>usfwc mmbrs</td><td>2</td><td>121</td></tr>
-  <tr><td>wiki.vallyworkr.org/</td><td>vally allianc of workr cooprativs mmbrs</td><td>NULL</td><td>NULL</td></tr>
-  <tr><td>www.vggitradr.com/</td><td>vggi tradr</td><td>NULL</td><td>NULL</td></tr>
-  <tr><td>www.voc.org/vrmontcompanis.shtml</td><td>vrmont mploy-ownd companis</td><td>NULL</td><td>NULL</td></tr>
+  <tr><td>wiki.vallyworkr.org/</td><td>vally allianc of workr cooprativs mmbrs</td><td>2</td><td>122</td></tr>
+  <tr><td>www.vggitradr.com/</td><td>vggi tradr</td><td>2</td><td>123</td></tr>
+  <tr><td>www.voc.org/vrmontcompanis.shtml</td><td>vrmont mploy-ownd companis</td><td>2</td><td>124</td></tr>
   <tr><td>www.nobawc.org/articl.php?id=56</td><td>workr cooprativs in th bay ara</td><td>2</td><td>125</td></tr>
 </table>
  
