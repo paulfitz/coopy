@@ -200,14 +200,19 @@ GnumericSheetPtr gnumeric_get_sheet_by_name(GnumericWorkbookPtr workbook,
 GnumericSheetPtr gnumeric_add_sheet(GnumericWorkbookPtr workbook,
 				    const char *name) {
   WorkbookView *wbv = (WorkbookView *)workbook;
+
+#ifndef OLD_GNUMERIC
   int cols = gnm_conf_get_core_workbook_n_cols ();
   int rows = gnm_conf_get_core_workbook_n_rows ();
   if (!gnm_sheet_valid_size (cols, rows)) {
     gnm_sheet_suggest_size (&cols, &rows);
   }
-
   Sheet *sheet = workbook_sheet_add (wb_view_get_workbook (wbv), 
 				     -1, cols, rows);
+#else
+  Sheet *sheet = workbook_sheet_add (wb_view_get_workbook (wbv), 
+				     -1, TRUE);
+#endif
   if (name!=NULL) {
     int idx = gnumeric_get_sheet_count(workbook)-1;
     GSList *idxs = NULL;
