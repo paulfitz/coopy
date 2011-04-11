@@ -27,7 +27,7 @@ IF (USE_MYSQL)
   IF (NOT LIB_MYSQL)
     MESSAGE(FATAL_ERROR "Cannot find mysqlclient library")
   ENDIF ()
-  LINK_LIBRARIES(${LIB_MYSQL})
+  LINK_LIBRARIES(${LIB_MYSQL} z)
 ENDIF ()
 
 IF (USE_POSTGRES)
