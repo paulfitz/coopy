@@ -5,6 +5,11 @@ if [ "k$1" = "k" ]; then
     exit 1
 fi
 
+cmake_opts="-DUSE_MYSQL=TRUE -DUSE_REMOTE_SQL=TRUE -DUSE_ACCESS=TRUE -DUSE_GNUMERIC=TRUE"
+
+cmake_opts_linux="-DUSE_ACCESS=TRUE -DUSE_MYSQL=TRUE -DUSE_REMOTE_SQL=TRUE  -DUSE_GNUMERIC=FALSE"
+cmake_opts_win="-DUSE_ACCESS=TRUE -DUSE_REMOTE_SQL=FALSE -DUSE_GNUMERIC=TRUE"
+
 while [ ! "k$1" = "k" ]; do 
 
     cfg="$HOME/.COOPY_PATHS"
@@ -39,14 +44,11 @@ while [ ! "k$1" = "k" ]; do
 	    echo "Creating $MINGW_BUILD"
 	    mkdir -p $MINGW_BUILD
 	    cd $MINGW_BUILD || exit 1
-	    cmake -DCMAKE_TOOLCHAIN_FILE=$MINGW_REPO/src/coopy_scm/scripts/mingwin.cmake $MINGW_REPO || exit 1
+	    cmake $cmake_opts_win -DCMAKE_TOOLCHAIN_FILE=$MINGW_REPO/src/coopy_scm/scripts/mingwin.cmake $MINGW_REPO || exit 1
 	)
 	cd $MINGW_BUILD || exit 1
-	cmake . || exit 1
-	make || {
-	    make clean
-	    make || exit 1
-	}
+	cmake $cmake_opts_win . || exit 1
+	make || exit 1
 	rm -f *.exe
 	make package || exit 1
 	cp -v *.exe $OUTPUT
@@ -70,7 +72,7 @@ while [ ! "k$1" = "k" ]; do
 	sudo rm -rf *.gz *.sh *.Z
 	(
 	    echo "cd $LINUX_CHROOT_BUILD"
-	    echo "cmake ."
+	    echo "cmake $cmake_opts_linux ."
 	    echo "make || ( make clean; make )"
 	    echo "make package"
 	    echo "make package_source"
