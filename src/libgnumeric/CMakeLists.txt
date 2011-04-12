@@ -9,7 +9,7 @@ if (USE_GNUMERIC)
   pkg_search_module (GOBJECT REQUIRED gobject-2.0)
   include_directories(${GOBJECT_INCLUDE_DIRS})
   pkg_search_module (GSF REQUIRED libgsf-1)
-  pkg_search_module (GNOMEPRINTUI REQUIRED libgnomeprintui-2.2)
+# pkg_search_module (GNOMEPRINTUI REQUIRED libgnomeprintui-2.2)
 
   set(GNUMERIC_ROOT "" CACHE STRING "Location of Gnumeric source") 
   message(STATUS "GNUMERIC_ROOT=${GNUMERIC_ROOT}")
@@ -60,7 +60,7 @@ if (USE_GNUMERIC)
   target_link_libraries(gnumeric ${GOBJECT_LIBRARIES})
   target_link_libraries(gnumeric ${GOFFICE_LIBRARIES})
   target_link_libraries(gnumeric ${GSF_LIBRARIES})
-  target_link_libraries(gnumeric ${GNOMEPRINTUI_LIBRARIES})
+# target_link_libraries(gnumeric ${GNOMEPRINTUI_LIBRARIES})
 
   target_link_libraries(gnumeric sheet_core)
 

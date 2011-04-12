@@ -1195,7 +1195,8 @@ bool CoopyFrame::createFile(const char *local_name) {
     wxString meat = wxT("example_name");
     wxRegEx re(wxT("[^a-zA-Z0-9]"));
     if (local_name!=NULL) {
-        wxString n(local_name);
+        std::string str(local_name);
+        wxString n(conv(local_name));
         wxFileName f = wxFileName::FileName(n);
         meat = f.GetName();
         re.ReplaceAll(&meat,wxT("_"));
