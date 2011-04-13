@@ -14,6 +14,13 @@
 using namespace coopy::store;
 using namespace coopy::cmp;
 
+// wxwidgets library version issue
+#ifdef __APPLE__
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+#endif
+
 #include <wx/wx.h>
 #include <wx/wxprec.h>
 #include <wx/dcbuffer.h>

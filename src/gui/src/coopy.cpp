@@ -6,6 +6,13 @@
  *
  */
 
+// wxwidgets library version issue
+#ifdef __APPLE__
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+#endif
+
 #include <wx/wx.h>
 #include <wx/wxprec.h>
 #include <wx/dcbuffer.h>
@@ -1195,7 +1202,8 @@ bool CoopyFrame::createFile(const char *local_name) {
     wxString meat = wxT("example_name");
     wxRegEx re(wxT("[^a-zA-Z0-9]"));
     if (local_name!=NULL) {
-        wxString n(local_name);
+        std::string ll(local_name);
+        wxString n(conv(ll));
         wxFileName f = wxFileName::FileName(n);
         meat = f.GetName();
         re.ReplaceAll(&meat,wxT("_"));

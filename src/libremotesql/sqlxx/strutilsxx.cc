@@ -478,6 +478,7 @@ string implode(const string &sGlue, const vector< string > &slPieces) {
 bool matchRegex(const string &sString, const string &sPattern) {
   regex_t RBuffer;
 
+#ifdef HAVE_GNUREGEX_H
   re_syntax_options=RE_SYNTAX_EGREP;
   RBuffer.buffer=0;
   RBuffer.allocated=0;
@@ -485,6 +486,9 @@ bool matchRegex(const string &sString, const string &sPattern) {
   RBuffer.fastmap=0;
   re_compile_pattern(sPattern.c_str(),sPattern.size(),&RBuffer);
   return re_match(&RBuffer,sString.c_str(),sString.size(),0,NULL)>=0;
+#else
+  return false;
+#endif
 }
 
 
