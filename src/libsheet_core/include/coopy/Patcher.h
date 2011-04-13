@@ -238,6 +238,18 @@ public:
     return (ct<=1); 
   }
 
+  virtual bool addSheet(const char *name, 
+			const coopy::store::PolySheet& sheet) {
+    return false;
+  }
+
+  virtual bool removeSheet(const char *name) {
+    return false;
+  }
+
+  virtual bool renameSheet(const char *name0, const char *name1) {
+    return false;
+  }
 
   virtual bool setFlags(const CompareFlags& flags) {
     this->flags = flags;

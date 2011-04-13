@@ -84,12 +84,6 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
       local_sheet =  pivot_is_local?pivot_sheet:local.readSheet(name.c_str());
       remote_sheet = pivot_is_remote?pivot_sheet:(local_is_remote?local_sheet:remote.readSheet(name.c_str()));
     }
-    if (!(pivot_sheet.isValid()&&
-	  local_sheet.isValid()&&
-	  remote_sheet.isValid())) {
-      fprintf(stderr,"Could not find matching sheets - no big deal, but not ready for this yet\n");
-      return -1;
-    }
 
     PolySheet mapping;
     CompareFlags flags2 = flags;
@@ -100,14 +94,37 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
       }
     }
 
-    SheetCompare cmp;
-    bool ok = output.setSheet(name.c_str());
-    if (!ok) {
-      fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());
+    if (pivot_sheet.isValid()&&
+	local_sheet.isValid()&&
+	remote_sheet.isValid()) {
+      SheetCompare cmp;
+      bool ok = output.setSheet(name.c_str());
+      if (!ok) {
+	fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());
+	return -1;
+      }
+      int r = cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags2);
+      if (r!=0) return r;
+    } else if (local_sheet.isValid()&&pivot_sheet.isValid()&&
+	       !remote_sheet.isValid()) {
+      dbg_printf("sheet removed in remote\n");
+      output.removeSheet(name.c_str());
+    } else if (remote_sheet.isValid()&&pivot_sheet.isValid()&&
+	       !local_sheet.isValid()) {
+      dbg_printf("sheet removed in local\n");
+      output.removeSheet(name.c_str());
+    } else if (remote_sheet.isValid()&&!pivot_sheet.isValid()&&
+	       !local_sheet.isValid()) {
+      dbg_printf("sheet added in remote\n");
+      output.addSheet(name.c_str(),remote_sheet);
+    } else if (local_sheet.isValid()&&!pivot_sheet.isValid()&&
+	       !remote_sheet.isValid()) {
+      dbg_printf("sheet added in local\n");
+      output.addSheet(name.c_str(),local_sheet);
+    } else {
+      fprintf(stderr,"Could not find matching sheets - no big deal, but not ready for this yet\n");
       return -1;
     }
-    int r = cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags2);
-    if (r!=0) return r;
     dbg_printf("BookCompare::compare - Done with \"%s\"\n", name.c_str());
   }
 
