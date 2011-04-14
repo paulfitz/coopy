@@ -116,7 +116,7 @@ public:
 
   bool remove(int x, int y) {
     typename efficient_map<long long,T>::iterator it = data.find(((long long)y)*w+x);
-    if (it==data.end()) {
+    if (it!=data.end()) {
       data.erase(it);
       return true;
     }
