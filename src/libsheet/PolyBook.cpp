@@ -266,6 +266,9 @@ bool PolyBook::attach(Property& config) {
     }
   }
   book = nextBook;
+  if (book!=NULL) {
+    book->addReference();
+  }
   options = config;
   return book!=NULL;
 }

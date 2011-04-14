@@ -3,6 +3,7 @@
 
 #include <coopy/PolySheet.h>
 #include <coopy/Property.h>
+#include <coopy/RefCount.h>
 
 #include <vector>
 #include <string>
@@ -13,7 +14,7 @@ namespace coopy {
   }
 }
 
-class coopy::store::DataBook {
+class coopy::store::DataBook : public RefCount {
 public:
   virtual ~DataBook() {}
 

@@ -116,12 +116,12 @@ public:
   }
 
   virtual int width() const {
-    COOPY_ASSERT(sheet);
+    if (!sheet) return 0;
     return sheet->width();
   }
 
   virtual int height() const {
-    COOPY_ASSERT(sheet);
+    if (!sheet) return 0;
     return sheet->height()-dh;
   }
 
@@ -285,6 +285,14 @@ public:
   bool setRowOffset(int dh) {
     this->dh = dh;
     return true;
+  }
+
+  bool hideHeaders() {
+    if (!hasExternalColumnNames()) {
+      setRowOffset(1);
+      return true;
+    }
+    return false;
   }
 };
 

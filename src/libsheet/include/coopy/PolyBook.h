@@ -17,7 +17,7 @@ private:
   coopy::store::Property options;
 public:
   PolyBook() {
-    book = NULL;
+    book = 0/*NULL*/;
   }
 
   virtual ~PolyBook() {
@@ -25,15 +25,36 @@ public:
   }
 
   void clear() {
-    if (book!=NULL) {
-      delete book;
-      book = NULL;
+    if (book!=0/*NULL*/) {
+      int ref = book->removeReference();
+      if (ref==0) {
+	delete book;
+      }
+      book = 0/*NULL*/;
     }
   }
 
   void take(TextBook *book) {
     clear();
     this->book = book;
+    if (book!=0) {
+      book->addReference();
+    }
+  }
+
+  PolyBook(const PolyBook& alt) {
+    book = alt.book;
+    if (book!=0) {
+      book->addReference();
+    }
+  }
+
+  const PolyBook& operator=(const PolyBook& alt) {
+    clear();
+    book = alt.book;
+    if (book!=0) {
+      book->addReference();
+    }
   }
 
   virtual std::vector<std::string> getNames() {

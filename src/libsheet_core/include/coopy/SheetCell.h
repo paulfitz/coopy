@@ -45,6 +45,8 @@ public:
   //operator std::string() const {
   //return toString();
   //}
+
+  int asInt() const;
 };
 
 #endif

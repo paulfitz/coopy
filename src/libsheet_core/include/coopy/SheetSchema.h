@@ -32,6 +32,12 @@ public:
   }
 
   virtual int getColumnIndexByName(const char *name) const {
+    for (int i=0; i<getColumnCount(); i++) {
+      ColumnInfo info = getColumnInfo(i);
+      if (info.getName()==name) {
+	return i;
+      }
+    }
     return -1;
   }
 

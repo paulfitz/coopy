@@ -67,8 +67,10 @@ add_subdirectory(libsheet_core)
 add_subdirectory(libremotesql)
 add_subdirectory(jsoncpp)
 add_subdirectory(libsheet)
+add_subdirectory(libsheet_fold)
 set(SHEET_INCLUDE_DIRS 
   ${CMAKE_SOURCE_DIR}/src/libsheet_core/include 
+  ${CMAKE_SOURCE_DIR}/src/libsheet_fold/include 
   ${CMAKE_SOURCE_DIR}/src/libcsv 
   ${CMAKE_SOURCE_DIR}/src/libsheet/include)
 
@@ -77,6 +79,7 @@ add_subdirectory(ssdiff)
 add_subdirectory(sspatch)
 add_subdirectory(ssrender)
 add_subdirectory(ssformat)
+add_subdirectory(ssfold)
 add_subdirectory(ssfossil)
 add_subdirectory(widesheet)
 add_subdirectory(gui)
