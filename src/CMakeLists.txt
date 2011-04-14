@@ -12,6 +12,12 @@ ENDIF (PROFILING)
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" HAVE_TR1)
+if (HAVE_TR1)
+  # We can't set the -std=c++0x flag globally, since it is an error for C
+  # files.  So we make C++ header files check that it has been added in
+  # individual targets.
+  add_definitions(-DSHOULD_HAVE_TR1)
+endif ()
 
 option(USE_GNUMERIC OFF "Enable gnumeric integration (For XLS, ODF, etc)")
 option(USE_ACCESS OFF "Enable Access formats (via mdbtools)")

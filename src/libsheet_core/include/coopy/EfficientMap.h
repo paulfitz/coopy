@@ -1,6 +1,17 @@
 #ifndef COOPY_EFFICIENTMAP
 #define COOPY_EFFICIENTMAP
 
+#ifdef SHOULD_HAVE_TR1
+#  ifndef HAVE_TR1
+#    error "TR1 flag not set correctly"
+#  endif
+#else
+#  ifdef HAVE_TR1
+#    error "TR1 flag set incorrectly"
+#  endif
+#endif
+
+
 #ifdef HAVE_TR1
 #  include <unordered_map>
 #  define efficient_map std::unordered_map
