@@ -35,7 +35,7 @@ std::string GnumericSheet::cellString(int x, int y,
   char *txt = gnumeric_sheet_get_cell_as_string(SHEET(implementation),
 						x, y);
   escaped = (txt==NULL);
-  if (txt==NULL) return "";
+  if (txt==NULL) return "NULL";
   string result = txt;
   //printf("GOT [%s]\n", result.c_str());
   // if txt is blank, it seems like we should not free it?
