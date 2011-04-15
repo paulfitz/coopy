@@ -2,6 +2,7 @@
 #include <coopy/PolyBook.h>
 #include <coopy/JsonProperty.h>
 #include <coopy/ShortTextBook.h>
+#include <coopy/FormatDesc.h>
 
 #include <fstream>
 
@@ -32,24 +33,48 @@ using namespace coopy::store;
 
 #include <coopy/SqliteTextBook.h>
 
+#define STRVAL PolyValue::makeString
+
 void getFactories(vector<TextBookFactory *>& lst,bool preview) {
 #ifdef USE_GNUMERIC
   if (preview) {
-    printf(".xls,.xlsx, and other Excel/Openoffice files (via Gnumeric)\n");
+    FormatDesc desc("GNUMERIC: Spreadsheet formats (via gnumeric)");
+    desc.addExtension(".xls","Excel spreadsheet");
+    desc.addExtension(".xlsx","Excel spreadsheet");
+    desc.addExtension(".gnumeric","Gnumeric spreadsheet");
+    desc.addDbi("dbi:gnumeric:fname.sheet","Force Gnumeric interpretation");
+    desc.addOption("type",STRVAL("gnumeric"),"Gnumeric family",true);
+    desc.addOption("file",STRVAL("fname.sheet"),"File name",true);
+    desc.show();
   } else {
     lst.push_back(new GnumericTextBookFactory());
   }
 #endif  
 #ifdef USE_ACCESS
   if (preview) {
-    printf(".mdb and other Access files (via Mdbtools)\n");
+    FormatDesc desc("MDB: Access database format (via Mdbtools, READ-ONLY)");
+    desc.addExtension(".mdb","Access database file");
+    desc.addDbi("dbi:access:fname.db","Force Access interpretation");
+    desc.addOption("type",STRVAL("access"),"Access family",true);
+    desc.addOption("file",STRVAL("fname.db"),"File name",true);
+    desc.show();
   } else {
     lst.push_back(new AccessTextBookFactory());
   }
 #endif  
 #ifdef USE_REMOTE_SQL
   if (preview) {
-    printf("mysql databases (use a .json file to specify a database)\n");
+    FormatDesc desc("MYSQL: database connector");
+    desc.addDbi("dbi:mysql:database_name","Use default port, username, etc");
+    desc.addDbi("dbi:mysql:database_name:username=USER:password=PASS","");
+    desc.addDbi("dbi:mysql:database_name:host=HOST:port=PORT","");
+    desc.addOption("type",STRVAL("mysql"),"MYSQL connector",true);
+    desc.addOption("database",STRVAL("db_name"),"Database name",true);
+    desc.addOption("host",STRVAL("localhost"),"Host name",true);
+    desc.addOption("port",STRVAL("1111"),"Port number",true);
+    desc.addOption("username",STRVAL("root"),"Username",true);
+    desc.addOption("password",STRVAL("****"),"Password",true);
+    desc.show();
   } else {
     lst.push_back(new RemoteSqlTextBookFactory("mysql"));
   }

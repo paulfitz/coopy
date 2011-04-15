@@ -287,18 +287,29 @@ bool PolyBook::flush() {
 #define STRVAL PolyValue::makeString
 
 void PolyBook::showFormats() {
-  printf("Supported formats:\n");
+  printf("Supported formats\n");
+  printf("-----------------\n\n");
   FormatDesc csv("CSV: plain-text delimiter-separated family of formats");
   csv.addExtension(".csv","Comma-separated values");
   csv.addExtension(".tsv","Tab-separated values");
   csv.addExtension(".ssv","Semicolon-separated values");
   csv.addOption("type",STRVAL("csv"),"CSV family",true);
-  csv.addOption("file",STRVAL("fname.csv"),"File name",true);
+  csv.addOption("file",STRVAL("fname.dsv"),"File name",true);
+  csv.addOption("delimiter",STRVAL("|"),"Delimiter character",true);
   csv.show();
 
   //printf("  file extensions: .csv .tsv .ssv\n");
   //printf("  .json options:   { \"type\": \"csv\", \"file\": \"fname.csv\", \"delimiter\": \",\", \"header\": 0, }\n");
-  printf(".sqlite files (in Sqlite database format)\n");
+  FormatDesc sqlite("SQLITE: file-based database");
+  sqlite.addExtension(".sqlite","Sqlite database file");
+  sqlite.addDbi("dbi:sqlite:fname.db","Force sqlite interpretation");
+  sqlite.addOption("type",STRVAL("sqlite"),"Sqlite family",true);
+  sqlite.addOption("file",STRVAL("fname.db"),"File name",true);
+  sqlite.show();
   vector<TextBookFactory *> all;
   getFactories(all,true);
+  printf("Tips:\n");
+  printf("*  Most spreadsheet/database formats support a 'table' option to restrict\n");
+  printf("   input/output to a named table or tables\n");
+  printf("*  json options and dbi options are interchangeable\n");
 }
