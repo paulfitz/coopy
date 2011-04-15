@@ -40,6 +40,7 @@ void SchemaSniffer::sniff(bool force) {
   fallback.setSheetName(name.c_str());
   fallback.setHeaderHeight(nameSniffer.getHeaderHeight());
   schema = &fallback;
+  fallback.setGuess(nameSniffer.isFake());
 }
 
 SheetSchema *SchemaSniffer::suggestSchema() {

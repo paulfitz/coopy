@@ -106,7 +106,7 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
       }
     }
     if (!target.hasExternalColumnNames()) {
-      if (schema->headerHeight()<=0) {
+      if (schema->headerHeight()<=0 && !schema->isGuess()) {
 	bool named = false;
 	for (int j=0; j<schema->getColumnCount(); j++) {
 	  ColumnInfo info = schema->getColumnInfo(j);

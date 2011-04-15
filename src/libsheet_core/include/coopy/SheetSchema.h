@@ -50,6 +50,10 @@ public:
   }
 
   virtual SheetSchema *clone() const;
+
+  virtual bool isGuess() const {
+    return false;
+  }
 };
 
 class coopy::store::SimpleSheetSchema : public SheetSchema {
@@ -58,9 +62,11 @@ private:
   std::vector<std::string> columns;
   std::vector<ColumnType> kinds;
   int hh;
+  bool guessed;
 public:
   SimpleSheetSchema() {
     hh = 0;
+    guessed = false;
   }
 
   bool copy(const SheetSchema& ss) {
@@ -74,6 +80,7 @@ public:
       columns.push_back(c.getName());
       kinds.push_back(c.getColumnType());
     }
+    guessed = ss.isGuess();
     return true;
   }
   
@@ -118,6 +125,14 @@ public:
 
   virtual std::string getSheetName() const {
     return sheetName;
+  }
+
+  virtual bool isGuess() const {
+    return guessed;
+  }
+
+  void setGuess(bool flag) {
+    guessed = flag;
   }
 };
 
