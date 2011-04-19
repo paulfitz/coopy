@@ -4,11 +4,6 @@
 
 #include <coopy/CsvFile.h>
 #include <coopy/MergeOutputPatch.h>
-#include <coopy/MergeOutputSqlDiff.h>
-#include <coopy/MergeOutputHumanDiff.h>
-#include <coopy/MergeOutputVerboseDiff.h>
-#include <coopy/MergeOutputCsvDiff.h>
-#include <coopy/MergeOutputTdiff.h>
 #include <coopy/MergeOutputIndex.h>
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
@@ -39,23 +34,7 @@ static void stop_output(string output, CompareFlags& flags) {
 }
 
 Patcher *createTool(string mode, string version="") {
-  Patcher *result = NULL;
-  if (mode=="sql") {
-    result = new MergeOutputSqlDiff;
-  } else if (mode=="human") {
-    result = new MergeOutputHumanDiff;
-  } else if (mode=="raw") {
-    result = new MergeOutputVerboseDiff;
-  } else if (mode=="tdiff") {
-    result = new MergeOutputTdiff;
-  } else if (mode=="csv") {
-    if (version=="0.2") {
-      result = new MergeOutputCsvDiffV0p2;
-    } else if (version=="0.4"||version=="0.5"||version=="") {
-      result = new MergeOutputCsvDiff;
-    }
-  }
-  return result;
+  return Patcher::createByName(mode.c_str(),version.c_str());
 }
 
 int main(int argc, char *argv[]) {

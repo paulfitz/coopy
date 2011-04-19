@@ -76,6 +76,7 @@ public:
   int mode;
 
   int identityToIndex(int id) const;
+  int identityToIndexAfter(int id) const;
 
   OrderChange() {
     subject = object = -1;
@@ -100,15 +101,15 @@ public:
 
 class coopy::cmp::RowChange {
 public:
-  int mode;
-  //typedef std::map<std::string,std::string> txt2txt;
   typedef std::map<std::string,coopy::store::SheetCell> txt2cell;
   typedef std::map<std::string,bool> txt2bool;
-  txt2cell cond;
-  txt2cell val;
+
+  int mode;         // One of ROW_CHANGE_*, see below
+  txt2cell cond;    // conditions for a match
+  txt2cell val;     // values to be assigned
   std::vector<std::string> names;
   std::vector<std::string> allNames;
-  txt2bool indexes;
+  txt2bool indexes; // conditions which are indexical, rather than confirming
   bool sequential;
 
   RowChange() {
@@ -310,6 +311,8 @@ public:
   coopy::store::TextBook *getBook() {
     return output_book;
   }
+
+  static Patcher *createByName(const char *name, const char *version = NULL);
 
 };
 

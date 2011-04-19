@@ -358,6 +358,36 @@ foreach(patcher patch_001_col_move patch_002_col_insert patch_003_col_insert pat
   ADD_TEST2(sqlite_${patcher} ${TESTS}/db/hdr_result_${patcher}.csv sspatch --tmp tmp.sqlite ${TESTS}/numbers.sqlite ${TESTS}/patch_v_0_2/${patcher}.txt)
 endforeach()
 
+#######################################################################
+#######################################################################
+
+# CSV <-> TDIFF testing
+
+foreach(patcher patch_001_col_move patch_002_col_insert patch_003_col_insert patch_004_col_delete patch_005_row_update patch_006_row_insert patch_007_row_delete)
+  SET(patch_file_csv1 ${TESTS}/patch_v_0_4/${patcher}.txt)
+  SET(patch_file_tdiff test_out_tdiff_${patcher}.tdiff)
+  SET(patch_file_csv2 test_out_tdiff_${patcher}_regenerated.csv)
+  SET(result_csv1 test_out_tdiff_${patcher}_result_csv1.csv)
+  SET(result_tdiff test_out_tdiff_${patcher}_result_tdiff.csv)
+  SET(result_csv2 test_out_tdiff_${patcher}_result_csv2.csv)
+
+  ADD_TEST(tdiff_${patcher} ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+    --format tdiff --output ${patch_file_tdiff} ${patch_file_csv1})
+  ADD_TEST(tdiff_${patcher}Reverse ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+    --format csv --output ${patch_file_csv2} ${patch_file_tdiff})
+
+  ADD_TEST(tdiff_${patcher}_csv1 ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+    --output ${result_csv1} ${TESTS}/numbers.csv ${patch_file_csv1})
+  ADD_TEST(tdiff_${patcher}_tdiff ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+    --output ${result_tdiff} ${TESTS}/numbers.csv ${patch_file_tdiff})
+  ADD_TEST(tdiff_${patcher}_csv1 ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+    --output ${result_csv2} ${TESTS}/numbers.csv ${patch_file_csv2})
+
+  ADD_TEST(tdiff_${patcher}Compare1 ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+    --equals ${result_csv1} ${result_tdiff})
+  ADD_TEST(tdiff_${patcher}Compare1 ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+    --equals ${result_csv2} ${result_tdiff})
+endforeach()
 
 #######################################################################
 #######################################################################

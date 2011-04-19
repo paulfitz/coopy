@@ -22,6 +22,11 @@ public:
     {}
     
   bool apply();
+
+private:
+  bool applyCsv();
+
+  bool applyTdiff();
 };
 
 #endif

@@ -10,6 +10,8 @@ using namespace std;
 using namespace coopy::fold;
 using namespace coopy::store;
 
+typedef vector<int> ints;
+
 class SheetAccess {
 public:
   PolySheet sheet;
@@ -137,6 +139,20 @@ public:
       return -1;
     }
     return it2->second;
+  }
+
+  ints transform(ints y) {
+    ints result;
+    for (int i=0; i<(int)y.size(); i++) {
+      for (mapper::iterator it1 = indexedSrc.lower_bound(y);
+	   it1 != indexedSrc.upper_bound(y); it1++) {	
+	for (mapper::iterator it2 = indexedDest.lower_bound(it1->second);
+	     it2 != indexedDest.upper_bound(it1->second); it2++) {	
+	  results.push_back(it2->second);
+	}
+      }
+    }
+    return results;
   }
 };
   

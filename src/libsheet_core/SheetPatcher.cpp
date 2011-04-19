@@ -16,20 +16,39 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
   if (chain) chain->changeColumn(change);
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
-    return sheet->deleteColumn(ColumnRef(change.subject));
-    //return sheet->deleteColumn(ColumnRef(change.identityToIndex(change.subject)));
+    //return sheet->deleteColumn(ColumnRef(change.subject));
+    return sheet->deleteColumn(ColumnRef(change.identityToIndex(change.subject)));
     break;
   case ORDER_CHANGE_INSERT:
-    return sheet->insertColumn(ColumnRef(change.subject)).isValid();
-    //return sheet->insertColumn(ColumnRef(change.identityToIndex(change.subject))).isValid();
+    //return sheet->insertColumn(ColumnRef(change.subject)).isValid();
+    {
+      int toSheet = change.identityToIndexAfter(change.subject);
+      if (toSheet==change.indicesAfter.size()-1) {
+	toSheet = -1;
+      } else {
+	int toId = change.indicesAfter[toSheet+1];
+	toSheet = change.identityToIndex(toId);
+      }
+      return sheet->insertColumn(ColumnRef(toSheet)).isValid();
+    }
     break;
   case ORDER_CHANGE_MOVE:
-    return sheet->moveColumn(ColumnRef(change.subject),
-			     ColumnRef(change.object)
-			     ).isValid();
-    //return sheet->moveColumn(ColumnRef(change.identityToIndex(change.subject)),
-    //			     ColumnRef(change.identityToIndex(change.object))
-    //			     ).isValid();
+    //return sheet->moveColumn(ColumnRef(change.subject),
+    //ColumnRef(change.object)
+    //).isValid();
+    {
+      int toSheet = change.identityToIndexAfter(change.subject);
+      if (toSheet==change.indicesAfter.size()-1) {
+	toSheet = -1;
+      } else {
+	int toId = change.indicesAfter[toSheet+1];
+	toSheet = change.identityToIndex(toId);
+      }
+      return sheet->moveColumn(ColumnRef(change.identityToIndex(change.subject)),
+			       ColumnRef(toSheet)
+			       ).isValid();
+    }
+    break;
   default:
     fprintf(stderr,"* ERROR: Unknown column operation\n");
     break;

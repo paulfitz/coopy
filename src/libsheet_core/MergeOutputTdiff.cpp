@@ -31,7 +31,7 @@ bool MergeOutputTdiff::mergeStart() {
 
 void MergeOutputTdiff::showSheet() {
   if (!sheetNameShown) {
-    fprintf(out,"\n# sheet %s\n\n", sheetName.c_str());
+    fprintf(out,"\n@@@ %s\n\n", sheetName.c_str());
     sheetNameShown = true;
   }
 }
@@ -45,19 +45,27 @@ bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
   constantColumns = false;
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
-    fprintf(out,"/* Column deletion ignored */\n\n");
+    fprintf(out,"@- %s", change.namesBefore[change.identityToIndex(change.subject)].c_str());
     break;
   case ORDER_CHANGE_INSERT:
-    fprintf(out,"/* Column insertion ignored */\n\n");
+    {
+    fprintf(out,"@+ %s", change.namesAfter[change.identityToIndexAfter(change.subject)].c_str());
+    }
     break;
   case ORDER_CHANGE_MOVE:
-    fprintf(out,"/* Column move ignored */\n\n");
+    fprintf(out,"@: %s", change.namesBefore[change.identityToIndex(change.subject)].c_str());
     break;
   default:
     fprintf(stderr,"  Unknown column operation\n\n");
     exit(1);
     break;
   }
+  fprintf(out, " |");
+  for (int i=0; i<(int)change.namesAfter.size(); i++) {
+    fprintf(out,"%s|",change.namesAfter[i].c_str());
+  }
+  fprintf(out,"\n");
+
   activeColumn.clear();
   for (int i=0; i<(int)change.namesAfter.size(); i++) {
     activeColumn[change.namesAfter[i]] = true;
@@ -235,12 +243,13 @@ bool MergeOutputTdiff::changeName(const NameChange& change) {
     }
     if (!constant) {
       showSheet();
-      fprintf(out, "/* %s %s ","column","name");
+      //fprintf(out, "/* %s %s ","column","name");
       //result.addField(ROW_COL,false);
+      fprintf(out,"@@ |");
       for (int i=0; i<(int)names.size(); i++) {
-	fprintf(out,"%s ",names[i].c_str());
+	fprintf(out,"%s|",names[i].c_str());
       }
-      fprintf(out,"*/\n\n");
+      fprintf(out,"\n");
       showedColumns = true;
     }
   }

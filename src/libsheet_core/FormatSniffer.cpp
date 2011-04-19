@@ -70,9 +70,13 @@ Format FormatSniffer::getFormat() {
       f.name = "coopy_patch_human";
     }
     return f;
+  } else if (cache.substr(0,7)=="# tdiff") {
+    Format f;
+    f.id = FORMAT_PATCH_TDIFF;
+    f.name = "coopy_patch_tdiff";
+    return f;
   }
 
-  //printf("CACHE %s\n", (cache.substr(0,15)).c_str());
   if (cache.substr(0,15)=="SQLite format 3") {
     Format f;
     f.id = FORMAT_BOOK_SQLITE;

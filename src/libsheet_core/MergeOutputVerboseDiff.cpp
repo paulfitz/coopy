@@ -91,6 +91,6 @@ bool MergeOutputVerboseDiff::changeName(const NameChange& change) {
 }
 
 bool MergeOutputVerboseDiff::setSheet(const char *name) { 
-  fprintf(out,"setSheet [%s]\n\n", stringer_encoder(name).c_str());
+  fprintf(out,"setSheet [%s]\n\n", stringer_encoder(string(name)).c_str());
   return true;
 }

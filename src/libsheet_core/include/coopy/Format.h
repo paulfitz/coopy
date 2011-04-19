@@ -10,6 +10,7 @@ namespace coopy {
     enum {
       FORMAT_UNKNOWN,
       FORMAT_PATCH_CSV,
+      FORMAT_PATCH_TDIFF,
       FORMAT_PATCH_HUMAN,
       FORMAT_BOOK_SQLITE,
       FORMAT_BOOK_CSVS,

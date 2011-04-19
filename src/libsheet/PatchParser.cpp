@@ -24,6 +24,13 @@ public:
   vector<SheetCell> data;
   vector<int> indices;
 
+  void read(const vector<string>& vals, int offset) {
+    for (int i=0; i<(int)vals.size(); i++) {
+      lst.push_back(vals[i]);
+      indices.push_back(i);
+    }
+  }
+
   void read(const DataSheet& sheet, int x, int y, int len = -1) {
     lst.clear();
     indices.clear();
@@ -83,7 +90,8 @@ public:
     } else {
       indices.push_back(neg);
     }
-    if (dest!=NULL) *dest = subject;
+    if (dest!=NULL) *dest = neg;
+    //if (dest!=NULL) *dest = subject;
     return mover;
   }
 
@@ -100,8 +108,8 @@ public:
     string mover = prior.lst[i];
     indices = prior.indices;
     int subject = i;
+    if (src!=NULL) *src = indices[subject];
     indices.erase(indices.begin()+subject);
-    if (src!=NULL) *src = subject;
     return mover;
   }
 
@@ -123,6 +131,7 @@ public:
     } else {
       mover = lst[i];
     }
+
     int isrc = -1;
     int idest = -1;
     vector<string>::const_iterator it = 
@@ -132,8 +141,10 @@ public:
     vector<string>::const_iterator it2 = 
       find(lst.begin(),lst.end(),mover);
     int add = it2-lst.begin();
+    bool append = false;
     if (add==((int)lst.size())-1) {
       idest = -1;
+      append = true;
     } else {
       vector<string>::const_iterator it_post = it2;
       it_post++;
@@ -143,11 +154,21 @@ public:
     }
     indices = prior.indices;
     int v = indices[rem];
+    if (src!=NULL) *src = v;
+    if (dest!=NULL) *dest = v;
     indices.erase(indices.begin()+rem);
+    //printf("removing at %d, inserting at %d\n", rem, add);
     if (add>rem) add--;
-    indices.insert(indices.begin()+add,v);
-    if (src!=NULL) *src = isrc;
-    if (dest!=NULL) *dest = idest;
+    if (append) {
+      indices.push_back(v);
+    } else {
+      indices.insert(indices.begin()+add,v);
+    }
+
+    //if (dest!=NULL) *dest = v;
+
+    //if (src!=NULL) *src = isrc;
+    //if (dest!=NULL) *dest = idest;
 
     return mover;
   }
@@ -159,16 +180,25 @@ bool PatchParser::apply() {
   if (patcher==NULL) return false;
 
   Format format = reader->getFormat();
-  if (format.id!=FORMAT_PATCH_CSV) {
-    fprintf(stderr,"Unsupported format\n");
-    return false;
+  if (format.id==FORMAT_PATCH_CSV) {
+    return applyCsv();
   }
+  if (format.id==FORMAT_PATCH_TDIFF) {
+    return applyTdiff();
+  }
+  fprintf(stderr,"Unsupported format\n");
+  return false;
+}
+
+bool PatchParser::applyCsv() {
 
   CsvSheet patch;
   if (CsvFile::read(*reader,patch)!=0) {
     fprintf(stderr,"Failed to read patch\n");
     return false;
   }
+
+  patcher->mergeStart();
 
   PatchColumnNames names;
   vector<string> allNames;
@@ -415,7 +445,238 @@ bool PatchParser::apply() {
     }
   }
 
+  patcher->mergeDone();
+  patcher->mergeAllDone();
+
   return true;
 }
 
+vector<string> normalizedMessage(const string& line) {
+  vector<string> all;
+  string result;
+  bool white = true;
+  bool quote = false;
+  bool pending = false;
+  for (int i=0; i<(int)line.length(); i++) {
+    char ch = line[i];
+    if (ch=='\"') {
+      quote = !quote;
+      result += ch;
+      pending = true;
+    } else if (quote) {
+      result += ch;
+      pending = true;
+    } else if (ch==' '||ch=='\r'||ch=='\t'||ch=='|') {
+      if (pending) {
+	all.push_back(result);
+	pending = false;
+      }
+      result = "";
+      white = true;
+      if (ch=='|') {
+	pending = true;
+      }
+    } else {
+      white = false;
+      result += ch;
+      pending = true;
+    }
+  }
+  if (pending&&result!="") {
+    all.push_back(result);
+    pending = false;
+  }
+  return all;
+}
+
+class TDiffPart {
+public:
+  string base;
+  string mod;
+  bool hasMod;
+  bool isId;
+
+  TDiffPart() {
+    isId = false;
+    hasMod = false;
+  }
+
+  TDiffPart(const string& s) {
+    apply(s);
+  }
+
+  void apply(string s) {
+    isId = false;
+    hasMod = false;
+    if (s.length()>0) {
+      if (s[s.length()-1]=='=') {
+	isId = true;
+	s = s.substr(0,s.length()-1);
+      }
+    }
+    bool quote = false;
+    int state = 0;
+    int pre = -1;
+    int post = -1;
+    for (int i=0; i<(int)s.length(); i++) {
+      char ch = s[i];
+      if (ch=='\"') {
+	state = 0;
+	quote = !quote;
+      } else if (quote) {
+	state = 0;
+      } else if (ch=='-'&&state==0&&pre==-1) {
+	state = 1;
+      } else if (ch=='>'&&state==1) {
+	state = 2;
+	pre = i-2;
+	post = i+1;
+      } else {
+	state = 0;
+      }
+    }
+    if (pre!=-1) {
+      base = s.substr(0,pre+1);
+      mod = s.substr(post,s.length());
+      hasMod = true;
+    } else {
+      base = s;
+      mod = "";
+    }
+  }
+
+  SheetCell baseCell() {
+    return SheetCell(base,false);
+  }
+
+  SheetCell modCell() {
+    return SheetCell(mod,false);
+  }
+};
+
+bool PatchParser::applyTdiff() {
+  patcher->mergeStart();
+
+  bool eof = false;
+  vector<TDiffPart> cols;
+  while (!eof) {
+    string line = reader->readLine(eof);
+    vector<string> msg = normalizedMessage(line);
+    if (msg.size()==0) {
+      //dbg_printf("Empty line\n");
+      continue;
+    } 
+    string first = msg[0];
+    if (first[0]=='#'||first[0]=='/') {
+      dbg_printf("Ignoring comment [%s]\n", line.c_str());
+      continue;
+    }
+    //printf("Got [%s] [%s]\n", line.c_str(), first.c_str());
+    if (first=="@@@") {
+      patcher->setSheet(msg[1].c_str());
+    } else if (first=="@"||first=="@@") {
+      vector<string> names;
+      cols.clear();
+      for (int i=1; i<(int)msg.size(); i++) {
+	cols.push_back(TDiffPart(msg[i]));
+	names.push_back(cols[i-1].base);
+      }
+      if (first=="@@") {
+	NameChange nc;
+	nc.mode = NAME_CHANGE_DECLARE;
+	nc.final = false;
+	nc.names = names;
+	patcher->changeName(nc);
+      }
+      /*
+      printf("Columns set to: ");
+      for (int i=0; i<(int)cols.size(); i++) {
+	printf("\"%s\" ", cols[i].base.c_str());
+      }
+      printf("\n");
+      */
+    } else if (first=="@:"||first=="@+"||first=="@-") {
+      vector<string> ocols;
+      vector<string> ncols;
+      for (int i=0; i<(int)cols.size(); i++) {
+	ocols.push_back(cols[i].base);
+      }
+      for (int i=2; i<(int)msg.size(); i++) {
+	ncols.push_back(msg[i]);
+      }
+      
+      OrderChange change;
+      PatchColumnNames names;
+      PatchColumnNames names2;
+      names.read(ocols,0);
+      names2.read(ncols,0);
+      if (first=="@:") {
+	string mover = names2.inferMove(names,&change.subject,&change.object);
+	dbg_printf("Moving columns to %s (%s moves // subj %d obj %d)\n", 
+		   names2.toString().c_str(),
+		   mover.c_str(),
+		   change.subject,
+		   change.object);
+	change.mode = ORDER_CHANGE_MOVE;
+      } else if (first=="@+") {
+	string mover = names2.inferInsert(names,&change.subject);
+	dbg_printf("Inserting columns to %s (%s insert // subj %d)\n", 
+		   names2.toString().c_str(),
+		   mover.c_str(),
+		   change.subject);
+	change.mode = ORDER_CHANGE_INSERT;
+      } else if (first=="@-") {
+	string mover = names2.inferDelete(names,&change.subject);
+	dbg_printf("Deleting columns from %s (%s delete // subj %d)\n", 
+		   names2.toString().c_str(),
+		   mover.c_str(),
+		   change.subject);
+	change.mode = ORDER_CHANGE_DELETE;
+      }
+      change.indicesBefore = names.indices;
+      change.indicesAfter = names2.indices;
+      change.namesBefore = names.lst;
+      change.namesAfter = names2.lst;
+      patcher->changeColumn(change);
+
+      cols.clear();
+      for (int i=2; i<(int)msg.size(); i++) {
+	cols.push_back(TDiffPart(msg[i]));
+      }
+ 
+    } else if (first=="=") {
+      vector<TDiffPart> assign;
+      for (int i=1; i<(int)msg.size(); i++) {
+	TDiffPart part;
+	part.apply(msg[i]);
+	//printf("[%d] [%s] [%s]\n", (int)part.hasMod, part.base.c_str(), part.mod.c_str());
+	assign.push_back(part);
+      }
+      COOPY_ASSERT(assign.size()==cols.size());
+
+      RowChange change;
+      change.mode = ROW_CHANGE_UPDATE;
+      for (int i=0; i<(int)assign.size(); i++) {
+	TDiffPart& context = cols[i];
+	TDiffPart& part = assign[i];
+	change.cond[context.base.c_str()] = part.baseCell();
+	if (context.isId) {
+	  change.indexes[context.base.c_str()] = true;
+	}
+	if (part.hasMod) {
+	  change.val[context.base.c_str()] = part.modCell();
+	}
+	change.names.push_back(context.base.c_str());
+	change.allNames.push_back(context.base.c_str());
+      }
+      patcher->changeRow(change);
+    }
+  }
+
+  patcher->mergeDone();
+  patcher->mergeAllDone();
+
+  fprintf(stderr,"(Warning: TDIFF parsing not implemented fully yet)\n");
+  return true;
+}
 
