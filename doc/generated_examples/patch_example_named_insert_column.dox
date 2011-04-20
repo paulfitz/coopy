@@ -3,17 +3,21 @@
 
 \ingroup patch_example
 
-\defgroup patch_example_named_insert_column_csv named_insert_column_csv example for sspatch
+\defgroup patch_example_named_insert_column insert column example for sspatch
 
-\section patch_example_named_insert_column_csv_command command
-\verbatim
- sspatch named_numbers.csv patch.csv
-\endverbatim
-\li \ref patch_example_named_insert_column_csv_output "output"
-\li \ref patch_example_named_insert_column_csv_ref1 "named_numbers.csv"
-\li \ref patch_example_named_insert_column_csv_ref2 "patch.csv"
+\section patch_example_named_insert_column_command command
  
-\section patch_example_named_insert_column_csv_output output
+In this example, we apply a patch as follows:
+\verbatim
+sspatch named_numbers.csv patch.tdiff
+\endverbatim
+The output, input, and patch are:
+\li \ref patch_example_named_insert_column_output "output"
+\li \ref patch_example_named_insert_column_ref1 "named_numbers.csv"
+\li \ref patch_example_named_insert_column_ref2 "patch.tdiff"
+\li \ref patch_example_named_insert_column_ref3 "patch.csv"
+ 
+\section patch_example_named_insert_column_output output
 <table>
   <tr><td>NAME</td><td>DIGIT</td><td>FRENCH</td><td>UNARY</td></tr>
   <tr><td>one</td><td>1</td><td>un</td><td>.</td></tr>
@@ -23,7 +27,7 @@
   <tr><td>five</td><td>5</td><td>cinq</td><td>.....</td></tr>
 </table>
  
-\section patch_example_named_insert_column_csv_ref1 named_numbers.csv
+\section patch_example_named_insert_column_ref1 named_numbers.csv
 <table>
   <tr><td>NAME</td><td>DIGIT</td></tr>
   <tr><td>one</td><td>1</td></tr>
@@ -33,7 +37,26 @@
   <tr><td>five</td><td>5</td></tr>
 </table>
  
-\section patch_example_named_insert_column_csv_ref2 patch.csv
+\section patch_example_named_insert_column_ref2 patch.tdiff
+\verbatim
+# tdiff version 0.2
+
+@@@ sheet
+
+@@ |NAME|DIGIT|
+@+ FRENCH |NAME|DIGIT|FRENCH|
+@+ UNARY |NAME|DIGIT|FRENCH|UNARY|
+@ |NAME=|FRENCH->|UNARY->|
+= |NAME|FRENCH|UNARY|
+= |one|un|.|
+= |two|deux|..|
+= |three|trois|...|
+= |four|quatre|....|
+= |five|cinq|.....|
+\endverbatim
+ 
+\section patch_example_named_insert_column_ref3 patch.csv
+Here is an equivalent patch in CSV format.
 <table>
   <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td><td></td><td></td></tr>
   <tr><td>table</td><td>name</td><td>sheet</td><td></td><td></td><td></td></tr>
@@ -49,6 +72,10 @@
   <tr><td>row</td><td>update</td><td>four</td><td>quatre</td><td>....</td><td></td></tr>
   <tr><td>row</td><td>update</td><td>five</td><td>cinq</td><td>.....</td><td></td></tr>
 </table>
+This patch can be applied with the following command:
+\verbatim
+sspatch named_numbers.csv patch.csv
+\endverbatim
 
  *
  */

@@ -1,19 +1,31 @@
 /**
  *
 
-\ingroup patch_example
+\ingroup diff_example
 
-\defgroup patch_example_named_insert_row_csv named_insert_row_csv example for sspatch
+\defgroup diff_example_named_insert_row insert row example for ssdiff
 
-\section patch_example_named_insert_row_csv_command command
+\section diff_example_named_insert_row_command command
 \verbatim
- sspatch named_numbers.csv patch.csv
+ ssdiff --format-tdiff named_numbers.csv named_numbers_add_row.csv
+ ssdiff --format-csv named_numbers.csv named_numbers_add_row.csv
 \endverbatim
-\li \ref patch_example_named_insert_row_csv_output "output"
-\li \ref patch_example_named_insert_row_csv_ref1 "named_numbers.csv"
-\li \ref patch_example_named_insert_row_csv_ref2 "patch.csv"
+\li \ref diff_example_named_insert_row_ref1 "named_numbers.csv"
+\li \ref diff_example_named_insert_row_ref2 "named_numbers_add_row.csv"
+\li \ref diff_example_named_insert_row_tdiff_output "tdiff output"
+\li \ref diff_example_named_insert_row_csv_output "csv output"
  
-\section patch_example_named_insert_row_csv_output output
+\section diff_example_named_insert_row_ref1 named_numbers.csv
+<table>
+  <tr><td>NAME</td><td>DIGIT</td></tr>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>five</td><td>5</td></tr>
+</table>
+ 
+\section diff_example_named_insert_row_ref2 named_numbers_add_row.csv
 <table>
   <tr><td>NAME</td><td>DIGIT</td></tr>
   <tr><td>one</td><td>1</td></tr>
@@ -23,18 +35,19 @@
   <tr><td>five</td><td>5</td></tr>
   <tr><td>six</td><td>6</td></tr>
 </table>
+\section diff_example_named_insert_row_tdiff_output tdiff output
+\verbatim
+# tdiff version 0.2
+
+@@@ sheet
+
+@ |NAME=|
+* |five|
+@ |NAME->|DIGIT->|
++ |six|6|
+\endverbatim
  
-\section patch_example_named_insert_row_csv_ref1 named_numbers.csv
-<table>
-  <tr><td>NAME</td><td>DIGIT</td></tr>
-  <tr><td>one</td><td>1</td></tr>
-  <tr><td>two</td><td>2</td></tr>
-  <tr><td>three</td><td>3</td></tr>
-  <tr><td>four</td><td>4</td></tr>
-  <tr><td>five</td><td>5</td></tr>
-</table>
- 
-\section patch_example_named_insert_row_csv_ref2 patch.csv
+\section diff_example_named_insert_row_csv_output csv output
 <table>
   <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
   <tr><td>table</td><td>name</td><td>sheet</td><td></td></tr>
@@ -46,6 +59,7 @@
   <tr><td>link</td><td>act</td><td>*=</td><td>=</td></tr>
   <tr><td>row</td><td>insert</td><td>six</td><td>6</td></tr>
 </table>
+ 
 
  *
  */

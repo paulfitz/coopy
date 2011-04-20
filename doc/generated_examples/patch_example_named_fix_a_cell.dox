@@ -1,0 +1,66 @@
+/**
+ *
+
+\ingroup patch_example
+
+\defgroup patch_example_named_fix_a_cell fix a cell example for sspatch
+
+\section patch_example_named_fix_a_cell_command command
+ 
+In this example, we apply a patch as follows:
+\verbatim
+sspatch named_numbers_three_23.csv patch.tdiff
+\endverbatim
+The output, input, and patch are:
+\li \ref patch_example_named_fix_a_cell_output "output"
+\li \ref patch_example_named_fix_a_cell_ref1 "named_numbers_three_23.csv"
+\li \ref patch_example_named_fix_a_cell_ref2 "patch.tdiff"
+\li \ref patch_example_named_fix_a_cell_ref3 "patch.csv"
+ 
+\section patch_example_named_fix_a_cell_output output
+<table>
+  <tr><td>NAME</td><td>DIGIT</td></tr>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>five</td><td>5</td></tr>
+</table>
+ 
+\section patch_example_named_fix_a_cell_ref1 named_numbers_three_23.csv
+<table>
+  <tr><td>NAME</td><td>DIGIT</td></tr>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>23</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>five</td><td>5</td></tr>
+</table>
+ 
+\section patch_example_named_fix_a_cell_ref2 patch.tdiff
+\verbatim
+# tdiff version 0.2
+
+@@@ sheet
+
+@ |NAME=|DIGIT=|
+= |three|23->3|
+\endverbatim
+ 
+\section patch_example_named_fix_a_cell_ref3 patch.csv
+Here is an equivalent patch in CSV format.
+<table>
+  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
+  <tr><td>table</td><td>name</td><td>sheet</td><td></td></tr>
+  <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
+  <tr><td>link</td><td>act</td><td>*</td><td>*=</td></tr>
+  <tr><td>row</td><td>select</td><td>three</td><td>23</td></tr>
+  <tr><td>row</td><td>update</td><td></td><td>3</td></tr>
+</table>
+This patch can be applied with the following command:
+\verbatim
+sspatch named_numbers_three_23.csv patch.csv
+\endverbatim
+
+ *
+ */

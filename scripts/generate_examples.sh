@@ -19,6 +19,8 @@ MERGE="./bin/ssmerge"
 SSFORMAT="./bin/ssformat"
 CSV2HTML="./bin/csv2html"
 TMPF=/tmp/eg_coopy_tmp.csv
+TMPF1=/tmp/eg_coopy_tmp1.csv
+TMPF2=/tmp/eg_coopy_tmp2.csv
 
 mkdir -p $OUT
 echo "EXAMPLES in $OUT"
@@ -68,27 +70,25 @@ function show_file {
 }
 
 function diff_base_apply {
-    format="$1"
-    shift
     f1=$1
     f2=$2
     name=$3
     echo $name > /tmp/_gen_name.txt
     if grep -q "$key" /tmp/_gen_name.txt; then
     out=$OUT/diff_example_$name.txt
-    echo "### $DIFF --format-$format $TEST/$f1 $TEST/$f2"
+
+    echo "### $DIFF --format-csv $TEST/$f1 $TEST/$f2"
+    echo "### $DIFF --format-tdiff $TEST/$f1 $TEST/$f2"
     {
 	echo "## SECTION command command"
 	echo "\verbatim"
-	echo " ssdiff --format-$format $f1 $f2"
+	echo " ssdiff --format-tdiff $f1 $f2"
+	echo " ssdiff --format-csv $f1 $f2"
 	echo "\endverbatim"
-	echo "## LINK output \"output\""
 	echo "## LINK ref1 \"$f1\""
 	echo "## LINK ref2 \"$f2\""
-	echo " "
-	echo "## SECTION output output"
-	$DIFF --output $TMPF --format-$format $TEST/$f1 $TEST/$f2 || exit 1
-	show_file $TMPF $format
+	echo "## LINK tdiff_output \"tdiff output\""
+	echo "## LINK csv_output \"csv output\""
 	echo " "
 	echo "## SECTION ref1 $f1"
 	$SSFORMAT $TEST/$f1 $TMPF.2.csv 2> /dev/null
@@ -97,50 +97,74 @@ function diff_base_apply {
 	echo "## SECTION ref2 $f2"
 	$SSFORMAT $TEST/$f2 $TMPF.3.csv 2> /dev/null
 	show_file $TMPF.3.csv csv
+	echo "## SECTION tdiff_output tdiff output"
+	$DIFF --output $TMPF1 --format-tdiff $TEST/$f1 $TEST/$f2 || exit 1
+	show_file $TMPF1 tdiff
+	echo " "
+	echo "## SECTION csv_output csv output"
+	$DIFF --output $TMPF2 --format-csv $TEST/$f1 $TEST/$f2 || exit 1
+	show_file $TMPF2 csv
+	echo " "
     } > $out
     echo "* Generated $out"
-    dox diff_example $name "$name example for ssdiff"
+    n=`echo $name | sed "s/_/ /g" | sed "s/^named //"`
+    dox diff_example $name "$n example for ssdiff"
     else
 	echo "skipped $name"
     fi
 }
 
 function patch_base_apply {
-    format="$1"
-    shift
     f1=$1
     f2=$2
     name=$3
     echo $name > /tmp/_gen_name.txt
     if grep -q "$key" /tmp/_gen_name.txt; then
     out=$OUT/patch_example_$name.txt
-    DF=$TMPF
-    rm -f $DF $DF.tmp
-    $DIFF --format-$format --output $DF.tmp $TEST/$f1 $TEST/$f2
-    grep -v "^config" $DF.tmp > $DF
-    echo "### $PATCH $TEST/$f1 $DF"
+    DF1=$TMPF1
+    DF2=$TMPF2
+
+    $DIFF --format-csv --output $DF1 $TEST/$f1 $TEST/$f2
+    $DIFF --format-tdiff --output $DF2 $TEST/$f1 $TEST/$f2
+
+    echo "### $PATCH $TEST/$f1 $DF1"
     {
 	echo "## SECTION command command"
+	echo " "
+	echo "In this example, we apply a patch as follows:"
 	echo "\verbatim"
-	echo " sspatch $f1 patch.$format"
+	echo "sspatch $f1 patch.tdiff"
 	echo "\endverbatim"
+	echo "The output, input, and patch are:"
 	echo "## LINK output \"output\""
 	echo "## LINK ref1 \"$f1\""
-	echo "## LINK ref2 \"patch.$format\""
+	echo "## LINK ref2 \"patch.tdiff\""
+	echo "## LINK ref3 \"patch.csv\""
 	echo " "
 	echo "## SECTION output output"
-	$PATCH --output $TMPF.2.csv $TEST/$f1 $DF || exit 1
-	show_file $TMPF.2.csv csv || exit 1
+	$PATCH --output $TMPF.1.csv $TEST/$f1 $DF1 || exit 1
+	$PATCH --output $TMPF.2.csv $TEST/$f1 $DF2 || exit 1
+	diff $TMPF.1.csv $TMPF.2.csv || exit 1
+	show_file $TMPF.1.csv csv || exit 1
 	echo " "
 	echo "## SECTION ref1 $f1"
 	$SSFORMAT $TEST/$f1 $TMPF.3.csv 2> /dev/null
 	show_file $TMPF.3.csv csv
 	echo " "
-	echo "## SECTION ref2 patch.$format"
-	show_file $DF $format
+	echo "## SECTION ref2 patch.tdiff"
+	show_file $DF2 tdiff
+	echo " "
+	echo "## SECTION ref3 patch.csv"
+	echo "Here is an equivalent patch in CSV format."
+	show_file $DF1 csv
+	echo "This patch can be applied with the following command:"
+	echo "\verbatim"
+	echo "sspatch $f1 patch.csv"
+	echo "\endverbatim"
     } > $out
     echo "* Generated $out"
-    dox patch_example $name "$name example for sspatch"
+    n=`echo $name | sed "s/_/ /g" | sed "s/^named //"`
+    dox patch_example $name "$n example for sspatch"
     else
 	echo "skipped $name"
     fi
@@ -152,11 +176,9 @@ function diff_apply {
     namer=$3
     #diff_base_apply human $f1 $f2 $namer
 
-    diff_base_apply tdiff $f1 $f2 ${namer}_tdiff
-    patch_base_apply tdiff $f1 $f2 ${namer}_tdiff
+    patch_base_apply $f1 $f2 ${namer}
 
-    diff_base_apply csv $f1 $f2 ${namer}_csv
-    patch_base_apply csv $f1 $f2 ${namer}_csv
+    diff_base_apply $f1 $f2 ${namer}
 
     #diff_base_apply raw $f1 $f2 ${namer}_raw
 }

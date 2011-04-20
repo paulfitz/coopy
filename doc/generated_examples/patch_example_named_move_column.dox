@@ -1,0 +1,64 @@
+/**
+ *
+
+\ingroup patch_example
+
+\defgroup patch_example_named_move_column move column example for sspatch
+
+\section patch_example_named_move_column_command command
+ 
+In this example, we apply a patch as follows:
+\verbatim
+sspatch named_numbers.csv patch.tdiff
+\endverbatim
+The output, input, and patch are:
+\li \ref patch_example_named_move_column_output "output"
+\li \ref patch_example_named_move_column_ref1 "named_numbers.csv"
+\li \ref patch_example_named_move_column_ref2 "patch.tdiff"
+\li \ref patch_example_named_move_column_ref3 "patch.csv"
+ 
+\section patch_example_named_move_column_output output
+<table>
+  <tr><td>DIGIT</td><td>NAME</td></tr>
+  <tr><td>1</td><td>one</td></tr>
+  <tr><td>2</td><td>two</td></tr>
+  <tr><td>3</td><td>three</td></tr>
+  <tr><td>4</td><td>four</td></tr>
+  <tr><td>5</td><td>five</td></tr>
+</table>
+ 
+\section patch_example_named_move_column_ref1 named_numbers.csv
+<table>
+  <tr><td>NAME</td><td>DIGIT</td></tr>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>five</td><td>5</td></tr>
+</table>
+ 
+\section patch_example_named_move_column_ref2 patch.tdiff
+\verbatim
+# tdiff version 0.2
+
+@@@ sheet
+
+@@ |NAME|DIGIT|
+@: NAME |DIGIT|NAME|
+\endverbatim
+ 
+\section patch_example_named_move_column_ref3 patch.csv
+Here is an equivalent patch in CSV format.
+<table>
+  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
+  <tr><td>table</td><td>name</td><td>sheet</td><td></td></tr>
+  <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
+  <tr><td>column</td><td>move</td><td>DIGIT</td><td>NAME</td></tr>
+</table>
+This patch can be applied with the following command:
+\verbatim
+sspatch named_numbers.csv patch.csv
+\endverbatim
+
+ *
+ */
