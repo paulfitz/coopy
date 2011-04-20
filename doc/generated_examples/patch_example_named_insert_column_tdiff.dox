@@ -1,0 +1,55 @@
+/**
+ *
+
+\ingroup patch_example
+
+\defgroup patch_example_named_insert_column_tdiff named_insert_column_tdiff example for sspatch
+
+\section patch_example_named_insert_column_tdiff_command command
+\verbatim
+ sspatch named_numbers.csv patch.tdiff
+\endverbatim
+\li \ref patch_example_named_insert_column_tdiff_output "output"
+\li \ref patch_example_named_insert_column_tdiff_ref1 "named_numbers.csv"
+\li \ref patch_example_named_insert_column_tdiff_ref2 "patch.tdiff"
+ 
+\section patch_example_named_insert_column_tdiff_output output
+<table>
+  <tr><td>NAME</td><td>DIGIT</td><td>FRENCH</td><td>UNARY</td></tr>
+  <tr><td>one</td><td>1</td><td>un</td><td>.</td></tr>
+  <tr><td>two</td><td>2</td><td>deux</td><td>..</td></tr>
+  <tr><td>three</td><td>3</td><td>trois</td><td>...</td></tr>
+  <tr><td>four</td><td>4</td><td>quatre</td><td>....</td></tr>
+  <tr><td>five</td><td>5</td><td>cinq</td><td>.....</td></tr>
+</table>
+ 
+\section patch_example_named_insert_column_tdiff_ref1 named_numbers.csv
+<table>
+  <tr><td>NAME</td><td>DIGIT</td></tr>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>five</td><td>5</td></tr>
+</table>
+ 
+\section patch_example_named_insert_column_tdiff_ref2 patch.tdiff
+\verbatim
+# tdiff version 0.2
+
+@@@ sheet
+
+@@ |NAME|DIGIT|
+@+ FRENCH |NAME|DIGIT|FRENCH|
+@+ UNARY |NAME|DIGIT|FRENCH|UNARY|
+@ |NAME=|FRENCH->|UNARY->|
+= |NAME|FRENCH|UNARY|
+= |one|un|.|
+= |two|deux|..|
+= |three|trois|...|
+= |four|quatre|....|
+= |five|cinq|.....|
+\endverbatim
+
+ *
+ */

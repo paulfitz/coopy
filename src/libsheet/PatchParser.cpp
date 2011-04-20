@@ -361,6 +361,20 @@ bool PatchParser::applyCsv() {
 	dbg_printf("Selecting %s\n", names2.dataString().c_str());
 	selector = names2.data;
 	needSelector = false;
+      } else if (cmd1=="after") {
+	sequential = true;
+	dbg_printf("After %s\n", names2.dataString().c_str());
+	change.mode = ROW_CHANGE_CONTEXT;
+	for (int i=0; i<len; i++) {
+	  string name = names.lst[i];
+	  const SheetCell& val = names2.data[i];
+	  bool ok = match_column[name];
+	  if (support_name_star && val.text=="*") ok = false;
+	  if (ok) {
+	    change.cond[change.names[i]] = val;
+	  }
+	}
+	ok = patcher->changeRow(change);
       } else if (cmd1=="etc") {
 	sequential = false;
       } else if (cmd1=="update"||cmd1=="=") {
@@ -495,10 +509,12 @@ public:
   string mod;
   bool hasMod;
   bool isId;
+  bool isWild;
 
   TDiffPart() {
     isId = false;
     hasMod = false;
+    isWild = false;
   }
 
   TDiffPart(const string& s) {
@@ -508,24 +524,33 @@ public:
   void apply(string s) {
     isId = false;
     hasMod = false;
+    isWild = false;
+    if (s=="*") {
+      base = "*";
+      isWild = true;
+      return;
+    }
     if (s.length()>0) {
       if (s[s.length()-1]=='=') {
 	isId = true;
 	s = s.substr(0,s.length()-1);
       }
     }
+
+    bool hasQuote = false;
     bool quote = false;
     int state = 0;
-    int pre = -1;
-    int post = -1;
+    int pre = -2;
+    int post = -2;
     for (int i=0; i<(int)s.length(); i++) {
       char ch = s[i];
       if (ch=='\"') {
+	hasQuote = true;
 	state = 0;
 	quote = !quote;
       } else if (quote) {
 	state = 0;
-      } else if (ch=='-'&&state==0&&pre==-1) {
+      } else if (ch=='-'&&state==0&&pre==-2) {
 	state = 1;
       } else if (ch=='>'&&state==1) {
 	state = 2;
@@ -535,7 +560,7 @@ public:
 	state = 0;
       }
     }
-    if (pre!=-1) {
+    if (pre!=-2) {
       base = s.substr(0,pre+1);
       mod = s.substr(post,s.length());
       hasMod = true;
@@ -543,6 +568,7 @@ public:
       base = s;
       mod = "";
     }
+    //printf(">> %s %s %d\n", base.c_str(), mod.c_str(), hasMod);
   }
 
   SheetCell baseCell() {
@@ -555,6 +581,8 @@ public:
 };
 
 bool PatchParser::applyTdiff() {
+  vector<string> allNames;
+
   patcher->mergeStart();
 
   bool eof = false;
@@ -637,6 +665,7 @@ bool PatchParser::applyTdiff() {
       change.indicesAfter = names2.indices;
       change.namesBefore = names.lst;
       change.namesAfter = names2.lst;
+      allNames = change.namesAfter;
       patcher->changeColumn(change);
 
       cols.clear();
@@ -644,7 +673,7 @@ bool PatchParser::applyTdiff() {
 	cols.push_back(TDiffPart(msg[i]));
       }
  
-    } else if (first=="=") {
+    } else if (first=="="||first=="-"||first=="+"||first=="*") {
       vector<TDiffPart> assign;
       for (int i=1; i<(int)msg.size(); i++) {
 	TDiffPart part;
@@ -655,20 +684,40 @@ bool PatchParser::applyTdiff() {
       COOPY_ASSERT(assign.size()==cols.size());
 
       RowChange change;
-      change.mode = ROW_CHANGE_UPDATE;
+      bool allIndex = false;
+      if (first=="=") {
+	change.mode = ROW_CHANGE_UPDATE;
+      } else if (first=="-") {
+	change.mode = ROW_CHANGE_DELETE;
+      } else if (first=="+") {
+	change.mode = ROW_CHANGE_INSERT;
+      } else if (first=="*") {
+	change.mode = ROW_CHANGE_CONTEXT;
+      }
+      change.indexes.clear();
       for (int i=0; i<(int)assign.size(); i++) {
 	TDiffPart& context = cols[i];
 	TDiffPart& part = assign[i];
-	change.cond[context.base.c_str()] = part.baseCell();
-	if (context.isId) {
-	  change.indexes[context.base.c_str()] = true;
+	if (!part.isWild) {
+	  if (!context.hasMod) {
+	    change.cond[context.base.c_str()] = part.baseCell();
+	  }
 	}
-	if (part.hasMod) {
-	  change.val[context.base.c_str()] = part.modCell();
+	if (context.isId||allIndex) {
+	  if (!part.isWild) {
+	    change.indexes[context.base.c_str()] = true;
+	  }
+	}
+	if (part.hasMod||context.hasMod||change.mode==ROW_CHANGE_INSERT) {
+	  if (part.hasMod) {
+	    change.val[context.base.c_str()] = part.modCell();
+	  } else {
+	    change.val[context.base.c_str()] = part.baseCell();
+	  }
 	}
 	change.names.push_back(context.base.c_str());
-	change.allNames.push_back(context.base.c_str());
       }
+      change.allNames = allNames;
       patcher->changeRow(change);
     }
   }
@@ -676,7 +725,6 @@ bool PatchParser::applyTdiff() {
   patcher->mergeDone();
   patcher->mergeAllDone();
 
-  fprintf(stderr,"(Warning: TDIFF parsing not implemented fully yet)\n");
   return true;
 }
 

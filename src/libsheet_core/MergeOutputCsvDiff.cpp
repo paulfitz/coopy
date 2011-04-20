@@ -289,6 +289,9 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
   case ROW_CHANGE_DELETE:
     updateRow(change,"delete",true,false,false);
     break;
+  case ROW_CHANGE_CONTEXT:
+    updateRow(change,"after",true,false,false);
+    break;
   case ROW_CHANGE_UPDATE:
     {
       bool terse = updateRow(change,"practice",true,true,true);

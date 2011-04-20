@@ -45,15 +45,37 @@ bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
   constantColumns = false;
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
-    fprintf(out,"@- %s", change.namesBefore[change.identityToIndex(change.subject)].c_str());
+    {
+      int idx = change.identityToIndex(change.subject);
+      if (change.namesBefore.size()<=idx) {
+	fprintf(stderr, "Could not find column to remove\n");
+	exit(1);
+      } else {
+	fprintf(out,"@- %s", change.namesBefore[idx].c_str());
+      }
+    }
     break;
   case ORDER_CHANGE_INSERT:
     {
-    fprintf(out,"@+ %s", change.namesAfter[change.identityToIndexAfter(change.subject)].c_str());
+      int idx = change.identityToIndexAfter(change.subject);
+      if (change.namesAfter.size()<=idx) {
+	fprintf(stderr, "Could not find column to insert\n");
+	exit(1);
+      } else {
+	fprintf(out,"@+ %s", change.namesAfter[idx].c_str());
+      }
     }
     break;
   case ORDER_CHANGE_MOVE:
-    fprintf(out,"@: %s", change.namesBefore[change.identityToIndex(change.subject)].c_str());
+    {
+      int idx = change.identityToIndex(change.subject);
+      if (change.namesBefore.size()<=idx) {
+	fprintf(stderr, "Could not find column to move\n");
+	exit(1);
+      } else {
+	fprintf(out,"@: %s", change.namesBefore[idx].c_str());
+      }
+    }
     break;
   default:
     fprintf(stderr,"  Unknown column operation\n\n");
@@ -82,11 +104,17 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
     }
   }
   if (lnops!=nops) {
-    if (columns!=lnops || !showedColumns) {
+    if (true) {
       fprintf(out, "@ |");
       for (int i=0; i<(int)change.names.size(); i++) {
 	if (activeColumn[change.names[i]]) {
-	  fprintf(out,"%s|",change.names[i].c_str());
+	  bool select = check(showForSelect,change.names[i]);
+	  bool cond = check(showForCond,change.names[i]);
+	  bool view = check(showForDescribe,change.names[i]);
+	  fprintf(out,"%s%s%s|",
+		  change.names[i].c_str(),
+		  select?"=":"",
+		  (view&&!(cond||select))?"->":"");
 	}
       }
       fprintf(out,"\n");
@@ -111,6 +139,8 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
       ch = '+';
     } else if (string(tag)=="delete") {
       ch = '-';
+    } else if (string(tag)=="after") {
+      ch = '*';
     }
     fprintf(out, "%c |",ch);
   }
@@ -118,17 +148,17 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
     string name = change.names[i];
     if (activeColumn[name]) {
       bool shown = false;
-      bool transition = false;
-      if (change.cond.find(name)!=change.cond.end() && 
-	  showForSelect[name] && select) {
+      bool transition = false; //showForDesign[name]&&showForSelect[name];
+      //if (change.cond.find(name)!=change.cond.end() && 
+      //  showForSelect[name] && select) {
+      if (showForCond[name] && select) {
 	if (!practice) {
 	  fprintf(out,"%s",change.cond.find(name)->second.toString().c_str());
 	  transition = true;
 	}
 	shown = true;
       }
-      if (change.val.find(name)!=change.val.end() && 
-	  showForDescribe[name] && update) {
+      if (showForDescribe[name] && update) {
 	if (!practice) {
 	  fprintf(out,"%s%s",
 		  transition?"->":"",
@@ -157,8 +187,10 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
   activeColumn.clear();
   prevSelect = showForSelect;
   prevDescribe = showForDescribe;
+  prevCond = showForCond;
   showForSelect.clear();
   showForDescribe.clear();
+  showForCond.clear();
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     bool condActive = false;
@@ -169,6 +201,7 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
     if (change.val.find(name)!=change.val.end()) {
       valueActive = true;
     }
+    bool shouldCond = condActive;
     bool shouldMatch = condActive && change.indexes.find(name)->second;
     bool shouldAssign = valueActive;
     if (shouldAssign) {
@@ -180,11 +213,11 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
 
     if (change.mode==ROW_CHANGE_INSERT) {
       // we do not care about matching
-      shouldMatch = prevSelect[name];
+      shouldMatch = false; //revSelect[name];
     }
     if (change.mode==ROW_CHANGE_DELETE) {
       // we do not care about assigning
-      shouldAssign = prevDescribe[name];
+      shouldAssign = false; //prevDescribe[name];
     }
 
     // ignoring shouldShow for now.
@@ -205,6 +238,7 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
     lops.push_back(op);
     showForSelect[name] = shouldMatch;
     showForDescribe[name] = shouldAssign;
+    showForCond[name] = shouldCond;
   }
 
   if (lops!=ops) {
@@ -217,6 +251,9 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
     break;
   case ROW_CHANGE_DELETE:
     updateRow(change,"delete",true,false,false);
+    break;
+  case ROW_CHANGE_CONTEXT:
+    updateRow(change,"after",true,false,false);
     break;
   case ROW_CHANGE_UPDATE:
     updateRow(change,"update",true,true,false);

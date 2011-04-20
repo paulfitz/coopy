@@ -1,0 +1,47 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_named_move_column_tdiff named_move_column_tdiff example for ssdiff
+
+\section diff_example_named_move_column_tdiff_command command
+\verbatim
+ ssdiff --format-tdiff named_numbers.csv named_numbers_flip_column.csv
+\endverbatim
+\li \ref diff_example_named_move_column_tdiff_output "output"
+\li \ref diff_example_named_move_column_tdiff_ref1 "named_numbers.csv"
+\li \ref diff_example_named_move_column_tdiff_ref2 "named_numbers_flip_column.csv"
+ 
+\section diff_example_named_move_column_tdiff_output output
+\verbatim
+# tdiff version 0.2
+
+@@@ sheet
+
+@@ |NAME|DIGIT|
+@: NAME |DIGIT|NAME|
+\endverbatim
+ 
+\section diff_example_named_move_column_tdiff_ref1 named_numbers.csv
+<table>
+  <tr><td>NAME</td><td>DIGIT</td></tr>
+  <tr><td>one</td><td>1</td></tr>
+  <tr><td>two</td><td>2</td></tr>
+  <tr><td>three</td><td>3</td></tr>
+  <tr><td>four</td><td>4</td></tr>
+  <tr><td>five</td><td>5</td></tr>
+</table>
+ 
+\section diff_example_named_move_column_tdiff_ref2 named_numbers_flip_column.csv
+<table>
+  <tr><td>DIGIT</td><td>NAME</td></tr>
+  <tr><td>1</td><td>one</td></tr>
+  <tr><td>2</td><td>two</td></tr>
+  <tr><td>3</td><td>three</td></tr>
+  <tr><td>4</td><td>four</td></tr>
+  <tr><td>5</td><td>five</td></tr>
+</table>
+
+ *
+ */

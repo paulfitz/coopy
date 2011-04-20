@@ -15,6 +15,7 @@ namespace coopy {
   namespace cmp {
     class ConfigChange;
     class OrderChange;
+    class RowChangeContext;
     class RowChange;
     class NameChange;
     class LinkDeclare;
@@ -32,6 +33,7 @@ namespace coopy {
       ROW_CHANGE_DELETE,
       ROW_CHANGE_INSERT,
       ROW_CHANGE_UPDATE,
+      ROW_CHANGE_CONTEXT,
     };
 
     enum {
@@ -98,6 +100,29 @@ public:
   }
 };
 
+class coopy::cmp::RowChangeContext {
+public:
+  typedef std::map<std::string,coopy::store::SheetCell> row;
+  typedef std::vector<row> rows;
+  rows before;
+  rows after;
+
+  std::map<std::string,coopy::store::SheetCell> getRow(int index) const {
+    if (index>=0) {
+      return after[index];
+    }
+    return before[-index-1];
+  }
+
+  int afterCount() const {
+    return (int)after.size();
+  }
+
+  int beforeCount() const {
+    return (int)before.size();
+  }
+};
+
 
 class coopy::cmp::RowChange {
 public:
@@ -111,6 +136,7 @@ public:
   std::vector<std::string> allNames;
   txt2bool indexes; // conditions which are indexical, rather than confirming
   bool sequential;
+  RowChangeContext context;
 
   RowChange() {
     mode = ROW_CHANGE_NONE;
@@ -129,6 +155,8 @@ public:
       return "update";
       //case ROW_CHANGE_MOVE:
       //return "move";
+    case ROW_CHANGE_CONTEXT:
+      return "context";
     }
     return "unknown";
   }

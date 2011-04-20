@@ -56,8 +56,8 @@ EOF
 }
 
 function show_file {
-    fname="$1"
-    format="$2"
+    local fname="$1"
+    local format="$2"
     if [ "k$format" = "kcsv" ]; then
 	$CSV2HTML $fname | sed "s/&rt;/>/g"
     else
@@ -151,8 +151,13 @@ function diff_apply {
     f2=$2
     namer=$3
     #diff_base_apply human $f1 $f2 $namer
-    diff_base_apply csv $f1 $f2 ${namer}
-    patch_base_apply csv $f1 $f2 ${namer}
+
+    diff_base_apply tdiff $f1 $f2 ${namer}_tdiff
+    patch_base_apply tdiff $f1 $f2 ${namer}_tdiff
+
+    diff_base_apply csv $f1 $f2 ${namer}_csv
+    patch_base_apply csv $f1 $f2 ${namer}_csv
+
     #diff_base_apply raw $f1 $f2 ${namer}_raw
 }
 
@@ -197,7 +202,7 @@ function merge_apply {
     fi
 }
 
-for pre in "" "named_"; do
+for pre in "named_"; do
   diff_apply ${pre}numbers.csv ${pre}numbers_flip_column.csv ${pre}move_column
   diff_apply ${pre}numbers.csv ${pre}numbers_change_five.csv update_cell
   diff_apply ${pre}numbers.csv ${pre}numbers_add_row.csv ${pre}insert_row

@@ -30,6 +30,7 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
   string blank = "__NOT_SET__CSVCOMPARE_SSFOSSIL";
   SheetCell blankCell;
   vector<SheetCell> expandLocal, expandRemote, expandPivot, expandMerge;
+  vector<SheetCell> saveLocal;
   vector<int> expandDel;
   map<string,SheetCell> cond, value, value0;
   vector<string> address;
@@ -133,6 +134,7 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	}
       }
     }
+    
     /*
     if (_csv_verbose) {
       printf(" expandMerge: %s\n", vector2string(expandMerge).c_str());
@@ -142,6 +144,7 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       printf(" change %d novel %d conflict %d\n", change, novel, conflict);
     }
     */
+
     if (diff) {
       if (!deleted) {
 	if (novel) {
@@ -228,14 +231,16 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     }
     */
 
-    /*
     dbg_printf("Row: (index p/l/r %d %d %d) act %d del %d / sz %d %d %d %d\n",
 	       pRow, lRow, rRow, 
 	       activity, 
 	       delRow,
 	       (int)expandMerge.size(), local.width(), current_row, local.height());
-    */
 
+    RowChange rowChange;
+    rowChange.cond = cond;
+    rowChange.val = value;
+    rowChange.names = names;
     if (activity||delRow) {
       char buf[256];
       if (lRow==-1) {
@@ -252,27 +257,40 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       if (change) {
 	output.addRow("[-]",expandLocal,blank);
       }
-      RowChange rowChange;
-      rowChange.cond = cond;
-      rowChange.val = value;
-      rowChange.names = names;
       if (lRow==-1) {
 	output.addRow("[+++]",expandMerge,blank);
 	rowChange.mode = ROW_CHANGE_INSERT;
 	//output.changeRow(rowChange);
+	if (last_local_row>=0) {
+	  if (last_local_row_marked!=last_local_row) {
+	    /*
+	    map<string,SheetCell> rr;
+	    for (int i=0; i<local.width(); i++) {
+	      rr[names[i]] = local.cellSummary(i,last_local_row);
+	    }
+	    rowChange.context.before.push_back(rr);
+	    */
+	    RowChange alt = lastRowChange;
+	    alt.mode = ROW_CHANGE_CONTEXT;
+	    rc.push_back(alt);
+	  }
+	}
 	rc.push_back(rowChange);
+	last_local_row_marked = lRow;
       } else {
 	if (rRow==-1) {
 	  output.addRow("[---]",expandLocal,blank);
 	  rowChange.mode = ROW_CHANGE_DELETE;
 	  //output.changeRow(rowChange);
 	  rc.push_back(rowChange);
+	  last_local_row_marked = lRow;
 	} else {
 	  if (value.size()!=0) {
 	    output.addRow("[+]",expandMerge,blank);
 	    rowChange.mode = ROW_CHANGE_UPDATE;
 	    //output.changeRow(rowChange);
 	    rc.push_back(rowChange);
+	    last_local_row_marked = lRow;
 	  }
 	}
       }
@@ -282,12 +300,17 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
       last_row = lRow;
       current_row++;
     }
+    last_local_row = lRow;
+    lastRowChange = rowChange;
   }
   return true;
 }
 
 
 bool Merger::merge(MergerState& state) {
+  last_local_row = -1;
+  last_local_row_marked = -1;
+
   coopy::store::DataSheet& pivot = state.pivot;
   coopy::store::DataSheet& local = state.local;
   coopy::store::DataSheet& remote = state.remote;
@@ -462,7 +485,7 @@ bool Merger::merge(MergerState& state) {
 	  }
 	}
 	change.mode = ORDER_CHANGE_DELETE;
-	change.subject = idx;
+	change.subject = lCol;
 	local_cols.erase(it);
 	local_col_names.erase(local_col_names.begin()+idx);
 	change.indicesAfter = local_cols;
@@ -573,7 +596,6 @@ bool Merger::merge(MergerState& state) {
 	OrderChange change;
 	change.indicesBefore = local_cols;
 	change.namesBefore = local_col_names;
-	change.subject = at;
 	change.mode = ORDER_CHANGE_INSERT;
 	local_cols.insert(local_cols.begin()+at,-rCol-1);
 
@@ -594,6 +616,7 @@ bool Merger::merge(MergerState& state) {
 	local_col_names.insert(local_col_names.begin()+at,name);
 	change.indicesAfter = local_cols;
 	change.namesAfter = local_col_names;
+	change.subject = local_cols[at];
 	//output.changeColumn(change);
 	cc.push_back(change);
 	at++;

@@ -431,28 +431,34 @@ ENDMACRO ()
 
 ADD_DIFF_TEST(ssdiff_loc ${TESTS}/loc/loc.csv ${TESTS}/loc/loc_perturb.csv)
 
-MACRO(ADD_ROUND_TRIP_TEST name P1 P2)
+MACRO(ADD_ROUND_TRIP_TEST name P1 P2 FORMAT)
     get_filename_component(F1 ${P1} NAME_WE)
     get_filename_component(F2 ${P2} NAME_WE)
-    #set(name "diffnpatch_${F1}_${F2}")
-    set(fname "test_out_patch_${name}.csv")
-    set(fname2 "test_out_result_${name}.csv")
+    set(fname "${name}_patch.${FORMAT}")
+    set(fname2 "${name}_result.csv")
     ADD_TEST(${name}_diff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
-      --output ${fname} --format-csv ${P1} ${P2})
+      --output ${fname} --format-${FORMAT} ${P1} ${P2})
     ADD_TEST(${name}_patch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
       --output ${fname2} ${P1} ${fname})
     ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
       --equals ${fname2} ${P2})
-
-    ADD_TEST(${name}_diff_inv ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
-      --output inv_${fname} --format-csv ${P2} ${P1})
-    ADD_TEST(${name}_patch_inv ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
-      --output inv_${fname2} ${P2} inv_${fname})
-    ADD_TEST(${name}Compare_inv ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
-      --equals inv_${fname2} ${P1})
 ENDMACRO ()
 
-ADD_ROUND_TRIP_TEST(joe_0000 ${TESTS}/bug/joe_0000/local.csv ${TESTS}/bug/joe_0000/remote.csv)
+foreach(FORMAT csv tdiff)
+  ADD_ROUND_TRIP_TEST(joe_0000_${FORMAT} ${TESTS}/bug/joe_0000/local.csv ${TESTS}/bug/joe_0000/remote.csv ${FORMAT})
+  ADD_ROUND_TRIP_TEST(joe_0000_${FORMAT}_inv ${TESTS}/bug/joe_0000/remote.csv ${TESTS}/bug/joe_0000/local.csv ${FORMAT})
+
+  SET(TARGETS named_numbers.csv named_numbers_wide.csv named_numbers_three_23.csv named_numbers_flip_column.csv named_numbers_add_row.csv)
+  foreach(T1 ${TARGETS})
+    foreach(T2 ${TARGETS})
+      get_filename_component(F1 ${T1} NAME_WE)
+      get_filename_component(F2 ${T2} NAME_WE)
+      string(REPLACE "named_numbers_" "" F1 ${F1})
+      string(REPLACE "named_numbers_" "" F2 ${F2})
+      ADD_ROUND_TRIP_TEST(trip_${F1}_${F2}_${FORMAT} ${TESTS}/${T1} ${TESTS}/${T2} ${FORMAT})
+    endforeach()
+  endforeach()
+endforeach()
 
 #######################################################################
 #######################################################################

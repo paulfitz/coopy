@@ -3,17 +3,17 @@
 
 \ingroup patch_example
 
-\defgroup patch_example_update_cell update_cell example for sspatch
+\defgroup patch_example_update_cell_csv update_cell_csv example for sspatch
 
-\section patch_example_update_cell_command command
+\section patch_example_update_cell_csv_command command
 \verbatim
  sspatch named_numbers.csv patch.csv
 \endverbatim
-\li \ref patch_example_update_cell_output "output"
-\li \ref patch_example_update_cell_ref1 "named_numbers.csv"
-\li \ref patch_example_update_cell_ref2 "patch.csv"
+\li \ref patch_example_update_cell_csv_output "output"
+\li \ref patch_example_update_cell_csv_ref1 "named_numbers.csv"
+\li \ref patch_example_update_cell_csv_ref2 "patch.csv"
  
-\section patch_example_update_cell_output output
+\section patch_example_update_cell_csv_output output
 <table>
   <tr><td>NAME</td><td>DIGIT</td></tr>
   <tr><td>one</td><td>1</td></tr>
@@ -23,7 +23,7 @@
   <tr><td>fyffe</td><td>5</td></tr>
 </table>
  
-\section patch_example_update_cell_ref1 named_numbers.csv
+\section patch_example_update_cell_csv_ref1 named_numbers.csv
 <table>
   <tr><td>NAME</td><td>DIGIT</td></tr>
   <tr><td>one</td><td>1</td></tr>
@@ -33,7 +33,7 @@
   <tr><td>five</td><td>5</td></tr>
 </table>
  
-\section patch_example_update_cell_ref2 patch.csv
+\section patch_example_update_cell_csv_ref2 patch.csv
 <table>
   <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
   <tr><td>table</td><td>name</td><td>sheet</td><td></td></tr>

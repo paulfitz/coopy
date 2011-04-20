@@ -18,8 +18,10 @@ public:
   std::map<std::string,bool> activeColumn;
   std::map<std::string,bool> showForSelect;
   std::map<std::string,bool> showForDescribe;
+  std::map<std::string,bool> showForCond;
   std::map<std::string,bool> prevSelect;
   std::map<std::string,bool> prevDescribe;
+  std::map<std::string,bool> prevCond;
   bool constantColumns;
   std::vector<std::string> columns;
   bool showedColumns;
@@ -27,6 +29,11 @@ public:
   bool sheetNameShown;
 
   MergeOutputTdiff();
+
+  bool check(std::map<std::string,bool>& m, const std::string& name) {
+    if (m.find(name)==m.end()) return false;
+    return m[name];
+  }
 
   virtual bool wantDiff() { return true; }
 

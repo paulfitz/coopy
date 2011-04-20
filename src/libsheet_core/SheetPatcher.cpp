@@ -86,14 +86,14 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   for (RowChange::txt2cell::const_iterator it = change.cond.begin();
        it!=change.cond.end(); it++) {
     int idx = dir[it->first];
-    //printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.c_str());
+    //printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
     active_cond[idx] = 1;
     cond[idx] = it->second;
   }
   for (RowChange::txt2cell::const_iterator it = change.val.begin();
        it!=change.val.end(); it++) {
     int idx = dir[it->first];
-    //printf("  [val] %d %s -> %s\n", idx, it->first.c_str(), it->second.c_str());
+    //printf("  [val] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
     active_val[idx] = 1;
     val[idx] = it->second;
   }
@@ -143,6 +143,35 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  RowRef row(r);
 	  rowCursor = r;
 	  sheet->deleteRow(row);
+	  success = true;
+	  break;
+	}
+      }
+      return success;
+    }
+    break;
+  case ROW_CHANGE_CONTEXT:
+    {
+      bool success = false;
+      int r;
+      for (r=0; r<sheet->height(); r++) {
+	bool match = true;
+	for (int c=0; c<width; c++) {
+	  if (active_cond[c]) {
+	    if (sheet->cellSummary(c,r)!=cond[c]) {
+	      match = false;
+	      break;
+	    }
+	  }
+	}
+	if (match) {
+	  if (r<sheet->width()-1) {
+	    r++;
+	  } else {
+	    r = -1;
+	  }
+	  RowRef row(r);
+	  rowCursor = r;
 	  success = true;
 	  break;
 	}

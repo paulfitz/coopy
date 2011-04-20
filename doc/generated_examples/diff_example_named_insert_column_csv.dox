@@ -3,17 +3,17 @@
 
 \ingroup diff_example
 
-\defgroup diff_example_named_insert_column named_insert_column example for ssdiff
+\defgroup diff_example_named_insert_column_csv named_insert_column_csv example for ssdiff
 
-\section diff_example_named_insert_column_command command
+\section diff_example_named_insert_column_csv_command command
 \verbatim
  ssdiff --format-csv named_numbers.csv named_numbers_wide.csv
 \endverbatim
-\li \ref diff_example_named_insert_column_output "output"
-\li \ref diff_example_named_insert_column_ref1 "named_numbers.csv"
-\li \ref diff_example_named_insert_column_ref2 "named_numbers_wide.csv"
+\li \ref diff_example_named_insert_column_csv_output "output"
+\li \ref diff_example_named_insert_column_csv_ref1 "named_numbers.csv"
+\li \ref diff_example_named_insert_column_csv_ref2 "named_numbers_wide.csv"
  
-\section diff_example_named_insert_column_output output
+\section diff_example_named_insert_column_csv_output output
 <table>
   <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td><td></td><td></td></tr>
   <tr><td>table</td><td>name</td><td>sheet</td><td></td><td></td><td></td></tr>
@@ -30,7 +30,7 @@
   <tr><td>row</td><td>update</td><td>five</td><td>cinq</td><td>.....</td><td></td></tr>
 </table>
  
-\section diff_example_named_insert_column_ref1 named_numbers.csv
+\section diff_example_named_insert_column_csv_ref1 named_numbers.csv
 <table>
   <tr><td>NAME</td><td>DIGIT</td></tr>
   <tr><td>one</td><td>1</td></tr>
@@ -40,7 +40,7 @@
   <tr><td>five</td><td>5</td></tr>
 </table>
  
-\section diff_example_named_insert_column_ref2 named_numbers_wide.csv
+\section diff_example_named_insert_column_csv_ref2 named_numbers_wide.csv
 <table>
   <tr><td>NAME</td><td>DIGIT</td><td>FRENCH</td><td>UNARY</td></tr>
   <tr><td>one</td><td>1</td><td>un</td><td>.</td></tr>

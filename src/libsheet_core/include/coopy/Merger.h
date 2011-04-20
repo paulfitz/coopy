@@ -75,6 +75,9 @@ private:
   std::vector<std::string> lastAddress;
   std::vector<std::string> lastAction;
   std::vector<std::string> names;
+  int last_local_row;
+  int last_local_row_marked;
+  RowChange lastRowChange;
   int current_row;
   int last_row;
   int addition;
