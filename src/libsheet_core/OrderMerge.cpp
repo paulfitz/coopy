@@ -211,58 +211,65 @@ void OrderMerge::merge(const OrderResult& nlocal,
 
   list<MatchUnit> canon = accum;
   int shunt_count = 0;
+  bool shunted = false;
 
   // Prepare a list of constraints on order
-  for (list<MatchUnit>::iterator it=accum.begin();
-       it!=accum.end(); 
-       it++) {
-    MatchUnit& unit = *it;
-    int pCol = unit.pivotUnit;
-    int lCol = unit.localUnit;
-    int rCol = unit.remoteUnit;
-    bool deleted = unit.deleted;
-
-    if (!deleted) {
-      if (pCol!=-1&&lCol!=-1&&rCol!=-1) {
-	//printf("Working on P/L/R %d %d %d\n", pCol, lCol, rCol);
-	int lColNext = order_local.a2b(pCol+1);
-	int rColNext = order_remote.a2b(pCol+1);
-	int lColPrev = order_local.a2b(pCol-1);
-	int rColPrev = order_remote.a2b(pCol-1);
-	//lColNext = order_local.b2a(_lp);
-	/*
-	  printf(">> %d:%d:%d %d:%d:%d\n",
-	  lColPrev, lCol, lColNext,
-	  rColPrev, rCol, rColNext);
-	*/
-	
-	bool lCont = summarize(lColPrev,lCol,lColNext);
-	bool rCont = summarize(rColPrev,rCol,rColNext);
-	
-	if (lCont&&!rCont) {
-	  dbg_printf("Remote constraint P/L/R %d/%d/%d\n", pCol, lCol, rCol);
-	  if (shunt(canon,unit,rCol-1,rCol,rCol+1,1)) {
-	    shunt_count++;
-	  }
-	}
-	if (rCont&&!lCont) {
-	  dbg_printf("Local constraint P/L/R %d/%d/%d\n", pCol, lCol, rCol);
-	  if (shunt(canon,unit,lCol-1,lCol,lCol+1,-1)) {
-	    shunt_count++;
-	  }
-	}
-      } else if (pCol==-1) {
-	if (rCol!=-1 && lCol==-1) {
+  do {
+    shunted = false;
+    for (list<MatchUnit>::iterator it=accum.begin();
+	 it!=accum.end(); 
+	 it++) {
+      MatchUnit& unit = *it;
+      int pCol = unit.pivotUnit;
+      int lCol = unit.localUnit;
+      int rCol = unit.remoteUnit;
+      bool deleted = unit.deleted;
+      
+      if (!deleted) {
+	if (pCol!=-1&&lCol!=-1&&rCol!=-1) {
+	  //dbg_printf("Working on P/L/R %d %d %d\n", pCol, lCol, rCol);
+	  int lColNext = order_local.a2b(pCol+1);
 	  int rColNext = order_remote.a2b(pCol+1);
+	  int lColPrev = order_local.a2b(pCol-1);
 	  int rColPrev = order_remote.a2b(pCol-1);
-	  dbg_printf("Remote new col constraint P/L/R %d/%d/%d\n", pCol, lCol, rCol);
-	  if (shunt(canon,unit,rCol-1,rCol,rCol+1,1)) {
-	    shunt_count++;
+	  //lColNext = order_local.b2a(_lp);
+	  /*
+	    printf(">> %d:%d:%d %d:%d:%d\n",
+	    lColPrev, lCol, lColNext,
+	    rColPrev, rCol, rColNext);
+	  */
+	  
+	  bool lCont = summarize(lColPrev,lCol,lColNext);
+	  bool rCont = summarize(rColPrev,rCol,rColNext);
+	  
+	  if (lCont&&!rCont) {
+	    dbg_printf("Remote constraint P/L/R %d/%d/%d\n", pCol, lCol, rCol);
+	    if (shunt(canon,unit,rCol-1,rCol,rCol+1,1)) {
+	      shunt_count++;
+	      shunted = true;
+	    }
+	  }
+	  if (rCont&&!lCont) {
+	    dbg_printf("Local constraint P/L/R %d/%d/%d\n", pCol, lCol, rCol);
+	    if (shunt(canon,unit,lCol-1,lCol,lCol+1,-1)) {
+	      shunt_count++;
+	      shunted = true;
+	    }
+	  }
+	} else if (pCol==-1) {
+	  if (rCol!=-1 && lCol==-1) {
+	    int rColNext = order_remote.a2b(pCol+1);
+	    int rColPrev = order_remote.a2b(pCol-1);
+	    dbg_printf("Remote new col constraint P/L/R %d/%d/%d\n", pCol, lCol, rCol);
+	    if (shunt(canon,unit,rCol-1,rCol,rCol+1,1)) {
+	      shunt_count++;
+	      shunted = true;
+	    }
 	  }
 	}
       }
     }
-  }
+  } while (false); //shunted);
   if (shunt_count>0) {
     dbg_printf("Copying result of shunt...\n");
     accum = canon;

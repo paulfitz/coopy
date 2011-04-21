@@ -78,6 +78,7 @@ private:
   int last_local_row;
   int last_local_row_marked;
   RowChange lastRowChange;
+
   int current_row;
   int last_row;
   int addition;

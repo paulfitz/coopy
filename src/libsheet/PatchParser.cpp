@@ -361,10 +361,10 @@ bool PatchParser::applyCsv() {
 	dbg_printf("Selecting %s\n", names2.dataString().c_str());
 	selector = names2.data;
 	needSelector = false;
-      } else if (cmd1=="after") {
+      } else if (cmd1=="after"||cmd1=="move") {
 	sequential = true;
-	dbg_printf("After %s\n", names2.dataString().c_str());
-	change.mode = ROW_CHANGE_CONTEXT;
+	dbg_printf("%s %s\n", cmd1.c_str(), names2.dataString().c_str());
+	change.mode = (cmd1=="after")?ROW_CHANGE_CONTEXT:ROW_CHANGE_MOVE;
 	for (int i=0; i<len; i++) {
 	  string name = names.lst[i];
 	  const SheetCell& val = names2.data[i];
@@ -471,6 +471,7 @@ vector<string> normalizedMessage(const string& line) {
   bool white = true;
   bool quote = false;
   bool pending = false;
+  bool commit = false;
   for (int i=0; i<(int)line.length(); i++) {
     char ch = line[i];
     if (ch=='\"') {
@@ -480,7 +481,7 @@ vector<string> normalizedMessage(const string& line) {
     } else if (quote) {
       result += ch;
       pending = true;
-    } else if (ch==' '||ch=='\r'||ch=='\t'||ch=='|') {
+    } else if (((ch==' '||ch=='\r'||ch=='\t')&&!commit)||ch=='|') {
       if (pending) {
 	all.push_back(result);
 	pending = false;
@@ -489,6 +490,7 @@ vector<string> normalizedMessage(const string& line) {
       white = true;
       if (ch=='|') {
 	pending = true;
+	commit = true;
       }
     } else {
       white = false;
@@ -505,6 +507,7 @@ vector<string> normalizedMessage(const string& line) {
 
 class TDiffPart {
 public:
+  string orig;
   string base;
   string mod;
   bool hasMod;
@@ -522,6 +525,7 @@ public:
   }
 
   void apply(string s) {
+    orig = s;
     isId = false;
     hasMod = false;
     isWild = false;
@@ -580,6 +584,11 @@ public:
   }
 };
 
+string stringer_encoder(const TDiffPart& part) {
+  return part.orig;
+}
+
+
 bool PatchParser::applyTdiff() {
   vector<string> allNames;
 
@@ -599,7 +608,7 @@ bool PatchParser::applyTdiff() {
       dbg_printf("Ignoring comment [%s]\n", line.c_str());
       continue;
     }
-    //printf("Got [%s] [%s]\n", line.c_str(), first.c_str());
+    dbg_printf("Got [%s] [%s]\n", line.c_str(), first.c_str());
     if (first=="@@@") {
       patcher->setSheet(msg[1].c_str());
     } else if (first=="@"||first=="@@") {
@@ -673,7 +682,7 @@ bool PatchParser::applyTdiff() {
 	cols.push_back(TDiffPart(msg[i]));
       }
  
-    } else if (first=="="||first=="-"||first=="+"||first=="*") {
+    } else if (first=="="||first=="-"||first=="+"||first=="*"||first==":") {
       vector<TDiffPart> assign;
       for (int i=1; i<(int)msg.size(); i++) {
 	TDiffPart part;
@@ -681,6 +690,8 @@ bool PatchParser::applyTdiff() {
 	//printf("[%d] [%s] [%s]\n", (int)part.hasMod, part.base.c_str(), part.mod.c_str());
 	assign.push_back(part);
       }
+      dbg_printf("  assign %s\n", vector2string(assign).c_str());
+      dbg_printf("  assign %s\n", vector2string(cols).c_str());
       COOPY_ASSERT(assign.size()==cols.size());
 
       RowChange change;
@@ -693,6 +704,8 @@ bool PatchParser::applyTdiff() {
 	change.mode = ROW_CHANGE_INSERT;
       } else if (first=="*") {
 	change.mode = ROW_CHANGE_CONTEXT;
+      } else if (first==":") {
+	change.mode = ROW_CHANGE_MOVE;
       }
       change.indexes.clear();
       for (int i=0; i<(int)assign.size(); i++) {
@@ -718,6 +731,7 @@ bool PatchParser::applyTdiff() {
 	change.names.push_back(context.base.c_str());
       }
       change.allNames = allNames;
+      dbg_printf("  ... change row ...\n");
       patcher->changeRow(change);
     }
   }

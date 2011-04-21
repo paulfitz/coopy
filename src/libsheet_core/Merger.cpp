@@ -241,6 +241,23 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     rowChange.cond = cond;
     rowChange.val = value;
     rowChange.names = names;
+    if (lRow!=-1) {
+      if (last_local_row!=-1) {
+	if (lRow<last_local_row) {
+	  if (last_local_row>=0) {
+	    if (last_local_row_marked!=last_local_row) {
+	      RowChange alt = lastRowChange;
+	      alt.mode = ROW_CHANGE_CONTEXT;
+	      rc.push_back(alt);
+	    }
+	  }
+	  RowChange alt = rowChange;
+	  alt.mode = ROW_CHANGE_MOVE;
+	  rc.push_back(alt);
+	  last_local_row_marked = lRow;
+	}
+      }
+    }
     if (activity||delRow) {
       char buf[256];
       if (lRow==-1) {
@@ -263,13 +280,6 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 	//output.changeRow(rowChange);
 	if (last_local_row>=0) {
 	  if (last_local_row_marked!=last_local_row) {
-	    /*
-	    map<string,SheetCell> rr;
-	    for (int i=0; i<local.width(); i++) {
-	      rr[names[i]] = local.cellSummary(i,last_local_row);
-	    }
-	    rowChange.context.before.push_back(rr);
-	    */
 	    RowChange alt = lastRowChange;
 	    alt.mode = ROW_CHANGE_CONTEXT;
 	    rc.push_back(alt);

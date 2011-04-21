@@ -103,7 +103,7 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
       lnops.push_back(change.names[i]);
     }
   }
-  if (lnops!=nops) {
+  if (true) { //lnops!=nops) {
     if (true) {
       fprintf(out, "@ |");
       for (int i=0; i<(int)change.names.size(); i++) {
@@ -141,6 +141,8 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
       ch = '-';
     } else if (string(tag)=="after") {
       ch = '*';
+    } else if (string(tag)=="move") {
+      ch = ':';
     }
     fprintf(out, "%c |",ch);
   }
@@ -254,6 +256,9 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
     break;
   case ROW_CHANGE_CONTEXT:
     updateRow(change,"after",true,false,false);
+    break;
+  case ROW_CHANGE_MOVE:
+    updateRow(change,"move",true,false,false);
     break;
   case ROW_CHANGE_UPDATE:
     updateRow(change,"update",true,true,false);

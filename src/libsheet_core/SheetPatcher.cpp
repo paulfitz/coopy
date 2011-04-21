@@ -57,6 +57,7 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 }
 
 bool SheetPatcher::changeRow(const RowChange& change) {
+  dbg_printf("\nRow cursor in: %d\n", rowCursor);
   changeCount++;
   if (sheet==NULL) return false;
   if (chain) chain->changeRow(change);
@@ -106,6 +107,9 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	int r = sheet->insertRow(tail).getIndex();
 	if (rowCursor!=-1) {
 	  rowCursor++;
+	  if (rowCursor==sheet->height()) {
+	    rowCursor = -1;
+	  }
 	}
 	if (r>=0) {
 	  for (int c=0; c<width; c++) {
@@ -165,12 +169,49 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  }
 	}
 	if (match) {
-	  if (r<sheet->width()-1) {
+	  if (r<sheet->height()-1) {
 	    r++;
 	  } else {
 	    r = -1;
 	  }
 	  RowRef row(r);
+	  rowCursor = r;
+	  success = true;
+	  break;
+	}
+      }
+      return success;
+    }
+    break;
+  case ROW_CHANGE_MOVE:
+    {
+      bool success = false;
+      int r;
+      for (r=0; r<sheet->height(); r++) {
+	bool match = true;
+	for (int c=0; c<width; c++) {
+	  if (active_cond[c]) {
+	    if (sheet->cellSummary(c,r)!=cond[c]) {
+	      match = false;
+	      break;
+	    }
+	  }
+	}
+	if (match) {
+	  RowRef from(r);
+	  RowRef to(rowCursor);
+	  RowRef result = sheet->moveRow(from,to);
+	  if (result.getIndex() == -1) {
+	    fprintf(stderr,"Row move not supported for sheet type\n");
+	  }
+	  r = result.getIndex();
+	  if (r!=-1) {
+	    if (r<sheet->height()-1) {
+	      r++;
+	    } else {
+	      r = -1;
+	    }
+	  }
 	  rowCursor = r;
 	  success = true;
 	  break;
@@ -197,19 +238,25 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  }
 	}
 	if (match) {
-	  rowCursor = r;
 	  dbg_printf("Match\n");
 	  for (int c=0; c<width; c++) {
 	    if (active_val[c]) {
 	      sheet->cellSummary(c,r,val[c]);
 	    }
 	  }
+	  if (r<sheet->height()-1) {
+	    r++;
+	  } else {
+	    r = -1;
+	  }
+	  rowCursor = r;
 	  success = true;
 	  break;
-	} else {
-	  dbg_printf("No match\n");
-	  rowCursor = -1;
 	}
+      }
+      if (!success) {
+	dbg_printf("No match for update\n");
+	rowCursor = -1;
       }
       return success;
     }

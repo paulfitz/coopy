@@ -34,6 +34,7 @@ namespace coopy {
       ROW_CHANGE_INSERT,
       ROW_CHANGE_UPDATE,
       ROW_CHANGE_CONTEXT,
+      ROW_CHANGE_MOVE,
     };
 
     enum {
@@ -153,8 +154,8 @@ public:
       return "insert";
     case ROW_CHANGE_UPDATE:
       return "update";
-      //case ROW_CHANGE_MOVE:
-      //return "move";
+    case ROW_CHANGE_MOVE:
+      return "move";
     case ROW_CHANGE_CONTEXT:
       return "context";
     }

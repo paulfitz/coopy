@@ -146,7 +146,22 @@ public:
 
   // move a row before base; if base is invalid move after all rows
   virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
-    return RowRef(); // NOT IMPLEMENTED
+    int offset1 = src.getIndex();
+    if (offset1>=h) return RowRef();
+    int offset2 = base.getIndex();
+    if (offset2>=h) return RowRef();
+    //printf("Moving %d to %d\n", offset1, offset2);
+    if (offset2!=-1) {
+      int orig = offset1+(offset2<offset1)?1:0;
+      arr.insert(arr.begin()+offset2, arr[offset1]);
+      arr.erase(arr.begin()+orig);
+      if (offset2>offset1) offset2--;
+    } else {
+      arr.push_back(arr[offset1]);
+      arr.erase(arr.begin()+offset1);
+      offset2 = (int)arr.size()-1;
+    }
+    return RowRef(offset2);
   }
 
   virtual Poly<SheetRow> insertRow() {
