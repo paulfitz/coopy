@@ -152,7 +152,7 @@ public:
     if (offset2>=h) return RowRef();
     //printf("Moving %d to %d\n", offset1, offset2);
     if (offset2!=-1) {
-      int orig = offset1+(offset2<offset1)?1:0;
+      int orig = offset1+((offset2<offset1)?1:0);
       arr.insert(arr.begin()+offset2, arr[offset1]);
       arr.erase(arr.begin()+orig);
       if (offset2>offset1) offset2--;
@@ -161,6 +161,7 @@ public:
       arr.erase(arr.begin()+offset1);
       offset2 = (int)arr.size()-1;
     }
+    //printf("Move resulted in %d\n", offset2);
     return RowRef(offset2);
   }
 

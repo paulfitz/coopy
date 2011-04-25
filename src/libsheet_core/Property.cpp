@@ -1,4 +1,5 @@
 #include <coopy/Property.h>
+#include <stdlib.h>
 
 using namespace coopy::store;
 using namespace std;
@@ -62,6 +63,16 @@ public:
   virtual bool isString() const { return true; }
   virtual bool isNull() const { return false; }
   virtual std::string asString() const { return x; }  
+  virtual int asInt() const { 
+    if (x=="true") return 1;
+    if (x=="True") return 1;
+    if (x=="TRUE") return 1;
+    return atoi(x.c_str());
+  }  
+
+  virtual bool asBoolean() const { 
+    return asInt()!=0;
+  }
 
   virtual std::string toString() const {
     return "[" + x + "]";

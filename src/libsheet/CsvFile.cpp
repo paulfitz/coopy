@@ -239,13 +239,28 @@ int read(const char *src, CsvSheetReaderState& dest,
     fclose(fp);
   }
   csv_free(&p);
+
+  if (config.get("flip_vertical").asInt()!=0) {
+    CsvSheet *sheet = dest.sheet;
+    for (int y=0; y<sheet->height()/2; y++) {
+      int y2 = sheet->height()-1-y;
+      for (int x=0; x<sheet->width(); x++) {
+	SheetCell tmp = sheet->cellSummary(x,y);
+	sheet->cellSummary(x,y,sheet->cellSummary(x,y2));
+	sheet->cellSummary(x,y2,tmp);
+      }
+    }
+  }
+
   return 0;
 }
 
 int CsvFile::read(const char *src, CsvSheet& dest, const Property& config) {
+  dbg_printf("CsvFile::read %s options %s\n", src, config.toString().c_str());
   CsvSheetReaderState state;
   state.sheet = &dest;
   return read(src,state,config);
+  //return result;
 }
 
 

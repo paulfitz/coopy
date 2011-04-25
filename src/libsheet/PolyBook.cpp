@@ -235,7 +235,7 @@ bool PolyBook::attach(Property& config) {
     }
   }
 
-  dbg_printf("Attach: type [%s] file [%s]\n", key.c_str(), filename.c_str());
+  dbg_printf("Attach: type [%s] file [%s] settings [%s]\n", key.c_str(), filename.c_str(), config.toString().c_str());
 
   if (key=="") {
     fprintf(stderr,"* Extension %s not known, maybe use a .json config file?\n",
@@ -247,7 +247,8 @@ bool PolyBook::attach(Property& config) {
   Factories f;
   AttachConfig ac;
   AttachReport ar;
-  ac.fname = filename;
+  ac.fname = config.get("file").asString();
+  if (ac.fname=="") ac.fname = filename;
   ac.ext = ext;
   ac.data = "";
   ac.options = config;

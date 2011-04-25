@@ -241,20 +241,22 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     rowChange.cond = cond;
     rowChange.val = value;
     rowChange.names = names;
-    if (lRow!=-1) {
-      if (last_local_row!=-1) {
-	if (lRow<last_local_row) {
-	  if (last_local_row>=0) {
-	    if (last_local_row_marked!=last_local_row) {
-	      RowChange alt = lastRowChange;
-	      alt.mode = ROW_CHANGE_CONTEXT;
-	      rc.push_back(alt);
+    if (!delRow) {
+      if (lRow!=-1) {
+	if (last_local_row!=-1) {
+	  if (lRow<last_local_row) {
+	    if (last_local_row>=0) {
+	      if (last_local_row_marked!=last_local_row) {
+		RowChange alt = lastRowChange;
+		alt.mode = ROW_CHANGE_CONTEXT;
+		rc.push_back(alt);
+	      }
 	    }
+	    RowChange alt = rowChange;
+	    alt.mode = ROW_CHANGE_MOVE;
+	    rc.push_back(alt);
+	    last_local_row_marked = lRow;
 	  }
-	  RowChange alt = rowChange;
-	  alt.mode = ROW_CHANGE_MOVE;
-	  rc.push_back(alt);
-	  last_local_row_marked = lRow;
 	}
       }
     }
