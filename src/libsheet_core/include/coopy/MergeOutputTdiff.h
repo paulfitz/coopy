@@ -15,7 +15,7 @@ namespace coopy {
 class coopy::cmp::MergeOutputTdiff : public MergeOutput {
 public:
   std::vector<std::string> ops;
-  std::vector<std::string> nops;
+  //std::vector<std::string> nops;
   std::map<std::string,bool> activeColumn;
   std::map<std::string,bool> showForSelect;
   std::map<std::string,bool> showForDescribe;

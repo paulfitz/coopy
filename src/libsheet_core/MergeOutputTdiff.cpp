@@ -92,17 +92,19 @@ bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
   for (int i=0; i<(int)change.namesAfter.size(); i++) {
     activeColumn[change.namesAfter[i]] = true;
   }
-  nops = change.namesAfter;
+  //nops = change.namesAfter;
   return true;
 }
 
 bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
+  /*
   vector<string> lnops;
   for (int i=0; i<(int)change.names.size(); i++) {
     if (activeColumn[change.names[i]]) {
       lnops.push_back(change.names[i]);
     }
   }
+  */
   if (true) { //lnops!=nops) {
     if (true) {
       fprintf(out, "@ |");
@@ -120,7 +122,7 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
       fprintf(out,"\n");
       showedColumns = true;
     }
-    nops = lnops;
+    //nops = lnops;
   }
 
   return true;
@@ -304,7 +306,7 @@ bool MergeOutputTdiff::setSheet(const char *name) {
   sheetName = name;
   sheetNameShown = false;
   ops.clear();
-  nops.clear();
+  //nops.clear();
   activeColumn.clear();
   showForSelect.clear();
   showForDescribe.clear();
