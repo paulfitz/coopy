@@ -77,7 +77,9 @@ private:
   std::vector<std::string> names;
   int last_local_row;
   int last_local_row_marked;
+  int bottom_local_row;
   RowChange lastRowChange;
+  bool had_row;
 
   int current_row;
   int last_row;

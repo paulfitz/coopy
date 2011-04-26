@@ -215,13 +215,11 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 		    sheet->desc().c_str());
 	  }
 	  r = result.getIndex();
-	  /*
 	  dbg_printf("Move result was %d\n", r);
 	  for (int y=0; y<sheet->height(); y++) {
 	    dbg_printf("%d %s / ", y, sheet->cellString(0,y).c_str());
 	  }
 	  dbg_printf("\n");
-	  */
 	  r++;
 	  if (r>=sheet->height()) {
 	    r = -1;

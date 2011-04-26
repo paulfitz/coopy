@@ -241,10 +241,17 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     rowChange.cond = cond;
     rowChange.val = value;
     rowChange.names = names;
+    if (last_local_row!=-1) {
+      had_row = true;
+    }
     if (!delRow) {
+      dbg_printf("Cursor? lRow %d last_local_row %d last_local_row_marked %d had_row %d\n",
+		 lRow, last_local_row, last_local_row_marked, had_row);
       if (lRow!=-1) {
-	if (last_local_row!=-1) {
-	  if (lRow<last_local_row) {
+	if (had_row) { //last_local_row!=-1) {
+	  //if (lRow!=last_local_row+1||last_local_row==-1) {
+	  if (lRow<bottom_local_row) {
+	    //if (fixed_row.find(lRow)!=fixed_row.end()) {
 	    if (last_local_row>=0) {
 	      if (last_local_row_marked!=last_local_row) {
 		RowChange alt = lastRowChange;
@@ -252,6 +259,8 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 		rc.push_back(alt);
 	      }
 	    }
+	    dbg_printf("MOVE! lRow %d last_local_row %d last_local_row_marked %d\n",
+		       lRow, last_local_row, last_local_row_marked);
 	    RowChange alt = rowChange;
 	    alt.mode = ROW_CHANGE_MOVE;
 	    rc.push_back(alt);
@@ -314,6 +323,9 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
     }
     last_local_row = lRow;
     lastRowChange = rowChange;
+    if (last_local_row>=bottom_local_row) {
+      bottom_local_row = last_local_row;
+    }
   }
   return true;
 }
@@ -321,7 +333,9 @@ bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
 
 bool Merger::merge(MergerState& state) {
   last_local_row = -1;
+  bottom_local_row = -1;
   last_local_row_marked = -1;
+  had_row = false;
 
   coopy::store::DataSheet& pivot = state.pivot;
   coopy::store::DataSheet& local = state.local;

@@ -365,10 +365,18 @@ static void evaluate(const OrderResult& order_local,
 }
 
 
-int safe_next(const efficient_map<int,int>& m, int val, int def) {
+static int safe_next(const efficient_map<int,int>& m, int val, int def) {
   efficient_map<int,int>::const_iterator it = m.find(val);
   if (it==m.end()) return def;
   return it->second;
+}
+
+static int next_avail(const set<int>& s, int val) {
+  set<int>::const_iterator it = s.find(val);
+  if (it==s.end()) return -2;
+  it++;
+  if (it==s.end()) return -2;
+  return *it;
 }
 
 void OrderMerge::merge(const OrderResult& nlocal,
@@ -404,10 +412,15 @@ void OrderMerge::merge(const OrderResult& nlocal,
 
     int ct = 0;
     efficient_map<int,int> l2k, r2k, p2k;
+    efficient_map<int,int> it2k;
     efficient_map<int,MatchUnit *> mu;
+    set<int> availableP;
+    set<int> availableL;
+    set<int> availableR;
     
     int lowestL = -2;
     int lowestR = -2;
+    int gct = 0;
     for (list<MatchUnit>::iterator it=canon_src->begin();
 	 it!=canon_src->end(); 
 	 it++) {
@@ -416,14 +429,27 @@ void OrderMerge::merge(const OrderResult& nlocal,
       int lCol = unit.localUnit;
       int rCol = unit.remoteUnit;
       bool deleted = unit.deleted;
+      dbg_printf("match %d: %d: P/L/R %d %d %d %s\n", 
+		 gct, deleted?-1:ct, pCol, lCol, rCol,
+		 deleted?"(deleted)":"");
+      gct++;
+      if (deleted) { continue; }
+      it2k[gct-1] = ct;
       if ((lCol<lowestL&&lCol>=0)||lowestL==-2) {
 	lowestL = lCol;
+      }
+      if (lCol!=-1) {
+	availableL.insert(lCol);
       }
       if ((rCol<lowestR&&rCol>=0)||lowestR==-2) {
 	lowestR = rCol;
       }
-      dbg_printf("match %d: P/L/R %d %d %d %s\n", ct, pCol, lCol, rCol,
-		 deleted?"(deleted)":"");
+      if (rCol!=-1) {
+	availableR.insert(rCol);
+      }
+      if (pCol!=-1) {
+	availableP.insert(pCol);
+      }
       if (pCol>=0) {
 	p2k[pCol] = ct;
       }
@@ -476,28 +502,28 @@ void OrderMerge::merge(const OrderResult& nlocal,
 		   deleted?"(deleted)":"");
 
 	if (lCol==-1 && rCol==-1) {
-	  int next = safe_next(p2k,pCol+1,dud);
+	  int next = safe_next(p2k,next_avail(availableP,pCol),dud);
 	  v.addTransition(k,next,0);
 	  dbg_printf("    transition %d %d\n", k, next);
 	  idx2.insert(next);
 	  continue;
 	}
 	if (rCol==-1) {
-	  int next = safe_next(l2k,lCol+1,dud);
+	  int next = safe_next(l2k,next_avail(availableL,lCol),dud);
 	  v.addTransition(k,next,0);
 	  dbg_printf("    transition %d %d\n", k, next);
 	  idx2.insert(next);
 	  continue;
 	}
 	if (lCol==-1) {
-	  int next = safe_next(r2k,rCol+1,dud);
+	  int next = safe_next(r2k,next_avail(availableR,rCol),dud);
 	  v.addTransition(k,next,0);
 	  dbg_printf("    transition %d %d\n", k, next);
 	  idx2.insert(next);
 	  continue;
 	}
-	int lnext = safe_next(l2k,lCol+1,dud);
-	int rnext = safe_next(r2k,rCol+1,dud);
+	int lnext = safe_next(l2k,next_avail(availableL,lCol),dud);
+	int rnext = safe_next(r2k,next_avail(availableR,rCol),dud);
 	/*
 	  if (lnext==dud||rnext==dud) {
 	  v.addTransition(k,lnext,0);
@@ -509,7 +535,7 @@ void OrderMerge::merge(const OrderResult& nlocal,
 	  continue;
 	  }
 	*/
-	int pnext = safe_next(p2k,pCol+1,dud);
+	int pnext = safe_next(p2k,next_avail(availableP,pCol),dud);
 	if (lnext!=pnext) {
 	  v.addTransition(k,lnext,0);
 	  dbg_printf("    transition %d %d\n", k, lnext);
@@ -549,6 +575,7 @@ void OrderMerge::merge(const OrderResult& nlocal,
 
     int q = v.length()-qo;
     efficient_map<int,int> dups;
+    efficient_map<int,int> accepted;
     dups[dud] = 1;
     good = true;
     //if (v.getPath(q)!=dud) {
@@ -560,68 +587,90 @@ void OrderMerge::merge(const OrderResult& nlocal,
       }
       if (dups.find(k)==dups.end() && dups.find(k2)==dups.end()) {
 	canon.push_back(*mu[k]);
+	dbg_printf("     ADDED -> %d (%d %d %d)\n", canon.size(),
+		   mu[k]->pivotUnit, mu[k]->localUnit, mu[k]->remoteUnit);
 	dups[k] = 1;
+	accepted[k] = 1;
       } else {
+	dbg_printf("     hit dodgy match\n");
 	good = false;
 	break;
       }
     }
-    //} else {
-    //      good = false;
-    //}
 
-    more = false;
-    if (!good) {
-      more = true;
-      dbg_printf("Going back for more after getting to length %d of %d...\n",
-		 canon.size(), accum.size());
-      list<MatchUnit> *canon_old_src = canon_src;
-      if (canon_src != &canon_rem1) {
-	canon_src = &canon_rem1;
-      } else {
-	canon_src = &canon_rem2;
-      }
-      canon_src->clear();
-      int k = 0;
-      int omit = 0;
-      for (list<MatchUnit>::iterator it=canon_old_src->begin();
-	   it!=canon_old_src->end(); 
-	   it++) {
-	if (dups.find(k)!=dups.end()) {
-	  omit++;
-	} else if (it->deleted) {
-	  canon.push_back(*it);
+    more = !good;
+    list<MatchUnit> *canon_old_src = canon_src;
+    if (canon_src != &canon_rem1) {
+      canon_src = &canon_rem1;
+    } else {
+      canon_src = &canon_rem2;
+    }
+    canon_src->clear();
+    int gct2 = 0;
+    int omit = 0;
+    for (list<MatchUnit>::iterator it=canon_old_src->begin();
+	 it!=canon_old_src->end(); 
+	 it++) {
+      if (it2k.find(gct2)!=it2k.end()) {
+	if (accepted.find(it2k[gct2])!=accepted.end()) {
 	  omit++;
 	} else {
 	  canon_src->push_back(*it);
 	}
-	k++;
       }
-      if (omit==0) {
-	dbg_printf("Actually, no point going back for more, no progress made\n");
-	more = false;
-      }
+      gct2++;
     }
-    dbg_printf("STATUS %d %d / %d %d\n", canon.size(), accum.size(), good, more);
+    dbg_printf("Got to length %d of %d...\n",
+	       canon.size(), accum.size());
+    if (omit==0) {
+      dbg_printf("No progress made\n");
+      more = false;
+    }
+    dbg_printf("STATUS %d %d / %s, %s\n", canon.size(), accum.size(), good?"good":"no good", more?"more":"no more");
   }
 
-  if (good) {
-    accum = canon;
-    for (list<MatchUnit>::iterator it=accum.begin();
-	 it!=accum.end(); 
+  if (canon_src!=&accum) {
+    for (list<MatchUnit>::iterator it=canon_src->begin();
+	 it!=canon_src->end(); 
 	 it++) {
-      MatchUnit& unit = *it;
-      int pCol = unit.pivotUnit;
-      int lCol = unit.localUnit;
-      int rCol = unit.remoteUnit;
-      bool deleted = unit.deleted;
-      dbg_printf("final P/L/R %d %d %d %s\n", pCol, lCol, rCol,
-		 deleted?"(deleted)":"");
+      if (!it->deleted) {
+	canon.push_back(*it);
+	dbg_printf("     ADDED UNORDERED -> %d (%d %d %d)\n", canon.size(),
+		   it->pivotUnit, it->localUnit, it->remoteUnit);
+      }
     }
+  }
+
+  for (list<MatchUnit>::iterator it=accum.begin();
+       it!=accum.end(); 
+       it++) {
+    if (it->deleted) {
+      canon.push_back(*it);
+      dbg_printf("     ADDED DELETED -> %d (%d %d %d)\n", canon.size(),
+		 it->pivotUnit, it->localUnit, it->remoteUnit);
+    }
+  }
+  accum = canon;
+  int ct = 0;
+  for (list<MatchUnit>::iterator it=accum.begin();
+       it!=accum.end(); 
+       it++) {
+    MatchUnit& unit = *it;
+    int pCol = unit.pivotUnit;
+    int lCol = unit.localUnit;
+    int rCol = unit.remoteUnit;
+    bool deleted = unit.deleted;
+    dbg_printf("final match %d: P/L/R %d %d %d %s\n", ct, pCol, lCol, rCol,
+	       deleted?"(deleted)":"");
+    ct++;
+  }
+
+  /*
   } else {
     fprintf(stderr, "No consistent order merge was possible.\n");
     dbg_printf("No consistent order merge was possible.\n");
   }
+  */
 }
 
 
