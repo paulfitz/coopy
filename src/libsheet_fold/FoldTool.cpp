@@ -1,4 +1,5 @@
 #include <coopy/FoldTool.h>
+#include <coopy/FoldedSheet.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/SchemaSniffer.h>
 #include <coopy/ShortTextBook.h>
@@ -141,6 +142,7 @@ public:
     return it2->second;
   }
 
+  /*
   ints transform(ints y) {
     ints result;
     for (int i=0; i<(int)y.size(); i++) {
@@ -154,6 +156,7 @@ public:
     }
     return results;
   }
+  */
 };
   
   class FoldCache {
@@ -186,7 +189,174 @@ public:
 FoldTool::FoldTool() {
 }
 
+class FoldEdge {
+public:
+  string table;
+  string key;
 
+  string toString() const {
+    return table + ":" + key;
+  }
+};
+
+class FoldEdgeCmp {
+public:
+  bool operator() (const FoldEdge& e1, const FoldEdge& e2) {
+    if (e1.table<e2.table) return true;
+    return e1.key<e2.key;
+  }
+};
+
+class Folds {
+public:
+  typedef map<FoldEdge,FoldEdge,FoldEdgeCmp> EdgeMap;
+
+  EdgeMap fwd;
+  EdgeMap rev;
+
+  void add(const char *fromTable, const char *toTable, 
+	   const char *fromField, const char *toField) {
+    FoldEdge e1, e2;
+    e1.table = fromTable;
+    e1.key = fromField;
+    e2.table = toTable;
+    e2.key = toField;
+    fwd[e1] = e2;
+    rev[e2] = e1;
+    printf("Added %s -> %s\n", e1.toString().c_str(), e2.toString().c_str());
+  }
+};
+
+class FoldSelector {
+public:
+  string tableName;
+  string keyName;
+  SheetCell val;
+};
+
+static bool fold_expander(Folds& folds, FoldCache& cache, FoldedSheet& sheet,
+			  FoldSelector& sel) {
+  SheetAccess& base = cache.getSheet(sel.tableName.c_str());
+  if (!base.isValid()) {
+    return false;
+  }
+  PolySheet& src = base.sheet;
+  SchemaSniffer& schema = base.schema;
+  int selId = -1;
+  if (sel.keyName!="") {
+    selId = base.getId(sel.keyName.c_str());
+  }
+  printf("Working on sheet %dx%d\n", src.width(), src.height());
+  FoldedCell fcell;
+  vector<int> selected;
+  for (int y=0; y<src.height(); y++) {
+    if (selId!=-1) {
+      if (src.cellSummary(selId,y)==sel.val) {
+	selected.push_back(y);
+      }
+    } else {
+      selected.push_back(y);
+    }
+  }
+  vector<int> expanded;
+  for (int x=0; x<src.width(); x++) {
+    FoldEdge e;
+    e.table = sel.tableName;
+    e.key = base.getName(x);
+    printf("Checking %s\n", e.toString().c_str());
+    Folds::EdgeMap::iterator it = folds.fwd.find(e);
+    if (it!=folds.fwd.end()) {
+      printf("Should expand out %s (to %s)\n", e.key.c_str(),
+	     it->second.toString().c_str());
+    }
+    Folds::EdgeMap::iterator it2 = folds.rev.find(e);
+    if (it2!=folds.rev.end()) {
+      printf("Should expand in %s (from %s)\n", e.key.c_str(),
+	     it2->second.toString().c_str());
+    }
+  }
+
+  printf("Producting sheet %dx%d\n", src.width(), selected.size());
+
+  sheet.resize(src.width(),selected.size(),fcell);
+  for (vector<int>::iterator yit=selected.begin(); yit!=selected.end(); yit++) {
+    int y = *yit;
+    int y0 = yit-selected.begin();
+    for (int x=0; x<sheet.width(); x++) {
+      FoldedCell& cell = sheet.cell(x,y0);
+      cell.datum = src.cellSummary(x,y);
+    }
+  }
+  return true;
+}
+
+bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
+  printf("Starting fold/unfold\n");
+
+  if (options.tableName=="") {
+    fprintf(stderr,"Please supply a root table name\n");
+    return false;
+  }
+
+  FoldCache cache;
+  cache.setBook(src);
+
+  SheetAccess& base = cache.getSheet(options.tableName.c_str());
+  if (!base.isValid()) {
+    return false;
+  }
+
+  vector<FoldLayout> layout;
+  FoldLayout baseLayout;
+  baseLayout.src = &base;
+  baseLayout.updateBase();
+  layout.push_back(baseLayout);
+
+  PolySheet recipe = options.recipe.readSheetByIndex(0);
+  recipe.hideHeaders();
+  Folds folds;
+  for (int i=0; i<recipe.height(); i++) {
+    string fromTable = recipe.cellString(0,i);
+    string fromField = recipe.cellString(1,i);
+    string toTable = recipe.cellString(2,i);
+    string toField = recipe.cellString(3,i);
+    printf("Recipe line %d: %s %s %s %s\n", i,
+	   fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str());
+    folds.add(fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str());
+    if (fromTable==options.tableName) {
+      /*
+      SheetAccess& alt = cache.getSheet(toTable.c_str());
+      if (!alt.isValid()) {
+	return false;
+      }
+      layout.push_back(FoldLayout());
+      FoldLayout& l = layout.back();
+      l.src = &base;
+      l.dest = &alt;
+      l.srcIdName = fromField;
+      l.destIdName = toField;
+      l.updateBase();
+      l.updateMap();
+      */
+    }
+  }
+
+  FoldedSheet fsheet;
+  FoldSelector sel;
+  sel.tableName = options.tableName;
+  fold_expander(folds, cache, fsheet, sel);
+
+  printf("Generated sheet %dx%d\n", fsheet.width(), fsheet.height());
+
+  printf("Incomplete...\n");
+  exit(1);
+
+  return true;
+}
+
+
+
+/*
 bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
   printf("Starting fold/unfold\n");
 
@@ -288,3 +458,4 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
 }
 
 
+*/
