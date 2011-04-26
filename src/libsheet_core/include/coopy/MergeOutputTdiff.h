@@ -2,6 +2,7 @@
 #define COOPY_MERGEOUTPUTTDIFF
 
 #include <coopy/MergeOutput.h>
+#include <coopy/Viterbi.h>
 
 #include <map>
 
@@ -27,6 +28,7 @@ public:
   bool showedColumns;
   std::string sheetName;
   bool sheetNameShown;
+  coopy::cmp::Viterbi formLattice;
 
   MergeOutputTdiff();
 

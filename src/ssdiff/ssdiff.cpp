@@ -39,7 +39,7 @@ Patcher *createTool(string mode, string version="") {
 
 int main(int argc, char *argv[]) {
   std::string output = "-";
-  std::string mode = "csv";
+  std::string mode = "tdiff";
   std::string parent_file = "";
   std::string version = "";
   std::string map_file = "";
@@ -150,13 +150,16 @@ int main(int argc, char *argv[]) {
   if (argc<2) {
     printf("Show the difference between two tables. Call as:\n");
     printf("  ssdiff [--output <filename>] local.csv modified.csv\n");
-    printf("For differences in a classic-diff-like format, do:\n");
+    printf("For differences in a CSV-compatible format, do:\n");
+    printf("  ssdiff --format-csv local.csv modified.csv\n");
+    printf("For differences in a classic-diff-like format (now the default), do:\n");
     printf("  ssdiff --format-tdiff local.csv modified.csv\n");
     printf("For differences in a verbose format, do:\n");
-    printf("  ssdiff --format-human local.csv modified.csv\n");
+    printf("  ssdiff --format-raw local.csv modified.csv\n");
     printf("To extract the mapping from local to modified in tabular form, do:\n");
     printf("  ssdiff --index local.csv modified.csv\n");
-    printf("Output defaults to standard output.  To list supported formats:\n");
+    printf("Output defaults to standard output.\n");
+    printf("To list supported *input* formats:\n");
     printf("  ssdiff --list-formats\n");
     printf("It is possible to immediately apply a difference to the local file:\n");
     printf("  ssdiff --apply local.xls modified.csv\n");
