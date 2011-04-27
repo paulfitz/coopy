@@ -14,15 +14,23 @@ namespace coopy {
 class coopy::store::SheetStyle {
 private:
   std::string delim;
+  std::string eol;
   std::string nullToken;
   bool haveNull;
   bool quoteCollision;
   bool trimEnd;
   bool markHeader;
+  bool eolAtEof;
 public:
   SheetStyle() {
     delim = ",";
     nullToken = "NULL";
+
+    eol =  "\r\n"; // use Windows encoding, since UNIX is more forgiving
+    // (victim logic, I know...)
+
+    eolAtEof = true;
+
     haveNull = true;
     markHeader = false;
     quoteCollision = true;
@@ -41,6 +49,18 @@ public:
 
   std::string getDelimiter() const {
     return delim;
+  }
+
+  void setDelimiter(const std::string& delim) {
+    this->delim = delim;
+  }
+
+  std::string getEol() const {
+    return eol;
+  }
+
+  void setEol(const std::string& eol) {
+    this->eol = eol;
   }
 
   std::string getNullToken() const {
@@ -63,8 +83,16 @@ public:
     return markHeader;
   }
 
+  bool shouldEolAtEof() const {
+    return eolAtEof;
+  }
+
   void setMarkHeader(bool flag) {
     markHeader = flag;
+  }
+
+  bool setEolAtEof(bool flag) {
+    eolAtEof = flag;
   }
 
   static const SheetStyle defaultStyle;

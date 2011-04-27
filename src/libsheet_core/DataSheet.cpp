@@ -6,7 +6,9 @@ using namespace coopy::store;
 
 std::string DataSheet::encode(const SheetStyle& style) const {
   std::string delim = style.getDelimiter();
+  std::string eol = style.getEol();
   std::string result = "";
+  int last = height()-1;
   for (int y=0;y<height();y++) {
     std::string line = "";
     for (int x=0;x<width();x++) {
@@ -16,7 +18,9 @@ std::string DataSheet::encode(const SheetStyle& style) const {
       line += encodeCell(cellSummary(x,y),style);
     }
     int len = line.length();
-    line += "\r\n"; // use Windows encoding, since UNIX is more forgiving
+    if (style.shouldEolAtEof()||y!=last) {
+      line += eol;
+    }
     if (style.shouldMarkHeader()) {
       SheetSchema *schema = getSchema();
       if (schema!=NULL) {
@@ -27,7 +31,7 @@ std::string DataSheet::encode(const SheetStyle& style) const {
 	    for (int i=0; i<len; i++) {
 	      line += '-';
 	    }
-	    line += "\r\n";	    
+	    line += eol;
 	  }
 	}
       }
