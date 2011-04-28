@@ -652,6 +652,7 @@ void OrderMerge::merge(const OrderResult& nlocal,
   }
   accum = canon;
   int ct = 0;
+  overlap = 0;
   for (list<MatchUnit>::iterator it=accum.begin();
        it!=accum.end(); 
        it++) {
@@ -660,10 +661,14 @@ void OrderMerge::merge(const OrderResult& nlocal,
     int lCol = unit.localUnit;
     int rCol = unit.remoteUnit;
     bool deleted = unit.deleted;
+    if (lCol!=-1&&rCol!=-1) {
+      overlap++;
+    }
     dbg_printf("final match %d: P/L/R %d %d %d %s\n", ct, pCol, lCol, rCol,
 	       deleted?"(deleted)":"");
     ct++;
   }
+  dbg_printf("overlap is %d\n", overlap);
 
   /*
   } else {

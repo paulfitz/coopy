@@ -356,13 +356,28 @@ bool Merger::merge(MergerState& state) {
   bool diff = output.wantDiff();
   bool link = output.wantLinks();
 
-  dbg_printf("Merging row order...\n");
-  row_merge.merge(row_local,row_remote,flags);
   dbg_printf("Merging column order...\n");
   CompareFlags cflags = flags;
   cflags.head_trimmed = false;
   cflags.tail_trimmed = false;
   col_merge.merge(col_local,col_remote,cflags);
+
+  dbg_printf("Merging row order...\n");
+  if (col_merge.overlap==0 && diff) {
+    dbg_printf("No overlap, just use remote...\n");
+    row_merge.accum.clear();
+    for (int i=0; i<remote.height(); i++) {
+      MatchUnit unit;
+      unit.pivotUnit = -1;
+      unit.localUnit = -1;
+      unit.remoteUnit = i;
+      unit.deleted = false;
+      row_merge.accum.push_back(unit);
+    }
+  } else {
+    row_merge.merge(row_local,row_remote,flags);
+  }
+
   conflicts = 0;
   dbg_printf("Order merges are done...\n");
 
@@ -447,6 +462,7 @@ bool Merger::merge(MergerState& state) {
     }
   }
 
+  bool allGone = false;
   if (diff) {
     current_row = 0;
     last_row = -1;
@@ -522,8 +538,12 @@ bool Merger::merge(MergerState& state) {
 	change.namesAfter = local_col_names;
 	//output.changeColumn(change);
 	cc.push_back(change);
+	if (local_cols.size()==0) {
+	  allGone = true;
+	}
       }
     }
+
 
     // Pass 2: check order
     vector<int> shuffled_cols;
@@ -671,9 +691,18 @@ bool Merger::merge(MergerState& state) {
 	   it!=row_merge.accum.end(); 
 	   it++) {
 	MatchUnit& unit = *it;
-	// ignoring row order for now ...
-	bool ok = mergeRow(pivot,local,remote,unit,output,flags,rc);
-	if (!ok) { return false; }
+
+	// Special case: if all columns were deleted, then we assume
+	// all local rows are deleted.
+	if (allGone) {
+	  unit.localUnit = -1;
+	  unit.pivotUnit = -1;
+	}
+
+	if (unit.remoteUnit!=-1 || !allGone) {
+	  bool ok = mergeRow(pivot,local,remote,unit,output,flags,rc);
+	  if (!ok) { return false; }
+	}
       }
     }
 

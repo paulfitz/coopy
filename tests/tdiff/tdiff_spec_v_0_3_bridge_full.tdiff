@@ -1,26 +1,27 @@
 # tdiff version 0.3
 
 /*
- * this comment could describe the whole document
+ * Hello, good evening, and welcome to today's patch.
  */
 
 /*
- * this comment could describe the following hunk
+ * D. Duck made the Williamsburg bridge?  D'oh.  That should be L. L. Buck.
  */
-* |bridge=Brooklyn|designer:'J.A.Roebling'|length:1595|
-= |bridge=Williamsburg|designer:'D.D.Duck'->'L.L.Buck'|length:1600|
-* |bridge=Queensborough|designer:'Palmer & Hornbostel'|length:1182|
+= |bridge=Williamsburg|designer:D. Duck->L. L. Buck|length:1600|
 
 /*
- * this comment could describe the following hunk, even
- * though it's not immediately adjacent to the hunk (there is 
- * an intervening newline).
+ * I never heart of the "Spamspan" bridge.  Delete that.
  */
-
-- |bridge=Spamspan|designer:'S.Spamington'|length:10000|
-+ |bridge=Manhattan|designer:'G.Lindenthal'|length:1470|
+- |bridge=Spamspan|designer:S. Spamington|length:10000|
 
 /*
- * final, wrap up, comment
+ * Add in the Manhatten bridge.  If we're in an ordered table,
+ * stick it after the Brooklyn bridge.
+ */
+* |bridge=Brooklyn|designer:J. A. Roebling|length:1595|
++ |bridge=Manhattan|designer:G. Lindenthal|length:1470|
+
+/*
+ * That should do it.
  */
 

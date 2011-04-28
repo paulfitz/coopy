@@ -116,7 +116,11 @@ public:
   }
 
   virtual bool deleteData() {
-    return false;
+    int h = height();
+    for (int i=0; i<h; i++) {
+      deleteRow(RowRef(0));
+    }
+    return true;
   }
 
   virtual bool hasDimension() const {

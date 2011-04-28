@@ -17,7 +17,15 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
     //return sheet->deleteColumn(ColumnRef(change.subject));
-    return sheet->deleteColumn(ColumnRef(change.identityToIndex(change.subject)));
+    {
+      bool ok = sheet->deleteColumn(ColumnRef(change.identityToIndex(change.subject)));
+      //dbg_printf("Sheet width is %d\n", sheet->width());
+      if (sheet->width()==0) {
+	sheet->deleteData();
+	rowCursor = -1;
+      }
+      return ok;
+    }
     break;
   case ORDER_CHANGE_INSERT:
     //return sheet->insertColumn(ColumnRef(change.subject)).isValid();

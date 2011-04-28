@@ -446,7 +446,7 @@ foreach(FORMAT csv tdiff)
   ADD_ROUND_TRIP_TEST(joe_0000_${FORMAT} ${TESTS}/bug/joe_0000/local.csv ${TESTS}/bug/joe_0000/remote.csv ${FORMAT})
   ADD_ROUND_TRIP_TEST(joe_0000_${FORMAT}_inv ${TESTS}/bug/joe_0000/remote.csv ${TESTS}/bug/joe_0000/local.csv ${FORMAT})
 
-  SET(TARGETS named_numbers.csv named_numbers_wide.csv named_numbers_three_23.csv named_numbers_flip_column.csv named_numbers_add_row.csv test003_conflicting_change.csv)
+  SET(TARGETS named_numbers.csv named_numbers_wide.csv named_numbers_three_23.csv named_numbers_flip_column.csv named_numbers_add_row.csv test003_conflicting_change.csv bridges.csv)
   foreach(T1 ${TARGETS})
     foreach(T2 ${TARGETS})
       if (NOT ${T1} STREQUAL ${T2})

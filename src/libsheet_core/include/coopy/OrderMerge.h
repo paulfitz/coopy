@@ -19,6 +19,7 @@ class coopy::cmp::OrderMerge {
 public:
   OrderResult order_local, order_remote;
   std::list<MatchUnit> accum;
+  int overlap;
   coopy::store::IntSheet xlocal, xremote;
   int start_local;
   int start_remote;
