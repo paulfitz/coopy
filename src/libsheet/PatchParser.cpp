@@ -508,79 +508,183 @@ vector<string> normalizedMessage(const string& line) {
 class TDiffPart {
 public:
   string orig;
-  string base;
-  string mod;
-  bool hasMod;
+
+  string key;
+  SheetCell val;
+  SheetCell nval;
+  bool hasKey;
+  bool hasVal;
+  bool hasNval;
+
   bool isId;
-  bool isWild;
+  bool isFresh;
 
   TDiffPart() {
     isId = false;
-    hasMod = false;
-    isWild = false;
+    isFresh = false;
+    hasKey = false;
+    hasVal = false;
+    hasNval = false;
   }
 
-  TDiffPart(const string& s) {
-    apply(s);
+  TDiffPart(const string& s, bool columnLike) {
+    apply(s, columnLike);
   }
 
-  void apply(string s) {
-    orig = s;
-    isId = false;
-    hasMod = false;
-    isWild = false;
-    if (s=="*") {
-      base = "*";
-      isWild = true;
-      return;
-    }
-    if (s.length()>0) {
-      if (s[s.length()-1]=='=') {
-	isId = true;
-	s = s.substr(0,s.length()-1);
-      }
-    }
 
-    bool hasQuote = false;
+  string peel(const string& s, string& sep, string& rem, bool& hasQuote) {
+    hasQuote = false;
+    bool acceptSingle = true;
+    bool acceptDouble = true;
     bool quote = false;
     int state = 0;
     int pre = -2;
-    int post = -2;
+    sep = "";
     for (int i=0; i<(int)s.length(); i++) {
       char ch = s[i];
-      if (ch=='\"') {
-	hasQuote = true;
+      if ((ch=='\"'&&acceptDouble)||(ch=='\''&&acceptSingle)) {
+	if (i==0) {
+	  hasQuote = true;
+	}
 	state = 0;
 	quote = !quote;
+	if (ch=='\"'&&quote) {
+	  acceptSingle = false;
+	}
+	if (ch=='\''&&quote) {
+	  acceptDouble = false;
+	}
+	if (!quote) {
+	  acceptSingle = acceptDouble = true;
+	}
       } else if (quote) {
 	state = 0;
+      } else if (ch==':'&&state==0&&pre==-2) {
+	pre = i-1;
+	sep = ":";
+	break;
+      } else if (ch=='='&&state==0&&pre==-2) {
+	pre = i-1;
+	sep = "=";
       } else if (ch=='-'&&state==0&&pre==-2) {
 	state = 1;
       } else if (ch=='>'&&state==1) {
-	state = 2;
 	pre = i-2;
-	post = i+1;
+	sep = "->";
       } else {
 	state = 0;
       }
     }
+    string result = s;
+    rem = "";
     if (pre!=-2) {
-      base = s.substr(0,pre+1);
-      mod = s.substr(post,s.length());
-      hasMod = true;
-    } else {
-      base = s;
-      mod = "";
+      result = s.substr(0,pre+1);
+      rem = s.substr(pre+sep.length()+1,s.length());
     }
-    //printf(">> %s %s %d\n", base.c_str(), mod.c_str(), hasMod);
+    if (hasQuote) {
+      result = result.substr(1,result.length()-2);
+    }
+    return result;
   }
 
-  SheetCell baseCell() {
-    return SheetCell(base,false);
+  SheetCell getCell(const string& txt, bool quoted) {
+    SheetCell result;
+    if (quoted) {
+      result.text = txt;
+      result.escaped = false;
+      //printf("Made cell %s from %s\n", result.toString().c_str(), txt.c_str());
+      return result;
+    }
+    if (txt=="NULL") {
+      result.escaped = true;
+      return result;
+    }
+    result.text = txt;
+    result.escaped = false;
+    return result;
   }
 
-  SheetCell modCell() {
-    return SheetCell(mod,false);
+  bool checkCell(const string& txt, bool quoted) {
+    if (quoted) return true;
+    return (txt!="*");
+  }
+
+  void applyElement(const string& txt,
+		    const string& pre,
+		    const string& post,
+		    bool quoted,
+		    bool columnLike) {
+    /*
+    printf("applyElement [%s] [%s] [%s], %s, %s\n",
+	   pre.c_str(), txt.c_str(), post.c_str(),
+	   quoted?"quoted":"unquoted",
+	   columnLike?"column":"value");
+    */
+    if (pre=="") {
+      if ((!columnLike)&&(post!="="&&post!=":")) {
+	if (checkCell(txt,quoted)) {
+	  val = getCell(txt,quoted);
+	  hasVal = true;
+	}
+      } else {
+	key = txt;
+	hasKey = true;
+      }
+    } else if (pre=="->") {
+      if (!columnLike) {
+	if (checkCell(txt,quoted)) {
+	  nval = getCell(txt,quoted);
+	  hasNval = true;
+	}
+      } else {
+	isFresh = true;
+      }
+    } else if (pre=="="||pre==":") {
+      isId = (pre=="=");
+      if (!columnLike) {
+	if (checkCell(txt,quoted)) {
+	  val = getCell(txt,quoted);
+	  hasVal = true;
+	}
+      }
+    }
+  }
+
+  void apply(const string& s, bool columnLike) {
+    orig = s;
+    hasKey = false;
+    hasVal = false;
+    hasNval = false;
+
+    isId = false;
+    isFresh = false;
+
+    string sep1, r1, rem1;
+    string sep2, r2, rem2;
+    string sep3, r3, rem3;
+    bool q1, q2, q3;
+    bool set1, set2, set3;
+    set1 = set2 = set3 = false;
+
+    r1 = peel(s,sep1,rem1, q1);
+    set1 = true;
+    if (sep1!="") {
+      r2 = peel(rem1,sep2,rem2, q2);
+      set2 = true;
+      if (sep2!="") {
+	r3 = peel(rem2,sep3,rem3, q3);
+	set3 = true;
+      }
+    }
+
+    //printf("Input %s\n", s.c_str());
+    //printf("  %s %s %s\n", r1.c_str(), sep1.c_str(), rem1.c_str());
+    //printf("  %s %s %s\n", r2.c_str(), sep2.c_str(), rem2.c_str());
+    //printf("  %s %s %s\n", r3.c_str(), sep3.c_str(), rem3.c_str());
+
+    if (set1) applyElement(r1,"",sep1,q1,columnLike);
+    if (set2) applyElement(r2,sep1,sep2,q2,columnLike);
+    if (set3) applyElement(r3,sep2,sep3,q3,columnLike);
   }
 };
 
@@ -596,17 +700,35 @@ bool PatchParser::applyTdiff() {
 
   bool eof = false;
   vector<TDiffPart> cols;
+  bool inComment = false;
   while (!eof) {
     string line = reader->readLine(eof);
+    if (inComment) {
+      if (line.find("*/")!=string::npos) {
+	inComment = false;
+      } else {
+	dbg_printf("Ignoring comment [%s]\n", line.c_str());
+      }
+      continue;
+    }
     vector<string> msg = normalizedMessage(line);
     if (msg.size()==0) {
       //dbg_printf("Empty line\n");
       continue;
     } 
     string first = msg[0];
-    if (first[0]=='#'||first[0]=='/') {
+    if (first[0]=='#') {
       dbg_printf("Ignoring comment [%s]\n", line.c_str());
       continue;
+    }
+    if (first.length()>=2) {
+      if (first[0]=='/') {
+	if (first[1]=='*') {
+	  dbg_printf("Ignoring comment [%s]\n", line.c_str());
+	  inComment = true;
+	  continue;
+	}
+      }
     }
     dbg_printf("Got [%s] [%s]\n", line.c_str(), first.c_str());
     if (first=="@@@") {
@@ -615,8 +737,8 @@ bool PatchParser::applyTdiff() {
       vector<string> names;
       cols.clear();
       for (int i=1; i<(int)msg.size(); i++) {
-	cols.push_back(TDiffPart(msg[i]));
-	names.push_back(cols[i-1].base);
+	cols.push_back(TDiffPart(msg[i],true));
+	names.push_back(cols[i-1].key);
       }
       if (first=="@@") {
 	NameChange nc;
@@ -636,7 +758,7 @@ bool PatchParser::applyTdiff() {
       vector<string> ocols;
       vector<string> ncols;
       for (int i=0; i<(int)cols.size(); i++) {
-	ocols.push_back(cols[i].base);
+	ocols.push_back(cols[i].key);
       }
       for (int i=2; i<(int)msg.size(); i++) {
 	ncols.push_back(msg[i]);
@@ -679,16 +801,33 @@ bool PatchParser::applyTdiff() {
 
       cols.clear();
       for (int i=2; i<(int)msg.size(); i++) {
-	cols.push_back(TDiffPart(msg[i]));
+	cols.push_back(TDiffPart(msg[i],true));
       }
  
     } else if (first=="="||first=="-"||first=="+"||first=="*"||first==":") {
       vector<TDiffPart> assign;
+      bool mod = false;
       for (int i=1; i<(int)msg.size(); i++) {
 	TDiffPart part;
-	part.apply(msg[i]);
-	//printf("[%d] [%s] [%s]\n", (int)part.hasMod, part.base.c_str(), part.mod.c_str());
+	part.apply(msg[i],false);
+	//printf("key %d [%s] / val %d [%s] / nval %d [%s]\n", 
+	//(int)part.hasKey, part.key.c_str(),
+	//(int)part.hasVal, part.val.toString().c_str(),
+	//     (int)part.hasNval, part.nval.toString().c_str());
+
 	assign.push_back(part);
+	if (part.hasKey) { mod = true; }
+      }
+      if (mod) {
+	cols.clear();
+	for (int i=1; i<(int)msg.size(); i++) {
+	  TDiffPart& a = assign[i-1];
+	  TDiffPart context = a;
+	  context.hasVal = false;
+	  context.hasNval = false;
+	  a.hasKey = false;
+	  cols.push_back(context);
+	}
       }
       dbg_printf("  assign %s\n", vector2string(assign).c_str());
       dbg_printf("  assign %s\n", vector2string(cols).c_str());
@@ -711,24 +850,37 @@ bool PatchParser::applyTdiff() {
       for (int i=0; i<(int)assign.size(); i++) {
 	TDiffPart& context = cols[i];
 	TDiffPart& part = assign[i];
-	if (!part.isWild) {
-	  if (!context.hasMod) {
-	    change.cond[context.base.c_str()] = part.baseCell();
+	bool conded = false;
+	if (part.hasVal) {
+	  if (context.hasKey&&change.mode!=ROW_CHANGE_INSERT) {
+	    if (!context.isFresh) {
+	      change.cond[context.key.c_str()] = part.val;
+	      conded = true;
+	    }
 	  }
 	}
 	if (context.isId||allIndex) {
-	  if (!part.isWild) {
-	    change.indexes[context.base.c_str()] = true;
+	  if (part.hasVal) {
+	    change.indexes[context.key.c_str()] = true;
 	  }
 	}
-	if (part.hasMod||context.hasMod||change.mode==ROW_CHANGE_INSERT) {
-	  if (part.hasMod) {
-	    change.val[context.base.c_str()] = part.modCell();
+	if (part.hasNval||change.mode==ROW_CHANGE_INSERT) {
+	  if (part.hasNval) {
+	    change.val[context.key.c_str()] = part.nval;
 	  } else {
-	    change.val[context.base.c_str()] = part.baseCell();
+	    if (!conded) {
+	      change.val[context.key.c_str()] = part.val;
+	    }
 	  }
 	}
-	change.names.push_back(context.base.c_str());
+	if (context.isFresh) {
+	  if (part.hasVal) {
+	    if (!conded) {
+	      change.val[context.key.c_str()] = part.val;
+	    }
+	  }
+	}
+	change.names.push_back(context.key.c_str());
       }
       change.allNames = allNames;
       dbg_printf("  ... change row ...\n");

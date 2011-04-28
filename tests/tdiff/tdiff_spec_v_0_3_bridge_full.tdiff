@@ -1,0 +1,26 @@
+# tdiff version 0.3
+
+/*
+ * this comment could describe the whole document
+ */
+
+/*
+ * this comment could describe the following hunk
+ */
+* |bridge=Brooklyn|designer:'J.A.Roebling'|length:1595|
+= |bridge=Williamsburg|designer:'D.D.Duck'->'L.L.Buck'|length:1600|
+* |bridge=Queensborough|designer:'Palmer & Hornbostel'|length:1182|
+
+/*
+ * this comment could describe the following hunk, even
+ * though it's not immediately adjacent to the hunk (there is 
+ * an intervening newline).
+ */
+
+- |bridge=Spamspan|designer:'S.Spamington'|length:10000|
++ |bridge=Manhattan|designer:'G.Lindenthal'|length:1470|
+
+/*
+ * final, wrap up, comment
+ */
+

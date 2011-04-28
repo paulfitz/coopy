@@ -1,0 +1,350 @@
+/**
+ *
+
+@page patch_format_tdiff TDIFF tabular diff format
+
+\version 0.3
+
+This page describes the 
+TDIFF diff format.  
+This is the main format to be used by the COOPY toolbox for
+representing differences between tables.  
+It is based on a draft specification with Joe Panico,
+see \ref patch_format_tdiff_v_0_3_history "version history".
+
+\section patch_format_tdiff_v_0_3_general General structure
+
+TDIFF documents use the UTF-8 character encoding.
+
+TDIFF documents comprise any number of \ref patch_format_tdiff_v_0_3_comment_blocks "comment blocks", 
+\ref patch_format_tdiff_v_0_3_control_blocks "control blocks", and \ref patch_format_tdiff_v_0_3_diff_hunk "diff hunks", interleaved in any order. 
+Each diff hunk describes a related set of differences
+between two tables. Each hunk could stand on its own as 
+an independent TDIFF document.  When there is a choice
+in how to decompose differences between two tables as 
+a sequence of hunks,
+generators are encouraged to choose a decomposition that
+minimizes ordering effects between hunks.
+
+Example:
+\verbatim
+# tdiff version 0.3
+
+/*
+ * this comment could describe the whole document
+ */
+
+/*
+ * this comment could describe the following hunk
+ */
+* |bridge=Brooklyn|designer:'J.A.Roebling'|length:1595|
+= |bridge=Williamsburg|designer:'D.D.Duck'->'L.L.Buck'|length:1600|
+* |bridge=Queensborough|designer:'Palmer & Hornbostel'|length:1182|
+
+/*
+ * this comment could describe the following hunk, even
+ * though it's not immediately adjacent to the hunk (there is 
+ * an intervening newline).
+ */
+
+- |bridge=Spamspan|designer:'S.Spamington'|length:10000|
++ |bridge=Manhattan|designer:'G.Lindenthal'|length:1470|
+
+/*
+ * final, wrap up, comment
+ */
+\endverbatim
+
+
+\section patch_format_tdiff_v_0_3_comment_blocks Comment blocks
+
+Comment blocks are delimited using: \verbatim/* */\endverbatim (C style). Any content can
+occur within a comment block.  Examples:
+
+\verbatim
+/* This is an example single-line comment */
+/* This is an
+   example multi-line
+   comment */
+\endverbatim
+
+\section patch_format_tdiff_v_0_3_control_blocks Control blocks
+
+Control blocks begin with "# ", and are delimited by a newline or 
+linefeed.  Control blocks may hold meta information about diffs,
+or environmental information that might be useful to an interpreter. 
+Apart from the special \ref patch_format_tdiff_v_0_3_header_control_block "header control block", they
+lie outside of the scope of this specification.
+
+\section patch_format_tdiff_v_0_3_header_control_block Header control block
+
+A TDIFF document should begin with a special
+\ref patch_format_tdiff_v_0_3_control_blocks "control block" called the header.
+The header begins with the characters "# tdiff".  It is there
+to aid in rapid identification of tdiff documents.  Example:
+\verbatim # tdiff version 0.3\endverbatim
+
+\section patch_format_tdiff_v_0_3_diff_hunk Hunk
+
+A hunk is a series of one or more adjacent \ref patch_format_tdiff_v_0_3_diff_line "diff lines", 
+optionally preceded by a \ref patch_format_tdiff_v_0_3_column_line "column line", where each
+diff line represents the 
+differences between the source tables for a single row. The
+lines within a hunk should be separated by only the newline
+characters that terminate each diff line, so that they all appear as
+adjacent lines within a text editor. Within a TDIFF document, 
+hunks are delimited from each other via intermediate filler
+or comment blocks.
+
+Example hunk:
+\verbatim
+- |bridge=Spamspan|designer:'S.Spamington'|length:10000|
+= |bridge=Williamsburg|designer:'D.D.Duck'->'L.L.Buck'|length:1600|
++ |bridge=Manhattan|designer:'G.Lindenthal'|length:1470|
+\endverbatim
+
+\section patch_format_tdiff_v_0_3_diff_line Diff line
+
+A diff line describes differences in a single row of the two tables that
+were compared. One table is designated the left or local table (called <b>L</b>)
+and the other table is designated the right or remote table (called <b>R</b>). 
+
+There are three types of diff lines:
+\li MISSING line: describes a row that is present in <b>L</b> but absent in <b>R</b>.
+\li EXTRA line: describes a row that is absent in <b>L</b> but present in <b>R</b>.
+\li CHANGE line: describes a row that is present in both tables, but differs
+in some specific column values.
+
+Each diff line occupies its own line in the document, and begins with
+one of three characters. These three characters are called "line type" 
+characters:
+
+\li MISSING lines begin with plus: <b>'+'</b>.  In order to make <b>R</b> look like <b>L</b> we would have to add the missing row to <b>R</b>.
+\li EXTRA lines begin with minus: <b>'-'</b>. In order to make <b>R</b> look like <b>L</b> we would remove the extra row from <b>R</b>.
+\li CHANGE lines begin with equals: <b>'='</b>. In order to make <b>R</b> look like <b>L</b> we would update some of its column values.
+
+The line type character can be left or right padded with any amount of
+whitespace, for readability. The line type character is followed by
+any number of name-value pairs, where the names represent column
+names, and the values are the values for the corresponding column name
+in that particular row. The name is separated from the value by an
+equals ('=') sign for identifying columns (usually part of the primary
+key, but see \ref patch_format_tdiff_v_0_3_identity "Keys versus identity")
+or a colon (':') sign for all other columns. 
+The name-value pairs, as well as the line type
+character, are delimited with whitespace and/or a pipe <b>'|'</b> character. 
+
+Example diff line:
+\verbatim
+= |bridge=Williamsburg|designer:'D.D.Duck'->'L.L.Buck'|length:1600|
+\endverbatim
+
+
+\section patch_format_tdiff_v_0_3_column_line Column line
+
+Optionally, key names can be removed from diff lines. To do this, a 
+special column line may be given within a hunk.  This lists
+column names, followed by "=" for identifying columns.  
+
+Column line example:
+\verbatim
+@ |bridge=|designer|length|
+\endverbatim
+
+This establishes bridge as an identifying column that appears first,
+followed by designer and length columns.  We can now rewrite this:
+\verbatim
+= |bridge=Williamsburg|designer:'D.D.Duck'->'L.L.Buck'|length:1600|
+\endverbatim
+as this:
+\verbatim
+= |Williamsburg|'D.D.Duck'->'L.L.Buck'|1600|
+\endverbatim
+The effect of column lines is limited to within a single hunk.
+
+
+\section patch_format_tdiff_v_0_3_identity Keys versus identity
+
+Determining whether a row is present in <b>L</b> and <b>R</b> requires
+a judgment about row identity.  This judgment may be simple.
+For example, the identity of a row may simply be the value of
+its primary key.  However, it is possible that the identity
+of a row is distinct from its primary key.  Consider for
+example a table with an auto-incrementing integer primary key,
+rather than something derived from the row data.  Comparison
+of that key between separately maintained copies of that table
+will be meaningless.  For meaningful comparison, an alternate
+row identity would need to be constructed.
+
+This issue lies outside the TDIFF specification, but it is
+important that implementors be aware that columns used for
+identification may or may not be part of the primary key.
+
+\section patch_format_tdiff_v_0_3_quoting Appendix: Quoting
+
+Names or values may be quoted in a TDIFF document.  Quoting is done
+as follows:
+
+- All instances of the single-quote character are duplicated into pairs.
+- All control characters and the backslash character are escaped as for C literals.
+- The name or value is wrapped in single-quotes
+
+It is always safe to single-quote a name or value.  Names or values
+*must* by quoted in any of the following conditions:
+
+- A name or value conflicts with a reserved word: NULL, ROW.
+- A name or value contains any character in the 7-bit ASCII range that is *not* in the following set: [A-Za-z0-9+.]
+- A *name* begins with any of the characters [0-9+.].
+
+In the case of column diffs, for each cell that was different between
+<b>L</b> and <b>R</b>, both the old and new values are displayed. The
+old value must come first, followed by '->' (dash greater than),
+followed by the new value. For all three diff line types, the
+generator may include <b>L</b> name-value pairs that are not
+strictly needed, but may help with row identification.
+
+
+\section patch_format_tdiff_v_0_3_quoting Appendix: Grammar
+
+\verbatim
+ document ::= header (block)*
+ block ::= hunk | control | comment | filler
+
+ hunk ::= (hunk_header)? (diff_line)+
+ hunk_header ::= '@' (divider name)* break
+ diff_line ::= ('-' | '+' | '=') (divider term)* break
+ term ::= (name ('='|':'))? (value '->')? value
+ break ::= divider? linebreak
+
+ control ::= "#" (divider value)* break
+
+ comment ::=  | ("/*" comment_body "*/")
+
+ filler ::= (linebreak | divider)+
+
+ header ::= '#' (divider term)* break
+
+ divider ::= (' ' | '\t')* ('|')? (' ' | '\t')*
+ linebreak ::= ('\r\n' | '\r' | '\n')
+
+ # unspecified in grammar: name, value, comment_body
+\endverbatim
+
+The linebreak non-terminal needs to be parsed greedily to work with all
+common end-of-line formats, since the number of linebreaks is
+significant in the grammar.  The comment_body non-terminal is
+as for C.  
+
+
+\section patch_format_tdiff_v_0_3_examples Appendix: Complete examples
+
+In example one, both tables are in an RDBMS, both tables have the same
+column names, and the rows are identified using column1. 
+
+Example 1:
+\verbatim
+L:				    R:                                        
+column1,column2,column3,column4     column1,column2,column3,column4           
+1,      0000,   x,      aaaa	    ----------------------------              
+----------------------------	    2,      1111,   x,      aaaa              
+3,      2222,   x,      aaaa	    3,      2222,   y,      aaaa              
+4,      3333,   x,      aaaa	    4,      0000,   z,      bbbb              
+5,      4444,   x,      aaaa	    5,      4444,   z,      bbbb              
+6,      5555,   x,      aaaa	    6,      5555,   u,      aaaa              
+----------------------------	    7,      0000,   v,      aaaa              
+----------------------------        8,      1111,   x,      aaaa              
+----
+\endverbatim
+
+Example 1 diff, variant 1:
+\verbatim # tdiff version 0.3
+
+/*
+ * this is the tDiff document for example 1, using 1 hunk only and no context.
+ * Note the "|" usage varies from previous examples in this document.
+ * "|" plays the same role as spaces and tabs in the spec, so varying 
+ * styles are possible.
+ */
+- | column1=1
++ | column1=2| column2:1111| column3:x| column4:aaaa
+= | column1=3| column3:x->y
+= | column1=4| column2:3333->0000| column3:x->z| column4:aaaa->bbbb
+= | column1=5| column3:x->z| column4:aaaa->bbbb
+= | column1=6| column3:x->u
++ | column1=7| column2:0000| column3:v| column4:aaaa
++ | column1=8| column2:1111| column3:x| column4:aaaa
+/*
+ * end of tDiff document
+ */
+\endverbatim
+
+Example 1 diff, variant 2:
+\verbatim # tdiff version 0.2
+# tdiff version 0.3
+
+/*
+ * here is a tDiff document that is equivalent to the document above, except
+ * that it uses 8 hunks, more comments, and adds in some context
+ */
+/*
+ * hunk 1: notice that columns 2,3,4 are context-- not strictly necessary
+ * to specify a remove
+ */
+- | column1=1| column2:0000| column3:x| column4:aaaa
+
+/*
+ * hunk 2: notice that the hunks are separated by standalone newline
+ */
++ | column1=2| column2:1111| column3:x| column4:aaaa
+
+/*
+ * hunk 3: notice that column2 and column4 are merely context
+ */
+= | column1=3| column2:2222| column3:x->y| column4:aaaa
+
+/*
+ * hunk 4: notice that the column diff line is surrounded by context rows, and
+ * that the context rows describe the values on the RHS.
+ */
+* | column1=3| column2:2222| column3:x| column4:aaaa
+= | column1=4| column2:3333->0000| column3:x->z| column4:aaaa->bbbb
+* | column1=5| column2:4444| column3:x| column4:aaaa
+
+/*
+ * hunk 5
+ */
+= | column1=5| column3:x->z| column4:aaaa->bbbb
+
+/*
+ * hunk 6
+ */
+= | column1=6| column3:x->u
+
+/*
+ * hunk 7
+ */
++ | column1=7| column2:0000| column3:v| column4:aaaa
+
+/*
+ * hunk 8
+ */
++ | column1=8| column2:1111| column3:x| column4:aaaa
+\endverbatim
+
+\section patch_format_tdiff_v_0_3_history Appendix: Version history
+
+TDIFF version 0.2 was co-developed by 
+COOPY author Paul Fitzpatrick and
+<a href='http://www.diffkit.org'>diffkit</a> author Joe Panico 
+(<a href='tdiff_spec_draft.html'>TDIFF 0.2 draft</a>,
+<a href='http://groups.google.com/group/diffkit-user/browse_thread/thread/bcb03d19a885b036'>diffkit-user thread</a>).
+Version 0.3 contains extensions to deal with schema changes and
+the like, and hasn't been sanity checked by Joe.
+
+Differences between version 0.2 and 0.3:
+\li O.3 drops specification of ROW pseudo column
+\li O.3 drops specification of Column Numbers
+\li O.3 drops specification of Context
+
+ *
+ */
