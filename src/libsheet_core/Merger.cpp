@@ -17,9 +17,13 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 
-bool Merger::mergeRow(DataSheet& pivot, DataSheet& local, DataSheet& remote,
-		      MatchUnit& row_unit, Patcher& output,
-		      const CompareFlags& flags, vector<RowChange>& rc) {
+bool Merger::mergeRow(coopy::store::DataSheet& pivot, 
+		      coopy::store::DataSheet& local, 
+		      coopy::store::DataSheet& remote,
+		      MatchUnit& row_unit, 
+		      Patcher& output,
+		      const CompareFlags& flags, 
+		      std::vector<coopy::cmp::RowChange>& rc) {
   
   bool diff = output.wantDiff();
   bool link = output.wantLinks();

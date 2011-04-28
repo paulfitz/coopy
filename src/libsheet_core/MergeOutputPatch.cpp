@@ -5,8 +5,8 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 bool MergeOutputPatch::addRow(const char *tag,
-			      const vector<SheetCell>& row,
-			      const string& blank) {
+			      const std::vector<SheetCell>& row,
+			      const std::string& blank) {
   result.addField(tag,false);
   for (size_t i=0; i<row.size(); i++) {
     if (row[i].text!=blank) {

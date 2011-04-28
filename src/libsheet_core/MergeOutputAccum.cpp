@@ -6,8 +6,8 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 bool MergeOutputAccum::addRow(const char *tag,
-			      const vector<SheetCell>& row,
-			      const string& blank) {
+			      const std::vector<SheetCell>& row,
+			      const std::string& blank) {
   dbg_printf("ADDING ROW of len %d\n", (int)row.size());
   result.addField(tag,false);
   for (size_t i=0; i<row.size(); i++) {

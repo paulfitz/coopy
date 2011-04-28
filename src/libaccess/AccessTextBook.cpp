@@ -92,7 +92,7 @@ vector<string> AccessTextBook::getNamesImpl() {
   return tables;
 }
 
-PolySheet AccessTextBook::readSheet(const string& name) {
+PolySheet AccessTextBook::readSheet(const std::string& name) {
   getNames();
   if (find(names.begin(),names.end(),name)==names.end()) {
     return PolySheet();

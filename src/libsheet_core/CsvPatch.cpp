@@ -11,7 +11,7 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
-class Patcher {
+class OldCsvPatcher {
 private:
   string out_of_range;
 public:
@@ -43,8 +43,10 @@ public:
   }
 };
 
-vector<string> Patcher::extract(CsvSheet& sheet, int row, int col_start,
-				int col_end) {
+std::vector<std::string> OldCsvPatcher::extract(coopy::store::CsvSheet& sheet, 
+					  int row, 
+					  int col_start,
+					  int col_end) {
   if (col_end==-1) { col_end = sheet.width()-1; }
   vector<string> out;
   for (int i=col_start; i<=col_end; i++) {
@@ -53,7 +55,7 @@ vector<string> Patcher::extract(CsvSheet& sheet, int row, int col_start,
   return out;
 }
 
-void Patcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
+void OldCsvPatcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
   if (patch.width()<1) {
     // nothing to do
     return;
@@ -185,6 +187,6 @@ void Patcher::apply(CsvSheet& original, CsvSheet& patch, CsvSheet& result) {
 
 
 void CsvPatch::apply(CsvSheet& original, CsvSheet& patch) {
-  Patcher patcher;
+  OldCsvPatcher patcher;
   patcher.apply(original,patch,result);
 }

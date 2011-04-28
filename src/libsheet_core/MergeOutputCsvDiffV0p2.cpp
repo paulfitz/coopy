@@ -7,7 +7,6 @@
  */
 
 #include <coopy/MergeOutputCsvDiff.h>
-#define MergeOutputCsvDiff MergeOutputCsvDiffV0p2
 
 #include <coopy/SheetStyle.h>
 #include <coopy/DataSheet.h>
@@ -24,7 +23,7 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
-MergeOutputCsvDiff::MergeOutputCsvDiff() {
+MergeOutputCsvDiffV0p2::MergeOutputCsvDiffV0p2() {
   result.setStrict(0);
   result.addField("dtbl",false);
   result.addField("csv",false);
@@ -41,13 +40,13 @@ MergeOutputCsvDiff::MergeOutputCsvDiff() {
   result.addRecord();
 }
 
-bool MergeOutputCsvDiff::mergeDone() {
+bool MergeOutputCsvDiffV0p2::mergeDone() {
   SheetStyle style;
   SheetCell c = result.cellSummary(0,0);
   fprintf(out,"%s",result.encode(style).c_str());
 }
 
-bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
+bool MergeOutputCsvDiffV0p2::changeColumn(const OrderChange& change) {
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
     result.addField("column",false);
@@ -84,7 +83,8 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
   return true;
 }
 
-bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
+bool MergeOutputCsvDiffV0p2::selectRow(const coopy::cmp::RowChange& change, 
+				   const char *tag) {
   result.addField("row",false);
   result.addField(tag,false);
   result.addField("*",false);
@@ -100,7 +100,7 @@ bool MergeOutputCsvDiff::selectRow(const RowChange& change, const char *tag) {
   return true;
 }
 
-bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
+bool MergeOutputCsvDiffV0p2::describeRow(const RowChange& change, const char *tag){
   result.addField("row",false);
   result.addField(tag,false);
   result.addField("*",false);
@@ -116,7 +116,7 @@ bool MergeOutputCsvDiff::describeRow(const RowChange& change, const char *tag){
   return true;
 }
 
-bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
+bool MergeOutputCsvDiffV0p2::changeRow(const RowChange& change) {
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
     describeRow(change,"insert");
@@ -137,7 +137,7 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
 }
 
 
-bool MergeOutputCsvDiff::declareNames(const vector<string>& names, 
+bool MergeOutputCsvDiffV0p2::declareNames(const std::vector<std::string>& names, 
 					  bool final) {
   if (!final) {
     result.addField("column",false);

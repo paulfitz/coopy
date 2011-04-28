@@ -98,7 +98,7 @@ vector<string> SqliteTextBook::getNamesSql() {
   return result;
 }
 
-PolySheet SqliteTextBook::readSheet(const string& name) {
+PolySheet SqliteTextBook::readSheet(const std::string& name) {
   getNames();
   if (find(names.begin(),names.end(),name)==names.end()) {
     return PolySheet();

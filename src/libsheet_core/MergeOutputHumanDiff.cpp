@@ -197,7 +197,7 @@ bool MergeOutputHumanDiff::changeRow(const RowChange& change) {
 }
 
 
-bool MergeOutputHumanDiff::declareNames(const vector<string>& names, 
+bool MergeOutputHumanDiff::declareNames(const std::vector<std::string>& names, 
 					  bool final) {
   string tag = "original ";
   string now = "";
