@@ -22,19 +22,22 @@ Here are some tips on how to use these programs:
 \li \ref ssdiff "ssdiff usage".
 \li \ref sspatch "sspatch usage".
 \li \ref ssmerge "ssmerge usage".
-\if link_examples
-\li \ref merge_example.
-\endif
+
 \if link_examples
 \li \ref diff_example.
 \endif
 \if link_examples
 \li \ref patch_example.
 \endif
-\li \ref ssfossil reference.
-\li \ref coopy graphical interface reference.
+\if link_examples
+\li \ref merge_example.
+\endif
+
 \li \ref patch_format.
 \li \ref table_format.
+
+\li \ref ssfossil reference.
+\li \ref coopy graphical interface reference.
 \if link_code
 \li <a href="annotated.html">Classes</a> used in implementation.
 \endif

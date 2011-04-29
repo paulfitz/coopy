@@ -6,7 +6,7 @@
 This shows the difference between two tables.
 The input tables can be in a variety of formats (see \ref table_format).
 The difference between the tables is by default represented
-as a CSV file (see \ref patch_format_csv).
+as a TDIFF file (see \ref patch_format_tdiff).
 
 \if link_internal
 Here are the ways you can use ssdiff:
@@ -16,7 +16,6 @@ Here are the ways you can use ssdiff:
 - \ref ssdiff_parent
 - \ref ssdiff_format_csv
 - \ref ssdiff_format_raw
-- \ref ssdiff_format_human
 \endif
 
 @section ssdiff_base ssdiff
@@ -28,13 +27,16 @@ using it.  At the time of writing, that output is:
 \verbatim
 Show the difference between two tables. Call as:
   ssdiff [--output <filename>] local.csv modified.csv
-For differences in a classic-diff-like format, do:
+For differences in a CSV-compatible format, do:
+  ssdiff --format-csv local.csv modified.csv
+For differences in a classic-diff-like format (now the default), do:
   ssdiff --format-tdiff local.csv modified.csv
 For differences in a verbose format, do:
-  ssdiff --format-human local.csv modified.csv
+  ssdiff --format-raw local.csv modified.csv
 To extract the mapping from local to modified in tabular form, do:
   ssdiff --index local.csv modified.csv
-Output defaults to standard output.  To list supported formats:
+Output defaults to standard output.
+To list supported *input* formats:
   ssdiff --list-formats
 It is possible to immediately apply a difference to the local file:
   ssdiff --apply local.xls modified.csv
@@ -68,11 +70,8 @@ five,5
 \endverbatim
 then the output of ssdiff will be (at the time of writing):
 \verbatim
-dtbl,csv,version,0.4
-column,name,[0],[1]
-link,act,*,*=
-row,select,three,23
-row,update,,3
+# tdiff version 0.3
+= |A=three|B=23->3|
 \endverbatim
 
 \if link_examples
@@ -81,7 +80,7 @@ See \ref diff_example for more.
 
 @section ssdiff_direct_output ssdiff --output out.txt orig.csv mod.csv
 
-The output of ssmerge is by default standard output.  It can be redirected
+The output of ssdiff is by default standard output.  It can be redirected
 to a file using the "--output" option.
 
 @section ssdiff_parent ssdiff --parent parent.txt orig.csv mod.csv
@@ -93,12 +92,6 @@ information on the role of a common ancestor.
 @section ssdiff_format_csv ssdiff --format-csv orig.csv mod.csv
 
 This is a terse format that shows modifications in a CSV-compatible way.
-This format is the default, and the best supported format available 
-(\ref sspatch currently requires it).
-
-@section ssdiff_format_human ssdiff --format-human orig.csv mod.csv
-
-This sets the output format to a verbose, human-readable output.
 
 @section ssdiff_format_raw ssdiff --format-raw orig.csv mod.csv
 

@@ -118,19 +118,26 @@ int main(int argc, char *argv[]) {
   if (argc==1&&fake) {
     patch_name = argv[0];
   } else if (argc<2) {
-    printf("Apply patch to a spreadsheet.\n");
+    printf("Apply patch to a table.\n");
     printf("  sspatch [--verbose] [--output output.csv] sheet.csv patch.txt\n");
     printf("  sspatch [--output output.sqlite] [--tmp tmp.sqlite] db.sqlite patch.txt\n");
     printf("  sspatch [--inplace] db.sqlite patch.txt\n");
+    printf("  sspatch [--format FORMAT] patch.txt\n");
     printf("Output defaults to standard output.\n");
-    printf("Write output to original file by doing:\n");
+    printf("Make changes in original file by doing:\n");
+    printf("  sspatch --inplace sheet.sqlite patch.txt\n");
+    printf("or:\n");
     printf("  sspatch --output sheet.csv sheet.csv patch.txt\n");
     printf("Get debug info about what a patch would do:\n");
     printf("  sspatch --format raw patch.txt\n");
     printf("Convert a CSV format diff to a TDIFF format diff:\n");
     printf("  sspatch --format tdiff patch.csv\n");
-    printf("Sanitize a CSV format diff by regenerating it:\n");
-    printf("  sspatch --format csv patch.csv\n");
+    printf("Convert a TDIFF format diff to a CSV format diff:\n");
+    printf("  sspatch --format csv patch.txt\n");
+    printf("Sanitize a TDIFF format diff by regenerating it:\n");
+    printf("  sspatch --format tdiff patch.txt\n");
+    printf("Read from standard input:\n");
+    printf("  sspatch local.csv -\n");
     return 1;
   } else {
     local_name = argv[0];

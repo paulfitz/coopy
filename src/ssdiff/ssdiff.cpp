@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
       {"format-raw", 0, 0, 'r'},
       {"format-tdiff", 0, 0, 't'},
       {"format-index", 0, 0, 'i'},
+      {"format", 1, 0, 'f'},
 
       {"apply", 0, 0, 'a'},
 
@@ -117,6 +118,9 @@ int main(int argc, char *argv[]) {
       map_file = optarg;
       break;
 
+    case 'f':
+      mode = optarg;
+      break;
     case 'o':
       output = optarg;
       break;
@@ -151,11 +155,11 @@ int main(int argc, char *argv[]) {
     printf("Show the difference between two tables. Call as:\n");
     printf("  ssdiff [--output <filename>] local.csv modified.csv\n");
     printf("For differences in a CSV-compatible format, do:\n");
-    printf("  ssdiff --format-csv local.csv modified.csv\n");
+    printf("  ssdiff --format csv local.csv modified.csv\n");
     printf("For differences in a classic-diff-like format (now the default), do:\n");
-    printf("  ssdiff --format-tdiff local.csv modified.csv\n");
+    printf("  ssdiff --format tdiff local.csv modified.csv\n");
     printf("For differences in a verbose format, do:\n");
-    printf("  ssdiff --format-raw local.csv modified.csv\n");
+    printf("  ssdiff --format raw local.csv modified.csv\n");
     printf("To extract the mapping from local to modified in tabular form, do:\n");
     printf("  ssdiff --index local.csv modified.csv\n");
     printf("Output defaults to standard output.\n");
