@@ -1,0 +1,73 @@
+/**
+ *
+
+\ingroup diff_example
+
+\defgroup diff_example_bridge bridge example for ssdiff
+
+\section diff_example_bridge_command command
+\verbatim
+ ssdiff --format-tdiff broken_bridges.csv bridges.csv
+ ssdiff --format-csv broken_bridges.csv bridges.csv
+\endverbatim
+\li \ref diff_example_bridge_ref1 "broken_bridges.csv"
+\li \ref diff_example_bridge_ref2 "bridges.csv"
+\li \ref diff_example_bridge_tdiff_output "tdiff output"
+\li \ref diff_example_bridge_csv_output "csv output"
+ 
+\section diff_example_bridge_ref1 broken_bridges.csv
+<table>
+  <tr><td>bridge</td><td>designer</td><td>length</td></tr>
+  <tr><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
+  <tr><td>Williamsburg</td><td>D. Duck</td><td>1600</td></tr>
+  <tr><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td>1182</td></tr>
+  <tr><td>Triborough</td><td>O. H. Ammann</td><td>1380,383</td></tr>
+  <tr><td>Bronx Whitestone</td><td>O. H. Ammann</td><td>2300</td></tr>
+  <tr><td>Throgs Neck</td><td>O. H. Ammann</td><td>1800</td></tr>
+  <tr><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
+  <tr><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
+</table>
+ 
+\section diff_example_bridge_ref2 bridges.csv
+<table>
+  <tr><td>bridge</td><td>designer</td><td>length</td></tr>
+  <tr><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
+  <tr><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
+  <tr><td>Williamsburg</td><td>L. L. Buck</td><td>1600</td></tr>
+  <tr><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td>1182</td></tr>
+  <tr><td>Triborough</td><td>O. H. Ammann</td><td>1380,383</td></tr>
+  <tr><td>Bronx Whitestone</td><td>O. H. Ammann</td><td>2300</td></tr>
+  <tr><td>Throgs Neck</td><td>O. H. Ammann</td><td>1800</td></tr>
+  <tr><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
+</table>
+\section diff_example_bridge_tdiff_output tdiff output
+\verbatim
+# tdiff version 0.3
+* |bridge=Brooklyn|
++ |bridge:->Manhattan|designer:->G. Lindenthal|length:->1470|
+= |bridge=Williamsburg|designer=D. Duck->L. L. Buck|
+- |bridge=Spamspan|
+\endverbatim
+ 
+\section diff_example_bridge_csv_output csv output
+<table>
+  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td><td></td></tr>
+  <tr><td>column</td><td>name</td><td>bridge</td><td>designer</td><td>length</td></tr>
+  <tr><td>link</td><td>name</td><td>bridge</td><td></td><td></td></tr>
+  <tr><td>link</td><td>act</td><td>*</td><td></td><td></td></tr>
+  <tr><td>row</td><td>after</td><td>Brooklyn</td><td></td><td></td></tr>
+  <tr><td>link</td><td>name</td><td>bridge</td><td>designer</td><td>length</td></tr>
+  <tr><td>link</td><td>act</td><td>*=</td><td>=</td><td>=</td></tr>
+  <tr><td>row</td><td>insert</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
+  <tr><td>link</td><td>name</td><td>bridge</td><td>designer</td><td></td></tr>
+  <tr><td>link</td><td>act</td><td>*</td><td>*=</td><td></td></tr>
+  <tr><td>row</td><td>select</td><td>Williamsburg</td><td>D. Duck</td><td></td></tr>
+  <tr><td>row</td><td>update</td><td></td><td>L. L. Buck</td><td></td></tr>
+  <tr><td>link</td><td>name</td><td>bridge</td><td>designer</td><td>length</td></tr>
+  <tr><td>link</td><td>act</td><td>*</td><td>*=</td><td>*</td></tr>
+  <tr><td>row</td><td>delete</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
+</table>
+ 
+
+ *
+ */

@@ -80,6 +80,7 @@ private:
   int bottom_local_row;
   RowChange lastRowChange;
   bool had_row;
+  bool had_foreign_row;
 
   int current_row;
   int last_row;

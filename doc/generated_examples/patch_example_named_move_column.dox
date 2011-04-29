@@ -39,10 +39,7 @@ The output, input, and patch are:
  
 \section patch_example_named_move_column_ref2 patch.tdiff
 \verbatim
-# tdiff version 0.2
-
-@@@ sheet
-
+# tdiff version 0.3
 @@ |NAME|DIGIT|
 @: NAME |DIGIT|NAME|
 \endverbatim
@@ -51,7 +48,6 @@ The output, input, and patch are:
 Here is an equivalent patch in CSV format.
 <table>
   <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
-  <tr><td>table</td><td>name</td><td>sheet</td><td></td></tr>
   <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
   <tr><td>column</td><td>move</td><td>DIGIT</td><td>NAME</td></tr>
 </table>

@@ -39,12 +39,11 @@ The output, input, and patch are:
  
 \section patch_example_xls_update_cell_ref2 patch.tdiff
 \verbatim
-# tdiff version 0.2
+# tdiff version 0.3
 
 @@@ NumberSheet
 
-@ |Name=|
-= |five->fyffe|
+= |Name=five->fyffe|
 \endverbatim
  
 \section patch_example_xls_update_cell_ref3 patch.csv

@@ -31,7 +31,7 @@ string ml_encode(string x) {
   return x;
 }
 
-string CsvRender::renderHtml(const CsvSheet& sheet) {
+string CsvRender::renderHtml(const DataSheet& sheet) {
   string result = "";
 
   if (full) {
@@ -53,14 +53,14 @@ string CsvRender::renderHtml(const CsvSheet& sheet) {
     result += ">\n";
 
     if (decorate) {
-      if (sheet.cell(0,0)[0]!='[') {
+      if (sheet.cellString(0,0)[0]!='[') {
 	decorate = false;
       }
     }
 
     for (int i=0; i<sheet.height(); i++) {
       string row_mode = "";
-      string txt = sheet.cell(0,i);
+      string txt = sheet.cellString(0,i);
       if (txt == "[---]") {
 	row_mode = "csv_row_mmm";
       } else if (txt == "[+++]") {
@@ -88,7 +88,7 @@ string CsvRender::renderHtml(const CsvSheet& sheet) {
       result += row_decorate;
       result += ">";
       for (int j=0; j<sheet.width(); j++) {
-	string txt = sheet.cell(j,i);
+	string txt = sheet.cellString(j,i);
 	txt = ml_encode(txt);
 	string cell_decorate = "";
 	if (decorate) {

@@ -1,7 +1,7 @@
 #ifndef CSVRENDER_INC
 #define CSVRENDER_INC
 
-#include <coopy/CsvSheet.h>
+#include <coopy/DataSheet.h>
 
 class CsvRender {
 private:
@@ -14,7 +14,7 @@ public:
   }
   void setDecorate(bool flag) { decorate = flag; }
   void setFull(bool flag) { full = flag; }
-  std::string renderHtml(const coopy::store::CsvSheet& sheet);
+  std::string renderHtml(const coopy::store::DataSheet& sheet);
 };
 
 #endif

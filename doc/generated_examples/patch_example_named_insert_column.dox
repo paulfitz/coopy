@@ -39,10 +39,7 @@ The output, input, and patch are:
  
 \section patch_example_named_insert_column_ref2 patch.tdiff
 \verbatim
-# tdiff version 0.2
-
-@@@ sheet
-
+# tdiff version 0.3
 @@ |NAME|DIGIT|
 @+ FRENCH |NAME|DIGIT|FRENCH|
 @+ UNARY |NAME|DIGIT|FRENCH|UNARY|
@@ -59,7 +56,6 @@ The output, input, and patch are:
 Here is an equivalent patch in CSV format.
 <table>
   <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td><td></td><td></td></tr>
-  <tr><td>table</td><td>name</td><td>sheet</td><td></td><td></td><td></td></tr>
   <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td><td></td><td></td></tr>
   <tr><td>column</td><td>insert</td><td>NAME</td><td>DIGIT</td><td>FRENCH</td><td></td></tr>
   <tr><td>column</td><td>insert</td><td>NAME</td><td>DIGIT</td><td>FRENCH</td><td>UNARY</td></tr>

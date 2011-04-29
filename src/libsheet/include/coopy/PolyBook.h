@@ -124,6 +124,12 @@ public:
     return false;
   }
 
+  virtual bool namedSheets() const {
+    if (book)
+      return book->namedSheets();
+    return true;
+  }
+
   virtual PolySheet provideSheet(const SheetSchema& schema) {
     if (book)
       return book->provideSheet(schema);

@@ -121,7 +121,7 @@ public:
     }
     */
     if (ctrl>=theta) {
-      man2.measure(pass,ctrl);
+      man2.measure(pass,ctrl-theta);
     } else {
       man1.measure(pass,ctrl);
     }

@@ -28,6 +28,9 @@ public:
   bool showedColumns;
   std::string sheetName;
   bool sheetNameShown;
+  bool lastWasFactored;
+
+  std::vector<coopy::cmp::RowChange> rowCache;
   coopy::cmp::Viterbi formLattice;
 
   MergeOutputTdiff();
@@ -40,12 +43,16 @@ public:
   virtual bool wantDiff() { return true; }
 
   virtual bool changeColumn(const OrderChange& change);
-  virtual bool changeRow(const RowChange& change);
+  virtual bool changeRow(const RowChange& change) {
+    changeRow(change,false,true);
+  }
+
+  bool changeRow(const RowChange& change, bool factored, bool caching);
 
   bool operateRow(const RowChange& change, const char *tag);
   bool updateRow(const RowChange& change, const char *tag, bool select, 
-		 bool update, bool practice);
-  bool describeRow(const RowChange& change, const char *tag);
+		 bool update, bool practice, bool factored);
+  //bool describeRow(const RowChange& change, const char *tag, bool factored);
 
   virtual bool mergeStart();
   virtual bool mergeDone();
@@ -55,6 +62,8 @@ public:
   virtual bool setSheet(const char *name);
 
   void showSheet();
+
+  void flushRows();
 
 };
 

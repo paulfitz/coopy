@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <coopy/Viterbi.h>
 
-#define DBG_LEVEL 0
-#define DBG(x) if (DBG_LEVEL>=(x))
+//#include <iostream>
+//using namespace std;
+
+//#define DBG_LEVEL 100
+//#define DBG(x) if (DBG_LEVEL>=(x))
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -29,7 +32,7 @@ void Viterbi::assertMode(int n_mode) {
     case 1:
       if (mode==0)
 	{
-	  assert(index<T);
+	  //assert(index<T);
 
 	  // Zeroing is now implicit.
 	  // The absence of a cell(x,y) should imply:
@@ -52,8 +55,29 @@ void Viterbi::assertMode(int n_mode) {
 }
 
 void Viterbi::addTransition(int s0, int s1, float c) {
+  bool resize = false;
+  if (s0>=K) {
+    K = s0+1;
+    resize = true;
+  }
+  if (s1>=K) {
+    K = s1+1;
+    resize = true;
+  }
+  if (resize) {
+    cost.nonDestructiveResize(K,T);
+    src.nonDestructiveResize(K,T,-1);
+    path.nonDestructiveResize(1,T,-1);
+  }
   path_valid = 0;
   assertMode(1);
+  if (index>=T) {
+    T=index+1;
+    //printf("RESIZE! index %d T %d\n", index, T);
+    cost.nonDestructiveResize(K,T);
+    src.nonDestructiveResize(K,T,-1);
+    path.nonDestructiveResize(1,T,-1);
+  }
   int sourced = 0;
   if (index>0)
     {
@@ -70,14 +94,14 @@ void Viterbi::addTransition(int s0, int s1, float c) {
       if (c<cost(s1,index)||src(s1,index)==-1)
 	{
 	  //cout << "Setting " << s1 << "," << index << " to "
-	  //   << s0 << endl;
+	  //<< s0 << endl;
 	  cost(s1,index) = c;
 	  src(s1,index) = s0;
 	}
       else
 	{
 	  //cout << "Rejecting " << s1 << "," << index << " to "
-	  //   << s0 << endl;
+	  //<< s0 << endl;
 	}
     }
 }
@@ -91,9 +115,9 @@ void Viterbi::calculatePath() {
       assert(index>0);
       for (int j=0; j<K; j++)
 	{
-//	  DBG(50) cout << "j=" << j << " and bestj is " << bestj 
-//		       << " and src(j,index-1)=" << src(j,index-2)
-//		       << endl;
+	  //DBG(50) cout << "j=" << j << " and bestj is " << bestj 
+	  //	       << " and src(j,index-1)=" << src(j,index-2)
+	  //	       << endl;
 	  if ((cost(j,index-1)<best||bestj==-1)&&src(j,index-1)!=-1)
 	    {
 	      best = cost(j,index-1);
@@ -105,7 +129,7 @@ void Viterbi::calculatePath() {
       for (int i=index-1; i>=0; i--)
 	{
 	  path(0,i) = bestj;
-//	  DBG(50) cout << "i=" << i << " and bestj is " << bestj << endl;
+	  //DBG(50) cout << "i=" << i << " and bestj is " << bestj << endl;
 	  assert(bestj!=-1);
 	  assert(bestj>=0&&bestj<K);
 	  bestj = src(bestj,i);

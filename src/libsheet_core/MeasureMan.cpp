@@ -160,7 +160,7 @@ void MeasureMan::compare1(int ctrl) {
       double ref2 = anorm_pass.match.cell(0,y);
       if (ref2<ref) ref = ref2;
       bool ok = false;
-      if (bestValue>ref/4 && bestValue>1 && bestIndex>=0) {
+      if (bestValue>ref/4 && bestIndex>=0) {
 	//if (bestInc>bestValue/2 && bestIndex>=0) {
 	ok = true;
 	  //}

@@ -636,6 +636,9 @@ public:
 	  nval = getCell(txt,quoted);
 	  hasNval = true;
 	}
+	if (!hasVal) {
+	  isFresh = true;
+	}
       } else {
 	isFresh = true;
       }
@@ -689,7 +692,7 @@ public:
 };
 
 string stringer_encoder(const TDiffPart& part) {
-  return part.orig;
+  return string("[") + part.orig + (part.isId?";id":"") + (part.isFresh?";fresh":"") + "]";
 }
 
 
@@ -830,7 +833,7 @@ bool PatchParser::applyTdiff() {
 	}
       }
       dbg_printf("  assign %s\n", vector2string(assign).c_str());
-      dbg_printf("  assign %s\n", vector2string(cols).c_str());
+      dbg_printf("  cols %s\n", vector2string(cols).c_str());
       COOPY_ASSERT(assign.size()==cols.size());
 
       RowChange change;

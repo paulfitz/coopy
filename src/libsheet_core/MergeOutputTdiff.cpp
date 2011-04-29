@@ -22,10 +22,11 @@ using namespace coopy::cmp;
 MergeOutputTdiff::MergeOutputTdiff() {
   setSheet("");
   sheetNameShown = true;
+  lastWasFactored = false;
 }
 
 bool MergeOutputTdiff::mergeStart() {
-  fprintf(out,"# tdiff version 0.2\n");
+  fprintf(out,"# tdiff version 0.3\n");
   return true;
 }
 
@@ -38,6 +39,7 @@ void MergeOutputTdiff::showSheet() {
 
 
 bool MergeOutputTdiff::mergeDone() {
+  flushRows();
 }
 
 bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
@@ -130,7 +132,8 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
 
 // practice mode is unnecessary for this output style
 bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
-				   bool select, bool update, bool practice) {
+				 bool select, bool update, bool practice,
+				 bool factored) {
   bool ok = true;
 
   char ch = '?';
@@ -155,37 +158,41 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
       bool transition = false; //showForDesign[name]&&showForSelect[name];
       //if (change.cond.find(name)!=change.cond.end() && 
       //  showForSelect[name] && select) {
+      if (!factored) {
+	bool select = check(showForSelect,name);
+	bool cond = check(showForCond,name);
+	bool view = check(showForDescribe,name);
+	fprintf(out,"%s%s%s%s",
+		name.c_str(),
+		select?"=":"",
+		(view&&!(cond||select))?((ch=='+')?":->":":*->"):"",
+		(cond&&!(view||select))?":":"");
+      }
       if (showForCond[name] && select) {
-	if (!practice) {
-	  fprintf(out,"%s",change.cond.find(name)->second.toString().c_str());
-	  transition = true;
-	}
+	fprintf(out,"%s",change.cond.find(name)->second.toString().c_str());
+	transition = true;
 	shown = true;
       }
       if (showForDescribe[name] && update) {
-	if (!practice) {
-	  fprintf(out,"%s%s",
-		  transition?"->":"",
-		  change.val.find(name)->second.toString().c_str());
-	}
+	fprintf(out,"%s%s",
+		transition?"->":"",
+		change.val.find(name)->second.toString().c_str());
 	if (shown) ok = false; // collision
 	shown = true;
       }
       if (!shown) {
-	if (!practice) {
-	  fprintf(out,"*");
-	}
+	fprintf(out,"*");
       }
       fprintf(out,"|");
     }
   }
-  if (!practice) {
-    fprintf(out,"\n");
-  }
+  fprintf(out,"\n");
   return ok;
 }
 
-bool MergeOutputTdiff::changeRow(const RowChange& change) {
+bool MergeOutputTdiff::changeRow(const RowChange& change,
+				 bool factored,
+				 bool caching) {
   showSheet();
   vector<string> lops;
   activeColumn.clear();
@@ -244,26 +251,51 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
     showForDescribe[name] = shouldAssign;
     showForCond[name] = shouldCond;
   }
-
-  if (lops!=ops) {
-    ops = lops;
-    operateRow(change,"act");
+  if (caching) {
+    // state 0 = no factoring of header
+    // state 1 = factoring of header
+    float costFactored = 1;
+    float costUnfactored = 1.9;
+    if (lops!=ops) {
+      //if (ops.size()>0) {
+      costFactored += 1.1;
+      //}
+      ops = lops;
+    }
+    float costSwitch = 0.25;
+    //printf("factored %g unfactored %g\n", costFactored, costUnfactored);
+    formLattice.beginTransitions();
+    formLattice.addTransition(0,0,costUnfactored);
+    formLattice.addTransition(1,0,costUnfactored+costSwitch);
+    formLattice.addTransition(0,1,costFactored+costSwitch);
+    formLattice.addTransition(1,1,costFactored);
+    formLattice.endTransitions();
+    rowCache.push_back(change);
+    return true;
   }
+
+  if (factored) {
+    if (lops!=ops) {
+      ops = lops;
+      operateRow(change,"act");
+    }
+  }
+  lastWasFactored = factored;
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
-    updateRow(change,"insert",false,true,false);
+    updateRow(change,"insert",false,true,false,factored);
     break;
   case ROW_CHANGE_DELETE:
-    updateRow(change,"delete",true,false,false);
+    updateRow(change,"delete",true,false,false,factored);
     break;
   case ROW_CHANGE_CONTEXT:
-    updateRow(change,"after",true,false,false);
+    updateRow(change,"after",true,false,false,factored);
     break;
   case ROW_CHANGE_MOVE:
-    updateRow(change,"move",true,false,false);
+    updateRow(change,"move",true,false,false,factored);
     break;
   case ROW_CHANGE_UPDATE:
-    updateRow(change,"update",true,true,false);
+    updateRow(change,"update",true,true,false,factored);
     break;
   default:
     fprintf(stderr,"  Unknown row operation\n\n");
@@ -275,6 +307,7 @@ bool MergeOutputTdiff::changeRow(const RowChange& change) {
 
 
 bool MergeOutputTdiff::changeName(const NameChange& change) {
+  flushRows();
   const vector<string>& names = change.names;
   bool final = change.final;
   bool constant = change.constant;
@@ -303,9 +336,16 @@ bool MergeOutputTdiff::changeName(const NameChange& change) {
 
 
 bool MergeOutputTdiff::setSheet(const char *name) {
-  sheetName = name;
   sheetNameShown = false;
+  sheetName = name;
+  flushRows();
+  return true;
+}
+
+
+void MergeOutputTdiff::flushRows() {
   ops.clear();
+  lastWasFactored = false;
   //nops.clear();
   activeColumn.clear();
   showForSelect.clear();
@@ -315,7 +355,14 @@ bool MergeOutputTdiff::setSheet(const char *name) {
   columns.clear();
   constantColumns = true;
   showedColumns = false;
-  return true;
+  if (rowCache.size()==0) return;
+  if (coopy_is_verbose()) {
+    formLattice.showPath();
+  }
+  for (int i=0; i<(int)rowCache.size(); i++) {
+    RowChange& change = rowCache[i];
+    changeRow(change,(formLattice(i)==1)?true:false,false);
+  }
+  formLattice.reset();
 }
-
 

@@ -224,6 +224,7 @@ function merge_apply {
     fi
 }
 
+diff_apply broken_bridges.csv bridges.csv bridge
 for pre in "named_"; do
   diff_apply ${pre}numbers.csv ${pre}numbers_flip_column.csv ${pre}move_column
   diff_apply ${pre}numbers.csv ${pre}numbers_change_five.csv update_cell

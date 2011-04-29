@@ -52,6 +52,13 @@ public:
     return true;
   }
 
+  bool nonDestructiveResize(int w, int h, const T& zero) {
+    this->zero = zero;
+    this->h = h;
+    this->w = w;
+    return true;
+  }
+
   void reheight(int h) {
     if (h>=this->h) {
       this->h = h;
@@ -150,6 +157,7 @@ public:
 class coopy::store::SparseFloatSheet : public SparseSheet<float> {
 public:
   using SparseSheet<float>::resize;
+  using SparseSheet<float>::nonDestructiveResize;
 
   virtual std::string cellString(int x, int y) const {
     char buf[256];
@@ -173,6 +181,11 @@ public:
     return resize(w,h,zero);
   }
 
+  bool nonDestructiveResize(int w, int h) {
+    float zero = 0;
+    return nonDestructiveResize(w,h,zero);
+  }
+
   bool canResize() {
     return true;
   }
@@ -189,6 +202,7 @@ public:
 class coopy::store::SparseIntSheet : public SparseSheet<int> {
 public:
   using SparseSheet<int>::resize;
+  using SparseSheet<int>::nonDestructiveResize;
 
   virtual std::string cellString(int x, int y) const {
     const int& v = cell(x,y);
@@ -198,6 +212,11 @@ public:
   bool resize(int w, int h) {
     int zero = 0;
     return resize(w,h,zero);
+  }
+
+  bool nonDestructiveResize(int w, int h) {
+    int zero = 0;
+    return nonDestructiveResize(w,h,zero);
   }
 
   bool canResize() {
@@ -217,6 +236,7 @@ public:
 class coopy::store::SparseByteSheet : public SparseSheet<unsigned char> {
 public:
   using SparseSheet<unsigned char>::resize;
+  using SparseSheet<unsigned char>::nonDestructiveResize;
 
   virtual std::string cellString(int x, int y) const {
     const unsigned char& v = cell(x,y);
@@ -227,6 +247,13 @@ public:
     unsigned char zero = 0;
     return resize(w,h,zero);
   }
+
+  bool nonDestructiveResize(int w, int h) {
+    unsigned char zero = 0;
+    return nonDestructiveResize(w,h,zero);
+  }
+
+
 
   bool canResize() {
     return true;

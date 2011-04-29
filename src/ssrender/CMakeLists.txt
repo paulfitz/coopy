@@ -12,6 +12,13 @@ ADD_CUSTOM_COMMAND(
 
 ADD_LIBRARY(ssrender include/coopy/CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
 
-ADD_EXECUTABLE(csv2html csv2html.cpp)
-TARGET_LINK_LIBRARIES(csv2html sheet ssrender)
-INSTALL(TARGETS csv2html COMPONENT ${CSVBIN} DESTINATION bin)
+IF (COMPILE_PLAIN_EXECUTABLES)
+  ADD_EXECUTABLE(csv2html csv2html.cpp)
+  TARGET_LINK_LIBRARIES(csv2html sheet ssrender)
+  INSTALL(TARGETS csv2html COMPONENT ${CSVBIN} DESTINATION bin)
+ENDIF ()
+
+ADD_EXECUTABLE(ss2html csv2html.cpp)
+TARGET_LINK_LIBRARIES(ss2html sheet_full ssrender)
+
+INSTALL(TARGETS ss2html COMPONENT ${BIGBIN} DESTINATION bin)

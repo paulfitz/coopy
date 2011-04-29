@@ -1,5 +1,4 @@
 dtbl,csv,version,0.5,,,,
-table,name,sheet,,,,,
 column,name,address1,address2,city,state,zip,country
 link,name,address1,state,,,,
 link,act,*,*=,,,,

@@ -247,14 +247,15 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     rowChange.names = names;
     if (last_local_row!=-1) {
       had_row = true;
+      had_foreign_row = false;
     }
     if (!delRow) {
       dbg_printf("Cursor? lRow %d last_local_row %d last_local_row_marked %d had_row %d\n",
 		 lRow, last_local_row, last_local_row_marked, had_row);
       if (lRow!=-1) {
-	if (had_row) { //last_local_row!=-1) {
+	if (had_row||had_foreign_row) { //last_local_row!=-1) {
 	  //if (lRow!=last_local_row+1||last_local_row==-1) {
-	  if (lRow<bottom_local_row) {
+	  if (lRow<bottom_local_row||had_foreign_row) {
 	    //if (fixed_row.find(lRow)!=fixed_row.end()) {
 	    if (last_local_row>=0) {
 	      if (last_local_row_marked!=last_local_row) {
@@ -301,6 +302,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	  }
 	}
 	rc.push_back(rowChange);
+	if (last_local_row<0) {
+	  had_foreign_row = true;
+	}
 	last_local_row_marked = lRow;
       } else {
 	if (rRow==-1) {
@@ -340,6 +344,7 @@ bool Merger::merge(MergerState& state) {
   bottom_local_row = -1;
   last_local_row_marked = -1;
   had_row = false;
+  had_foreign_row = false;
 
   coopy::store::DataSheet& pivot = state.pivot;
   coopy::store::DataSheet& local = state.local;
