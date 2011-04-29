@@ -261,14 +261,18 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	      if (last_local_row_marked!=last_local_row) {
 		RowChange alt = lastRowChange;
 		alt.mode = ROW_CHANGE_CONTEXT;
-		rc.push_back(alt);
+		if (flags.use_order) {
+		  rc.push_back(alt);
+		}
 	      }
 	    }
 	    dbg_printf("MOVE! lRow %d last_local_row %d last_local_row_marked %d\n",
 		       lRow, last_local_row, last_local_row_marked);
 	    RowChange alt = rowChange;
 	    alt.mode = ROW_CHANGE_MOVE;
-	    rc.push_back(alt);
+	    if (flags.use_order) {
+	      rc.push_back(alt);
+	    }
 	    last_local_row_marked = lRow;
 	  }
 	}
@@ -298,7 +302,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	  if (last_local_row_marked!=last_local_row) {
 	    RowChange alt = lastRowChange;
 	    alt.mode = ROW_CHANGE_CONTEXT;
-	    rc.push_back(alt);
+	    if (flags.use_order) {
+	      rc.push_back(alt);
+	    }
 	  }
 	}
 	rc.push_back(rowChange);
@@ -502,9 +508,14 @@ bool Merger::merge(MergerState& state) {
 
     vector<int> index_flags = localIndex.suggestIndexes();
     RowChange::txt2bool indexes;
+    bool atLeastOne = false;
     for (int i=0; i<(int)original_col_names.size(); i++) {
       string name = original_col_names[i];
       indexes[name] = (index_flags[i]>0);
+      atLeastOne = atLeastOne||indexes[name];
+    }
+    if (!atLeastOne) {
+      indexes.clear();
     }
 
     vector<OrderChange> cc;

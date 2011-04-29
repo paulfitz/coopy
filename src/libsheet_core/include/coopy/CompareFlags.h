@@ -28,6 +28,7 @@ public:
   coopy::store::DataSheet *mapping;
   coopy::store::DataBook *mapping_book;
   bool pivot_sides_with_local;
+  bool use_order;
 
   CompareFlags() {
     head_trimmed = false;
@@ -37,6 +38,7 @@ public:
     mapping = 0 /*NULL*/;
     mapping_book = 0 /*NULL*/;
     pivot_sides_with_local = false;
+    use_order = true;
   }
 };
 

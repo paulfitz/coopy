@@ -403,7 +403,7 @@ IF (USE_GNUMERIC)
     ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
       --output test_out_${name}.xls
       ${ARGN})
-    ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ss2html${EXE_EXT} 
+    ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/gnumeric_ss2html${EXE_EXT} 
       --compare
         #  test_out_${name}.xls ${ref} ${ref})
 	test_out_${name}.xls test_out_${name}.html ${ref})

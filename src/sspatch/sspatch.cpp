@@ -60,6 +60,7 @@ bool copy_file(const char *src, const char *dest) {
 int main(int argc, char *argv[]) {
   bool verbose = false;
   bool fake = false;
+  bool inplace = false;
   string output = "-";
   string formatName = "raw";
   string tmp = "-";
@@ -69,6 +70,7 @@ int main(int argc, char *argv[]) {
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
       {"fake", 0, 0, 'k'},
+      {"inplace", 0, 0, 'i'},
       {"tmp", 1, 0, 't'},
       {"format", 1, 0, 'f'},
       {0, 0, 0, 0}
@@ -80,6 +82,9 @@ int main(int argc, char *argv[]) {
     switch (c) {
     case 'v':
       verbose = true;
+      break;
+    case 'i':
+      inplace = true;
       break;
     case 'k':
       fake = true;
@@ -116,6 +121,7 @@ int main(int argc, char *argv[]) {
     printf("Apply patch to a spreadsheet.\n");
     printf("  sspatch [--verbose] [--output output.csv] sheet.csv patch.txt\n");
     printf("  sspatch [--output output.sqlite] [--tmp tmp.sqlite] db.sqlite patch.txt\n");
+    printf("  sspatch [--inplace] db.sqlite patch.txt\n");
     printf("Output defaults to standard output.\n");
     printf("Write output to original file by doing:\n");
     printf("  sspatch --output sheet.csv sheet.csv patch.txt\n");
@@ -129,6 +135,10 @@ int main(int argc, char *argv[]) {
   } else {
     local_name = argv[0];
     patch_name = argv[1];
+  }
+
+  if (inplace) {
+    output = local_name;
   }
 
   if (verbose) {

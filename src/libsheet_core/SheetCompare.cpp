@@ -166,6 +166,13 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
   CompareFlags eflags = flags;
 
+  if (!local.isSequential()) {
+    eflags.use_order = false;
+  }
+  if (!remote.isSequential()) {
+    eflags.use_order = false;
+  }
+
   if (eflags.trust_ids) {
     local_names.sniff();
     remote_names.sniff();
