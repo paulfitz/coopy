@@ -15,6 +15,7 @@ namespace coopy {
 class coopy::cmp::MergeOutputTdiff : public MergeOutput {
 public:
   std::vector<std::string> ops;
+  std::vector<std::string> opsLoose;
   //std::vector<std::string> nops;
   std::map<std::string,bool> activeColumn;
   std::map<std::string,bool> showForSelect;
@@ -44,6 +45,7 @@ public:
 
   virtual bool changeColumn(const OrderChange& change);
   virtual bool changeRow(const RowChange& change) {
+    //rowCache.push_back(change);
     changeRow(change,false,true);
   }
 

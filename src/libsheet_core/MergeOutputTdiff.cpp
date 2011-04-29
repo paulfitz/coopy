@@ -345,6 +345,7 @@ bool MergeOutputTdiff::setSheet(const char *name) {
 
 void MergeOutputTdiff::flushRows() {
   ops.clear();
+  //opsLoose.clear();
   lastWasFactored = false;
   //nops.clear();
   activeColumn.clear();
@@ -356,12 +357,16 @@ void MergeOutputTdiff::flushRows() {
   constantColumns = true;
   showedColumns = false;
   if (rowCache.size()==0) return;
+  /*for (int i=0; i<(int)rowCache.size(); i++) {
+    RowChange& change = rowCache[i];
+    changeRow(change,false,true);
+  }*/
   if (coopy_is_verbose()) {
     formLattice.showPath();
   }
   for (int i=0; i<(int)rowCache.size(); i++) {
     RowChange& change = rowCache[i];
-    changeRow(change,(formLattice(i)==1)?true:false,false);
+    changeRow(change,(formLattice(i)==1),false);
   }
   formLattice.reset();
 }

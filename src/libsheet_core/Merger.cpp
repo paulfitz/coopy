@@ -499,9 +499,11 @@ bool Merger::merge(MergerState& state) {
       local_cols.push_back(i);
 
       string name = local_names.suggestColumnName(i);
+      /*
       if (name[0]>='0'&&name[0]<='9') {
 	name = string("[") + name + "]";
       }
+      */
       local_col_names.push_back(name);
     }
     original_col_names = local_col_names;

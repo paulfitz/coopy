@@ -89,8 +89,12 @@ std::string NameSniffer::suggestColumnName(int col) {
   if (names.size()>0) {
     return names[col];
   }
+  if (col==26) {
+    fprintf(stderr,"NameSniffer.cpp is inadequately inventive\n");
+    exit(1);
+  }
   char buf[256];
-  sprintf(buf,"%d",col);
+  sprintf(buf,"%c",'A'+col);
   return buf;
 }
 

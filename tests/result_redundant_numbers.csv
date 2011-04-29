@@ -1,6 +1,6 @@
 dtbl,csv,version,0.2,,,
 config,empty_tag,*,,,,
 config,row_tag,ROW,,,,
-column,name,ROW,[0],[1],[2],[3]
+column,name,ROW,A,B,C,D
 row,select,*,five,5,five,5
 row,update,*,*,*,fyffe,*

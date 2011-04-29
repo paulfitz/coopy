@@ -26,7 +26,7 @@ void SchemaSniffer::sniff(bool force) {
   for (int i=0; i<(int)names.size(); i++) {
     fallback.addColumn(names[i].c_str(),ct[i]);
   }
-  char col[2] = "A";
+  char col[3] = "A2";
   int at = (int)names.size();
   while ((int)fallback.getColumnCount()<sheet->width()) {
     fallback.addColumn(col,ct[at]);
