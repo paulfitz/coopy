@@ -9,6 +9,8 @@ if (USE_GNUMERIC)
   pkg_search_module (GOBJECT REQUIRED gobject-2.0)
   include_directories(${GOBJECT_INCLUDE_DIRS})
   pkg_search_module (GSF REQUIRED libgsf-1)
+  pkg_search_module (GDK_PIXBUF REQUIRED gdk-pixbuf-2.0)
+  include_directories(${GDK_PIXBUF_INCLUDE_DIRS})
 # pkg_search_module (GNOMEPRINTUI REQUIRED libgnomeprintui-2.2)
 
   set(GNUMERIC_ROOT "" CACHE STRING "Location of Gnumeric source") 
