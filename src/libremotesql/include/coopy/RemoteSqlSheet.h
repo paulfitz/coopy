@@ -76,6 +76,10 @@ public:
    return false;
  }
 
+  virtual bool hasExternalColumnNames() const {
+    return true;
+  }
+
 private:
   RemoteSqlSheetSchema *schema;
   RemoteSqlTextBook *book;

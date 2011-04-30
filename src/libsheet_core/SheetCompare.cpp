@@ -127,6 +127,12 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   SchemaSniffer sremote(_remote,NULL,true);
   PolySheet dpivot, dlocal, dremote;
   bool appleOrange = false;
+  dbg_printf("SheetCompare::compare local external names? %s\n", 
+	     _local.hasExternalColumnNames()?"yes":"no");
+  dbg_printf("SheetCompare::compare remote external names? %s\n", 
+	     _remote.hasExternalColumnNames()?"yes":"no");
+  dbg_printf("SheetCompare::compare pivot external names? %s\n", 
+	     _pivot.hasExternalColumnNames()?"yes":"no");
   if (_local.hasExternalColumnNames()!=_remote.hasExternalColumnNames() ||
       _local.hasExternalColumnNames()!=_pivot.hasExternalColumnNames()) {
     appleOrange = true;
