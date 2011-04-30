@@ -146,7 +146,7 @@ std::string RemoteSqlSheet::cellString(int x, int y, bool& escaped) const {
   const unsigned char *f = cacheFlag.pcell_const(x,y);
   if (f!=NULL) {
     escaped = true;
-    return "";
+    return "NULL";
   }
   const string *c = cache.pcell_const(x,y);
   if (c!=NULL) {
