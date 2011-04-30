@@ -8,6 +8,7 @@
 namespace coopy {
   namespace cmp {
     class CompareFlags;
+    class CompareOutput;
   }
   namespace store {
     // forward declarations
@@ -15,6 +16,34 @@ namespace coopy {
     class DataBook;
   }
 }
+
+class coopy::cmp::CompareOutput {
+public:
+  FILE *out;
+
+  CompareOutput() {
+    out = stdout;
+  }
+
+  CompareOutput(const char *fname) {
+    out = stdout;
+    setOutput(fname);
+  }
+
+  ~CompareOutput() {
+    setOutput(NULL);
+  }
+
+  bool setOutput(const char *fname) {
+    if (out!=stdout) {
+      fclose(out);
+      out = stdout;
+    }
+    if (fname==NULL) return true;
+    out = fopen(fname,"wb");
+    return (out!=NULL);
+  }
+};
 
 class coopy::cmp::CompareFlags {
 public:
@@ -39,6 +68,14 @@ public:
     mapping_book = 0 /*NULL*/;
     pivot_sides_with_local = false;
     use_order = true;
+  }
+
+  ~CompareFlags() {
+    setOutput(NULL);
+  }
+
+  bool setOutput(const CompareOutput& o) {
+    out = o.out;
   }
 };
 

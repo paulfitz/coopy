@@ -1,0 +1,1 @@
+import.pybook = coopy.PolyBook()book.read('numbers.csv')book.write('numbers.sqlite')

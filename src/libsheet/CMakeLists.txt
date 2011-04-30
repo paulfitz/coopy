@@ -23,12 +23,15 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/BookHook.cpp.in ${BOOK_HOOK0}
 ADD_LIBRARY(sheet_plus_csv_sql CsvFile.cpp PatchParser.cpp 
   CsvTextBook.cpp ShortTextBook.cpp JsonProperty.cpp)
 TARGET_LINK_LIBRARIES(sheet_plus_csv_sql sheet_core sqlite csv jsoncpp)
+export(TARGETS sheet_plus_csv_sql APPEND FILE ${COOPY_DEPENDENCIES})
 
 ADD_LIBRARY(sheet PolyBook.cpp ${BOOK_HOOK0})
 TARGET_LINK_LIBRARIES(sheet sheet_plus_csv_sql)
+export(TARGETS sheet APPEND FILE ${COOPY_DEPENDENCIES})
 
 ADD_LIBRARY(sheet_full PolyBook.cpp ${BOOK_HOOK})
 TARGET_LINK_LIBRARIES(sheet_full sheet_plus_csv_sql)
+export(TARGETS sheet_full APPEND FILE ${COOPY_DEPENDENCIES})
 #else ()
 #  ADD_LIBRARY(sheet_full Dummy.cpp)
 #  TARGET_LINK_LIBRARIES(sheet_full sheet)
@@ -36,13 +39,16 @@ TARGET_LINK_LIBRARIES(sheet_full sheet_plus_csv_sql)
 
 if (USE_GNUMERIC)
   TARGET_LINK_LIBRARIES(sheet_full gnumeric)
+  export(TARGETS gnumeric APPEND FILE ${COOPY_DEPENDENCIES})
 endif ()
 
 if (USE_REMOTE_SQL)
   TARGET_LINK_LIBRARIES(sheet_full remotesql jsoncpp)
+  export(TARGETS remotesql jsoncpp APPEND FILE ${COOPY_DEPENDENCIES})
 endif ()
 
 IF (USE_ACCESS)
   TARGET_LINK_LIBRARIES(sheet_full access)
+  export(TARGETS access APPEND FILE ${COOPY_DEPENDENCIES})
 endif ()
 

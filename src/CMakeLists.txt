@@ -56,7 +56,7 @@ IF (EXISTS ${STATLIB})
     LINK_LIBRARIES(${statlibs})
 ENDIF (EXISTS ${STATLIB})
 
-
+export(TARGETS FILE ${COOPY_DEPENDENCIES})
 
 add_subdirectory(libcsv)
 add_subdirectory(libsqlite)
@@ -86,3 +86,4 @@ add_subdirectory(gui)
 
 add_subdirectory(testing)
 
+include(CoopyDescribe)

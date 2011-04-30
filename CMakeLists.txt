@@ -21,6 +21,7 @@ make_directory(${LIBRARY_OUTPUT_PATH})
 make_directory(${EXECUTABLE_OUTPUT_PATH})
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/conf" ${CMAKE_MODULE_PATH})
+set(COOPY_DEPENDENCIES ${CMAKE_BINARY_DIR}/CoopyDependencies.cmake)
 
 add_subdirectory(src)
 

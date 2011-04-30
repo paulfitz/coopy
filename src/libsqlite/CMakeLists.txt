@@ -14,6 +14,7 @@ TARGET_LINK_LIBRARIES(sqlite sheet_core)
 IF (UNIX)
   TARGET_LINK_LIBRARIES(sqlite dl pthread)
 ENDIF (UNIX)
+export(TARGETS sqlite APPEND FILE ${COOPY_DEPENDENCIES})
 
 ADD_EXECUTABLE(test_sqlite test_sqlite.cpp)
 TARGET_LINK_LIBRARIES(test_sqlite sqlite)
