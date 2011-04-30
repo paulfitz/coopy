@@ -19,6 +19,16 @@ using namespace coopy::cmp;
 #define OP_CONTEXT "#"
 #define OP_NONE ""
 
+static string celly(const SheetCell& c) {
+  if (c.text=="NULL"&&!c.escaped) {
+    return "\"NULL\"";
+  }
+  if (c.escaped) {
+    return "NULL";
+  }
+  return c.text;
+}
+
 MergeOutputTdiff::MergeOutputTdiff() {
   setSheet("");
   sheetNameShown = true;
@@ -169,14 +179,14 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
 		(cond&&!(view||select))?":":"");
       }
       if (showForCond[name] && select) {
-	fprintf(out,"%s",change.cond.find(name)->second.toString().c_str());
+	fprintf(out,"%s",celly(change.cond.find(name)->second).c_str());
 	transition = true;
 	shown = true;
       }
       if (showForDescribe[name] && update) {
 	fprintf(out,"%s%s",
 		transition?"->":"",
-		change.val.find(name)->second.toString().c_str());
+		celly(change.val.find(name)->second).c_str());
 	if (shown) ok = false; // collision
 	shown = true;
       }

@@ -597,6 +597,7 @@ public:
     }
     if (txt=="NULL") {
       result.escaped = true;
+      result.text = txt;
       return result;
     }
     result.text = txt;

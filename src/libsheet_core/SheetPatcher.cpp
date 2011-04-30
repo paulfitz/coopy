@@ -316,7 +316,7 @@ bool SheetPatcher::setSheet(const char *name) {
   config = ConfigChange();
   columns.clear();
   column_names.clear();
-  rowCursor = 0;
+  rowCursor = -1;
   sheet = NULL;
 
   // load
