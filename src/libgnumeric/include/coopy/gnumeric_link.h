@@ -35,6 +35,8 @@ char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y);
 int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
 				      const char *str);
 
+int gnumeric_sheet_remove_cell(GnumericSheetPtr sheet, int x, int y);
+
 const char *gnumeric_sheet_get_name(GnumericSheetPtr sheet);
 
 void gnumeric_free_string(char *str);

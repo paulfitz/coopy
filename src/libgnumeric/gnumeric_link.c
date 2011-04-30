@@ -261,6 +261,16 @@ int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
   return 0;
 }
 
+int gnumeric_sheet_remove_cell(GnumericSheetPtr sheet, int x, int y) {
+  GnmCell *cell = sheet_cell_get((Sheet*)sheet,x,y);
+  if (cell==NULL) {
+    return 0;
+  }
+  sheet_cell_remove((Sheet*)sheet,cell,FALSE,FALSE);
+  return 0;
+}
+
+
 const char *gnumeric_sheet_get_name(GnumericSheetPtr sheet) {
   Sheet *s = (Sheet *)sheet;
   return s->name_unquoted;
