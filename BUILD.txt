@@ -8,6 +8,17 @@ An example for Linux:
   cmake ..
   make
 
+To then make python/ruby bindings, first install the development 
+libraries for the language of interest (a -dev package). 
+Then set Coopy_DIR to the main build directory, and Coopy_ROOT to the 
+source directory, and do something like:
+  cd $Coopy_ROOT
+  mkdir -p build/python
+  cd build/python
+  cmake -DCREATE_PYTHON=TRUE ../../bindings
+  make
+  python example.py
+
 ========================================================================
 
 To include Gnumeric support, a few more steps are needed.

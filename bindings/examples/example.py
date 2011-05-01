@@ -7,7 +7,7 @@ book2.read('named_numbers_three_23.csv')
 book1.write('named_numbers.sqlite')
 out = coopy.CompareOutput('patch.diff')
 
-patcher = coopy.Patch1er.createByName('tdiff')
+patcher = coopy.Patcher.createByName('tdiff')
 flags = coopy.CompareFlags()
 flags.setOutput(out)
 cmp = coopy.BookCompare()
