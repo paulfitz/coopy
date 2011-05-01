@@ -1,4 +1,9 @@
 %module coopy
+
+// common name clashes
+%rename(toString_c) *::toString() const;
+%rename(clone_c) *::clone() const;
+
 %{
 #include <coopy/PolySheet.h>
 #include <coopy/PolyBook.h>

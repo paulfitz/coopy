@@ -10,6 +10,7 @@ if (CREATE_BINDINGS)
 
   set(CREATE_PYTHON FALSE CACHE BOOL "Create Python interface")
   set(CREATE_RUBY FALSE CACHE BOOL "Create Ruby interface")
+  set(CREATE_JAVA FALSE CACHE BOOL "Create Java interface")
 
   FIND_PACKAGE(SWIG REQUIRED)
   INCLUDE(${SWIG_USE_FILE})
@@ -29,11 +30,6 @@ if (CREATE_BINDINGS)
     find_package(PythonLibs)
     include_directories(${PYTHON_INCLUDE_PATH})
     swig_add_module(coopy python coopy.i)
-    #ADD_DEFINITIONS(-DPy_DEBUG)
-    find_package(PythonInterp REQUIRED)
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; print(sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_PREFIX}'))" 
-      OUTPUT_VARIABLE PYTHON_INSTDIR OUTPUT_STRIP_TRAILING_WHITESPACE )
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/coopy.py ${CMAKE_CURRENT_BINARY_DIR}/_coopy.so DESTINATION ${PYTHON_INSTDIR} )
     configure_file(examples/example.py ${CMAKE_BINARY_DIR}/example.py)
   endif (CREATE_PYTHON)
 
@@ -46,5 +42,24 @@ if (CREATE_BINDINGS)
     configure_file(examples/example.rb ${CMAKE_BINARY_DIR}/example.rb)
     set_target_properties(coopy PROPERTIES PREFIX "")
   endif (CREATE_RUBY)
+
+  if (CREATE_JAVA)
+   set(CMAKE_SWIG_OUTDIR "${CMAKE_CURRENT_BINARY_DIR}/coopy")
+   set(CMAKE_SWIG_FLAGS "-package;coopy;-Wall;-module;coopy")
+   find_package(JNI REQUIRED)
+   include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+   swig_add_module(coopy java coopy.i)
+   option (CREATE_JAVA_CLASS_FILES "Compile java code with javac" ON)
+   if (CREATE_JAVA_CLASS_FILES)
+     ADD_CUSTOM_COMMAND(TARGET coopy
+       POST_BUILD
+       COMMAND javac -source 1.3 -target 1.3 "coopy/*.java"
+       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+   endif ()
+   if (APPLE)
+     set_target_properties(coopy PROPERTIES SUFFIX ".jnilib")
+   endif (APPLE)
+   configure_file(examples/example.java ${CMAKE_BINARY_DIR}/example.java)
+endif (CREATE_JAVA)
 
 endif ()
