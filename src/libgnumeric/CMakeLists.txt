@@ -1,6 +1,18 @@
 
 if (USE_GNUMERIC)
 
+  # for binary builds -- completely optional
+  SET (STATLIB "${CMAKE_BINARY_DIR}/static_libs_gnumeric")
+  SET (ADD_LIBS)
+  IF (EXISTS ${STATLIB})
+      MESSAGE(STATUS "static_libs directory present: ${STATLIB}")
+      LINK_DIRECTORIES(${STATLIB})
+      ADD_DEFINITIONS(-static-libgcc)
+      FILE(GLOB statlibs ${STATLIB}/*.a)
+      SET(ADD_LIBS ${statlibs} gconf-2 bonobo-2)
+  ENDIF (EXISTS ${STATLIB})
+
+
   if (NOT MINGW)
     include(FindPkgConfig)
     pkg_check_modules (GLIB2 REQUIRED glib-2.0)
@@ -12,7 +24,7 @@ if (USE_GNUMERIC)
     pkg_search_module (GSF REQUIRED libgsf-1)
     pkg_search_module (GDK_PIXBUF REQUIRED gdk-pixbuf-2.0)
     include_directories(${GDK_PIXBUF_INCLUDE_DIRS})
-    # pkg_search_module (GNOMEPRINTUI REQUIRED libgnomeprintui-2.2)
+    pkg_search_module (GNOMEPRINTUI libgnomeprintui-2.2)
   endif ()
 
   set(GNUMERIC_ROOT "" CACHE STRING "Location of Gnumeric source") 
@@ -77,9 +89,10 @@ if (USE_GNUMERIC)
   target_link_libraries(gnumeric ${GOBJECT_LIBRARIES})
   target_link_libraries(gnumeric ${GOFFICE_LIBRARIES})
   target_link_libraries(gnumeric ${GSF_LIBRARIES})
-# target_link_libraries(gnumeric ${GNOMEPRINTUI_LIBRARIES})
+  target_link_libraries(gnumeric ${GNOMEPRINTUI_LIBRARIES})
 
   target_link_libraries(gnumeric sheet_core)
+  target_link_libraries(gnumeric ${ADD_LIBS})
 
   add_executable(test_gnumeric test_gnumeric.cpp)
   target_link_libraries(test_gnumeric gnumeric)

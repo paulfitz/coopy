@@ -54,6 +54,7 @@ IF (EXISTS ${STATLIB})
     SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
     FILE(GLOB statlibs ${STATLIB}/*.a)
     LINK_LIBRARIES(${statlibs})
+    LINK_LIBRARIES(gconf-2 bonobo-2)  # chance not including these
 ENDIF (EXISTS ${STATLIB})
 
 export(TARGETS FILE ${COOPY_DEPENDENCIES})
