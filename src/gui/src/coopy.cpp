@@ -115,6 +115,7 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters"),
       wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
     { wxCMD_LINE_SWITCH, wxT("g"), wxT("gui"), wxT("force show GUI") },
+    { wxCMD_LINE_SWITCH, wxT("l"), wxT("silent"), wxT("keep it quiet") },
     //{ wxCMD_LINE_OPTION, wxT("r"), wxT("res"), wxT("set resource location"),
     //wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_SWITCH, wxT("p"), wxT("pull"), wxT("pull in data") },
