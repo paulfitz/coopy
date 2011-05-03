@@ -5,10 +5,10 @@ if [ "k$1" = "k" ]; then
     exit 1
 fi
 
-cmake_opts="-DUSE_MYSQL=TRUE -DUSE_REMOTE_SQL=TRUE -DUSE_ACCESS=TRUE -DUSE_GNUMERIC=TRUE"
+cmake_opts="-DUSE_MYSQL=TRUE -DUSE_REMOTE_SQL=TRUE -DUSE_ACCESS=TRUE -DUSE_GNUMERIC=TRUE -DCMAKE_BUILD_TYPE=Release"
 
-cmake_opts_linux="-DUSE_ACCESS=TRUE -DUSE_MYSQL=TRUE -DUSE_REMOTE_SQL=TRUE  -DUSE_GNUMERIC=FALSE"
-cmake_opts_win="-DUSE_ACCESS=TRUE -DUSE_REMOTE_SQL=FALSE -DUSE_GNUMERIC=TRUE"
+cmake_opts_linux="$cmake_opts"
+cmake_opts_win="$cmake_opts"
 
 while [ ! "k$1" = "k" ]; do 
 
