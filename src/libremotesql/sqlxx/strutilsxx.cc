@@ -25,7 +25,7 @@
 #ifdef HAVE_GNUREGEX_H
 #include <gnuregex.h>
 #else
-#include <regex.h>
+//#include <regex.h>
 #endif
 #include <cstdarg>
 #include <string.h>
@@ -476,9 +476,9 @@ string implode(const string &sGlue, const vector< string > &slPieces) {
 */
 
 bool matchRegex(const string &sString, const string &sPattern) {
+#ifdef HAVE_GNUREGEX_H
   regex_t RBuffer;
 
-#ifdef HAVE_GNUREGEX_H
   re_syntax_options=RE_SYNTAX_EGREP;
   RBuffer.buffer=0;
   RBuffer.allocated=0;
