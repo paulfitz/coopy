@@ -206,6 +206,9 @@ bool PolyBook::attach(Property& config) {
     if (ext==".xls"||ext==".xlsx"||ext==".gnumeric") {
       key = "gnumeric";
     }
+    if (ext==".jsonbook") {
+      key = "jsonbook";
+    }
     if (ext==".mdb") {
       key = "access";
     }

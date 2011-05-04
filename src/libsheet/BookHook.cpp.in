@@ -2,6 +2,7 @@
 #include <coopy/PolyBook.h>
 #include <coopy/JsonProperty.h>
 #include <coopy/ShortTextBook.h>
+#include <coopy/JsonBook.h>
 #include <coopy/FormatDesc.h>
 
 #include <fstream>
@@ -36,6 +37,13 @@ using namespace coopy::store;
 #define STRVAL PolyValue::makeString
 
 void getFactories(vector<TextBookFactory *>& lst,bool preview) {
+  if (preview) {
+    FormatDesc desc("JSONBOOK: Spreadsheet formats in json");
+    desc.addExtension(".jsonbook","Json spreadsheet");
+    desc.show();
+  } else {
+    lst.push_back(new JsonBookFactory());
+  }  
 #ifdef USE_GNUMERIC
   if (preview) {
     FormatDesc desc("GNUMERIC: Spreadsheet formats (via gnumeric)");

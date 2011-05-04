@@ -1,26 +1,19 @@
-#ifndef COOPY_CSVTEXTBOOK
-#define COOPY_CSVTEXTBOOK
+#ifndef COOPY_JSONBOOK
+#define COOPY_JSONBOOK
 
+#include <coopy/FoldedSheet.h>
 #include <coopy/TextBook.h>
 #include <coopy/TextBookFactory.h>
-#include <coopy/CsvSheet.h>
-#include <coopy/CsvFile.h>
-
-#include <vector>
-#include <map>
 
 namespace coopy {
   namespace store {
-    class CsvTextBook;
-    class CsvTextBookFactory;
+    class JsonBook;
+    class JsonBookFactory;
   }
 }
 
-class coopy::store::CsvTextBook : public TextBook, public CsvSheetReader {
+class coopy::store::JsonBook : public TextBook {
 public:
-  CsvTextBook(bool compact) : compact(compact) {
-  }
-
   std::vector<PolySheet> sheets;
   std::vector<std::string> names;
   std::map<std::string,int> name2index;
@@ -46,46 +39,34 @@ public:
   bool read(const char *fname);
 
   bool write(const char *fname) {
-    return write(fname,this,compact);
+    return write(fname,this);
   }
 
-  static bool write(const char *fname, TextBook *book, bool compact);
+  static bool write(const char *fname, TextBook *book);
 
   virtual bool open(const Property& config);
 
   bool addSheet(const SheetSchema& schema);
 
-  virtual CsvSheet *nextSheet(const char *name);
-
   virtual bool namedSheets() const {
     return true;
   }
-
-private:
-  bool compact;
 };
 
 
-class coopy::store::CsvTextBookFactory : public TextBookFactory {
-private:
-  bool compact;
-public:
-  CsvTextBookFactory(bool compact) : compact(compact) {
-  }
 
+class coopy::store::JsonBookFactory : public TextBookFactory {
+public:
   virtual std::string getName() {
-    return compact?"csvs":"book";
+    return "jsonbook";
   }
 
   virtual TextBook *open(AttachConfig& config, AttachReport& report) {
     if (config.shouldWrite) {
       if (config.prevBook!=NULL) {
 	dbg_printf("writing book file %s\n", config.options.get("file").asString().c_str());
-	//int r = CsvFile::write(config.prevBook->readSheetByIndex(0),
-	//config.options);
-	if (CsvTextBook::write(config.options.get("file").asString().c_str(),
-			       config.prevBook,
-			       compact)) {
+	if (JsonBook::write(config.options.get("file").asString().c_str(),
+			    config.prevBook)) {
 	  report.success = true;
 	  return config.prevBook;
 	}
@@ -93,12 +74,12 @@ public:
       return NULL;
     }
 
-    CsvTextBook *book = new CsvTextBook(compact);
+    JsonBook *book = new JsonBook();
     if (book==NULL) return NULL;
 
     if (config.shouldRead) {
       if (!config.options.check("should_attach")) {
-	dbg_printf("reading csv file %s\n", config.options.get("file").asString().c_str());
+	dbg_printf("reading jsonbook file %s\n", config.options.get("file").asString().c_str());
 	bool r = book->read(config.fname.c_str());
 	if (!r) {
 	  delete book;
@@ -114,14 +95,13 @@ public:
     return book;
   }
 
-  static CsvTextBookFactory *makeFactory() {
-    return new CsvTextBookFactory(false);
-  }
-
-  static CsvTextBookFactory *makeCompactFactory() {
-    return new CsvTextBookFactory(true);
+  static JsonBookFactory *makeFactory() {
+    return new JsonBookFactory();
   }
 };
 
 
+
+
 #endif
+

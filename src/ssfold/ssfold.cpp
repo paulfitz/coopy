@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
   if (argc<2) {
     printf("Fold or flatten tables:\n");
-    printf("  ssfold [--table TABLE] [--recipe RECIPE] [--unfold|--fold] SOURCE DESINATION\n");
+    printf("  ssfold [--table TABLE] [--recipe RECIPE] [--unfold|--fold] SOURCE DESTINATION\n");
     printf("  ssfold --recipe folds.csv --table main --unfold tables.sqlite sheet.csv\n");
     return 1;
   }
