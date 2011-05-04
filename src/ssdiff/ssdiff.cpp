@@ -166,6 +166,10 @@ int main(int argc, char *argv[]) {
     printf("  ssdiff --format tdiff local.csv modified.csv\n");
     printf("For differences in a verbose format, do:\n");
     printf("  ssdiff --format raw local.csv modified.csv\n");
+    printf("To declare a key that should be trusted, do:\n");
+    printf("  ssdiff --id COLUMN1 --id COLUMN2 local.csv modified.csv\n");
+    printf("To declare that columns are named, and those names can be trusted:\n");
+    printf("  ssdiff --named local.csv modified.csv\n");
     printf("To extract the mapping from local to modified in tabular form, do:\n");
     printf("  ssdiff --index local.csv modified.csv\n");
     printf("Output defaults to standard output.\n");
