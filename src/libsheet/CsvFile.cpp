@@ -57,6 +57,9 @@ public:
       COOPY_ASSERT(schema);
       Poly<SheetSchema> pschema(schema,true);
       schema->setHeaderHeight(sheet->height()-1);
+      for (int i=0; i<sheet->width(); i++) {
+	schema->addColumn(sheet->cellString(i,sheet->height()-1).c_str());
+      }
       sheet->setSchema(pschema);
     }
   }

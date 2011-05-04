@@ -292,6 +292,21 @@ public:
     return true;
   }
 
+  bool setRowOffset() {
+    COOPY_ASSERT(sheet);
+    if (dh>0) return true;
+    SheetSchema *schema = getSchema();
+    if (!schema) {
+      schema = sheet->getSchema();
+    }
+    if (!schema) return true;
+    if (sheet->hasExternalColumnNames()) return true;
+    if (schema->headerHeight()>=0) {
+      setRowOffset(schema->headerHeight()+1);
+    }
+    return true;
+  }
+
   bool hideHeaders() {
     if (!hasExternalColumnNames()) {
       setRowOffset(1);

@@ -23,11 +23,16 @@ static string getRoot(const char *fname) {
 
 bool CsvTextBook::read(const char *fname) {
   if (compact) {
+    printf("READing..\n");
     clear();
     Property p;
     if (CsvFile::read(fname,*this,p)!=0) {
       fprintf(stderr,"Failed to read %s\n", fname);
       return false;
+    }
+    for (int i=0; i<(int)sheets.size(); i++) {
+      printf("checking..\n");
+      sheets[i].setRowOffset();
     }
     return true;
   }
