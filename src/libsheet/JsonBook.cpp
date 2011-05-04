@@ -126,7 +126,10 @@ static bool writePart(Json::Value& root2,
     root2["columns"] = Json::Value(Json::arrayValue);
     Json::Value& cols = root2["columns"];
     SheetSchema *schema = sheet.getSchema();
-    for (int x=0; x<sheet.width(); x++) {
+    if (schema->getColumnCount()!=sheet.width()) {
+      fprintf(stderr,"warning: partial schema information, %d columns in sheet, %d column names\n", sheet.width(), schema->getColumnCount());
+    }
+    for (int x=0; x<schema->getColumnCount(); x++) {
       ColumnInfo info = schema->getColumnInfo(x);
       cols.append(Json::Value(info.getName()));
     }    
@@ -145,7 +148,7 @@ static bool writePart(Json::Value& root2,
 	  row.append(Json::Value(sheet.cellString(x,y)));
 	}
       } else {
-	bool hasSchema2 = (psheet->getSchema()!=NULL);
+	bool hasSchema2 = (next->getSchema()!=NULL);
 	if (hasSchema2) {
 	  row.append(Json::Value(Json::objectValue));
 	} else {
