@@ -2,6 +2,7 @@
 #define COOPY_ROWMAN
 
 #include <coopy/Measure.h>
+#include <coopy/CompareFlags.h>
 #include <coopy/FMap.h>
 
 namespace coopy {
@@ -16,12 +17,14 @@ namespace coopy {
 template <class map_type> 
 class coopy::cmp::RowManOf : public Measure {
 public:
+  CompareFlags flags;
   int vigor;
   int bound;
   map_type m;
+  std::vector<int> ref_subset, query_subset;
   coopy::store::SparseFloatSheet match;
 
-  RowManOf() : m(match) {
+  RowManOf(const CompareFlags& flags) : flags(flags), m(match) {
     vigor = 0;
     bound = -1;
   }
@@ -32,6 +35,10 @@ public:
 
   virtual void setup(MeasurePass& pass) {
     pass.setSize(pass.a.height(),pass.b.height());
+    if (flags.trust_ids) {
+      ref_subset = pass.va.meta.getSubset();
+      query_subset = pass.vb.meta.getSubset();
+    }
   }
 
   void apply(coopy::store::DataSheet& a, 
@@ -45,10 +52,20 @@ public:
       if (asel.cell(0,y)==-1) {
 	if (at<top) {
 	  at++;
-	  for (int x=0; x<w; x++) {
-	    std::string txt = a.cellString(x,y);
-	    m.setCurr(x,y);
-	    m.add(txt,query,ctrl);
+	  if (!flags.trust_ids) {
+	    for (int x=0; x<w; x++) {
+	      std::string txt = a.cellString(x,y);
+	      m.setCurr(x,y);
+	      m.add(txt,query,ctrl);
+	    }
+	  } else {
+	    const std::vector<int>& subset = query?query_subset:ref_subset;
+	    std::string txt = "";
+	    for (int x=0; x<(int)subset.size(); x++) {
+	      txt += a.cellString(subset[x],y) + "__";
+	    }
+	    m.setCurr(0,y);
+	    m.add(txt,query,0);
 	  }
 	} else {
 	  match.cell(0,y) = -2;
@@ -98,7 +115,7 @@ public:
   int theta;
   bool flip;
 
-  CombinedRowMan() {
+ CombinedRowMan(const CompareFlags& flags) : man1(flags), man2(flags) {
     theta = man1.getCtrlMax()/2;
     flip = false;
   }

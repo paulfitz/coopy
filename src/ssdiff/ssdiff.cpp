@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
   bool equality = false;
   bool indexed = false;
   bool apply = false;
+  bool named = false;
 
   while (true) {
     int option_index = 0;
@@ -68,6 +69,8 @@ int main(int argc, char *argv[]) {
       {"verbose", 0, 0, 'v'},
 
       {"id", 1, 0, 'k'},
+
+      {"named", 0, 0, 'd'},
 
       {"map", 1, 0, 'm'},
 
@@ -108,6 +111,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'i':
       indexed = true;
+      break;
+    case 'd':
+      named = true;
       break;
 
     case 'k':
@@ -222,6 +228,7 @@ int main(int argc, char *argv[]) {
     flags.ids = ids;
     flags.trust_ids = true;
   }
+  flags.trust_column_names = named;
   if (indexed) {
     MergeOutputIndex diff;
     PolyBook book;

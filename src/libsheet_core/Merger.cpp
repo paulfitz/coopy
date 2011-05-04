@@ -235,11 +235,13 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     }
     */
 
+    /*
     dbg_printf("Row: (index p/l/r %d %d %d) act %d del %d / sz %d %d %d %d\n",
 	       pRow, lRow, rRow, 
 	       activity, 
 	       delRow,
 	       (int)expandMerge.size(), local.width(), current_row, local.height());
+    */
 
     RowChange rowChange;
     rowChange.cond = cond;
@@ -250,8 +252,8 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
       had_foreign_row = false;
     }
     if (!delRow) {
-      dbg_printf("Cursor? lRow %d last_local_row %d last_local_row_marked %d had_row %d\n",
-		 lRow, last_local_row, last_local_row_marked, had_row);
+      //dbg_printf("Cursor? lRow %d last_local_row %d last_local_row_marked %d had_row %d\n",
+      //lRow, last_local_row, last_local_row_marked, had_row);
       if (lRow!=-1) {
 	if (had_row||had_foreign_row) { //last_local_row!=-1) {
 	  //if (lRow!=last_local_row+1||last_local_row==-1) {

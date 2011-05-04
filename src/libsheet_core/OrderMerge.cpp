@@ -429,9 +429,9 @@ void OrderMerge::merge(const OrderResult& nlocal,
       int lCol = unit.localUnit;
       int rCol = unit.remoteUnit;
       bool deleted = unit.deleted;
-      dbg_printf("match %d: %d: P/L/R %d %d %d %s\n", 
+      /*dbg_printf("match %d: %d: P/L/R %d %d %d %s\n", 
 		 gct, deleted?-1:ct, pCol, lCol, rCol,
-		 deleted?"(deleted)":"");
+		 deleted?"(deleted)":"");*/
       gct++;
       if (deleted) { continue; }
       it2k[gct-1] = ct;
@@ -483,13 +483,13 @@ void OrderMerge::merge(const OrderResult& nlocal,
     v.endTransitions();
     
     for (int draw=0; draw<units-1; draw++) {
-      dbg_printf("DRAW %d\n", draw);
+      //dbg_printf("DRAW %d\n", draw);
       v.beginTransitions();
 
       set<int> idx2;
       for (set<int>::const_iterator it1=idx.begin(); it1!=idx.end(); it1++) {
 	int k = (*it1);
-	dbg_printf("  draw %d k %d\n", draw, k);
+	//dbg_printf("  draw %d k %d\n", draw, k);
 	if (k==dud) continue;
 
 	MatchUnit& unit = *mu[k];
@@ -498,27 +498,27 @@ void OrderMerge::merge(const OrderResult& nlocal,
 	int rCol = unit.remoteUnit;
 	bool deleted = unit.deleted;
 
-	dbg_printf("    match P/L/R %d %d %d %s\n", pCol, lCol, rCol,
-		   deleted?"(deleted)":"");
+	//dbg_printf("    match P/L/R %d %d %d %s\n", pCol, lCol, rCol,
+	//deleted?"(deleted)":"");
 
 	if (lCol==-1 && rCol==-1) {
 	  int next = safe_next(p2k,next_avail(availableP,pCol),dud);
 	  v.addTransition(k,next,0);
-	  dbg_printf("    transition %d %d\n", k, next);
+	  //dbg_printf("    transition %d %d\n", k, next);
 	  idx2.insert(next);
 	  continue;
 	}
 	if (rCol==-1) {
 	  int next = safe_next(l2k,next_avail(availableL,lCol),dud);
 	  v.addTransition(k,next,0);
-	  dbg_printf("    transition %d %d\n", k, next);
+	  //dbg_printf("    transition %d %d\n", k, next);
 	  idx2.insert(next);
 	  continue;
 	}
 	if (lCol==-1) {
 	  int next = safe_next(r2k,next_avail(availableR,rCol),dud);
 	  v.addTransition(k,next,0);
-	  dbg_printf("    transition %d %d\n", k, next);
+	  //dbg_printf("    transition %d %d\n", k, next);
 	  idx2.insert(next);
 	  continue;
 	}
@@ -538,17 +538,17 @@ void OrderMerge::merge(const OrderResult& nlocal,
 	int pnext = safe_next(p2k,next_avail(availableP,pCol),dud);
 	if (lnext!=pnext) {
 	  v.addTransition(k,lnext,0);
-	  dbg_printf("    transition %d %d\n", k, lnext);
+	  //dbg_printf("    transition %d %d\n", k, lnext);
 	  idx2.insert(lnext);
 	}
 	if (rnext!=pnext) {
 	  v.addTransition(k,rnext,0);
-	  dbg_printf("    transition %d %d\n", k, rnext);
+	  //dbg_printf("    transition %d %d\n", k, rnext);
 	  idx2.insert(rnext);
 	}
 	if (rnext==pnext&&lnext==pnext) {
 	  v.addTransition(k,pnext,0);
-	  dbg_printf("    transition %d %d\n", k, pnext);
+	  //dbg_printf("    transition %d %d\n", k, pnext);
 	  idx2.insert(pnext);
 	}
       }
@@ -564,6 +564,7 @@ void OrderMerge::merge(const OrderResult& nlocal,
     v.endTransitions();
     int qo = 1;
 
+    /*
     if (_csv_verbose) {
       dbg_printf("Viterbi calculation:\n");
       int q = v.length()-qo;
@@ -572,6 +573,7 @@ void OrderMerge::merge(const OrderResult& nlocal,
 	dbg_printf("*** %d\n", k);
       }
     }
+    */
 
     int q = v.length()-qo;
     efficient_map<int,int> dups;
@@ -587,12 +589,12 @@ void OrderMerge::merge(const OrderResult& nlocal,
       }
       if (dups.find(k)==dups.end() && dups.find(k2)==dups.end()) {
 	canon.push_back(*mu[k]);
-	dbg_printf("     ADDED -> %d (%d %d %d)\n", canon.size(),
-		   mu[k]->pivotUnit, mu[k]->localUnit, mu[k]->remoteUnit);
+	//dbg_printf("     ADDED -> %d (%d %d %d)\n", canon.size(),
+	//	   mu[k]->pivotUnit, mu[k]->localUnit, mu[k]->remoteUnit);
 	dups[k] = 1;
 	accepted[k] = 1;
       } else {
-	dbg_printf("     hit dodgy match\n");
+	//dbg_printf("     hit dodgy match\n");
 	good = false;
 	break;
       }
@@ -620,10 +622,10 @@ void OrderMerge::merge(const OrderResult& nlocal,
       }
       gct2++;
     }
-    dbg_printf("Got to length %d of %d...\n",
-	       canon.size(), accum.size());
+    //dbg_printf("Got to length %d of %d...\n",
+    //canon.size(), accum.size());
     if (omit==0) {
-      dbg_printf("No progress made\n");
+      //      dbg_printf("No progress made\n");
       more = false;
     }
     dbg_printf("STATUS %d %d / %s, %s\n", canon.size(), accum.size(), good?"good":"no good", more?"more":"no more");
@@ -635,8 +637,8 @@ void OrderMerge::merge(const OrderResult& nlocal,
 	 it++) {
       if (!it->deleted) {
 	canon.push_back(*it);
-	dbg_printf("     ADDED UNORDERED -> %d (%d %d %d)\n", canon.size(),
-		   it->pivotUnit, it->localUnit, it->remoteUnit);
+	//dbg_printf("     ADDED UNORDERED -> %d (%d %d %d)\n", canon.size(),
+	//it->pivotUnit, it->localUnit, it->remoteUnit);
       }
     }
   }
@@ -646,8 +648,8 @@ void OrderMerge::merge(const OrderResult& nlocal,
        it++) {
     if (it->deleted) {
       canon.push_back(*it);
-      dbg_printf("     ADDED DELETED -> %d (%d %d %d)\n", canon.size(),
-		 it->pivotUnit, it->localUnit, it->remoteUnit);
+      //dbg_printf("     ADDED DELETED -> %d (%d %d %d)\n", canon.size(),
+      //it->pivotUnit, it->localUnit, it->remoteUnit);
     }
   }
   accum = canon;
@@ -664,8 +666,8 @@ void OrderMerge::merge(const OrderResult& nlocal,
     if (lCol!=-1&&rCol!=-1) {
       overlap++;
     }
-    dbg_printf("final match %d: P/L/R %d %d %d %s\n", ct, pCol, lCol, rCol,
-	       deleted?"(deleted)":"");
+    //dbg_printf("final match %d: P/L/R %d %d %d %s\n", ct, pCol, lCol, rCol,
+    //deleted?"(deleted)":"");
     ct++;
   }
   dbg_printf("overlap is %d\n", overlap);

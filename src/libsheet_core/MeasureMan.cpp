@@ -144,10 +144,12 @@ void MeasureMan::compare1(int ctrl) {
     v.addTransition(0,0,0);
     v.endTransitions();
   }
+  /*
   if (_csv_verbose) {
     dbg_printf("Viterbi calculation:\n");
     v.showPath();
   }
+  */
 
   for (int y=0; y<match.height(); y++) {
     if (bsel.cell(0,y)==-1) {
@@ -186,10 +188,12 @@ void MeasureMan::compare1(int ctrl) {
 	}
       }
       if (ok) {
+	/*
 	dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
 		   y,bestIndex,y,bestIndex,
 		   bestIndex, bestValue, -1.0, ref);
 	dbg_printf("  [remote/local] %s %s\n", cell(b,0,y).c_str(), cell(a,0,bestIndex).c_str());
+	*/
 	if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
 	  dbg_printf("COLLISION! Ignoring unavailable match\n");
 	  dbg_printf("This case has not been optimized\n");

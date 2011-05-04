@@ -54,6 +54,7 @@ public:
   std::vector<int> ids_local;
   std::vector<int> ids_remote;
   bool trust_ids;
+  bool trust_column_names;
   coopy::store::DataSheet *mapping;
   coopy::store::DataBook *mapping_book;
   bool pivot_sides_with_local;
@@ -64,6 +65,7 @@ public:
     tail_trimmed = false;
     out = stdout;
     trust_ids = false;
+    trust_column_names = false;
     mapping = 0 /*NULL*/;
     mapping_book = 0 /*NULL*/;
     pivot_sides_with_local = false;

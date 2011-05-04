@@ -43,7 +43,7 @@ public:
     remote_hash = pass.vb.sha1;
   }
 
-  void match(bool rowLike) {
+  void match(bool rowLike, const CompareFlags& flags) {
 
     // We check if the two things being compared are identical.
     // If so, that's easy!
@@ -87,6 +87,39 @@ public:
 		 pass.a.width(),pass.a.height(),
 		 pass.b.width(),pass.b.height());
     }
+
+    // do we just trust the column names?
+    if (!rowLike) {
+      if (flags.trust_column_names) {
+	dbg_printf("FastMatch would like to trust columns\n");
+	if (local_names!=NULL && remote_names!=NULL) {
+	  vector<string> ln = local_names->suggestNames();
+	  vector<string> rn = remote_names->suggestNames();
+	  map<string,int> lni, rni;
+	  for (int i=0; i<(int)ln.size(); i++) {
+	    lni[ln[i]] = i;
+	  }
+	  for (int i=0; i<(int)rn.size(); i++) {
+	    rni[rn[i]] = i;
+	  }
+	  dbg_printf("FastMatch trusting columns\n");
+	  for (int i=0; i<pass.asel.height(); i++) {
+	    string name = ln[i];
+	    if (rni.find(name)!=rni.end()) {
+	      pass.asel.cell(0,i) = rni[name];
+	    }
+	  }
+	  for (int i=0; i<pass.bsel.height(); i++) {
+	    string name = rn[i];
+	    if (lni.find(name)!=lni.end()) {
+	      pass.bsel.cell(0,i) = lni[name];
+	    }
+	  }
+	  return;
+	}
+      }
+    }
+
 
     // Non identical eh?  Well, maybe we've been told to trust
     // some identifying columns.
@@ -221,9 +254,9 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     MeasurePass p2l_row_pass_norm1(vpivot,vpivot);
     MeasurePass p2l_row_pass_norm2(vlocal,vlocal);
     
-    CombinedRowMan p2l_row_local;
-    CombinedRowMan p2l_row_norm1;
-    CombinedRowMan p2l_row_norm2;
+    CombinedRowMan p2l_row_local(eflags);
+    CombinedRowMan p2l_row_norm1(eflags);
+    CombinedRowMan p2l_row_norm2(eflags);
     
     MeasureMan p2l_row_man(p2l_row_local,p2l_row_pass_local,
 			   p2l_row_norm1,p2l_row_pass_norm1,
@@ -236,7 +269,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     //p2l_row_fast_match.remote_names = &local_names;
     //p2l_row_fast_match.local_hash = pivot_hash;
     //p2l_row_fast_match.remote_hash = local_hash;
-    p2l_row_fast_match.match(true);
+    p2l_row_fast_match.match(true,eflags);
     p2l_row_man.compare();
     
     /////////////////////////////////////////////////////////////////////////
@@ -248,9 +281,9 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     MeasurePass p2r_row_pass_norm1(vpivot,vpivot);
     MeasurePass p2r_row_pass_norm2(vremote,vremote);
     
-    CombinedRowMan p2r_row_local;
-    CombinedRowMan p2r_row_norm1;
-    CombinedRowMan p2r_row_norm2;
+    CombinedRowMan p2r_row_local(eflags);
+    CombinedRowMan p2r_row_norm1(eflags);
+    CombinedRowMan p2r_row_norm2(eflags);
     
     MeasureMan p2r_row_man(p2r_row_local,p2r_row_pass_local,
 			   p2r_row_norm1,p2r_row_pass_norm1,
@@ -263,7 +296,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     //p2r_row_fast_match.remote_names = &remote_names;
     //p2r_row_fast_match.local_hash = pivot_hash;
     //p2r_row_fast_match.remote_hash = remote_hash;
-    p2r_row_fast_match.match(true);
+    p2r_row_fast_match.match(true,eflags);
     p2r_row_man.compare();
     
     p2l_row_order = p2l_row_pass_local.getOrder();
@@ -351,7 +384,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   FastMatch p2l_col_fast_match(p2l_col_pass_local);
   //p2l_col_fast_match.local_hash = pivot_hash;
   //p2l_col_fast_match.remote_hash = local_hash;
-  p2l_col_fast_match.match(false);
+  p2l_col_fast_match.match(false,eflags);
   p2l_col_man.compare();
 
 
@@ -377,7 +410,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   FastMatch p2r_col_fast_match(p2r_col_pass_local);
   //p2r_col_fast_match.local_hash = pivot_hash;
   //p2r_col_fast_match.remote_hash = remote_hash;
-  p2r_col_fast_match.match(false);
+  p2r_col_fast_match.match(false,eflags);
   p2r_col_man.compare();
 
 
