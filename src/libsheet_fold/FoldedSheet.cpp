@@ -17,19 +17,15 @@ FoldedSheet *FoldedCell::getOrCreateSheet() {
   return sheet;
 }
 
-std::string FoldedSheet::cellString(int x, int y) const {
+SheetCell FoldedSheet::cellSummary(int x, int y) const {
   const FoldedCell& c = cell(x,y);
-  string result;
-  if (c.sheet) {
-    result += "(";
-    SheetStyle style;
-    style.setEol("; ");
-    style.setEolAtEof(false);
-    result += c.sheet->encode(style);
-    result += ")";
-  } else {
-    result = c.datum.toString();
-  }
-  return result;
+  if (!c.sheet) return c.datum;
+  string result = "(";
+  SheetStyle style;
+  style.setEol("; ");
+  style.setEolAtEof(false);
+  result += c.sheet->encode(style);
+  result += ")";
+  return SheetCell(result,false);
 }
 

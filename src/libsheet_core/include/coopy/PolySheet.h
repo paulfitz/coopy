@@ -282,6 +282,11 @@ public:
     return sheet->isSequential();
   }
 
+  virtual DataSheet *getNestedSheet(int x, int y) {
+    COOPY_ASSERT(sheet);
+    return sheet->getNestedSheet(x,y);
+  }
+
   bool setRowOffset(int dh) {
     this->dh = dh;
     return true;

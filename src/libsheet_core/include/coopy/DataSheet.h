@@ -201,6 +201,11 @@ public:
     return true;
   }
 
+  virtual DataSheet *getNestedSheet(int x, int y) {
+    return 0/*NULL*/; 
+  }
+
+
 private:
   std::string hash_cache;
 };

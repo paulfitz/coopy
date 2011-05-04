@@ -65,6 +65,30 @@ static bool readPart(Json::Value& rows,
   return true;
 }
 
+static bool writePart(Json::Value& root2,
+		      DataSheet *psheet) {
+  DataSheet& sheet = *psheet;
+  for (int y=0; y<sheet.height(); y++) {
+    Json::Value row(Json::arrayValue);
+    for (int x=0; x<sheet.width(); x++) {
+      DataSheet *next = sheet.getNestedSheet(x,y);
+      if (next==NULL) {
+	SheetCell c = sheet.cellSummary(x,y);
+	if (c.escaped) {
+	  row.append(Json::Value(Json::nullValue));
+	} else {
+	  row.append(Json::Value(sheet.cellString(x,y)));
+	}
+      } else {
+	row.append(Json::Value(Json::arrayValue));
+	if (!writePart(row[x],next)) return false;
+      }
+    }
+    root2.append(row);
+  }
+  return true;
+}
+
 bool JsonBook::read(const char *fname) {
   clear();
 
@@ -107,18 +131,7 @@ bool JsonBook::write(const char *fname, TextBook *book) {
     Json::Value& root2 = root[names[i]];
     PolySheet sheet = book->readSheet(names[i]);
     if (!sheet.isValid()) return false;
-    for (int y=0; y<sheet.height(); y++) {
-      Json::Value row(Json::arrayValue);
-      for (int x=0; x<sheet.width(); x++) {
-	SheetCell c = sheet.cellSummary(x,y);
-	if (c.escaped) {
-	  row.append(Json::Value(Json::nullValue));
-	} else {
-	  row.append(Json::Value(sheet.cellString(x,y)));
-	}
-      }
-      root2.append(row);
-    }
+    if (!writePart(root2,&sheet.tail())) return false;
   }
   out << root;
   return true;

@@ -106,7 +106,8 @@ int main(int argc, char *argv[]) {
     fprintf(stderr,"Fold failed - probably because it is not yet implemented\n");
     return 1;
   }
-  if (!CsvTextBook::write(argv[1],&remote,true)) {
+  //if (!CsvTextBook::write(argv[1],&remote,true)) {
+  if (!remote.write(argv[1])) {
     fprintf(stderr,"Failed to write %s\n", argv[1]);
     return 1;
   }
