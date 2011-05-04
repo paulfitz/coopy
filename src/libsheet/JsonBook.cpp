@@ -65,9 +65,74 @@ static bool readPart(Json::Value& rows,
   return true;
 }
 
+bool JsonBook::read(const char *fname) {
+  clear();
+
+  ifstream in(fname);
+  Json::Value root;
+  Json::Reader reader;
+  if (!reader.parse(in,root,false)) {
+    fprintf(stderr,"Failed to parse %s\n", fname);
+    return false;
+  }
+  for (Json::Value::iterator it=root.begin(); it!=root.end(); it++) {
+    FoldedSheet *psheet = new FoldedSheet;
+    COOPY_ASSERT(psheet);
+    FoldedSheet& sheet = *psheet;
+    PolySheet p(psheet,true);
+
+    Json::Value *prows = &(*it);
+    if (prows->isObject()) {
+      Json::Value& crows = (*it);
+      prows = &(crows["rows"]);
+      if (prows->isNull()) {
+	fprintf(stderr,"Cannot find rows for %s\n", it.memberName());
+	return false;
+      }
+      const Json::Value& cols = (*it)["columns"];
+      if (cols.isNull()) {
+	fprintf(stderr,"Cannot find columns for %s\n", it.memberName());
+	return false;
+      }
+      SimpleSheetSchema *ss = new SimpleSheetSchema();
+      COOPY_ASSERT(ss);
+      ss->setSheetName(it.memberName());
+      for (Json::Value::iterator it=cols.begin(); it!=cols.end(); it++) {
+	//printf("Got col %s\n", (*it).asString().c_str());
+	ss->addColumn((*it).asString().c_str());
+      }
+      p.setSchema(ss,true);
+      //printf("Configured sheet\n");
+    }
+    if (prows->isArray()) {
+      dbg_printf("JSON Working on %s\n", it.memberName());
+      Json::Value& rows = *prows;
+      if (!readPart(rows,psheet)) return false;
+      name2index[it.memberName()] = (int)sheets.size();
+      sheets.push_back(p);
+      names.push_back(it.memberName());
+    }
+  }
+
+  return true;
+}
+
 static bool writePart(Json::Value& root2,
-		      DataSheet *psheet) {
+		      DataSheet *psheet,
+		      bool hasSchema) {
   DataSheet& sheet = *psheet;
+  Json::Value *rows = &root2;
+  if (hasSchema) {
+    root2["columns"] = Json::Value(Json::arrayValue);
+    Json::Value& cols = root2["columns"];
+    SheetSchema *schema = sheet.getSchema();
+    for (int x=0; x<sheet.width(); x++) {
+      ColumnInfo info = schema->getColumnInfo(x);
+      cols.append(Json::Value(info.getName()));
+    }    
+    root2["rows"] = Json::Value(Json::arrayValue);
+    rows = &root2["rows"];
+  }
   for (int y=0; y<sheet.height(); y++) {
     Json::Value row(Json::arrayValue);
     for (int x=0; x<sheet.width(); x++) {
@@ -80,40 +145,17 @@ static bool writePart(Json::Value& root2,
 	  row.append(Json::Value(sheet.cellString(x,y)));
 	}
       } else {
-	row.append(Json::Value(Json::arrayValue));
-	if (!writePart(row[x],next)) return false;
+	bool hasSchema2 = (psheet->getSchema()!=NULL);
+	if (hasSchema2) {
+	  row.append(Json::Value(Json::objectValue));
+	} else {
+	  row.append(Json::Value(Json::arrayValue));
+	}
+	if (!writePart(row[x],next,hasSchema2)) return false;
       }
     }
-    root2.append(row);
+    rows->append(row);
   }
-  return true;
-}
-
-bool JsonBook::read(const char *fname) {
-  clear();
-
-  ifstream in(fname);
-  Json::Value root;
-  Json::Reader reader;
-  if (!reader.parse(in,root,false)) {
-    fprintf(stderr,"Failed to parse %s\n", fname);
-    return false;
-  }
-  for (Json::Value::iterator it=root.begin(); it!=root.end(); it++) {
-     if ((*it).isArray()) {
-       dbg_printf("JSON Working on %s\n", it.memberName());
-       Json::Value& rows = *it;
-       FoldedSheet *psheet = new FoldedSheet;
-       COOPY_ASSERT(psheet);
-       FoldedSheet& sheet = *psheet;
-       PolySheet p(psheet,true);
-       if (!readPart(rows,psheet)) return false;
-       name2index[it.memberName()] = (int)sheets.size();
-       sheets.push_back(p);
-       names.push_back(it.memberName());
-     }
-  }
-
   return true;
 }
 
@@ -127,11 +169,16 @@ bool JsonBook::write(const char *fname, TextBook *book) {
   }
   vector<string> names = book->getNames();
   for (int i=0; i<(int)names.size(); i++) {
-    root[names[i]] = Json::Value(Json::arrayValue);
-    Json::Value& root2 = root[names[i]];
     PolySheet sheet = book->readSheet(names[i]);
+    bool hasSchema = (sheet.getSchema()!=NULL);
+    if (hasSchema) {
+      root[names[i]] = Json::Value(Json::objectValue);
+    } else {
+      root[names[i]] = Json::Value(Json::arrayValue);
+    }
+    Json::Value& root2 = root[names[i]];
     if (!sheet.isValid()) return false;
-    if (!writePart(root2,&sheet.tail())) return false;
+    if (!writePart(root2,&sheet,hasSchema)) return false;
   }
   out << root;
   return true;
