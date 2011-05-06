@@ -1,5 +1,6 @@
 #include <coopy/Dbg.h>
 #include <coopy/SqliteSheet.h>
+#include <coopy/Stringer.h>
 #include <sqlite3.h>
 
 using namespace coopy::store;
@@ -13,30 +14,8 @@ namespace coopy {
 }
 
 
-std::string _quoted(const std::string& x) {
-  bool quote = false;
-  bool easy = true;
-  std::string result = x;
-  for (int i=0; i<(int)x.length(); i++) {
-    char ch = x[i];
-    if ((ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z')||(ch>='0'&&ch<='9')||
-	ch=='_') {
-      // ok
-    } else {
-      if (ch=='"') {
-	easy = false;
-      }
-      quote = true;
-    }
-  }
-  if (quote&&easy) {
-    result = string("\"") + x + "\"";
-  } else if (!easy) {
-    printf("Fix %s:%d to quote correctly (%s)\n", __FILE__, __LINE__,
-	   x.c_str());
-    exit(1);
-  }
-  return result;
+static std::string _quoted(const std::string& x) {
+  return quoteSql(x,'\"',false);
 }
 
 class coopy::store::SqliteSchema {

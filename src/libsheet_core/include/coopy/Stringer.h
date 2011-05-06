@@ -72,4 +72,8 @@ public:
   }
 };
 
+
+std::string quoteSql(std::string x, char del, bool alwaysQuote);
+
+
 #endif
