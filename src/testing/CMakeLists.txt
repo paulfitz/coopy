@@ -462,6 +462,10 @@ foreach(FORMAT csv tdiff)
   endforeach()
 endforeach()
 
+ADD_ROUND_TRIP_TEST(quote_me ${TESTS}/quote_me.csv ${TESTS}/quote_me2.csv tdiff)
+ADD_ROUND_TRIP_TEST(quote_me2 ${TESTS}/quote_me2.csv ${TESTS}/quote_me.csv tdiff)
+
+
 #######################################################################
 #######################################################################
 

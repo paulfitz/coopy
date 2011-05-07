@@ -56,7 +56,30 @@ Supported diff formats
 * DTBL (csv-compatible format, COOPY specific, may be dropped)
 * SQL (Sqlite flavor)
 
+Features
+--------
+* By default, when comparing tables, no initial assumption is
+  made about schema similarity.  Column names are not required 
+  to exist, or to be preserved between tables.  The number and
+  order of columns may also differ.
+* If schema changes are not expected, COOPY can be directed
+  to use certain columns as a trusted identity for rows (a key).
+* Respects row order for table representations for which row
+  order is meaningful (spreadsheets, csv).
+
+Algorithm
+---------
+The core of the COOPY toolbox is a 3-way comparision between an
+ancestor and two descendents.  First, rows are compared using bags of
+substrings drawn from across all columns.  Once corresponding rows are
+known, columns are compared, again using bags of substrings.  Row and
+column assignments are optimized and ordered using a Viterbi lattice.
+Once the pairwise relationships between each descendent and its
+ancestor are known, differences are computed, and a good merged
+ordering is determined (again using the Viterbi algorithm).
+
 Status
 ------
-COOPY targets a stable release at version 1.0.  At the time of
-writing, it is just beyond 0.5.  It is about half way there.
+COOPY targets a stable, fully-documented release at version 1.0.  At 
+the time of writing, the version number is just beyond 0.5.  It is 
+about half way there.

@@ -1,6 +1,6 @@
 
-To fully use Coopy, you need to be able to host a fossil repository.
-Known sites for hosting repositories:
+To use the coopy graphical program, you need to be able to host 
+a fossil repository online.  Known sites for hosting repositories:
   http://share.find.coop/
   http://www.chiselapp.com/
 

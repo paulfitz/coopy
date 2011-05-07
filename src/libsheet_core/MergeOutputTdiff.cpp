@@ -26,6 +26,36 @@ static string celly(const SheetCell& c) {
   if (c.escaped) {
     return "NULL";
   }
+  bool needQuote = false;
+  bool lastWasMinus = false;
+  for (int i=0; i<(int)c.text.length() && !needQuote; i++) {
+    switch (c.text[i]) {
+    case ':':
+    case '=':
+    case '|':
+      needQuote = true;
+      break;
+    case '-':
+      break;
+    case '>':
+      if (lastWasMinus) {
+	needQuote = true;
+      }
+      break;
+    case '\'':
+      needQuote = true;
+      break;
+    default:
+      if (c.text[i]<32) {
+	needQuote = true;
+      }
+      break;
+    }
+    lastWasMinus = (c.text[i]=='-');
+  }
+  if (needQuote) {
+    return quoteSql(c.text,'\'',true);
+  }
   return c.text;
 }
 

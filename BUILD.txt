@@ -7,6 +7,7 @@ An example for Linux:
   cd build
   cmake ..
   make
+See optional flags that require extra libraries in ccmake/cmake-gui.
 
 To then make python/ruby bindings, first install the development 
 libraries for the language of interest (a -dev package). 
@@ -25,9 +26,10 @@ To include Gnumeric support, a few more steps are needed.
 
 How to compile:
 
-* Limitation: be on a POSIX machine (cross-compiling OK)
-  - Linux OK, Mac OSX probably ok.
 * Install gnumeric (ideally through your package manager)
+  - easy on Linux
+  - on MacOSX, see gtk-osx + jhbuild
+  - on Windows, see jhbuild scripts for windows build in gnumeric source.
 * Install gnumeric source (ideally through your package manager)
 * Run "./configure" on your gnumeric source, do anything it needs
   you to do in order to get configured (e.g. installing extra -dev

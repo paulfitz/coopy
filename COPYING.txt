@@ -3,14 +3,16 @@ Coopy is licensed under the GPLv2.
 
 Coopy uses "fossil" under the GPL:
 + See src/ssfossil/fossil
+This only affects the "ssfossil" program.
 
 Coopy uses "libcsv" under the GPL:
 + See src/libcsv
+This library appears to have relicensed to LGPL.
 
 Coopy *optionally* uses "sqlxx" under the LGPL:
 + See src/libremotesql/sqlxx
 
-The remaining code is:
-  Copyright: (c) 2010 Paul Fitzpatrick <paulfitz@alum.mit.edu>
+The remaining source code is:
+  Copyright: (c) 2010 Paul Fitzpatrick <paul@robotrebuilt.com>
   CopyPolicy: Released under the GPLv2 (see GPL.TXT)
 

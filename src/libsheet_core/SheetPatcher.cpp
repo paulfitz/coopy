@@ -95,7 +95,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   for (RowChange::txt2cell::const_iterator it = change.cond.begin();
        it!=change.cond.end(); it++) {
     int idx = dir[it->first];
-    //printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
+    printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
     active_cond[idx] = 1;
     cond[idx] = it->second;
   }

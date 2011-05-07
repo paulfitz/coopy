@@ -31,27 +31,21 @@ Example:
 # tdiff version 0.3
 
 /*
- * this comment could describe the whole document
- */
-
-/*
- * this comment could describe the following hunk
+ * fix some goofs
  */
 * |bridge=Brooklyn|designer:'J.A.Roebling'|length:1595|
 = |bridge=Williamsburg|designer:'D.D.Duck'->'L.L.Buck'|length:1600|
 * |bridge=Queensborough|designer:'Palmer & Hornbostel'|length:1182|
 
 /*
- * this comment could describe the following hunk, even
- * though it's not immediately adjacent to the hunk (there is 
- * an intervening newline).
+ * remove spam and add a missing bridge
  */
 
 - |bridge=Spamspan|designer:'S.Spamington'|length:10000|
 + |bridge=Manhattan|designer:'G.Lindenthal'|length:1470|
 
 /*
- * final, wrap up, comment
+ * we are done!
  */
 \endverbatim
 
@@ -132,7 +126,7 @@ equals ('=') sign for identifying columns (usually part of the primary
 key, but see \ref patch_format_tdiff_v_0_3_identity "Keys versus identity")
 or a colon (':') sign for all other columns. 
 The name-value pairs, as well as the line type
-character, are delimited with whitespace and/or a pipe <b>'|'</b> character. 
+character, are delimited by a pipe <b>'|'</b> character. 
 
 Example diff line:
 \verbatim
@@ -142,11 +136,14 @@ Example diff line:
 
 \section patch_format_tdiff_v_0_3_column_line Column line
 
-Optionally, key names can be removed from diff lines. To do this, a 
-special column line may be given within a hunk.  This lists
-column names, followed by "=" for identifying columns.  
+Optionally, key names can be "factored out" of diff lines and placed
+in a special column line.  A column line lists
+column names, followed by "=" for identifying columns.
+New columns that were not present in the input should have
+"->" appended, to flag that cells in such columns have no
+prior values.
 
-Column line example:
+Here's a column line example:
 \verbatim
 @ |bridge=|designer|length|
 \endverbatim
@@ -160,7 +157,14 @@ as this:
 \verbatim
 = |Williamsburg|'D.D.Duck'->'L.L.Buck'|1600|
 \endverbatim
-The effect of column lines is limited to within a single hunk.
+The effect of column lines should be limited to within a single hunk.
+
+In the case of column diffs, for each cell that was different between
+<b>L</b> and <b>R</b>, both the old and new values are displayed. The
+old value must come first, followed by '->' (dash greater than),
+followed by the new value. For all three diff line types, the
+generator may include <b>L</b> name-value pairs that are not
+strictly needed, but may help with row identification.
 
 
 \section patch_format_tdiff_v_0_3_identity Keys versus identity
@@ -189,51 +193,45 @@ as follows:
 - All control characters and the backslash character are escaped as for C literals.
 - The name or value is wrapped in single-quotes
 
-It is always safe to single-quote a name or value.  Names or values
-*must* by quoted in any of the following conditions:
+It is always safe to single-quote a name or value.  Names or values <i>must</i>
+by quoted in any of the following conditions:
 
-- A name or value conflicts with a reserved word: NULL, ROW.
-- A name or value contains any character in the 7-bit ASCII range that is *not* in the following set: [A-Za-z0-9+.]
-- A *name* begins with any of the characters [0-9+.].
+- A name or value conflicts with the reserved word: NULL
+- A name or value contains any character in the 7-bit ASCII range that is *not* in the following set: [A-Za-z0-9+. ]
+- A <i>name</i> begins with any of the characters [0-9+.].
 
-In the case of column diffs, for each cell that was different between
-<b>L</b> and <b>R</b>, both the old and new values are displayed. The
-old value must come first, followed by '->' (dash greater than),
-followed by the new value. For all three diff line types, the
-generator may include <b>L</b> name-value pairs that are not
-strictly needed, but may help with row identification.
-
-
-\section patch_format_tdiff_v_0_3_quoting Appendix: Grammar
+\section patch_format_tdiff_v_0_3_grammar Appendix: Grammar
 
 \verbatim
- document ::= header (block)*
+ document ::= header ((space)? block)*
  block ::= hunk | control | comment | filler
 
- hunk ::= (hunk_header)? (diff_line)+
- hunk_header ::= '@' (divider name)* break
- diff_line ::= ('-' | '+' | '=') (divider term)* break
+ hunk ::= (hunk_header)? ((space)? diff_line)+
+ hunk_header ::= '@' (space)+ divider (column divider)* break
+ diff_line ::= ('-' | '+' | '=') (space)+ divider (term divider)* break
  term ::= (name ('='|':'))? (value '->')? value
+ column ::= name ('='|'->')?
  break ::= divider? linebreak
 
  control ::= "#" (divider value)* break
 
- comment ::=  | ("/*" comment_body "*/")
+ comment ::= ("/*" comment_body "*/")
 
  filler ::= (linebreak | divider)+
 
- header ::= '#' (divider term)* break
+ header ::= "# tdiff" ([^\r\n])* break
 
- divider ::= (' ' | '\t')* ('|')? (' ' | '\t')*
+ divider ::= '|'
  linebreak ::= ('\r\n' | '\r' | '\n')
 
  # unspecified in grammar: name, value, comment_body
+ # see spec for quoting rules
 \endverbatim
 
-The linebreak non-terminal needs to be parsed greedily to work with all
-common end-of-line formats, since the number of linebreaks is
+The linebreak non-terminal needs to be handled more
+carefully than the grammar suggests, since the number of linebreaks is
 significant in the grammar.  The comment_body non-terminal is
-as for C.  
+as for the C language.  
 
 
 \section patch_format_tdiff_v_0_3_examples Appendix: Complete examples

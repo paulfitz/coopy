@@ -474,7 +474,7 @@ vector<string> normalizedMessage(const string& line) {
   bool commit = false;
   for (int i=0; i<(int)line.length(); i++) {
     char ch = line[i];
-    if (ch=='\"') {
+    if (ch=='\'') {
       quote = !quote;
       result += ch;
       pending = true;
@@ -536,13 +536,14 @@ public:
     hasQuote = false;
     bool acceptSingle = true;
     bool acceptDouble = true;
+    bool allowDouble = false;
     bool quote = false;
     int state = 0;
     int pre = -2;
     sep = "";
     for (int i=0; i<(int)s.length(); i++) {
       char ch = s[i];
-      if ((ch=='\"'&&acceptDouble)||(ch=='\''&&acceptSingle)) {
+      if ((allowDouble&&ch=='\"'&&acceptDouble)||(ch=='\''&&acceptSingle)) {
 	if (i==0) {
 	  hasQuote = true;
 	}
@@ -885,6 +886,9 @@ bool PatchParser::applyTdiff() {
 	  }
 	}
 	change.names.push_back(context.key.c_str());
+      }
+      if (change.names.size()>allNames.size()) {
+	allNames = change.names;
       }
       change.allNames = allNames;
       dbg_printf("  ... change row ...\n");

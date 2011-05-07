@@ -123,18 +123,12 @@ void MeasureMan::compare1(int ctrl) {
 	   it0++) {
 	int i0 = (*it0);
 	double mod = 0.1*log(1+fabs((double)(i-i1)))/log(2);
-	v.addTransition(i0+1,i1+1,c+mod);
-	//if (match.width()<100) {
-	//printf("<%d;%d:%d>%g/%g|%g // ", i,i0+1, i1+1, c, match.cell(i1,i),mod);
-	//}
+	if (i0!=i1) {
+	  v.addTransition(i0+1,i1+1,c+mod);
+	}
+	//printf("%d: %d to %d (diff %g) costs %g\n", i, i0+1, i1+1, mod, c+mod);
       }
-      //if (match.width()<100) {
-      //printf("\n");
-      //}
       v.addTransition(0,i1+1,c);
-      //if (match.width()<100) {
-      //printf("--> <%d;0:%d>%g\n", i, i1+1, c);
-      //}
     }
     for (set<int>::const_iterator it0=pidx0->begin(); it0!=pidx0->end(); 
 	 it0++) {
@@ -144,12 +138,12 @@ void MeasureMan::compare1(int ctrl) {
     v.addTransition(0,0,0);
     v.endTransitions();
   }
-  /*
+
   if (_csv_verbose) {
     dbg_printf("Viterbi calculation:\n");
     v.showPath();
   }
-  */
+
 
   for (int y=0; y<match.height(); y++) {
     if (bsel.cell(0,y)==-1) {
@@ -188,12 +182,12 @@ void MeasureMan::compare1(int ctrl) {
 	}
       }
       if (ok) {
-	/*
+       
 	dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
 		   y,bestIndex,y,bestIndex,
 		   bestIndex, bestValue, -1.0, ref);
 	dbg_printf("  [remote/local] %s %s\n", cell(b,0,y).c_str(), cell(a,0,bestIndex).c_str());
-	*/
+	
 	if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
 	  dbg_printf("COLLISION! Ignoring unavailable match\n");
 	  dbg_printf("This case has not been optimized\n");
