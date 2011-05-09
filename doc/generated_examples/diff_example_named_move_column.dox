@@ -7,13 +7,11 @@
 
 \section diff_example_named_move_column_command command
 \verbatim
- ssdiff --format-tdiff named_numbers.csv named_numbers_flip_column.csv
- ssdiff --format-csv named_numbers.csv named_numbers_flip_column.csv
+ ssdiff named_numbers.csv named_numbers_flip_column.csv
 \endverbatim
 \li \ref diff_example_named_move_column_ref1 "named_numbers.csv"
 \li \ref diff_example_named_move_column_ref2 "named_numbers_flip_column.csv"
 \li \ref diff_example_named_move_column_tdiff_output "tdiff output"
-\li \ref diff_example_named_move_column_csv_output "csv output"
  
 \section diff_example_named_move_column_ref1 named_numbers.csv
 <table>
@@ -40,14 +38,6 @@
 @@ |NAME|DIGIT|
 @: NAME |DIGIT|NAME|
 \endverbatim
- 
-\section diff_example_named_move_column_csv_output csv output
-<table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
-  <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
-  <tr><td>column</td><td>move</td><td>DIGIT</td><td>NAME</td></tr>
-</table>
- 
 
  *
  */

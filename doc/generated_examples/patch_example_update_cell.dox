@@ -15,7 +15,6 @@ The output, input, and patch are:
 \li \ref patch_example_update_cell_output "output"
 \li \ref patch_example_update_cell_ref1 "named_numbers.csv"
 \li \ref patch_example_update_cell_ref2 "patch.tdiff"
-\li \ref patch_example_update_cell_ref3 "patch.csv"
  
 \section patch_example_update_cell_output output
 <table>
@@ -41,21 +40,6 @@ The output, input, and patch are:
 \verbatim
 # tdiff version 0.3
 = |NAME=five->fyffe|
-\endverbatim
- 
-\section patch_example_update_cell_ref3 patch.csv
-Here is an equivalent patch in CSV format.
-<table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
-  <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
-  <tr><td>link</td><td>name</td><td>NAME</td><td></td></tr>
-  <tr><td>link</td><td>act</td><td>*=</td><td></td></tr>
-  <tr><td>row</td><td>select</td><td>five</td><td></td></tr>
-  <tr><td>row</td><td>update</td><td>fyffe</td><td></td></tr>
-</table>
-This patch can be applied with the following command:
-\verbatim
-sspatch named_numbers.csv patch.csv
 \endverbatim
 
  *

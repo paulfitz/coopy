@@ -15,7 +15,6 @@ The output, input, and patch are:
 \li \ref patch_example_named_delete_row_output "output"
 \li \ref patch_example_named_delete_row_ref1 "named_numbers_add_row.csv"
 \li \ref patch_example_named_delete_row_ref2 "patch.tdiff"
-\li \ref patch_example_named_delete_row_ref3 "patch.csv"
  
 \section patch_example_named_delete_row_output output
 <table>
@@ -42,18 +41,6 @@ The output, input, and patch are:
 \verbatim
 # tdiff version 0.3
 - |NAME=six|
-\endverbatim
- 
-\section patch_example_named_delete_row_ref3 patch.csv
-Here is an equivalent patch in CSV format.
-<table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
-  <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
-  <tr><td>row</td><td>delete</td><td>six</td><td>6</td></tr>
-</table>
-This patch can be applied with the following command:
-\verbatim
-sspatch named_numbers_add_row.csv patch.csv
 \endverbatim
 
  *

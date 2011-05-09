@@ -7,13 +7,11 @@
 
 \section diff_example_bridge_command command
 \verbatim
- ssdiff --format-tdiff broken_bridges.csv bridges.csv
- ssdiff --format-csv broken_bridges.csv bridges.csv
+ ssdiff broken_bridges.csv bridges.csv
 \endverbatim
 \li \ref diff_example_bridge_ref1 "broken_bridges.csv"
 \li \ref diff_example_bridge_ref2 "bridges.csv"
 \li \ref diff_example_bridge_tdiff_output "tdiff output"
-\li \ref diff_example_bridge_csv_output "csv output"
  
 \section diff_example_bridge_ref1 broken_bridges.csv
 <table>
@@ -48,26 +46,6 @@
 = |bridge=Williamsburg|designer=D. Duck->L. L. Buck|
 - |bridge=Spamspan|
 \endverbatim
- 
-\section diff_example_bridge_csv_output csv output
-<table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td><td></td></tr>
-  <tr><td>column</td><td>name</td><td>bridge</td><td>designer</td><td>length</td></tr>
-  <tr><td>link</td><td>name</td><td>bridge</td><td></td><td></td></tr>
-  <tr><td>link</td><td>act</td><td>*</td><td></td><td></td></tr>
-  <tr><td>row</td><td>after</td><td>Brooklyn</td><td></td><td></td></tr>
-  <tr><td>link</td><td>name</td><td>bridge</td><td>designer</td><td>length</td></tr>
-  <tr><td>link</td><td>act</td><td>*=</td><td>=</td><td>=</td></tr>
-  <tr><td>row</td><td>insert</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
-  <tr><td>link</td><td>name</td><td>bridge</td><td>designer</td><td></td></tr>
-  <tr><td>link</td><td>act</td><td>*</td><td>*=</td><td></td></tr>
-  <tr><td>row</td><td>select</td><td>Williamsburg</td><td>D. Duck</td><td></td></tr>
-  <tr><td>row</td><td>update</td><td></td><td>L. L. Buck</td><td></td></tr>
-  <tr><td>link</td><td>name</td><td>bridge</td><td>designer</td><td>length</td></tr>
-  <tr><td>link</td><td>act</td><td>*</td><td>*=</td><td>*</td></tr>
-  <tr><td>row</td><td>delete</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
-</table>
- 
 
  *
  */

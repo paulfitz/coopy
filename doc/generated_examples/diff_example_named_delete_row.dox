@@ -7,13 +7,11 @@
 
 \section diff_example_named_delete_row_command command
 \verbatim
- ssdiff --format-tdiff named_numbers_add_row.csv named_numbers.csv
- ssdiff --format-csv named_numbers_add_row.csv named_numbers.csv
+ ssdiff named_numbers_add_row.csv named_numbers.csv
 \endverbatim
 \li \ref diff_example_named_delete_row_ref1 "named_numbers_add_row.csv"
 \li \ref diff_example_named_delete_row_ref2 "named_numbers.csv"
 \li \ref diff_example_named_delete_row_tdiff_output "tdiff output"
-\li \ref diff_example_named_delete_row_csv_output "csv output"
  
 \section diff_example_named_delete_row_ref1 named_numbers_add_row.csv
 <table>
@@ -40,14 +38,6 @@
 # tdiff version 0.3
 - |NAME=six|
 \endverbatim
- 
-\section diff_example_named_delete_row_csv_output csv output
-<table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td></tr>
-  <tr><td>column</td><td>name</td><td>NAME</td><td>DIGIT</td></tr>
-  <tr><td>row</td><td>delete</td><td>six</td><td>6</td></tr>
-</table>
- 
 
  *
  */

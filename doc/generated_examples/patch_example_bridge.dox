@@ -15,7 +15,6 @@ The output, input, and patch are:
 \li \ref patch_example_bridge_output "output"
 \li \ref patch_example_bridge_ref1 "broken_bridges.csv"
 \li \ref patch_example_bridge_ref2 "patch.tdiff"
-\li \ref patch_example_bridge_ref3 "patch.csv"
  
 \section patch_example_bridge_output output
 <table>
@@ -50,30 +49,6 @@ The output, input, and patch are:
 + |bridge:->Manhattan|designer:->G. Lindenthal|length:->1470|
 = |bridge=Williamsburg|designer=D. Duck->L. L. Buck|
 - |bridge=Spamspan|
-\endverbatim
- 
-\section patch_example_bridge_ref3 patch.csv
-Here is an equivalent patch in CSV format.
-<table>
-  <tr><td>dtbl</td><td>csv</td><td>version</td><td>0.5</td><td></td></tr>
-  <tr><td>column</td><td>name</td><td>bridge</td><td>designer</td><td>length</td></tr>
-  <tr><td>link</td><td>name</td><td>bridge</td><td></td><td></td></tr>
-  <tr><td>link</td><td>act</td><td>*</td><td></td><td></td></tr>
-  <tr><td>row</td><td>after</td><td>Brooklyn</td><td></td><td></td></tr>
-  <tr><td>link</td><td>name</td><td>bridge</td><td>designer</td><td>length</td></tr>
-  <tr><td>link</td><td>act</td><td>*=</td><td>=</td><td>=</td></tr>
-  <tr><td>row</td><td>insert</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
-  <tr><td>link</td><td>name</td><td>bridge</td><td>designer</td><td></td></tr>
-  <tr><td>link</td><td>act</td><td>*</td><td>*=</td><td></td></tr>
-  <tr><td>row</td><td>select</td><td>Williamsburg</td><td>D. Duck</td><td></td></tr>
-  <tr><td>row</td><td>update</td><td></td><td>L. L. Buck</td><td></td></tr>
-  <tr><td>link</td><td>name</td><td>bridge</td><td>designer</td><td>length</td></tr>
-  <tr><td>link</td><td>act</td><td>*</td><td>*=</td><td>*</td></tr>
-  <tr><td>row</td><td>delete</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
-</table>
-This patch can be applied with the following command:
-\verbatim
-sspatch broken_bridges.csv patch.csv
 \endverbatim
 
  *
