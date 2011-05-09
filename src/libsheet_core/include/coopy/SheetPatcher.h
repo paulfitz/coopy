@@ -20,22 +20,24 @@ private:
   std::vector<int> columns;
   std::vector<std::string> column_names;
   int rowCursor;
-  coopy::store::PolySheet psheet;
+  //coopy::store::PolySheet psheet;
   bool summary;
   Patcher *chain;
   int changeCount;
 public:
-  coopy::store::DataSheet *sheet;
-  coopy::store::TextBook *book;
+  //coopy::store::DataSheet *sheet;
+  //coopy::store::TextBook *book;
 
-  SheetPatcher(coopy::store::DataSheet *sheet) : sheet(sheet) {
+  //SheetPatcher(coopy::store::DataSheet *sheet) : sheet(sheet) {
+  SheetPatcher() {
     rowCursor = -1;
-    book = NULL;
+    //book = NULL;
     summary = false;
     chain = NULL;
     changeCount = 0;
   }
 
+  /*
   SheetPatcher(coopy::store::TextBook *book) : book(book) {
     rowCursor = -1;
     sheet = NULL;
@@ -43,6 +45,7 @@ public:
     chain = NULL;
     changeCount = 0;
   }
+  */
 
   virtual ~SheetPatcher() {
   }

@@ -12,16 +12,17 @@ using namespace coopy::store;
 
 bool SheetPatcher::changeColumn(const OrderChange& change) {
   changeCount++;
-  if (sheet==NULL) return false;
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return false;
   if (chain) chain->changeColumn(change);
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
     //return sheet->deleteColumn(ColumnRef(change.subject));
     {
-      bool ok = sheet->deleteColumn(ColumnRef(change.identityToIndex(change.subject)));
+      bool ok = sheet.deleteColumn(ColumnRef(change.identityToIndex(change.subject)));
       //dbg_printf("Sheet width is %d\n", sheet->width());
-      if (sheet->width()==0) {
-	sheet->deleteData();
+      if (sheet.width()==0) {
+	sheet.deleteData();
 	rowCursor = -1;
       }
       return ok;
@@ -37,7 +38,7 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 	int toId = change.indicesAfter[toSheet+1];
 	toSheet = change.identityToIndex(toId);
       }
-      return sheet->insertColumn(ColumnRef(toSheet)).isValid();
+      return sheet.insertColumn(ColumnRef(toSheet)).isValid();
     }
     break;
   case ORDER_CHANGE_MOVE:
@@ -52,9 +53,9 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 	int toId = change.indicesAfter[toSheet+1];
 	toSheet = change.identityToIndex(toId);
       }
-      return sheet->moveColumn(ColumnRef(change.identityToIndex(change.subject)),
-			       ColumnRef(toSheet)
-			       ).isValid();
+      return sheet.moveColumn(ColumnRef(change.identityToIndex(change.subject)),
+			      ColumnRef(toSheet)
+			      ).isValid();
     }
     break;
   default:
@@ -65,9 +66,10 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 }
 
 bool SheetPatcher::changeRow(const RowChange& change) {
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return false;
   dbg_printf("\n======================\nRow cursor in: %d\n", rowCursor);
   changeCount++;
-  if (sheet==NULL) return false;
   if (chain) chain->changeRow(change);
   if (!change.sequential) rowCursor = -1;
   map<string,int> dir;
@@ -79,7 +81,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   int width = (int)change.allNames.size();
   if (width==0) {
     if (column_names.size()==0) {
-      NameSniffer sniffer(*sheet);
+      NameSniffer sniffer(sheet);
       column_names = sniffer.suggestNames();
     }
     allNames = column_names;
@@ -95,7 +97,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   for (RowChange::txt2cell::const_iterator it = change.cond.begin();
        it!=change.cond.end(); it++) {
     int idx = dir[it->first];
-    printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
+    //printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
     active_cond[idx] = 1;
     cond[idx] = it->second;
   }
@@ -110,9 +112,9 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
     {
-      if (sheet->isSequential()) {
+      if (sheet.isSequential()) {
 	RowRef tail(rowCursor);
-	int r = sheet->insertRow(tail).getIndex();
+	int r = sheet.insertRow(tail).getIndex();
 	/*
 	if (rowCursor!=-1) {
 	  rowCursor++;
@@ -123,17 +125,17 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	if (r>=0) {
 	  for (int c=0; c<width; c++) {
 	    if (active_val[c]) {
-	      sheet->cellSummary(c,r,val[c]);
+	      sheet.cellSummary(c,r,val[c]);
 	    }
 	  }
 	}
 	r++;
-	if (r>=sheet->height()) {
+	if (r>=sheet.height()) {
 	  r = -1;
 	}
 	rowCursor = r;
       } else {
-	Poly<SheetRow> inserter = sheet->insertRow();
+	Poly<SheetRow> inserter = sheet.insertRow();
 	for (int c=0; c<width; c++) {
 	  if (active_val[c]) {
 	    inserter->setCell(c,val[c]);
@@ -147,11 +149,11 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     {
       bool success = false;
       int r;
-      for (r=0; r<sheet->height(); r++) {
+      for (r=0; r<sheet.height(); r++) {
 	bool match = true;
 	for (int c=0; c<width; c++) {
 	  if (active_cond[c]) {
-	    if (sheet->cellSummary(c,r)!=cond[c]) {
+	    if (sheet.cellSummary(c,r)!=cond[c]) {
 	      match = false;
 	      break;
 	    }
@@ -160,8 +162,8 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	if (match) {
 	  RowRef row(r);
 	  rowCursor = r;
-	  sheet->deleteRow(row);
-	  if (rowCursor>=sheet->height()) {
+	  sheet.deleteRow(row);
+	  if (rowCursor>=sheet.height()) {
 	    rowCursor = -1;
 	  }
 	  success = true;
@@ -175,11 +177,11 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     {
       bool success = false;
       int r;
-      for (r=0; r<sheet->height(); r++) {
+      for (r=0; r<sheet.height(); r++) {
 	bool match = true;
 	for (int c=0; c<width; c++) {
 	  if (active_cond[c]) {
-	    if (sheet->cellSummary(c,r)!=cond[c]) {
+	    if (sheet.cellSummary(c,r)!=cond[c]) {
 	      match = false;
 	      break;
 	    }
@@ -187,7 +189,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	}
 	if (match) {
 	  r++;
-	  if (r>=sheet->height()) {
+	  if (r>=sheet.height()) {
 	    r = -1;
 	  }
 	  RowRef row(r);
@@ -203,11 +205,11 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     {
       bool success = false;
       int r;
-      for (r=0; r<sheet->height(); r++) {
+      for (r=0; r<sheet.height(); r++) {
 	bool match = true;
 	for (int c=0; c<width; c++) {
 	  if (active_cond[c]) {
-	    if (sheet->cellSummary(c,r)!=cond[c]) {
+	    if (sheet.cellSummary(c,r)!=cond[c]) {
 	      match = false;
 	      break;
 	    }
@@ -216,20 +218,20 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	if (match) {
 	  RowRef from(r);
 	  RowRef to(rowCursor);
-	  dbg_printf("Moving %d to %d in sheet of length %d\n", from.getIndex(), to.getIndex(), sheet->height());
-	  RowRef result = sheet->moveRow(from,to);
+	  dbg_printf("Moving %d to %d in sheet of length %d\n", from.getIndex(), to.getIndex(), sheet.height());
+	  RowRef result = sheet.moveRow(from,to);
 	  if (result.getIndex() == -1) {
 	    fprintf(stderr,"Row move failed in sheet of type %s\n",
-		    sheet->desc().c_str());
+		    sheet.desc().c_str());
 	  }
 	  r = result.getIndex();
 	  dbg_printf("Move result was %d\n", r);
-	  for (int y=0; y<sheet->height(); y++) {
-	    dbg_printf("%d %s / ", y, sheet->cellString(0,y).c_str());
+	  for (int y=0; y<sheet.height(); y++) {
+	    dbg_printf("%d %s / ", y, sheet.cellString(0,y).c_str());
 	  }
 	  dbg_printf("\n");
 	  r++;
-	  if (r>=sheet->height()) {
+	  if (r>=sheet.height()) {
 	    r = -1;
 	  }
 	  rowCursor = r;
@@ -244,14 +246,14 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     {
       bool success = false;
       int r;
-      for (r=0; r<sheet->height(); r++) {
+      for (r=0; r<sheet.height(); r++) {
 	bool match = true;
 	for (int c=0; c<width; c++) {
 	  if (active_cond[c]) {
 	    dbg_printf("compare %s and %s\n",
-		       sheet->cellSummary(c,r).toString().c_str(),
+		       sheet.cellSummary(c,r).toString().c_str(),
 		       cond[c].toString().c_str());
-	    if (sheet->cellSummary(c,r)!=cond[c]) {
+	    if (sheet.cellSummary(c,r)!=cond[c]) {
 	      match = false;
 	      break;
 	    }
@@ -261,11 +263,11 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  dbg_printf("Match for assignment\n");
 	  for (int c=0; c<width; c++) {
 	    if (active_val[c]) {
-	      sheet->cellSummary(c,r,val[c]);
+	      sheet.cellSummary(c,r,val[c]);
 	    }
 	  }
 	  r++;
-	  if (r>=sheet->height()) {
+	  if (r>=sheet.height()) {
 	    r = -1;
 	  }
 	  rowCursor = r;
@@ -291,10 +293,11 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 
 bool SheetPatcher::declareNames(const std::vector<std::string>& names, 
 				bool final) {
-  if (sheet==NULL) return false;
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return false;
   if (chain) chain->declareNames(names,final);
   if (config.trustNames==false) {
-    if ((int)names.size()!=sheet->width()) {
+    if ((int)names.size()!=sheet.width()) {
       fprintf(stderr,"* WARNING: name mismatch\n");
       return false;
     }
@@ -309,6 +312,7 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
 }
 
 bool SheetPatcher::setSheet(const char *name) {
+  TextBook *book = getBook();
   if (book==NULL) return false;
   if (chain) chain->setSheet(name);
 
@@ -317,16 +321,18 @@ bool SheetPatcher::setSheet(const char *name) {
   columns.clear();
   column_names.clear();
   rowCursor = -1;
-  sheet = NULL;
 
   // load
+  PolySheet psheet;
+  attachSheet(psheet);
   psheet = book->readSheet(name);
   if (!psheet.isValid()) {
     fprintf(stderr,"Cannot find sheet %s\n", name);
     return false;
   }
   dbg_printf("Moved to sheet %s\n", name);
-  sheet = &psheet;
+  attachSheet(psheet);
+  //sheet = &psheet;
   return true;
 }
 

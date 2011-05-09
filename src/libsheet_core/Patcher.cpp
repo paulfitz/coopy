@@ -4,6 +4,7 @@
 #include <coopy/MergeOutputVerboseDiff.h>
 #include <coopy/MergeOutputCsvDiff.h>
 #include <coopy/MergeOutputTdiff.h>
+#include <coopy/SheetPatcher.h>
 
 #include <algorithm>
 
@@ -39,6 +40,8 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
     result = new MergeOutputVerboseDiff;
   } else if (mode=="tdiff") {
     result = new MergeOutputTdiff;
+  } else if (mode=="apply") {
+    result = new SheetPatcher;
   } else if (mode=="csv") {
     if (_version=="0.2") {
       result = new MergeOutputCsvDiffV0p2;

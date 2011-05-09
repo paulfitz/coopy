@@ -348,7 +348,8 @@ bool WideSheetManager::mergeToLocal(const char *localName,
   }
 
   MergeOutputTdiff nested_diff;
-  SheetPatcher diff(local);
+  SheetPatcher diff;
+  diff.attachBook(*local);
   diff.showSummary(&nested_diff);
   BookCompare cmp;
   CompareFlags flags;

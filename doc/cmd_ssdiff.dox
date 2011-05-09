@@ -3,13 +3,17 @@
 
 @page ssdiff ssdiff
 
-This shows the difference between two tables.
-The input tables can be in a variety of formats (see \ref table_format).
+This shows the difference between two tables or sets of tables.
+A variety of formats are supported (see \ref table_format).
 The difference between the tables is by default represented
-as a TDIFF file (see \ref patch_format_tdiff).
+as a TDIFF file (see \ref patch_format_tdiff).  A typical usage of
+ssdiff is from the command-line to compare two files:
+\verbatim
+ssdiff version1.csv version2.sqlite
+\endverbatim
 
 \if link_internal
-Here are the ways you can use ssdiff:
+Here are the options you can use with ssdiff:
 - \ref ssdiff_base
 - \ref ssdiff_common_usage
 - \ref ssdiff_direct_output
@@ -17,6 +21,11 @@ Here are the ways you can use ssdiff:
 - \ref ssdiff_format_csv
 - \ref ssdiff_format_raw
 \endif
+
+Comparisons between distinct formats are possible (e.g. Excel against MySQL).
+The difference will include ordering information if all tables being 
+compared have meaningful row order; otherwise ordering information is
+omitted.
 
 @section ssdiff_base ssdiff
 

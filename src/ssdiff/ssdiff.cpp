@@ -269,7 +269,8 @@ int main(int argc, char *argv[]) {
     }
   } else {
     Patcher *pdiff = createTool(mode,version);
-    SheetPatcher diff(local);
+    SheetPatcher diff;
+    diff.attachBook(*local);
     diff.showSummary(pdiff);
     start_output(output,flags);
     cmp.compare(*pivot,*local,*remote,diff,flags);

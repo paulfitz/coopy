@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
   bool fake = false;
   bool inplace = false;
   string output = "-";
-  string formatName = "raw";
+  string formatName = "apply";
   string tmp = "-";
   while (true) {
     int option_index = 0;
@@ -88,6 +88,7 @@ int main(int argc, char *argv[]) {
       break;
     case 'k':
       fake = true;
+      formatName = "raw";
       break;
     case 'o':
       output = optarg;
@@ -152,6 +153,8 @@ int main(int argc, char *argv[]) {
     coopy_set_verbose(verbose);
   }
 
+  fake = (formatName!="apply");
+
   PolyBook local;
   CsvSheet patch;
   if (fake) {
@@ -197,20 +200,17 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   */
-  SheetPatcher patcher(&sheet);
-  patcher.book = &local;
-  Patcher *alt = NULL;
-  if (fake) {
-    alt = Patcher::createByName(formatName.c_str());
-    if (alt==NULL) {
-      fprintf(stderr,"Failed to create patch tool of type '%s'\n",
-	      formatName.c_str());
-      exit(1);
-    }
+
+  Patcher *alt = alt = Patcher::createByName(formatName.c_str());
+  if (alt==NULL) {
+    fprintf(stderr,"Failed to create patch tool of type '%s'\n",
+	    formatName.c_str());
+    return 1;
   }
+  alt->attachSheet(sheet);
+  alt->attachBook(local);
   MergeOutputVerboseDiff fakePatcher;
-  PatchParser parser(fake?alt:((Patcher*)(&patcher)),
-		     &sniffer);
+  PatchParser parser(alt,&sniffer);
   CompareFlags flags;
   if (fake) {
     start_output(output,flags);

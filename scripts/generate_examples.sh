@@ -77,18 +77,19 @@ function diff_base_apply {
     if grep -q "$key" /tmp/_gen_name.txt; then
     out=$OUT/diff_example_$name.txt
 
-    echo "### $DIFF --format-csv $TEST/$f1 $TEST/$f2"
+    # echo "### $DIFF --format-csv $TEST/$f1 $TEST/$f2"
     echo "### $DIFF --format-tdiff $TEST/$f1 $TEST/$f2"
     {
 	echo "## SECTION command command"
 	echo "\verbatim"
-	echo " ssdiff --format-tdiff $f1 $f2"
-	echo " ssdiff --format-csv $f1 $f2"
+	echo " ssdiff $f1 $f2"
+	#echo " ssdiff --format-tdiff $f1 $f2"
+	#echo " ssdiff --format-csv $f1 $f2"
 	echo "\endverbatim"
 	echo "## LINK ref1 \"$f1\""
 	echo "## LINK ref2 \"$f2\""
 	echo "## LINK tdiff_output \"tdiff output\""
-	echo "## LINK csv_output \"csv output\""
+	#echo "## LINK csv_output \"csv output\""
 	echo " "
 	echo "## SECTION ref1 $f1"
 	$SSFORMAT $TEST/$f1 $TMPF.2.csv 2> /dev/null
@@ -100,11 +101,11 @@ function diff_base_apply {
 	echo "## SECTION tdiff_output tdiff output"
 	$DIFF --output $TMPF1 --format-tdiff $TEST/$f1 $TEST/$f2 || exit 1
 	show_file $TMPF1 tdiff
-	echo " "
-	echo "## SECTION csv_output csv output"
-	$DIFF --output $TMPF2 --format-csv $TEST/$f1 $TEST/$f2 || exit 1
-	show_file $TMPF2 csv
-	echo " "
+	#echo " "
+	#echo "## SECTION csv_output csv output"
+	#$DIFF --output $TMPF2 --format-csv $TEST/$f1 $TEST/$f2 || exit 1
+	#show_file $TMPF2 csv
+	#echo " "
     } > $out
     echo "* Generated $out"
     n=`echo $name | sed "s/_/ /g" | sed "s/^named //"`
@@ -125,7 +126,7 @@ function patch_base_apply {
     DF2=$TMPF2
 
     $DIFF --format-csv --output $DF1 $TEST/$f1 $TEST/$f2
-    $DIFF --format-tdiff --output $DF2 $TEST/$f1 $TEST/$f2
+    $DIFF --output $DF2 $TEST/$f1 $TEST/$f2
 
     echo "### $PATCH $TEST/$f1 $DF1"
     {
@@ -139,7 +140,7 @@ function patch_base_apply {
 	echo "## LINK output \"output\""
 	echo "## LINK ref1 \"$f1\""
 	echo "## LINK ref2 \"patch.tdiff\""
-	echo "## LINK ref3 \"patch.csv\""
+	#echo "## LINK ref3 \"patch.csv\""
 	echo " "
 	echo "## SECTION output output"
 	$PATCH --output $TMPF.1.csv $TEST/$f1 $DF1 || exit 1
@@ -153,14 +154,14 @@ function patch_base_apply {
 	echo " "
 	echo "## SECTION ref2 patch.tdiff"
 	show_file $DF2 tdiff
-	echo " "
-	echo "## SECTION ref3 patch.csv"
-	echo "Here is an equivalent patch in CSV format."
-	show_file $DF1 csv
-	echo "This patch can be applied with the following command:"
-	echo "\verbatim"
-	echo "sspatch $f1 patch.csv"
-	echo "\endverbatim"
+	#echo " "
+	#echo "## SECTION ref3 patch.csv"
+	#echo "Here is an equivalent patch in CSV format."
+	#show_file $DF1 csv
+	#echo "This patch can be applied with the following command:"
+	#echo "\verbatim"
+	#echo "sspatch $f1 patch.csv"
+	#echo "\endverbatim"
     } > $out
     echo "* Generated $out"
     n=`echo $name | sed "s/_/ /g" | sed "s/^named //"`
