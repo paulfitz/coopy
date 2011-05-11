@@ -18,3 +18,10 @@ bool MergeOutputPatch::addRow(const char *tag,
   result.addRecord();
   return true;
 }
+
+
+bool MergeOutputPatch::mergeAllDone() {
+  SheetStyle style;
+  fprintf(out,"%s",get().encode(style).c_str());
+  return true;
+}

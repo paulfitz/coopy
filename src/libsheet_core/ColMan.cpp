@@ -17,20 +17,22 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
     if (ha<10 || hb<10) {
       pass.va.meta.sniff();
       pass.vb.meta.sniff();
-      const std::vector<std::string>& anames = pass.va.meta.suggestNames();
-      const std::vector<std::string>& bnames = pass.vb.meta.suggestNames();
-      if (anames.size()==wa && bnames.size()==wb) {
-	FMultiMap m(pass.match);
-	int c = m.getCtrlMax();
-	for (int i=0; i<wa; i++) {
-	  m.setCurr(i,i);
-	  m.add(anames[i],false,c);
+      if (!pass.va.meta.isEmbedded() || !pass.va.meta.isEmbedded()) {
+	const std::vector<std::string>& anames = pass.va.meta.suggestNames();
+	const std::vector<std::string>& bnames = pass.vb.meta.suggestNames();
+	if (anames.size()==wa && bnames.size()==wb) {
+	  FMultiMap m(pass.match);
+	  int c = m.getCtrlMax();
+	  for (int i=0; i<wa; i++) {
+	    m.setCurr(i,i);
+	    m.add(anames[i],false,c);
+	  }
+	  for (int j=0; j<wb; j++) {
+	    m.setCurr(j,j);
+	    m.add(bnames[j],true,c);
+	  }
+	  dbg_printf("added column names to column comparison\n");
 	}
-	for (int j=0; j<wb; j++) {
-	  m.setCurr(j,j);
-	  m.add(bnames[j],true,c);
-	}
-	dbg_printf("added column names to column comparison\n");
       }
     }
 

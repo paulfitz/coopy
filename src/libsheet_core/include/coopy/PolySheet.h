@@ -314,6 +314,21 @@ public:
     }
     return false;
   }
+
+  virtual Poly<Appearance> getCellAppearance(int x, int y) {
+    COOPY_ASSERT(sheet);
+    return sheet->getCellAppearance(x,y);
+  }
+
+  virtual Poly<Appearance> getRowAppearance(int y) {
+    COOPY_ASSERT(sheet);
+    return sheet->getRowAppearance(y);
+  }
+
+  virtual Poly<Appearance> getColAppearance(int x) {
+    COOPY_ASSERT(sheet);
+    return sheet->getColAppearance(x);
+  }
 };
 
 #endif

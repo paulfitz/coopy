@@ -208,12 +208,15 @@ private:
 protected:
   CompareFlags flags;
   FILE *out;
-  coopy::store::PolySheet output_sheet;
+  coopy::store::PolySheet patch_sheet;
+  coopy::store::TextBook *patch_book;
   coopy::store::TextBook *output_book;
 public:
   Patcher() {
     ct = 0;
     out = stdout;
+    patch_book = 0;
+    output_book = 0;
   }
 
   virtual ~Patcher() {}
@@ -326,23 +329,49 @@ public:
 
 
   virtual void attachSheet(coopy::store::PolySheet sheet) {
-    output_sheet = sheet;
+    patch_sheet = sheet;
   }
 
   void attachBook(coopy::store::TextBook& book) {
-    output_book = &book;
+    patch_book = &book;
+    attachSheet(book.readSheetByIndex(0));
   }
   
   virtual coopy::store::PolySheet getSheet() {
-    return output_sheet;
+    return patch_sheet;
   }
 
   coopy::store::TextBook *getBook() {
-    return output_book;
+    return patch_book;
   }
 
   static Patcher *createByName(const char *name, const char *version = NULL);
 
+  virtual bool startOutput(const std::string& output, CompareFlags& flags);
+
+  virtual bool stopOutput(const std::string& output, CompareFlags& flags);
+
+  virtual bool needOutputBook() {
+    return false;
+  }
+
+  virtual bool outputStartsFromInput() {
+    return false;
+  }
+
+  void attachOutputBook(coopy::store::TextBook& book) {
+    output_book = &book;
+  }
+  
+  coopy::store::TextBook *getOutputBook() {
+    return output_book;
+  }
+
+  virtual int getChangeCount() {
+    return 0;
+  }
+
+  static bool copyFile(const char *src, const char *dest);
 };
 
 

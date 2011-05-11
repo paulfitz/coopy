@@ -12,6 +12,21 @@ extern "C" {
 using namespace coopy::store;
 using namespace std;
 
+int main_alt() {
+  gnumeric_init();
+  GnumericWorkbookPtr book2 = gnumeric_create();
+  GnumericSheetPtr sheet2 = gnumeric_add_sheet(book2,"bob");
+  gnumeric_sheet_set_cell_as_string(sheet2,0,0,"10.5");
+  GnumericStylePtr p = gnumeric_sheet_get_style(sheet2,0,0);
+  gnumeric_style_set_font_bold(p,1);
+  gnumeric_sheet_set_style(sheet2,p,0,0);
+  gnumeric_save(book2,"book2.xls",NULL);
+  gnumeric_free(book2);
+  gnumeric_fini();
+
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
   if (argc>1) {
     if (string(argv[1])=="--verbose") {
@@ -20,15 +35,17 @@ int main(int argc, char *argv[]) {
       argv++;
     }
   }
+
   if (argc<3) {
     printf("Call as:\n");
     printf("  test_gnumeric template.xls target.xls\n");
-    return 1;
+    return main_alt();
   }
   const char *template_name = argv[1];
   const char *target_name = argv[2];
 
   gnumeric_init();
+
   GnumericWorkbookPtr book = gnumeric_load(template_name);
   CsvSheet data;
   data.addField("1",false);
@@ -70,7 +87,9 @@ int main(int argc, char *argv[]) {
   }
   gnumeric_save(book,target_name,NULL);
   gnumeric_free(book);
+
   gnumeric_fini();
+
   return 0;
 }
 

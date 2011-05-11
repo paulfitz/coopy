@@ -88,10 +88,12 @@ public:
   }
 
   T& operator *() const {
+    COOPY_ASSERT(ref!=0);
     return *ref;
   }
 
   T *operator ->() const {
+    COOPY_ASSERT(ref!=0);
     return ref;
   }
 

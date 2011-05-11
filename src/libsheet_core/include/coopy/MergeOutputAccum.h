@@ -52,7 +52,7 @@ public:
       s.copyData(result);
       sync = true;
     }
-    return output_sheet;
+    return patch_sheet;
   }
 
 };

@@ -3,7 +3,6 @@
 #include <getopt.h>
 
 #include <coopy/CsvFile.h>
-#include <coopy/MergeOutputPatch.h>
 #include <coopy/MergeOutputIndex.h>
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
@@ -12,26 +11,6 @@
 using namespace coopy::store;
 using namespace coopy::cmp;
 using namespace std;
-
-static void start_output(string output, CompareFlags& flags) {
-  if (output=="" || output=="-") {
-    flags.out = stdout;
-    return;
-  }
-  FILE *fout = fopen(output.c_str(),"wb");
-  if (fout==NULL) {
-    fprintf(stderr,"Could not open %s for writing\n", output.c_str());
-    exit(1);
-  }
-  flags.out = fout;
-}
-
-static void stop_output(string output, CompareFlags& flags) {
-  if (flags.out!=stdout) {
-    fclose(flags.out);
-    flags.out = stdout;
-  }
-}
 
 Patcher *createTool(string mode, string version="") {
   return Patcher::createByName(mode.c_str(),version.c_str());
@@ -43,10 +22,10 @@ int main(int argc, char *argv[]) {
   std::string parent_file = "";
   std::string version = "";
   std::string map_file = "";
+
   std::vector<std::string> ids;
   bool verbose = false;
   bool equality = false;
-  bool indexed = false;
   bool apply = false;
   bool named = false;
 
@@ -110,7 +89,7 @@ int main(int argc, char *argv[]) {
       equality = true;
       break;
     case 'i':
-      indexed = true;
+      mode = "index";
       break;
     case 'd':
       named = true;
@@ -119,6 +98,7 @@ int main(int argc, char *argv[]) {
     case 'k':
       ids.push_back(optarg);
       break;
+
 
     case 'm':
       map_file = optarg;
@@ -142,7 +122,6 @@ int main(int argc, char *argv[]) {
       break;
     case 'a':
       apply = true;
-      mode = "tdiff";
       break;
     default:
       fprintf(stderr, "Unrecognized option\n");
@@ -235,51 +214,70 @@ int main(int argc, char *argv[]) {
     flags.trust_ids = true;
   }
   flags.trust_column_names = named;
-  if (indexed) {
-    MergeOutputIndex diff;
-    PolyBook book;
-    book.attach(output.c_str());
-    diff.attachBook(book);
-    cmp.compare(*pivot,*local,*remote,diff,flags);
-    book.flush();
-  } else if (!apply) {
-    Patcher *diff = createTool(mode,version);
-    if (diff!=NULL) {
-      start_output(output,flags);
-      cmp.compare(*pivot,*local,*remote,*diff,flags);
-      stop_output(output,flags);
-      delete diff;
-      diff = NULL;
-    } else if (mode=="csv0") {
-      MergeOutputPatch patch;
-      cmp.compare(*pivot,*local,*remote,patch,flags);
-      const CsvSheet& result = patch.get();
-      if (output!="") {
-	if (CsvFile::write(result,output.c_str())!=0) {
-	  return 1;
-	}
-      } else {
-	SheetStyle style;
-	std::string out = result.encode(style);
-	printf("%s",out.c_str());
-      }
-    } else {
-      fprintf(stderr,"Patch mode not recognized\n");
+
+  Patcher *diff = createTool(mode,version);
+  if (diff==NULL) {
+    fprintf(stderr,"Patch mode not recognized\n");
+    return 1;
+  }
+  PolyBook obook;
+  if (diff->needOutputBook()) {
+    if (!obook.attach(output.c_str())) {
+      delete diff; diff = NULL;
       return 1;
     }
-  } else {
-    Patcher *pdiff = createTool(mode,version);
-    SheetPatcher diff;
-    diff.attachBook(*local);
-    diff.showSummary(pdiff);
-    start_output(output,flags);
-    cmp.compare(*pivot,*local,*remote,diff,flags);
-    stop_output(output,flags);
-    if (pdiff!=NULL) {
-      delete pdiff;
-      pdiff = NULL;
+    diff->attachOutputBook(obook);
+  }
+  PolyBook tbook;
+  if (diff->outputStartsFromInput()) {
+    if (output=="-") {
+      fprintf(stderr,"Output file needed, please use --output\n");
+      delete diff; diff = NULL;
+      return 1;
     }
-    if (diff.getChangeCount()>0) {
+    if (!_local.write(output.c_str())) {
+      delete diff; diff = NULL;
+      return 1;
+    }
+    if (!_local.read(argv[0])) {
+      fprintf(stderr,"Failed to read %s\n", argv[0]);
+      return 1;
+    }
+    if (!tbook.read(output.c_str())) {
+      fprintf(stderr,"Failed to read %s\n", output.c_str());
+      return 1;
+    }
+    diff->attachBook(tbook);
+  } else {
+    diff->attachBook(*local);
+  }
+
+  if (apply) {
+    SheetPatcher *apply_diff = new SheetPatcher(false);
+    COOPY_ASSERT(apply_diff!=NULL);
+    apply_diff->showSummary(diff);
+    diff = apply_diff;
+    diff->attachBook(*local);
+  }
+  if (!diff->startOutput(output,flags)) {
+    fprintf(stderr,"Patch output failed\n");
+    delete diff;
+    diff = NULL;
+    return 1;
+  }
+  cmp.compare(*pivot,*local,*remote,*diff,flags);
+  diff->stopOutput(output,flags);
+  if (diff->needOutputBook()) {
+    obook.flush();
+  }
+  if (diff->outputStartsFromInput()) {
+    if (!tbook.write(output.c_str())) {
+      fprintf(stderr,"Failed to write %s\n", output.c_str());
+      return 1;
+    }
+  }
+  if (apply) {
+    if (diff->getChangeCount()>0) {
       if (!local->inplace()) {
 	if (!local->write(argv[0])) {
 	  fprintf(stderr,"Failed to write %s\n", argv[0]);
@@ -288,6 +286,9 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+  delete diff;
+  diff = NULL;
+
   return 0;
 }
 

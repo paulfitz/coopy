@@ -30,6 +30,10 @@ public:
   virtual bool wantDiff() { return false; }
 
   virtual bool wantLinks() { return true; }
+
+  virtual bool needOutputBook() {
+    return true;
+  }
 };
 
 #endif

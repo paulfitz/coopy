@@ -38,6 +38,9 @@ public:
 
   virtual bool deleteRow(const RowRef& src);
 
+  virtual RowRef moveRow(const RowRef& src, const RowRef& base);
+
+
   virtual bool hasDimension() const {
     return false;
   }
@@ -48,6 +51,12 @@ public:
   }
 
   virtual bool deleteData();
+
+  virtual Poly<Appearance> getCellAppearance(int x, int y);
+
+  virtual Poly<Appearance> getRowAppearance(int y);
+
+  virtual Poly<Appearance> getColAppearance(int x);
 
 private:
   void *implementation;

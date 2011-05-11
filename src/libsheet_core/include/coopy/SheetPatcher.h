@@ -5,6 +5,7 @@
 #include <coopy/DataSheet.h>
 #include <coopy/PolySheet.h>
 #include <coopy/TextBook.h>
+#include <coopy/CsvSheet.h>
 
 #include <vector>
 
@@ -17,6 +18,7 @@ namespace coopy {
 class coopy::cmp::SheetPatcher : public Patcher {
 private:
   ConfigChange config;
+  coopy::store::CsvSheet activeRow;
   std::vector<int> columns;
   std::vector<std::string> column_names;
   int rowCursor;
@@ -24,16 +26,22 @@ private:
   bool summary;
   Patcher *chain;
   int changeCount;
+  bool descriptive;
+
+  int matchRow(const std::vector<int>& active_cond,
+	       const std::vector<coopy::store::SheetCell>& cond,
+	       int width);
+
 public:
   //coopy::store::DataSheet *sheet;
   //coopy::store::TextBook *book;
 
   //SheetPatcher(coopy::store::DataSheet *sheet) : sheet(sheet) {
-  SheetPatcher() {
+  SheetPatcher(bool descriptive = false) : descriptive(descriptive) {
     rowCursor = -1;
     //book = NULL;
     summary = false;
-    chain = NULL;
+    chain = 0/*NULL*/;
     changeCount = 0;
   }
 
@@ -48,6 +56,10 @@ public:
   */
 
   virtual ~SheetPatcher() {
+    if (chain!=0/*NULL*/) {
+      delete chain;
+      chain = 0/*NULL*/;
+    }
   }
 
   void showSummary(Patcher *chain) {
@@ -69,6 +81,17 @@ public:
   virtual bool declareNames(const std::vector<std::string>& names, bool final);
 
   virtual bool setSheet(const char *name);
+
+  virtual bool mergeStart();
+
+  virtual bool mergeDone();
+
+  virtual bool mergeAllDone();
+
+  virtual bool outputStartsFromInput() {
+    return descriptive;
+  }
+
 };
 
 #endif

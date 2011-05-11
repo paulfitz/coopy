@@ -38,23 +38,7 @@ static void stop_output(string output, CompareFlags& flags) {
 }
 
 bool copy_file(const char *src, const char *dest) {
-  FILE *fin = NULL;
-  FILE *fout = NULL;
-  fin = fopen(src,"rb");
-  if (fin==NULL) return false;
-  fout = fopen(dest,"wb");
-  if (fout==NULL) {
-    fclose(fin);
-    return false;
-  }
-  char buf[32768];
-  int bytes_read = 0;
-  while ((bytes_read=fread(buf,1,sizeof(buf),fin))>0) {
-    fwrite(buf,1,bytes_read,fout);
-  }
-  fclose(fout);
-  fclose(fin);
-  return true;
+  return Patcher::copyFile(src,dest);
 }
 
 int main(int argc, char *argv[]) {
@@ -153,7 +137,7 @@ int main(int argc, char *argv[]) {
     coopy_set_verbose(verbose);
   }
 
-  fake = (formatName!="apply");
+  fake = (formatName!="apply")&&(formatName!="sheet");
 
   PolyBook local;
   CsvSheet patch;

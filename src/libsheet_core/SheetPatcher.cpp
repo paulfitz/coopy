@@ -10,11 +10,42 @@ using namespace std;
 using namespace coopy::cmp;
 using namespace coopy::store;
 
-bool SheetPatcher::changeColumn(const OrderChange& change) {
-  changeCount++;
+#define FULL_COLOR (65535)
+#define HALF_COLOR (65535/2)
+
+int SheetPatcher::matchRow(const vector<int>& active_cond,
+			   const vector<SheetCell>& cond,
+			   int width) {
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return false;
+  int r = -1;
+  for (r=0; r<sheet.height(); r++) {
+    if (activeRow.cellString(0,r)!="---") {
+      bool match = true;
+      for (int c=0; c<width; c++) {
+	if (active_cond[c]) {
+	  if (sheet.cellSummary(c,r)!=cond[c]) {
+	    match = false;
+	    break;
+	  }
+	}
+      }
+      if (match) return r;
+    }
+  }
+  return -1;
+}
+
+
+bool SheetPatcher::changeColumn(const OrderChange& change) {
+  changeCount++;
   if (chain) chain->changeColumn(change);
+
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) {
+    fprintf(stderr,"No sheet available to patch\n");
+    return false;
+  }
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
     //return sheet->deleteColumn(ColumnRef(change.subject));
@@ -66,11 +97,20 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 }
 
 bool SheetPatcher::changeRow(const RowChange& change) {
-  PolySheet sheet = getSheet();
-  if (!sheet.isValid()) return false;
-  dbg_printf("\n======================\nRow cursor in: %d\n", rowCursor);
   changeCount++;
   if (chain) chain->changeRow(change);
+
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) {
+    fprintf(stderr,"No sheet available to patch\n");
+    return false;
+  }
+
+  if (activeRow.height()!=sheet.height() || activeRow.width()!=1) {
+    activeRow.resize(1,sheet.height());
+  }
+
+  dbg_printf("\n======================\nRow cursor in: %d\n", rowCursor);
   if (!change.sequential) rowCursor = -1;
   map<string,int> dir;
   vector<int> active_cond;
@@ -115,6 +155,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       if (sheet.isSequential()) {
 	RowRef tail(rowCursor);
 	int r = sheet.insertRow(tail).getIndex();
+	activeRow.insertRow(tail);
 	/*
 	if (rowCursor!=-1) {
 	  rowCursor++;
@@ -123,9 +164,22 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  }
 	  }*/
 	if (r>=0) {
+	  activeRow.cellString(0,r,"+++");
 	  for (int c=0; c<width; c++) {
 	    if (active_val[c]) {
 	      sheet.cellSummary(c,r,val[c]);
+	    }
+	  }
+	  if (descriptive) {
+	    Poly<Appearance> appear = sheet.getRowAppearance(r);
+	    if (appear.isValid()) {
+	      appear->begin();
+	      appear->setBackgroundRgb16(HALF_COLOR,
+					 FULL_COLOR,
+					 HALF_COLOR,
+					 AppearanceRange::full());
+	      appear->setWeightBold(true,AppearanceRange::full());
+	      appear->end();
 	    }
 	  }
 	}
@@ -147,140 +201,113 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     break;
   case ROW_CHANGE_DELETE:
     {
-      bool success = false;
-      int r;
-      for (r=0; r<sheet.height(); r++) {
-	bool match = true;
-	for (int c=0; c<width; c++) {
-	  if (active_cond[c]) {
-	    if (sheet.cellSummary(c,r)!=cond[c]) {
-	      match = false;
-	      break;
-	    }
-	  }
+      int r = matchRow(active_cond,cond,width);
+      if (r<0) return false;
+      RowRef row(r);
+      rowCursor = r;
+      if (!descriptive) {
+	sheet.deleteRow(row);
+	activeRow.deleteRow(row);
+      } else {
+	Poly<Appearance> appear = sheet.getRowAppearance(r);
+	if (appear.isValid()) {
+	  appear->begin();
+	  appear->setBackgroundRgb16(FULL_COLOR,
+				     HALF_COLOR,
+				     HALF_COLOR,
+				     AppearanceRange::full());
+	  //appear->setWeightBold(true,AppearanceRange::full());
+	  appear->setStrikethrough(true,AppearanceRange::full());
+	  appear->end();
 	}
-	if (match) {
-	  RowRef row(r);
-	  rowCursor = r;
-	  sheet.deleteRow(row);
-	  if (rowCursor>=sheet.height()) {
-	    rowCursor = -1;
-	  }
-	  success = true;
-	  break;
-	}
+	activeRow.cellString(0,r,"---");
       }
-      return success;
+      if (rowCursor>=sheet.height()) {
+	rowCursor = -1;
+      }
+      return true;
     }
     break;
   case ROW_CHANGE_CONTEXT:
     {
-      bool success = false;
-      int r;
-      for (r=0; r<sheet.height(); r++) {
-	bool match = true;
-	for (int c=0; c<width; c++) {
-	  if (active_cond[c]) {
-	    if (sheet.cellSummary(c,r)!=cond[c]) {
-	      match = false;
-	      break;
-	    }
-	  }
-	}
-	if (match) {
-	  r++;
-	  if (r>=sheet.height()) {
-	    r = -1;
-	  }
-	  RowRef row(r);
-	  rowCursor = r;
-	  success = true;
-	  break;
-	}
+      int r = matchRow(active_cond,cond,width);
+      if (r<0) return false;
+      r++;
+      if (r>=sheet.height()) {
+	r = -1;
       }
-      return success;
+      RowRef row(r);
+      rowCursor = r;
+      return true;
     }
     break;
   case ROW_CHANGE_MOVE:
     {
       bool success = false;
-      int r;
-      for (r=0; r<sheet.height(); r++) {
-	bool match = true;
-	for (int c=0; c<width; c++) {
-	  if (active_cond[c]) {
-	    if (sheet.cellSummary(c,r)!=cond[c]) {
-	      match = false;
-	      break;
-	    }
-	  }
-	}
-	if (match) {
-	  RowRef from(r);
-	  RowRef to(rowCursor);
-	  dbg_printf("Moving %d to %d in sheet of length %d\n", from.getIndex(), to.getIndex(), sheet.height());
-	  RowRef result = sheet.moveRow(from,to);
-	  if (result.getIndex() == -1) {
-	    fprintf(stderr,"Row move failed in sheet of type %s\n",
-		    sheet.desc().c_str());
-	  }
-	  r = result.getIndex();
-	  dbg_printf("Move result was %d\n", r);
-	  for (int y=0; y<sheet.height(); y++) {
-	    dbg_printf("%d %s / ", y, sheet.cellString(0,y).c_str());
-	  }
-	  dbg_printf("\n");
-	  r++;
-	  if (r>=sheet.height()) {
-	    r = -1;
-	  }
-	  rowCursor = r;
-	  success = true;
-	  break;
-	}
+      int r = matchRow(active_cond,cond,width);
+      if (r<0) return false;
+      RowRef from(r);
+      RowRef to(rowCursor);
+      dbg_printf("Moving %d to %d in sheet of length %d\n", from.getIndex(), to.getIndex(), sheet.height());
+      RowRef result = sheet.moveRow(from,to);
+      if (result.getIndex() == -1) {
+	fprintf(stderr,"Row move failed in sheet of type %s\n",
+		sheet.desc().c_str());
+      } else {
+	activeRow.moveRow(from,to);
       }
-      return success;
+      r = result.getIndex();
+      dbg_printf("Move result was %d\n", r);
+      for (int y=0; y<sheet.height(); y++) {
+	dbg_printf("%d %s / ", y, sheet.cellString(0,y).c_str());
+      }
+      dbg_printf("\n");
+      r++;
+      if (r>=sheet.height()) {
+	r = -1;
+      }
+      rowCursor = r;
+      return true;
     }
     break;
   case ROW_CHANGE_UPDATE:
     {
       bool success = false;
-      int r;
-      for (r=0; r<sheet.height(); r++) {
-	bool match = true;
-	for (int c=0; c<width; c++) {
-	  if (active_cond[c]) {
-	    dbg_printf("compare %s and %s\n",
-		       sheet.cellSummary(c,r).toString().c_str(),
-		       cond[c].toString().c_str());
-	    if (sheet.cellSummary(c,r)!=cond[c]) {
-	      match = false;
-	      break;
-	    }
-	  }
-	}
-	if (match) {
-	  dbg_printf("Match for assignment\n");
-	  for (int c=0; c<width; c++) {
-	    if (active_val[c]) {
-	      sheet.cellSummary(c,r,val[c]);
-	    }
-	  }
-	  r++;
-	  if (r>=sheet.height()) {
-	    r = -1;
-	  }
-	  rowCursor = r;
-	  dbg_printf("Cursor moved to %d\n", r);
-	  success = true;
-	  break;
-	}
-      }
-      if (!success) {
+      int r = matchRow(active_cond,cond,width);
+      if (r<0) {
 	dbg_printf("No match for update\n");
 	rowCursor = -1;
+	return false;
       }
-      return success;
+      dbg_printf("Match for assignment\n");
+      for (int c=0; c<width; c++) {
+	if (active_val[c]) {
+	  if (descriptive) {
+	    string from = sheet.cellSummary(c,r).toString();
+	    string to = val[c].toString();
+	    sheet.cellString(c,r,from + "->" + to);
+	    Poly<Appearance> appear = sheet.getCellAppearance(c,r);
+	    if (appear.isValid()) {
+	      appear->begin();
+	      appear->setBackgroundRgb16(HALF_COLOR,
+					 HALF_COLOR,
+					 FULL_COLOR,
+					 AppearanceRange::full());
+	      appear->setWeightBold(true,AppearanceRange::full());
+	      appear->end();
+	    }
+	  } else {
+	    sheet.cellSummary(c,r,val[c]);
+	  }
+	}
+      }
+      r++;
+      if (r>=sheet.height()) {
+	r = -1;
+      }
+      rowCursor = r;
+      dbg_printf("Cursor moved to %d\n", r);
+      return true;
     }
     break;
   default:
@@ -312,9 +339,11 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
 }
 
 bool SheetPatcher::setSheet(const char *name) {
+  if (chain) chain->setSheet(name);
+
+  activeRow.resize(1,0);
   TextBook *book = getBook();
   if (book==NULL) return false;
-  if (chain) chain->setSheet(name);
 
   //reset
   config = ConfigChange();
@@ -335,4 +364,21 @@ bool SheetPatcher::setSheet(const char *name) {
   //sheet = &psheet;
   return true;
 }
+
+
+bool SheetPatcher::mergeStart() {
+  if (chain) chain->mergeStart();
+  return true;
+}
+
+bool SheetPatcher::mergeDone() {
+  if (chain) chain->mergeDone();
+  return true;
+}
+
+bool SheetPatcher::mergeAllDone() {
+  if (chain) chain->mergeAllDone();
+  return true;
+}
+
 

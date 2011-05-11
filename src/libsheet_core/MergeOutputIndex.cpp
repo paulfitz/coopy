@@ -30,7 +30,9 @@ bool MergeOutputIndex::mergeStart() {
     ss.addColumn("local",ColumnType("INTEGER"));
     ss.addColumn("remote",ColumnType("INTEGER"));
     ss.addColumn("deleted",ColumnType("INTEGER"));
-    links = getBook()->provideSheet(ss);
+    if (getOutputBook()!=NULL) {
+      links = getOutputBook()->provideSheet(ss);
+    }
     
     if (!links.isValid()) {
       fprintf(stderr,"* Could not generate links sheet\n");
@@ -115,3 +117,21 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
   }
   return true;
 }
+
+/*
+bool MergeOutputIndex::startOutput(const std::string& output, 
+				   CompareFlags& flags) {
+  //if (!index.attach(output.c_str())) {
+  //     return false;
+  //   }
+   return true;
+}
+
+bool MergeOutputIndex::stopOutput(const std::string& output, 
+				  CompareFlags& flags) {
+
+  //index.flush();
+  return true;
+}
+
+*/

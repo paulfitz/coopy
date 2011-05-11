@@ -150,8 +150,9 @@ public:
     return *this;
   }
 
-
   static void showFormats();
+
+  static bool copyFile(const char *src, const char *dest);
 };
 
 #endif

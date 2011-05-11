@@ -28,6 +28,11 @@
 #include "stf-parse.h"
 #include "clipboard.h"
 
+#include "mstyle.h"
+#include "style.h"
+#include "sheet-style.h"
+#include "style-color.h"
+
 #include "coopy/gnumeric_link.h"
 
 #ifndef GNM_VERSION_FULL
@@ -244,6 +249,14 @@ char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
   return value_get_as_string(value);
 }
 
+static void
+coopy_add_attr (PangoAttrList *attrs, PangoAttribute *attr)
+{
+	attr->start_index = 0;
+	attr->end_index = 2;
+	pango_attr_list_insert (attrs, attr);
+}
+
 int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
 				      const char *str) {
   GnmCell *cell = sheet_cell_get((Sheet*)sheet,x,y);
@@ -256,7 +269,25 @@ int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
 
   // For now we quote everything as strings:
   GnmValue *val = value_new_string(str);
+
   sheet_cell_set_value(cell,val);
+
+
+  /*
+  GnmStyle *mstyle;
+  
+  mstyle = gnm_style_new ();
+  //gnm_style_set_format_text (mstyle, format);
+  //gnm_style_get_pango_attrs(mstyle,NULL,1.0)
+  printf("Setting WEIGHT\n");
+  gnm_style_set_font_strike (mstyle, TRUE);
+  //gnm_style_set_font_bold (mstyle, TRUE);
+  printf("Done.\n");
+  
+  GnmRange r;
+  r.start = r.end = cell->pos;
+  sheet_style_apply_range (cell->base.sheet, &r, mstyle);
+  */
 
   return 0;
 }
@@ -345,6 +376,59 @@ int gnumeric_move_column(GnumericSheetPtr sheet, int src, int dest) {
   return 0;
 }
 
+
+int gnumeric_move_row(GnumericSheetPtr sheet, int src, int dest) {
+  int w, h;
+  gnumeric_sheet_get_size(sheet,&w,&h);
+
+  GnmPasteTarget pt;
+  pt.sheet = sheet;
+  pt.paste_flags = PASTE_CONTENTS | PASTE_COMMENTS | PASTE_NO_RECALC;
+  pt.paste_flags = pt.paste_flags | PASTE_FORMATS;
+
+  GnmRange range1, range2;
+  GnmCellRegion *rcopy1, *rcopy2 = NULL;
+  if (src==dest) return 0;
+
+  // copy src column
+  range1.start.col = 0;
+  range1.end.col = w-1;
+  range1.start.row = src;
+  range1.end.row = src;
+  rcopy1 = clipboard_copy_range(sheet,&range1);
+
+  // copy src-dest range
+  range2.start.col = 0;
+  range2.end.col = w-1;
+  if (dest<src) {
+    range2.start.row = dest;
+    range2.end.row = src-1;
+  } else {
+    range2.start.row = src+1;
+    range2.end.row = dest;
+  }
+  rcopy2 = clipboard_copy_range(sheet,&range2);
+  if (dest<src) {
+    range2.start.row++;
+    range2.end.row++;
+  } else {
+    range2.start.row--;
+    range2.end.row--;
+  }
+  pt.range = range2;
+  clipboard_paste_region(rcopy2, &pt, cc);
+  cellregion_unref(rcopy2);
+
+  range1.start.row = dest;
+  range1.end.row = dest;
+  pt.range = range1;
+  clipboard_paste_region(rcopy1, &pt, cc);
+  cellregion_unref(rcopy1);
+  return 0;
+}
+
+
+
 int gnumeric_insert_column(GnumericSheetPtr sheet, int before) {
   BEGIN_UNDO;
   sheet_insert_cols(sheet,before,1,DO_UNDO,cc);
@@ -383,3 +467,68 @@ int gnumeric_delete_data(GnumericSheetPtr sheet) {
   return 0;
 }
 
+
+GnumericStylePtr gnumeric_sheet_get_style(GnumericSheetPtr sheet, 
+					  int x, int y) {
+  GnmStyle const *r = sheet_style_get((Sheet*)sheet,x,y);
+  if (r==NULL) return NULL;
+  return gnm_style_dup(r);
+}
+
+int gnumeric_sheet_set_style(GnumericSheetPtr sheet, 
+			     GnumericStylePtr style,
+			     int x, int y) {
+  GnmRange r;
+  r.start.col = x;
+  r.start.row = y;
+  r.end.col = x;
+  r.end.row = y;
+  sheet_style_apply_range ((Sheet*)sheet, &r, (GnmStyle*)style);
+  return 0;
+}
+
+int gnumeric_sheet_set_row_style(GnumericSheetPtr sheet, 
+				 GnumericStylePtr style,
+				 int y) {
+  sheet_style_apply_row ((Sheet*)sheet, y, (GnmStyle*)style);
+  return 0;
+}
+
+int gnumeric_sheet_set_col_style(GnumericSheetPtr sheet, 
+				 GnumericStylePtr style,
+				 int x) {
+  sheet_style_apply_col ((Sheet*)sheet, x, (GnmStyle*)style);
+  return 0;
+}
+
+//gnumeric_style_set_font_strike(GnumericStylePtr style, int flag);
+
+int gnumeric_style_set_font_strike(GnumericStylePtr style, int flag) {
+  gnm_style_set_font_strike ((GnmStyle*)style, flag?TRUE:FALSE);
+  return 0;
+}
+
+int gnumeric_style_set_font_bold(GnumericStylePtr style, int flag) {
+  gnm_style_set_font_bold ((GnmStyle*)style, flag?TRUE:FALSE);
+  return 0;
+}
+
+int gnumeric_style_set_font_color(GnumericStylePtr style, 
+				  int r16, int g16, int b16) {
+  GnmColor *color = style_color_new_i16(r16,g16,b16);
+  gnm_style_set_font_color((GnmStyle*)style,color);
+  return 0;
+}
+
+int gnumeric_style_set_back_color(GnumericStylePtr style, 
+				  int r16, int g16, int b16) {
+  GnmColor *color = style_color_new_i16(r16,g16,b16);
+  gnm_style_set_back_color((GnmStyle*)style,color);
+  gnm_style_set_pattern((GnmStyle*)style,1);
+  return 0;
+}
+
+
+void gnumeric_free_style(GnumericStylePtr style) {
+  gnm_style_unref((GnmStyle*)style);
+}

@@ -98,7 +98,7 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
 	local_sheet.isValid()&&
 	remote_sheet.isValid()) {
       SheetCompare cmp;
-      if (local.namedSheets()) {
+      if (local.namedSheets()&&remote.namedSheets()) {
 	bool ok = output.setSheet(name.c_str());
 	if (!ok) {
 	  fprintf(stderr,"Output format rejected sheet \"%s\"\n", name.c_str());

@@ -317,3 +317,17 @@ void PolyBook::showFormats() {
   printf("   input/output to a named table or tables\n");
   printf("*  json options and dbi options are interchangeable\n");
 }
+
+
+bool PolyBook::copyFile(const char *src, const char *dest) {
+  PolyBook bsrc;
+  if (!bsrc.read(src)) {
+    fprintf(stderr,"Failed to read %s\n", src);
+    return false;
+  }
+  if (!bsrc.write(dest)) {
+    fprintf(stderr,"Failed to write %s\n", dest);
+    return false;
+  }
+  return true;
+}

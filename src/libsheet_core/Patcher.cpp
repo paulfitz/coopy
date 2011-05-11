@@ -4,6 +4,8 @@
 #include <coopy/MergeOutputVerboseDiff.h>
 #include <coopy/MergeOutputCsvDiff.h>
 #include <coopy/MergeOutputTdiff.h>
+#include <coopy/MergeOutputPatch.h>
+#include <coopy/MergeOutputIndex.h>
 #include <coopy/SheetPatcher.h>
 
 #include <algorithm>
@@ -41,15 +43,67 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
   } else if (mode=="tdiff") {
     result = new MergeOutputTdiff;
   } else if (mode=="apply") {
-    result = new SheetPatcher;
+    result = new SheetPatcher(false);
+  } else if (mode=="sheet") {
+    result = new SheetPatcher(true);
   } else if (mode=="csv") {
     if (_version=="0.2") {
       result = new MergeOutputCsvDiffV0p2;
     } else if (_version=="0.4"||_version=="0.5"||_version=="") {
       result = new MergeOutputCsvDiff;
     }
+  } else if (mode=="csv0") {
+    result = new MergeOutputPatch;
+  } else if (mode=="index") {
+    result = new MergeOutputIndex;
   }
   return result;
 }
 
 
+
+bool Patcher::startOutput(const std::string& output, CompareFlags& flags) {
+  if (needOutputBook()) return true;
+  if (output=="" || output=="-") {
+    flags.out = stdout;
+    return true;
+  }
+  FILE *fout = fopen(output.c_str(),"wb");
+  if (fout==NULL) {
+    fprintf(stderr,"Could not open %s for writing\n", output.c_str());
+    exit(1);
+    return false;
+  }
+  flags.out = fout;
+  return true;
+}
+
+bool Patcher::stopOutput(const std::string& output, CompareFlags& flags) {
+  if (needOutputBook()) return true;
+  if (flags.out!=stdout) {
+    fclose(flags.out);
+    flags.out = stdout;
+  }
+  return true;
+}
+
+
+bool Patcher::copyFile(const char *src, const char *dest) {
+  FILE *fin = NULL;
+  FILE *fout = NULL;
+  fin = fopen(src,"rb");
+  if (fin==NULL) return false;
+  fout = fopen(dest,"wb");
+  if (fout==NULL) {
+    fclose(fin);
+    return false;
+  }
+  char buf[32768];
+  int bytes_read = 0;
+  while ((bytes_read=fread(buf,1,sizeof(buf),fin))>0) {
+    fwrite(buf,1,bytes_read,fout);
+  }
+  fclose(fout);
+  fclose(fin);
+  return true;
+}

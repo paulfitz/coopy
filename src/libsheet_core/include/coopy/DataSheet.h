@@ -8,6 +8,7 @@
 #include <coopy/ColumnRef.h>
 #include <coopy/RefCount.h>
 #include <coopy/SheetCell.h>
+#include <coopy/Appearance.h>
 
 #include <string>
 #include <vector>
@@ -205,6 +206,17 @@ public:
     return 0/*NULL*/; 
   }
 
+  virtual Poly<Appearance> getCellAppearance(int x, int y) {
+    return Poly<Appearance>();
+  }
+
+  virtual Poly<Appearance> getRowAppearance(int y) {
+    return Poly<Appearance>();
+  }
+
+  virtual Poly<Appearance> getColAppearance(int x) {
+    return Poly<Appearance>();
+  }
 
 private:
   std::string hash_cache;

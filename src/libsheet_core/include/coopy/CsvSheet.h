@@ -195,6 +195,8 @@ public:
       }
       addRecord();
     }
+    s.w = w;
+    s.h = h;
     return true;
   }
 

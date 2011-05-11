@@ -22,6 +22,7 @@ public:
 
   const coopy::store::CsvSheet& get() { return result; }
 
+  virtual bool mergeAllDone();
 };
 
 #endif
