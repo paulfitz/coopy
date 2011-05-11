@@ -280,6 +280,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	return false;
       }
       dbg_printf("Match for assignment\n");
+      activeRow.cellString(0,r,"->");
       for (int c=0; c<width; c++) {
 	if (active_val[c]) {
 	  if (descriptive) {
@@ -373,6 +374,23 @@ bool SheetPatcher::mergeStart() {
 
 bool SheetPatcher::mergeDone() {
   if (chain) chain->mergeDone();
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return false;
+  sheet.insertColumn(ColumnRef(0)); 
+  //sheet.insertRow(RowRef(0));
+  for (int i=0; i<sheet.height(); i++) {
+    string txt = activeRow.cellString(0,i);
+    if (txt!="") {
+      sheet.cellString(0,i,txt);
+      Poly<Appearance> appear = sheet.getCellAppearance(0,i);
+      if (appear.isValid()) {
+	appear->begin();
+	appear->setWeightBold(true,AppearanceRange::full());
+	appear->setStrikethrough(false,AppearanceRange::full());
+	appear->end();
+      }
+    }
+  }
   return true;
 }
 

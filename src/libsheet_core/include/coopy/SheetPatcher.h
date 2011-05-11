@@ -22,38 +22,26 @@ private:
   std::vector<int> columns;
   std::vector<std::string> column_names;
   int rowCursor;
-  //coopy::store::PolySheet psheet;
   bool summary;
   Patcher *chain;
   int changeCount;
   bool descriptive;
+  int xoff;
+  int yoff;
 
   int matchRow(const std::vector<int>& active_cond,
 	       const std::vector<coopy::store::SheetCell>& cond,
 	       int width);
 
 public:
-  //coopy::store::DataSheet *sheet;
-  //coopy::store::TextBook *book;
-
-  //SheetPatcher(coopy::store::DataSheet *sheet) : sheet(sheet) {
   SheetPatcher(bool descriptive = false) : descriptive(descriptive) {
     rowCursor = -1;
-    //book = NULL;
     summary = false;
     chain = 0/*NULL*/;
     changeCount = 0;
+    xoff = 0;
+    yoff = 0;
   }
-
-  /*
-  SheetPatcher(coopy::store::TextBook *book) : book(book) {
-    rowCursor = -1;
-    sheet = NULL;
-    summary = false;
-    chain = NULL;
-    changeCount = 0;
-  }
-  */
 
   virtual ~SheetPatcher() {
     if (chain!=0/*NULL*/) {
