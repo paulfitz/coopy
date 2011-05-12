@@ -4,7 +4,7 @@
 
 #include <coopy/PolyBook.h>
 #include <coopy/CsvFile.h>
-#include <coopy/CsvPatch.h>
+#include <coopy/CsvTextBook.h>
 #include <coopy/PatchParser.h>
 #include <coopy/SheetPatcher.h>
 #include <coopy/MergeOutputVerboseDiff.h>
@@ -42,7 +42,6 @@ bool copy_file(const char *src, const char *dest) {
 
 int main(int argc, char *argv[]) {
   bool verbose = false;
-  bool fake = false;
   bool inplace = false;
   string output = "-";
   string formatName = "apply";
@@ -70,7 +69,6 @@ int main(int argc, char *argv[]) {
       inplace = true;
       break;
     case 'k':
-      fake = true;
       formatName = "raw";
       break;
     case 'o':
@@ -80,7 +78,6 @@ int main(int argc, char *argv[]) {
       tmp = optarg;
       break;
     case 'f':
-      fake = true;
       formatName = optarg;
       break;
     default:
@@ -99,7 +96,7 @@ int main(int argc, char *argv[]) {
   const char *local_name = "";
   const char *patch_name = "";
 
-  if (argc==1&&fake) {
+  if (argc==1&&(formatName!="apply"&&formatName!="color")) {
     patch_name = argv[0];
   } else if (argc<2) {
     printf("Apply patch to a table.\n");
@@ -136,45 +133,7 @@ int main(int argc, char *argv[]) {
     coopy_set_verbose(verbose);
   }
 
-  fake = (formatName!="apply")&&(formatName!="sheet");
-
-  PolyBook local;
-  CsvSheet patch;
-  if (fake) {
-    local_name = "";
-  } else {
-    if (!local.read(local_name)) {
-      fprintf(stderr,"Failed to read %s\n", local_name);
-      return 1;
-    }
-  }
-
-  if (local.inplace()&&output!=local_name) {
-    if (output=="-"&&tmp=="-") {
-      fprintf(stderr,"Inplace operation; please confirm output or specify a 'tmp' location\n");
-      return 1;
-    }
-    if (tmp=="-") {
-      tmp = output;
-    }
-    if (!copy_file(local_name,tmp.c_str())) {
-      fprintf(stderr,"Failed to write %s\n", output.c_str());
-      return 1;
-    }
-    if (!local.read(tmp.c_str())) {
-      fprintf(stderr,"Failed to switch to %s\n", output.c_str());
-      return 1;
-    }
-  }
-  
-
-  PolySheet sheet = local.readSheetByIndex(0);
-  /*
-  if (!sheet.isValid()) {
-    fprintf(stderr, "No sheet found\n");
-    return 1;
-  }
-  */
+  bool willMod = (formatName=="apply");
 
   Patcher *alt = alt = Patcher::createByName(formatName.c_str());
   if (alt==NULL) {
@@ -182,37 +141,113 @@ int main(int argc, char *argv[]) {
 	    formatName.c_str());
     return 1;
   }
-  alt->attachSheet(sheet);
-  alt->attachBook(local);
+
+  PolyBook local;
+  CsvSheet patch;
+  if (!willMod&&!alt->outputStartsFromInput()) {
+    local_name = "";
+  } else {
+    if (!local.read(local_name)) {
+      fprintf(stderr,"Failed to read %s\n", local_name);
+      delete alt; alt = NULL;
+      return 1;
+    }
+  }
+
+  if (willMod&&local.inplace()&&output!=local_name) {
+    if (output=="-"&&tmp=="-") {
+      fprintf(stderr,"Inplace operation; please confirm output or specify a 'tmp' location\n");
+      delete alt; alt = NULL;
+      return 1;
+    }
+    if (tmp=="-") {
+      tmp = output;
+    }
+    if (!copy_file(local_name,tmp.c_str())) {
+      fprintf(stderr,"Failed to write %s\n", output.c_str());
+      delete alt; alt = NULL;
+      return 1;
+    }
+    if (!local.read(tmp.c_str())) {
+      fprintf(stderr,"Failed to switch to %s\n", output.c_str());
+      delete alt; alt = NULL;
+      return 1;
+    }
+  }
+  
+
+  //PolySheet sheet = local.readSheetByIndex(0);
+  /*
+  if (!sheet.isValid()) {
+    fprintf(stderr, "No sheet found\n");
+    return 1;
+  }
+  */
+
+  PolyBook obook;
+  if (alt->needOutputBook()) {
+    if (!obook.attach(output.c_str())) {
+      delete alt; alt = NULL;
+      return 1;
+    }
+    alt->attachOutputBook(obook);
+  }
+  PolyBook tbook;
+  if (alt->outputStartsFromInput()) {
+    if (output!="-") {
+      if (!local.write(output.c_str())) {
+	delete alt; alt = NULL;
+	return 1;
+      }
+      if (!tbook.read(output.c_str())) {
+	fprintf(stderr,"Failed to read %s\n", output.c_str());
+	return 1;
+      }
+    } else {
+      tbook.take(new CsvTextBook(true));
+      Property p;
+      tbook.copy(local,p);
+    }
+    alt->attachBook(tbook);
+  } else {
+    alt->attachBook(local);
+  }
+
   MergeOutputVerboseDiff fakePatcher;
   PatchParser parser(alt,patch_name);
   CompareFlags flags;
-  if (fake) {
-    start_output(output,flags);
-    alt->setFlags(flags);
-  }
+  alt->startOutput(output,flags);
+  alt->setFlags(flags);
   bool ok = parser.apply();
-  if (fake) {
-    stop_output(output,flags);
-  }
+  alt->stopOutput(output,flags);
   if (!ok) {
-    fprintf(stderr,"Patch application failed\n");
+    fprintf(stderr,"Patch operation failed\n");
+    delete alt; alt = NULL;
     return 1;
   }
 
-  if (fake) {
-    return 0;
+  if (alt->needOutputBook()) {
+    obook.flush();
   }
-  
-  //if (CsvFile::write(local,output.c_str())!=0) {
-  if ((!local.inplace())||(tmp!=output)) {
-    if (output!=local_name || !local.inplace()) {
-      if (!local.write(output.c_str())) {
-	fprintf(stderr,"Failed to write %s\n", output.c_str());
-	return 1;
+  if (alt->outputStartsFromInput()) {
+    if (!tbook.write(output.c_str())) {
+      fprintf(stderr,"Failed to write %s\n", output.c_str());
+      delete alt; alt = NULL;
+      return 1;
+    }
+  }  
+  if (willMod) {
+    if ((!local.inplace())||(tmp!=output)) {
+      if (output!=local_name || !local.inplace()) {
+	if (!local.write(output.c_str())) {
+	  fprintf(stderr,"Failed to write %s\n", output.c_str());
+	  delete alt; alt = NULL;
+	  return 1;
+	}
       }
     }
   }
+  delete alt; alt = NULL;
   return 0;
 }
 
