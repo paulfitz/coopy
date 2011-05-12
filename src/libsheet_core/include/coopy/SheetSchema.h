@@ -49,6 +49,10 @@ public:
     return "";
   }
 
+  virtual bool hasSheetName() const {
+    return true;
+  }
+
   virtual SheetSchema *clone() const;
 
   virtual bool isGuess() const {
@@ -63,10 +67,12 @@ private:
   std::vector<ColumnType> kinds;
   int hh;
   bool guessed;
+  bool hasName;
 public:
   SimpleSheetSchema() {
     hh = 0;
     guessed = false;
+    hasName = true;
   }
 
   bool copy(const SheetSchema& ss) {
@@ -133,6 +139,14 @@ public:
 
   void setGuess(bool flag) {
     guessed = flag;
+  }
+
+  void setHasSheetName(bool flag) {
+    hasName = flag;
+  }
+
+  virtual bool hasSheetName() const {
+    return hasName;
   }
 };
 

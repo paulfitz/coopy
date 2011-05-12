@@ -24,6 +24,12 @@ void NameSniffer::sniff() {
       div = schema->headerHeight();
     } else {
       dbg_printf("Sniffing... found schema!\n");
+      if (sheet.width()!=schema->getColumnCount()) {
+	fprintf(stderr, "Problem detecting schema\n");
+	fprintf(stderr, "  table has %d columns\n", sheet.width());
+	fprintf(stderr, "  schema has %d columns\n", schema->getColumnCount());
+      }
+      COOPY_ASSERT(sheet.width()==schema->getColumnCount());
       for (int i=0; i<sheet.width(); i++) {
 	ColumnInfo info = schema->getColumnInfo(i);
 	if (!info.hasName()) {

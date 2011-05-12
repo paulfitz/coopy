@@ -3,6 +3,7 @@
 #include <coopy/CsvFile.h>
 #include <coopy/Format.h>
 #include <coopy/Dbg.h>
+#include <coopy/PolyBook.h>
 
 #include <stdio.h>
 
@@ -176,24 +177,28 @@ public:
 
 
 bool PatchParser::apply() {
-  if (reader==NULL) return false;
   if (patcher==NULL) return false;
 
-  Format format = reader->getFormat();
+  sniffer.open(fname.c_str());
+
+  Format format = sniffer.getFormat();
   if (format.id==FORMAT_PATCH_CSV) {
+    dbg_printf("Looks like DTBL\n");
     return applyCsv();
   }
   if (format.id==FORMAT_PATCH_TDIFF) {
+    dbg_printf("Looks like TDIFF\n");
     return applyTdiff();
   }
-  fprintf(stderr,"Unsupported format\n");
-  return false;
+  //fprintf(stderr,"Unsupported format\n");
+  dbg_printf("Try color\n");
+  return applyColor();
 }
 
 bool PatchParser::applyCsv() {
 
   CsvSheet patch;
-  if (CsvFile::read(*reader,patch)!=0) {
+  if (CsvFile::read(sniffer,patch)!=0) {
     fprintf(stderr,"Failed to read patch\n");
     return false;
   }
@@ -707,7 +712,7 @@ bool PatchParser::applyTdiff() {
   vector<TDiffPart> cols;
   bool inComment = false;
   while (!eof) {
-    string line = reader->readLine(eof);
+    string line = sniffer.readLine(eof);
     if (inComment) {
       if (line.find("*/")!=string::npos) {
 	inComment = false;
@@ -901,4 +906,93 @@ bool PatchParser::applyTdiff() {
 
   return true;
 }
+
+
+
+bool PatchParser::applyColor() {
+  sniffer.close();
+  PolyBook book;
+  if (!book.read(fname.c_str())) {
+    fprintf(stderr, "Don't know what to do with %s\n", fname.c_str());
+    return false;
+  }
+
+  patcher->mergeStart();
+
+  vector<string> names = book.getNames();
+  for (int s=0; s<(int)names.size(); s++) {
+    string name = names[s];
+    patcher->setSheet(name.c_str());
+    PolySheet sheet = book.readSheet(name);
+    if (sheet.width()<2) {
+      fprintf(stderr, "Not a diff: %s\n", fname.c_str());
+      return false;
+    }
+    vector<string> cols;
+    RowChange::txt2bool indexes;
+    for (int i=0; i<sheet.height(); i++) {
+      RowChange change;
+      change.names = cols;
+      change.allNames = cols;
+      change.indexes = indexes;
+      string code = sheet.cellString(0,i);
+      if (code == "@") {
+	cols.clear();
+	for (int j=1; j<sheet.width(); j++) {
+	  cols.push_back(sheet.cellString(j,i));
+	  indexes[sheet.cellString(j,i)] = true;
+	}
+      } else if (code == "+++") {
+	change.mode = ROW_CHANGE_INSERT;
+	for (int j=1; j<sheet.width(); j++) {
+	  SheetCell c = sheet.cellSummary(j,i);
+	  change.val[cols[j-1]] = c;
+	}
+	patcher->changeRow(change);
+      } else if (code == "---") {
+	change.mode = ROW_CHANGE_DELETE;
+	for (int j=1; j<sheet.width(); j++) {
+	  SheetCell c = sheet.cellSummary(j,i);
+	  change.cond[cols[j-1]] = c;
+	}
+	patcher->changeRow(change);
+      } else if (code == "->") {
+	change.mode = ROW_CHANGE_UPDATE;
+	for (int j=1; j<sheet.width(); j++) {
+	  SheetCell c = sheet.cellSummary(j,i);
+	  bool done = false;
+	  if (!c.escaped) {
+	    TDiffPart p(c.text,false);
+	    if (p.hasNval) {
+	      change.val[cols[j-1]] = p.nval;
+	      change.cond[cols[j-1]] = p.val;
+	      done = true;
+	    }
+	  }
+	  if (!done) {
+	    change.cond[cols[j-1]] = c;
+	  }
+	}
+	patcher->changeRow(change);
+      } else {
+	if (i<sheet.height()-1) {
+	  if (sheet.cellString(0,i+1)=="+++") {
+	    change.mode = ROW_CHANGE_CONTEXT;
+	    for (int j=1; j<sheet.width(); j++) {
+	      SheetCell c = sheet.cellSummary(j,i);
+	      change.cond[cols[j-1]] = c;
+	    }
+	    patcher->changeRow(change);
+	  }
+	}
+      }
+    }
+  }
+
+  patcher->mergeDone();
+  patcher->mergeAllDone();
+
+  return true;
+}
+
 

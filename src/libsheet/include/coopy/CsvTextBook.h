@@ -19,6 +19,7 @@ namespace coopy {
 class coopy::store::CsvTextBook : public TextBook, public CsvSheetReader {
 public:
   CsvTextBook(bool compact) : compact(compact) {
+    named = true;
   }
 
   std::vector<PolySheet> sheets;
@@ -43,26 +44,27 @@ public:
     return true;
   }
   
-  bool read(const char *fname);
+  bool readCsvs(const char *fname);
 
-  bool write(const char *fname) {
+  bool writeCsvs(const char *fname) {
     return write(fname,this,compact);
   }
 
   static bool write(const char *fname, TextBook *book, bool compact);
 
-  virtual bool open(const Property& config);
+  //  virtual bool open(const Property& config);
 
   bool addSheet(const SheetSchema& schema);
 
-  virtual CsvSheet *nextSheet(const char *name);
+  virtual CsvSheet *nextSheet(const char *name, bool named);
 
   virtual bool namedSheets() const {
-    return true;
+    return named;
   }
 
 private:
   bool compact;
+  bool named;
 };
 
 
@@ -80,7 +82,7 @@ public:
   virtual TextBook *open(AttachConfig& config, AttachReport& report) {
     if (config.shouldWrite) {
       if (config.prevBook!=NULL) {
-	dbg_printf("writing book file %s\n", config.options.get("file").asString().c_str());
+	dbg_printf("writing csvs book file %s\n", config.options.get("file").asString().c_str());
 	//int r = CsvFile::write(config.prevBook->readSheetByIndex(0),
 	//config.options);
 	if (CsvTextBook::write(config.options.get("file").asString().c_str(),
@@ -99,7 +101,7 @@ public:
     if (config.shouldRead) {
       if (!config.options.check("should_attach")) {
 	dbg_printf("reading csv file %s\n", config.options.get("file").asString().c_str());
-	bool r = book->read(config.fname.c_str());
+	bool r = book->readCsvs(config.fname.c_str());
 	if (!r) {
 	  delete book;
 	  book = NULL;

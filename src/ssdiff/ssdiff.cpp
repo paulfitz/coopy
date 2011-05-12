@@ -3,6 +3,7 @@
 #include <getopt.h>
 
 #include <coopy/CsvFile.h>
+#include <coopy/CsvTextBook.h>
 #include <coopy/MergeOutputIndex.h>
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
@@ -230,22 +231,23 @@ int main(int argc, char *argv[]) {
   }
   PolyBook tbook;
   if (diff->outputStartsFromInput()) {
-    if (output=="-") {
-      fprintf(stderr,"Output file needed, please use --output\n");
-      delete diff; diff = NULL;
-      return 1;
-    }
-    if (!_local.write(output.c_str())) {
-      delete diff; diff = NULL;
-      return 1;
-    }
-    if (!_local.read(argv[0])) {
-      fprintf(stderr,"Failed to read %s\n", argv[0]);
-      return 1;
-    }
-    if (!tbook.read(output.c_str())) {
-      fprintf(stderr,"Failed to read %s\n", output.c_str());
-      return 1;
+    if (output!="-") {
+      if (!_local.write(output.c_str())) {
+	delete diff; diff = NULL;
+	return 1;
+      }
+      if (!_local.read(argv[0])) {
+	fprintf(stderr,"Failed to read %s\n", argv[0]);
+	return 1;
+      }
+      if (!tbook.read(output.c_str())) {
+	fprintf(stderr,"Failed to read %s\n", output.c_str());
+	return 1;
+      }
+    } else {
+      tbook.take(new CsvTextBook(true));
+      Property p;
+      tbook.copy(_local,p);
     }
     diff->attachBook(tbook);
   } else {

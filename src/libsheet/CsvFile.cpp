@@ -44,9 +44,9 @@ public:
     }
   }
 
-  bool addSheet(const char *name) {
+  bool addSheet(const char *name,bool named) {
     if (reader != NULL) {
-      sheet = reader->nextSheet(name);
+      sheet = reader->nextSheet(name,named);
     }
     return sheet!=NULL;
   }
@@ -80,7 +80,7 @@ extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p, int quoted) {
 	str[j] = '\0';
 	char *name = str+3;
 	//printf("Name is perhaps [%s]\n", name);
-	state->addSheet(name);
+	state->addSheet(name,true);
 	state->ignore = true;
 	return;
       }
@@ -90,6 +90,10 @@ extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p, int quoted) {
 	return;
       }
     }
+  }
+  if (sheet==NULL) {
+    state->addSheet("sheet",false);
+    sheet = state->sheet;
   }
   if (sheet!=NULL) {
     state->expecting = false;

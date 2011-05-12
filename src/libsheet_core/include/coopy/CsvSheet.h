@@ -9,6 +9,7 @@
 namespace coopy {
   namespace store {
     class CsvSheet;
+    class CsvSheetSchema;
   }
 }
 
@@ -20,6 +21,7 @@ private:
   SheetStyle style;
   bool strict;
   Poly<SheetSchema> pSchema;
+  std::string sheetName;
 public:
   using EscapedTypedSheet<std::string>::resize;
   using EscapedTypedSheet<std::string>::insertRow;
@@ -208,7 +210,56 @@ public:
   virtual std::string getDescription() const {
     return "csv";
   }
+  
+  virtual bool hasSheetName() const {
+    return sheetName!="";
+  }
+  
+  void setSheetName(const char *name) {
+    sheetName = name;
+  }
 };
 
+
+
+/*
+class coopy::store::CsvSheetSchema : public SheetSchema {
+public:
+  CsvSheet *sheet;
+  std::string name;
+  int row;
+
+  CsvSheetSchema(CsvSheet *sheet, const std::string& name, int row) :
+    sheet(sheet), name(name), row(row)
+  {
+    row = 0;
+  }
+
+  virtual int headerHeight() const {
+    return row;
+  }
+
+  virtual std::string getSheetName() const {
+    return name;
+  }
+
+  virtual ColumnInfo getColumnInfo(int x) const {
+    if (row==-1) return ColumnInfo();
+    return ColumnInfo(sheet.cellString(x,row),ColumnType());
+  }
+
+  virtual int getColumnCount() const {
+    return sheet->width();
+  }
+
+  virtual bool providesPrimaryKeys() const {
+    return false;
+  }
+
+  virtual bool isGuess() const {
+    return false;
+  }
+};
+*/
 
 #endif

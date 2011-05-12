@@ -5,7 +5,6 @@
 #include <coopy/PolyBook.h>
 #include <coopy/CsvFile.h>
 #include <coopy/CsvPatch.h>
-#include <coopy/FormatSniffer.h>
 #include <coopy/PatchParser.h>
 #include <coopy/SheetPatcher.h>
 #include <coopy/MergeOutputVerboseDiff.h>
@@ -168,14 +167,6 @@ int main(int argc, char *argv[]) {
     }
   }
   
-  FormatSniffer sniffer;
-  sniffer.open(patch_name);
-  Format format = sniffer.getFormat();
-
-  if (format.id!=FORMAT_PATCH_CSV && format.id!=FORMAT_PATCH_TDIFF) {
-    fprintf(stderr,"Only DTBL CSV format and TDIFF format patches are supported\n");
-    return 1;
-  }
 
   PolySheet sheet = local.readSheetByIndex(0);
   /*
@@ -194,7 +185,7 @@ int main(int argc, char *argv[]) {
   alt->attachSheet(sheet);
   alt->attachBook(local);
   MergeOutputVerboseDiff fakePatcher;
-  PatchParser parser(alt,&sniffer);
+  PatchParser parser(alt,patch_name);
   CompareFlags flags;
   if (fake) {
     start_output(output,flags);

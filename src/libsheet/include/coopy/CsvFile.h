@@ -26,7 +26,7 @@ namespace coopy {
 
 class coopy::store::CsvSheetReader {
 public:
-  virtual CsvSheet *nextSheet(const char *name) = 0;
+  virtual CsvSheet *nextSheet(const char *name, bool named) = 0;
 };
 
 #endif

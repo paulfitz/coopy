@@ -218,6 +218,10 @@ public:
     return Poly<Appearance>();
   }
 
+  virtual bool hasSheetName() const {
+    return true;
+  }
+
 private:
   std::string hash_cache;
 };

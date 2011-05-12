@@ -4,6 +4,9 @@
 #include <coopy/Patcher.h>
 #include <coopy/Reader.h>
 #include <coopy/Property.h>
+#include <coopy/FormatSniffer.h>
+
+#include <string>
 
 namespace coopy {
   namespace cmp {
@@ -13,12 +16,14 @@ namespace coopy {
 
 class coopy::cmp::PatchParser {
 public:
+  coopy::format::FormatSniffer sniffer;
   Patcher *patcher;
-  coopy::format::Reader *reader;
   coopy::store::Property config;
+  std::string fname;
 
   PatchParser(Patcher *patcher,
-	      coopy::format::Reader *reader) : patcher(patcher), reader(reader)
+	      const std::string& fname) : 
+    patcher(patcher), fname(fname)
     {}
     
   bool apply();
@@ -27,6 +32,8 @@ private:
   bool applyCsv();
 
   bool applyTdiff();
+
+  bool applyColor();
 };
 
 #endif

@@ -21,9 +21,8 @@ static string getRoot(const char *fname) {
   return root;
 }
 
-bool CsvTextBook::read(const char *fname) {
+bool CsvTextBook::readCsvs(const char *fname) {
   if (compact) {
-    printf("READing..\n");
     clear();
     Property p;
     if (CsvFile::read(fname,*this,p)!=0) {
@@ -31,7 +30,6 @@ bool CsvTextBook::read(const char *fname) {
       return false;
     }
     for (int i=0; i<(int)sheets.size(); i++) {
-      printf("checking..\n");
       sheets[i].setRowOffset();
     }
     return true;
@@ -101,7 +99,9 @@ bool CsvTextBook::write(const char *fname, TextBook *book, bool compact) {
 	p.put("append",true);
 	p.put("mark_header",true);
       }
-      CsvFile::write(book->readSheetByIndex(i),p);
+      PolySheet sheet = book->readSheetByIndex(i);
+      dbg_printf("  writing CSVS sheet %s\n", names[i].c_str());
+      CsvFile::write(sheet,p);
     }
     return true;
   }
@@ -122,14 +122,17 @@ bool CsvTextBook::write(const char *fname, TextBook *book, bool compact) {
   return ok;
 }
 
-bool CsvTextBook::open(const Property& config) {
-  if (!config.check("file")) return false;
-  return read(config.get("file").asString().c_str());
-}
+//bool CsvTextBook::open(const Property& config) {
+//  if (!config.check("file")) return false;
+//  return readCsvs(config.get("file").asString().c_str());
+//}
 
 bool CsvTextBook::addSheet(const SheetSchema& schema) {
   dbg_printf("csvtextbook::addsheet %s\n", schema.getSheetName().c_str());
   string name = schema.getSheetName();
+  if (!schema.hasSheetName()) {
+    named = false;
+  }
   if (find(names.begin(),names.end(),name)!=names.end()) {
     return false;
   }
@@ -138,20 +141,28 @@ bool CsvTextBook::addSheet(const SheetSchema& schema) {
     fprintf(stderr,"Failed to allocated data sheet\n");
     return false;
   }
+  if (schema.hasSheetName()) {
+    data->setSheetName(name.c_str());
+  }
   PolySheet sheet(data,true);
   name2index[name] = (int)sheets.size();
   sheets.push_back(sheet);
   names.push_back(name);
   data->setWidth(schema.getColumnCount());
+  /*
+  CsvSheetSchema *rec = new CsvSheetSchema(data,name,0);
+  COOPY_ASSERT(rec);
+  data->setSchema(Poly<SheetSchema>(rec,true));
   SimpleSheetSchema *rec = new SimpleSheetSchema;
   COOPY_ASSERT(rec);
   rec->copy(schema);
   data->setSchema(Poly<SheetSchema>(rec,true));
+  */
   return true;
 }
 
 
-CsvSheet *CsvTextBook::nextSheet(const char *name) {
+CsvSheet *CsvTextBook::nextSheet(const char *name, bool named) {
   CsvSheet *data = new CsvSheet;
   if (data==NULL) {
     fprintf(stderr,"Failed to allocated data sheet\n");
@@ -161,6 +172,7 @@ CsvSheet *CsvTextBook::nextSheet(const char *name) {
   name2index[name] = (int)sheets.size();
   sheets.push_back(sheet);
   names.push_back(name);
+  this->named = named;
   return data;
 }
 

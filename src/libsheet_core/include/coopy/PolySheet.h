@@ -329,6 +329,11 @@ public:
     COOPY_ASSERT(sheet);
     return sheet->getColAppearance(x);
   }
+
+  virtual bool hasSheetName() const {
+    COOPY_ASSERT(sheet);
+    return sheet->hasSheetName();
+  }
 };
 
 #endif

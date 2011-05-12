@@ -374,21 +374,47 @@ bool SheetPatcher::mergeStart() {
 
 bool SheetPatcher::mergeDone() {
   if (chain) chain->mergeDone();
-  PolySheet sheet = getSheet();
-  if (!sheet.isValid()) return false;
-  sheet.insertColumn(ColumnRef(0)); 
-  //sheet.insertRow(RowRef(0));
-  for (int i=0; i<sheet.height(); i++) {
-    string txt = activeRow.cellString(0,i);
-    if (txt!="") {
-      sheet.cellString(0,i,txt);
-      Poly<Appearance> appear = sheet.getCellAppearance(0,i);
-      if (appear.isValid()) {
-	appear->begin();
-	appear->setWeightBold(true,AppearanceRange::full());
-	appear->setStrikethrough(false,AppearanceRange::full());
-	appear->end();
+  if (descriptive) {
+    PolySheet sheet = getSheet();
+    if (!sheet.isValid()) return false;
+    sheet.insertColumn(ColumnRef(0)); 
+    //sheet.insertRow(RowRef(0));
+    for (int i=0; i<sheet.height(); i++) {
+      string txt = activeRow.cellString(0,i);
+      if (txt!="") {
+	sheet.cellString(0,i,txt);
+	Poly<Appearance> appear = sheet.getCellAppearance(0,i);
+	if (appear.isValid()) {
+	  appear->begin();
+	  appear->setWeightBold(true,AppearanceRange::full());
+	  appear->setStrikethrough(false,AppearanceRange::full());
+	  appear->end();
+	}
       }
+    }
+    NameSniffer sniffer(sheet);
+    int r = sniffer.getHeaderHeight()-1;
+    if (r>=0 && r<sheet.height()) {
+      for (int i=0; i<=r; i++) {
+	sheet.cellString(0,i,"@");
+      }
+    }
+    if (r<0) {
+      sheet.insertRow(RowRef(0)); 
+      sheet.cellString(0,0,"@");
+      for (int i=0; i<sheet.width(); i++) {
+	sheet.cellString(i+1,0,sniffer.suggestColumnName(i));
+      }
+    }
+    Poly<Appearance> appear = sheet.getRowAppearance(r);
+    if (appear.isValid()) {
+      appear->begin();
+      appear->setBackgroundRgb16(FULL_COLOR,
+				 FULL_COLOR,
+				 HALF_COLOR,
+				 AppearanceRange::full());
+      appear->setWeightBold(true,AppearanceRange::full());
+      appear->end();
     }
   }
   return true;
