@@ -432,20 +432,26 @@ ENDMACRO ()
 ADD_DIFF_TEST(ssdiff_loc ${TESTS}/loc/loc.csv ${TESTS}/loc/loc_perturb.csv)
 
 MACRO(ADD_ROUND_TRIP_TEST name P1 P2 FORMAT)
-    set(fname "${name}_patch.${FORMAT}")
+    set(ext ${FORMAT})
+    if ("${ext}" STREQUAL "color")
+      set(ext "csvs")
+    endif()
+    set(fname "${name}_patch.${ext}")
     set(fname2 "${name}_result.csv")
     ADD_TEST(${name}_diff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
-      --output ${fname} --format-${FORMAT} ${P1} ${P2})
+      --output ${fname} --format ${FORMAT} ${P1} ${P2})
     ADD_TEST(${name}_patch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
       --output ${fname2} ${P1} ${fname})
     ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
       --equals ${fname2} ${P2})
 ENDMACRO ()
 
-foreach(FORMAT csv tdiff)
+foreach(FORMAT csv tdiff color)
   ADD_ROUND_TRIP_TEST(joe_0000_${FORMAT} ${TESTS}/bug/joe_0000/local.csv ${TESTS}/bug/joe_0000/remote.csv ${FORMAT})
   ADD_ROUND_TRIP_TEST(joe_0000_${FORMAT}_inv ${TESTS}/bug/joe_0000/remote.csv ${TESTS}/bug/joe_0000/local.csv ${FORMAT})
+endforeach()
 
+foreach(FORMAT csv tdiff)
   SET(TARGETS named_numbers.csv named_numbers_wide.csv named_numbers_three_23.csv named_numbers_flip_column.csv named_numbers_add_row.csv test003_conflicting_change.csv bridges.csv)
   foreach(T1 ${TARGETS})
     foreach(T2 ${TARGETS})
@@ -462,8 +468,18 @@ foreach(FORMAT csv tdiff)
   endforeach()
 endforeach()
 
+#######################################################################
+#######################################################################
+
+# quote testing
+
 ADD_ROUND_TRIP_TEST(quote_me ${TESTS}/quote_me.csv ${TESTS}/quote_me2.csv tdiff)
 ADD_ROUND_TRIP_TEST(quote_me2 ${TESTS}/quote_me2.csv ${TESTS}/quote_me.csv tdiff)
+
+#######################################################################
+#######################################################################
+
+# color format testing
 
 
 #######################################################################

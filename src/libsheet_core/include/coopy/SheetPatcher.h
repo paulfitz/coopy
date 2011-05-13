@@ -6,6 +6,7 @@
 #include <coopy/PolySheet.h>
 #include <coopy/TextBook.h>
 #include <coopy/CsvSheet.h>
+#include <coopy/NameSniffer.h>
 
 #include <vector>
 
@@ -19,8 +20,10 @@ class coopy::cmp::SheetPatcher : public Patcher {
 private:
   ConfigChange config;
   coopy::store::CsvSheet activeRow;
+  coopy::store::CsvSheet activeCol;
   std::vector<int> columns;
   std::vector<std::string> column_names;
+  std::map<std::string,int> name2col;
   int rowCursor;
   bool summary;
   Patcher *chain;
@@ -28,6 +31,8 @@ private:
   bool descriptive;
   int xoff;
   int yoff;
+  coopy::store::NameSniffer *sniffer;
+  coopy::store::DataSheet *sniffedSheet;
 
   int matchRow(const std::vector<int>& active_cond,
 	       const std::vector<coopy::store::SheetCell>& cond,
@@ -41,13 +46,26 @@ public:
     changeCount = 0;
     xoff = 0;
     yoff = 0;
+    sniffer = 0/*NULL*/;
+    sniffedSheet = 0/*NULL*/;
   }
 
   virtual ~SheetPatcher() {
+    clearNames();
     if (chain!=0/*NULL*/) {
       delete chain;
       chain = 0/*NULL*/;
     }
+  }
+
+  void setNames();
+
+  void clearNames() {
+    if (sniffer!=0/*NULL*/) {
+      delete sniffer;
+      sniffer = 0/*NULL*/;
+    }
+    sniffedSheet = 0/*NULL*/;
   }
 
   void showSummary(Patcher *chain) {

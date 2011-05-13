@@ -50,7 +50,9 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
   case ORDER_CHANGE_DELETE:
     //return sheet->deleteColumn(ColumnRef(change.subject));
     {
-      bool ok = sheet.deleteColumn(ColumnRef(change.identityToIndex(change.subject)));
+      ColumnRef col(change.identityToIndex(change.subject));
+      bool ok = sheet.deleteColumn(col);
+      activeCol.deleteColumn(col);
       //dbg_printf("Sheet width is %d\n", sheet->width());
       if (sheet.width()==0) {
 	sheet.deleteData();
@@ -69,7 +71,21 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 	int toId = change.indicesAfter[toSheet+1];
 	toSheet = change.identityToIndex(toId);
       }
-      return sheet.insertColumn(ColumnRef(toSheet)).isValid();
+      bool ok = sheet.insertColumn(ColumnRef(toSheet)).isValid();
+      ColumnRef at = activeCol.insertColumn(ColumnRef(toSheet));
+      activeCol.cellString(at.getIndex(),0,"+++");
+      if (descriptive) {
+	Poly<Appearance> appear = sheet.getColAppearance(at.getIndex());
+	if (appear.isValid()) {
+	  appear->begin();
+	  appear->setBackgroundRgb16(HALF_COLOR,
+				     FULL_COLOR,
+				     HALF_COLOR,
+				     AppearanceRange::full());
+	  appear->end();
+	}
+      }
+      return ok;
     }
     break;
   case ORDER_CHANGE_MOVE:
@@ -84,9 +100,11 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 	int toId = change.indicesAfter[toSheet+1];
 	toSheet = change.identityToIndex(toId);
       }
-      return sheet.moveColumn(ColumnRef(change.identityToIndex(change.subject)),
-			      ColumnRef(toSheet)
-			      ).isValid();
+      ColumnRef from(change.identityToIndex(change.subject));
+      ColumnRef to(toSheet);
+      bool ok = sheet.moveColumn(from,to).isValid();
+      activeCol.moveColumn(from,to);
+      return ok;
     }
     break;
   default:
@@ -284,7 +302,9 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       for (int c=0; c<width; c++) {
 	if (active_val[c]) {
 	  if (descriptive) {
-	    string from = sheet.cellSummary(c,r).toString();
+	    SheetCell prev = sheet.cellSummary(c,r);
+	    string from = prev.toString();
+	    if (prev.escaped) from = "";
 	    string to = val[c].toString();
 	    sheet.cellString(c,r,from + "->" + to);
 	    Poly<Appearance> appear = sheet.getCellAppearance(c,r);
@@ -342,7 +362,6 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
 bool SheetPatcher::setSheet(const char *name) {
   if (chain) chain->setSheet(name);
 
-  activeRow.resize(1,0);
   TextBook *book = getBook();
   if (book==NULL) return false;
 
@@ -351,6 +370,8 @@ bool SheetPatcher::setSheet(const char *name) {
   columns.clear();
   column_names.clear();
   rowCursor = -1;
+  activeRow.resize(1,0);
+  activeCol.resize(0,1);
 
   // load
   PolySheet psheet;
@@ -363,11 +384,16 @@ bool SheetPatcher::setSheet(const char *name) {
   dbg_printf("Moved to sheet %s\n", name);
   attachSheet(psheet);
   //sheet = &psheet;
+  setNames();
+
   return true;
 }
 
 
 bool SheetPatcher::mergeStart() {
+  activeRow.resize(1,0);
+  activeCol.resize(0,1);
+  setNames();
   if (chain) chain->mergeStart();
   return true;
 }
@@ -392,30 +418,38 @@ bool SheetPatcher::mergeDone() {
 	}
       }
     }
-    NameSniffer sniffer(sheet);
-    int r = sniffer.getHeaderHeight()-1;
+    COOPY_ASSERT(sniffer);
+    int r = sniffer->getHeaderHeight()-1;
     if (r>=0 && r<sheet.height()) {
       for (int i=0; i<=r; i++) {
-	sheet.cellString(0,i,"@");
+	sheet.cellString(0,i,string("@")+sheet.cellString(0,i));
       }
     }
     if (r<0) {
       sheet.insertRow(RowRef(0)); 
-      sheet.cellString(0,0,"@");
-      for (int i=0; i<sheet.width(); i++) {
-	sheet.cellString(i+1,0,sniffer.suggestColumnName(i));
+      sheet.cellString(0,yoff,"@");
+      for (int i=1; i<sheet.width(); i++) {
+	sheet.cellString(i,yoff,sniffer->suggestColumnName(i-1));
       }
     }
-    Poly<Appearance> appear = sheet.getRowAppearance(r);
+    int yoff = 0;
+    /*
+    {
+      sheet.insertRow(RowRef(0)); 
+      sheet.cellString(0,0,"!");
+      for (int i=1; i<sheet.width(); i++) {
+	sheet.cellString(i,0,activeCol.cellString(i-1,0));
+      }
+      yoff++;
+    }
+    */
+    Poly<Appearance> appear = sheet.getRowAppearance(r+yoff);
     if (appear.isValid()) {
       appear->begin();
-      appear->setBackgroundRgb16(FULL_COLOR,
-				 FULL_COLOR,
-				 HALF_COLOR,
-				 AppearanceRange::full());
       appear->setWeightBold(true,AppearanceRange::full());
       appear->end();
     }
+
   }
   return true;
 }
@@ -423,6 +457,22 @@ bool SheetPatcher::mergeDone() {
 bool SheetPatcher::mergeAllDone() {
   if (chain) chain->mergeAllDone();
   return true;
+}
+
+
+void SheetPatcher::setNames() {
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return;
+  if (&sheet!=sniffedSheet) {
+    clearNames();
+    sniffer = new NameSniffer(sheet);
+    COOPY_ASSERT(sniffer);
+    sniffedSheet = &sheet;
+    activeCol.resize(sheet.width(),1);
+    for (int i=0; i<sheet.width(); i++) {
+      activeCol.cellString(i,0) = sniffer->suggestColumnName(i);
+    }
+  }
 }
 
 

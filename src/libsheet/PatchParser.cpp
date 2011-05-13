@@ -938,9 +938,21 @@ bool PatchParser::applyColor() {
       string code = sheet.cellString(0,i);
       if (code == "@") {
 	cols.clear();
+	bool acts = false;
+	if (i>0) {
+	  if (sheet.cellString(0,i-1)=="!") {
+	    acts = true;
+	  }
+	}
 	for (int j=1; j<sheet.width(); j++) {
-	  cols.push_back(sheet.cellString(j,i));
-	  indexes[sheet.cellString(j,i)] = true;
+	  TDiffPart p(sheet.cellString(j,i),false);
+	  string txt = p.hasNval?p.nval.text:p.val.text;
+	  cols.push_back(txt);
+	  indexes[txt] = true;
+	}
+	if (acts) {
+	  OrderChange order;
+	  // not yet implemented
 	}
       } else if (code == "+++") {
 	change.mode = ROW_CHANGE_INSERT;
