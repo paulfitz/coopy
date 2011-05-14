@@ -920,6 +920,7 @@ bool PatchParser::applyColor() {
   patcher->mergeStart();
 
   vector<string> names = book.getNames();
+  bool needDeclare = false;
   for (int s=0; s<(int)names.size(); s++) {
     string name = names[s];
     patcher->setSheet(name.c_str());
@@ -929,14 +930,17 @@ bool PatchParser::applyColor() {
       return false;
     }
     vector<string> cols;
+    vector<string> activeCol;
+    vector<string> statusCol;
     RowChange::txt2bool indexes;
     for (int i=0; i<sheet.height(); i++) {
       RowChange change;
-      change.names = cols;
+      change.names = activeCol;
       change.allNames = cols;
+      //printf("Cols are %s\n",vector2string(cols).c_str());
       change.indexes = indexes;
       string code = sheet.cellString(0,i);
-      if (code == "@") {
+      if (code[0] == '@') {
 	cols.clear();
 	bool acts = false;
 	if (i>0) {
@@ -948,13 +952,64 @@ bool PatchParser::applyColor() {
 	  TDiffPart p(sheet.cellString(j,i),false);
 	  string txt = p.hasNval?p.nval.text:p.val.text;
 	  cols.push_back(txt);
+	  activeCol.push_back(txt);
+	  statusCol.push_back("");
 	  indexes[txt] = true;
 	}
 	if (acts) {
-	  OrderChange order;
-	  // not yet implemented
+	  activeCol.clear();
+	  for (int j=1; j<sheet.width(); j++) {
+	    string act = sheet.cellString(j,i-1);
+	    string col = cols[j-1];
+	    //printf("[%s] [%s]\n", act.c_str(), col.c_str());
+	    if (act=="+++") {
+	      statusCol[j-1] = act;
+	      indexes[col] = false;
+	    }
+	    if (act=="---") {
+	      statusCol[j-1] = act;
+	      indexes[col] = false;
+	    } else {
+	      activeCol.push_back(col);
+	    }
+	  }
+	  for (int j=0; j<(int)cols.size(); j++) {
+	    string act = statusCol[j];
+	    //printf("   [%d] [%s]\n", j, act.c_str());
+	    if (act=="") continue;
+	    OrderChange order;
+	    if (act=="+++") {
+	      order.mode = ORDER_CHANGE_INSERT;
+	    } else if (act=="---") {
+	      order.mode = ORDER_CHANGE_DELETE;
+	    }
+	    for (int k=0; k<(int)cols.size(); k++) {	
+	      string actk = statusCol[k];
+	      if (actk=="" || (k>=j&&actk=="---") || (k<j&&actk=="+++")) {
+		order.namesBefore.push_back(cols[k]);
+		order.indicesBefore.push_back((actk=="+++")?-(k+1):k);
+	      }
+	    }
+	    for (int k=0; k<(int)cols.size(); k++) {	
+	      string actk = statusCol[k];
+	      if (actk=="" || (k>j&&actk=="---") || (k<=j&&actk=="+++")) {
+		order.namesAfter.push_back(cols[k]);
+		order.indicesAfter.push_back((actk=="+++")?-(k+1):k);
+	      }
+	    }
+	    order.subject = (act=="+++")?-(j+1):j;
+	    patcher->changeColumn(order);
+	  }
 	}
-      } else if (code == "+++") {
+	code = code.substr(1,code.length());
+
+	NameChange nc;
+	nc.mode = NAME_CHANGE_DECLARE;
+	nc.final = true;
+	nc.names = activeCol;
+	patcher->changeName(nc);
+      }
+      if (code == "+++") {
 	change.mode = ROW_CHANGE_INSERT;
 	for (int j=1; j<sheet.width(); j++) {
 	  SheetCell c = sheet.cellSummary(j,i);
@@ -973,16 +1028,22 @@ bool PatchParser::applyColor() {
 	for (int j=1; j<sheet.width(); j++) {
 	  SheetCell c = sheet.cellSummary(j,i);
 	  bool done = false;
+	  string col = cols[j-1];
+	  bool added = statusCol[j-1]=="+++";
 	  if (!c.escaped) {
 	    TDiffPart p(c.text,false);
 	    if (p.hasNval) {
-	      change.val[cols[j-1]] = p.nval;
-	      change.cond[cols[j-1]] = p.val;
+	      change.val[col] = p.nval;
+	      if (!added) {
+		change.cond[col] = p.val;
+	      }
 	      done = true;
 	    }
 	  }
 	  if (!done) {
-	    change.cond[cols[j-1]] = c;
+	    if (!added) {
+	      change.cond[col] = c;
+	    }
 	  }
 	}
 	patcher->changeRow(change);

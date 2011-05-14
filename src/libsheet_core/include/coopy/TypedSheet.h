@@ -69,7 +69,8 @@ public:
 
   virtual bool deleteColumn(const ColumnRef& column) {
     int offset = column.getIndex();
-    if (offset<0||offset>=(int)arr.size()) return false;
+    if (offset<0) return false;
+    if (offset>=w) return false;
     for (int i=0; i<(int)arr.size(); i++) {
       arr[i].erase(arr[i].begin()+offset);
     }

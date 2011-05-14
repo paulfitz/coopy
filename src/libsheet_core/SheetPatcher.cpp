@@ -36,6 +36,74 @@ int SheetPatcher::matchRow(const vector<int>& active_cond,
   return -1;
 }
 
+int SheetPatcher::matchCol(const std::string& mover) {
+  string imover = mover;
+  if (syn2name.find(mover)!=syn2name.end()) {
+    imover = syn2name[mover];
+  }
+  for (int i=0; i<activeCol.width(); i++) {
+    //    printf("Checking %s against %s\n", activeCol.cellString(i,0).c_str(),
+    //	   mover.c_str());
+    if (activeCol.cellString(i,0)==imover) {
+      if (statusCol.cellString(i,0)!="---") {
+	return i;
+      }
+    }
+  }
+  fprintf(stderr,"column not found: %s\n", mover.c_str());
+  exit(1);
+  return -1;
+}
+
+int SheetPatcher::updateCols() {
+  PolySheet sheet = getSheet();
+  if (activeCol.width()!=sheet.width()) {
+    printf("activeCol drift\n");
+    exit(1);
+  }
+  name2col.clear();
+  for (int i=0; i<activeCol.width(); i++) {
+    string name = activeCol.cellString(i,0);
+    //printf("NAME %d %s\n", i, name.c_str());
+    if (name!="---") {
+      name2col[name] = i;
+      if (name2syn.find(name)!=name2syn.end()) {
+	name2col[name2syn[name]] = i;
+      }
+    }
+  }
+  return 0;
+}
+
+bool SheetPatcher::moveColumn(int idx, int idx2) {
+  PolySheet sheet = getSheet();
+  ColumnRef from(idx);
+  ColumnRef to(idx2);
+  bool ok = sheet.moveColumn(from,to).isValid();
+  activeCol.moveColumn(from,to);
+  ColumnRef at = statusCol.moveColumn(from,to);
+  if (descriptive) {
+    int first = idx;
+    int final = at.getIndex();
+    int sgn = 1;
+    string name = "";
+    string ch = ">";
+    if (final<first) {
+      first = final;
+      final = idx;
+      sgn = -1;
+      ch = "<";
+    }
+    for (int i=first; i!=final; i+=sgn) {
+      if (statusCol.cellString(i,0)!="---") {
+	name += ch;
+      }
+    }
+    statusCol.cellString(final,0,name);
+  }
+  updateCols();
+  return ok;
+}
 
 bool SheetPatcher::changeColumn(const OrderChange& change) {
   changeCount++;
@@ -50,14 +118,33 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
   case ORDER_CHANGE_DELETE:
     //return sheet->deleteColumn(ColumnRef(change.subject));
     {
-      ColumnRef col(change.identityToIndex(change.subject));
-      bool ok = sheet.deleteColumn(col);
-      activeCol.deleteColumn(col);
-      //dbg_printf("Sheet width is %d\n", sheet->width());
-      if (sheet.width()==0) {
-	sheet.deleteData();
-	rowCursor = -1;
+      string mover = change.namesBefore[change.identityToIndex(change.subject)];
+      //printf("Deleting %s\n", mover.c_str());
+      int idx = matchCol(mover);
+      bool ok = true;
+      if (!descriptive) {
+	ColumnRef col(idx); //change.identityToIndex(change.subject));
+	ok = sheet.deleteColumn(col);
+	activeCol.deleteColumn(col);
+	statusCol.deleteColumn(col);
+	if (sheet.width()==0) {
+	  sheet.deleteData();
+	  rowCursor = -1;
+	}
+      } else {
+	statusCol.cellString(idx,0,"---");
+	bool gone = true;
+	for (int i=0; i<(int)statusCol.width(); i++) {
+	  if (statusCol.cellString(i,0)=="") {
+	    gone = false;
+	    break;
+	  }
+	}
+	if (gone) {
+	  killNeutral = true;
+	}
       }
+      updateCols();
       return ok;
     }
     break;
@@ -65,15 +152,32 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
     //return sheet->insertColumn(ColumnRef(change.subject)).isValid();
     {
       int toSheet = change.identityToIndexAfter(change.subject);
+      string mover = change.namesAfter[toSheet];
+      //printf("Adding %s\n", mover.c_str());
+      /*
       if (toSheet==change.indicesAfter.size()-1) {
 	toSheet = -1;
       } else {
 	int toId = change.indicesAfter[toSheet+1];
 	toSheet = change.identityToIndex(toId);
       }
-      bool ok = sheet.insertColumn(ColumnRef(toSheet)).isValid();
-      ColumnRef at = activeCol.insertColumn(ColumnRef(toSheet));
-      activeCol.cellString(at.getIndex(),0,"+++");
+      */
+      string before = "";
+      int idx = -1;
+      if (toSheet!=change.indicesAfter.size()-1) {
+	//if (toSheet==-1) {
+	//printf("At end\n");
+	//} else {
+	before = change.namesAfter[toSheet+1];
+	//printf("Before %s\n", before.c_str());
+	idx = matchCol(before);
+      }
+      //bool ok = sheet.insertColumn(ColumnRef(toSheet)).isValid();
+      bool ok = sheet.insertColumn(ColumnRef(idx)).isValid();
+      ColumnRef at = activeCol.insertColumn(ColumnRef(idx));
+      statusCol.insertColumn(ColumnRef(idx));
+      activeCol.cellString(at.getIndex(),0,mover);
+      statusCol.cellString(at.getIndex(),0,"+++");
       if (descriptive) {
 	Poly<Appearance> appear = sheet.getColAppearance(at.getIndex());
 	if (appear.isValid()) {
@@ -85,6 +189,7 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 	  appear->end();
 	}
       }
+      updateCols();
       return ok;
     }
     break;
@@ -94,6 +199,19 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
     //).isValid();
     {
       int toSheet = change.identityToIndexAfter(change.subject);
+      string mover = change.namesAfter[toSheet];
+      int idx = matchCol(mover);
+      //printf("Moving %s\n", mover.c_str());
+      string before = "";
+      int idx2 = -1;
+      if (toSheet!=change.indicesAfter.size()-1) {
+	before = change.namesAfter[change.indicesAfter[toSheet+1]];
+	//printf("Before %s\n", before.c_str());
+	idx2 = matchCol(before);
+	//int toId = change.indicesAfter[toSheet+1];
+	//toSheet = change.identityToIndex(toId);
+      }
+      /*
       if (toSheet==change.indicesAfter.size()-1) {
 	toSheet = -1;
       } else {
@@ -103,8 +221,8 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
       ColumnRef from(change.identityToIndex(change.subject));
       ColumnRef to(toSheet);
       bool ok = sheet.moveColumn(from,to).isValid();
-      activeCol.moveColumn(from,to);
-      return ok;
+      */
+      return moveColumn(idx,idx2);
     }
     break;
   default:
@@ -130,13 +248,14 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 
   dbg_printf("\n======================\nRow cursor in: %d\n", rowCursor);
   if (!change.sequential) rowCursor = -1;
-  map<string,int> dir;
+  //map<string,int> dir;
   vector<int> active_cond;
   vector<SheetCell> cond;
   vector<int> active_val;
   vector<SheetCell> val;
   vector<string> allNames = change.allNames;
-  int width = (int)change.allNames.size();
+  int width = sheet.width(); //(int)change.allNames.size();
+  /*
   if (width==0) {
     if (column_names.size()==0) {
       NameSniffer sniffer(sheet);
@@ -145,8 +264,9 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     allNames = column_names;
     width = (int)allNames.size();
   }
+  */
   for (int i=0; i<width; i++) {
-    dir[allNames[i]] = i;
+    //dir[allNames[i]] = i;
     active_cond.push_back(0);
     cond.push_back(SheetCell());
     active_val.push_back(0);
@@ -154,17 +274,21 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   }
   for (RowChange::txt2cell::const_iterator it = change.cond.begin();
        it!=change.cond.end(); it++) {
-    int idx = dir[it->first];
-    //printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
-    active_cond[idx] = 1;
-    cond[idx] = it->second;
+    if (name2col.find(it->first)!=name2col.end()) {
+      int idx = name2col[it->first]; //dir[it->first];
+      //printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
+      active_cond[idx] = 1;
+      cond[idx] = it->second;
+    }
   }
   for (RowChange::txt2cell::const_iterator it = change.val.begin();
        it!=change.val.end(); it++) {
-    int idx = dir[it->first];
-    //printf("  [val] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
-    active_val[idx] = 1;
-    val[idx] = it->second;
+    if (name2col.find(it->first)!=name2col.end()) {
+      int idx = name2col[it->first]; //dir[it->first];
+      //printf("  [val] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
+      active_val[idx] = 1;
+      val[idx] = it->second;
+    }
   }
   
   switch (change.mode) {
@@ -345,9 +469,35 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
   if (!sheet.isValid()) return false;
   if (chain) chain->declareNames(names,final);
   if (config.trustNames==false) {
-    if ((int)names.size()!=sheet.width()) {
-      fprintf(stderr,"* WARNING: name mismatch\n");
-      return false;
+    if (!descriptive) {
+      if ((int)names.size()!=sheet.width()) {
+	fprintf(stderr,"* ERROR: name mismatch\n");
+	return false;
+      }
+    }
+    if (!final) {
+      for (int i=0; i<(int)names.size(); i++) {
+	if (names[i]!=activeCol.cellString(i,0)) {
+	  if (names[i][0]=='[') {
+	    syn2name[names[i]] = activeCol.cellString(i,0);
+	    name2syn[activeCol.cellString(i,0)] = names[i];
+	  }
+	}
+      }
+      updateCols();
+    } else {
+      if (!descriptive) {
+	for (int i=0; i<(int)names.size(); i++) {
+	  if (names[i]!=activeCol.cellString(i,0)) {
+	    if (names[i][0]!='[') {
+	      int idx = matchCol(names[i]);
+	      int idx1 = matchCol(activeCol.cellString(i,0));
+	      moveColumn(idx,idx1);
+	    }
+	  }
+	}
+	updateCols();
+      }
     }
   } else {
     for (int i=0; i<(int)names.size(); i++) {
@@ -370,8 +520,6 @@ bool SheetPatcher::setSheet(const char *name) {
   columns.clear();
   column_names.clear();
   rowCursor = -1;
-  activeRow.resize(1,0);
-  activeCol.resize(0,1);
 
   // load
   PolySheet psheet;
@@ -391,8 +539,8 @@ bool SheetPatcher::setSheet(const char *name) {
 
 
 bool SheetPatcher::mergeStart() {
+  killNeutral = false;
   activeRow.resize(1,0);
-  activeCol.resize(0,1);
   setNames();
   if (chain) chain->mergeStart();
   return true;
@@ -405,8 +553,11 @@ bool SheetPatcher::mergeDone() {
     if (!sheet.isValid()) return false;
     sheet.insertColumn(ColumnRef(0)); 
     //sheet.insertRow(RowRef(0));
-    for (int i=0; i<sheet.height(); i++) {
+    for (int i=0; i<sheet.height()&&i<activeRow.height(); i++) {
       string txt = activeRow.cellString(0,i);
+      if (txt==""&&killNeutral) {
+	txt = "---";
+      }
       if (txt!="") {
 	sheet.cellString(0,i,txt);
 	Poly<Appearance> appear = sheet.getCellAppearance(0,i);
@@ -419,30 +570,41 @@ bool SheetPatcher::mergeDone() {
       }
     }
     COOPY_ASSERT(sniffer);
-    int r = sniffer->getHeaderHeight()-1;
+    int r = -1;
+    r = sniffer->getHeaderHeight()-1;
     if (r>=0 && r<sheet.height()) {
-      for (int i=0; i<=r; i++) {
-	sheet.cellString(0,i,string("@")+sheet.cellString(0,i));
+      string key = sheet.cellString(0,r);
+      if (key == "" || key == "->") {
+	for (int i=0; i<=r; i++) {
+	  sheet.cellString(0,i,string("@")+sheet.cellString(0,i));
+	}
+      } else {
+	r = -1;
       }
     }
     if (r<0) {
       sheet.insertRow(RowRef(0)); 
-      sheet.cellString(0,yoff,"@");
+      sheet.cellString(0,yoff,"@@");
       for (int i=1; i<sheet.width(); i++) {
-	sheet.cellString(i,yoff,sniffer->suggestColumnName(i-1));
+	sheet.cellString(i,yoff,activeCol.cellString(i-1,0));
       }
     }
     int yoff = 0;
-    /*
-    {
+    bool colAction = false;
+    for (int i=1; i<sheet.width(); i++) {
+      if (statusCol.cellString(i-1,0)!="") {
+	colAction = true;
+	break;
+      }
+    }
+    if (colAction) {
       sheet.insertRow(RowRef(0)); 
       sheet.cellString(0,0,"!");
       for (int i=1; i<sheet.width(); i++) {
-	sheet.cellString(i,0,activeCol.cellString(i-1,0));
+	sheet.cellString(i,0,statusCol.cellString(i-1,0));
       }
       yoff++;
     }
-    */
     Poly<Appearance> appear = sheet.getRowAppearance(r+yoff);
     if (appear.isValid()) {
       appear->begin();
@@ -465,13 +627,17 @@ void SheetPatcher::setNames() {
   if (!sheet.isValid()) return;
   if (&sheet!=sniffedSheet) {
     clearNames();
+    activeCol.resize(0,1);
+    statusCol.resize(0,1);
     sniffer = new NameSniffer(sheet);
     COOPY_ASSERT(sniffer);
     sniffedSheet = &sheet;
     activeCol.resize(sheet.width(),1);
+    statusCol.resize(sheet.width(),1);
     for (int i=0; i<sheet.width(); i++) {
-      activeCol.cellString(i,0) = sniffer->suggestColumnName(i);
+      activeCol.cellString(i,0,sniffer->suggestColumnName(i));
     }
+    updateCols();
   }
 }
 

@@ -21,9 +21,12 @@ private:
   ConfigChange config;
   coopy::store::CsvSheet activeRow;
   coopy::store::CsvSheet activeCol;
+  coopy::store::CsvSheet statusCol;
   std::vector<int> columns;
   std::vector<std::string> column_names;
   std::map<std::string,int> name2col;
+  std::map<std::string,std::string> syn2name;
+  std::map<std::string,std::string> name2syn;
   int rowCursor;
   bool summary;
   Patcher *chain;
@@ -31,12 +34,19 @@ private:
   bool descriptive;
   int xoff;
   int yoff;
+  bool killNeutral;
   coopy::store::NameSniffer *sniffer;
   coopy::store::DataSheet *sniffedSheet;
 
   int matchRow(const std::vector<int>& active_cond,
 	       const std::vector<coopy::store::SheetCell>& cond,
 	       int width);
+
+  int matchCol(const std::string& mover);
+
+  int updateCols();
+
+  bool moveColumn(int idx, int idx2);
 
 public:
   SheetPatcher(bool descriptive = false) : descriptive(descriptive) {
@@ -48,6 +58,7 @@ public:
     yoff = 0;
     sniffer = 0/*NULL*/;
     sniffedSheet = 0/*NULL*/;
+    killNeutral = false;
   }
 
   virtual ~SheetPatcher() {
