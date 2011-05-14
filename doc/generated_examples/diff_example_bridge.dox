@@ -6,12 +6,19 @@
 \defgroup diff_example_bridge bridge example for ssdiff
 
 \section diff_example_bridge_command command
+ 
+In this example, we compare two tables as follows:
 \verbatim
  ssdiff broken_bridges.csv bridges.csv
+ ssdiff --format hilite --output diff.xls broken_bridges.csv bridges.csv
 \endverbatim
+The two tables are:
 \li \ref diff_example_bridge_ref1 "broken_bridges.csv"
 \li \ref diff_example_bridge_ref2 "bridges.csv"
-\li \ref diff_example_bridge_tdiff_output "tdiff output"
+ 
+The result of comparing the tables are:
+\li \ref diff_example_bridge_tdiff_output "tdiff output"  (textual comparision)
+\li \ref diff_example_bridge_highlighter_output "highlighter output"  (visual comparision)
  
 \section diff_example_bridge_ref1 broken_bridges.csv
 <table>
@@ -46,6 +53,80 @@
 = |bridge=Williamsburg|designer=D. Duck->L. L. Buck|
 - |bridge=Spamspan|
 \endverbatim
+ 
+\section diff_example_bridge_highlighter_output highlighter output
+<p><table >
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>\@</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>bridge</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>designer</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>length</b></td>
+<td  style=""><b></b></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Brooklyn</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">J. A. Roebling</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1595</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>+++</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>Manhattan</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>G. Lindenthal</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>1470</b></td>
+<td  bgcolor="#7FFF7F" style="background:#7FFF7F;"><b></b></td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Williamsburg</td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>D. Duck-&gt;L. L. Buck</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1600</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Queensborough</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Palmer &amp; Hornbostel</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1182</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Triborough</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td colspan="2"  valign="bottom"  align="left"  style=" font-size:10pt;">1380,383</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Bronx Whitestone</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">2300</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Throgs Neck</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1800</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">George Washington</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">3500</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><b>---</b></td>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">Spamspan</span></td>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">S. Spamington</span></td>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">10000</span></td>
+<td  bgcolor="#FF7F7F" style="background:#FF7F7F;"><span style="text-decoration: line-through;"></span></td>
+</tr>
+</table>
+ 
 
  *
  */

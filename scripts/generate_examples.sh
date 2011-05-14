@@ -60,8 +60,19 @@ EOF
 function show_file {
     local fname="$1"
     local format="$2"
-    if [ "k$format" = "kcsv" ]; then
-	$CSV2HTML $fname | sed "s/&rt;/>/g"
+    if [ "k$format" = "kxls" ]; then
+	rm -f /tmp/tmp.html
+	# bug in ssconvert :-(
+	#PROB="1380,383"
+	#echo "= |length=$PROB->FOO|" | ( sspatch --inplace $fname - > /dev/null )
+	ssconvert --export-type=Gnumeric_html:html40frag $fname /tmp/tmp.html > /dev/null
+	if [ ! -e /tmp/tmp.html ] ; then
+	    echo "Failed to ssconvert $fname" 1>&2
+	    exit 1
+	fi
+	cat /tmp/tmp.html | grep -v caption | grep -v exporter | sed "s/&rt;/>/g" | sed "s/\@/\\\\@/g" | sed "s/border=.1.//g" | sed "s|</*font[^<>]*>||g" | sed "s/FOO/$PROB/"
+    elif [ "k$format" = "kcsv" ]; then
+	$CSV2HTML $fname | sed "s/&rt;/>/g" | sed "s/\@/\\\\@/g"
     else
 	echo "\verbatim"
 	cat $fname || exit 1
@@ -81,15 +92,19 @@ function diff_base_apply {
     echo "### $DIFF --format-tdiff $TEST/$f1 $TEST/$f2"
     {
 	echo "## SECTION command command"
+	echo " "
+	echo "In this example, we compare two tables as follows:"
 	echo "\verbatim"
 	echo " ssdiff $f1 $f2"
-	#echo " ssdiff --format-tdiff $f1 $f2"
-	#echo " ssdiff --format-csv $f1 $f2"
+	echo " ssdiff --format hilite --output diff.xls $f1 $f2"
 	echo "\endverbatim"
+	echo "The two tables are:"
 	echo "## LINK ref1 \"$f1\""
 	echo "## LINK ref2 \"$f2\""
-	echo "## LINK tdiff_output \"tdiff output\""
-	#echo "## LINK csv_output \"csv output\""
+	echo " "
+	echo "The result of comparing the tables are:"
+	echo "## LINK tdiff_output \"tdiff output\"  (textual comparision)" 
+	echo "## LINK highlighter_output \"highlighter output\"  (visual comparision)"
 	echo " "
 	echo "## SECTION ref1 $f1"
 	$SSFORMAT $TEST/$f1 $TMPF.2.csv 2> /dev/null
@@ -99,13 +114,19 @@ function diff_base_apply {
 	$SSFORMAT $TEST/$f2 $TMPF.3.csv 2> /dev/null
 	show_file $TMPF.3.csv csv
 	echo "## SECTION tdiff_output tdiff output"
-	$DIFF --output $TMPF1 --format-tdiff $TEST/$f1 $TEST/$f2 || exit 1
+	$DIFF --output $TMPF1 --format tdiff $TEST/$f1 $TEST/$f2 || exit 1
 	show_file $TMPF1 tdiff
-	#echo " "
-	#echo "## SECTION csv_output csv output"
-	#$DIFF --output $TMPF2 --format-csv $TEST/$f1 $TEST/$f2 || exit 1
-	#show_file $TMPF2 csv
-	#echo " "
+	echo " "
+	echo "## SECTION highlighter_output highlighter output"
+	rm -f $TMPF2.xls
+	{
+	    $DIFF --output $TMPF2.xls --format color $TEST/$f1 $TEST/$f2 || exit 1
+	} > /dev/null
+	show_file $TMPF2.xls xls
+	if [ ! -e $TMPF2.xls ]; then
+	    exit 1
+	fi
+	echo " "
     } > $out
     echo "* Generated $out"
     n=`echo $name | sed "s/_/ /g" | sed "s/^named //"`

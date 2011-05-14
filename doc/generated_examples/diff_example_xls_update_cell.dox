@@ -6,12 +6,19 @@
 \defgroup diff_example_xls_update_cell xls update cell example for ssdiff
 
 \section diff_example_xls_update_cell_command command
+ 
+In this example, we compare two tables as follows:
 \verbatim
  ssdiff numbers.xls numbers_change_five.xls
+ ssdiff --format hilite --output diff.xls numbers.xls numbers_change_five.xls
 \endverbatim
+The two tables are:
 \li \ref diff_example_xls_update_cell_ref1 "numbers.xls"
 \li \ref diff_example_xls_update_cell_ref2 "numbers_change_five.xls"
-\li \ref diff_example_xls_update_cell_tdiff_output "tdiff output"
+ 
+The result of comparing the tables are:
+\li \ref diff_example_xls_update_cell_tdiff_output "tdiff output"  (textual comparision)
+\li \ref diff_example_xls_update_cell_highlighter_output "highlighter output"  (visual comparision)
  
 \section diff_example_xls_update_cell_ref1 numbers.xls
 <table>
@@ -40,6 +47,41 @@
 
 = |Name=five->fyffe|
 \endverbatim
+ 
+\section diff_example_xls_update_cell_highlighter_output highlighter output
+<p><table >
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:12pt; color:#3366FF;"><b>\@</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:12pt; color:#3366FF;"><b>Name</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:12pt; color:#3366FF;"><b>Number</b></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">one</td>
+<td  valign="bottom"  align="right"  style=" font-size:10pt;">1</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">two</td>
+<td  valign="bottom"  align="right"  style=" font-size:10pt;">2</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">three</td>
+<td  valign="bottom"  align="right"  style=" font-size:10pt;">3</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">four</td>
+<td  valign="bottom"  align="right"  style=" font-size:10pt;">4</td>
+</tr>
+<tr>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;</b></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>five-&gt;fyffe</b></td>
+<td  valign="bottom"  align="right"  style=" font-size:10pt;">5</td>
+</tr>
+</table>
+ 
 
  *
  */

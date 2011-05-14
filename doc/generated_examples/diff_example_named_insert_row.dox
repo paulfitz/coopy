@@ -6,12 +6,19 @@
 \defgroup diff_example_named_insert_row insert row example for ssdiff
 
 \section diff_example_named_insert_row_command command
+ 
+In this example, we compare two tables as follows:
 \verbatim
  ssdiff named_numbers.csv named_numbers_add_row.csv
+ ssdiff --format hilite --output diff.xls named_numbers.csv named_numbers_add_row.csv
 \endverbatim
+The two tables are:
 \li \ref diff_example_named_insert_row_ref1 "named_numbers.csv"
 \li \ref diff_example_named_insert_row_ref2 "named_numbers_add_row.csv"
-\li \ref diff_example_named_insert_row_tdiff_output "tdiff output"
+ 
+The result of comparing the tables are:
+\li \ref diff_example_named_insert_row_tdiff_output "tdiff output"  (textual comparision)
+\li \ref diff_example_named_insert_row_highlighter_output "highlighter output"  (visual comparision)
  
 \section diff_example_named_insert_row_ref1 named_numbers.csv
 <table>
@@ -39,6 +46,46 @@
 * |NAME=five|
 + |NAME:->six|DIGIT:->6|
 \endverbatim
+ 
+\section diff_example_named_insert_row_highlighter_output highlighter output
+<p><table >
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>\@</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>NAME</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>DIGIT</b></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">one</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">two</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">2</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">three</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">3</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">four</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">4</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">five</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">5</td>
+</tr>
+<tr>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>+++</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>six</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>6</b></td>
+</tr>
+</table>
+ 
 
  *
  */

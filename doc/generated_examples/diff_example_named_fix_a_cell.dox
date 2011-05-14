@@ -6,12 +6,19 @@
 \defgroup diff_example_named_fix_a_cell fix a cell example for ssdiff
 
 \section diff_example_named_fix_a_cell_command command
+ 
+In this example, we compare two tables as follows:
 \verbatim
  ssdiff named_numbers_three_23.csv named_numbers.csv
+ ssdiff --format hilite --output diff.xls named_numbers_three_23.csv named_numbers.csv
 \endverbatim
+The two tables are:
 \li \ref diff_example_named_fix_a_cell_ref1 "named_numbers_three_23.csv"
 \li \ref diff_example_named_fix_a_cell_ref2 "named_numbers.csv"
-\li \ref diff_example_named_fix_a_cell_tdiff_output "tdiff output"
+ 
+The result of comparing the tables are:
+\li \ref diff_example_named_fix_a_cell_tdiff_output "tdiff output"  (textual comparision)
+\li \ref diff_example_named_fix_a_cell_highlighter_output "highlighter output"  (visual comparision)
  
 \section diff_example_named_fix_a_cell_ref1 named_numbers_three_23.csv
 <table>
@@ -37,6 +44,41 @@
 # tdiff version 0.3
 = |NAME=three|DIGIT=23->3|
 \endverbatim
+ 
+\section diff_example_named_fix_a_cell_highlighter_output highlighter output
+<p><table >
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>\@</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>NAME</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>DIGIT</b></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">one</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">two</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">2</td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">three</td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>23-&gt;3</b></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">four</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">4</td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">five</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">5</td>
+</tr>
+</table>
+ 
 
  *
  */

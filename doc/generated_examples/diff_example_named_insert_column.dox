@@ -6,12 +6,19 @@
 \defgroup diff_example_named_insert_column insert column example for ssdiff
 
 \section diff_example_named_insert_column_command command
+ 
+In this example, we compare two tables as follows:
 \verbatim
  ssdiff named_numbers.csv named_numbers_wide.csv
+ ssdiff --format hilite --output diff.xls named_numbers.csv named_numbers_wide.csv
 \endverbatim
+The two tables are:
 \li \ref diff_example_named_insert_column_ref1 "named_numbers.csv"
 \li \ref diff_example_named_insert_column_ref2 "named_numbers_wide.csv"
-\li \ref diff_example_named_insert_column_tdiff_output "tdiff output"
+ 
+The result of comparing the tables are:
+\li \ref diff_example_named_insert_column_tdiff_output "tdiff output"  (textual comparision)
+\li \ref diff_example_named_insert_column_highlighter_output "highlighter output"  (visual comparision)
  
 \section diff_example_named_insert_column_ref1 named_numbers.csv
 <table>
@@ -46,6 +53,66 @@
 = |four|quatre|....|
 = |five|cinq|.....|
 \endverbatim
+ 
+\section diff_example_named_insert_column_highlighter_output highlighter output
+<p><table >
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>!</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>+++</b></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>+++</b></td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>\@-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>NAME</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>DIGIT</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;FRENCH</b></td>
+<td colspan="2"  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;UNARY</b></td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">one</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1</td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;un</b></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;.</b></td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">two</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">2</td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;deux</b></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;..</b></td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">three</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">3</td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;trois</b></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;...</b></td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">four</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">4</td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;quatre</b></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;....</b></td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">five</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">5</td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;cinq</b></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;.....</b></td>
+<td  style=""></td>
+</tr>
+</table>
+ 
 
  *
  */

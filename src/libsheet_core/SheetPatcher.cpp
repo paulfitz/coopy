@@ -546,6 +546,10 @@ bool SheetPatcher::mergeStart() {
   return true;
 }
 
+static string clean(const string& s) {
+  return (s!="NULL")?s:"";
+}
+
 bool SheetPatcher::mergeDone() {
   if (chain) chain->mergeDone();
   if (descriptive) {
@@ -573,10 +577,10 @@ bool SheetPatcher::mergeDone() {
     int r = -1;
     r = sniffer->getHeaderHeight()-1;
     if (r>=0 && r<sheet.height()) {
-      string key = sheet.cellString(0,r);
+      string key = clean(sheet.cellString(0,r));
       if (key == "" || key == "->") {
 	for (int i=0; i<=r; i++) {
-	  sheet.cellString(0,i,string("@")+sheet.cellString(0,i));
+	  sheet.cellString(0,i,string("@")+clean(sheet.cellString(0,i)));
 	}
       } else {
 	r = -1;
