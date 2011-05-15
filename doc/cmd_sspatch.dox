@@ -22,26 +22,21 @@ to confirm that it exists, and to give tips on where to get started
 using it.  At the time of writing, that output is:
 
 \verbatim
-Apply patch to a table.
-  sspatch [--verbose] [--output output.csv] sheet.csv patch.txt
-  sspatch [--output output.sqlite] [--tmp tmp.sqlite] db.sqlite patch.txt
-  sspatch [--inplace] db.sqlite patch.txt
-  sspatch [--format FORMAT] patch.txt
-Output defaults to standard output.
-Make changes in original file by doing:
-  sspatch --inplace sheet.sqlite patch.txt
-or:
-  sspatch --output sheet.csv sheet.csv patch.txt
-Get debug info about what a patch would do:
-  sspatch --format raw patch.txt
-Convert a CSV format diff to a TDIFF format diff:
-  sspatch --format tdiff patch.csv
-Convert a TDIFF format diff to a CSV format diff:
-  sspatch --format csv patch.txt
-Sanitize a TDIFF format diff by regenerating it:
-  sspatch --format tdiff patch.txt
-Read from standard input:
+Modify a table/database/spreadsheet based on a pre-computed comparison.
+  sspatch [--output output.csv] local.csv patch.txt
+
+Output by default goes to standard output.  For inplace modification:
+  sspatch --inplace db.sqlite patch.txt
+
+The patch may be read from standard input as follows:
   sspatch local.csv -
+
+The sspatch tool can also be used to convert between patch formats
+  sspatch --format raw patch.txt    # show debug information about patch
+  sspatch --format tdiff patch.csv  # render patch in tdiff format
+  sspatch --format csv patch.txt    # render patch in csv format
+  sspatch --format hilite local.csv patch.txt # render patch in highlighter
+                                    # format (best used with --output out.xls)
 \endverbatim
 
 @section sspatch_common_usage sspatch sheet.csv patch.csv

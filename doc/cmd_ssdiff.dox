@@ -34,23 +34,28 @@ to confirm that it exists, and to give tips on where to get started
 using it.  At the time of writing, that output is:
 
 \verbatim
-Show the difference between two tables. Call as:
-  ssdiff [--output <filename>] local.csv modified.csv
-For differences in a CSV-compatible format, do:
-  ssdiff --format csv local.csv modified.csv
-For differences in a classic-diff-like format (now the default), do:
-  ssdiff --format tdiff local.csv modified.csv
-For differences in a verbose format, do:
-  ssdiff --format raw local.csv modified.csv
-To extract the mapping from local to modified in tabular form, do:
-  ssdiff --index local.csv modified.csv
-Output defaults to standard output.
-To list supported *input* formats:
+Show the difference between two tables/databases/spreadsheets. Call as:
+  ssdiff [--output <filename>] local.csv remote.csv
+
+To list supported input formats:
   ssdiff --list-formats
-It is possible to immediately apply a difference to the local file:
-  ssdiff --apply local.xls modified.csv
-This will modify local.xls to bring it into alignment with modified.csv
-Formatting information in local.xls will be left untouched.
+
+The difference can be shown in different output formats:
+  ssdiff --format tdiff local.csv modified.csv  # default format
+  ssdiff --format hilite local.csv modified.csv # colorful format, best used
+                                                  with --output out.xls
+  ssdiff --format csv local.csv modified.csv    # CSV-compatible diff format
+  ssdiff --format raw local.csv modified.csv    # verbose format for debugging
+  ssdiff --format sql local.csv modified.csv    # SQL format
+  ssdiff --format index local.csv modified.csv  # table showing matching rows
+
+The default matching algorithm is very general.  Generality can be traded for
+speed with the following options:
+  ssdiff --id COL1 --id COL2 local.csv modified.csv # declare primary key
+  ssdiff --named local.csv modified.csv   # trust names of columns
+
+It is possible to immediately apply a difference as a patch:
+  ssdiff --apply local.xls modified.csv   # modifies local.xls
 \endverbatim
 
 @section ssdiff_common_usage ssdiff orig.csv mod.csv
