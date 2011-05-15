@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
   bool equality = false;
   bool apply = false;
   bool named = false;
+  bool help = false;
 
   while (true) {
     int option_index = 0;
@@ -36,7 +37,6 @@ int main(int argc, char *argv[]) {
       {"format-csv", 0, 0, 'c'},
       {"format-csv-old", 0, 0, '0'},
       {"format-sql", 0, 0, 's'},
-      {"format-human", 0, 0, 'h'},
       {"format-raw", 0, 0, 'r'},
       {"format-tdiff", 0, 0, 't'},
       {"format-index", 0, 0, 'i'},
@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
       {"version", 1, 0, 'V'},
       {"parent", 1, 0, 'p'},
       {"list-formats", 0, 0, 'l'},
+      {"help", 0, 0, 'h'},
       {0, 0, 0, 0}
     };
 
@@ -75,7 +76,7 @@ int main(int argc, char *argv[]) {
       mode = "sql";
       break;
     case 'h':
-      mode = "human";
+      help = true;
       break;
     case 't':
       mode = "tdiff";
@@ -137,30 +138,33 @@ int main(int argc, char *argv[]) {
   argc -= optind;
   argv += optind;
 
-  if (argc<2) {
-    printf("Show the difference between two tables. Call as:\n");
-    printf("  ssdiff [--output <filename>] local.csv modified.csv\n");
-    printf("For differences in a CSV-compatible format, do:\n");
-    printf("  ssdiff --format csv local.csv modified.csv\n");
-    printf("For differences in a classic-diff-like format (now the default), do:\n");
-    printf("  ssdiff --format tdiff local.csv modified.csv\n");
-    printf("For differences in a verbose format, do:\n");
-    printf("  ssdiff --format raw local.csv modified.csv\n");
-    printf("For differences in an SQL format, do:\n");
-    printf("  ssdiff --format sql local.csv modified.csv\n");
-    printf("To declare a key that should be trusted, do:\n");
-    printf("  ssdiff --id COLUMN1 --id COLUMN2 local.csv modified.csv\n");
-    printf("To declare that columns are named, and those names can be trusted:\n");
-    printf("  ssdiff --named local.csv modified.csv\n");
-    printf("To extract the mapping from local to modified in tabular form, do:\n");
-    printf("  ssdiff --index local.csv modified.csv\n");
-    printf("Output defaults to standard output.\n");
-    printf("To list supported *input* formats:\n");
+  if (argc<2||help) {
+    printf("Show the difference between two tables/databases/spreadsheets. Call as:\n");
+    printf("  ssdiff [--output <filename>] local.csv remote.csv\n");
+    printf("\n");
+
+    printf("To list supported input formats:\n");
     printf("  ssdiff --list-formats\n");
-    printf("It is possible to immediately apply a difference to the local file:\n");
-    printf("  ssdiff --apply local.xls modified.csv\n");
-    printf("This will modify local.xls to bring it into alignment with modified.csv\n");
-    printf("Formatting information in local.xls will be left untouched.\n");
+    printf("\n");
+
+    printf("The difference can be shown in different output formats:\n");
+    printf("  ssdiff --format tdiff local.csv modified.csv  # default format\n");
+    printf("  ssdiff --format hilite local.csv modified.csv # colorful format, best used\n");
+    printf("                                                  with --output out.xls\n");
+    printf("  ssdiff --format csv local.csv modified.csv    # CSV-compatible diff format\n");
+    printf("  ssdiff --format raw local.csv modified.csv    # verbose format for debugging\n");
+    printf("  ssdiff --format sql local.csv modified.csv    # SQL format\n");
+    printf("  ssdiff --format index local.csv modified.csv  # table showing matching rows\n");
+    printf("\n");
+
+    printf("The default matching algorithm is very general.  Generality can be traded for\n");
+    printf("speed with the following options:\n");
+    printf("  ssdiff --id COL1 --id COL2 local.csv modified.csv # declare primary key\n");
+    printf("  ssdiff --named local.csv modified.csv   # trust names of columns\n");
+    printf("\n");
+
+    printf("It is possible to immediately apply a difference as a patch:\n");
+    printf("  ssdiff --apply local.xls modified.csv   # modifies local.xls\n");
     return 1;
   }
 

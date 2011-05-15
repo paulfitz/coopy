@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
   bool extractHeader = false;
   bool extractIndex = false;
   bool verbose = false;
+  bool help = false;
   string sheetSelection = "";
 
   while (true) {
@@ -23,6 +24,7 @@ int main(int argc, char *argv[]) {
       {"verbose", 0, 0, 'v'},
       {"header", 0, 0, 'h'},
       {"index", 0, 0, 'i'},
+      {"help", 0, 0, 'H'},
       {"sheet", 1, 0, 's'},
       {"table", 1, 0, 't'},
       {0, 0, 0, 0}
@@ -38,6 +40,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'h':
       extractHeader = true;
+      break;
+    case 'H':
+      help = true;
       break;
     case 'i':
       extractIndex = true;
@@ -59,7 +64,7 @@ int main(int argc, char *argv[]) {
   argc -= optind;
   argv += optind;
 
-  if (argc<1) {
+  if (argc<1||help) {
     printf("Call with input file and desired output file. Examples:\n");
     printf("  ssformat input.csv output.sqlite\n");
     printf("  ssformat input.sqlite output.csvs\n");

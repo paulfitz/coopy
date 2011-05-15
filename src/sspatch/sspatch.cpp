@@ -43,6 +43,7 @@ bool copy_file(const char *src, const char *dest) {
 int main(int argc, char *argv[]) {
   bool verbose = false;
   bool inplace = false;
+  bool help = false;
   string output = "-";
   string formatName = "apply";
   string tmp = "-";
@@ -52,6 +53,7 @@ int main(int argc, char *argv[]) {
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
       {"fake", 0, 0, 'k'},
+      {"help", 0, 0, 'h'},
       {"inplace", 0, 0, 'i'},
       {"tmp", 1, 0, 't'},
       {"format", 1, 0, 'f'},
@@ -70,6 +72,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'k':
       formatName = "raw";
+      break;
+    case 'h':
+      help = true;
       break;
     case 'o':
       output = optarg;
@@ -98,27 +103,23 @@ int main(int argc, char *argv[]) {
 
   if (argc==1&&(formatName!="apply"&&formatName!="color")) {
     patch_name = argv[0];
-  } else if (argc<2) {
-    printf("Apply patch to a table.\n");
-    printf("  sspatch [--verbose] [--output output.csv] sheet.csv patch.txt\n");
-    printf("  sspatch [--output output.sqlite] [--tmp tmp.sqlite] db.sqlite patch.txt\n");
-    printf("  sspatch [--inplace] db.sqlite patch.txt\n");
-    printf("  sspatch [--format FORMAT] patch.txt\n");
-    printf("Output defaults to standard output.\n");
-    printf("Make changes in original file by doing:\n");
-    printf("  sspatch --inplace sheet.sqlite patch.txt\n");
-    printf("or:\n");
-    printf("  sspatch --output sheet.csv sheet.csv patch.txt\n");
-    printf("Get debug info about what a patch would do:\n");
-    printf("  sspatch --format raw patch.txt\n");
-    printf("Convert a CSV format diff to a TDIFF format diff:\n");
-    printf("  sspatch --format tdiff patch.csv\n");
-    printf("Convert a TDIFF format diff to a CSV format diff:\n");
-    printf("  sspatch --format csv patch.txt\n");
-    printf("Sanitize a TDIFF format diff by regenerating it:\n");
-    printf("  sspatch --format tdiff patch.txt\n");
-    printf("Read from standard input:\n");
+  } else if (argc<2 || help) {
+    printf("Modify a table/database/spreadsheet based on a pre-computed comparison.\n");
+    printf("  sspatch [--output output.csv] local.csv patch.txt\n");
+    printf("\n");
+    printf("Output by default goes to standard output.  For inplace modification:\n");
+    printf("  sspatch --inplace db.sqlite patch.txt\n");
+    printf("\n");
+    printf("The patch may be read from standard input as follows:\n");
     printf("  sspatch local.csv -\n");
+    printf("\n");
+    
+    printf("The sspatch tool can also be used to convert between patch formats\n");
+    printf("  sspatch --format raw patch.txt    # show debug information about patch\n");
+    printf("  sspatch --format tdiff patch.csv  # render patch in tdiff format\n");
+    printf("  sspatch --format csv patch.txt    # render patch in csv format\n");
+    printf("  sspatch --format hilite local.csv patch.txt # render patch in highlighter\n");
+    printf("                                    # format (best used with --output out.xls)\n");
     return 1;
   } else {
     local_name = argv[0];
