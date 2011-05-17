@@ -72,7 +72,7 @@ public:
   bool selectRow(const RowChange& change, const char *tag);
   bool describeRow(const RowChange& change, const char *tag);
 
-  virtual bool mergeDone();
+  virtual bool mergeAllDone();
 
   virtual bool declareNames(const std::vector<std::string>& names, bool final);
 

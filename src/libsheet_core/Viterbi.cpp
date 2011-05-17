@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <coopy/Viterbi.h>
+#include <coopy/Dbg.h>
 
 //#include <iostream>
 //using namespace std;
@@ -112,7 +113,11 @@ void Viterbi::calculatePath() {
       endTransitions();
       float best = 0;
       int bestj = -1;
-      assert(index>0);
+      if (index<=0) {
+	// declare victory and exit
+	path_valid = 1;
+	return;
+      }
       for (int j=0; j<K; j++)
 	{
 	  //DBG(50) cout << "j=" << j << " and bestj is " << bestj 
@@ -130,8 +135,8 @@ void Viterbi::calculatePath() {
 	{
 	  path(0,i) = bestj;
 	  //DBG(50) cout << "i=" << i << " and bestj is " << bestj << endl;
-	  assert(bestj!=-1);
-	  assert(bestj>=0&&bestj<K);
+	  COOPY_ASSERT(bestj!=-1);
+	  COOPY_ASSERT(bestj>=0&&bestj<K);
 	  bestj = src(bestj,i);
 	}
       path_valid = 1;

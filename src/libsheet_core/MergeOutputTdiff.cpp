@@ -404,10 +404,13 @@ void MergeOutputTdiff::flushRows() {
   if (coopy_is_verbose()) {
     formLattice.showPath();
   }
+  printf("formlattice %d rowCache %d\n",
+	 formLattice.length(), rowCache.size());
   for (int i=0; i<(int)rowCache.size(); i++) {
     RowChange& change = rowCache[i];
     changeRow(change,(formLattice(i)==1),false);
   }
   formLattice.reset();
+  rowCache.clear();
 }
 

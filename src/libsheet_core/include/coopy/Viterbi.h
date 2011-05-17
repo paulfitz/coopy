@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <coopy/SparseSheet.h>
+#include <coopy/Dbg.h>
 
 namespace coopy {
   namespace cmp {
@@ -64,7 +65,7 @@ public:
 
   int getPath(int i) {
     calculatePath();
-    assert(i<index);
+    COOPY_ASSERT(i<index);
     return path(0,i);
   }
 

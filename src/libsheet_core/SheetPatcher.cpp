@@ -550,8 +550,8 @@ static string clean(const string& s) {
   return (s!="NULL")?s:"";
 }
 
-bool SheetPatcher::mergeDone() {
-  if (chain) chain->mergeDone();
+bool SheetPatcher::mergeAllDone() {
+  if (chain) chain->mergeAllDone();
   if (descriptive) {
     PolySheet sheet = getSheet();
     if (!sheet.isValid()) return false;
@@ -620,8 +620,8 @@ bool SheetPatcher::mergeDone() {
   return true;
 }
 
-bool SheetPatcher::mergeAllDone() {
-  if (chain) chain->mergeAllDone();
+bool SheetPatcher::mergeDone() {
+  if (chain) chain->mergeDone();
   return true;
 }
 

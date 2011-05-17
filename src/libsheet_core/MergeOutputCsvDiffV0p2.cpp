@@ -40,7 +40,7 @@ MergeOutputCsvDiffV0p2::MergeOutputCsvDiffV0p2() {
   result.addRecord();
 }
 
-bool MergeOutputCsvDiffV0p2::mergeDone() {
+bool MergeOutputCsvDiffV0p2::mergeAllDone() {
   SheetStyle style;
   SheetCell c = result.cellSummary(0,0);
   fprintf(out,"%s",result.encode(style).c_str());
