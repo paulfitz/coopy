@@ -51,7 +51,7 @@ public:
 
   ~Factories() {
     for (int i=0; i<(int)all.size(); i++) {
-      if (all[i]==NULL) {
+      if (all[i]!=NULL) {
 	delete all[i];
       }
     }
@@ -312,6 +312,11 @@ void PolyBook::showFormats() {
   sqlite.show();
   vector<TextBookFactory *> all;
   getFactories(all,true);
+  for (int i=0; i<(int)all.size(); i++) {
+    if (all[i]!=NULL) {
+      delete all[i];
+    }
+  }
   printf("Tips:\n");
   printf("*  Most spreadsheet/database formats support a 'table' option to restrict\n");
   printf("   input/output to a named table or tables\n");

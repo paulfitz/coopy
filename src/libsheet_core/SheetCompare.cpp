@@ -212,7 +212,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     eflags.use_order = false;
   }
 
-  if (eflags.trust_ids) {
+  if (eflags.trust_ids || eflags.trust_column_names) {
     local_names.sniff();
     remote_names.sniff();
     pivot_names.sniff();
@@ -224,8 +224,12 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     ok = ok && remote_names.subset(eflags.ids);
     ok = ok && pivot_names.subset(eflags.ids);
     if (!ok) {
-      fprintf(stderr,"Not all ID columns found\n");
-      return -1;
+      slocal.sniff();
+      SheetSchema *schema = slocal.suggestSchema();
+      COOPY_ASSERT(schema!=NULL);
+      fprintf(stderr,"*** Not all ID columns found for %s\n", 
+	      schema->getSheetName().c_str());
+      eflags.trust_ids = false;
     }
   }
 
