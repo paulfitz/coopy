@@ -318,11 +318,14 @@ bool MergeOutputTdiff::changeRow(const RowChange& change,
     return true;
   }
 
+  dbg_printf("round 2 - local ops %s (%d)\n", vector2string(lops).c_str(), factored);
   if (factored) {
     if (lops!=ops) {
       ops = lops;
       operateRow(change,"act");
     }
+  } else {
+    ops = lops;
   }
   lastWasFactored = factored;
   switch (change.mode) {
