@@ -2,6 +2,7 @@
 #define COOPY_MEASUREMAN
 
 #include <coopy/Measure.h>
+#include <coopy/CompareFlags.h>
 
 namespace coopy {
   namespace cmp {
@@ -18,6 +19,7 @@ public:
   MeasurePass& anorm_pass;
   MeasurePass& bnorm_pass;
   bool rowLike;
+  CompareFlags flags;
 
   MeasureMan(Measure& main,
 	     MeasurePass& main_pass,
@@ -25,13 +27,15 @@ public:
 	     MeasurePass& anorm_pass,
 	     Measure& bnorm,
 	     MeasurePass& bnorm_pass,
-	     bool rowLike) : main(main), 
-			     anorm(anorm), 
-			     bnorm(bnorm),
-			     main_pass(main_pass),
-			     anorm_pass(anorm_pass),
-			     bnorm_pass(bnorm_pass),
-			     rowLike(rowLike) // just for debugging
+	     bool rowLike,
+	     const CompareFlags& flags) : main(main), 
+    anorm(anorm), 
+    bnorm(bnorm),
+    main_pass(main_pass),
+    anorm_pass(anorm_pass),
+    bnorm_pass(bnorm_pass),
+    rowLike(rowLike),
+    flags(flags)
   {
   }
 	     

@@ -265,7 +265,8 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     MeasureMan p2l_row_man(p2l_row_local,p2l_row_pass_local,
 			   p2l_row_norm1,p2l_row_pass_norm1,
 			   p2l_row_norm2,p2l_row_pass_norm2,
-			   1);
+			   1,
+			   eflags);
     
     p2l_row_man.setup();
     FastMatch p2l_row_fast_match(p2l_row_pass_local);
@@ -292,7 +293,8 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     MeasureMan p2r_row_man(p2r_row_local,p2r_row_pass_local,
 			   p2r_row_norm1,p2r_row_pass_norm1,
 			   p2r_row_norm2,p2r_row_pass_norm2,
-			   1);
+			   1,
+			   eflags);
     
     p2r_row_man.setup();
     FastMatch p2r_row_fast_match(p2r_row_pass_local);
@@ -382,7 +384,8 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   MeasureMan p2l_col_man(p2l_col_local,p2l_col_pass_local,
 			 p2l_col_norm1,p2l_col_pass_norm1,
 			 p2l_col_norm2,p2l_col_pass_norm2,
-			 0);
+			 0,
+			 eflags);
 
   p2l_col_man.setup();
   FastMatch p2l_col_fast_match(p2l_col_pass_local);
@@ -408,7 +411,8 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   MeasureMan p2r_col_man(p2r_col_local,p2r_col_pass_local,
 			 p2r_col_norm1,p2r_col_pass_norm1,
 			 p2r_col_norm2,p2r_col_pass_norm2,
-			 0);
+			 0,
+			 eflags);
 
   p2r_col_man.setup();
   FastMatch p2r_col_fast_match(p2r_col_pass_local);

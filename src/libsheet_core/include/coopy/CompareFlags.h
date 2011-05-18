@@ -59,6 +59,7 @@ public:
   coopy::store::DataBook *mapping_book;
   bool pivot_sides_with_local;
   bool use_order;
+  bool omit_format_name;
 
   CompareFlags() {
     head_trimmed = false;
@@ -70,6 +71,7 @@ public:
     mapping_book = 0 /*NULL*/;
     pivot_sides_with_local = false;
     use_order = true;
+    omit_format_name = false;
   }
 
   ~CompareFlags() {

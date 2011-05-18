@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
   bool apply = false;
   bool named = false;
   bool help = false;
+  bool omitHeader = false;
 
   while (true) {
     int option_index = 0;
@@ -53,6 +54,8 @@ int main(int argc, char *argv[]) {
       {"named", 0, 0, 'd'},
 
       {"map", 1, 0, 'm'},
+
+      {"omit-format-name", 0, 0, 'O'},
 
       {"output", 1, 0, 'o'},
       {"version", 1, 0, 'V'},
@@ -104,6 +107,10 @@ int main(int argc, char *argv[]) {
 
     case 'm':
       map_file = optarg;
+      break;
+
+    case 'O':
+      omitHeader = true;
       break;
 
     case 'f':
@@ -219,6 +226,10 @@ int main(int argc, char *argv[]) {
     flags.trust_ids = true;
   }
   flags.trust_column_names = named;
+
+  if (omitHeader) {
+    flags.omit_format_name = true;
+  }
 
   Patcher *diff = createTool(mode,version);
   if (diff==NULL) {

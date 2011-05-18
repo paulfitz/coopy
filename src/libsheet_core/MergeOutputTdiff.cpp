@@ -66,7 +66,9 @@ MergeOutputTdiff::MergeOutputTdiff() {
 }
 
 bool MergeOutputTdiff::mergeStart() {
-  fprintf(out,"# tdiff version 0.3\n");
+  if (!getFlags().omit_format_name) {
+    fprintf(out,"# tdiff version 0.3\n");
+  }
   return true;
 }
 
@@ -296,13 +298,15 @@ bool MergeOutputTdiff::changeRow(const RowChange& change,
     // state 1 = factoring of header
     float costFactored = 1;
     float costUnfactored = 1.9;
+    dbg_printf("local ops %s\n", vector2string(lops).c_str());
+    float costSwitch = 0.25;
     if (lops!=ops) {
       //if (ops.size()>0) {
       costFactored += 1.1;
       //}
       ops = lops;
+      costSwitch = 0;
     }
-    float costSwitch = 0.25;
     //printf("factored %g unfactored %g\n", costFactored, costUnfactored);
     formLattice.beginTransitions();
     formLattice.addTransition(0,0,costUnfactored);

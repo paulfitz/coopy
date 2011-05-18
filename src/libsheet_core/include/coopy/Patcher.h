@@ -289,6 +289,9 @@ public:
     out = flags.out;
   }
 
+  const CompareFlags& getFlags() const {
+    return flags;
+  }
 
   // Old stuff, still used but not very important
 

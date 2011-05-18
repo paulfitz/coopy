@@ -51,7 +51,7 @@ void NameSniffer::sniff() {
 
   if (div<0) {
     DataStat stat;
-    stat.evaluate(sheet);
+    stat.evaluate2(sheet);
     div = stat.getRowDivider();
     ct = stat.suggestTypes();
   }

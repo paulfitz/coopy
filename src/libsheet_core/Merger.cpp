@@ -490,7 +490,7 @@ bool Merger::merge(MergerState& state) {
 
     // for now, we will only use filtered index if column manipulations
     // are non-existent or trivial
-    IndexSniffer localIndex(local);
+    IndexSniffer localIndex(local,state.flags,local_names);
     bool constantColumns = true;
     bool constantIndex = true;
 

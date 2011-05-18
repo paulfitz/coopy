@@ -31,6 +31,8 @@ public:
 
   void evaluate(const coopy::store::DataSheet& sheet);
 
+  void evaluate2(const coopy::store::DataSheet& sheet);
+
   const std::vector<coopy::store::ColumnType>& suggestTypes() const {
     return ct;
   }

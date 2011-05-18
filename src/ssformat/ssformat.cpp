@@ -7,8 +7,10 @@
 #include <coopy/ShortTextBook.h>
 #include <coopy/CsvTextBook.h>
 #include <coopy/Dbg.h>
+#include <coopy/CompareFlags.h>
 
 using namespace coopy::store;
+using namespace coopy::cmp;
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -70,8 +72,10 @@ int main(int argc, char *argv[]) {
     printf("  ssformat input.sqlite output.csvs\n");
     printf("  ssformat dbi:mysql:database_name:host=localhost:username=root output.sqlite\n");
     printf("  ssformat input.sqlite\n");
-    printf("A single sheet/table can be extracted if desired:\n");
-    printf("  ssformat --table people input.sqlite people.csv\n");
+    printf("Subsets of data can be extracted:\n");
+    printf("  ssformat --table people input.sqlite people.csv # extract single table\n");
+    printf("  ssformat --header people.csv # show just the header line, if one is detected\n");
+    printf("  ssformat --index people.csv  # show just the key columns, if detected\n");
     printf("If the output file is omitted, it is set to standard output\n");
     return 1;
   }
@@ -111,7 +115,9 @@ int main(int argc, char *argv[]) {
   }
   if (extractIndex) {
     PolySheet sheet = src.readSheetByIndex(0);
-    IndexSniffer sniff(sheet);
+    CompareFlags flags;
+    NameSniffer nsniff(sheet);
+    IndexSniffer sniff(sheet,flags,nsniff);
     vector<int> indexes = sniff.suggestIndexes();
     dbg_printf("Index count %d\n", (int)indexes.size());
     ShortTextBook *book = new ShortTextBook();

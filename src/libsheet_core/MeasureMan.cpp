@@ -24,6 +24,7 @@ void MeasureMan::compare() {
   int rem = -1;
   int ctrl = 0;
   int ctrlMax = main.getCtrlMax();
+  bool allOrNothing = (flags.trust_ids && rowLike);
 
   int remaining = 0;
   for (int j=0; j<main_pass.bsel.height(); j++) {
@@ -64,6 +65,10 @@ void MeasureMan::compare() {
       dbg_printf("No progress\n");
       if (ctrl<ctrlMax) {
 	dbg_printf("Increasing desperation\n");
+	if (allOrNothing) {
+	  dbg_printf(" ... but we've been told to trust ids\n");
+	  break;
+	}
 	ctrl++;
       } else {
 	break;

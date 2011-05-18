@@ -28,6 +28,7 @@ ENDIF()
 SET(testprg ${EXECUTABLE_OUTPUT_PATH}/test_sheet${EXE_EXT})
 SET(testprg_viterbi ${EXECUTABLE_OUTPUT_PATH}/test_viterbi${EXE_EXT})
 SET(ssformat ${EXECUTABLE_OUTPUT_PATH}/ssformat${EXE_EXT})
+SET(ssdiff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT})
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -439,7 +440,7 @@ MACRO(ADD_ROUND_TRIP_TEST name P1 P2 FORMAT)
     set(fname "${name}_patch.${ext}")
     set(fname2 "${name}_result.csv")
     ADD_TEST(${name}_diff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
-      --output ${fname} --format ${FORMAT} ${P1} ${P2})
+      --output ${fname} --format ${FORMAT} ${ARGN} ${P1} ${P2})
     ADD_TEST(${name}_patch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
       --output ${fname2} ${P1} ${fname})
     ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
@@ -481,15 +482,29 @@ ADD_ROUND_TRIP_TEST(quote_me2 ${TESTS}/quote_me2.csv ${TESTS}/quote_me.csv tdiff
 #######################################################################
 #######################################################################
 
-# color format testing
-
-
-#######################################################################
-#######################################################################
-
 # conversion testing
 
 ADD_TEST(format_book_sqlite ${ssformat} ${TESTS}/book/000/index.book format_book_sqlite.sqlite)
 
 
+#######################################################################
+#######################################################################
+
+# header testing
+
+ADD_TEST(header_applicants ${ssformat} --header ${TESTS}/header/applicants.csv applicants_header.csv)
+ADD_TEST(header_applicants_check ${ssdiff} --equals ${TESTS}/header/applicants_header.csv applicants_header.csv)
+
+#######################################################################
+#######################################################################
+
+# trust testing
+
+ADD_ROUND_TRIP_TEST(trust_name_applicants ${TESTS}/header/applicants.csv ${TESTS}/header/applicants_fix.csv tdiff --id first --id last --named)
+
+ADD_TEST(trust_name_applications_format ${ssdiff} --output trust_name_applications_check.tdiff --id first --id last --named --omit-format-name ${TESTS}/header/applicants.csv ${TESTS}/header/applicants_fix.csv)
+
+ADD_TEST(trust_name_applications_check ${CMAKE_COMMAND} -E compare_files 
+  trust_name_applications_check.tdiff 
+  ${TESTS}/header/applicants_base_fix.tdiff)
 
