@@ -179,7 +179,11 @@ public:
 bool PatchParser::apply() {
   if (patcher==NULL) return false;
 
-  sniffer.open(fname.c_str());
+  if (fname!="") {
+    sniffer.open(fname.c_str());
+  } else {
+    sniffer.setString(oneliner.c_str());
+  }
 
   Format format = sniffer.getFormat();
   if (format.id==FORMAT_PATCH_CSV) {
@@ -366,6 +370,11 @@ bool PatchParser::applyCsv() {
 	dbg_printf("Selecting %s\n", names2.dataString().c_str());
 	selector = names2.data;
 	needSelector = false;
+      } else if (cmd1=="start") {
+	sequential = true;
+	RowChange change2;
+	change2.mode = ROW_CHANGE_CONTEXT;
+	ok = patcher->changeRow(change2);
       } else if (cmd1=="after"||cmd1=="move") {
 	sequential = true;
 	dbg_printf("%s %s\n", cmd1.c_str(), names2.dataString().c_str());
@@ -841,6 +850,9 @@ bool PatchParser::applyTdiff() {
       }
       dbg_printf("  assign %s\n", vector2string(assign).c_str());
       dbg_printf("  cols %s\n", vector2string(cols).c_str());
+      while (assign.size()<cols.size()) {
+	cols.erase(cols.begin()+assign.size());
+      }
       COOPY_ASSERT(assign.size()==cols.size());
 
       RowChange change;

@@ -250,6 +250,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   if (!change.sequential) rowCursor = -1;
   //map<string,int> dir;
   vector<int> active_cond;
+  int active_conds = 0;
   vector<SheetCell> cond;
   vector<int> active_val;
   vector<SheetCell> val;
@@ -278,6 +279,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       int idx = name2col[it->first]; //dir[it->first];
       //printf("  [cond] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
       active_cond[idx] = 1;
+      active_conds++;
       cond[idx] = it->second;
     }
   }
@@ -372,14 +374,18 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     break;
   case ROW_CHANGE_CONTEXT:
     {
-      int r = matchRow(active_cond,cond,width);
-      if (r<0) return false;
-      r++;
-      if (r>=sheet.height()) {
-	r = -1;
+      if (active_conds>0) {
+	int r = matchRow(active_cond,cond,width);
+	if (r<0) return false;
+	r++;
+	if (r>=sheet.height()) {
+	  r = -1;
+	}
+	RowRef row(r);
+	rowCursor = r;
+      } else {
+	rowCursor = 0;
       }
-      RowRef row(r);
-      rowCursor = r;
       return true;
     }
     break;

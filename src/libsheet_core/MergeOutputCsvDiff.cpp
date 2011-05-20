@@ -293,7 +293,7 @@ bool MergeOutputCsvDiff::changeRow(const RowChange& change) {
     updateRow(change,"move",true,false,false);
     break;
   case ROW_CHANGE_CONTEXT:
-    updateRow(change,"after",true,false,false);
+    updateRow(change,(change.cond.size()>0)?"after":"start",true,false,false);
     break;
   case ROW_CHANGE_UPDATE:
     {

@@ -7,6 +7,12 @@
 using namespace std;
 using namespace coopy::format;
 
+bool FormatSniffer::setString(const char *str) {
+  close();
+  cache = str;
+  return true;
+}
+
 bool FormatSniffer::open(const char *fname, bool caching) {
   close();
   FILE *fp;

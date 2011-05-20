@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
   bool help = false;
   string output = "-";
   string formatName = "apply";
+  string cmd = "";
   string tmp = "-";
   while (true) {
     int option_index = 0;
@@ -56,6 +57,7 @@ int main(int argc, char *argv[]) {
       {"help", 0, 0, 'h'},
       {"inplace", 0, 0, 'i'},
       {"tmp", 1, 0, 't'},
+      {"cmd", 1, 0, 'c'},
       {"format", 1, 0, 'f'},
       {0, 0, 0, 0}
     };
@@ -85,6 +87,9 @@ int main(int argc, char *argv[]) {
     case 'f':
       formatName = optarg;
       break;
+    case 'c':
+      cmd = optarg;
+      break;
     default:
       fprintf(stderr, "Unrecognized option\n");
       return 1;
@@ -101,9 +106,9 @@ int main(int argc, char *argv[]) {
   const char *local_name = "";
   const char *patch_name = "";
 
-  if (argc==1&&(formatName!="apply"&&formatName!="color")) {
+  if (argc==1&&(formatName!="apply"&&formatName!="color")&&cmd=="") {
     patch_name = argv[0];
-  } else if (argc<2 || help) {
+  } else if ((argc<2&&cmd=="") || help) {
     printf("Modify a table/database/spreadsheet based on a pre-computed comparison.\n");
     printf("  sspatch [--output output.csv] local.csv patch.txt\n");
     printf("\n");
@@ -123,7 +128,9 @@ int main(int argc, char *argv[]) {
     return 1;
   } else {
     local_name = argv[0];
-    patch_name = argv[1];
+    if (argc>=2) {
+      patch_name = argv[1];
+    }
   }
 
   if (inplace) {
@@ -215,7 +222,7 @@ int main(int argc, char *argv[]) {
   }
 
   MergeOutputVerboseDiff fakePatcher;
-  PatchParser parser(alt,patch_name);
+  PatchParser parser(alt,patch_name,cmd);
   CompareFlags flags;
   alt->startOutput(output,flags);
   alt->setFlags(flags);

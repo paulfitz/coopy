@@ -29,6 +29,7 @@ SET(testprg ${EXECUTABLE_OUTPUT_PATH}/test_sheet${EXE_EXT})
 SET(testprg_viterbi ${EXECUTABLE_OUTPUT_PATH}/test_viterbi${EXE_EXT})
 SET(ssformat ${EXECUTABLE_OUTPUT_PATH}/ssformat${EXE_EXT})
 SET(ssdiff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT})
+SET(sspatch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT})
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -507,4 +508,16 @@ ADD_TEST(trust_name_applications_format ${ssdiff} --output trust_name_applicatio
 ADD_TEST(trust_name_applications_check ${CMAKE_COMMAND} -E compare_files 
   trust_name_applications_check.tdiff 
   ${TESTS}/header/applicants_base_fix.tdiff)
+
+#######################################################################
+#######################################################################
+
+# check insertions throughout range
+
+FOREACH(x 1 2 3 4 5)
+  ADD_TEST(insertion_omit_line_${x} ${sspatch} --output insertion_omit_line_${x}.csv --cmd "- |B=${x}|" ${TESTS}/numbers.csv)
+  ADD_ROUND_TRIP_TEST(insertion_omit_line_${x}_rt insertion_omit_line_${x}.csv  ${TESTS}/numbers.csv tdiff)
+  ADD_ROUND_TRIP_TEST(deletion_add_line_${x}_rt ${TESTS}/numbers.csv insertion_omit_line_${x}.csv tdiff)
+ENDFOREACH()
+
 

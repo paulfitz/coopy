@@ -85,6 +85,7 @@ private:
   int current_row;
   int last_row;
   int addition;
+  bool allGone;
   //SheetSchema defaultSheetSchema;
   //SheetSchema *pivotSheetSchema;
   //SheetSchema *localSheetSchema;

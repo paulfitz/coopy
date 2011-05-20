@@ -247,6 +247,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     rowChange.cond = cond;
     rowChange.val = value;
     rowChange.names = names;
+    bool prev_had_row = had_row;
     if (last_local_row!=-1) {
       had_row = true;
       had_foreign_row = false;
@@ -268,12 +269,14 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 		}
 	      }
 	    }
-	    dbg_printf("MOVE! lRow %d last_local_row %d last_local_row_marked %d\n",
-		       lRow, last_local_row, last_local_row_marked);
-	    RowChange alt = rowChange;
-	    alt.mode = ROW_CHANGE_MOVE;
-	    if (flags.use_order) {
-	      rc.push_back(alt);
+	    if (prev_had_row||lRow!=0) {
+	      dbg_printf("MOVE! lRow %d last_local_row %d last_local_row_marked %d\n",
+			 lRow, last_local_row, last_local_row_marked);
+	      RowChange alt = rowChange;
+	      alt.mode = ROW_CHANGE_MOVE;
+	      if (flags.use_order) {
+		rc.push_back(alt);
+	      }
 	    }
 	    last_local_row_marked = lRow;
 	  }
@@ -300,9 +303,19 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	output.addRow("[+++]",expandMerge,blank);
 	rowChange.mode = ROW_CHANGE_INSERT;
 	//output.changeRow(rowChange);
+	//printf("last_local_row_marked %d last_local_row %d lRow %d\n",
+	//last_local_row_marked, last_local_row, lRow);
 	if (last_local_row>=0) {
 	  if (last_local_row_marked!=last_local_row) {
 	    RowChange alt = lastRowChange;
+	    alt.mode = ROW_CHANGE_CONTEXT;
+	    if (flags.use_order) {
+	      rc.push_back(alt);
+	    }
+	  }
+	} else {
+	  if (!(prev_had_row||had_foreign_row||allGone)) {
+	    RowChange alt;
 	    alt.mode = ROW_CHANGE_CONTEXT;
 	    if (flags.use_order) {
 	      rc.push_back(alt);
@@ -353,6 +366,7 @@ bool Merger::merge(MergerState& state) {
   last_local_row_marked = -1;
   had_row = false;
   had_foreign_row = false;
+  allGone = false;
 
   coopy::store::DataSheet& pivot = state.pivot;
   coopy::store::DataSheet& local = state.local;
@@ -475,7 +489,7 @@ bool Merger::merge(MergerState& state) {
     }
   }
 
-  bool allGone = false;
+  allGone = false;
   if (diff) {
     current_row = 0;
     last_row = -1;

@@ -12,8 +12,14 @@ string Reader::readLine(bool& eof) {
     if (at==string::npos) {
       string x = read();
       if (x.length()==0) {
-	eof = true;
-	return "";
+	if (unread=="") {
+	  eof = true;
+	  return "";
+	} else {
+	  x = unread;
+	  unread = "";
+	  return x;
+	}
       }
       unread += x;
       more = true;

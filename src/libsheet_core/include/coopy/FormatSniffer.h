@@ -28,6 +28,8 @@ public:
     close();
   }
 
+  bool setString(const char *str);
+
   bool open(const char *fname, bool caching = true);
   bool close();
 
