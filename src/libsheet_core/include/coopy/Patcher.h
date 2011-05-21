@@ -243,7 +243,7 @@ public:
    * giving a final sequence of column names.
    *
    */
-  virtual bool declareNames(const std::vector<std::string>& names, bool final) {
+  virtual bool declareNames(const std::vector<std::string>& names, bool isFinal) {
     return false;
   }
 

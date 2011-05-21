@@ -6,6 +6,7 @@ if (CREATE_BINDINGS)
 
   find_package(Coopy REQUIRED)
   include_directories(${Coopy_INCLUDE_DIRS})
+  link_directories(${Coopy_LIBRARY_DIRS})
   link_libraries(${Coopy_LIBRARIES})
 
   set(CREATE_PYTHON FALSE CACHE BOOL "Create Python interface")
