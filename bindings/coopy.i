@@ -1,5 +1,17 @@
 %module(directors="1") coopy
+
 %feature("director") coopy::cmp::Patcher;
+#if defined(SWIGPHP)
+%feature("nodirector") coopy::cmp::Patcher::addRow;
+%feature("nodirector") coopy::cmp::Patcher::changeName;
+/*%feature("director") coopy::cmp::Patcher::changeRow;
+%feature("director") coopy::cmp::Patcher::changeColumn;
+%feature("director") coopy::cmp::Patcher::setSheet;
+%feature("director") coopy::cmp::Patcher::mergeStart;
+%feature("director") coopy::cmp::Patcher::mergeDone;
+%feature("director") coopy::cmp::Patcher::mergeAllDone;
+*/
+#endif
 
 %include "std_string.i"
 %include "std_vector.i"
@@ -9,7 +21,7 @@
  //%rename(toString_c) *::toString() const;
 %rename(clone_c) *::clone() const;
 
-#if defined(SWIGJAVA)
+#if defined(SWIGJAVA) || defined(SWIGPHP)
 %rename(equals) *::operator==;
 %rename(not_equals) *::operator!=;
 %ignore *::setString(const std::string &);

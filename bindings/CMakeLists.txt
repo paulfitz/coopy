@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.6)
 
 option(CREATE_BINDINGS "Create SWIG language bindings" ON)
 
+SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_MODULE_PATH})
+
 if (CREATE_BINDINGS)
 
   find_package(Coopy REQUIRED)
@@ -12,6 +14,7 @@ if (CREATE_BINDINGS)
   set(CREATE_PYTHON FALSE CACHE BOOL "Create Python interface")
   set(CREATE_RUBY FALSE CACHE BOOL "Create Ruby interface")
   set(CREATE_JAVA FALSE CACHE BOOL "Create Java interface")
+  set(CREATE_PHP FALSE CACHE BOOL "Create PHP interface")
 
   FIND_PACKAGE(SWIG REQUIRED)
   INCLUDE(${SWIG_USE_FILE})
@@ -61,6 +64,16 @@ if (CREATE_BINDINGS)
      set_target_properties(coopy PROPERTIES SUFFIX ".jnilib")
    endif (APPLE)
    configure_file(examples/example.java ${CMAKE_BINARY_DIR}/example.java)
-endif (CREATE_JAVA)
+ endif (CREATE_JAVA)
+
+  if (CREATE_PHP)
+    find_package(PHPLibs REQUIRED)
+    set(CMAKE_SWIG_FLAGS "-Wall;-module;coopy")
+    include_directories(${PHP_INCLUDE_DIRS})
+    swig_add_module(coopy php coopy.i)
+    swig_link_libraries(coopy ${PHP_LIBRARIES})
+    configure_file(examples/example.php ${CMAKE_BINARY_DIR}/example.php)
+    set_target_properties(coopy PROPERTIES PREFIX "")
+  endif (CREATE_PHP)
 
 endif ()
