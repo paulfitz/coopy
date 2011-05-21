@@ -18,6 +18,9 @@
 %rename(isFinal) *::final;
 %ignore coopy::store::Property::put(char const *,std::string const &);
 #endif
+#if defined(SWIGRUBY)
+%rename(not_equals) *::operator!=;
+#endif
 %ignore *::asMap() const;
 %rename(assign) *::operator=;
 
