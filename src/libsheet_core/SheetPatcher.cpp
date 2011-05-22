@@ -622,6 +622,39 @@ bool SheetPatcher::mergeAllDone() {
       appear->end();
     }
 
+    vector<int> show;
+    show.resize(sheet.height(),0);
+    for (int i=0; i<sheet.height(); i++) {
+      bool present = clean(sheet.cellString(0,i))!="";
+      if (present) {
+	for (int j=-2; j<=2; j++) {
+	  int k = i+j;
+	  if (k>=0 && k<sheet.height()) {
+	    show[k] = 1;
+	  }
+	}
+      }
+    }
+    int offset = 0;
+    bool addedBreak = false;
+    for (int i=0; i<(int)show.size(); i++) {
+      if (show[i]==0) {	
+	int k = i+offset;
+	if (addedBreak) {
+	  sheet.deleteRow(RowRef(k));
+	  offset--;
+	} else {
+	  sheet.cellString(0,k,"...");
+	  for (int j=1; j<sheet.width(); j++) {
+	    sheet.cellString(j,k,"...");
+	  }
+	  addedBreak = true;
+	}
+      } else {
+	addedBreak = false;
+      }
+    }
+    
   }
   return true;
 }
