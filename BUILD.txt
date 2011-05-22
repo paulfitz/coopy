@@ -33,7 +33,11 @@ How to compile:
 * Install gnumeric source (ideally through your package manager)
 * Run "./configure" on your gnumeric source, do anything it needs
   you to do in order to get configured (e.g. installing extra -dev
-  packages).
+  packages).  E.g. on Debian, I needed:
+    intltool
+    libglade2-dev libgtk2.0-dev
+    libgoffice-0.8-dev libgsf-1-dev
+  You'd need more to compile gnumeric completely, but we're not doing that.
 * In the "src" subdirectory of gnumeric source, do 
   "make gnumeric-paths.h".  If having trouble, see next step.
 * You may need to take other steps to bring all header files into
