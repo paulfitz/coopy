@@ -30,6 +30,7 @@ private:
   int rowCursor;
   bool summary;
   Patcher *chain;
+  bool chainOwned;
   int changeCount;
   bool descriptive;
   int xoff;
@@ -53,6 +54,7 @@ public:
     rowCursor = -1;
     summary = false;
     chain = 0/*NULL*/;
+    chainOwned = false;
     changeCount = 0;
     xoff = 0;
     yoff = 0;
@@ -64,8 +66,11 @@ public:
   virtual ~SheetPatcher() {
     clearNames();
     if (chain!=0/*NULL*/) {
-      delete chain;
+      if (chainOwned) {
+	delete chain;
+      }
       chain = 0/*NULL*/;
+      chainOwned = false;
     }
   }
 
@@ -79,9 +84,10 @@ public:
     sniffedSheet = 0/*NULL*/;
   }
 
-  void showSummary(Patcher *chain) {
+  void showSummary(Patcher *chain, bool chainOwned = true) {
     summary = true;
     this->chain = chain;
+    this->chainOwned = chainOwned;
   }
 
   int getChangeCount() {

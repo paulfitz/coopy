@@ -322,6 +322,7 @@ bool WideSheetManager::mergeToLocal(const char *localName,
 				    const char *remoteName,
 				    const char *pivotName,
 				    const char *logName) {
+  printf("HELLO merge to local\n");
   PolyBook _pivot;
   PolyBook *pivot;
   PolyBook _local;
@@ -347,10 +348,10 @@ bool WideSheetManager::mergeToLocal(const char *localName,
     pivot = &_local;
   }
 
-  MergeOutputTdiff nested_diff;
   SheetPatcher diff;
+  MergeOutputTdiff nested_diff;
   diff.attachBook(*local);
-  diff.showSummary(&nested_diff);
+  diff.showSummary(&nested_diff,false);
   BookCompare cmp;
   CompareFlags flags;
   string output = logName;
