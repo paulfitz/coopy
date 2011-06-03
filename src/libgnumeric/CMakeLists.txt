@@ -25,6 +25,8 @@ if (USE_GNUMERIC)
     pkg_search_module (GDK_PIXBUF REQUIRED gdk-pixbuf-2.0)
     include_directories(${GDK_PIXBUF_INCLUDE_DIRS})
     pkg_search_module (GNOMEPRINTUI libgnomeprintui-2.2)
+  else ()
+    link_libraries(goffice-0.8 gobject-2.0)
   endif ()
 
   set(GNUMERIC_ROOT "" CACHE STRING "Location of Gnumeric source") 
