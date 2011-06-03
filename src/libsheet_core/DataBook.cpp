@@ -21,7 +21,9 @@ bool DataBook::operator==(const DataBook& alt) const {
   }
 
   PolySheet s1 = b1->readSheet(names[0]);
+  s1.hideHeaders();
   PolySheet s2 = b2->readSheet(altNames[0]);
+  s2.hideHeaders();
   if (s1.width()!=s2.width() || s1.height()!=s2.height()) {
     return false;
   }

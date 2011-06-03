@@ -243,7 +243,7 @@ public:
   }
 
   virtual bool hasExternalColumnNames() const {
-    if (dh!=0 && schema!=NULL) return true;
+    if (dh!=0) return true;
     COOPY_ASSERT(sheet);
     return sheet->hasExternalColumnNames();
   }

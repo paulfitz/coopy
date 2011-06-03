@@ -521,3 +521,15 @@ FOREACH(x 1 2 3 4 5)
 ENDFOREACH()
 
 
+#######################################################################
+#######################################################################
+
+# check csvs header
+ADD_TEST(csvs_header_sqlite ${ssformat} ${TESTS}/numbers.xls csvs_header.sqlite)
+ADD_TEST(csvs_header_csvs ${ssformat} csvs_header.sqlite csvs_header.csvs)
+ADD_TEST(csvs_header_equal_sqlite ${ssdiff} --equal ${TESTS}/numbers.xls csvs_header.sqlite)
+ADD_TEST(csvs_header_equal_csvs ${ssdiff} --equal ${TESTS}/numbers.xls csvs_header.csvs)
+ADD_TEST(csvs_header_diff ${ssdiff} --verbose --output csvs_header_diff.tdiff --omit-format-name ${TESTS}/numbers.xls csvs_header.csvs)
+ADD_TEST(csvs_header_diff_ok ${CMAKE_COMMAND} -E compare_files 
+  csvs_header_diff.tdiff ${TESTS}/results/blank.tdiff)
+
