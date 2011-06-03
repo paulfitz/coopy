@@ -63,6 +63,7 @@ add_subdirectory(libcsv)
 add_subdirectory(libsqlite)
 add_subdirectory(libgnumeric)
 add_subdirectory(libaccess)
+# add_subdirectory(libsocialcalc)
 
 add_subdirectory(libsheet_core)
 add_subdirectory(libremotesql)
