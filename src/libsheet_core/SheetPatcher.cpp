@@ -532,6 +532,11 @@ bool SheetPatcher::setSheet(const char *name) {
   attachSheet(psheet);
   psheet = book->readSheet(name);
   if (!psheet.isValid()) {
+    if (!book->namedSheets()) {
+      psheet = book->readSheetByIndex(0);
+    }
+  }
+  if (!psheet.isValid()) {
     fprintf(stderr,"Cannot find sheet %s\n", name);
     return false;
   }
