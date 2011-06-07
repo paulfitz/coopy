@@ -202,7 +202,8 @@ ADD_TEST(basic_merge_garbled ${testprg}
   --remote --read ${TESTS}/numbers_change_five.csv
   --diff
   --prop diffs --assert 0)
-SET_PROPERTY(TEST basic_merge_garbled PROPERTY WILL_FAIL TRUE)
+# no longer fails, now CSV loading is Excel-style-forgiving
+# SET_PROPERTY(TEST basic_merge_garbled PROPERTY WILL_FAIL TRUE)
 
 
 ADD_TEST(basic_merge_modify_one_cell ${testprg}
@@ -533,3 +534,7 @@ ADD_TEST(csvs_header_diff ${ssdiff} --verbose --output csvs_header_diff.tdiff --
 ADD_TEST(csvs_header_diff_ok ${CMAKE_COMMAND} -E compare_files 
   csvs_header_diff.tdiff ${TESTS}/results/blank.tdiff)
 
+set(PRIVATE_TESTS_ROOT "" CACHE PATH "Location of private tests") 
+if (PRIVATE_TESTS_ROOT)
+  add_subdirectory(${PRIVATE_TESTS_ROOT} private_tests)
+endif()

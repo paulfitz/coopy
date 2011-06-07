@@ -178,9 +178,12 @@ int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest,
 }
 
 
-int read(const char *src, CsvSheetReaderState& dest, 
-	 const Property& config) {
-  FILE *fp;
+// len = -1: file
+// len >= 0: in memory
+static int read(const char *src, int len, CsvSheetReaderState& dest, 
+		const Property& config) {
+  bool fromFile = (len==-1);
+  FILE *fp = NULL;
   char buf[32768];
   size_t bytes_read;
   struct csv_parser p;
@@ -190,21 +193,28 @@ int read(const char *src, CsvSheetReaderState& dest,
     exit(1);
   }
   SheetStyle style;
-  style.setFromFilename(src);
+  if (fromFile) {
+    style.setFromFilename(src);
+  }
   style.setFromProperty(config);
   dest.setStyle(style);
   csv_set_delim(&p,style.getDelimiter()[0]);
 
   bool need_close = true;
-  if (strcmp(src,"-")==0) {
-    fp = stdin;
-    need_close = false;
+
+  if (fromFile) {
+    if (strcmp(src,"-")==0) {
+      fp = stdin;
+      need_close = false;
+    } else {
+      fp = fopen(src,"rb");
+    }
+    if (!fp) {
+      fprintf(stderr,"CsvRead: could not open %s\n", src);
+      return 1;
+    }
   } else {
-    fp = fopen(src,"rb");
-  }
-  if (!fp) {
-    fprintf(stderr,"CsvRead: could not open %s\n", src);
-    return 1;
+    need_close = false;
   }
 
   if (fp==stdin) {
@@ -225,7 +235,7 @@ int read(const char *src, CsvSheetReaderState& dest,
       fprintf(stderr,"error parsing standard input\n");
       exit(1);
     }
-  } else {
+  } else if (fp!=NULL) {
     while ((bytes_read=fread(buf,1,sizeof(buf),fp))>0) {
       if (csv_parse(&p,
 		    buf,
@@ -236,6 +246,17 @@ int read(const char *src, CsvSheetReaderState& dest,
 	fprintf(stderr,"error parsing %s\n", src);
 	exit(1);
       }
+    }
+  } else {
+    // in memory
+    if (csv_parse(&p,
+		  src,
+		  len,
+		  csvfile_merge_cb1,
+		  csvfile_merge_cb2,
+		  (void*)(&dest)) != len) {
+      fprintf(stderr,"error parsing %s\n", src);
+      exit(1);
     }
   }
   csv_fini(&p,
@@ -266,7 +287,7 @@ int CsvFile::read(const char *src, CsvSheet& dest, const Property& config) {
   dbg_printf("CsvFile::read %s options %s\n", src, config.toString().c_str());
   CsvSheetReaderState state;
   state.sheet = &dest;
-  return read(src,state,config);
+  return read(src,-1,state,config);
   //return result;
 }
 
@@ -286,6 +307,13 @@ int CsvFile::read(const char *src, CsvSheetReader& dest,
 		  const Property& config) {
   CsvSheetReaderState state;
   state.reader = &dest;
-  return read(src,state,config);  
+  return read(src,-1,state,config);  
 }
 
+int CsvFile::read(const char *data, int len, CsvSheetReader& dest, 
+		  const Property& config) {
+  CsvSheetReaderState state;
+  state.reader = &dest;
+  if (len<0) return -1;
+  return read(data,len,state,config);  
+}

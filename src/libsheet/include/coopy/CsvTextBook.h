@@ -46,6 +46,8 @@ public:
   
   bool readCsvs(const char *fname);
 
+  bool readCsvsData(const char *data, int len);
+
   bool writeCsvs(const char *fname) {
     return write(fname,this,compact);
   }

@@ -8,6 +8,7 @@
 using namespace coopy::store;
 
 void CsvSheet::addField(const char *s, bool escaped) {
+  /*
   if (isStrict()) {
     if (th>=1&&tw>=this->s.w) {
       fprintf(stderr,"Attempt to add a spurious field to a sheet (\"%s\")\n",
@@ -24,6 +25,7 @@ void CsvSheet::addField(const char *s, bool escaped) {
       exit(1);
     }
   }
+  */
   pairCellType p(s,escaped);
   rec.push_back(p);
   tw++;

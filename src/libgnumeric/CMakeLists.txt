@@ -29,7 +29,7 @@ if (USE_GNUMERIC)
     link_libraries(goffice-0.8 gobject-2.0)
   endif ()
 
-  set(GNUMERIC_ROOT "" CACHE STRING "Location of Gnumeric source") 
+  set(GNUMERIC_ROOT "" CACHE PATH "Location of Gnumeric source") 
   message(STATUS "GNUMERIC_ROOT=${GNUMERIC_ROOT}")
 
   if (GNUMERIC_ROOT)

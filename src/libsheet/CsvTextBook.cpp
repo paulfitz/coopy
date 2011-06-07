@@ -21,6 +21,20 @@ static string getRoot(const char *fname) {
   return root;
 }
 
+bool CsvTextBook::readCsvsData(const char *data, int len) {
+  if (!compact) return false;
+  clear();
+  Property p;
+  if (CsvFile::read(data,len,*this,p)!=0) {
+    fprintf(stderr,"Failed to read CSVS data\n");
+    return false;
+  }
+  for (int i=0; i<(int)sheets.size(); i++) {
+    sheets[i].setRowOffset();
+  }
+  return true;
+}
+
 bool CsvTextBook::readCsvs(const char *fname) {
   if (compact) {
     clear();

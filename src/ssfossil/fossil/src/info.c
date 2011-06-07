@@ -905,6 +905,45 @@ void diff_page(void){
   style_footer();
 }
 
+
+/*
+** WEBPAGE: sdiff
+**
+** Two arguments, v1 and v2, are integers.  Show the difference between
+** the two records, as spreadsheets.
+*/
+void sdiff_page(void){
+  int v1, v2;
+  Blob c1, c2, diff;
+
+  login_check_credentials();
+  if( !g.okRead ){ login_needed(); return; }
+  v1 = name_to_rid_www("v1");
+  v2 = name_to_rid_www("v2");
+  if( v1==0 || v2==0 ) fossil_redirect_home();
+  style_header("Diff");
+  @ <h2>Spreadsheet Differences From:</h2>
+  @ <blockquote><p>
+  object_description(v1, 1, 0);
+  @ </p></blockquote>
+  @ <h2>To:</h2>
+  @ <blockquote><p>
+  object_description(v2, 1, 0);
+  @ </p></blockquote>
+  @ <hr />
+  @ <blockquote><pre>
+  content_get(v1, &c1);
+  content_get(v2, &c2);
+  blob_zero(&diff);
+  csvs_diff(&c1, &c2, &diff);
+  blob_reset(&c1);
+  blob_reset(&c2);
+  @ %h(blob_str(&diff))
+  @ </pre></blockquote>
+  blob_reset(&diff);
+  style_footer();
+}
+
 /*
 ** WEBPAGE: raw
 ** URL: /raw?name=ARTIFACTID&m=TYPE

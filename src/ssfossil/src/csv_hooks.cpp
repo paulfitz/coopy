@@ -11,7 +11,12 @@ extern "C" {
 
 #include <coopy/SheetCompare.h>
 #include <coopy/MergeOutputAccum.h>
+//#include <coopy/MergeOutputTdiff.h>
 #include <coopy/CsvRender.h>
+#include <coopy/CsvTextBook.h>
+#include <coopy/SheetPatcher.h>
+#include <coopy/PolyBook.h>
+#include <coopy/BookCompare.h>
 
 #include "ssfossil.h"
 
@@ -20,6 +25,7 @@ using namespace coopy::cmp;
 
 extern "C" int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut);
 extern "C" int csv_render(Blob *in, Blob *out);
+extern "C" int csvs_diff(Blob *pV1, Blob *pV2, Blob *pOut);
 
 extern "C" void cvs_merge_cb1 (void *s, size_t i, void *p, int quoted) {
   ((CsvSheet*)p)->addField((char *)s, i);
@@ -31,9 +37,6 @@ extern "C" void cvs_merge_cb2 (int c, void *p) {
 
 int blob_to_csv(Blob *pIn, CsvSheet& csv) {
   SheetStyle style;
-  style.setFromInspection(blob_buffer(pIn),blob_size(pIn));
-  csv.clear();
-  csv.setStyle(style);
   if (pIn==NULL) return -1;
   struct csv_parser p;
   csv_init(&p,0); // CSV_APPEND_NULL does not seem reliable
@@ -52,6 +55,14 @@ int blob_to_csv(Blob *pIn, CsvSheet& csv) {
     return -1;
   }
   if (!csv.isValid()) {
+    return -1;
+  }
+  return 0;
+}
+
+int blob_to_csvs(Blob *pIn, CsvTextBook& csv) {
+  if (pIn==NULL) return -1;
+  if (!csv.readCsvsData(blob_buffer(pIn),blob_size(pIn))) {
     return -1;
   }
   return 0;
@@ -113,5 +124,34 @@ int csv_render(Blob *in, Blob *out) {
     blob_appendf(out,"%s",result.c_str());
     return 1;
   }
+  return 0;
+}
+
+
+extern "C" int csvs_diff(Blob *pV1, Blob *pV2, Blob *pOut) {
+  CsvTextBook book1(true);
+  CsvTextBook book2(true);
+  if (blob_to_csvs(pV1,book1)!=0) {
+    return 1;
+  }
+  if (blob_to_csvs(pV2,book2)!=0) {
+    return 1;
+  }
+  PolyBook obook;
+  //MergeOutputTdiff highlighter;
+  SheetPatcher highlighter(true);
+  highlighter.attachOutputBook(obook);
+  CompareFlags flags;
+  BookCompare cmp;
+  PolyBook tbook;
+  tbook.take(new CsvTextBook(true));
+  Property p;
+  tbook.copy(book1,p);
+  highlighter.attachBook(tbook);
+  cmp.compare(book1,book1,book2,highlighter,flags);
+
+  PolySheet result = tbook.readSheetByIndex(0);
+  blob_zero(pOut);
+  blob_show_csv(result,SheetStyle(),pOut);
   return 0;
 }

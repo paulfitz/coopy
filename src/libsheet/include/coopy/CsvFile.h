@@ -20,6 +20,10 @@ namespace coopy {
       int read(const char *src, 
 	       CsvSheetReader& dest, 
 	       const Property& config);
+
+      int read(const char *data, int len,
+	       CsvSheetReader& dest, 
+	       const Property& config);
     }
   }
 }
