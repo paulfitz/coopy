@@ -192,14 +192,14 @@ bool SqliteSheet::create(const SheetSchema& schema) {
 
   string cols = "";
   vector<string> keys;
-  if (schema.providesPrimaryKeys()) {
-    for (int i=0; i<schema.getColumnCount(); i++) {
-      ColumnInfo ci = schema.getColumnInfo(i);
-      if (ci.isPrimaryKey()) {
-	keys.push_back(ci.getName());
-      }
+  //if (schema.providesPrimaryKeys()) {
+  for (int i=0; i<schema.getColumnCount(); i++) {
+    ColumnInfo ci = schema.getColumnInfo(i);
+    if (ci.isPrimaryKey()) {
+      keys.push_back(ci.getName());
     }
   }
+  //}
 
   for (int i=0; i<schema.getColumnCount(); i++) {
     ColumnInfo ci = schema.getColumnInfo(i);
@@ -239,6 +239,7 @@ bool SqliteSheet::create(const SheetSchema& schema) {
   }
 
 
+  dbg_printf("Creating table: %s\n", cols.c_str());
   query = sqlite3_mprintf("CREATE TABLE %q (%s)", 
 			  _quoted(name).c_str(),
 			  cols.c_str());
