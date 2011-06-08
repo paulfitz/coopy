@@ -21,7 +21,7 @@ using namespace coopy::cmp;
 
 static string celly(const SheetCell& c) {
   if (c.text=="NULL"&&!c.escaped) {
-    return "\"NULL\"";
+    return "\'NULL\'";
   }
   if (c.escaped) {
     return "NULL";

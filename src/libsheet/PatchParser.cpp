@@ -6,6 +6,7 @@
 #include <coopy/PolyBook.h>
 
 #include <stdio.h>
+#include <string.h>
 
 #include <string>
 #include <vector>
@@ -177,6 +178,21 @@ public:
 
 
 static SheetCell nully(string x) {
+  if (x=="NULL") {
+    return SheetCell("NULL",true);
+  }
+  int score = 0;
+  for (score=0; score<(int)x.length(); score++) {
+    if (x[score]!='_') {
+      break;
+    }
+  }
+  if (score>0) {
+    string token = "NULL";
+    if (memcmp(((char*)x.c_str())+score,token.c_str(),x.length()-score)==0) {
+      return SheetCell(x.substr(1,x.length()),false);
+    }
+  }
   // does nothing for now
   return SheetCell(x,false);
 }
@@ -1085,13 +1101,13 @@ bool PatchParser::applyColor() {
 	    if (offset!=string::npos) {
 	      if (!added) {
 		change.cond[col] = nully(c.text.substr(0,offset));
+		done = true;
 	      }
 	      change.val[col] = nully(c.text.substr(offset+separator.length(),
 						    c.text.length()));
 	    } else {
 	      change.val[col] = nully(c.text);
 	    }
-	    done = true;
 	    /*
 	    TDiffPart p(c.text,false,minuses);
 	    if (p.hasNval) {

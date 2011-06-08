@@ -232,6 +232,23 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
   return false;
 }
 
+static string colorEncode(const SheetCell& c) {
+  std::string str = c.text;
+  if (!c.escaped) {
+    int score = 0;
+    for (score=0; score<(int)str.length(); score++) {
+      if (str[score]!='_') {
+	break;
+      }
+    }
+    if (str.substr(score,str.length())=="NULL") {
+      str = std::string("_") + str;
+    }
+    return str;
+  }
+  return "NULL";
+}
+
 bool SheetPatcher::markChanges(int r,int width,
 			       vector<int>& active_val,
 			       vector<SheetCell>& val) {
@@ -261,7 +278,10 @@ bool SheetPatcher::markChanges(int r,int width,
 	string from = prev.toString();
 	if (prev.escaped) from = "";
 	string to = val[c].toString();
-	sheet.cellString(c,r,from + separator + to);
+	SheetStyle style;
+	sheet.cellString(c,r,colorEncode(prev) + 
+			 separator + 
+			 colorEncode(val[c]));
 	Poly<Appearance> appear = sheet.getCellAppearance(c,r);
 	if (appear.isValid()) {
 	  appear->begin();
