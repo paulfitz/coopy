@@ -143,16 +143,18 @@ bool PolyBook::attach(Property& config) {
   }
   dbg_printf("Attach: extension is %s\n", ext.c_str());
 
-  if (ext == ".json") {
-    dbg_printf("Asked to attach, with json configuration\n");
-    if (!JsonProperty::add(config,filename)) {
-      return false;
+  if (filename.substr(0,4)!="dbi:") {
+    if (ext == ".json") {
+      dbg_printf("Asked to attach, with json configuration\n");
+      if (!JsonProperty::add(config,filename)) {
+	return false;
+      }
+      filename = config.get("file",PolyValue::makeString("-")).asString();
+      ext = "";
+      config.put("ext","");
+    } else {
+      config.put("ext",ext);
     }
-    filename = config.get("file",PolyValue::makeString("-")).asString();
-    ext = "";
-    config.put("ext","");
-  } else {
-    config.put("ext",ext);
   }
 
   if (filename.substr(0,4)=="dbi:") {
