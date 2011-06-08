@@ -31,12 +31,13 @@ int main(int argc, char *argv[]) {
   bool named = false;
   bool help = false;
   bool omitHeader = false;
+  bool ordered = false;
+  bool orderSet = false;
 
   while (true) {
     int option_index = 0;
     static struct option long_options[] = {
       {"format-csv", 0, 0, 'c'},
-      {"format-csv-old", 0, 0, '0'},
       {"format-sql", 0, 0, 's'},
       {"format-raw", 0, 0, 'r'},
       {"format-tdiff", 0, 0, 't'},
@@ -52,6 +53,9 @@ int main(int argc, char *argv[]) {
       {"id", 1, 0, 'k'},
 
       {"named", 0, 0, 'd'},
+
+      {"ordered", 0, 0, '1'},
+      {"unordered", 0, 0, '0'},
 
       {"map", 1, 0, 'm'},
 
@@ -71,9 +75,6 @@ int main(int argc, char *argv[]) {
     switch (c) {
     case 'c':
       mode = "csv";
-      break;
-    case '0':
-      mode = "csv0";
       break;
     case 's':
       mode = "sql";
@@ -98,6 +99,14 @@ int main(int argc, char *argv[]) {
       break;
     case 'd':
       named = true;
+      break;
+    case '0':
+      ordered = false;
+      orderSet = true;
+      break;
+    case '1':
+      ordered = true;
+      orderSet = true;
       break;
 
     case 'k':
@@ -168,6 +177,7 @@ int main(int argc, char *argv[]) {
     printf("speed with the following options:\n");
     printf("  ssdiff --id COL1 --id COL2 local.csv modified.csv # declare primary key\n");
     printf("  ssdiff --named local.csv modified.csv   # trust names of columns\n");
+    printf("  ssdiff --unordered local.csv modified.csv   # do not worry about row order\n");
     printf("\n");
 
     printf("It is possible to immediately apply a difference as a patch:\n");
@@ -226,6 +236,9 @@ int main(int argc, char *argv[]) {
     flags.trust_ids = true;
   }
   flags.trust_column_names = named;
+  if (orderSet) {
+    flags.use_order = ordered;
+  }
 
   if (omitHeader) {
     flags.omit_format_name = true;
