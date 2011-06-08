@@ -176,6 +176,11 @@ public:
 };
 
 
+static SheetCell nully(string x) {
+  // does nothing for now
+  return SheetCell(x,false);
+}
+
 bool PatchParser::apply() {
   if (patcher==NULL) return false;
 
@@ -977,6 +982,10 @@ bool PatchParser::applyColor() {
       //printf("Cols are %s\n",vector2string(cols).c_str());
       change.indexes = indexes;
       string code = sheet.cellString(0,i);
+      string tail2 = "";
+      if (code.length()>=2) {
+	tail2 = code.substr(code.length()-2,2);
+      }
       if (code[0] == '@') {
 	cols.clear();
 	bool acts = false;
@@ -1060,15 +1069,31 @@ bool PatchParser::applyColor() {
 	  change.cond[cols[j-1]] = c;
 	}
 	patcher->changeRow(change);
-      } else if (code == "->") {
+      } else if (tail2 == "->") {
 	change.mode = ROW_CHANGE_UPDATE;
+	int minuses = 0;
+	string separator = code.substr(code.find("-"),code.length());
 	for (int j=1; j<sheet.width(); j++) {
 	  SheetCell c = sheet.cellSummary(j,i);
 	  bool done = false;
 	  string col = cols[j-1];
 	  bool added = statusCol[j-1]=="+++";
 	  if (!c.escaped) {
-	    TDiffPart p(c.text,false);
+	    //printf("Looking at [%s], separator [%s]\n",
+	    //c.toString().c_str(), separator.c_str());
+	    string::size_type offset = c.text.find(separator);
+	    if (offset!=string::npos) {
+	      if (!added) {
+		change.cond[col] = nully(c.text.substr(0,offset));
+	      }
+	      change.val[col] = nully(c.text.substr(offset+separator.length(),
+						    c.text.length()));
+	    } else {
+	      change.val[col] = nully(c.text);
+	    }
+	    done = true;
+	    /*
+	    TDiffPart p(c.text,false,minuses);
 	    if (p.hasNval) {
 	      change.val[col] = p.nval;
 	      if (!added) {
@@ -1076,6 +1101,7 @@ bool PatchParser::applyColor() {
 	      }
 	      done = true;
 	    }
+	    */
 	  }
 	  if (!done) {
 	    if (!added) {

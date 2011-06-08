@@ -232,6 +232,54 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
   return false;
 }
 
+bool SheetPatcher::markChanges(int r,int width,
+			       vector<int>& active_val,
+			       vector<SheetCell>& val) {
+  PolySheet sheet = getSheet();
+
+  string separator = "";
+  for (int c=0; c<width; c++) {
+    if (active_val[c]) {
+      if (separator=="") {
+	separator = "->";
+	bool more = true;
+	while (more) {
+	  more = false;
+	  for (int i=0; i<width; i++) {
+	    SheetCell prev = sheet.cellSummary(i,r);
+	    if (prev.text.find(separator)!=string::npos) {
+	      separator = string("-") + separator;
+	      more = true;
+	      break;
+	    }
+	  }
+	}
+      }
+      activeRow.cellString(0,r,separator);
+      if (descriptive) {
+	SheetCell prev = sheet.cellSummary(c,r);
+	string from = prev.toString();
+	if (prev.escaped) from = "";
+	string to = val[c].toString();
+	sheet.cellString(c,r,from + separator + to);
+	Poly<Appearance> appear = sheet.getCellAppearance(c,r);
+	if (appear.isValid()) {
+	  appear->begin();
+	  appear->setBackgroundRgb16(HALF_COLOR,
+				     HALF_COLOR,
+				     FULL_COLOR,
+				     AppearanceRange::full());
+	  appear->setWeightBold(true,AppearanceRange::full());
+	  appear->end();
+	}
+      } else {
+	sheet.cellSummary(c,r,val[c]);
+      }
+    }
+  }
+  return true;
+}
+
 bool SheetPatcher::changeRow(const RowChange& change) {
   changeCount++;
   if (chain) chain->changeRow(change);
@@ -410,30 +458,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	dbg_printf("%d %s / ", y, sheet.cellString(0,y).c_str());
       }
       dbg_printf("\n");
-      for (int c=0; c<width; c++) {
-	if (active_val[c]) {
-	  activeRow.cellString(0,r,"->");
-	  if (descriptive) {
-	    SheetCell prev = sheet.cellSummary(c,r);
-	    string from = prev.toString();
-	    if (prev.escaped) from = "";
-	    string to = val[c].toString();
-	    sheet.cellString(c,r,from + "->" + to);
-	    Poly<Appearance> appear = sheet.getCellAppearance(c,r);
-	    if (appear.isValid()) {
-	      appear->begin();
-	      appear->setBackgroundRgb16(HALF_COLOR,
-					 HALF_COLOR,
-					 FULL_COLOR,
-					 AppearanceRange::full());
-	      appear->setWeightBold(true,AppearanceRange::full());
-	      appear->end();
-	    }
-	  } else {
-	    sheet.cellSummary(c,r,val[c]);
-	  }
-	}
-      }
+      markChanges(r,width,active_val,val);
       r++;
       if (r>=sheet.height()) {
 	r = -1;
@@ -452,30 +477,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	return false;
       }
       dbg_printf("Match for assignment\n");
-      activeRow.cellString(0,r,"->");
-      for (int c=0; c<width; c++) {
-	if (active_val[c]) {
-	  if (descriptive) {
-	    SheetCell prev = sheet.cellSummary(c,r);
-	    string from = prev.toString();
-	    if (prev.escaped) from = "";
-	    string to = val[c].toString();
-	    sheet.cellString(c,r,from + "->" + to);
-	    Poly<Appearance> appear = sheet.getCellAppearance(c,r);
-	    if (appear.isValid()) {
-	      appear->begin();
-	      appear->setBackgroundRgb16(HALF_COLOR,
-					 HALF_COLOR,
-					 FULL_COLOR,
-					 AppearanceRange::full());
-	      appear->setWeightBold(true,AppearanceRange::full());
-	      appear->end();
-	    }
-	  } else {
-	    sheet.cellSummary(c,r,val[c]);
-	  }
-	}
-      }
+      markChanges(r,width,active_val,val);
       r++;
       if (r>=sheet.height()) {
 	r = -1;

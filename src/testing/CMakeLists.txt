@@ -480,6 +480,8 @@ endforeach()
 
 ADD_ROUND_TRIP_TEST(quote_me ${TESTS}/quote_me.csv ${TESTS}/quote_me2.csv tdiff)
 ADD_ROUND_TRIP_TEST(quote_me2 ${TESTS}/quote_me2.csv ${TESTS}/quote_me.csv tdiff)
+ADD_ROUND_TRIP_TEST(color_quote_me ${TESTS}/quote_me.csv ${TESTS}/quote_me2.csv color)
+ADD_ROUND_TRIP_TEST(color_quote_me2 ${TESTS}/quote_me2.csv ${TESTS}/quote_me.csv color)
 
 #######################################################################
 #######################################################################
