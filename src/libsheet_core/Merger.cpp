@@ -244,6 +244,8 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     */
 
     RowChange rowChange;
+    RowChange rowChangeMove;
+    bool haveMove = false;
     rowChange.cond = cond;
     rowChange.val = value;
     rowChange.names = names;
@@ -275,7 +277,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	      RowChange alt = rowChange;
 	      alt.mode = ROW_CHANGE_MOVE;
 	      if (flags.use_order) {
-		rc.push_back(alt);
+		haveMove = true;
+		rowChangeMove = alt;
+		//rc.push_back(alt);
 	      }
 	    }
 	    last_local_row_marked = lRow;
@@ -300,6 +304,10 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	output.addRow("[-]",expandLocal,blank);
       }
       if (lRow==-1) {
+	if (haveMove) {
+	  rc.push_back(rowChangeMove);
+	  haveMove = false;
+	}
 	output.addRow("[+++]",expandMerge,blank);
 	rowChange.mode = ROW_CHANGE_INSERT;
 	//output.changeRow(rowChange);
@@ -329,6 +337,10 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	last_local_row_marked = lRow;
       } else {
 	if (rRow==-1) {
+	  if (haveMove) {
+	    rc.push_back(rowChangeMove);
+	    haveMove = false;
+	  }
 	  output.addRow("[---]",expandLocal,blank);
 	  rowChange.mode = ROW_CHANGE_DELETE;
 	  //output.changeRow(rowChange);
@@ -337,13 +349,18 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	} else {
 	  if (value.size()!=0) {
 	    output.addRow("[+]",expandMerge,blank);
-	    rowChange.mode = ROW_CHANGE_UPDATE;
+	    rowChange.mode = haveMove?ROW_CHANGE_MOVE:ROW_CHANGE_UPDATE;
+	    haveMove = false;
 	    //output.changeRow(rowChange);
 	    rc.push_back(rowChange);
 	    last_local_row_marked = lRow;
 	  }
 	}
       }
+    }
+    if (haveMove) {
+      rc.push_back(rowChangeMove);
+      haveMove = false;
     }
     if (lRow!=-1 && !delRow) {
       current_row = lRow;

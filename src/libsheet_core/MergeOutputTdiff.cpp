@@ -13,9 +13,9 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
-#define OP_MATCH "*"
-#define OP_ASSIGN "="
-#define OP_MATCH_ASSIGN "*="
+#define OP_MATCH "..."
+#define OP_ASSIGN "..."
+#define OP_MATCH_ASSIGN "..."
 #define OP_CONTEXT "#"
 #define OP_NONE ""
 
@@ -160,7 +160,7 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
 	  fprintf(out,"%s%s%s|",
 		  change.names[i].c_str(),
 		  select?"=":"",
-		  (view&&!(cond||select))?"->":"");
+		  (view&&!(cond||select))?"=":"");  // = was ->
 	}
       }
       fprintf(out,"\n");
@@ -179,9 +179,11 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
   bool ok = true;
 
   char ch = '?';
+  bool assign = false;
   if (!practice) {
     if (string(tag)=="update") {
       ch = '=';
+      assign = true;
     } else if (string(tag)=="insert") {
       ch = '+';
     } else if (string(tag)=="delete") {
@@ -190,6 +192,7 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
       ch = '*';
     } else if (string(tag)=="move") {
       ch = ':';
+      assign = true;
     }
     fprintf(out, "%c |",ch);
   }
@@ -200,15 +203,19 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
       bool transition = false; //showForDesign[name]&&showForSelect[name];
       //if (change.cond.find(name)!=change.cond.end() && 
       //  showForSelect[name] && select) {
+      bool select = check(showForSelect,name);
+      bool cond = check(showForCond,name);
+      bool view = check(showForDescribe,name);
       if (!factored) {
-	bool select = check(showForSelect,name);
-	bool cond = check(showForCond,name);
-	bool view = check(showForDescribe,name);
 	fprintf(out,"%s%s%s%s",
 		name.c_str(),
 		select?"=":"",
 		(view&&!(cond||select))?((ch=='+')?":->":":*->"):"",
 		(cond&&!(view||select))?":":"");
+      } else {
+	if (assign&&(!cond)) {
+	  fprintf(out,"*->");
+	}
       }
       if (showForCond[name] && select) {
 	fprintf(out,"%s",celly(change.cond.find(name)->second).c_str());
@@ -339,7 +346,7 @@ bool MergeOutputTdiff::changeRow(const RowChange& change,
     updateRow(change,"after",true,false,false,factored);
     break;
   case ROW_CHANGE_MOVE:
-    updateRow(change,"move",true,false,false,factored);
+    updateRow(change,"move",true,true,false,factored);
     break;
   case ROW_CHANGE_UPDATE:
     updateRow(change,"update",true,true,false,factored);

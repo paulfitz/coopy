@@ -375,10 +375,10 @@ bool PatchParser::applyCsv() {
 	RowChange change2;
 	change2.mode = ROW_CHANGE_CONTEXT;
 	ok = patcher->changeRow(change2);
-      } else if (cmd1=="after"||cmd1=="move") {
+      } else if (cmd1=="after") {
 	sequential = true;
 	dbg_printf("%s %s\n", cmd1.c_str(), names2.dataString().c_str());
-	change.mode = (cmd1=="after")?ROW_CHANGE_CONTEXT:ROW_CHANGE_MOVE;
+	change.mode = ROW_CHANGE_CONTEXT;
 	for (int i=0; i<len; i++) {
 	  string name = names.lst[i];
 	  const SheetCell& val = names2.data[i];
@@ -389,6 +389,31 @@ bool PatchParser::applyCsv() {
 	  }
 	}
 	ok = patcher->changeRow(change);
+      } else if (cmd1=="move") {
+	sequential = true;
+	if (needSelector) {
+	  selector = names2.data;
+	}
+	dbg_printf("Moving to %s\n", names2.dataString().c_str());	
+	change.mode = ROW_CHANGE_MOVE;
+	for (int i=0; i<len; i++) {
+	  const SheetCell& sel = selector[i];
+	  string name = names.lst[i];
+	  bool ok = match_column[name];
+	  if (support_name_star && sel.text=="*") ok = false;	
+	  if (ok) {
+	    change.cond[change.names[i]] = sel;
+	  }
+	  const SheetCell& val = names2.data[i];
+	  ok = assign_column[name];
+	  if (support_name_star && val.text=="*") ok = false;
+	  if (ok) {
+	    change.val[change.names[i]] = val;
+	    //printf("assign %s %s\n", change.names[i].c_str(), val.toString().c_str());
+	  }
+	}
+	ok = patcher->changeRow(change);
+	needSelector = true;
       } else if (cmd1=="etc") {
 	sequential = false;
       } else if (cmd1=="update"||cmd1=="=") {

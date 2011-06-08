@@ -534,6 +534,14 @@ ADD_TEST(csvs_header_diff ${ssdiff} --verbose --output csvs_header_diff.tdiff --
 ADD_TEST(csvs_header_diff_ok ${CMAKE_COMMAND} -E compare_files 
   csvs_header_diff.tdiff ${TESTS}/results/blank.tdiff)
 
+#######################################################################
+#######################################################################
+
+# check lots of moves
+ADD_ROUND_TRIP_TEST(wii_move_tdiff ${TESTS}/bug/wii_0001/wii1.csv ${TESTS}/bug/wii_0001/wii2.csv tdiff)
+ADD_ROUND_TRIP_TEST(wii_move_csv ${TESTS}/bug/wii_0001/wii1.csv ${TESTS}/bug/wii_0001/wii2.csv csv)
+
+
 set(PRIVATE_TESTS_ROOT "" CACHE PATH "Location of private tests") 
 if (PRIVATE_TESTS_ROOT)
   add_subdirectory(${PRIVATE_TESTS_ROOT} private_tests)

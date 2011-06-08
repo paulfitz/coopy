@@ -410,6 +410,30 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	dbg_printf("%d %s / ", y, sheet.cellString(0,y).c_str());
       }
       dbg_printf("\n");
+      for (int c=0; c<width; c++) {
+	if (active_val[c]) {
+	  activeRow.cellString(0,r,"->");
+	  if (descriptive) {
+	    SheetCell prev = sheet.cellSummary(c,r);
+	    string from = prev.toString();
+	    if (prev.escaped) from = "";
+	    string to = val[c].toString();
+	    sheet.cellString(c,r,from + "->" + to);
+	    Poly<Appearance> appear = sheet.getCellAppearance(c,r);
+	    if (appear.isValid()) {
+	      appear->begin();
+	      appear->setBackgroundRgb16(HALF_COLOR,
+					 HALF_COLOR,
+					 FULL_COLOR,
+					 AppearanceRange::full());
+	      appear->setWeightBold(true,AppearanceRange::full());
+	      appear->end();
+	    }
+	  } else {
+	    sheet.cellSummary(c,r,val[c]);
+	  }
+	}
+      }
       r++;
       if (r>=sheet.height()) {
 	r = -1;
