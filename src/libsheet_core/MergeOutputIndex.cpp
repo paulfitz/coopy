@@ -24,8 +24,8 @@ bool MergeOutputIndex::mergeStart() {
   {
     SimpleSheetSchema ss;
     ss.setSheetName("links");
-    //ss.addColumn("frame",ColumnType("TEXT"));
     ss.addColumn("category",ColumnType("TEXT"));
+    //ss.addColumn("frame",ColumnType("TEXT"));
     ss.addColumn("pivot",ColumnType("INTEGER"));
     ss.addColumn("local",ColumnType("INTEGER"));
     ss.addColumn("remote",ColumnType("INTEGER"));
@@ -109,6 +109,7 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
     seen[s] = 1;
     int at = 0;
     row.setCell(at,SheetCell(mode,false)); at++;
+    //row.setCell(at,SheetCell(frame,false)); at++;
     row.setCell(at,SheetCell(decl.rc_id_pivot)); at++;
     row.setCell(at,SheetCell(decl.rc_id_local)); at++;
     row.setCell(at,SheetCell(decl.rc_id_remote)); at++;

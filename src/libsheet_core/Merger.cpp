@@ -177,6 +177,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
   if (link) {
     LinkDeclare decl;
     decl.mode = LINK_DECLARE_MERGE;
+    decl.column = false;
     decl.rc_id_pivot = pRow;
     decl.rc_id_local = lRow;
     decl.rc_id_remote = rRow;
@@ -475,6 +476,7 @@ bool Merger::merge(MergerState& state) {
       output.declareLink(decl);
     }
 
+    /*
     // perspective: LOCAL, ROW
     for (int i=0; i<local.height(); i++) {
       LinkDeclare decl;
@@ -504,6 +506,7 @@ bool Merger::merge(MergerState& state) {
       decl.rc_deleted = 0;
       output.declareLink(decl);      
     }
+    */
   }
 
   allGone = false;
