@@ -101,7 +101,8 @@ int main(int argc, char *argv[]) {
   }
   if (extractHeader) {
     PolySheet sheet = src.readSheetByIndex(0);
-    NameSniffer sniff(sheet);
+    CompareFlags flags;
+    NameSniffer sniff(sheet,flags);
     ShortTextBook *book = new ShortTextBook();
     if (book==NULL) {
       fprintf(stderr,"Failed to allocate output\n");
@@ -116,7 +117,7 @@ int main(int argc, char *argv[]) {
   if (extractIndex) {
     PolySheet sheet = src.readSheetByIndex(0);
     CompareFlags flags;
-    NameSniffer nsniff(sheet);
+    NameSniffer nsniff(sheet,flags);
     IndexSniffer sniff(sheet,flags,nsniff);
     vector<int> indexes = sniff.suggestIndexes();
     dbg_printf("Index count %d\n", (int)indexes.size());

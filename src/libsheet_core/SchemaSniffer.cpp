@@ -22,8 +22,8 @@ void SchemaSniffer::sniff(bool force) {
       }
     }
   }
-  NameSniffer nameSniffer(*sheet);
   CompareFlags flags;
+  NameSniffer nameSniffer(*sheet,flags);
   vector<string> names = nameSniffer.suggestNames();
   vector<ColumnType> ct = nameSniffer.suggestTypes();
   IndexSniffer indexSniffer(*sheet,flags,nameSniffer);

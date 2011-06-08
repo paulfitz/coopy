@@ -2,6 +2,7 @@
 #define COOPY_NAME_SNIFFER
 
 #include <coopy/DataSheet.h>
+#include <coopy/CompareFlags.h>
 
 #include <vector>
 #include <string>
@@ -18,12 +19,15 @@ private:
   std::vector<std::string> names;
   std::vector<int> subset_index;
   std::vector<ColumnType> ct;
+  const coopy::cmp::CompareFlags& flags;
   bool embed;
   bool fake;
   bool sniffed;
   int div;
 public:
- NameSniffer(const DataSheet& sheet, bool autosniff=true) : sheet(sheet) {
+ NameSniffer(const DataSheet& sheet, 
+	     const coopy::cmp::CompareFlags& flags,
+	     bool autosniff=true) : sheet(sheet), flags(flags) {
     div = -1;
     fake = true;
     sniffed = false;

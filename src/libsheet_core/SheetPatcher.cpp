@@ -723,7 +723,7 @@ void SheetPatcher::setNames() {
     clearNames();
     activeCol.resize(0,1);
     statusCol.resize(0,1);
-    sniffer = new NameSniffer(sheet);
+    sniffer = new NameSniffer(sheet,getFlags());
     COOPY_ASSERT(sniffer);
     sniffedSheet = &sheet;
     activeCol.resize(sheet.width(),1);

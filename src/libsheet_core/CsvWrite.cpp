@@ -6,6 +6,7 @@
 #include <coopy/NameSniffer.h>
 
 using namespace coopy::store;
+using namespace coopy::cmp;
 
 int CsvFile::write(const DataSheet& src, const char *fname) {
   Property p;
@@ -47,7 +48,8 @@ int CsvFile::write(const DataSheet& src, const Property& config) {
   bool markHeader = config.get("mark_header",
 			       PolyValue::makeBoolean(false)).asBoolean();
   if (wantHeader) {
-    NameSniffer sniffer(src);
+    CompareFlags flags;
+    NameSniffer sniffer(src,flags);
     if (!sniffer.isEmbedded()) {
       if (wantFakeHeader||!sniffer.isFake()) {
 	CsvSheet header;

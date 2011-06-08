@@ -4,6 +4,7 @@
 #include <coopy/DataColumn.h>
 #include <coopy/ColumnInfo.h>
 #include <coopy/FloatSheet.h>
+#include <coopy/CompareFlags.h>
 
 namespace coopy {
   namespace cmp {
@@ -31,7 +32,8 @@ public:
 
   void evaluate(const coopy::store::DataSheet& sheet);
 
-  void evaluate2(const coopy::store::DataSheet& sheet);
+  void evaluate2(const coopy::store::DataSheet& sheet,
+		 const coopy::cmp::CompareFlags& flags);
 
   const std::vector<coopy::store::ColumnType>& suggestTypes() const {
     return ct;

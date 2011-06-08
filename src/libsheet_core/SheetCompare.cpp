@@ -199,9 +199,9 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   DataSheet& local = *plocal;
   DataSheet& remote = *premote;
 
-  NameSniffer pivot_names(pivot,false);
-  NameSniffer local_names(local,false);
-  NameSniffer remote_names(remote,false);
+  NameSniffer pivot_names(pivot,flags,false);
+  NameSniffer local_names(local,flags,false);
+  NameSniffer remote_names(remote,flags,false);
 
   CompareFlags eflags = flags;
 
@@ -227,8 +227,12 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
       slocal.sniff();
       SheetSchema *schema = slocal.suggestSchema();
       COOPY_ASSERT(schema!=NULL);
+      std::string sname = schema->getSheetName();
+      if (sname=="") sname = "sheet";
       fprintf(stderr,"*** Not all ID columns found for %s\n", 
-	      schema->getSheetName().c_str());
+	      sname.c_str());
+      dbg_printf("*** Not all ID columns found for %s\n", 
+		 sname.c_str());
       eflags.trust_ids = false;
     }
   }

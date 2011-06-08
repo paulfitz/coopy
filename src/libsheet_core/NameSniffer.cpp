@@ -51,7 +51,7 @@ void NameSniffer::sniff() {
 
   if (div<0) {
     DataStat stat;
-    stat.evaluate2(sheet);
+    stat.evaluate2(sheet,flags);
     div = stat.getRowDivider();
     ct = stat.suggestTypes();
   }
@@ -63,13 +63,27 @@ void NameSniffer::sniff() {
 
   map<string,int> nameCheck;
   bool failure = false;
+  string lastName = "";
   for (int i=0; i<sheet.width(); i++) {
     string name = sheet.cellString(i,div);
     if (name=="") {
-      dbg_printf("Reject header, blank name\n");
-      failure = true;
-      break;
+      string below = ".";
+      if (sheet.height()>div) {
+	below = sheet.cellString(i,div+1);
+      }
+      if (below!="") {
+	dbg_printf("Reject header, blank name\n");
+	failure = true;
+	break;
+      }
+    } else {
+      lastName = name;
     }
+    if (name=="") {
+      name = lastName + "_";
+      lastName = name;
+    }
+
     if (nameCheck.find(name)!=nameCheck.end()) {
       dbg_printf("Reject header, repeated name %s\n", name.c_str());
       failure = true;
@@ -110,6 +124,14 @@ bool NameSniffer::subset(std::vector<std::string>& ext) {
   for (int i=0; i<(int)ext.size(); i++) {
     for (int j=0; j<(int)names.size(); j++) {
       if (ext[i]==names[j]) {
+	dbg_printf("pos %d %s\n", j, names[j].c_str());
+	subset_index.push_back(j);
+	break;
+      }
+    }
+    if (ext[i].size()==1) {
+      int j = ext[i][0]-'A';
+      if (j>=0&&j<=26) {
 	dbg_printf("pos %d %s\n", j, names[j].c_str());
 	subset_index.push_back(j);
 	break;
