@@ -13,6 +13,16 @@ if (USE_ACCESS)
   INCLUDE_DIRECTORIES(${GLIB2_INCLUDE_DIRS})
   INCLUDE_DIRECTORIES(${Mdbtools_INCLUDE_DIRS})
 
+  # tweak for apple build
+  if (APPLE)
+    option(NEED_FAKE_INTL "create a fake intl library (may be needed with OSX)" TRUE)
+  endif()
+  if (NEED_FAKE_INTL)
+    add_library(intl ../libgnumeric/dummy.c)
+    link_libraries(intl)
+  endif()
+
+
   add_library(access AccessTextBook.cpp AccessSheet.cpp)
   target_link_libraries(access sheet_core)
   target_link_libraries(access ${Mdbtools_LIBRARIES} ${GLIB2_LIBRARIES})
