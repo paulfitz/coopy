@@ -26,7 +26,7 @@ export BUNDLE_HOMEBREW=$PWD/homebrew
 
 APP=coopy
 
-rm -rf $APP.app || exit 1
+rm -rf $APP.app* || exit 1
 mkdir -p $APP.app || exit 1
 cd $APP.app || exit 1
 APP_DIR=$PWD
@@ -38,7 +38,7 @@ mkdir -p Resources || exit 1
 cp $SOURCE_DIR/conf/Info.plist $APP_DIR/Contents || exit 1
 cp $SOURCE_DIR/conf/coopy.icns $APP_DIR/Contents/Resources || exit 1
 
-for tool in coopy ssformat csvformat; do
+for tool in coopy ssformat csvformat ssconvert; do
 
   if [ ! -e "$BUNDLE_HOMEBREW/bin/$tool" ]; then
 	echo "Cannot find $BUNDLE_HOMEBREW/bin/$tool"
@@ -97,3 +97,12 @@ done
 #chmod u+w $TARGET_DIR/libxmllocal2.2.dylib
 #install_name_tool -id @executable_path/libxmllocal2.2.dylib $TARGET_DIR/libxmllocal2.2.dylib || exit 1
 #chmod u-w $TARGET_DIR/libxmllocal2.2.dylib
+
+cp -R -L $BUNDLE_HOMEBREW/etc $TARGET_DIR/etc || exit 1
+mkdir -p $TARGET_DIR/lib || exit 1
+cp -R -L $BUNDLE_HOMEBREW/lib/gdk-pixbuf-2.0 $TARGET_DIR/lib || exit 1
+cp -R -L $BUNDLE_HOMEBREW/lib/gnumeric $TARGET_DIR/lib || exit 1
+cp -R -L $BUNDLE_HOMEBREW/lib/goffice $TARGET_DIR/lib || exit 1
+cp -R -L $BUNDLE_HOMEBREW/lib/pango $TARGET_DIR/lib || exit 1
+cd $BUILD_DIR || exit 1
+zip -r coopy.app.zip coopy.app || exit 1
