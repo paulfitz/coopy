@@ -40,6 +40,9 @@
 #include <map>
 #include <iostream>
 
+static bool __coopy_verbose = false;
+static bool verb() { return __coopy_verbose; }
+
 // hack to remove warning
 #define static const
 #include "icon/appicon.xpm"
@@ -98,6 +101,7 @@ public:
     static string fossil_action;
     static string fossil_message;
     static string fossil_key;
+    static string fossil_repo;
     static bool fossil_autoend;
     static bool silent;
     static int fossil_result;
@@ -107,6 +111,7 @@ string CoopyApp::fossil_object;
 string CoopyApp::fossil_action;
 string CoopyApp::fossil_message;
 string CoopyApp::fossil_key;
+string CoopyApp::fossil_repo;
 bool CoopyApp::fossil_autoend = false;
 bool CoopyApp::silent = false;
 int CoopyApp::fossil_result = 0;
@@ -115,12 +120,15 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters"),
       wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
     { wxCMD_LINE_SWITCH, wxT("g"), wxT("gui"), wxT("force show GUI") },
+    { wxCMD_LINE_SWITCH, wxT("v"), wxT("verbose"), wxT("show debug information") },
     { wxCMD_LINE_SWITCH, wxT("l"), wxT("silent"), wxT("keep it quiet") },
     //{ wxCMD_LINE_OPTION, wxT("r"), wxT("res"), wxT("set resource location"),
     //wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_SWITCH, wxT("p"), wxT("pull"), wxT("pull in data") },
     { wxCMD_LINE_SWITCH, wxT("c"), wxT("push"), wxT("push out data") },
     { wxCMD_LINE_OPTION, wxT("k"), wxT("key"), wxT("key for adding/export"),
+      wxCMD_LINE_VAL_STRING, 0  },
+    { wxCMD_LINE_OPTION, wxT("r"), wxT("repo"), wxT("repository link"),
       wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_OPTION, wxT("a"), wxT("add"), wxT("add a spreadsheet/database"),
       wxCMD_LINE_VAL_STRING, 0  },
@@ -153,6 +161,9 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     if (parser.Found(wxT("k"),&key)) {
         fossil_key = conv(key);
     }
+    if (parser.Found(wxT("r"),&key)) {
+        fossil_repo = conv(key);
+    }
     if (parser.Found(wxT("m"),&message)) {
         fossil_message = conv(message);
     }
@@ -173,6 +184,9 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     }
     if (parser.Found(wxT("c"))) {
         fossil_action = "push";
+    }
+    if (parser.Found(wxT("v"))) {
+        __coopy_verbose = true;
     }
     fossil_autoend = false;
     if (fossil_action!="") {
@@ -418,6 +432,7 @@ public:
         bool fail = false;
         if (status!=0) {
             addLog(wxT("TROUBLE in CoopyTown..."));
+            addLog(wxT("* Is repository link valid?"));
             fail = true;
             if (next!="revertable") {
                 background = false;
@@ -742,7 +757,9 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
             op1 = conv(string(argv[i]));
         }
     }
-    //addLog(wxT("Command: [") + op + wxT("]"));
+    if (verb()) {
+        addLog(wxT("Command: [") + op + wxT("]"));
+    }
     if (op1 == wxT("update")) {
         addLog(wxT(" \n \nLooking for changes online..."));
     } else if (op1 == wxT("changes")) {
@@ -1321,6 +1338,10 @@ bool CoopyFrame::haveSource() {
         if (ref!=source) {
             source = ref;
         }
+    }
+    if (CoopyApp::fossil_repo.length()>0) {
+        source = CoopyApp::fossil_repo;
+        askSource = false;
     }
 
     if (source==""||askSource) {
