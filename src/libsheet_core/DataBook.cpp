@@ -71,6 +71,8 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
     }
     dbg_printf("  - Have a schema with %d columns\n", 
 	       schema->getColumnCount());
+    dbg_printf("  - Sheet name [%s]\n", 
+	       schema->getSheetName().c_str());
     PolySheet target = readSheet(target_name);
     if (!target.isValid()) {
       if (!addSheet(*schema)) {

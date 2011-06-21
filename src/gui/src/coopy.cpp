@@ -40,6 +40,8 @@
 #include <map>
 #include <iostream>
 
+#include <coopy/Dbg.h>
+
 static bool __coopy_verbose = false;
 static bool verb() { return __coopy_verbose; }
 
@@ -187,6 +189,7 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     }
     if (parser.Found(wxT("v"))) {
         __coopy_verbose = true;
+        coopy_set_verbose(true);
     }
     fossil_autoend = false;
     if (fossil_action!="") {

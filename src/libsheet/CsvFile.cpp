@@ -23,12 +23,16 @@ public:
   SheetStyle style;
   bool expecting;
   bool ignore;
+  string name;
+  bool named;
 
   CsvSheetReaderState() {
     reader = NULL;
     sheet = NULL;
     expecting = true;
     ignore = false;
+    name = "";
+    named = false;
   }
 
   void setStyle(const SheetStyle& style) {
@@ -48,6 +52,8 @@ public:
     if (reader != NULL) {
       sheet = reader->nextSheet(name,named);
     }
+    this->name = name;
+    this->named = named;
     return sheet!=NULL;
   }
 
@@ -59,6 +65,9 @@ public:
       schema->setHeaderHeight(sheet->height()-1);
       for (int i=0; i<sheet->width(); i++) {
 	schema->addColumn(sheet->cellString(i,sheet->height()-1).c_str());
+      }
+      if (named) {
+	schema->setSheetName(name.c_str());
       }
       sheet->setSchema(pschema);
     }

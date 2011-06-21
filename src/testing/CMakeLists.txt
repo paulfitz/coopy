@@ -548,3 +548,15 @@ set(PRIVATE_TESTS_ROOT "" CACHE PATH "Location of private tests")
 if (PRIVATE_TESTS_ROOT)
   add_subdirectory(${PRIVATE_TESTS_ROOT} private_tests)
 endif()
+
+#######################################################################
+#######################################################################
+
+# sundry bug reports
+
+IF (USE_GNUMERIC)
+
+  ADD_TEST(peeps_to_xls ${ssformat} ${TESTS}/bug/peeps_0002/people.csvs peeps_to_xls.xls)
+  ADD_TEST(peeps_to_xls_Compare ${ssdiff} --equal ${TESTS}/bug/peeps_0002/people.csvs peeps_to_xls.xls)
+
+ENDIF ()

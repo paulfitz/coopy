@@ -46,6 +46,7 @@ bool CsvTextBook::readCsvs(const char *fname) {
     for (int i=0; i<(int)sheets.size(); i++) {
       sheets[i].setRowOffset();
     }
+    dbg_printf("Read CSVS file %s\n", fname);
     return true;
   }
 
@@ -187,6 +188,7 @@ CsvSheet *CsvTextBook::nextSheet(const char *name, bool named) {
   sheets.push_back(sheet);
   names.push_back(name);
   this->named = named;
+  dbg_printf("Adding CSV sheet %s (named? %d)\n", name, named);
   return data;
 }
 

@@ -18,6 +18,7 @@ void SchemaSniffer::sniff(bool force) {
     if (sheet->getSchema()!=NULL) {
       if (sheet->getSchema()->getColumnCount()!=0) {
 	schema = sheet->getSchema();
+	dbg_printf("  - Schema built in\n");
 	return;
       }
     }
