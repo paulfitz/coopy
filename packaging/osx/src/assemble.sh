@@ -54,8 +54,9 @@ for tool in $coopy_bins $gnumeric_bins; do
   cd $APP_DIR || exit 1
   chmod u+w $TARGET_DIR/$tool || exit 1
   for f in `cd $TARGET_DIR; otool -L $tool | egrep -v "[[:space:]]/usr/" | egrep -v "[[:space:]]/System" | sed "s/(.*//" | grep "/"`; do
+	fb=`echo $f | sed "s/2.8.0.dylib/2.8.0.7.0.dylib/"`
 	echo "Processing [$f]"
-        base=`basename $f`
+        base=`basename $fb`
 	f2=$TARGET_DIR/../Frameworks/$base
 	if [ ! -e $f2 ]; then
 	  cp $f $f2 || exit 1
@@ -74,8 +75,9 @@ done
 for rep in 1 2 3 4 5; do
 for f0 in `cd $TARGET_DIR/../Frameworks; ls *.dylib`; do
   for f in `cd $TARGET_DIR/../Frameworks; otool -L $f0 | egrep -v "[[:space:]]/usr/" | egrep -v "[[:space:]]/System" | sed "s/(.*//" | grep "/"`; do
+	fb=`echo $f | sed "s/2.8.0.dylib/2.8.0.7.0.dylib/"`
 	echo "Processing [$f]"
-        base=`basename $f`
+        base=`basename $fb`
 	f2=$TARGET_DIR/../Frameworks/$base
 	if [ ! -e $f2 ]; then
 	  cp $f $f2 || exit 1
@@ -84,6 +86,9 @@ for f0 in `cd $TARGET_DIR/../Frameworks; ls *.dylib`; do
         install_name_tool -change $f @executable_path/../Frameworks/$base $TARGET_DIR/../Frameworks/$f0 || exit 1
 	chmod u-w $TARGET_DIR/../Frameworks/$f0 || exit 1
   done
+  chmod u+w  $TARGET_DIR/../Frameworks/$f0 || exit 1
+  install_name_tool -id @executable_path/../Frameworks/$f0 $TARGET_DIR/../Frameworks/$f0 || exit 1
+  chmod u-w  $TARGET_DIR/../Frameworks/$f0 || exit 1
 done
 done
 
