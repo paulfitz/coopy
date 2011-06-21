@@ -13,10 +13,130 @@ namespace coopy {
   }
 }
 
-
-static std::string _quoted(const std::string& x) {
-  return quoteSql(x,'\"',false);
-}
+static const char *sql_keywords[] = {
+"ABORT",
+"ACTION",
+"ADD",
+"AFTER",
+"ALL",
+"ALTER",
+"ANALYZE",
+"AND",
+"AS",
+"ASC",
+"ATTACH",
+"AUTOINCREMENT",
+"BEFORE",
+"BEGIN",
+"BETWEEN",
+"BY",
+"CASCADE",
+"CASE",
+"CAST",
+"CHECK",
+"COLLATE",
+"COLUMN",
+"COMMIT",
+"CONFLICT",
+"CONSTRAINT",
+"CREATE",
+"CROSS",
+"CURRENT_DATE",
+"CURRENT_TIME",
+"CURRENT_TIMESTAMP",
+"DATABASE",
+"DEFAULT",
+"DEFERRABLE",
+"DEFERRED",
+"DELETE",
+"DESC",
+"DETACH",
+"DISTINCT",
+"DROP",
+"EACH",
+"ELSE",
+"END",
+"ESCAPE",
+"EXCEPT",
+"EXCLUSIVE",
+"EXISTS",
+"EXPLAIN",
+"FAIL",
+"FOR",
+"FOREIGN",
+"FROM",
+"FULL",
+"GLOB",
+"GROUP",
+"HAVING",
+"IF",
+"IGNORE",
+"IMMEDIATE",
+"IN",
+"INDEX",
+"INDEXED",
+"INITIALLY",
+"INNER",
+"INSERT",
+"INSTEAD",
+"INTERSECT",
+"INTO",
+"IS",
+"ISNULL",
+"JOIN",
+"KEY",
+"LEFT",
+"LIKE",
+"LIMIT",
+"MATCH",
+"NATURAL",
+"NO",
+"NOT",
+"NOTNULL",
+"NULL",
+"OF",
+"OFFSET",
+"ON",
+"OR",
+"ORDER",
+"OUTER",
+"PLAN",
+"PRAGMA",
+"PRIMARY",
+"QUERY",
+"RAISE",
+"REFERENCES",
+"REGEXP",
+"REINDEX",
+"RELEASE",
+"RENAME",
+"REPLACE",
+"RESTRICT",
+"RIGHT",
+"ROLLBACK",
+"ROW",
+"SAVEPOINT",
+"SELECT",
+"SET",
+"TABLE",
+"TEMP",
+"TEMPORARY",
+"THEN",
+"TO",
+"TRANSACTION",
+"TRIGGER",
+"UNION",
+"UNIQUE",
+"UPDATE",
+"USING",
+"VACUUM",
+"VALUES",
+"VIEW",
+"VIRTUAL",
+"WHEN",
+"WHERE",
+NULL
+};
 
 class coopy::store::SqliteSchema {
 public:
@@ -49,7 +169,35 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
   schema = new SqliteSheetSchema;
   COOPY_MEMORY(schema);
   schema->sheet = this;
+
+  const char **k = sql_keywords;
+  while (*k!=NULL) {
+    string s = *k;
+    keywordMap[s] = 1;
+    k++;
+  }
 }
+
+bool SqliteSheet::isReserved(const std::string& name) {
+  std::string _name = name;
+  for (int i=0; i<(int)_name.length(); i++) {
+    _name[i] = toupper(_name[i]);
+  }
+  return keywordMap.find(_name)!=keywordMap.end();
+}
+
+std::string SqliteSheet::_quoted(const std::string& x, char ch, bool force) {
+  return quoteSql(x,ch,force);
+}
+
+std::string SqliteSheet::_quoted_double(const std::string& x) {
+  return _quoted(x,'\"',isReserved(x));
+}
+
+std::string SqliteSheet::_quoted_single(const std::string& x) {
+  return _quoted(x,'\'',isReserved(x));
+}
+
 
 bool SqliteSheet::connect() {
 
@@ -211,10 +359,7 @@ bool SqliteSheet::create(const SheetSchema& schema) {
     if (cols!="") {
       cols += ',';
     }
-    char *squery = NULL;
-    squery = sqlite3_mprintf("%q", cname.c_str());
-    cols += _quoted(squery);
-    sqlite3_free(squery);
+    cols += _quoted_single(cname);
     if (ci.hasType()) {
       string t = ci.getColumnType().asSqlite(keys.size()<=1);
       dbg_printf("TYPE %s (%s)\n", t.c_str(), ci.getColumnType().src_name.c_str());
@@ -230,18 +375,15 @@ bool SqliteSheet::create(const SheetSchema& schema) {
       if (i>0) {
 	cols += ", ";
       }
-      char *squery = NULL;
-      squery = sqlite3_mprintf("%q", keys[i].c_str());
-      cols += _quoted(squery);
-      sqlite3_free(squery);
+      cols += _quoted_single(keys[i]);
     }
     cols += ")";
   }
 
 
   dbg_printf("Creating table: %s\n", cols.c_str());
-  query = sqlite3_mprintf("CREATE TABLE %q (%s)", 
-			  _quoted(name).c_str(),
+  query = sqlite3_mprintf("CREATE TABLE %s (%s)", 
+			  _quoted_single(name).c_str(),
 			  cols.c_str());
 
   int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);

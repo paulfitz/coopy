@@ -3,6 +3,7 @@
 
 #include <coopy/DataSheet.h>
 #include <coopy/SparseSheet.h>
+#include <coopy/EfficientMap.h>
 
 #include <vector>
 
@@ -93,6 +94,12 @@ private:
   SparseStringSheet cache;
   SparseByteSheet cacheFlag;
   void checkKeys();
+  efficient_map<std::string,int> keywordMap;
+
+  bool isReserved(const std::string& name);
+  std::string _quoted(const std::string& x, char ch, bool force);
+  std::string _quoted_double(const std::string& x);
+  std::string _quoted_single(const std::string& x);
 };
 
 class coopy::store::SqliteSheetSchema : public SheetSchema {

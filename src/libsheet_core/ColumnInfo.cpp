@@ -1,6 +1,7 @@
 #include <coopy/ColumnInfo.h>
 
 #include <stdio.h>
+#include <ctype.h>
 
 using namespace coopy::store;
 
@@ -9,18 +10,28 @@ bool ColumnType::setType(const std::string& name,
   reset();
   src_name = name;
   src_lang = lang;
-  if (name=="INT"||name=="INTEGER"||name=="int"||name=="tinyint") {
+  std::string _name = name;
+  for (int i=0; i<(int)_name.length(); i++) {
+    _name[i] = tolower(_name[i]);
+  }
+  if (_name=="int"||_name=="integer"||_name=="tinyint"||_name=="byte") {
     family = COLUMN_FAMILY_INTEGER;
-  } else if (name=="TEXT") {
+  } else if (_name=="text") {
     family = COLUMN_FAMILY_TEXT;
-  } else if (name == "Long Integer") {
+  } else if (_name == "long integer") {
     family = COLUMN_FAMILY_INTEGER;
-  } else if (name == "float") {
+  } else if (_name == "float" || _name=="single" || _name=="double") {
     family = COLUMN_FAMILY_REAL;
-  } else if (name == "DateTime (Short)"||name=="datetime"||name=="date") {
+  } else if (_name == "datetime (short)"||_name=="datetime"||_name=="date") {
     family = COLUMN_FAMILY_DATETIME;
-  } else if (name=="Text"||name=="text"||name=="varchar") {
+  } else if (_name=="text"||_name=="varchar") {
     family = COLUMN_FAMILY_TEXT;
+  } else if (_name=="memo"||_name=="hyperlink"||_name=="memo/hyperlink") {
+    family = COLUMN_FAMILY_TEXT;
+  } else if (_name=="boolean"||_name=="bool") {
+    family = COLUMN_FAMILY_BOOLEAN;
+  } else if (_name=="currency") {
+    family = COLUMN_FAMILY_CURRENCY;
   }
   if (family==COLUMN_FAMILY_NONE) {
     fprintf(stderr,"Unrecognized type %s; update src/libsheet_core/ColumnInfo.cpp\n", name.c_str());
@@ -36,11 +47,20 @@ std::string ColumnType::asSqlite(bool addPrimaryKey) const {
   case COLUMN_FAMILY_INTEGER:
     result = "INTEGER";
     break;
+  case COLUMN_FAMILY_REAL:
+    result = "REAL";
+    break;
   case COLUMN_FAMILY_TEXT:
     result = "TEXT";
     break;
   case COLUMN_FAMILY_DATETIME:
-    result = "DATETIME"; // for documentation purposes only, really
+    result = "DATETIME"; // for documentation purposes only
+    break;
+  case COLUMN_FAMILY_BOOLEAN:
+    result = "BOOLEAN"; // for documentation purposes only
+    break;
+  case COLUMN_FAMILY_BLOB:
+    result = "BLOB"; // for documentation purposes only
     break;
   }
   bool pk = false;
