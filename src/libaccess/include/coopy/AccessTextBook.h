@@ -41,6 +41,9 @@ public:
 
 private:
   void *implementation;
+
+  Property config;
+
   std::vector<std::string> names;
 
   std::vector<std::string> getNamesImpl();

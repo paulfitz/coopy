@@ -198,6 +198,12 @@ public:
     return (it!=data.end());
   }
 
+  bool flag(const char *key, bool def) const {
+    std::map<std::string,PolyValue>::const_iterator it = data.find(key);    
+    if (it==data.end()) return def;
+    return it->second.asBoolean();
+  }
+
   const Value& get(const char *key) const {
     std::map<std::string,PolyValue>::const_iterator it = data.find(key);    
     if (it==data.end()) return nullValue;

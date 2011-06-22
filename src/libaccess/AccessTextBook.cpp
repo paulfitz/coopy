@@ -67,6 +67,7 @@ bool AccessTextBook::open(const Property& config) {
     fprintf(stderr,"failed to read %s\n", config.get("file").asString().c_str());
     return false;
   }
+  this->config = config;
   if (!config.check("table")) {
     dbg_printf("Loaded access workbook\n");
     return true;
@@ -97,7 +98,7 @@ PolySheet AccessTextBook::readSheet(const std::string& name) {
   if (find(names.begin(),names.end(),name)==names.end()) {
     return PolySheet();
   }
-  AccessSheet *sheet = new AccessSheet(implementation,name.c_str());
+  AccessSheet *sheet = new AccessSheet(implementation,name.c_str(),config);
   if (sheet!=NULL) sheet->connect();
   return PolySheet(sheet,true);
 }

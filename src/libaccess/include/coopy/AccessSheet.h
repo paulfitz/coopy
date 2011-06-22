@@ -3,6 +3,7 @@
 
 #include <coopy/DataSheet.h>
 #include <coopy/SparseSheet.h>
+#include <coopy/Property.h>
 
 #include <vector>
 
@@ -15,7 +16,7 @@ namespace coopy {
 
 class coopy::store::AccessSheet : public DataSheet {
 public:
-  AccessSheet(void *db, const char *name);
+  AccessSheet(void *db, const char *name, const Property& config);
 
   bool connect();
 
@@ -52,6 +53,7 @@ public:
 
 private:
   AccessSheetSchema *schema;
+  Property config;
   void *implementation;
   void *table_implementation;
   std::string name;

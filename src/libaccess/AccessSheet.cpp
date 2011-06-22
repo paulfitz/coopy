@@ -15,10 +15,11 @@ namespace coopy {
 #define DB(x) ((MdbHandle *)(x))
 #define TABLE(x) ((MdbTableDef *)(x))
 
-AccessSheet::AccessSheet(void *db1, const char *name) {
+AccessSheet::AccessSheet(void *db1, const char *name, const Property& config) {
   implementation = db1;
   table_implementation = NULL;
   this->name = name;
+  this->config = config;
   w = h = 0;
 
   schema = new AccessSheetSchema;
@@ -58,12 +59,14 @@ bool AccessSheet::connect() {
   //////////////////////////////////////////////////////////////////
   // Check keys
 
-  for (int i=0;i<table->num_idxs;i++) {
-    MdbIndex *idx = (MdbIndex *)g_ptr_array_index(table->indices,i);
-    if (idx->index_type==1) {
-      for (int j=0;j<idx->num_keys;j++) {
-	int off = idx->key_col_num[j]-1;
-	col2pk[off] = true;
+  if (config.flag("indexes",true)) {
+    for (int i=0;i<table->num_idxs;i++) {
+      MdbIndex *idx = (MdbIndex *)g_ptr_array_index(table->indices,i);
+      if (idx->index_type==1) {
+	for (int j=0;j<idx->num_keys;j++) {
+	  int off = idx->key_col_num[j]-1;
+	  col2pk[off] = true;
+	}
       }
     }
   }
