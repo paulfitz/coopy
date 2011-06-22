@@ -164,13 +164,15 @@ bool CsvTextBook::addSheet(const SheetSchema& schema) {
   sheets.push_back(sheet);
   names.push_back(name);
   data->setWidth(schema.getColumnCount());
-  /*
-  CsvSheetSchema *rec = new CsvSheetSchema(data,name,0);
-  COOPY_ASSERT(rec);
-  data->setSchema(Poly<SheetSchema>(rec,true));
+
   SimpleSheetSchema *rec = new SimpleSheetSchema;
   COOPY_ASSERT(rec);
   rec->copy(schema);
+  data->setSchema(Poly<SheetSchema>(rec,true));
+
+  /*
+  CsvSheetSchema *rec = new CsvSheetSchema(data,name,0);
+  COOPY_ASSERT(rec);
   data->setSchema(Poly<SheetSchema>(rec,true));
   */
   return true;

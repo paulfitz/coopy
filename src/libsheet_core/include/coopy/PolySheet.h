@@ -334,6 +334,11 @@ public:
     COOPY_ASSERT(sheet);
     return sheet->hasSheetName();
   }
+
+  virtual bool addedHeader() {
+    COOPY_ASSERT(sheet);
+    return sheet->addedHeader();
+  }
 };
 
 #endif

@@ -560,3 +560,8 @@ IF (USE_GNUMERIC)
   ADD_TEST(peeps_to_xls_Compare ${ssdiff} --equal ${TESTS}/bug/peeps_0002/people.csvs peeps_to_xls.xls)
 
 ENDIF ()
+
+ADD_TEST(csvs_preserve_pk_index_pre ${ssformat} --index ${TESTS}/numbers.sqlite csvs_preserve_pk.1.csv)
+ADD_TEST(csvs_preserve_pk ${ssformat} --table numbers ${TESTS}/numbers.sqlite csvs_preserve_pk.sqlite)
+ADD_TEST(csvs_preserve_pk_index_post ${ssformat} --index csvs_preserve_pk.sqlite csvs_preserve_pk.2.csv)
+ADD_TEST(csvs_preserve_pk_check ${ssdiff} --equal csvs_preserve_pk.1.csv csvs_preserve_pk.2.csv)

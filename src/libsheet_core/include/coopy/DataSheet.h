@@ -168,6 +168,13 @@ public:
     return false;
   }
 
+  virtual bool addedHeader() {
+    if (getSchema()) {
+      getSchema()->addedHeader();
+    }
+    return true;
+  }
+
   virtual std::string getDescription() const {
     return "data";
   }

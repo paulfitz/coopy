@@ -10,6 +10,7 @@ extern "C" {
 
 #include <coopy/CsvFile.h>
 #include <coopy/CsvSheet.h>
+#include <coopy/Stringer.h>
 
 #include <string.h>
 
@@ -64,7 +65,28 @@ public:
       Poly<SheetSchema> pschema(schema,true);
       schema->setHeaderHeight(sheet->height()-1);
       for (int i=0; i<sheet->width(); i++) {
-	schema->addColumn(sheet->cellString(i,sheet->height()-1).c_str());
+	string k = sheet->cellString(i,sheet->height()-1);
+
+	/*
+	bool pk = false;
+	if (k.length()>1) {
+	  if (k[k.length()-1]==':') {
+	    if (k[k.length()-2]==':') {
+	      pk = true;
+	      k = k.substr(0,k.length()-2);
+	      sheet->cellString(i,sheet->height()-1,k);
+	    }
+	  }
+	}
+	ColumnType kind;
+	if (pk) {
+	  kind.primaryKey = true;
+	  kind.primaryKeySet = true;
+	}
+	schema->addColumn(k.c_str(),kind);
+	*/
+
+	schema->addColumn(k.c_str());
       }
       if (named) {
 	schema->setSheetName(name.c_str());

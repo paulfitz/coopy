@@ -3,6 +3,7 @@
 
 #include <coopy/ColumnInfo.h>
 #include <coopy/RefCount.h>
+#include <coopy/Dbg.h>
 
 #include <vector>
 #include <string>
@@ -58,6 +59,11 @@ public:
   virtual bool isGuess() const {
     return false;
   }
+
+  virtual bool addedHeader() {
+    fprintf(stderr, "Don't know what to do with header\n");
+    COOPY_ASSERT(1==0);
+  }
 };
 
 class coopy::store::SimpleSheetSchema : public SheetSchema {
@@ -89,7 +95,10 @@ public:
     guessed = ss.isGuess();
     return true;
   }
-  
+
+  virtual bool addedHeader() {
+    hh++;
+  }  
 
   void setHeaderHeight(int hh) {
     this->hh = hh;

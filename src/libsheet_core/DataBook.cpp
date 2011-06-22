@@ -71,6 +71,8 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
     }
     dbg_printf("  - Have a schema with %d columns\n", 
 	       schema->getColumnCount());
+    dbg_printf("  - Have a table with %d rows\n", 
+	       sheet.height());
     dbg_printf("  - Sheet name [%s]\n", 
 	       schema->getSheetName().c_str());
     PolySheet target = readSheet(target_name);
@@ -124,6 +126,7 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
 	    row.setCell(j,SheetCell(info.getName(),false));
 	  }
 	  row.flush();
+	  target.addedHeader();
 	}
       }
     }
@@ -136,7 +139,10 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
       }
       row.flush();
     }
-    dbg_printf("Final size %dx%d\n", sheet.width(), sheet.height());
+    dbg_printf("Final size for %s: src %dx%d target %dx%d\n", 
+	       name.c_str(),
+	       sheet.width(), sheet.height(),
+	       target.width(), target.height());
   }
   return true;
 }
