@@ -81,7 +81,21 @@ while [ ! "k$1" = "k" ]; do
     fi
 
     if [ "k$1" = "kosx" ]; then
-	scp $OSX_USER@$OSX_IP:$OSX_PATH/*.dmg $OUTPUT
+	scp $OSX_USER@$OSX_IP:$OSX_PATH/$OSX_FILE $OUTPUT
+    fi
+
+    if [ "k$1" = "ksrc" ]; then
+	# rm -rf /tmp/coopysrc
+	mkdir -p /tmp/coopysrc
+	cd /tmp/coopysrc || exit 1
+	git clone git://github.com/paulfitz/coopy.git || {
+	    cd coopy ; git pull; cd ..
+	    }
+	mkdir -p build
+	cd build || exit 1
+	cmake ../coopy
+	make package_source
+	cp -v coopy*.tar.gz $OUTPUT
     fi
 
     if [ "k$1" = "kdoc" ]; then
