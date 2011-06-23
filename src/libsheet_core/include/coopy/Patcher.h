@@ -198,6 +198,9 @@ public:
   int rc_id_local;
   int rc_id_remote;
   bool rc_deleted;
+  std::string rc_str_pivot;
+  std::string rc_str_local;
+  std::string rc_str_remote;
 
   // should also give all necessary info to show indexes
 };

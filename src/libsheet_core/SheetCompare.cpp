@@ -212,13 +212,13 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     eflags.use_order = false;
   }
 
-  if (eflags.trust_ids || eflags.trust_column_names) {
+  if (eflags.trust_ids || eflags.bias_ids || eflags.trust_column_names) {
     local_names.sniff();
     remote_names.sniff();
     pivot_names.sniff();
   }
 
-  if (eflags.trust_ids) {
+  if (eflags.trust_ids||eflags.bias_ids) {
     dbg_printf("Checking IDs\n");
     bool ok = local_names.subset(eflags.ids);
     ok = ok && remote_names.subset(eflags.ids);

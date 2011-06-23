@@ -565,3 +565,7 @@ ADD_TEST(csvs_preserve_pk_index_pre ${ssformat} --index ${TESTS}/numbers.sqlite 
 ADD_TEST(csvs_preserve_pk ${ssformat} --table numbers ${TESTS}/numbers.sqlite csvs_preserve_pk.sqlite)
 ADD_TEST(csvs_preserve_pk_index_post ${ssformat} --index csvs_preserve_pk.sqlite csvs_preserve_pk.2.csv)
 ADD_TEST(csvs_preserve_pk_check ${ssdiff} --equal csvs_preserve_pk.1.csv csvs_preserve_pk.2.csv)
+
+ADD_TEST(wide_format ${ssformat} ${TESTS}/bug/wide_0004/wide.csv wide_format.csvs)
+ADD_TEST(wide_format_check ${ssdiff} ${TESTS}/bug/wide_0004/wide.csv wide_format.csvs)
+

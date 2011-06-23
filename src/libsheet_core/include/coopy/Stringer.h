@@ -70,6 +70,9 @@ public:
       pos += rep.length();
     }
   }
+
+  static std::string getSpreadsheetColumnName(int x);
+  static std::string nextSpreadsheetColumnName(std::string current);
 };
 
 

@@ -77,3 +77,36 @@ string quoteSql(string x, char del, bool alwaysQuote) {
   }
   return result;
 }
+
+std::string Stringer::getSpreadsheetColumnName(int x) {
+  string current;
+  int offset = 0;
+  int rem = x;
+  do {
+    offset = rem%26;
+    rem = rem/26;
+    char A[2] = "A";
+    A[0] += offset;
+    current = string(A) + current;
+  } while (rem!=0);
+  return current;
+}
+
+std::string Stringer::nextSpreadsheetColumnName(std::string current) {
+    int len = current.length();
+    int cursor = len-1;
+    while (cursor>=0) {
+      if (current[cursor]!='Z') {
+	current[cursor]++;
+	break;
+      }
+      current[cursor] = 'A';
+      cursor--;
+      if (cursor<0) {
+	current += 'A';
+      }
+    }  
+    return current;
+}
+
+

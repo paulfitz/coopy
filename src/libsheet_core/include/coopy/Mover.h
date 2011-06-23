@@ -12,9 +12,21 @@ namespace coopy {
 }
 
 class coopy::cmp::Mover {
+private:
+  int solutions;
+  bool global_solved;
+  std::vector<int> global_best_order;
 public:
-  void move(const std::vector<int>& src, const std::vector<int>& dest, 
-	    std::vector<int>& order, int depth);
+  bool move(const std::vector<int>& src, const std::vector<int>& dest, 
+	    std::vector<int>& order) {
+    std::vector<int> forbidden;
+    return move(src,dest,order,forbidden,0);
+  }
+
+  bool move(const std::vector<int>& src, const std::vector<int>& dest, 
+	    std::vector<int>& order, 
+	    std::vector<int>& forbidden, 
+	    int depth);
 };
 
 

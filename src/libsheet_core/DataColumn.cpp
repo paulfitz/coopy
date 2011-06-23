@@ -11,6 +11,12 @@ void Nature::evaluate(const char *txt, bool forward) {
   string s = txt;
   size_t i;
 
+  if (s=="NULL") {
+    nully.vote(1,1);
+  } else {
+    nully.vote(-1,0.1);
+  }
+
   // How URL-like are we?
 
   int webby = 0;
@@ -105,15 +111,15 @@ void Nature::evaluate(const char *txt, bool forward) {
   }
 
   text.vote(1,0.1);
+}
 
-  /*
-  dbg_printf("%s: web %g email %g text %g number %g\n",
-	     txt,
-	     web.result(),
-	     email.result(),
-	     text.result(),
-	     number.result());
-  */
+void Nature::show() {
+  printf("web %g email %g text %g number %g nully %g\n",
+	 web.result(),
+	 email.result(),
+	 text.result(),
+	 number.result(),
+	 nully.result());
 }
 
 float Nature::compare(const char *txt, bool forward) {
@@ -122,14 +128,17 @@ float Nature::compare(const char *txt, bool forward) {
   float dot = n.web.result()*web.result() +
     n.email.result()*email.result() +
     n.text.result()*text.result() +
-    n.number.result()*number.result();
+    n.number.result()*number.result() +
+    n.nully.result()*nully.result();
+  //printf("Nully %g vs %g : %g\n", n.nully.result(), nully.result(), dot);
   return dot;
 }
 
 
 float Nature::confidence() {
-  float c = FMAX(FMAX(web.confidence,email.confidence),
-		 FMAX(text.confidence,number.confidence));
+  float c = FMAX(FMAX(FMAX(web.confidence,email.confidence),
+		      FMAX(text.confidence,number.confidence)),
+		 nully.confidence);
   return c;
 }
 

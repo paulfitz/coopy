@@ -6,6 +6,10 @@
 
 #include <stdio.h>
 
+#define WANT_MAP2STRING
+#define WANT_VECTOR2STRING
+#include <coopy/Stringer.h>
+
 using namespace std;
 using namespace coopy::cmp;
 using namespace coopy::store;
@@ -94,7 +98,7 @@ bool SheetPatcher::moveColumn(int idx, int idx2) {
       sgn = -1;
       ch = "<";
     }
-    for (int i=first; i!=final; i+=sgn) {
+    for (int i=first; i!=final; i++) {
       if (statusCol.cellString(i,0)!="---") {
 	name += ch;
       }
@@ -201,27 +205,15 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
       int toSheet = change.identityToIndexAfter(change.subject);
       string mover = change.namesAfter[toSheet];
       int idx = matchCol(mover);
-      //printf("Moving %s\n", mover.c_str());
       string before = "";
       int idx2 = -1;
+      //printf("after %d for %d\n", toSheet, change.subject);
       if (toSheet!=change.indicesAfter.size()-1) {
-	before = change.namesAfter[change.indicesAfter[toSheet+1]];
+	before = change.namesAfter[toSheet+1];
 	//printf("Before %s\n", before.c_str());
 	idx2 = matchCol(before);
-	//int toId = change.indicesAfter[toSheet+1];
-	//toSheet = change.identityToIndex(toId);
       }
-      /*
-      if (toSheet==change.indicesAfter.size()-1) {
-	toSheet = -1;
-      } else {
-	int toId = change.indicesAfter[toSheet+1];
-	toSheet = change.identityToIndex(toId);
-      }
-      ColumnRef from(change.identityToIndex(change.subject));
-      ColumnRef to(toSheet);
-      bool ok = sheet.moveColumn(from,to).isValid();
-      */
+      //printf("Moving %s %d->%d\n", mover.c_str(), idx, idx2);
       return moveColumn(idx,idx2);
     }
     break;

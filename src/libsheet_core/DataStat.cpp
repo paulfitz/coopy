@@ -167,6 +167,7 @@ void DataStat::evaluate2(const coopy::store::DataSheet& sheet,
     for (int j=0; j<sheet.width(); j++) {
       DataColumn& c = col[j];
       Nature n = c.getNature();
+      //n.show();
       vector<float> cmp;
       float tot = 0;
       float tot2 = 0;
@@ -210,7 +211,7 @@ void DataStat::evaluate2(const coopy::store::DataSheet& sheet,
     }
 
     //oddness_accum.normalize(-1,-1,1);
-    
+
     /*
       Property p;
       p.put("file","-");

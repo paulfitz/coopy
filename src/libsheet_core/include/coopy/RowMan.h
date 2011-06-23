@@ -35,7 +35,7 @@ public:
 
   virtual void setup(MeasurePass& pass) {
     pass.setSize(pass.a.height(),pass.b.height());
-    if (flags.trust_ids) {
+    if (flags.trust_ids||flags.bias_ids) {
       ref_subset = pass.va.meta.getSubset();
       query_subset = pass.vb.meta.getSubset();
     }
@@ -52,11 +52,20 @@ public:
       if (asel.cell(0,y)==-1) {
 	if (at<top) {
 	  at++;
-	  if (!flags.trust_ids) {
-	    for (int x=0; x<w; x++) {
-	      std::string txt = a.cellString(x,y);
-	      m.setCurr(x,y);
-	      m.add(txt,query,ctrl);
+	  if (!(flags.trust_ids)) {
+	    if (!flags.bias_ids) {
+	      for (int x=0; x<w; x++) {
+		std::string txt = a.cellString(x,y);
+		m.setCurr(x,y);
+		m.add(txt,query,ctrl);
+	      }
+	    } else {
+	      const std::vector<int>& subset = query?query_subset:ref_subset;
+	      for (int x=0; x<(int)subset.size(); x++) {
+		std::string txt = a.cellString(subset[x],y);
+		m.setCurr(subset[x],y);
+		m.add(txt,query,ctrl);
+	      }
 	    }
 	  } else {
 	    const std::vector<int>& subset = query?query_subset:ref_subset;

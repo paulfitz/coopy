@@ -56,6 +56,7 @@ public:
   Vote text;
   Vote number;
   Vote type_integer;
+  Vote nully;
 
   void evaluate(const char *txt, bool forward = true);  
 
@@ -73,7 +74,10 @@ public:
     text.clear();
     number.clear();
     type_integer.clear();
+    nully.clear();
   }
+
+  void show();
 
   bool couldBeInteger() {
     return (type_integer.yes>0.5) && (type_integer.no>-0.5);

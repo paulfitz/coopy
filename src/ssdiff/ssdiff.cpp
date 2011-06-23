@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
   bool omitHeader = false;
   bool ordered = false;
   bool orderSet = false;
+  bool bias = false;
 
   while (true) {
     int option_index = 0;
@@ -51,6 +52,7 @@ int main(int argc, char *argv[]) {
       {"verbose", 0, 0, 'v'},
 
       {"id", 1, 0, 'k'},
+      {"bid", 1, 0, 'b'},
 
       {"named", 0, 0, 'd'},
 
@@ -111,6 +113,10 @@ int main(int argc, char *argv[]) {
 
     case 'k':
       ids.push_back(optarg);
+      break;
+    case 'b':
+      ids.push_back(optarg);
+      bias = true;
       break;
 
 
@@ -176,6 +182,7 @@ int main(int argc, char *argv[]) {
     printf("The default matching algorithm is very general.  Generality can be traded for\n");
     printf("speed with the following options:\n");
     printf("  ssdiff --id COL1 --id COL2 local.csv modified.csv # declare primary key\n");
+    printf("  ssdiff --bid COL1 --bid COL2 local.csv modified.csv # concentrate comparison\n");
     printf("  ssdiff --named local.csv modified.csv   # trust names of columns\n");
     printf("  ssdiff --unordered local.csv modified.csv   # do not worry about row order\n");
     printf("\n");
@@ -233,7 +240,8 @@ int main(int argc, char *argv[]) {
 
   if (ids.size()>0) {
     flags.ids = ids;
-    flags.trust_ids = true;
+    flags.trust_ids = !bias;
+    flags.bias_ids = bias;
   }
   flags.trust_column_names = named;
   if (orderSet) {

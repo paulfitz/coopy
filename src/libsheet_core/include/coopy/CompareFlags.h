@@ -54,6 +54,7 @@ public:
   std::vector<int> ids_local;
   std::vector<int> ids_remote;
   bool trust_ids;
+  bool bias_ids;
   bool trust_column_names;
   coopy::store::DataSheet *mapping;
   coopy::store::DataBook *mapping_book;
@@ -66,6 +67,7 @@ public:
     tail_trimmed = false;
     out = stdout;
     trust_ids = false;
+    bias_ids = false;
     trust_column_names = false;
     mapping = 0 /*NULL*/;
     mapping_book = 0 /*NULL*/;

@@ -1,5 +1,6 @@
 #include <coopy/NameSniffer.h>
 #include <coopy/DataStat.h>
+#include <coopy/Stringer.h>
 
 #include <map>
 
@@ -25,24 +26,25 @@ void NameSniffer::sniff() {
     } else {
       dbg_printf("Sniffing... found schema!\n");
       if (sheet.width()!=schema->getColumnCount()) {
-	fprintf(stderr, "Problem detecting schema\n");
-	fprintf(stderr, "  table has %d columns\n", sheet.width());
-	fprintf(stderr, "  schema has %d columns\n", schema->getColumnCount());
-      }
-      COOPY_ASSERT(sheet.width()==schema->getColumnCount());
-      for (int i=0; i<sheet.width(); i++) {
-	ColumnInfo info = schema->getColumnInfo(i);
-	if (!info.hasName()) {
-	  names.clear();
-	  ct.clear();
-	  break;
+	dbg_printf("Problem detecting schema\n");
+	dbg_printf("  table has %d columns\n", sheet.width());
+	dbg_printf("  schema has %d columns\n", schema->getColumnCount());
+      } else {
+	COOPY_ASSERT(sheet.width()==schema->getColumnCount());
+	for (int i=0; i<sheet.width(); i++) {
+	  ColumnInfo info = schema->getColumnInfo(i);
+	  if (!info.hasName()) {
+	    names.clear();
+	    ct.clear();
+	    break;
+	  }
+	  names.push_back(info.getName());
+	  ct.push_back(info.getColumnType());
 	}
-	names.push_back(info.getName());
-	ct.push_back(info.getColumnType());
-      }
-      if (names.size()>0) {
-	dbg_printf("Found names in schema\n");
-	return;
+	if (names.size()>0) {
+	  dbg_printf("Found names in schema\n");
+	  return;
+	}
       }
     }
   } else {
@@ -109,13 +111,7 @@ std::string NameSniffer::suggestColumnName(int col) {
   if (names.size()>0) {
     return names[col];
   }
-  if (col==26) {
-    fprintf(stderr,"NameSniffer.cpp is inadequately inventive\n");
-    exit(1);
-  }
-  char buf[256];
-  sprintf(buf,"%c",'A'+col);
-  return buf;
+  return Stringer::getSpreadsheetColumnName(col);
 }
 
 

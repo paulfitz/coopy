@@ -3,6 +3,7 @@
 #include <coopy/IndexSniffer.h>
 #include <coopy/Dbg.h>
 #include <coopy/CompareFlags.h>
+#include <coopy/Stringer.h>
 
 #include <stdlib.h>
 
@@ -54,16 +55,13 @@ void SchemaSniffer::sniff(bool force) {
     }
     fallback.addColumn(names[i].c_str(),ct[i]);
   }
-  char col[3] = "A2";
   int at = (int)names.size();
+  string col = Stringer::getSpreadsheetColumnName(at);
+  //char col[3] = "A2";
   while ((int)fallback.getColumnCount()<sheet->width()) {
-    fallback.addColumn(col,ct[at]);
+    fallback.addColumn((col + "2").c_str(),ct[at]);
+    col = Stringer::nextSpreadsheetColumnName(col);
     at++;
-    if (col[0]=='Z') {
-      fprintf(stderr,"SchemaSniffer.cpp is inadequately inventive\n");
-      exit(1);
-    }
-    col[0]++;
   }
   fallback.setSheetName(name.c_str());
   fallback.setHasSheetName(sheet->hasSheetName());

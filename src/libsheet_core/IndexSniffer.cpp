@@ -12,17 +12,19 @@ void IndexSniffer::sniff() {
   int len = w;
   guessed = true;
 
-  if (sniffer.hasSubset()) {
-    vector<int> keys = sniffer.getSubset();
-    flags.clear();
-    for (int i=0; i<w; i++) {
-      flags.push_back(0);
+  if (!cflags.bias_ids) {
+    if (sniffer.hasSubset()) {
+      vector<int> keys = sniffer.getSubset();
+      flags.clear();
+      for (int i=0; i<w; i++) {
+	flags.push_back(0);
+      }
+      for (int i=0; i<(int)keys.size(); i++) {
+	flags[keys[i]] = 1;
+      }
+      guessed = false;
+      return;
     }
-    for (int i=0; i<(int)keys.size(); i++) {
-      flags[keys[i]] = 1;
-    }
-    guessed = false;
-    return;
   }
 
   SheetSchema *schema = sheet.getSchema();

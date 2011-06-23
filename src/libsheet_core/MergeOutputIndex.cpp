@@ -30,6 +30,8 @@ bool MergeOutputIndex::mergeStart() {
     ss.addColumn("local",ColumnType("INTEGER"));
     ss.addColumn("remote",ColumnType("INTEGER"));
     ss.addColumn("deleted",ColumnType("INTEGER"));
+    ss.addColumn("local_name",ColumnType("TEXT"));
+    ss.addColumn("remote_name",ColumnType("TEXT"));
     if (getOutputBook()!=NULL) {
       links = getOutputBook()->provideSheet(ss);
     }
@@ -114,6 +116,8 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
     row.setCell(at,SheetCell(decl.rc_id_local)); at++;
     row.setCell(at,SheetCell(decl.rc_id_remote)); at++;
     row.setCell(at,SheetCell(decl.rc_deleted?1:0)); at++;
+    row.setCell(at,SheetCell(decl.rc_str_local,false)); at++;
+    row.setCell(at,SheetCell(decl.rc_str_remote,false)); at++;
     row.flush();
   }
   return true;

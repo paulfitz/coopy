@@ -77,6 +77,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     }
     if (lRow>=0 && lCol>=0 && !deleted) {
       if (diff) {
+	//printf("I think that %s has name %s\n",
+	//local.cellSummary(lCol,lRow).toString().c_str(),
+	//names[at].c_str());
 	cond[names[at]] = local.cellSummary(lCol,lRow);
       }
     }
@@ -427,6 +430,10 @@ bool Merger::merge(MergerState& state) {
   dbg_printf("Order merges are done...\n");
 
   if (link) {
+    local_names.sniff();
+    remote_names.sniff();
+
+    /*
     // perspective: LOCAL, COLUMN
     for (int i=0; i<local.width(); i++) {
       LinkDeclare decl;
@@ -439,6 +446,10 @@ bool Merger::merge(MergerState& state) {
 	decl.rc_id_remote = col_remote.b2a(decl.rc_id_pivot);
       }
       decl.rc_deleted = 0;
+      decl.rc_str_local = local_names.suggestColumnName(i);
+      if (decl.rc_id_remote!=-1) {
+	decl.rc_str_remote = remote_names.suggestColumnName(decl.rc_id_remote);
+      }
       output.declareLink(decl);      
     }
 
@@ -454,8 +465,13 @@ bool Merger::merge(MergerState& state) {
       }
       decl.rc_id_remote = i;
       decl.rc_deleted = 0;
+      decl.rc_str_remote = remote_names.suggestColumnName(i);
+      if (decl.rc_id_local!=-1) {
+	decl.rc_str_local = local_names.suggestColumnName(decl.rc_id_local);
+      }
       output.declareLink(decl);      
     }
+    */
 
     // perspective: MERGE, COLUMN
     for (list<MatchUnit>::iterator it=col_merge.accum.begin();
@@ -473,6 +489,12 @@ bool Merger::merge(MergerState& state) {
       decl.rc_id_local = lCol;
       decl.rc_id_remote = rCol;
       decl.rc_deleted = deleted;
+      if (lCol!=-1) {
+	decl.rc_str_local = local_names.suggestColumnName(lCol);
+      }
+      if (rCol!=-1) {
+	decl.rc_str_remote = remote_names.suggestColumnName(rCol);
+      }
       output.declareLink(decl);
     }
 
@@ -616,6 +638,9 @@ bool Merger::merge(MergerState& state) {
     }
     //printf("\n");
 
+    dbg_printf("Column order is now %s\n",
+	       vector2string(local_col_names).c_str());
+
     // Pass 2: signal any column shuffling
     // 1 2 3 4
     // 2 3 4 1
@@ -630,7 +655,7 @@ bool Merger::merge(MergerState& state) {
       exit(1);
     }
 
-    move.move(local_cols,shuffled_cols,move_order,0);
+    move.move(local_cols,shuffled_cols,move_order);
     dbg_printf("* move complete\n");
  
     if (move_order.size()>0) {
@@ -684,6 +709,9 @@ bool Merger::merge(MergerState& state) {
       }
     }
 
+    dbg_printf("Column order is now %s\n",
+	       vector2string(local_col_names).c_str());
+
     //printf(">>> %s %d\n", __FILE__, __LINE__);
 
     // Pass 3: signal any column insertions
@@ -709,6 +737,7 @@ bool Merger::merge(MergerState& state) {
 	  name = string("{") + name + "}";
 	}
 	do {
+	  collision = false;
 	  for (int i=0; i<(int)local_col_names.size(); i++) {
 	    if (local_col_names[i]==name) {
 	      collision = true;
@@ -731,6 +760,9 @@ bool Merger::merge(MergerState& state) {
     }
 
     //printf(">>> %s %d\n", __FILE__, __LINE__);
+
+    dbg_printf("Column order is now %s\n",
+	       vector2string(local_col_names).c_str());
 
     if (cc.size()>0) {
       constantColumns = false;
