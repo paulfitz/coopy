@@ -82,9 +82,9 @@ for full_platform in $PLATFORMS; do
     (
 	echo "chroot_$full_platform.txt:"
 	echo -e "\t$SOURCE_DIR/src/build_chroot.sh $full_platform chroot_$full_platform && touch chroot_$platform.txt\n"
-	echo "coopy_$platform.txt:"
+	echo "coopy_$full_platform.txt:"
 	echo -e "\t$SOURCE_DIR/src/build_coopy.sh $full_platform coopy_$full_platform && touch coopy_$platform.txt\n"
-	echo "test_$platform.txt:"
+	echo "test_$full_platform.txt:"
 	echo -e "\t$SOURCE_DIR/src/test_coopy.sh $full_platform && touch test_$full_platform.txt\n"
     ) >> $BUILD_DIR/Makefile
     #  --components=main,universe
