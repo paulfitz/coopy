@@ -33,6 +33,7 @@ private:
   bool chainOwned;
   int changeCount;
   bool descriptive;
+  bool forReview;
   int xoff;
   int yoff;
   bool killNeutral;
@@ -49,8 +50,10 @@ private:
 
   bool moveColumn(int idx, int idx2);
 
-public:
-  SheetPatcher(bool descriptive = false) : descriptive(descriptive) {
+  SheetPatcher(bool descriptive = false,
+	       bool forReview = false) : descriptive(descriptive),
+					 forReview(forReview)
+  {
     rowCursor = -1;
     summary = false;
     chain = 0/*NULL*/;
@@ -61,6 +64,19 @@ public:
     sniffer = 0/*NULL*/;
     sniffedSheet = 0/*NULL*/;
     killNeutral = false;
+  }
+
+public:
+  static SheetPatcher *createForApply() {
+    return new SheetPatcher();
+  }
+
+  static SheetPatcher *createForDescription() {
+    return new SheetPatcher(true);
+  }
+
+  static SheetPatcher *createForReview() {
+    return new SheetPatcher(true,true);
   }
 
   virtual ~SheetPatcher() {

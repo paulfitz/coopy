@@ -43,9 +43,11 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
   } else if (mode=="tdiff") {
     result = new MergeOutputTdiff;
   } else if (mode=="apply") {
-    result = new SheetPatcher(false);
+    result = SheetPatcher::createForApply();
   } else if (mode=="sheet"||mode=="color"||mode=="hilite"||mode=="highlight"||mode=="hiliter"||mode=="highlighter") {
-    result = new SheetPatcher(true);
+    result = SheetPatcher::createForDescription();
+  } else if (mode=="review") {
+    result = SheetPatcher::createForReview();
   } else if (mode=="csv") {
     if (_version=="0.2") {
       result = new MergeOutputCsvDiffV0p2;

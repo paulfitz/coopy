@@ -139,16 +139,18 @@ extern "C" int csvs_diff(Blob *pV1, Blob *pV2, Blob *pOut) {
   }
   PolyBook obook;
   //MergeOutputTdiff highlighter;
-  SheetPatcher highlighter(true);
-  highlighter.attachOutputBook(obook);
+  SheetPatcher *highlighter = SheetPatcher::createForDescription();
+  highlighter->attachOutputBook(obook);
+  COOPY_ASSERT(highlighter);
   CompareFlags flags;
   BookCompare cmp;
   PolyBook tbook;
   tbook.take(new CsvTextBook(true));
   Property p;
   tbook.copy(book1,p);
-  highlighter.attachBook(tbook);
-  cmp.compare(book1,book1,book2,highlighter,flags);
+  highlighter->attachBook(tbook);
+  cmp.compare(book1,book1,book2,*highlighter,flags);
+  delete highlighter;  highlighter = NULL;
 
   PolySheet result = tbook.readSheetByIndex(0);
   blob_zero(pOut);

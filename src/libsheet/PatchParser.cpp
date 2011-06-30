@@ -966,6 +966,20 @@ bool PatchParser::applyTdiff() {
 }
 
 
+static bool checkAllowed(DataSheet& sheet, int i, bool allowed) {
+  if (sheet.height()<=i) return false;
+  SheetCell cell = sheet.cellSummary(0,i);
+  string c = cell.text;
+  if (cell.escaped) c = "";
+  if (c[0]=='N'||c[0]=='n'||c[0]=='0') {
+    allowed = false;
+  }
+  if (c[0]=='Y'||c[0]=='y'||c[0]=='1') {
+    allowed = true;
+  }
+  return allowed;
+}
+
 
 bool PatchParser::applyColor() {
   sniffer.close();
@@ -991,26 +1005,53 @@ bool PatchParser::applyColor() {
     vector<string> activeCol;
     vector<string> statusCol;
     RowChange::txt2bool indexes;
+    int xoff = 1;
+    int yoff = 0;
+    bool needYes = false;
     for (int i=0; i<sheet.height(); i++) {
+      string c = sheet.cellString(0,i);
+      if (c[0]=='@'||c[0]=='-'||c[0]=='+') {
+	xoff = 0;
+	break;
+      }
+      if (c=="yes"||c=="YES"||c=="Yes") {
+	needYes = true;
+      }
+    }
+
+    for (int i=0; i<sheet.height(); i++) {
+      bool allowed = true;
+      bool willBeAllowed = true;
+      if (xoff==1) {
+	if (needYes) {
+	  allowed = false;
+	  willBeAllowed = false;
+	}
+	allowed = checkAllowed(sheet,i,allowed);
+	willBeAllowed = checkAllowed(sheet,i+1,willBeAllowed);
+      }
+
       RowChange change;
       change.names = activeCol;
       change.allNames = cols;
       //printf("Cols are %s\n",vector2string(cols).c_str());
       change.indexes = indexes;
-      string code = sheet.cellString(0,i);
+      string code = sheet.cellString(xoff,i);
       string tail2 = "";
       if (code.length()>=2) {
 	tail2 = code.substr(code.length()-2,2);
       }
+      //printf("Code is %s, allowed is %d, needYes is %d\n", code.c_str(), 
+      //allowed, needYes);
       if (code[0] == '@') {
 	cols.clear();
 	bool acts = false;
 	if (i>0) {
-	  if (sheet.cellString(0,i-1)=="!") {
+	  if (sheet.cellString(xoff,i-1)=="!") {
 	    acts = true;
 	  }
 	}
-	for (int j=1; j<sheet.width(); j++) {
+	for (int j=1+xoff; j<sheet.width(); j++) {
 	  TDiffPart p(sheet.cellString(j,i),false);
 	  string txt = p.hasNval?p.nval.text:p.val.text;
 	  cols.push_back(txt);
@@ -1020,16 +1061,16 @@ bool PatchParser::applyColor() {
 	}
 	if (acts) {
 	  activeCol.clear();
-	  for (int j=1; j<sheet.width(); j++) {
+	  for (int j=1+xoff; j<sheet.width(); j++) {
 	    string act = sheet.cellString(j,i-1);
-	    string col = cols[j-1];
+	    string col = cols[j-1-xoff];
 	    //printf("[%s] [%s]\n", act.c_str(), col.c_str());
 	    if (act=="+++") {
-	      statusCol[j-1] = act;
+	      statusCol[j-1-xoff] = act;
 	      indexes[col] = false;
 	    }
 	    if (act=="---") {
-	      statusCol[j-1] = act;
+	      statusCol[j-1-xoff] = act;
 	      indexes[col] = false;
 	    } else {
 	      activeCol.push_back(col);
@@ -1073,27 +1114,27 @@ bool PatchParser::applyColor() {
       }
       if (code == "+++") {
 	change.mode = ROW_CHANGE_INSERT;
-	for (int j=1; j<sheet.width(); j++) {
+	for (int j=1+xoff; j<sheet.width(); j++) {
 	  SheetCell c = sheet.cellSummary(j,i);
-	  change.val[cols[j-1]] = c;
+	  change.val[cols[j-1-xoff]] = c;
 	}
-	patcher->changeRow(change);
+	if (allowed) patcher->changeRow(change);
       } else if (code == "---") {
 	change.mode = ROW_CHANGE_DELETE;
-	for (int j=1; j<sheet.width(); j++) {
+	for (int j=1+xoff; j<sheet.width(); j++) {
 	  SheetCell c = sheet.cellSummary(j,i);
-	  change.cond[cols[j-1]] = c;
+	  change.cond[cols[j-1-xoff]] = c;
 	}
-	patcher->changeRow(change);
+	if (allowed) patcher->changeRow(change);
       } else if (tail2 == "->") {
 	change.mode = ROW_CHANGE_UPDATE;
 	int minuses = 0;
 	string separator = code.substr(code.find("-"),code.length());
-	for (int j=1; j<sheet.width(); j++) {
+	for (int j=1+xoff; j<sheet.width(); j++) {
 	  SheetCell c = sheet.cellSummary(j,i);
 	  bool done = false;
-	  string col = cols[j-1];
-	  bool added = statusCol[j-1]=="+++";
+	  string col = cols[j-1-xoff];
+	  bool added = statusCol[j-1-xoff]=="+++";
 	  if (!c.escaped) {
 	    //printf("Looking at [%s], separator [%s]\n",
 	    //c.toString().c_str(), separator.c_str());
@@ -1125,16 +1166,16 @@ bool PatchParser::applyColor() {
 	    }
 	  }
 	}
-	patcher->changeRow(change);
+	if (allowed) patcher->changeRow(change);
       } else {
 	if (i<sheet.height()-1) {
-	  if (sheet.cellString(0,i+1)=="+++") {
+	  if (sheet.cellString(xoff,i+1)=="+++") {
 	    change.mode = ROW_CHANGE_CONTEXT;
-	    for (int j=1; j<sheet.width(); j++) {
+	    for (int j=1+xoff; j<sheet.width(); j++) {
 	      SheetCell c = sheet.cellSummary(j,i);
-	      change.cond[cols[j-1]] = c;
+	      change.cond[cols[j-1-xoff]] = c;
 	    }
-	    patcher->changeRow(change);
+	    if (willBeAllowed) patcher->changeRow(change);
 	  }
 	}
       }

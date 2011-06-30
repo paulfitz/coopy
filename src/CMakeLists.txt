@@ -1,4 +1,4 @@
-option(PROFILING OFF "Turn on profiling")
+option(PROFILING "Turn on profiling" OFF)
 IF (PROFILING)
 #  FOREACH(target ssformat ssmerge csv sheet sheet_full remotesql remotesql_sqlxx sheet_core)
 #    SET_TARGET_PROPERTIES(${target} PROPERTIES COMPILE_FLAGS -pg LINK_FLAGS -pg)

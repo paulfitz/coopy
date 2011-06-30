@@ -291,7 +291,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (apply) {
-    SheetPatcher *apply_diff = new SheetPatcher(false);
+    SheetPatcher *apply_diff = SheetPatcher::createForApply();
     COOPY_ASSERT(apply_diff!=NULL);
     apply_diff->showSummary(diff);
     diff = apply_diff;

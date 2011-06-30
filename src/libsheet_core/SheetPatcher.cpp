@@ -696,9 +696,17 @@ bool SheetPatcher::mergeAllDone() {
       } else {
 	addedBreak = false;
       }
-    }
-    
+    }    
   }
+
+  if (forReview) {
+    PolySheet sheet = getSheet();
+    if (!sheet.isValid()) return false;
+    sheet.insertColumn(ColumnRef(0)); 
+    sheet.insertRow(RowRef(0)); 
+    sheet.cellString(0,0,"Allow? (yes/no)"); 
+  }
+
   return true;
 }
 

@@ -539,15 +539,28 @@ ADD_TEST(csvs_header_diff_ok ${CMAKE_COMMAND} -E compare_files
 #######################################################################
 #######################################################################
 
+# check reviewed diff
+FOREACH(rev all all_but_add just_add)
+  ADD_TEST(review_${rev}_patch ${sspatch} --output review_${rev}_out.csv ${TESTS}/broken_bridges.csv ${TESTS}/review/review_${rev}.csv)
+  ADD_TEST(review_${rev}_compare ${ssdiff} --equal ${TESTS}/review/review_${rev}_result.csv review_${rev}_out.csv)
+ENDFOREACH()
+
+
+#######################################################################
+#######################################################################
+
 # check lots of moves
 ADD_ROUND_TRIP_TEST(wii_move_tdiff ${TESTS}/bug/wii_0001/wii1.csv ${TESTS}/bug/wii_0001/wii2.csv tdiff)
 ADD_ROUND_TRIP_TEST(wii_move_csv ${TESTS}/bug/wii_0001/wii1.csv ${TESTS}/bug/wii_0001/wii2.csv csv)
 
 
-set(PRIVATE_TESTS_ROOT "" CACHE PATH "Location of private tests") 
-if (PRIVATE_TESTS_ROOT)
-  add_subdirectory(${PRIVATE_TESTS_ROOT} private_tests)
-endif()
+option(USE_PRIVATE_TESTS "Use non-public tests" OFF)
+if (USE_PRIVATE_TESTS)
+  set(PRIVATE_TESTS_ROOT "" CACHE PATH "Location of private tests") 
+  if (PRIVATE_TESTS_ROOT)
+    add_subdirectory(${PRIVATE_TESTS_ROOT} private_tests)
+  endif()
+endif ()
 
 #######################################################################
 #######################################################################

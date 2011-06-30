@@ -348,19 +348,24 @@ bool WideSheetManager::mergeToLocal(const char *localName,
     pivot = &_local;
   }
 
-  SheetPatcher diff;
+  SheetPatcher *diff = SheetPatcher::createForApply();
+  COOPY_ASSERT(diff);
   MergeOutputTdiff nested_diff;
-  diff.attachBook(*local);
-  diff.showSummary(&nested_diff,false);
+  diff->attachBook(*local);
+  diff->showSummary(&nested_diff,false);
   BookCompare cmp;
   CompareFlags flags;
   string output = logName;
   start_output2(output,flags);
   nested_diff.setFlags(flags);
-  int r = cmp.compare(*pivot,*local,*remote,diff,flags);
+  int r = cmp.compare(*pivot,*local,*remote,*diff,flags);
+  int cc = diff->getChangeCount();
   stop_output2(output,flags);
-  if (r!=0) return false;
-  if (diff.getChangeCount()>0) {
+  delete diff;  diff = NULL;
+  if (r!=0) {
+    return false;
+  }
+  if (cc>0) {
     if (!local->inplace()) {
       if (!local->write(localName)) {
 	fprintf(stderr,"Failed to write %s\n", localName);
