@@ -32,7 +32,7 @@ function run_in_chroot {
     sudo chroot $1 bash -c "$2"
 }
 
-run_in_chroot build_chroot "yes | apt-get install libwxgtk2.8-dev git-core cmake" || exit 1
+run_in_chroot build_chroot "yes | apt-get install libx11-dev zlib1g-dev libwxgtk2.8-dev git-core cmake" || exit 1
 
 run_in_chroot build_chroot "cd /tmp; test -e coopy || git clone git://github.com/paulfitz/coopy.git" || exit 1
 CHROOT_SRC=/tmp/coopy
