@@ -449,9 +449,13 @@ MACRO(ADD_ROUND_TRIP_TEST name P1 P2 FORMAT)
       --equals ${fname2} ${P2})
 ENDMACRO ()
 
+MACRO(ADD_ROUND_TRIP_TEST_BI name P1 P2 FORMAT)
+  ADD_ROUND_TRIP_TEST(${name}_forward ${P1} ${P2} ${FORMAT})
+  ADD_ROUND_TRIP_TEST(${name}_reverse ${P2} ${P1} ${FORMAT})
+ENDMACRO()
+
 foreach(FORMAT csv tdiff color)
-  ADD_ROUND_TRIP_TEST(joe_0000_${FORMAT} ${TESTS}/bug/joe_0000/local.csv ${TESTS}/bug/joe_0000/remote.csv ${FORMAT})
-  ADD_ROUND_TRIP_TEST(joe_0000_${FORMAT}_inv ${TESTS}/bug/joe_0000/remote.csv ${TESTS}/bug/joe_0000/local.csv ${FORMAT})
+  ADD_ROUND_TRIP_TEST_BI(joe_0000_${FORMAT} ${TESTS}/bug/joe_0000/local.csv ${TESTS}/bug/joe_0000/remote.csv ${FORMAT})
 endforeach()
 
 foreach(FORMAT csv tdiff color)
@@ -581,4 +585,7 @@ ADD_TEST(csvs_preserve_pk_check ${ssdiff} --equal csvs_preserve_pk.1.csv csvs_pr
 
 ADD_TEST(wide_format ${ssformat} ${TESTS}/bug/wide_0004/wide.csv wide_format.csvs)
 ADD_TEST(wide_format_check ${ssdiff} ${TESTS}/bug/wide_0004/wide.csv wide_format.csvs)
+
+ADD_ROUND_TRIP_TEST_BI(highlighter_small_file ${TESTS}/bug/highlighter_0005/orig.csv ${TESTS}/bug/highlighter_0005/mod.csv tdiff)
+ADD_ROUND_TRIP_TEST_BI(highlighter_small_file_hilite ${TESTS}/bug/highlighter_0005/orig.csv ${TESTS}/bug/highlighter_0005/mod.csv color)
 
