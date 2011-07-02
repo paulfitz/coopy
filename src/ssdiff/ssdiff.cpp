@@ -171,11 +171,13 @@ int main(int argc, char *argv[]) {
 
     printf("The difference can be shown in different output formats:\n");
     printf("  ssdiff --format tdiff local.csv modified.csv  # default format\n");
-    printf("  ssdiff --format hilite local.csv modified.csv # colorful format, best used\n");
-    printf("                                                # with --output out.xls\n");
-    printf("  ssdiff --format csv local.csv modified.csv    # CSV-compatible diff format\n");
     printf("  ssdiff --format raw local.csv modified.csv    # verbose format for debugging\n");
     printf("  ssdiff --format sql local.csv modified.csv    # SQL format\n");
+    printf("  ssdiff --format hilite local.csv modified.csv # colorful format, best used\n");
+    printf("                                                # with --output out.xls\n");
+    printf("  ssdiff --format review local.csv modified.csv # hilite, with column for\n");
+    printf("                                                # selecting/rejecting changes\n");
+    printf("  ssdiff --format csv local.csv modified.csv    # CSV-compatible diff format\n");
     printf("  ssdiff --format index local.csv modified.csv  # table showing matching rows\n");
     printf("\n");
 

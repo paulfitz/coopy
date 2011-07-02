@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
     printf("The sspatch tool can also be used to convert between patch formats\n");
     printf("  sspatch --format raw patch.txt    # show debug information about patch\n");
     printf("  sspatch --format tdiff patch.csv  # render patch in tdiff format\n");
+    printf("  sspatch --format sql patch.csv    # render patch in SQL format\n");
     printf("  sspatch --format csv patch.txt    # render patch in csv format\n");
     printf("  sspatch --format hilite local.csv patch.txt # render patch in highlighter\n");
     printf("                                    # format (best used with --output out.xls)\n");
