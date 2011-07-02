@@ -17,8 +17,8 @@ using namespace coopy::store;
 #define FULL_COLOR (65535)
 #define HALF_COLOR (65535/2)
 
-int SheetPatcher::matchRow(const vector<int>& active_cond,
-			   const vector<SheetCell>& cond,
+int SheetPatcher::matchRow(const std::vector<int>& active_cond,
+			   const std::vector<SheetCell>& cond,
 			   int width) {
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return false;
@@ -242,8 +242,8 @@ static string colorEncode(const SheetCell& c) {
 }
 
 bool SheetPatcher::markChanges(int r,int width,
-			       vector<int>& active_val,
-			       vector<SheetCell>& val) {
+			       std::vector<int>& active_val,
+			       std::vector<SheetCell>& val) {
   PolySheet sheet = getSheet();
 
   string separator = "";
