@@ -46,12 +46,15 @@ public:
   }
 
   void setIndex(int idx) {
-    indices.insert(idx);
+    if (indices.size()<50) {
+      indices.insert(idx);
+    }
   }
 
   void apply(coopy::store::SparseFloatSheet& match,int row) {
     size_t len = indices.size();
     if (len<=0) return;
+    if (len>=50) return;
     float delta = 1.0/len;
     for (std::set<int>::const_iterator it=indices.begin();
 	 it!=indices.end();
