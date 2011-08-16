@@ -2,6 +2,7 @@
 #include <coopy/Property.h>
 
 using namespace coopy::store;
+using namespace coopy::store::remotesql;
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -9,6 +10,7 @@ int main(int argc, char *argv[]) {
   Property p;
   p.put("username","root");
   p.put("password","");
+  // "lostname" should be "hostname" I imagine
   p.put("lostname","localhost");
   p.put("port",3128);
   p.put("database",(argc>1)?argv[1]:"mysql");

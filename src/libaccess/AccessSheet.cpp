@@ -4,6 +4,7 @@
 #include "mdbtools.h"
 
 using namespace coopy::store;
+using namespace coopy::store::mdb;
 using namespace std;
 
 namespace coopy {

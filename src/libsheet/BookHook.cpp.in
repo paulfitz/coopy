@@ -2,7 +2,6 @@
 #include <coopy/PolyBook.h>
 #include <coopy/JsonProperty.h>
 #include <coopy/ShortTextBook.h>
-#include <coopy/JsonBook.h>
 #include <coopy/FormatDesc.h>
 
 #include <fstream>
@@ -20,19 +19,26 @@ using namespace coopy::store;
 
 #ifdef USE_GNUMERIC
 #include <coopy/GnumericTextBookFactory.h>
+using namespace coopy::store::gnumeric;
 #endif
 
 #ifdef USE_ACCESS
 #include <coopy/AccessTextBook.h>
+using namespace coopy::store::mdb;
 #endif
 
 #include <json/json.h>
 
 #ifdef USE_REMOTE_SQL
 #include <coopy/RemoteSqlTextBook.h>
+using namespace coopy::store::remotesql;
 #endif
 
 #include <coopy/SqliteTextBook.h>
+using namespace coopy::store::sqlite;
+
+#include <coopy/JsonBook.h>
+using namespace coopy::store::json;
 
 #define STRVAL PolyValue::makeString
 

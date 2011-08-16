@@ -23,6 +23,7 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::store::sqlite;
 using namespace coopy::format;
 
 static bool exists(const char *fname) {

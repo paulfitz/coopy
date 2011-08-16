@@ -5,11 +5,13 @@
 
 namespace coopy {
   namespace store {
-    class GnumericSheet;
+    namespace gnumeric {
+      class GnumericSheet;
+    }
   }
 }
 
-class coopy::store::GnumericSheet : public DataSheet {
+class coopy::store::gnumeric::GnumericSheet : public DataSheet {
 public:
   GnumericSheet(void *sheet);
 

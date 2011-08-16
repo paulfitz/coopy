@@ -6,12 +6,20 @@
 
 namespace coopy {
   namespace store {
-    class SqliteTextBook;
-    class SqliteTextBookFactory;
+
+    /**
+     *
+     * Sqlite-backed table representation.
+     *
+     */
+    namespace sqlite {
+      class SqliteTextBook;
+      class SqliteTextBookFactory;
+    }
   }
 }
 
-class coopy::store::SqliteTextBook : public TextBook {
+class coopy::store::sqlite::SqliteTextBook : public TextBook {
 public:
   SqliteTextBook();
   virtual ~SqliteTextBook();
@@ -48,7 +56,7 @@ private:
 };
 
 
-class coopy::store::SqliteTextBookFactory : public TextBookFactory {
+class coopy::store::sqlite::SqliteTextBookFactory : public TextBookFactory {
 public:
   virtual std::string getName() {
     return "sqlite";

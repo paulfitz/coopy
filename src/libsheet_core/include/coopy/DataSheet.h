@@ -34,64 +34,144 @@ public:
 };
 
 
+/**
+ *
+ * An abstract table.  
+ *
+ */
 class coopy::store::DataSheet : public RefCount {
 public:
   virtual ~DataSheet() {}
 
+  /**
+   *
+   * @return width of table
+   *
+   */
   virtual int width() const = 0;
+
+  /**
+   *
+   * @return height of table
+   *
+   */
   virtual int height() const = 0;
 
+  /**
+   *
+   * @return contents of cell in column x, row y, as a string.
+   * The value returned by a cell with a NULL value is unspecified.
+   *
+   */
   virtual std::string cellString(int x, int y) const = 0;
 
+  /**
+   *
+   * @return contents of cell in column x, row y, as a string.  The
+   * "escaped" variable is set to true iff the cell has a NULL value.
+   *
+   */
   virtual std::string cellString(int x, int y, bool& escaped) const {
     escaped = false;
     return cellString(x,y);
   }
 
+  /**
+   *
+   * @return contents of cell in column x, row y
+   *
+   */
   virtual SheetCell cellSummary(int x, int y) const {
     SheetCell c;
     c.text = cellString(x,y,c.escaped);
     return c;
   }
 
+  /**
+   *
+   * sets the contents of cell in column x, row y to a specified string value
+   *
+   */
   virtual bool cellString(int x, int y, const std::string& str) {
     return false;
   }
 
+  /**
+   *
+   * sets the contents of cell in column x, row y to a specified string value,
+   * or to NULL if "escaped" is set.
+   *
+   */
   virtual bool cellString(int x, int y, const std::string& str, bool escaped) {
     return cellString(x,y,str);
   }
 
+  /**
+   *
+   * sets the contents of cell in column x, row y to a specified value.
+   *
+   */
   virtual bool cellSummary(int x, int y, const SheetCell& c) {
     return cellString(x,y,c.text,c.escaped);
   }
 
+  /**
+   *
+   * @return true iff cells in this table may be NULL
+   *
+   */
   virtual bool canEscape() const {
     return false;
   }
 
+  /**
+   *
+   * @return contents of cell in column x, row y
+   *
+   */
   virtual SheetCell getCell(int x, int y) const {
     return cellSummary(x,y);
   }
 
+  /**
+   *
+   * set contents of cell in column x, row y
+   *
+   */
   virtual bool setCell(int x, int  y, const SheetCell& c) {
     return cellSummary(x,y,c);
   }
 
+  /**
+   *
+   * Render table as serialized text, using the specified style.
+   *
+   */
   std::string encode(const SheetStyle& style) const;
 
+  /**
+   *
+   * Render table as serialized text, using a default style.
+   *
+   */
   std::string toString() const {
     SheetStyle style;
     return encode(style);
   }
 
+  /**
+   *
+   * Encode a cell value as text using a specified style.
+   *
+   */
   static std::string encodeCell(const SheetCell& str, 
 				const SheetStyle& style);
 
-  //static std::string encodeCell(const std::string& str, 
-  //				const SheetStyle& style);
-
-  // remove any cached values, e.g. in remote connections.
+  /**
+   *
+   * Remove any cached values if used, e.g. in proxies for remote tables.
+   *
+   */
   virtual bool clearCache() { return true; }
 
   virtual SheetSchema *getSchema() const {

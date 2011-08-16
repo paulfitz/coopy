@@ -7,12 +7,19 @@
 
 namespace coopy {
   namespace store {
-    class RemoteSqlTextBook;
-    class RemoteSqlTextBookFactory;
+    /**
+     *
+     * Remote SQL plugin (currently limited to MySQL).
+     *
+     */
+    namespace remotesql {
+      class RemoteSqlTextBook;
+      class RemoteSqlTextBookFactory;
+    }
   }
 }
 
-class coopy::store::RemoteSqlTextBook : public TextBook {
+class coopy::store::remotesql::RemoteSqlTextBook : public TextBook {
 public:
   RemoteSqlTextBook();
   virtual ~RemoteSqlTextBook();
@@ -45,7 +52,7 @@ private:
 };
 
 
-class coopy::store::RemoteSqlTextBookFactory : public TextBookFactory {
+class coopy::store::remotesql::RemoteSqlTextBookFactory : public TextBookFactory {
 private:
   std::string name;
 public:

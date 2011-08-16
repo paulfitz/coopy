@@ -10,6 +10,7 @@ extern "C" {
 }
 
 using namespace coopy::store;
+using namespace coopy::store::gnumeric;
 using namespace std;
 
 int main_alt() {

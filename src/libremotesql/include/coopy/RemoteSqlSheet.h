@@ -9,13 +9,15 @@
 
 namespace coopy {
   namespace store {
-    class RemoteSqlSheet;
-    class RemoteSqlSheetSchema;
-    class RemoteSqlTextBook;
+    namespace remotesql {
+      class RemoteSqlSheet;
+      class RemoteSqlSheetSchema;
+      class RemoteSqlTextBook;
+    }
   }
 }
 
-class coopy::store::RemoteSqlSheet : public DataSheet {
+class coopy::store::remotesql::RemoteSqlSheet : public DataSheet {
 public:
   RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name);
 
@@ -100,7 +102,7 @@ private:
   std::vector<int> key_cols;
 };
 
-class coopy::store::RemoteSqlSheetSchema : public SheetSchema {
+class coopy::store::remotesql::RemoteSqlSheetSchema : public SheetSchema {
 public:
   RemoteSqlSheet *sheet;
 

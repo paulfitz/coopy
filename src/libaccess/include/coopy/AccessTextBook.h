@@ -6,12 +6,19 @@
 
 namespace coopy {
   namespace store {
-    class AccessTextBook;
-    class AccessTextBookFactory;
+    /**
+     *
+     * MDB/Access plugin.
+     *
+     */
+    namespace mdb {
+      class AccessTextBook;
+      class AccessTextBookFactory;
+    }
   }
 }
 
-class coopy::store::AccessTextBook : public TextBook {
+class coopy::store::mdb::AccessTextBook : public TextBook {
 public:
   AccessTextBook();
   virtual ~AccessTextBook();
@@ -53,7 +60,7 @@ private:
 };
 
 
-class coopy::store::AccessTextBookFactory : public TextBookFactory {
+class coopy::store::mdb::AccessTextBookFactory : public TextBookFactory {
 public:
   virtual std::string getName() {
     return "access";

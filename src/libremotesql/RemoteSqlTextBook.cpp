@@ -9,6 +9,7 @@
 #include <algorithm>
 
 using namespace coopy::store;
+using namespace coopy::store::remotesql;
 using namespace std;
 using namespace sqlxx;
 

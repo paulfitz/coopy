@@ -8,12 +8,19 @@
 
 namespace coopy {
   namespace store {
-    class GnumericTextBook;
-    class GnumericTextBookFactory;
+    /**
+     *
+     * Gnumeric table plugin (for Excel files, OpenOffice, etc)
+     *
+     */
+    namespace gnumeric {
+      class GnumericTextBook;
+      class GnumericTextBookFactory;
+    }
   }
 }
 
-class coopy::store::GnumericTextBook : public TextBook {
+class coopy::store::gnumeric::GnumericTextBook : public TextBook {
 private:
   void *implementation;
   std::vector<std::string> names;

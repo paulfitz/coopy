@@ -11,6 +11,7 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::store::mdb;
 
 int AccessTextBook::uses = 0;
 

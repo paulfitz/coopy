@@ -11,6 +11,7 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::store::sqlite;
 
 #define DB(x) ((sqlite3 *)(x))
 

@@ -9,6 +9,7 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::store::remotesql;
 using namespace sqlxx;
 
 #define SQL_CONNECTION(x) (*((CSQL*)((x)->getSqlInterface())))

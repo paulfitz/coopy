@@ -4,6 +4,7 @@
 #include <sqlite3.h>
 
 using namespace coopy::store;
+using namespace coopy::store::sqlite;
 using namespace std;
 
 namespace coopy {

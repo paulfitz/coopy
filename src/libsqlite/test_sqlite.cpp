@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 using namespace coopy::store;
+using namespace coopy::store::sqlite;
 using namespace std;
 
 int main(int argc, char *argv[]) {

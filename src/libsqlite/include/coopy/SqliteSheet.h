@@ -9,12 +9,14 @@
 
 namespace coopy {
   namespace store {
-    class SqliteSheet;
-    class SqliteSheetSchema;
+    namespace sqlite {
+      class SqliteSheet;
+      class SqliteSheetSchema;
+    }
   }
 }
 
-class coopy::store::SqliteSheet : public DataSheet {
+class coopy::store::sqlite::SqliteSheet : public DataSheet {
 public:
   SqliteSheet(void *db, const char *name);
 
@@ -102,7 +104,7 @@ private:
   std::string _quoted_single(const std::string& x);
 };
 
-class coopy::store::SqliteSheetSchema : public SheetSchema {
+class coopy::store::sqlite::SqliteSheetSchema : public SheetSchema {
 public:
   SqliteSheet *sheet;
 

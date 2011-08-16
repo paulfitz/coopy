@@ -6,6 +6,11 @@
 
 namespace coopy {
   namespace store {
+    /**
+     *
+     * CSV file I/O.
+     *
+     */
     namespace CsvFile {
       int write(const DataSheet& src, const char *fname);
       int write(const DataSheet& src, const Property& config);

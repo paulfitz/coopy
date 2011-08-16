@@ -5,6 +5,7 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::store::gnumeric;
 
 extern "C" {
 #include <coopy/gnumeric_link.h>

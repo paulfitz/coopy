@@ -8,6 +8,12 @@ namespace coopy {
   }
 }
 
+/**
+ *
+ * Reference-counted objects.  Bare-bones implementation to avoid
+ * introducing dependency on boost or tr1
+ *
+ */
 class coopy::store::RefCount {
 private:
   int ref_ct;

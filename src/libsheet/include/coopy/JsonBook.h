@@ -7,12 +7,19 @@
 
 namespace coopy {
   namespace store {
-    class JsonBook;
-    class JsonBookFactory;
+    /**
+     *
+     * Json table representation.
+     *
+     */
+    namespace json {
+      class JsonBook;
+      class JsonBookFactory;
+    }
   }
 }
 
-class coopy::store::JsonBook : public TextBook {
+class coopy::store::json::JsonBook : public TextBook {
 public:
   std::vector<PolySheet> sheets;
   std::vector<std::string> names;
@@ -55,7 +62,7 @@ public:
 
 
 
-class coopy::store::JsonBookFactory : public TextBookFactory {
+class coopy::store::json::JsonBookFactory : public TextBookFactory {
 public:
   virtual std::string getName() {
     return "jsonbook";

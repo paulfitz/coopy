@@ -6,11 +6,13 @@
 
 namespace coopy {
   namespace store {
-    class GnumericTextBookFactory;
+    namespace gnumeric {
+      class GnumericTextBookFactory;
+    }
   }
 }
 
-class coopy::store::GnumericTextBookFactory : public TextBookFactory {
+class coopy::store::gnumeric::GnumericTextBookFactory : public TextBookFactory {
 public:
   virtual std::string getName() {
     return "gnumeric";

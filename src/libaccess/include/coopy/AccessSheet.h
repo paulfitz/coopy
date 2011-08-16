@@ -9,12 +9,14 @@
 
 namespace coopy {
   namespace store {
-    class AccessSheet;
-    class AccessSheetSchema;
+    namespace mdb {
+      class AccessSheet;
+      class AccessSheetSchema;
+    }
   }
 }
 
-class coopy::store::AccessSheet : public DataSheet {
+class coopy::store::mdb::AccessSheet : public DataSheet {
 public:
   AccessSheet(void *db, const char *name, const Property& config);
 
@@ -66,7 +68,7 @@ private:
  
 };
 
-class coopy::store::AccessSheetSchema : public SheetSchema {
+class coopy::store::mdb::AccessSheetSchema : public SheetSchema {
 public:
   AccessSheet *sheet;
 

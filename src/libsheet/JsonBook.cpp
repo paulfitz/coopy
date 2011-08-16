@@ -8,6 +8,7 @@
 
 using namespace std;
 using namespace coopy::store;
+using namespace coopy::store::json;
 using namespace coopy::fold;
 
 static bool readPart(Json::Value& rows,
