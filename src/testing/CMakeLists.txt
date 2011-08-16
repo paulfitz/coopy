@@ -30,6 +30,7 @@ SET(testprg_viterbi ${EXECUTABLE_OUTPUT_PATH}/test_viterbi${EXE_EXT})
 SET(ssformat ${EXECUTABLE_OUTPUT_PATH}/ssformat${EXE_EXT})
 SET(ssdiff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT})
 SET(sspatch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT})
+SET(ssfold ${EXECUTABLE_OUTPUT_PATH}/ssfold${EXE_EXT})
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -565,6 +566,15 @@ if (USE_PRIVATE_TESTS)
     add_subdirectory(${PRIVATE_TESTS_ROOT} private_tests)
   endif()
 endif ()
+
+#######################################################################
+#######################################################################
+
+# folding isn't ready, but at least make sure a test can run
+
+ADD_TEST(folding_base ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table organizations ${TESTS}/fold/contacts.sqlite -)
+
+ADD_TEST(folding_json ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table organizations ${TESTS}/fold/contacts.sqlite folding_json_result.jsonbook)
 
 #######################################################################
 #######################################################################
