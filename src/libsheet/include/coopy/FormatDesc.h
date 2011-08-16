@@ -12,6 +12,11 @@ namespace coopy {
   }
 }
 
+/**
+ *
+ * Description of a single format for importing/exporting tables.
+ *
+ */
 class coopy::store::FormatDesc {
 public:
   std::string name;

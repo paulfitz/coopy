@@ -12,6 +12,11 @@ namespace coopy {
   }
 }
 
+/**
+ *
+ * Factory for ShortTextBook objects.
+ *
+ */
 class coopy::store::ShortTextBookFactory : public TextBookFactory {
   virtual std::string getName() {
     return "csv";

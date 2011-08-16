@@ -16,6 +16,11 @@ namespace coopy {
   }
 }
 
+/**
+ *
+ * Collection of CSV tables.
+ *
+ */
 class coopy::store::CsvTextBook : public TextBook, public CsvSheetReader {
 public:
   CsvTextBook(bool compact) : compact(compact) {
@@ -70,6 +75,11 @@ private:
 };
 
 
+/**
+ *
+ * Factory for CsvTextBook objects.
+ *
+ */
 class coopy::store::CsvTextBookFactory : public TextBookFactory {
 private:
   bool compact;

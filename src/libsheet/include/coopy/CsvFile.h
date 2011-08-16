@@ -28,6 +28,11 @@ namespace coopy {
   }
 }
 
+/**
+ *
+ * Factory for CSV objects while loading CSV files.
+ *
+ */
 class coopy::store::CsvSheetReader {
 public:
   virtual CsvSheet *nextSheet(const char *name, bool named) = 0;

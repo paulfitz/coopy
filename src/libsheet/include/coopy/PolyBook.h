@@ -11,6 +11,12 @@ namespace coopy {
   }
 }
 
+/**
+ *
+ * Container for a workbook (collection of tables) backed by any kind
+ * of spreadsheet or database.
+ *
+ */
 class coopy::store::PolyBook : public TextBook {
 private:
   TextBook *book;

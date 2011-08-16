@@ -11,6 +11,11 @@ namespace coopy {
   }
 }
 
+/**
+ *
+ * CSV-backed workbook constrained to contain a single table.
+ *
+ */
 class coopy::store::ShortTextBook : public TextBook {
 public:
   std::string name;

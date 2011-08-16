@@ -11,6 +11,11 @@ namespace coopy {
   }
 }
 
+/**
+ *
+ * Collection of key/value pairs, represented in Json format.
+ *
+ */
 class coopy::store::JsonProperty {
 public:
   static bool add(Property& prop, const char *fname);
