@@ -29,7 +29,7 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
   CSQL& SQL = SQL_CONNECTION(book);
 
   {
-    string query = string("SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, EXTRA, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=")+quote(name);
+    string query = string("SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, EXTRA, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=")+quote(name) + " AND TABLE_SCHEMA=" + quote(book->getDatabaseName());
     dbg_printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     if (result==NULL) return;
@@ -75,7 +75,7 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
 
   {
     string query = string("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ") + quote(book->getDatabaseName()) + " AND TABLE_NAME = " + quote(name) + " AND COLUMN_KEY = 'PRI'";
-    //printf("Query is %s\n", query.c_str());
+    dbg_printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     while (result->fetch()) {
       //printf("Got %s\n", result->get(0).c_str());
@@ -102,14 +102,14 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
 
   {
     string query = string("SELECT * FROM ") + name + " ORDER BY " + key_list;
-    //printf("Query is %s\n", query.c_str());
+    dbg_printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     while (result->fetch()) {
       vector<string> accum;
       cache.reheight(h+1);
       cacheFlag.reheight(h+1);
       for (int i=0; i<w; i++) {
-	//printf("Got %d,%d: ", i, h);
+	//printf("Got %d,%d:\n", i, h);
 	//printf("Got %d,%d %s\n", i, h, result->get(i).c_str());
 	if (result->isNull(i)) {
 	  cacheFlag.cell(i,h) = 1;
