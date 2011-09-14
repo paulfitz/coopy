@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
   bool verbose = false;
   bool unfold = false;
   bool fold = false;
+  FoldOptions options;
 
   while (true) {
     int option_index = 0;
@@ -27,6 +28,9 @@ int main(int argc, char *argv[]) {
 
       {"recipe", 1, 0, 'r'},
       {"table", 1, 0, 't'},
+
+      {"drop", 1, 0, 'd'},
+
       {0, 0, 0, 0}
     };
 
@@ -50,6 +54,11 @@ int main(int argc, char *argv[]) {
     case 't':
       table_name = optarg;
       break;
+
+    case 'd':
+      options.drops.insert(optarg);
+      break;
+
     default:
       fprintf(stderr, "Unrecognized option\n");
       return 1;
@@ -67,6 +76,7 @@ int main(int argc, char *argv[]) {
     printf("Fold or flatten tables:\n");
     printf("  ssfold [--table TABLE] [--recipe RECIPE] [--unfold|--fold] SOURCE DESTINATION\n");
     printf("  ssfold --recipe folds.csv --table main --unfold tables.sqlite sheet.csv\n");
+    printf("  ssfold --drop length bridges.csv partial.csv  # removes length column\n");
     return 1;
   }
 
@@ -96,7 +106,6 @@ int main(int argc, char *argv[]) {
   }
 
   dbg_printf("ssfold: %s\n", fold?"folding":"unfolding");
-  FoldOptions options;
   options.tableName = table_name;
   options.fold = fold;
   options.recipe = recipe;

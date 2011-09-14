@@ -618,7 +618,15 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
   //printf("recipe? -- %s\n", options.recipe.toString().c_str());
   if (missing.isValid()) {
     dbg_printf("Processing list of \"Missing\" columns\n");
+    for (int y=0; y<missing.height(); y++) {
+      string name = missing.cellString(0,y);
+      options.drops.insert(name);
+    }
+  }
+
+  if (options.drops.size()>0) {
     src = dest;
+    dbg_printf("Working on drops...\n");
     vector<string> names = src.getNames();
     for (int i=0; i<src.getSheetCount(); i++) {
       PolySheet sheet = src.readSheet(names[i]);
@@ -628,25 +636,12 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
 	dbg_printf("No schema for %s\n", names[i].c_str());
 	continue;
       }
-      set<string> cols;
-      set<string> drop_cols;
-      for (int c=0; c<schema->getColumnCount(); c++) {
-	string name = schema->getColumnInfo(c).getName();
-	cols.insert(name);
-      }
-      for (int y=0; y<missing.height(); y++) {
-	string name = missing.cellString(0,y);
-	if (cols.find(name)!=cols.end()) {
-	  dbg_printf("Drop %s\n", name.c_str());
-	  drop_cols.insert(name);
-	}
-      }
       SimpleSheetSchema s;
       s.copy(*schema);
       int at = 0;
       for (int c=0; c<s.getColumnCount(); c++) {
 	string name = s.getColumnInfo(c).getName();
-	if (drop_cols.find(name)!=drop_cols.end()) {
+	if (options.drops.find(name)!=options.drops.end()) {
 	  sheet.deleteColumn(ColumnRef(at));
 	} else {
 	  at++;

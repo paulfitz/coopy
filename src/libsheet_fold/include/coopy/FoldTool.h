@@ -1,8 +1,10 @@
 #ifndef COOPY_FOLDTOOL
 #define COOPY_FOLDTOOL
 
-#include <string>
 #include <coopy/PolyBook.h>
+
+#include <string>
+#include <set>
 
 namespace coopy {
   namespace fold {
@@ -15,6 +17,7 @@ class coopy::fold::FoldOptions {
 public:
   std::string tableName;
   coopy::store::PolyBook recipe;
+  std::set<std::string> drops;
   bool fold;
 
   FoldOptions() {
