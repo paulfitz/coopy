@@ -5,7 +5,12 @@ using namespace coopy::fold;
 using namespace coopy::store;
 
 void FoldedCell::clear() {
-  if (sheet!=NULL) delete sheet;
+  if (sheet!=NULL) {
+    sheet->removeReference();
+    if (sheet->getReferenceCount()==0) {
+      delete sheet;
+    }
+  }
   sheet = NULL;
   datum.text = "";
   datum.escaped = true;
@@ -14,6 +19,7 @@ void FoldedCell::clear() {
 FoldedSheet *FoldedCell::getOrCreateSheet() {
   if (sheet!=NULL) return sheet;
   sheet = new FoldedSheet;
+  sheet->addReference();
   return sheet;
 }
 

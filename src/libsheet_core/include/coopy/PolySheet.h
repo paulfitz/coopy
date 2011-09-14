@@ -156,7 +156,12 @@ public:
 
   virtual bool deleteColumn(const ColumnRef& column) {
     COOPY_ASSERT(sheet);
-    return sheet->deleteColumn(column);
+    bool ok = sheet->deleteColumn(column);
+    if (ok&&owned_schema&&schema!=0/*NULL*/) {
+      printf("Deleting column %d\n", column.getIndex());
+      schema->deleteColumn(column);
+    }
+    return ok;
   }
 
   virtual ColumnRef insertColumn(const ColumnRef& base) {

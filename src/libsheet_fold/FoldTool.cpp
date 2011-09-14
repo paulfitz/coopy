@@ -609,8 +609,9 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
       return 1;
     }
     book->sheet = psheet;
-    dest.take(book);
-  } else {
+    dest.take(book); 
+    src = dest;
+ } else {
     dest = src;
   }
 
@@ -625,7 +626,6 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
   }
 
   if (options.drops.size()>0) {
-    src = dest;
     dbg_printf("Working on drops...\n");
     vector<string> names = src.getNames();
     for (int i=0; i<src.getSheetCount(); i++) {
@@ -642,6 +642,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
       for (int c=0; c<s.getColumnCount(); c++) {
 	string name = s.getColumnInfo(c).getName();
 	if (options.drops.find(name)!=options.drops.end()) {
+	  dbg_printf(" + Dropping column %s\n", name.c_str());
 	  sheet.deleteColumn(ColumnRef(at));
 	} else {
 	  at++;

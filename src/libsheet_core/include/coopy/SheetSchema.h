@@ -2,6 +2,7 @@
 #define COOPY_SHEETSCHEMA
 
 #include <coopy/ColumnInfo.h>
+#include <coopy/ColumnRef.h>
 #include <coopy/RefCount.h>
 #include <coopy/Dbg.h>
 
@@ -63,6 +64,10 @@ public:
   virtual bool addedHeader() {
     fprintf(stderr, "Don't know what to do with header\n");
     COOPY_ASSERT(1==0);
+  }
+
+  virtual bool deleteColumn(const ColumnRef& column) {
+    return false;
   }
 };
 
@@ -157,6 +162,13 @@ public:
   virtual bool hasSheetName() const {
     return hasName;
   }
+
+  virtual bool deleteColumn(const ColumnRef& column) {
+    columns.erase(columns.begin()+column.getIndex());
+    kinds.erase(kinds.begin()+column.getIndex());
+    return true;
+  }
+
 };
 
 #endif

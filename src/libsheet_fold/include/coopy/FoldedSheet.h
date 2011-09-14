@@ -24,6 +24,25 @@ public:
     clear();
   }
 
+  FoldedCell(const FoldedCell& alt) {
+    sheet = 0 /*NULL*/;
+    if (alt.sheet) {
+      sheet = alt.sheet;
+      ((coopy::store::RefCount*)sheet)->addReference();
+    }
+    datum = alt.datum;
+  }
+
+  const FoldedCell& operator = (const FoldedCell& alt) {
+    clear();
+    if (alt.sheet) {
+      sheet = alt.sheet;
+      ((coopy::store::RefCount*)sheet)->addReference();
+    }    
+    datum = alt.datum;
+    return *this;
+  }
+
   void clear();
 
   FoldedSheet *getSheet() { return sheet; }

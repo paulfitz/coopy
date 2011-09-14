@@ -3,3 +3,8 @@ from_table,from_column,to_table,to_column,for_table
 ---------------------------------------------------
 organizations,id,org2loc,org_id,organizations
 org2loc,loc_id,locations,id,org2loc
+
+== Missing ==
+name
+----
+id
