@@ -1,3 +1,5 @@
+#ifndef GNUMERIC_LINK_INC
+#define GNUMERIC_LINK_INC
 
 typedef void *GnumericWorkbookPtr;
 typedef void *GnumericSheetPtr;
@@ -81,3 +83,5 @@ int gnumeric_style_set_back_color(GnumericStylePtr style,
 				  int r16, int g16, int b16);
 
 void gnumeric_free_style(GnumericStylePtr style);
+
+#endif

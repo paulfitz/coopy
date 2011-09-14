@@ -222,7 +222,7 @@ public:
     }
     PolySheet sheet = book.readSheet(name);
     if (!sheet.isValid()) {
-      fprintf(stderr,"Could not find table %s\n", name);
+      fprintf(stderr,"Could not find table \"%s\"\n", name);
       return dud;
     }
     sheets[name] = SheetAccess();
@@ -535,9 +535,9 @@ static bool fold_expander(Folds& folds, FoldCache& cache, FoldedSheet& sheet,
 }
 
 bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
-  printf("Starting fold/unfold\n");
+  dbg_printf("Starting fold/unfold\n");
 
-  if (options.tableName=="") {
+  if (options.tableName=="" && src.getSheetCount()>1) {
     fprintf(stderr,"Please supply a root table name\n");
     return false;
   }
@@ -545,63 +545,115 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
   FoldCache cache;
   cache.setBook(src);
 
-  SheetAccess& base = cache.getSheet(options.tableName.c_str());
-  if (!base.isValid()) {
-    return false;
+  PolySheet recipe = options.recipe.readSheet("Folds");
+  if (recipe.isValid()) {
+    dbg_printf("Found folds\n");
+
+    SheetAccess& base = cache.getSheet(options.tableName.c_str());
+    if (!base.isValid()) {
+      return false;
+    }
+    
+    vector<FoldLayout> layout;
+    FoldLayout baseLayout;
+    baseLayout.src = &base;
+    baseLayout.updateBase();
+    layout.push_back(baseLayout);
+    
+    //options.recipe.write("/tmp/test.sqlite");
+    //fprintf(stderr, "failed to read recipe (no Folds table)\n");
+    //    exit(1);
+
+    recipe.hideHeaders();
+    
+    Folds folds;
+    for (int i=0; i<recipe.height(); i++) {
+      string fromTable = recipe.cellString(0,i);
+      string fromField = recipe.cellString(1,i);
+      string toTable = recipe.cellString(2,i);
+      string toField = recipe.cellString(3,i);
+      string allowedTable = recipe.cellString(4,i);
+      dbg_printf("Recipe line %d: %s %s %s %s (%s)\n", i,
+		 fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str(),allowedTable.c_str());
+      folds.add(fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str(),allowedTable.c_str());
+      if (fromTable==options.tableName) {
+	/*
+	  SheetAccess& alt = cache.getSheet(toTable.c_str());
+	  if (!alt.isValid()) {
+	  return false;
+	  }
+	  layout.push_back(FoldLayout());
+	  FoldLayout& l = layout.back();
+	  l.src = &base;
+	  l.dest = &alt;
+	  l.srcIdName = fromField;
+	  l.destIdName = toField;
+	  l.updateBase();
+	  l.updateMap();
+	*/
+      }
+    }
+
+    FoldedSheet *fsheet = new FoldedSheet;
+    PolySheet psheet(fsheet,true);
+    COOPY_ASSERT(fsheet);
+    FoldSelector sel;
+    sel.tableName = options.tableName;
+    fold_expander(folds, cache, *fsheet, sel, &psheet);
+    
+    //printf("Generated sheet %dx%d\n", fsheet->width(), fsheet->height());
+
+    FakeBook *book = new FakeBook();
+    if (book==NULL) {
+      fprintf(stderr,"Failed to allocate output\n");
+      return 1;
+    }
+    book->sheet = psheet;
+    dest.take(book);
+  } else {
+    dest = src;
   }
 
-  vector<FoldLayout> layout;
-  FoldLayout baseLayout;
-  baseLayout.src = &base;
-  baseLayout.updateBase();
-  layout.push_back(baseLayout);
-
-  PolySheet recipe = options.recipe.readSheetByIndex(0);
-  recipe.hideHeaders();
-  Folds folds;
-  for (int i=0; i<recipe.height(); i++) {
-    string fromTable = recipe.cellString(0,i);
-    string fromField = recipe.cellString(1,i);
-    string toTable = recipe.cellString(2,i);
-    string toField = recipe.cellString(3,i);
-    string allowedTable = recipe.cellString(4,i);
-    dbg_printf("Recipe line %d: %s %s %s %s (%s)\n", i,
-	       fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str(),allowedTable.c_str());
-    folds.add(fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str(),allowedTable.c_str());
-    if (fromTable==options.tableName) {
-      /*
-      SheetAccess& alt = cache.getSheet(toTable.c_str());
-      if (!alt.isValid()) {
-	return false;
+  PolySheet missing = options.recipe.readSheet("Missing");
+  //printf("recipe? -- %s\n", options.recipe.toString().c_str());
+  if (missing.isValid()) {
+    dbg_printf("Processing list of \"Missing\" columns\n");
+    src = dest;
+    vector<string> names = src.getNames();
+    for (int i=0; i<src.getSheetCount(); i++) {
+      PolySheet sheet = src.readSheet(names[i]);
+      SchemaSniffer ss(sheet);
+      SheetSchema *schema = ss.suggestSchema();
+      if (!schema) {
+	dbg_printf("No schema for %s\n", names[i].c_str());
+	continue;
       }
-      layout.push_back(FoldLayout());
-      FoldLayout& l = layout.back();
-      l.src = &base;
-      l.dest = &alt;
-      l.srcIdName = fromField;
-      l.destIdName = toField;
-      l.updateBase();
-      l.updateMap();
-      */
+      set<string> cols;
+      set<string> drop_cols;
+      for (int c=0; c<schema->getColumnCount(); c++) {
+	string name = schema->getColumnInfo(c).getName();
+	cols.insert(name);
+      }
+      for (int y=0; y<missing.height(); y++) {
+	string name = missing.cellString(0,y);
+	if (cols.find(name)!=cols.end()) {
+	  dbg_printf("Drop %s\n", name.c_str());
+	  drop_cols.insert(name);
+	}
+      }
+      SimpleSheetSchema s;
+      s.copy(*schema);
+      int at = 0;
+      for (int c=0; c<s.getColumnCount(); c++) {
+	string name = s.getColumnInfo(c).getName();
+	if (drop_cols.find(name)!=drop_cols.end()) {
+	  sheet.deleteColumn(ColumnRef(at));
+	} else {
+	  at++;
+	}
+      }
     }
   }
-
-  FoldedSheet *fsheet = new FoldedSheet;
-  PolySheet psheet(fsheet,true);
-  COOPY_ASSERT(fsheet);
-  FoldSelector sel;
-  sel.tableName = options.tableName;
-  fold_expander(folds, cache, *fsheet, sel, &psheet);
-
-  //printf("Generated sheet %dx%d\n", fsheet->width(), fsheet->height());
-
-  FakeBook *book = new FakeBook();
-  if (book==NULL) {
-    fprintf(stderr,"Failed to allocate output\n");
-    return 1;
-  }
-  book->sheet = psheet;
-  dest.take(book);
 
   return true;
 }

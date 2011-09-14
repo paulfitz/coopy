@@ -26,6 +26,8 @@ public:
   bool ignore;
   string name;
   bool named;
+  bool broken;
+  int headerLen;
 
   CsvSheetReaderState() {
     reader = NULL;
@@ -34,6 +36,8 @@ public:
     ignore = false;
     name = "";
     named = false;
+    broken = false;
+    headerLen = 0;
   }
 
   void setStyle(const SheetStyle& style) {
@@ -55,10 +59,12 @@ public:
     }
     this->name = name;
     this->named = named;
+    broken = false;
     return sheet!=NULL;
   }
 
   void markBreak() {
+    broken = true;
     if (sheet!=NULL) {
       SimpleSheetSchema *schema = new SimpleSheetSchema;
       COOPY_ASSERT(schema);
@@ -100,22 +106,36 @@ public:
 extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p, int quoted) {
   CsvSheetReaderState *state = (CsvSheetReaderState*)p;
   CsvSheet *sheet = state->sheet;
+  /*
+  printf("Expecting? %d  Reader? %d  WORKING ON ",
+	 state->expecting, state->reader!=NULL);
+  for (int q=0; q<i; q++) {
+    printf("%c", ((char*)s)[q]);
+  }
+  printf("\n");
+  */
   if (state->expecting && state->reader!=NULL) {
     char *str = (char *)s;
-    if (i>4 && !quoted) {
-      if (str[0]=='=' && str[1]=='=' && str[2]==' ') {
-	size_t j;
-	for (j=i-1; j>=3; j--) {
-	  if (str[j]==' '&&str[j+1]=='=') break;
+    if (!quoted) {
+      if (i>4) {
+	if (str[0]=='=' && str[1]=='=' && str[2]==' ') {
+	  size_t j;
+	  for (j=i-1; j>=3; j--) {
+	    if (str[j]==' '&&str[j+1]=='=') break;
+	  }
+	  str[j] = '\0';
+	  char *name = str+3;
+	  //printf("Name is perhaps [%s]\n", name);
+	  state->addSheet(name,true);
+	  state->ignore = true;
+	  return;
 	}
-	str[j] = '\0';
-	char *name = str+3;
-	//printf("Name is perhaps [%s]\n", name);
-	state->addSheet(name,true);
-	state->ignore = true;
-	return;
       }
-      if (str[0]=='-' && str[1]=='-' && str[2]=='-') {
+      int q = 0;
+      for (q=0; q<i; q++) {
+	if (str[q]!='-'&&str[q]!='\n'&&str[q]!='\r') break;
+      }
+      if (q==i&&i>=3&&state->named&&!state->broken) {
 	state->markBreak();
 	state->ignore = true;
 	return;

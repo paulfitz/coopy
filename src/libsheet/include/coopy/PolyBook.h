@@ -70,6 +70,10 @@ public:
     return std::vector<std::string>();
   }
 
+  virtual int getSheetCount() {
+    return (int)getNames().size();
+  }
+
   virtual PolySheet readSheet(const std::string& name) {
     if (book) {
       return book->readSheet(name);
@@ -118,11 +122,7 @@ public:
     return false;
   }
 
-  virtual bool copy(const DataBook& alt, const Property& options) {
-    if (book)
-      return book->copy(alt,options);
-    return false;
-  }
+  virtual bool copy(const DataBook& alt, const Property& options);
 
   virtual bool addSheet(const SheetSchema& schema) {
     if (book)
@@ -159,6 +159,18 @@ public:
   static void showFormats();
 
   static bool copyFile(const char *src, const char *dest);
+
+  std::string toString() {
+    std::string result;
+    std::vector<std::string> names = getNames();
+    for (int i=0; i<getSheetCount(); i++) {
+      result += names[i];
+      result += ":\n";
+      result += readSheet(names[i]).toString();
+      result += "\n";
+      return result;
+    }
+  }
 };
 
 #endif

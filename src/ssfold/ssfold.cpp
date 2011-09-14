@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  printf("ssfold: %s\n", fold?"folding":"unfolding");
+  dbg_printf("ssfold: %s\n", fold?"folding":"unfolding");
   FoldOptions options;
   options.tableName = table_name;
   options.fold = fold;

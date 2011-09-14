@@ -339,3 +339,12 @@ bool PolyBook::copyFile(const char *src, const char *dest) {
   }
   return true;
 }
+
+
+bool PolyBook::copy(const DataBook& alt, const Property& options) {
+  if (!book)
+    book = new CsvTextBook(true);
+  if (book)
+    return book->copy(alt,options);
+  return false;
+}
