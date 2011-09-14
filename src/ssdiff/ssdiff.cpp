@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
   bool ordered = false;
   bool orderSet = false;
   bool bias = false;
+  bool fixedColumns = false;
 
   while (true) {
     int option_index = 0;
@@ -55,6 +56,8 @@ int main(int argc, char *argv[]) {
       {"bid", 1, 0, 'b'},
 
       {"named", 0, 0, 'd'},
+
+      {"fixed-columns", 0, 0, 'F'},
 
       {"ordered", 0, 0, '1'},
       {"unordered", 0, 0, '0'},
@@ -147,6 +150,11 @@ int main(int argc, char *argv[]) {
     case 'a':
       apply = true;
       break;
+
+    case 'F':
+      fixedColumns = true;
+      break;
+
     default:
       fprintf(stderr, "Unrecognized option\n");
       return 1;
@@ -187,6 +195,7 @@ int main(int argc, char *argv[]) {
     printf("  ssdiff --bid COL1 --bid COL2 local.csv modified.csv # concentrate comparison\n");
     printf("  ssdiff --named local.csv modified.csv   # trust names of columns\n");
     printf("  ssdiff --unordered local.csv modified.csv   # do not worry about row order\n");
+    printf("  ssdiff --fixed-columns local.csv modified.csv   # no column modifications\n");
     printf("\n");
 
     printf("It is possible to immediately apply a difference as a patch:\n");
@@ -252,6 +261,10 @@ int main(int argc, char *argv[]) {
 
   if (omitHeader) {
     flags.omit_format_name = true;
+  }
+
+  if (fixedColumns) {
+    flags.fixed_columns = true;
   }
 
   Patcher *diff = createTool(mode,version);

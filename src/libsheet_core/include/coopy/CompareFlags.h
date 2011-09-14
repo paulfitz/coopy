@@ -61,6 +61,7 @@ public:
   bool pivot_sides_with_local;
   bool use_order;
   bool omit_format_name;
+  bool fixed_columns;
 
   CompareFlags() {
     head_trimmed = false;
@@ -74,6 +75,7 @@ public:
     pivot_sides_with_local = false;
     use_order = true;
     omit_format_name = false;
+    fixed_columns = false;
   }
 
   ~CompareFlags() {

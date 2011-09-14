@@ -24,7 +24,8 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 		      Patcher& output,
 		      const CompareFlags& flags, 
 		      std::vector<coopy::cmp::RowChange>& rc) {
-  
+
+  bool fixedColumns = flags.fixed_columns;
   bool diff = output.wantDiff();
   bool link = output.wantLinks();
   int pRow = row_unit.pivotUnit;
@@ -36,6 +37,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
   vector<SheetCell> expandLocal, expandRemote, expandPivot, expandMerge;
   vector<SheetCell> saveLocal;
   vector<int> expandDel;
+  vector<int> existsLocally;
   map<string,SheetCell> cond, value, value0;
   vector<string> address;
   vector<string> action;
@@ -55,6 +57,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     string mval = "";
     if (diff||!deleted) {
       expandDel.push_back(deleted);
+      existsLocally.push_back(lCol!=-1);
       if (lRow>=0 && lCol>=0) {
 	//printf("access local %d %d (size %d %d)\n", lCol, lRow, 
 	//local.width(), local.height());
@@ -115,6 +118,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
   expandMerge = expandLocal;
   at = 0;
   for (size_t i=0; i<expandLocal.size(); i++) {
+    if (fixedColumns) {
+      if (!existsLocally[i]) continue;
+    }
     SheetCell& _l = expandMerge[i];
     SheetCell& _r = expandRemote[i];
     SheetCell& _p = expandPivot[i];
@@ -580,6 +586,8 @@ bool Merger::merge(MergerState& state) {
 
     vector<OrderChange> cc;
 
+    bool fixedColumns = flags.fixed_columns;
+
     // Pass 1: signal any column deletions
     for (list<MatchUnit>::iterator it=col_merge.accum.begin();
 	 it!=col_merge.accum.end(); 
@@ -649,7 +657,7 @@ bool Merger::merge(MergerState& state) {
     
     if (local_cols.size()!=shuffled_cols.size()) {
       dbg_printf("Match failed %s:%d\n",
-	      __FILE__, __LINE__);
+		 __FILE__, __LINE__);
       fprintf(stderr,"Match failed, please report %s:%d\n",
 	      __FILE__, __LINE__);
       exit(1);
@@ -768,6 +776,10 @@ bool Merger::merge(MergerState& state) {
       constantColumns = false;
     }
 
+    if (fixedColumns) {
+      local_col_names = original_col_names;
+    }
+    
     names = local_col_names;
 
     vector<RowChange> rc;
@@ -794,7 +806,7 @@ bool Merger::merge(MergerState& state) {
 
     //printf(">>> %s %d\n", __FILE__, __LINE__);
 
-    {
+    if (!fixedColumns) {
       NameChange nc;
       nc.mode = NAME_CHANGE_DECLARE;
       nc.final = false;
@@ -805,11 +817,13 @@ bool Merger::merge(MergerState& state) {
 
     //printf(">>> %s %d\n", __FILE__, __LINE__);
 
-    for (int i=0; i<(int)cc.size(); i++) {
-      OrderChange& change = cc[i];
-      output.changeColumn(change);
+    if (!fixedColumns) {
+      for (int i=0; i<(int)cc.size(); i++) {
+	OrderChange& change = cc[i];
+	output.changeColumn(change);
+      }
     }
-    
+
     {
       NameChange nc;
       nc.mode = NAME_CHANGE_DECLARE;
