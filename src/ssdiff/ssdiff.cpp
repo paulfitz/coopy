@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
   std::string version = "";
   std::string map_file = "";
 
+  CompareFlags flags;
+
   std::vector<std::string> ids;
   bool verbose = false;
   bool equality = false;
@@ -34,7 +36,6 @@ int main(int argc, char *argv[]) {
   bool ordered = false;
   bool orderSet = false;
   bool bias = false;
-  bool fixedColumns = false;
 
   while (true) {
     int option_index = 0;
@@ -58,6 +59,7 @@ int main(int argc, char *argv[]) {
       {"named", 0, 0, 'd'},
 
       {"fixed-columns", 0, 0, 'F'},
+      {"ignore-case", 0, 0, 'A'},
 
       {"ordered", 0, 0, '1'},
       {"unordered", 0, 0, '0'},
@@ -152,7 +154,11 @@ int main(int argc, char *argv[]) {
       break;
 
     case 'F':
-      fixedColumns = true;
+      flags.fixed_columns = true;
+      break;
+
+    case 'A':
+      flags.ignore_case = true;
       break;
 
     default:
@@ -203,7 +209,6 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  CompareFlags flags;
   BookCompare cmp;
   cmp.setVerbose(verbose);
 
@@ -261,10 +266,6 @@ int main(int argc, char *argv[]) {
 
   if (omitHeader) {
     flags.omit_format_name = true;
-  }
-
-  if (fixedColumns) {
-    flags.fixed_columns = true;
   }
 
   Patcher *diff = createTool(mode,version);

@@ -5,6 +5,7 @@
 #include <coopy/IndexSniffer.h>
 
 #include <stdlib.h>
+#include <ctype.h>
 
 #include <algorithm>
 
@@ -16,6 +17,23 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
+static string normalize_string(string low, const CompareFlags& flags) {
+  if (flags.ignore_case) {
+    for (size_t c=0; c<low.length(); c++) {
+      low[c] = tolower(low[c]);
+    }
+  }
+  return low;
+}
+
+static bool compare_string(const SheetCell& a, const SheetCell& b,
+			   const CompareFlags& flags) {
+  if (!flags.ignore_case) {
+    return a==b;
+  }
+  if (a.escaped!=b.escaped) return false;
+  return normalize_string(a.text,flags)==normalize_string(b.text,flags);
+}
 
 bool Merger::mergeRow(coopy::store::DataSheet& pivot, 
 		      coopy::store::DataSheet& local, 
@@ -126,7 +144,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     SheetCell& _p = expandPivot[i];
     bool novel = false;
     bool deleted = (bool)expandDel[i];
-    if (_l!=_r) {
+    if (!compare_string(_l,_r,flags)) {
       if (_l==blankCell) {
 	_l = _r;
 	novel = true;
@@ -134,8 +152,8 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	if (_r!=blankCell) {
 	  // two assertions, do they conflict?
 	  // if pivot is the same as either, then no.
-	  if (_p==_l||_p==_r) {
-	    if (_p==_l) { 
+	  if (compare_string(_p,_l,flags)||compare_string(_p,_r,flags)) {
+	    if (compare_string(_p,_l,flags)) { 
 	      _l = _r; 
 	      change = true;
 	      novel = true;

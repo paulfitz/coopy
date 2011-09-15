@@ -62,6 +62,7 @@ public:
   bool use_order;
   bool omit_format_name;
   bool fixed_columns;
+  bool ignore_case;
 
   CompareFlags() {
     head_trimmed = false;
@@ -76,6 +77,7 @@ public:
     use_order = true;
     omit_format_name = false;
     fixed_columns = false;
+    ignore_case = false;
   }
 
   ~CompareFlags() {

@@ -570,6 +570,17 @@ endif ()
 #######################################################################
 #######################################################################
 
+# Ignore case
+
+ADD_TEST(ignore_case ${ssdiff} --output ignore_case.tdiff --ignore-case --omit-format-name ${TESTS}/bridges.csv ${TESTS}/case/bridges_case.csv)
+
+ADD_TEST(ignore_case_check ${CMAKE_COMMAND} -E compare_files 
+  ignore_case.tdiff 
+  ${TESTS}/case/ignore_case.tdiff)
+
+#######################################################################
+#######################################################################
+
 # folding isn't ready, but at least make sure a test can run
 
 ADD_TEST(folding_base ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table organizations ${TESTS}/fold/contacts.sqlite -)

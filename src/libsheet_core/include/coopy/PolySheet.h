@@ -158,7 +158,6 @@ public:
     COOPY_ASSERT(sheet);
     bool ok = sheet->deleteColumn(column);
     if (ok&&owned_schema&&schema!=0/*NULL*/) {
-      printf("Deleting column %d\n", column.getIndex());
       schema->deleteColumn(column);
     }
     return ok;
