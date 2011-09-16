@@ -9,6 +9,7 @@
 #include <coopy/NameSniffer.h>
 
 #include <vector>
+#include <set>
 
 namespace coopy {
   namespace cmp {
@@ -75,6 +76,7 @@ private:
   std::vector<std::string> lastAddress;
   std::vector<std::string> lastAction;
   std::vector<std::string> names;
+  std::set<std::string> filtered_names;
   int last_local_row;
   int last_local_row_marked;
   int bottom_local_row;

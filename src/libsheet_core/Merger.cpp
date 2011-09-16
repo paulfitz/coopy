@@ -144,23 +144,33 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     SheetCell& _p = expandPivot[i];
     bool novel = false;
     bool deleted = (bool)expandDel[i];
-    if (!compare_string(_l,_r,flags)) {
-      if (_l==blankCell) {
-	_l = _r;
-	novel = true;
-      } else {
-	if (_r!=blankCell) {
-	  // two assertions, do they conflict?
-	  // if pivot is the same as either, then no.
-	  if (compare_string(_p,_l,flags)||compare_string(_p,_r,flags)) {
-	    if (compare_string(_p,_l,flags)) { 
-	      _l = _r; 
-	      change = true;
-	      novel = true;
+    bool ignored = false;
+    if (!deleted) {
+      if (filtered_names.size()>0) {
+	if (filtered_names.find(names[at])==filtered_names.end()) {
+	  ignored = true;
+	}
+      }
+    }
+    if (!ignored) {
+      if (!compare_string(_l,_r,flags)) {
+	if (_l==blankCell) {
+	  _l = _r;
+	  novel = true;
+	} else {
+	  if (_r!=blankCell) {
+	    // two assertions, do they conflict?
+	    // if pivot is the same as either, then no.
+	    if (compare_string(_p,_l,flags)||compare_string(_p,_r,flags)) {
+	      if (compare_string(_p,_l,flags)) { 
+		_l = _r; 
+		change = true;
+		novel = true;
+	      }
+	    } else {
+	      conflict = true;
+	      break;
 	    }
-	  } else {
-	    conflict = true;
-	    break;
 	  }
 	}
       }
@@ -793,12 +803,15 @@ bool Merger::merge(MergerState& state) {
     if (cc.size()>0) {
       constantColumns = false;
     }
-
-    if (fixedColumns) {
-      local_col_names = original_col_names;
-    }
     
     names = local_col_names;
+    filtered_names.clear();
+
+    if (fixedColumns) {
+      for (int i=0; i<(int)original_col_names.size(); i++) {
+	filtered_names.insert(original_col_names[i]);
+      }
+    }
 
     vector<RowChange> rc;
     // Now process rows
@@ -820,6 +833,10 @@ bool Merger::merge(MergerState& state) {
 	  if (!ok) { return false; }
 	}
       }
+    }
+
+    if (fixedColumns) {
+      local_col_names = original_col_names;
     }
 
     //printf(">>> %s %d\n", __FILE__, __LINE__);
