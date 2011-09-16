@@ -53,6 +53,11 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
        it!=candidate_name_set.end();
        it++) {
     string name = *it;
+
+    if (flags.tables.size()>0) {
+      if (flags.tables.find(name)==flags.tables.end()) continue;
+    }
+
     bool in_pivot = (pivot_name_set.find(name)!=pivot_name_set.end());
     bool in_local = (local_name_set.find(name)!=local_name_set.end());
     bool in_remote = (remote_name_set.find(name)!=remote_name_set.end());

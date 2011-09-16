@@ -68,6 +68,8 @@ int main(int argc, char *argv[]) {
 
       {"omit-format-name", 0, 0, 'O'},
 
+      {"table", 1, 0, 'T'},
+
       {"output", 1, 0, 'o'},
       {"version", 1, 0, 'V'},
       {"parent", 1, 0, 'p'},
@@ -161,6 +163,10 @@ int main(int argc, char *argv[]) {
       flags.ignore_case = true;
       break;
 
+    case 'T':
+      flags.tables.insert(optarg);
+      break;
+
     default:
       fprintf(stderr, "Unrecognized option\n");
       return 1;
@@ -202,6 +208,10 @@ int main(int argc, char *argv[]) {
     printf("  ssdiff --named local.csv modified.csv   # trust names of columns\n");
     printf("  ssdiff --unordered local.csv modified.csv   # do not worry about row order\n");
     printf("  ssdiff --fixed-columns local.csv modified.csv   # no column modifications\n");
+    printf("\n");
+
+    printf("For multi-table input, you can narrow the diff down using:\n");
+    printf("  ssdiff --table TABLE1 --table TABLE2 local.mdb modified.mdb\n");
     printf("\n");
 
     printf("It is possible to immediately apply a difference as a patch:\n");

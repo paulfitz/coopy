@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <set>
 #include <string>
 
 namespace coopy {
@@ -50,6 +51,7 @@ public:
   bool head_trimmed;
   bool tail_trimmed;
   FILE *out;
+  std::set<std::string> tables;
   std::vector<std::string> ids;
   std::vector<int> ids_local;
   std::vector<int> ids_remote;
