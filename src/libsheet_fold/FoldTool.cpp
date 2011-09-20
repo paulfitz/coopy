@@ -9,6 +9,8 @@
 #include <map>
 #include <set>
 
+#include <coopy/Stringer.h>
+
 using namespace std;
 using namespace coopy::fold;
 using namespace coopy::store;
@@ -73,6 +75,11 @@ public:
     int result = ss->getColumnIndexByName(name);
     if (result<0) {
       printf("Could not find column %s\n", name);
+      for (int i=0; i<ss->getColumnCount(); i++) {
+	ColumnInfo info = ss->getColumnInfo(i);
+	printf("  col %d %s\n", i, info.getName().c_str());
+      }
+      exit(1);
     }
     return result;
   }
@@ -107,6 +114,8 @@ public:
     return result;
   }
 };
+
+
 
 class FoldLayout {
 public:
@@ -187,27 +196,91 @@ public:
     return it2->second;
   }
 
-  /*
-  ints transform(ints y) {
-    ints result;
-    for (int i=0; i<(int)y.size(); i++) {
-      for (mapper::iterator it1 = indexedSrc.lower_bound(y);
-	   it1 != indexedSrc.upper_bound(y); it1++) {	
-	for (mapper::iterator it2 = indexedDest.lower_bound(it1->second);
-	     it2 != indexedDest.upper_bound(it1->second); it2++) {	
-	  results.push_back(it2->second);
-	}
-      }
-    }
-    return results;
-  }
-  */
 };
+
+
+class FoldEdge {
+public:
+  string table;
+  string key;
+
+  FoldEdge() {}
+
+  FoldEdge(string ntable, string nkey) {
+    table = ntable;
+    key = nkey;
+  }
+
+  string toString() const {
+    return table + ":" + key;
+  }
+};
+
+class FoldEdgeCmp {
+public:
+  bool operator() (const FoldEdge& e1, const FoldEdge& e2) {
+    if (e1.table<e2.table) return true;
+    if (e1.table>e2.table) return false;
+    return e1.key<e2.key;
+  }
+};
+
+
+class FoldSelector {
+public:
+  // table to select from
+  string tableName;
+  // key name in that table
+  string keyName;
+  // id of key name in that table
+  int id;
+
+  // value to match
+  SheetCell val;
+  // id in local table
+  int idLocal;
+
+  int minCt;
+  int maxCt;
+
+  int actualMinCt;
+  int actualMaxCt;
+  int targetLength;
+
+  string title;
+
+  FoldSelector() {
+    id = -1;
+    idLocal = -1;
+    minCt = maxCt = -1;
+    actualMinCt = -1;
+    actualMaxCt = 0;
+    targetLength = -1;
+  }
+
+  string toString() const {
+    return tableName + ":" + keyName + "=" + val.toString();
+  }
+};
+
   
+class Folds;
+
+struct Expansion {
+public:
+  vector<FoldSelector>& expanded;
+  SheetAccess& base;
+  PolySheet& src;
+  int selId;
+};
+
 class FoldCache {
 public:
   SheetAccess dud;
+  PolySheet dud_sheet;
   PolyBook book;
+
+  map<FoldEdge,vector<FoldSelector>, FoldEdgeCmp > expanded_map;
 
   void setBook(const PolyBook& book) {
     this->book = book;
@@ -229,31 +302,39 @@ public:
     sheets[name].setSheet(sheet);
     return sheets[name];
   }
+
+  //vector<FoldSelector>& 
+  Expansion getExpansion(const FoldEdge& edge, Folds *folds);
 };
 
 FoldTool::FoldTool() {
 }
 
-class FoldEdge {
-public:
-  string table;
-  string key;
-
-  string toString() const {
-    return table + ":" + key;
-  }
-};
-
 class FoldEdgePair {
 public:
   FoldEdge to, from;
   string allowed;
+  int minCt, maxCt;
+  string label;
 
-  string toString() const {
-    return to.toString() + "->" + from.toString() + "(" + allowed + ")";
+  FoldEdgePair() {
+    minCt = maxCt = -1;
   }
 
-  string desc(const string& ref) {
+  string toString() const {
+    string result = to.toString() + "->" + from.toString() + "(" + allowed + ")";
+    result += ",";
+    result += stringer_encoder(minCt);
+    result += ",";
+    result += stringer_encoder(maxCt);
+    result += ",";
+    result += label;
+    return result;
+  }
+
+  string desc(const string& ref) const {
+    if (label!="") return label;
+
     string result = "";
     if (from.table!=ref) {
       result += from.table + ":";
@@ -268,14 +349,6 @@ public:
   }
 };
 
-class FoldEdgeCmp {
-public:
-  bool operator() (const FoldEdge& e1, const FoldEdge& e2) {
-    if (e1.table<e2.table) return true;
-    if (e1.table>e2.table) return false;
-    return e1.key<e2.key;
-  }
-};
 
 class FoldEdgePairCmp {
 public:
@@ -300,7 +373,9 @@ public:
 
   void add(const char *fromTable, const char *toTable, 
 	   const char *fromField, const char *toField,
-	   const char *allowedTable) {
+	   const char *allowedTable, 
+	   int minCt, int maxCt,
+	   const char *label) {
     FoldEdge e1, e2;
     e1.table = fromTable;
     e1.key = fromField;
@@ -312,39 +387,21 @@ public:
     p1.from = e1;
     p1.to = e2;
     p1.allowed = allowedTable; 
+    p1.minCt = minCt;
+    p1.maxCt = maxCt;
+    p1.label = label;
     allowed.insert(p1);
     FoldEdgePair p2;
     p2.from = e2;
     p2.to = e1;
     p2.allowed = allowedTable;
+    p2.minCt = minCt;
+    p2.maxCt = maxCt;
+    p2.label = label;
     allowed.insert(p2);
-    //printf("Added %s -> %s\n", e1.toString().c_str(), e2.toString().c_str());
+    //printf("Added %s -> %s\n", p1.toString().c_str(), p2.toString().c_str());
     //printf("Allowed %s\n", p1.toString().c_str());
     //printf("Allowed %s\n", p2.toString().c_str());
-  }
-};
-
-class FoldSelector {
-public:
-  // table to select from
-  string tableName;
-  // key name in that table
-  string keyName;
-  // id of key name in that table
-  int id;
-
-  // value to match
-  SheetCell val;
-  // id in local table
-  int idLocal;
-
-  FoldSelector() {
-    id = -1;
-    idLocal = -1;
-  }
-
-  string toString() const {
-    return tableName + ":" + keyName + "=" + val.toString();
   }
 };
 
@@ -387,53 +444,44 @@ public:
 };
 
 
-static bool fold_expander(Folds& folds, FoldCache& cache, FoldedSheet& sheet,
-			  FoldSelector& sel, PolySheet *target = NULL) {
-  //printf("EXPANDER from %s selecting %s\n", sel.tableName.c_str(),
-  //	 sel.toString().c_str());
-  SheetAccess& base = cache.getSheet(sel.tableName.c_str());
-  if (!base.isValid()) {
-    return false;
+void assertColumn(SimpleSheetSchema *s, int offset, const string& name) {
+  if (s==NULL) return;
+  while (s->getColumnCount()<=offset) {
+    s->addColumn("...");
   }
-  PolySheet& src = base.sheet;
-  //SchemaSniffer& schema = base.schema;
+  ColumnInfo c = s->getColumnInfo(offset);
+  if (c.getName()!=name) {
+    s->renameColumn(offset,name.c_str());
+  }
+}
+
+Expansion FoldCache::getExpansion(const FoldEdge& edge,
+				  Folds *pfolds) {
+  Folds& folds = *pfolds;
+  FoldCache& cache = *this;
+
+  bool exists = false;
+  if (expanded_map.find(edge)==expanded_map.end()) {
+    expanded_map[edge] = vector<FoldSelector>();
+  } else {
+    exists = true;
+  }
+  vector<FoldSelector>& expanded = expanded_map[edge];
+
+  SheetAccess& base = cache.getSheet(edge.table.c_str());
+  PolySheet& src = base.isValid()?base.sheet:dud_sheet;
   int selId = -1;
-  if (sel.keyName!="") {
-    selId = base.getId(sel.keyName.c_str());
+  if (edge.key!="") {
+    selId = base.getId(edge.key.c_str());
   }
-  SimpleSheetSchema *schema = NULL;
-  if (selId==-1) {
-    schema = new SimpleSheetSchema;
-    COOPY_ASSERT(schema);
-    schema->setSheetName("flat");
+  Expansion result = {expanded,base,src,selId};
+  if (exists) {
+    return result;
   }
 
-  //printf("Working on sheet %dx%d\n", src.width(), src.height());
-  FoldedCell fcell;
-  vector<int> selected;
-  selected = base.selectFrom(selId,sel.val);
-
-  /*
-  for (int y=0; y<src.height(); y++) {
-    if (selId!=-1) {
-      if (src.cellSummary(selId,y)==sel.val) {
-	selected.push_back(y);
-      }
-    } else {
-      selected.push_back(y);
-    }
-  }
-  */
-
-  vector<FoldSelector> expanded;
-  for (int x=0; x<src.width(); x++) {
-    if (selId==-1) {
-      schema->addColumn(base.getName(x).c_str());
-    }
-  }
   for (int x=0; x<src.width(); x++) {
     FoldEdge e;
-    e.table = sel.tableName;
+    e.table = edge.table;
     e.key = base.getName(x);
     if (selId==-1) {
       dbg_printf("Checking %s\n", e.toString().c_str());
@@ -444,11 +492,12 @@ static bool fold_expander(Folds& folds, FoldCache& cache, FoldedSheet& sheet,
       FoldEdgePair p;
       p.to = it->first;
       p.from = it->second;
-      p.allowed = sel.tableName;
+      p.allowed = edge.table;
       if (selId==-1) {
 	dbg_printf("Checking %s\n", p.toString().c_str());
       }
-      if (folds.allowed.find(p)!=folds.allowed.end()) {
+      set<FoldEdgePair,FoldEdgePairCmp>::iterator al = folds.allowed.find(p);
+      if (al!=folds.allowed.end()) {
 	if (selId==-1) {
 	  dbg_printf("Should expand out %s (to %s)\n", e.key.c_str(),
 		     it->second.toString().c_str());
@@ -458,14 +507,15 @@ static bool fold_expander(Folds& folds, FoldCache& cache, FoldedSheet& sheet,
 	f.keyName = it->second.key;
 	SheetAccess& alt = cache.getSheet(f.tableName.c_str());
 	if (!alt.isValid()) {
-	  return false;
+	  expanded.clear();
+	  return result;
 	}
 	f.id = alt.getId(f.keyName.c_str());
 	f.idLocal = base.getId(it->first.key.c_str());
+	f.minCt = al->minCt;
+	f.maxCt = al->maxCt;
+	f.title = al->desc(base.getName());
 	expanded.push_back(f);
-	if (selId==-1) {
-	  schema->addColumn(p.desc(base.getName()).c_str());
-	}
       }
       it++;
     }
@@ -475,11 +525,12 @@ static bool fold_expander(Folds& folds, FoldCache& cache, FoldedSheet& sheet,
       FoldEdgePair p;
       p.to = it2->first;
       p.from = it2->second;
-      p.allowed = sel.tableName;
+      p.allowed = edge.table;
       if (selId==-1) {
 	dbg_printf("Checking %s\n", p.toString().c_str());
       }
-      if (folds.allowed.find(p)!=folds.allowed.end()) {
+      set<FoldEdgePair,FoldEdgePairCmp>::iterator al = folds.allowed.find(p);
+      if (al!=folds.allowed.end()) {
 	if (selId==-1) {
 	  dbg_printf("Should expand in %s (from %s)\n", e.key.c_str(),
 		     it2->second.toString().c_str());
@@ -489,50 +540,229 @@ static bool fold_expander(Folds& folds, FoldCache& cache, FoldedSheet& sheet,
 	f.keyName = it2->second.key;
 	SheetAccess& alt = cache.getSheet(f.tableName.c_str());
 	if (!alt.isValid()) {
-	  return false;
+	  expanded.clear();
+	  return result;
 	}
 	f.id = alt.getId(f.keyName.c_str());
 	f.idLocal = base.getId(it2->first.key.c_str());
+	f.minCt = al->minCt;
+	f.maxCt = al->maxCt;
+	f.title = al->desc(base.getName());
 	expanded.push_back(f);
-	if (selId==-1) {
-	  schema->addColumn(p.desc(base.getName()).c_str());
-	}
       }
       it2++;
     }
   }
+  return result;
+}
 
-  int hh = selected.size();
-  int ww0 = src.width();
-  int ww1 = expanded.size();
-  int ww = ww0 + ww1;
-  //printf("Producing sheet %dx%d\n", ww, hh);
 
-  sheet.resize(ww,hh,fcell);
+class FoldFactor {
+public:
+  int ct;
+  bool excess;
+  int xoffset;
+  int yoffset;
+  int depth;
+  int skips;
+  bool practice;
+  string prefix;
+
+  FoldFactor() { 
+    ct = -1; 
+    excess = false; 
+    xoffset = yoffset = 0;
+    depth = 0;
+    practice = false;
+    skips = 0;
+  }
+};
+
+
+
+
+static int fold_expander(const FoldFactor& factor,
+			 Folds& folds, FoldCache& cache, FoldedSheet& sheet,
+			 FoldSelector& sel,
+			 SimpleSheetSchema *schema = NULL) {
+
+  bool practice = factor.practice;
+
+  Expansion exp = cache.getExpansion(FoldEdge(sel.tableName,sel.keyName),
+				     &folds);
+
+  // get selection
+  vector<int> selected = exp.base.selectFrom(exp.selId,sel.val);
+
+  // Prepare to iterate
+  if (factor.depth==0) {
+    if (!practice) {
+      sheet.resize(exp.src.width(),selected.size()-factor.skips,FoldedCell());
+    }
+  }
+
+  int xoffset = factor.xoffset;
+  int initial_xoffset = xoffset;
+  int yoffset = factor.yoffset;
+  int fct = 0;
+  int fskip = 0;
+  int cell_length = 0;
+
   for (vector<int>::iterator yit=selected.begin(); yit!=selected.end(); yit++) {
     int y = *yit;
     int y0 = yit-selected.begin();
-    for (int x=0; x<ww0; x++) {
-      FoldedCell& cell = sheet.cell(x,y0);
-      cell.datum = src.cellSummary(x,y);
+
+    string prefix = factor.prefix;
+    if (prefix!=""&&factor.depth>0&&!practice) {
+      if (sel.actualMaxCt>1) {
+	prefix += "[";
+	prefix += stringer_encoder(fct);
+	//prefix += ":";
+	//prefix += stringer_encoder(sel.actualMaxCt);
+	prefix += "]";
+      }
     }
-    for (int x=0; x<ww1; x++) {
-      FoldSelector f = expanded[x];
-      f.val = src.cellSummary(f.idLocal,y);
-      FoldedCell& cell = sheet.cell(x+ww0,y0);
-      FoldedSheet *sheet = cell.getOrCreateSheet();
-      COOPY_ASSERT(sheet);
-      fold_expander(folds, cache, *sheet, f);
+
+    fct++;
+    if (fskip<factor.skips) {
+      fskip++;
+      continue;
+    }
+
+    if (fct>factor.ct && factor.ct!=-1) {
+      printf("TOO LONG! %d vs %d\n", fct, factor.ct);
+      if (!practice) {
+	if (xoffset>=sheet.width()) {
+	  sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
+				     FoldedCell());
+	}
+	assertColumn(schema,xoffset,prefix + ".excess");
+	FoldedCell& cell = sheet.cell(xoffset,yoffset);
+	FoldedSheet *sheet = cell.getOrCreateSheet();
+	COOPY_ASSERT(sheet);
+	FoldFactor next_factor;
+	next_factor.skips = fct-1;
+	fold_expander(next_factor, folds, cache, *sheet, sel);
+      }
+      printf("done\n");
+      xoffset++;
+      break;
+    }
+
+    if (factor.depth==0) {
+      xoffset = 0;
+      yoffset = y0-fskip;
+    }
+
+    //printf(" >> y0 = %d\n", y0);
+
+    // add regular columns
+    if (!practice) {
+      for (int x=0; x<exp.src.width(); x++) {
+	if (xoffset>=sheet.width()) {
+	  sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
+				     FoldedCell());
+	}
+	string name = exp.base.getName(x);
+	if (prefix!="") {
+	  name = prefix + "." + name;
+	}
+	assertColumn(schema,xoffset,name);
+	
+	FoldedCell& cell = sheet.cell(xoffset,yoffset);
+	cell.datum = exp.src.cellSummary(x,y);
+	/*
+	if (schema) {
+	  printf("[%d:%d:%d] add %d %d -> %d %d [%s]\n", xoffset, 
+		 schema->getColumnCount(),
+		 sheet.width(),
+		 x, y, xoffset,yoffset,
+		 cell.datum.toString().c_str());
+	}
+	*/
+	xoffset++;
+      }
+    } else {
+      xoffset += exp.src.width();
+    }
+
+    // add expansions
+    for (int x=0; x<exp.expanded.size(); x++) {
+      FoldSelector& f = exp.expanded[x];
+      f.val = exp.src.cellSummary(f.idLocal,y);
+      string name = f.title;
+      if (prefix!="") {
+	name = prefix + "." + name;
+      }
+      if (f.minCt==-1 && f.maxCt==-1) {
+	if (!practice) {
+	  if (xoffset>=sheet.width()) {
+	    sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
+				       FoldedCell());
+	  }
+	  assertColumn(schema,xoffset,name);
+	  FoldedCell& cell = sheet.cell(xoffset,yoffset);
+	  FoldedSheet *sheet = cell.getOrCreateSheet();
+	  COOPY_ASSERT(sheet);
+	  fold_expander(FoldFactor(),folds, cache, *sheet, f);
+	}
+	xoffset++;
+      } else {
+	//if (!practice) printf("Go go\n");
+	FoldFactor next_factor;
+	next_factor.ct = f.maxCt;
+	next_factor.excess = f.minCt>0;
+	next_factor.xoffset = xoffset;
+	next_factor.yoffset = yoffset;
+	next_factor.depth = factor.depth+1;
+	next_factor.practice = practice;
+	next_factor.prefix = name;
+	int o = fold_expander(next_factor, folds, cache, sheet, f, schema);
+	xoffset += o;
+      }
+    }
+    int ncell_length = xoffset-initial_xoffset;
+    if (ncell_length>cell_length) {
+      cell_length = ncell_length;
     }
   }
 
-  if (selId==-1) {
-    if (target!=NULL) {
-      target->setSchema(schema,true);
+  int ncell_length = xoffset-initial_xoffset;
+  if (ncell_length>cell_length) {
+    cell_length = ncell_length;
+  }
+
+  if (practice) {
+    int len = (int)selected.size();
+    if (len<sel.actualMinCt||sel.actualMinCt==-1) sel.actualMinCt = len;
+    if (len>sel.actualMaxCt) sel.actualMaxCt = len;
+    if (cell_length>sel.targetLength) sel.targetLength = cell_length;
+  } 
+  
+  if (factor.depth>0) {
+    while (cell_length<sel.targetLength) {
+      if (xoffset>=sheet.width()) {
+	sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
+				   FoldedCell());
+      }
+      xoffset++;
+      cell_length++;
     }
   }
-  return true;
+
+  return cell_length;
 }
+
+
+
+static void replace(string& str, const string& old, const string& rep) {
+  size_t pos = 0;
+  while((pos = str.find(old, pos)) != std::string::npos) {
+    str.replace(pos, old.length(), rep);
+    pos += rep.length();
+  }
+}
+
 
 bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
   dbg_printf("Starting fold/unfold\n");
@@ -573,9 +803,23 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
       string toTable = recipe.cellString(2,i);
       string toField = recipe.cellString(3,i);
       string allowedTable = recipe.cellString(4,i);
-      dbg_printf("Recipe line %d: %s %s %s %s (%s)\n", i,
-		 fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str(),allowedTable.c_str());
-      folds.add(fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str(),allowedTable.c_str());
+      SheetCell minCtStr;
+      SheetCell maxCtStr;
+      int minCt = -1;
+      int maxCt = -1;
+      string label;
+      if (recipe.width()>6) {
+	minCtStr = recipe.cellSummary(6,i);
+	if (!minCtStr.escaped)  minCt = atoi(minCtStr.text.c_str());
+	maxCtStr = recipe.cellSummary(5,i);
+	if (!maxCtStr.escaped)  maxCt = atoi(maxCtStr.text.c_str());
+      }
+      if (recipe.width()>7) {
+	label = recipe.cellSummary(7,i).text.c_str();
+      }
+      dbg_printf("Recipe line %d: %s %s %s %s (%s) %d:%d '%s'\n", i,
+		 fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str(),allowedTable.c_str(),minCt,maxCt,label.c_str());
+      folds.add(fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str(),allowedTable.c_str(), minCt, maxCt,label.c_str());
       if (fromTable==options.tableName) {
 	/*
 	  SheetAccess& alt = cache.getSheet(toTable.c_str());
@@ -599,8 +843,26 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
     COOPY_ASSERT(fsheet);
     FoldSelector sel;
     sel.tableName = options.tableName;
-    fold_expander(folds, cache, *fsheet, sel, &psheet);
-    
+
+    SimpleSheetSchema *schema = new SimpleSheetSchema;
+    COOPY_ASSERT(schema);
+    schema->setSheetName("sheet");
+    FoldFactor factor;
+    factor.practice = true;
+    int prev_width = -1;
+    int width = 0;
+    while (prev_width!=width) {
+      prev_width = width;
+      width = fold_expander(factor, folds, cache, *fsheet, sel, schema);
+      printf("On practice run, width is %d\n", width);
+    }
+
+    factor.practice = false;
+    fold_expander(factor, folds, cache, *fsheet, sel, schema);
+    printf("After actual run, data width is %d\n", fsheet->width());
+    printf("After actual run, schema width is %d\n", schema->getColumnCount());
+
+    psheet.setSchema(schema,true);
     //printf("Generated sheet %dx%d\n", fsheet->width(), fsheet->height());
 
     FakeBook *book = new FakeBook();
@@ -611,7 +873,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
     book->sheet = psheet;
     dest.take(book); 
     src = dest;
- } else {
+  } else {
     dest = src;
   }
 
@@ -640,9 +902,18 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
       s.copy(*schema);
       int at = 0;
       for (int c=0; c<s.getColumnCount(); c++) {
-	string name = s.getColumnInfo(c).getName();
+	string iname = s.getColumnInfo(c).getName();
+	string name;
+	bool quoted = false;
+	for (int i=0; i<(int)iname.length(); i++) {
+	  if (iname[i]=='[') quoted = true;
+	  if (!quoted) {
+	    name += iname[i];
+	  }
+	  if (iname[i]==']') quoted = false;
+	}
 	if (options.drops.find(name)!=options.drops.end()) {
-	  dbg_printf(" + Dropping column %s\n", name.c_str());
+	  dbg_printf(" + Dropping column %s\n", iname.c_str());
 	  sheet.deleteColumn(ColumnRef(at));
 	} else {
 	  at++;
@@ -651,111 +922,56 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
     }
   }
 
-  return true;
-}
-
-
-
-/*
-bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
-  printf("Starting fold/unfold\n");
-
-  if (options.tableName=="") {
-    fprintf(stderr,"Please supply a root table name\n");
-    return false;
-  }
-
-  FoldCache cache;
-  cache.setBook(src);
-
-  SheetAccess& base = cache.getSheet(options.tableName.c_str());
-  if (!base.isValid()) {
-    return false;
-  }
-
-  vector<FoldLayout> layout;
-  FoldLayout baseLayout;
-  baseLayout.src = &base;
-  baseLayout.updateBase();
-  layout.push_back(baseLayout);
-
-  PolySheet recipe = options.recipe.readSheetByIndex(0);
-  recipe.hideHeaders();
-  for (int i=0; i<recipe.height(); i++) {
-    string fromTable = recipe.cellString(0,i);
-    string fromField = recipe.cellString(1,i);
-    string toTable = recipe.cellString(2,i);
-    string toField = recipe.cellString(3,i);
-    printf("Recipe line %d: %s %s %s %s\n", i,
-	   fromTable.c_str(), toTable.c_str(), fromField.c_str(), toField.c_str());
-    if (fromTable==options.tableName) {
-      SheetAccess& alt = cache.getSheet(toTable.c_str());
-      if (!alt.isValid()) {
-	return false;
-      }
-      layout.push_back(FoldLayout());
-      FoldLayout& l = layout.back();
-      l.src = &base;
-      l.dest = &alt;
-      l.srcIdName = fromField;
-      l.destIdName = toField;
-      l.updateBase();
-      l.updateMap();
+  PolySheet rename = options.recipe.readSheet("Rename");
+  map<string,string> rename_map;
+  if (rename.isValid()) {
+    dbg_printf("Processing list of \"Rename\" columns\n");
+    for (int y=0; y<rename.height(); y++) {
+      string from = rename.cellString(0,y);
+      string to = rename.cellString(1,y);
+      rename_map[from] = to;
     }
   }
 
-  ShortTextBook *book = new ShortTextBook();
-  if (book==NULL) {
-    fprintf(stderr,"Failed to allocate output\n");
-    return 1;
-  }
-  printf("Starting to generate output\n");
-  SimpleSheetSchema schema;
-  schema.setSheetName("flat");
-  for (int i=0; i<(int)layout.size(); i++) {
-    FoldLayout& unit = layout[i];
-    if (i==0) {
-      for (int x=0; x<unit.srcTable.width(); x++) {
-	schema.addColumn(unit.src->getName(x).c_str());
+  if (rename_map.size()>0) {
+    vector<string> names = src.getNames();
+    for (int i=0; i<src.getSheetCount(); i++) {
+      PolySheet sheet = src.readSheet(names[i]);
+      SchemaSniffer ss(sheet);
+      SheetSchema *schema = ss.suggestSchema();
+      if (!schema) {
+	dbg_printf("No schema for %s\n", names[i].c_str());
+	continue;
       }
-    } else {
-      for (int x=0; x<unit.destTable.width(); x++) {
-	string remoteField = unit.dest->getName(x);
-	string localField = unit.srcIdName;
-	string remoteTable = unit.dest->getName();
-	string name = remoteField + ":" + remoteTable + "[" + localField + "]";
-	schema.addColumn(name.c_str());
-      }
-    }
-  }
-  book->provideSheet(schema);
-  CsvSheet& accum = book->sheet;
+      SheetSchema& s = *schema;
+      int at = 0;
+      bool mod = false;
+      for (int c=0; c<s.getColumnCount(); c++) {
+	string iname = s.getColumnInfo(c).getName();
+	string prev = iname;
 
-  for (int y=0; y<base.sheet.height(); y++) {
-    for (int i=0; i<(int)layout.size(); i++) {
-      FoldLayout& unit = layout[i];
-      if (i==0) {
-	for (int x=0; x<unit.srcTable.width(); x++) {
-	  accum.addField(unit.srcTable.cellSummary(x,y));
+	for (map<string,string>::iterator it=rename_map.begin();
+	     it != rename_map.end(); it++) {
+	  replace(iname,it->first,it->second);
 	}
-      } else {
-	int yy = unit.transformForward(y);
-	for (int x=0; x<unit.destTable.width(); x++) {
-	  if (yy>=0) {
-	    accum.addField(unit.destTable.cellSummary(x,yy));
-	  } else {
-	    accum.addField(SheetCell());
-	  }
+	if (iname!=prev) {
+	  printf(">>> %s -> %s\n", prev.c_str(), iname.c_str());
+	  s.renameColumn(c,iname.c_str());
+	  mod = true;
 	}
       }
+      /*
+      if (mod) {
+	SimpleSheetSchema *next = new SimpleSheetSchema();
+	COOPY_ASSERT(next);
+	next->copy(*next);
+	sheet.tail().setSchema(next,true);
+      }
+      */
     }
-    accum.addRecord();
   }
-
-  dest.take(book);
 
   return true;
 }
 
 
-*/

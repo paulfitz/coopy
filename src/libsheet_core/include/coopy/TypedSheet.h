@@ -46,6 +46,23 @@ public:
     this->zero = zero;
   }
 
+  void nonDestructiveResize(int w, int h, const T& zero) {
+    this->zero = zero;
+    if (this->h==h && this->w==w) return;
+
+    this->h = h;
+    this->w = w;
+    while (arr.size()<h) {
+      arr.push_back(std::vector<T>());
+    }
+    for (int i=0; i<h; i++) {
+      std::vector<T>& lst = arr[i];
+      while (lst.size()<w) {
+	lst.push_back(zero);
+      }
+    }
+  }
+
   int width() const {
     return w;
   }

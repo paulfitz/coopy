@@ -69,6 +69,13 @@ public:
   virtual bool deleteColumn(const ColumnRef& column) {
     return false;
   }
+
+  virtual bool renameColumn(int x, const char *name) {
+    fprintf(stderr, "Don't know how to rename column\n");
+    return false;
+  }
+
+
 };
 
 class coopy::store::SimpleSheetSchema : public SheetSchema {
@@ -131,12 +138,13 @@ public:
     return ColumnInfo(columns[x],kinds[x]);
   }
 
-  virtual int getColumnCount() const {
-    return columns.size();
+  virtual bool renameColumn(int x, const char *name) {
+    columns[x] = name;
+    return true;
   }
 
-  virtual int getColumnIndexByName(const char *name) const {
-    return -1;
+  virtual int getColumnCount() const {
+    return columns.size();
   }
 
   virtual bool providesPrimaryKeys() const {
