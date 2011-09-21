@@ -333,7 +333,7 @@ public:
   }
 
   string desc(const string& ref) const {
-    if (label!="") return label;
+    if (label!="-") return label;
 
     string result = "";
     if (from.table!=ref) {
@@ -561,6 +561,7 @@ class FoldFactor {
 public:
   int ct;
   bool excess;
+  bool wrap;
   int xoffset;
   int yoffset;
   int depth;
@@ -571,6 +572,7 @@ public:
   FoldFactor() { 
     ct = -1; 
     excess = false; 
+    wrap = false;
     xoffset = yoffset = 0;
     depth = 0;
     practice = false;
@@ -584,7 +586,8 @@ public:
 static int fold_expander(const FoldFactor& factor,
 			 Folds& folds, FoldCache& cache, FoldedSheet& sheet,
 			 FoldSelector& sel,
-			 SimpleSheetSchema *schema = NULL) {
+			 SimpleSheetSchema *schema = NULL,
+			 int *ywrap = NULL) {
 
   bool practice = factor.practice;
 
@@ -602,15 +605,17 @@ static int fold_expander(const FoldFactor& factor,
   }
 
   int xoffset = factor.xoffset;
-  int initial_xoffset = xoffset;
   int yoffset = factor.yoffset;
+  int initial_xoffset = xoffset;
   int fct = 0;
   int fskip = 0;
   int cell_length = 0;
 
+  int at = 0;
   for (vector<int>::iterator yit=selected.begin(); yit!=selected.end(); yit++) {
     int y = *yit;
-    int y0 = yit-selected.begin();
+    int y0 = at; at++; //yit-selected.begin();
+    int dy = 0;
 
     string prefix = factor.prefix;
     if (prefix!=""&&factor.depth>0&&!practice) {
@@ -629,7 +634,8 @@ static int fold_expander(const FoldFactor& factor,
       continue;
     }
 
-    if (fct>factor.ct && factor.ct!=-1) {
+    bool out_of_space = (fct>factor.ct && factor.ct!=-1);
+    if (out_of_space&&!factor.wrap) {
       printf("TOO LONG! %d vs %d\n", fct, factor.ct);
       if (!practice) {
 	if (xoffset>=sheet.width()) {
@@ -649,12 +655,23 @@ static int fold_expander(const FoldFactor& factor,
       break;
     }
 
+    if (out_of_space&&factor.wrap) {
+      yoffset++;
+      xoffset = initial_xoffset;
+      fct -= factor.ct;
+      if (ywrap!=NULL) {
+	(*ywrap)++;
+      }
+    }
+
     if (factor.depth==0) {
       xoffset = 0;
       yoffset = y0-fskip;
     }
-
-    //printf(" >> y0 = %d\n", y0);
+    if (yoffset>=sheet.height()) {
+      sheet.nonDestructiveResize(sheet.width(),sheet.height()+1,
+				 FoldedCell());
+    }
 
     // add regular columns
     if (!practice) {
@@ -711,19 +728,28 @@ static int fold_expander(const FoldFactor& factor,
 	//if (!practice) printf("Go go\n");
 	FoldFactor next_factor;
 	next_factor.ct = f.maxCt;
-	next_factor.excess = f.minCt>0;
+	next_factor.excess = f.minCt==1;
+	next_factor.wrap = f.minCt==2;
 	next_factor.xoffset = xoffset;
 	next_factor.yoffset = yoffset;
 	next_factor.depth = factor.depth+1;
 	next_factor.practice = practice;
 	next_factor.prefix = name;
-	int o = fold_expander(next_factor, folds, cache, sheet, f, schema);
+	int next_ywrap = 0;
+	int o = fold_expander(next_factor, folds, cache, sheet, f, schema,
+			      &next_ywrap);
+	if (next_ywrap>dy) {
+	  dy = next_ywrap;
+	}
 	xoffset += o;
       }
     }
     int ncell_length = xoffset-initial_xoffset;
     if (ncell_length>cell_length) {
       cell_length = ncell_length;
+    }
+    if (factor.depth==0) {
+      at += dy;
     }
   }
 
