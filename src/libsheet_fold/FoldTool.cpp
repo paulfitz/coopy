@@ -568,6 +568,7 @@ public:
   int depth;
   int skips;
   bool practice;
+  bool namer;
   string prefix;
   IntSheet *zebra;
 
@@ -580,6 +581,7 @@ public:
     practice = false;
     skips = 0;
     zebra = NULL;
+    namer = true;
   }
 };
 
@@ -617,6 +619,7 @@ static int fold_expander(const FoldFactor& factor,
 
   int at = 0;
   int z = 1;
+  bool namer = factor.namer;
   for (vector<int>::iterator yit=selected.begin(); yit!=selected.end(); yit++) {
     z = 1-z;
     int y = *yit;
@@ -648,12 +651,13 @@ static int fold_expander(const FoldFactor& factor,
 	  sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
 				     FoldedCell());
 	}
-	assertColumn(schema,xoffset,prefix + ".excess");
+	if (namer) assertColumn(schema,xoffset,prefix + ".excess");
 	FoldedCell& cell = sheet.cell(xoffset,yoffset);
 	FoldedSheet *sheet = cell.getOrCreateSheet();
 	COOPY_ASSERT(sheet);
 	FoldFactor next_factor;
 	next_factor.skips = fct-1;
+	next_factor.namer = namer;
 	fold_expander(next_factor, folds, cache, *sheet, sel);
       }
       printf("done\n");
@@ -662,6 +666,7 @@ static int fold_expander(const FoldFactor& factor,
     }
 
     if (out_of_space&&factor.wrap) {
+      namer = false;
       yoffset++;
       xoffset = initial_xoffset;
       fct -= factor.ct;
@@ -696,7 +701,7 @@ static int fold_expander(const FoldFactor& factor,
 	if (prefix!="") {
 	  name = prefix + "." + name;
 	}
-	assertColumn(schema,xoffset,name);
+	if (namer) assertColumn(schema,xoffset,name);
 	
 	FoldedCell& cell = sheet.cell(xoffset,yoffset);
 	cell.datum = exp.src.cellSummary(x,y);
@@ -729,7 +734,7 @@ static int fold_expander(const FoldFactor& factor,
 	    sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
 				       FoldedCell());
 	  }
-	  assertColumn(schema,xoffset,name);
+	  if (namer) assertColumn(schema,xoffset,name);
 	  FoldedCell& cell = sheet.cell(xoffset,yoffset);
 	  FoldedSheet *sheet = cell.getOrCreateSheet();
 	  COOPY_ASSERT(sheet);
@@ -747,6 +752,7 @@ static int fold_expander(const FoldFactor& factor,
 	next_factor.depth = factor.depth+1;
 	next_factor.practice = practice;
 	next_factor.prefix = name;
+	next_factor.namer = namer;
 	int next_ywrap = 0;
 	int o = fold_expander(next_factor, folds, cache, sheet, f, schema,
 			      &next_ywrap);

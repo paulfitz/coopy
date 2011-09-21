@@ -1,0 +1,39 @@
+== locations ==
+id,street,country
+-----------------
+1,"17 Space Street",Space
+2,"33 House",Anytown
+3,"99 Main Street","New York"
+ 
+== org2loc ==
+id,org_id,loc_id
+----------------
+1,2,1
+2,1,2
+3,4,1
+4,4,2
+4,4,3
+ 
+== organizations ==
+id,title
+--------
+1,"Home Office"
+2,"Space Station"
+3,"Fly Ink"
+4,"Dream Stealer"
+ 
+== people ==
+id,first,last
+-------------
+1,Tom,Smith
+2,John,Smith
+3,Frank,McMahon
+4,Sam,Fitzpatrick
+ 
+== ppl2org ==
+id,ppl_id,org_id
+----------------
+1,1,2
+2,2,2
+3,3,2
+3,3,1

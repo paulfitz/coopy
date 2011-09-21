@@ -583,9 +583,9 @@ ADD_TEST(ignore_case_check ${CMAKE_COMMAND} -E compare_files
 
 # folding isn't ready, but at least make sure a test can run
 
-ADD_TEST(folding_base ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table organizations ${TESTS}/fold/contacts.sqlite -)
+ADD_TEST(folding_base ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table organizations ${TESTS}/fold/contacts.csvs -)
 
-ADD_TEST(folding_json ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table organizations ${TESTS}/fold/contacts.sqlite folding_json_result.jsonbook)
+ADD_TEST(folding_json ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table organizations ${TESTS}/fold/contacts.csvs folding_json_result.jsonbook)
 
 #######################################################################
 #######################################################################

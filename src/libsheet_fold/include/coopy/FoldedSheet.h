@@ -86,6 +86,10 @@ public:
     FoldedCell& c = cell(x,y);
     return c.sheet;
   }
+
+  virtual bool hasExternalColumnNames() const {
+    return true;
+  }
 };
 
 #endif

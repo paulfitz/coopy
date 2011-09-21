@@ -1,10 +1,19 @@
 == Folds ==
-from_table,from_column,to_table,to_column,for_table
----------------------------------------------------
-organizations,id,org2loc,org_id,organizations
-org2loc,loc_id,locations,id,org2loc
+from_table,from_column,to_table,to_column,for_table,width,mode
+--------------------------------------------------------------
+organizations,id,org2loc,org_id,organizations,2,2,loc
+org2loc,loc_id,locations,id,org2loc,1,0,content
 
 == Missing ==
 name
 ----
 id
+loc.id
+loc.org_id
+loc.loc_id
+loc.content.id
+
+== Rename ==
+from,to
+-------
+.content,

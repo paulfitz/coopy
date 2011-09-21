@@ -194,6 +194,20 @@ bool JsonBook::open(const Property& config) {
 }
 
 bool JsonBook::addSheet(const SheetSchema& schema) {
-  return false;
+  dbg_printf("jsonbook::addsheet %s\n", schema.getSheetName().c_str());
+  FoldedSheet *psheet = new FoldedSheet;
+  COOPY_ASSERT(psheet);
+  FoldedSheet& sheet = *psheet;
+  PolySheet p(psheet,true);
+  SimpleSheetSchema *sss = new SimpleSheetSchema();
+  COOPY_ASSERT(sss);
+  sss->copy(schema);
+  p.setSchema(sss,true);
+  name2index[schema.getSheetName()] = (int)sheets.size();
+  sheet.resize(schema.getColumnCount(),0,FoldedCell());
+  //dbg_printf("CREATED %d %d (%d)\n", p.width(), p.height(), schema.getColumnCount());
+  sheets.push_back(p);
+  names.push_back(schema.getSheetName());
+  return true;
 }
 

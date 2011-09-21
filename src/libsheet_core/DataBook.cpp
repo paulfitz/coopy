@@ -41,6 +41,7 @@ bool DataBook::operator==(const DataBook& alt) const {
 
 
 bool DataBook::copy(const DataBook& alt, const Property& options) {
+  dbg_printf("Copying book\n");
   DataBook& src = (DataBook &) alt;
   vector<string> names = src.getNames();
   vector<string> names0 = getNames();
@@ -94,6 +95,8 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
     }
     if (target.width()!=sheet.width()) {
       fprintf(stderr, "Column mismatch %s\n", name.c_str());
+      fprintf(stderr, "Src width %d, dest width %d\n", 
+	      sheet.width(), target.width());
       return false;
     }
     if (target.height()!=0) {
@@ -106,12 +109,15 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
       }
     }
     int start = 0;
+    bool ext = target.hasExternalColumnNames()||target.getSchema()!=NULL;
+    dbg_printf("  - target.hasExternalColumnNames? %d\n", 
+	       target.hasExternalColumnNames());
     if (schema->headerHeight()>0) {
-      if (target.hasExternalColumnNames()) {
+      if (ext) {
 	start += schema->headerHeight();
       }
     }
-    if (!target.hasExternalColumnNames()) {
+    if (!ext) {
       if (schema->headerHeight()<=0 && !schema->isGuess()) {
 	bool named = false;
 	for (int j=0; j<schema->getColumnCount(); j++) {

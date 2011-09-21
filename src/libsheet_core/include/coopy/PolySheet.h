@@ -313,8 +313,10 @@ public:
 
   bool hideHeaders() {
     if (!hasExternalColumnNames()) {
-      setRowOffset(1);
-      return true;
+      if (getSchema()==0/*NULL*/) {
+	setRowOffset(1);
+	return true;
+      }
     }
     return false;
   }
