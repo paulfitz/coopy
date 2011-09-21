@@ -104,19 +104,24 @@ int main(int argc, char *argv[]) {
       return 1;
     }
   }
+  if (!remote.attach(argv[1])) {
+    fprintf(stderr,"Failed to attach %s\n", argv[1]);
+    return 1;
+  }
 
   dbg_printf("ssfold: %s\n", fold?"folding":"unfolding");
   options.tableName = table_name;
   options.fold = fold;
   options.recipe = recipe;
   FoldTool tool;
+  
   bool ok = tool.fold(local,remote,options);
   if (!ok) {
     fprintf(stderr,"Fold failed - probably because it is not yet implemented\n");
     return 1;
   }
   //if (!CsvTextBook::write(argv[1],&remote,true)) {
-  if (!remote.write(argv[1])) {
+  if (!remote.flush()) {
     fprintf(stderr,"Failed to write %s\n", argv[1]);
     return 1;
   }

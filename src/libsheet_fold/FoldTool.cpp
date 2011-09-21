@@ -4,6 +4,7 @@
 #include <coopy/SchemaSniffer.h>
 #include <coopy/ShortTextBook.h>
 #include <coopy/CsvFile.h>
+#include <coopy/IntSheet.h>
 
 #include <vector>
 #include <map>
@@ -568,6 +569,7 @@ public:
   int skips;
   bool practice;
   string prefix;
+  IntSheet *zebra;
 
   FoldFactor() { 
     ct = -1; 
@@ -577,6 +579,7 @@ public:
     depth = 0;
     practice = false;
     skips = 0;
+    zebra = NULL;
   }
 };
 
@@ -584,7 +587,8 @@ public:
 
 
 static int fold_expander(const FoldFactor& factor,
-			 Folds& folds, FoldCache& cache, FoldedSheet& sheet,
+			 Folds& folds, FoldCache& cache, 
+			 FoldedSheet& sheet,
 			 FoldSelector& sel,
 			 SimpleSheetSchema *schema = NULL,
 			 int *ywrap = NULL) {
@@ -612,9 +616,11 @@ static int fold_expander(const FoldFactor& factor,
   int cell_length = 0;
 
   int at = 0;
+  int z = 1;
   for (vector<int>::iterator yit=selected.begin(); yit!=selected.end(); yit++) {
+    z = 1-z;
     int y = *yit;
-    int y0 = at; at++; //yit-selected.begin();
+    int y0 = at; //yit-selected.begin();
     int dy = 0;
 
     string prefix = factor.prefix;
@@ -662,19 +668,25 @@ static int fold_expander(const FoldFactor& factor,
       if (ywrap!=NULL) {
 	(*ywrap)++;
       }
+      /*
+      printf("at %d %d / %d\n", sheet.width(), sheet.height(), yoffset);
+      FoldedCell& cell = sheet.cell(0,yoffset);
+      cell.datum = SheetCell("...",false);
+      */
     }
 
     if (factor.depth==0) {
       xoffset = 0;
       yoffset = y0-fskip;
     }
-    if (yoffset>=sheet.height()) {
-      sheet.nonDestructiveResize(sheet.width(),sheet.height()+1,
-				 FoldedCell());
-    }
 
     // add regular columns
     if (!practice) {
+      if (yoffset>=sheet.height()) {
+	sheet.nonDestructiveResize(sheet.width(),yoffset+1,
+				   FoldedCell());
+      }
+
       for (int x=0; x<exp.src.width(); x++) {
 	if (xoffset>=sheet.width()) {
 	  sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
@@ -748,9 +760,17 @@ static int fold_expander(const FoldFactor& factor,
     if (ncell_length>cell_length) {
       cell_length = ncell_length;
     }
+    if (factor.zebra) {
+      factor.zebra->nonDestructiveResize(1,sheet.height(),0);
+      for (int i=at; i<at+dy+1; i++) {
+	//printf("set %d %d (%d)\n", i, z, sheet.height());
+	factor.zebra->cell(0,i) = z;
+      }
+    }
     if (factor.depth==0) {
       at += dy;
     }
+    at++;
   }
 
   int ncell_length = xoffset-initial_xoffset;
@@ -790,7 +810,9 @@ static void replace(string& str, const string& old, const string& rep) {
 }
 
 
-bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
+bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
+  PolyBook dest;
+
   dbg_printf("Starting fold/unfold\n");
 
   if (options.tableName=="" && src.getSheetCount()>1) {
@@ -802,6 +824,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
   cache.setBook(src);
 
   PolySheet recipe = options.recipe.readSheet("Folds");
+  IntSheet zebra;
   if (recipe.isValid()) {
     dbg_printf("Found folds\n");
 
@@ -884,6 +907,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
     }
 
     factor.practice = false;
+    factor.zebra = &zebra;
     fold_expander(factor, folds, cache, *fsheet, sel, schema);
     printf("After actual run, data width is %d\n", fsheet->width());
     printf("After actual run, schema width is %d\n", schema->getColumnCount());
@@ -994,6 +1018,34 @@ bool FoldTool::fold(PolyBook& src, PolyBook& dest, FoldOptions& options) {
 	sheet.tail().setSchema(next,true);
       }
       */
+    }
+  }
+
+  // add zebra
+  printf("Copying...\n");
+  rdest.copy(dest,Property());
+  printf("Sheets... %d\n",rdest.getNames().size());
+  PolySheet sheet = rdest.readSheetByIndex(0);
+  COOPY_ASSERT(sheet.isValid());
+  sheet.hideHeaders();
+  int LIGHT = 0xbb*0x100;
+  int DARK = 0x99*0x100;
+  for (int i=0; i<sheet.height(); i++) {
+    //printf("i %d zebra %d\n", i, zebra.cell(0,i));
+    if (i>0) {
+      if (zebra.cell(0,i)==zebra.cell(0,i-1)) {
+	sheet.cellString(0,i,"...");
+      }
+    }
+    Poly<Appearance> app = sheet.getRowAppearance(i);
+    int r = zebra.cell(0,i)?LIGHT:DARK;
+    int g = r;
+    int b = r;
+    if (app.isValid()) {
+      app->begin();
+      app->setBackgroundRgb16(r,g,b,
+			      AppearanceRange::full());
+      app->end();
     }
   }
 

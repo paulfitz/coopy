@@ -321,12 +321,12 @@ public:
 
   virtual Poly<Appearance> getCellAppearance(int x, int y) {
     COOPY_ASSERT(sheet);
-    return sheet->getCellAppearance(x,y);
+    return sheet->getCellAppearance(x,y+dh);
   }
 
   virtual Poly<Appearance> getRowAppearance(int y) {
     COOPY_ASSERT(sheet);
-    return sheet->getRowAppearance(y);
+    return sheet->getRowAppearance(y+dh);
   }
 
   virtual Poly<Appearance> getColAppearance(int x) {

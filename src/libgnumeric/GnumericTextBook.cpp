@@ -99,13 +99,16 @@ bool GnumericTextBook::addSheet(const SheetSchema& schema) {
   string name = schema.getSheetName();
   getNames();
   if (find(names.begin(),names.end(),name)!=names.end()) {
+    fprintf(stderr,"failed to add sheet\n");
     return false;
   }
   GnumericWorkbookPtr book = (GnumericWorkbookPtr)implementation;
   GnumericSheetPtr sheet = gnumeric_add_sheet(book,name.c_str());
   if (sheet==NULL) {
+    fprintf(stderr,"failed to add sheet\n");
     return false;
   }
+  dirtyNames = true;
   /*
   GnumericSheet s(sheet);
   for (int i=0; i<schema.getColumnCount(); i++) {
