@@ -205,7 +205,7 @@ bool JsonBook::addSheet(const SheetSchema& schema) {
   p.setSchema(sss,true);
   name2index[schema.getSheetName()] = (int)sheets.size();
   sheet.resize(schema.getColumnCount(),0,FoldedCell());
-  //dbg_printf("CREATED %d %d (%d)\n", p.width(), p.height(), schema.getColumnCount());
+  dbg_printf("CREATED %d %d (%d)\n", p.width(), p.height(), schema.getColumnCount());
   sheets.push_back(p);
   names.push_back(schema.getSheetName());
   return true;

@@ -31,6 +31,11 @@ public:
     arr.clear();
     h = w = 0;
   }
+
+  virtual bool resize(int w, int h) {
+    resize(w,h,zero);
+    return true;
+  }
   
   void resize(int w, int h, const T& zero) {
     arr.clear();

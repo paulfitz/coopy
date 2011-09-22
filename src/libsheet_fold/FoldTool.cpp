@@ -1068,6 +1068,8 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
   adder.resize(3,orig_inventory.size());
   adder.createHeaders();
   //adder.hideHeaders();
+  printf("Size %d %d / %d\n", adder.width(), adder.height(),
+	 orig_inventory.size());
   for (int i=0; i<(int)orig_inventory.size(); i++) {
     string n = orig_inventory[i];
     adder.cellString(0,i,n);
