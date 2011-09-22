@@ -452,7 +452,7 @@ void assertColumn(SimpleSheetSchema *s, int offset, const string& name) {
   }
   ColumnInfo c = s->getColumnInfo(offset);
   if (c.getName()!=name) {
-    s->renameColumn(offset,name.c_str());
+    s->modifyColumn(ColumnRef(offset),ColumnInfo(name));
   }
 }
 
@@ -1019,7 +1019,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
 	}
 	if (iname!=prev) {
 	  printf(">>> %s -> %s\n", prev.c_str(), iname.c_str());
-	  s.renameColumn(c,iname.c_str());
+	  s.modifyColumn(ColumnRef(c),ColumnInfo(iname));
 	  fate_inventory[prev] = iname;
 	  mod = true;
 	}
@@ -1060,9 +1060,9 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
   
   SimpleSheetSchema adder_schema;
   adder_schema.setSheetName("mapping");
-  adder_schema.addColumn("name");
-  adder_schema.addColumn("fate");
-  adder_schema.addColumn("alias");
+  adder_schema.addColumn("NAME");
+  adder_schema.addColumn("FATE");
+  adder_schema.addColumn("ALIAS");
   PolySheet adder = rdest.provideSheet(adder_schema);
   adder.setSchema(&adder_schema,false);
   adder.resize(3,orig_inventory.size());
@@ -1086,3 +1086,62 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
 }
 
 
+
+bool FoldTool::unfold(coopy::store::PolyBook& src,
+		      coopy::store::PolyBook& dest,
+		      FoldOptions& options) {
+  PolySheet mapping = src.readSheet("mapping");
+  if (!mapping.isValid()) {
+    mapping = options.recipe.readSheet("mapping");
+  }
+  if (!mapping.isValid()) {
+    fprintf(stderr,"Need a sheet/table called 'mapping'\n");
+    return false;
+  }
+
+  vector<string> names = src.getNames();
+  PolySheet sheet;
+  string sheet_name;
+  for (int i=0; i<(int)names.size(); i++) {
+    if (names[i]!="mapping") {
+      sheet_name = names[i];
+      sheet = src.readSheetByIndex(i);
+      break;
+    }
+  }
+  if (!sheet.isValid()) {
+    fprintf(stderr,"No sheet to operate on\n");
+    return false;
+  }
+
+  Property p;
+  p.put("sheet",sheet_name.c_str());
+  dest.copy(src,p);
+
+  PolySheet out = dest.readSheet(sheet_name.c_str());
+  if (!out.isValid()) {
+    fprintf(stderr,"Cannot open output\n");
+    return false;
+  }
+
+  int at = 0;
+  for (int i=0; i<mapping.height(); i++) {
+    string name = mapping.cellString(0,i);
+    string fate = mapping.cellString(1,i);
+    string prev = mapping.cellString(2,i);
+    printf("Operating on %s / %s / %s\n", name.c_str(),
+	   fate.c_str(), prev.c_str());
+    if (fate=="drop") {
+      out.insertColumn(ColumnRef(at),ColumnInfo(name));
+      //schema->insertColumn(ColumnRef(at),name.c_str());
+      at++;
+    } else if (fate=="rename") {
+      out.modifyColumn(ColumnRef(at),ColumnInfo(name));
+      at++;
+    } else {
+      at++;
+    }
+  }
+
+  return true;
+}

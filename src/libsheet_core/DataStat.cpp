@@ -72,7 +72,7 @@ void DataStat::evaluate(const DataSheet& sheet) {
   for (int i=0; i<hh; i++) {
     float v = oddness_accum.cell(0,i);
     if (v>=1) {
-      if (i<10) {
+      if (i<10 && i<=hh*0.25+2) {
 	top = i;
       } else {
 	top = -1;
@@ -228,7 +228,7 @@ void DataStat::evaluate2(const coopy::store::DataSheet& sheet,
     for (int i=0; i<hh; i++) {
       float v = oddness_accum.cell(0,i);
       if (v>=0.99&&v>peak*0.75) {
-	if (i<10) {
+	if (i<10 && i<=hh*0.25+2) {
 	  top = i;
 	  peak = v;
 	} else {

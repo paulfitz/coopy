@@ -53,6 +53,14 @@ public:
     return name;
   }
 
+  virtual ColumnRef insertColumn(const ColumnRef& base, const ColumnInfo& kind) {
+    return ColumnRef();
+  }
+
+  virtual bool modifyColumn(const ColumnRef& base, const ColumnInfo& kind) {
+    return false;
+  }
+
 private:
   AccessSheetSchema *schema;
   Property config;

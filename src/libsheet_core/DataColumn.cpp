@@ -79,6 +79,9 @@ void Nature::evaluate(const char *txt, bool forward) {
   int nonnumbery = 0;
   int integral = 0;
   int nonintegral = 0;
+  int caps = 0;
+  int noncaps = 0;
+  int total = 0;
   for (size_t j=0; j<s.length(); j++) {
     char ch = s[j];
     if (ch>='0'&&ch<='9') {
@@ -94,6 +97,12 @@ void Nature::evaluate(const char *txt, bool forward) {
 	nonnumbery++;
       }
     }
+    if (ch>='A'&&ch<='Z') {
+      caps++;
+    } else if (ch>='a'&&ch<='z') {
+      noncaps++;
+    }
+    total++;
   }
   if (numbery>0) {
     if (nonnumbery==0) {
@@ -109,17 +118,27 @@ void Nature::evaluate(const char *txt, bool forward) {
   } else {
     type_integer.vote(-1,1,forward);
   }
+  if (caps&&!noncaps) {
+    if (caps>total/2) {
+      cappy.vote(1,1);
+    } else {
+      cappy.vote(-1,1);
+    }
+  } else {
+    cappy.vote(-1,1);
+  }
 
   text.vote(1,0.1);
 }
 
 void Nature::show() {
-  printf("web %g email %g text %g number %g nully %g\n",
+  printf("web %g email %g text %g number %g nully %g cappy %g\n",
 	 web.result(),
 	 email.result(),
 	 text.result(),
 	 number.result(),
-	 nully.result());
+	 nully.result(),
+	 cappy.result());
 }
 
 float Nature::compare(const char *txt, bool forward) {
@@ -129,7 +148,8 @@ float Nature::compare(const char *txt, bool forward) {
     n.email.result()*email.result() +
     n.text.result()*text.result() +
     n.number.result()*number.result() +
-    n.nully.result()*nully.result();
+    n.nully.result()*nully.result() +
+    n.cappy.result()*cappy.result();
   //printf("Nully %g vs %g : %g\n", n.nully.result(), nully.result(), dot);
   return dot;
 }

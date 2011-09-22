@@ -233,6 +233,16 @@ ColumnRef RemoteSqlSheet::insertColumn(const ColumnRef& base) {
   return ColumnRef();
 }
 
+ColumnRef RemoteSqlSheet::insertColumn(const ColumnRef& base, 
+				       const ColumnInfo& info) {
+  return ColumnRef();
+}
+
+bool RemoteSqlSheet::modifyColumn(const ColumnRef& base, 
+				  const ColumnInfo& info) {
+  return false;
+}
+
 RowRef RemoteSqlSheet::insertRow(const RowRef& base) {
   return RowRef();
 }

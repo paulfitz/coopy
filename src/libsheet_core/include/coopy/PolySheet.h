@@ -165,8 +165,38 @@ public:
 
   virtual ColumnRef insertColumn(const ColumnRef& base) {
     COOPY_ASSERT(sheet);
-    return sheet->insertColumn(base);
+    ColumnRef result = sheet->insertColumn(base);
+    if (!result.isValid()) return result;
+    if (schema) {
+      result = schema->insertColumn(base,ColumnInfo());
+    }
+    return result;
   }
+
+  virtual ColumnRef insertColumn(const ColumnRef& base, 
+				 const ColumnInfo& info) {
+    printf("Insert col %s (%d)\n", info.getName().c_str(), schema!=NULL);
+    COOPY_ASSERT(sheet);
+    ColumnRef result = sheet->insertColumn(base,info);
+    if (!result.isValid()) return result;
+    if (schema) {
+      result = schema->insertColumn(base,info);
+    }
+    return result;
+  }
+
+  virtual bool modifyColumn(const ColumnRef& base, 
+			    const ColumnInfo& info) {
+    COOPY_ASSERT(sheet);
+    bool result = sheet->modifyColumn(base,info);
+    if (!result) return result;
+    if (schema) {
+      result = schema->modifyColumn(base,info);
+    }
+    return result;
+  }
+
+
 
   // move a column before base; if base is invalid move after all columns
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {

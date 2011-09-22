@@ -42,6 +42,10 @@ public:
 
   virtual ColumnRef insertColumn(const ColumnRef& base);
 
+  virtual ColumnRef insertColumn(const ColumnRef& base, const ColumnInfo& info);
+
+  virtual bool modifyColumn(const ColumnRef& base, const ColumnInfo& info);
+
   virtual RowRef insertRow(const RowRef& base);
 
   virtual bool deleteRow(const RowRef& src);

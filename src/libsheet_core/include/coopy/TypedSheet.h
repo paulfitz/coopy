@@ -114,6 +114,17 @@ public:
     return ColumnRef((offset>=0)?offset:ColumnRef(w-1));
   }
 
+  virtual ColumnRef insertColumn(const ColumnRef& base, 
+				 const ColumnInfo& info) {
+    return insertColumn(base);
+  }
+
+  virtual bool modifyColumn(const ColumnRef& base, 
+			    const ColumnInfo& info) {
+    return true;
+  }
+
+
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {
     int offset = base.getIndex();
     if (offset>=(int)w) return ColumnRef();
@@ -298,6 +309,16 @@ public:
 
   virtual ColumnRef insertColumn(const ColumnRef& base) {
     return s.insertColumn(base);
+  }
+
+  virtual ColumnRef insertColumn(const ColumnRef& base, 
+				 const ColumnInfo& info) {
+    return s.insertColumn(base,info);
+  }
+
+  virtual bool modifyColumn(const ColumnRef& base, 
+			    const ColumnInfo& info) {
+    return s.modifyColumn(base,info);
   }
 
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {

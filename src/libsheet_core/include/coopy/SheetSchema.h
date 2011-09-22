@@ -70,8 +70,15 @@ public:
     return false;
   }
 
-  virtual bool renameColumn(int x, const char *name) {
-    fprintf(stderr, "Don't know how to rename column\n");
+  virtual ColumnRef insertColumn(const ColumnRef& column, 
+				 const ColumnInfo& info) {
+    fprintf(stderr, "Don't know how to insert column in schema\n");
+    return ColumnRef();
+  }
+
+  virtual bool modifyColumn(const ColumnRef& column, 
+			    const ColumnInfo& info) {
+    fprintf(stderr, "Don't know how to modify column in schema\n");
     return false;
   }
 
@@ -127,23 +134,20 @@ public:
     sheetName = name;
   }
 
-  void addColumn(const char *name) {
+  bool addColumn(const char *name) {
     columns.push_back(name);
     kinds.push_back(ColumnType());
+    return true;
   }
 
-  void addColumn(const char *name, const ColumnType& kind) {
+  bool addColumn(const char *name, const ColumnType& kind) {
     columns.push_back(name);
     kinds.push_back(kind);
+    return true;
   }
 
   virtual ColumnInfo getColumnInfo(int x) const {
     return ColumnInfo(columns[x],kinds[x]);
-  }
-
-  virtual bool renameColumn(int x, const char *name) {
-    columns[x] = name;
-    return true;
   }
 
   virtual int getColumnCount() const {
@@ -179,6 +183,25 @@ public:
     kinds.erase(kinds.begin()+column.getIndex());
     return true;
   }
+
+  virtual ColumnRef insertColumn(const ColumnRef& column, 
+				 const ColumnInfo& info) {
+    int index = column.getIndex();
+    if (index==-1) {
+      return addColumn(info.getName().c_str());
+    }
+    columns.insert(columns.begin()+column.getIndex(),info.getName().c_str());
+    kinds.insert(kinds.begin()+column.getIndex(),info.getColumnType());
+    return true;
+  }
+
+  virtual bool modifyColumn(const ColumnRef& column, 
+			    const ColumnInfo& info) {
+    
+    columns[column.getIndex()] = info.getName();
+    return true;
+  }
+
 
 };
 

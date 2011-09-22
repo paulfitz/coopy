@@ -33,6 +33,9 @@ public:
 	    coopy::store::PolyBook& dest,
 	    FoldOptions& options);
 
+  bool unfold(coopy::store::PolyBook& src,
+	      coopy::store::PolyBook& dest,
+	      FoldOptions& options);
 };
 
 #endif

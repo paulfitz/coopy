@@ -501,8 +501,10 @@ ADD_TEST(format_book_sqlite ${ssformat} ${TESTS}/book/000/index.book format_book
 
 # header testing
 
-ADD_TEST(header_applicants ${ssformat} --header ${TESTS}/header/applicants.csv applicants_header.csv)
-ADD_TEST(header_applicants_check ${ssdiff} --equals ${TESTS}/header/applicants_header.csv applicants_header.csv)
+foreach(prefix applicants capital)
+  ADD_TEST(header_${prefix} ${ssformat} --header ${TESTS}/header/${prefix}.csv ${prefix}_header.csv)
+  ADD_TEST(header_${prefix}_check ${ssdiff} --equals ${TESTS}/header/${prefix}_header.csv ${prefix}_header.csv)
+endforeach()
 
 #######################################################################
 #######################################################################

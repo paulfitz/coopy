@@ -115,9 +115,14 @@ int main(int argc, char *argv[]) {
   options.recipe = recipe;
   FoldTool tool;
   
-  bool ok = tool.fold(local,remote,options);
+  bool ok = false;
+  if (fold) {
+    ok = tool.fold(local,remote,options);
+  } else {
+    ok = tool.unfold(local,remote,options);
+  }
   if (!ok) {
-    fprintf(stderr,"Fold failed - probably because it is not yet implemented\n");
+    fprintf(stderr,"Operation failed.\n");
     return 1;
   }
   //if (!CsvTextBook::write(argv[1],&remote,true)) {

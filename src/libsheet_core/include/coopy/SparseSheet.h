@@ -142,6 +142,17 @@ public:
   virtual std::string getDescription() const {
     return "sparse";
   }
+
+  virtual ColumnRef insertColumn(const ColumnRef& base, 
+				 const ColumnInfo& info) {
+    return ColumnRef();
+  }
+
+  virtual bool modifyColumn(const ColumnRef& base, 
+			    const ColumnInfo& info) {
+    return false;
+  }
+
 };
 
 

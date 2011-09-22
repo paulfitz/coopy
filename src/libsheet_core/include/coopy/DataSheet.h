@@ -187,6 +187,12 @@ public:
     return ColumnRef(); // invalid column
   }
 
+  virtual ColumnRef insertColumn(const ColumnRef& base, 
+				 const ColumnInfo& info) = 0;
+
+  virtual bool modifyColumn(const ColumnRef& base, 
+			    const ColumnInfo& info) = 0;
+
   // move a column before base; if base is invalid move after all columns
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {
     return ColumnRef(); // invalid column

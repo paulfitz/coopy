@@ -44,6 +44,10 @@ public:
 
   virtual ColumnRef insertColumn(const ColumnRef& base);
 
+  virtual ColumnRef insertColumn(const ColumnRef& base, const ColumnInfo& kind);
+
+  virtual bool modifyColumn(const ColumnRef& base, const ColumnInfo& kind);
+
   virtual RowRef insertRow(const RowRef& base);
 
   virtual bool deleteRow(const RowRef& src);
@@ -96,12 +100,12 @@ private:
   SparseStringSheet cache;
   SparseByteSheet cacheFlag;
   void checkKeys();
-  efficient_map<std::string,int> keywordMap;
 
-  bool isReserved(const std::string& name);
-  std::string _quoted(const std::string& x, char ch, bool force);
-  std::string _quoted_double(const std::string& x);
-  std::string _quoted_single(const std::string& x);
+public:
+  static bool isReserved(const std::string& name);
+  static std::string _quoted(const std::string& x, char ch, bool force);
+  static std::string _quoted_double(const std::string& x);
+  static std::string _quoted_single(const std::string& x);
 };
 
 class coopy::store::sqlite::SqliteSheetSchema : public SheetSchema {

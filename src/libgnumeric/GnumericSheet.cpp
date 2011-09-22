@@ -101,6 +101,18 @@ ColumnRef GnumericSheet::insertColumn(const ColumnRef& base) {
   return ColumnRef(index);
 }
 
+
+ColumnRef GnumericSheet::insertColumn(const ColumnRef& base, 
+				      const ColumnInfo& kind) {
+  return insertColumn(base);
+}
+
+bool GnumericSheet::modifyColumn(const ColumnRef& base, 
+				 const ColumnInfo& kind) {
+  return false;
+}
+
+
 RowRef GnumericSheet::insertRow(const RowRef& base) {
   //printf("inserting row\n");
   int index = base.getIndex();

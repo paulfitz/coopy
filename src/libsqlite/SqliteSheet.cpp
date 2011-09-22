@@ -170,19 +170,25 @@ SqliteSheet::SqliteSheet(void *db1, const char *name) {
   schema = new SqliteSheetSchema;
   COOPY_MEMORY(schema);
   schema->sheet = this;
-
-  const char **k = sql_keywords;
-  while (*k!=NULL) {
-    string s = *k;
-    keywordMap[s] = 1;
-    k++;
-  }
 }
 
 bool SqliteSheet::isReserved(const std::string& name) {
+  static efficient_map<std::string,int> keywordMap;
+  if (keywordMap.size()==0) {
+    const char **k = sql_keywords;
+    while (*k!=NULL) {
+      string s = *k;
+      keywordMap[s] = 1;
+      k++;
+    }
+  }
   std::string _name = name;
   for (int i=0; i<(int)_name.length(); i++) {
     _name[i] = toupper(_name[i]);
+    char ch = _name[i];
+    if (ch=='['||ch==']'||ch=='.') {
+      return true;
+    }
   }
   return keywordMap.find(_name)!=keywordMap.end();
 }
@@ -562,7 +568,24 @@ bool SqliteSheet::deleteColumn(const ColumnRef& column) {
   return ischema.apply(col2sql);
 }
 
+
 ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
+  return insertColumn(base,ColumnInfo());
+}
+
+bool SqliteSheet::modifyColumn(const ColumnRef& base, const ColumnInfo& kind) {
+  int idx = base.getIndex();
+  bool ok = insertColumn(base,kind).getIndex()!=-1;
+  if (!ok) return false;
+  for (int i=0; i<height(); i++) {
+    cellSummary(idx,i,cellSummary(idx+1,i));
+  }
+  return deleteColumn(ColumnRef(idx+1));
+}
+
+
+ColumnRef SqliteSheet::insertColumn(const ColumnRef& base, 
+				    const ColumnInfo& kind) {
   clearCache();
 
   // we will need to pass in type hints in future, for better merges.
@@ -573,11 +596,13 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
 
   int index = base.getIndex();
 
-  string suggest = "ins";
+  string suggest_base = "ins";
+  if (kind.hasName()) suggest_base = kind.getName();
+  string suggest = suggest_base;
   bool found = false;
   for (int i=0; i<(int)col2sql.size(); i++) {
     string n = col2sql[i];
-    if (n.substr(0,3)=="ins") {
+    if (n.substr(0,suggest_base.length())==suggest_base) {
       if (n.length()>=suggest.length()) {
 	suggest = n;
 	found = true;
@@ -609,7 +634,7 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base) {
     return ColumnRef(w-1);
   }
 
-  string col_sql = suggest;
+  string col_sql = _quoted_single(suggest);
 
   SqliteSchema ischema;
   string sql_pre = ischema.fetch(db,name.c_str());
