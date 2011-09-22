@@ -933,6 +933,10 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
     dest = src;
   }
 
+  vector<string> drop_inventory;
+  vector<string> orig_inventory;
+  map<string,string> fate_inventory;
+  map<string,bool> doom_inventory;
   PolySheet missing = options.recipe.readSheet("Missing");
   //printf("recipe? -- %s\n", options.recipe.toString().c_str());
   if (missing.isValid()) {
@@ -959,6 +963,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
       int at = 0;
       for (int c=0; c<s.getColumnCount(); c++) {
 	string iname = s.getColumnInfo(c).getName();
+	orig_inventory.push_back(iname);
 	string name;
 	bool quoted = false;
 	for (int i=0; i<(int)iname.length(); i++) {
@@ -971,6 +976,8 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
 	if (options.drops.find(name)!=options.drops.end()) {
 	  dbg_printf(" + Dropping column %s\n", iname.c_str());
 	  sheet.deleteColumn(ColumnRef(at));
+	  drop_inventory.push_back(iname);
+	  doom_inventory[iname] = true;
 	} else {
 	  at++;
 	}
@@ -1013,17 +1020,13 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
 	if (iname!=prev) {
 	  printf(">>> %s -> %s\n", prev.c_str(), iname.c_str());
 	  s.renameColumn(c,iname.c_str());
+	  fate_inventory[prev] = iname;
 	  mod = true;
 	}
       }
-      /*
-      if (mod) {
-	SimpleSheetSchema *next = new SimpleSheetSchema();
-	COOPY_ASSERT(next);
-	next->copy(*next);
-	sheet.tail().setSchema(next,true);
-      }
-      */
+    }
+    for (int i=0; i<src.getSheetCount(); i++) {
+      //map
     }
   }
 
@@ -1052,6 +1055,28 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
       app->setBackgroundRgb16(r,g,b,
 			      AppearanceRange::full());
       app->end();
+    }
+  }
+  
+  SimpleSheetSchema adder_schema;
+  adder_schema.setSheetName("mapping");
+  adder_schema.addColumn("name");
+  adder_schema.addColumn("fate");
+  adder_schema.addColumn("alias");
+  PolySheet adder = rdest.provideSheet(adder_schema);
+  adder.setSchema(&adder_schema,false);
+  adder.resize(3,orig_inventory.size());
+  adder.createHeaders();
+  //adder.hideHeaders();
+  for (int i=0; i<(int)orig_inventory.size(); i++) {
+    string n = orig_inventory[i];
+    adder.cellString(0,i,n);
+    if (fate_inventory.find(n)!=fate_inventory.end()) {
+      adder.cellString(2,i,fate_inventory[n]);
+      adder.cellString(1,i,"rename");
+    }
+    if (doom_inventory.find(n)!=doom_inventory.end()) {
+      adder.cellString(1,i,"drop");
     }
   }
 

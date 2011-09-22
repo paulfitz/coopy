@@ -311,6 +311,23 @@ public:
     return true;
   }
 
+  bool createHeaders() {
+    if (dh>0) return false;
+    if (!hasExternalColumnNames()) {
+      SheetSchema *schema = getSchema();
+      if (schema) {
+	insertRow(RowRef(0));
+	for (int i=0; i<schema->getColumnCount(); i++) {
+	  cellString(i,0,schema->getColumnInfo(i).getName());
+	}
+	setRowOffset(1);
+	schema->setHeaderHeight(1);
+	return true;
+      }
+    }
+    return false;
+  }
+
   bool hideHeaders() {
     if (!hasExternalColumnNames()) {
       if (getSchema()==0/*NULL*/) {

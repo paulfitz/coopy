@@ -75,7 +75,9 @@ public:
     return false;
   }
 
-
+  virtual bool setHeaderHeight(int hh) {
+    return false;
+  }
 };
 
 class coopy::store::SimpleSheetSchema : public SheetSchema {
@@ -112,8 +114,9 @@ public:
     hh++;
   }  
 
-  void setHeaderHeight(int hh) {
+  virtual bool setHeaderHeight(int hh) {
     this->hh = hh;
+    return true;
   }
 
   virtual int headerHeight() const {

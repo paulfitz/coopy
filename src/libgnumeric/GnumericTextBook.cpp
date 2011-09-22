@@ -109,6 +109,7 @@ bool GnumericTextBook::addSheet(const SheetSchema& schema) {
     return false;
   }
   dirtyNames = true;
+
   /*
   GnumericSheet s(sheet);
   for (int i=0; i<schema.getColumnCount(); i++) {

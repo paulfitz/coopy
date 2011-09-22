@@ -42,7 +42,27 @@ void NameSniffer::sniff() {
 	  ct.push_back(info.getColumnType());
 	}
 	if (names.size()>0) {
-	  dbg_printf("Found names in schema\n");
+	  dbg_printf("Found names in schema (%d)\n", names.size());
+	  if (schema->headerHeight()>0) {
+	    dbg_printf("Also, embedded\n");
+	    div = schema->headerHeight()-1;
+	    embed = true;
+	  }
+	  if (!embed && sheet.width()==names.size() && 
+	      sheet.height()>=1) {
+	    bool ok = true;
+	    for (int i=0; i<(int)names.size(); i++) {
+	      if (sheet.cellString(i,0)!=names[i]) {
+		ok = false;
+		break;
+	      }
+	    }
+	    if (ok) {
+	      dbg_printf("Also, embedded, it seems\n");
+	      div = 0;
+	      embed = true;
+	    }
+	  }
 	  return;
 	}
       }
