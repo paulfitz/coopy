@@ -137,7 +137,7 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
       }
     }
     for (int i=start; i<sheet.height(); i++) {
-      //dbg_printf("Row %d\n", i);
+      dbg_printf("Row %d\n", i);
       Poly<SheetRow> pRow = target.insertRow();
       SheetRow& row = *pRow;
       for (int j=0; j<sheet.width(); j++) {

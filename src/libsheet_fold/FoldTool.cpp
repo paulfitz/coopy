@@ -445,16 +445,6 @@ public:
 };
 
 
-void assertColumn(SimpleSheetSchema *s, int offset, const string& name) {
-  if (s==NULL) return;
-  while (s->getColumnCount()<=offset) {
-    s->addColumn("...");
-  }
-  ColumnInfo c = s->getColumnInfo(offset);
-  if (c.getName()!=name) {
-    s->modifyColumn(ColumnRef(offset),ColumnInfo(name));
-  }
-}
 
 Expansion FoldCache::getExpansion(const FoldEdge& edge,
 				  Folds *pfolds) {
@@ -557,6 +547,12 @@ Expansion FoldCache::getExpansion(const FoldEdge& edge,
   return result;
 }
 
+class ColumnHistory {
+public:
+  string name;
+  string from_table;
+  string from_name;
+};
 
 class FoldFactor {
 public:
@@ -571,6 +567,8 @@ public:
   bool namer;
   string prefix;
   IntSheet *zebra;
+  map<string,ColumnHistory> *history;
+  FoldSelector *selector;
 
   FoldFactor() { 
     ct = -1; 
@@ -581,11 +579,32 @@ public:
     practice = false;
     skips = 0;
     zebra = NULL;
+    history = NULL;
     namer = true;
+    selector = NULL;
   }
 };
 
 
+void assertColumn(SimpleSheetSchema *s, int offset, const string& name,
+		  const string& orig_name,
+		  const FoldFactor& factor) {
+  if (s==NULL) return;
+  while (s->getColumnCount()<=offset) {
+    s->addColumn("...");
+  }
+  ColumnInfo c = s->getColumnInfo(offset);
+  if (c.getName()!=name) {
+    s->modifyColumn(ColumnRef(offset),ColumnInfo(name));
+    if (factor.history&&factor.selector) {
+      ColumnHistory hist;
+      hist.name = name;
+      hist.from_table = factor.selector->tableName;
+      hist.from_name = orig_name;
+      (*factor.history)[hist.name] = hist;
+    }
+  }
+}
 
 
 static int fold_expander(const FoldFactor& factor,
@@ -651,13 +670,16 @@ static int fold_expander(const FoldFactor& factor,
 	  sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
 				     FoldedCell());
 	}
-	if (namer) assertColumn(schema,xoffset,prefix + ".excess");
+	if (namer) assertColumn(schema,xoffset,prefix + ".excess","excess",
+				factor);
 	FoldedCell& cell = sheet.cell(xoffset,yoffset);
 	FoldedSheet *sheet = cell.getOrCreateSheet();
 	COOPY_ASSERT(sheet);
 	FoldFactor next_factor;
 	next_factor.skips = fct-1;
 	next_factor.namer = namer;
+	next_factor.selector = &sel;
+	next_factor.history = factor.history;
 	fold_expander(next_factor, folds, cache, *sheet, sel);
       }
       printf("done\n");
@@ -697,11 +719,12 @@ static int fold_expander(const FoldFactor& factor,
 	  sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
 				     FoldedCell());
 	}
-	string name = exp.base.getName(x);
+	string oname = exp.base.getName(x);
+	string name = oname;
 	if (prefix!="") {
 	  name = prefix + "." + name;
 	}
-	if (namer) assertColumn(schema,xoffset,name);
+	if (namer) assertColumn(schema,xoffset,name,oname,factor);
 	
 	FoldedCell& cell = sheet.cell(xoffset,yoffset);
 	cell.datum = exp.src.cellSummary(x,y);
@@ -724,7 +747,8 @@ static int fold_expander(const FoldFactor& factor,
     for (int x=0; x<exp.expanded.size(); x++) {
       FoldSelector& f = exp.expanded[x];
       f.val = exp.src.cellSummary(f.idLocal,y);
-      string name = f.title;
+      string oname = f.title;
+      string name = oname;
       if (prefix!="") {
 	name = prefix + "." + name;
       }
@@ -734,7 +758,7 @@ static int fold_expander(const FoldFactor& factor,
 	    sheet.nonDestructiveResize(sheet.width()+1,sheet.height(),
 				       FoldedCell());
 	  }
-	  if (namer) assertColumn(schema,xoffset,name);
+	  if (namer) assertColumn(schema,xoffset,name,oname,factor); // PFHIT
 	  FoldedCell& cell = sheet.cell(xoffset,yoffset);
 	  FoldedSheet *sheet = cell.getOrCreateSheet();
 	  COOPY_ASSERT(sheet);
@@ -753,6 +777,8 @@ static int fold_expander(const FoldFactor& factor,
 	next_factor.practice = practice;
 	next_factor.prefix = name;
 	next_factor.namer = namer;
+	next_factor.selector = &f;
+	next_factor.history = factor.history;
 	int next_ywrap = 0;
 	int o = fold_expander(next_factor, folds, cache, sheet, f, schema,
 			      &next_ywrap);
@@ -831,6 +857,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
 
   PolySheet recipe = options.recipe.readSheet("Folds");
   IntSheet zebra;
+  map<string,ColumnHistory> history;
   if (recipe.isValid()) {
     dbg_printf("Found folds\n");
 
@@ -904,6 +931,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
     schema->setSheetName("sheet");
     FoldFactor factor;
     factor.practice = true;
+    factor.selector = &sel;
     int prev_width = -1;
     int width = 0;
     while (prev_width!=width) {
@@ -914,6 +942,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
 
     factor.practice = false;
     factor.zebra = &zebra;
+    factor.history = &history;
     fold_expander(factor, folds, cache, *fsheet, sel, schema);
     printf("After actual run, data width is %d\n", fsheet->width());
     printf("After actual run, schema width is %d\n", schema->getColumnCount());
@@ -1063,9 +1092,11 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
   adder_schema.addColumn("NAME");
   adder_schema.addColumn("FATE");
   adder_schema.addColumn("ALIAS");
+  adder_schema.addColumn("ORIG_TABLE");
+  adder_schema.addColumn("ORIG_COLUMN");
   PolySheet adder = rdest.provideSheet(adder_schema);
   adder.setSchema(&adder_schema,false);
-  adder.resize(3,orig_inventory.size());
+  adder.resize(5,orig_inventory.size());
   adder.createHeaders();
   //adder.hideHeaders();
   printf("Size %d %d / %d\n", adder.width(), adder.height(),
@@ -1079,6 +1110,11 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
     }
     if (doom_inventory.find(n)!=doom_inventory.end()) {
       adder.cellString(1,i,"drop");
+    }
+    map<string,ColumnHistory>::iterator it = history.find(n);
+    if (it!=history.end()) {
+      adder.cellString(3,i,it->second.from_table.c_str());
+      adder.cellString(4,i,it->second.from_name.c_str());
     }
   }
 
@@ -1116,7 +1152,9 @@ bool FoldTool::unfold(coopy::store::PolyBook& src,
 
   Property p;
   p.put("sheet",sheet_name.c_str());
+  printf("Getting ready to copy...\n");
   dest.copy(src,p);
+  printf("Copied.\n");
 
   PolySheet out = dest.readSheet(sheet_name.c_str());
   if (!out.isValid()) {

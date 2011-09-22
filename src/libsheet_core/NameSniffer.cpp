@@ -43,11 +43,13 @@ void NameSniffer::sniff() {
 	}
 	if (names.size()>0) {
 	  dbg_printf("Found names in schema (%d)\n", names.size());
+	  /*
 	  if (schema->headerHeight()>0) {
 	    dbg_printf("Also, embedded\n");
 	    div = schema->headerHeight()-1;
 	    embed = true;
 	  }
+	  */
 	  if (!embed && sheet.width()==names.size() && 
 	      sheet.height()>=1) {
 	    bool ok = true;

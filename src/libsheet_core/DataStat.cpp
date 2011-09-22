@@ -200,28 +200,39 @@ void DataStat::evaluate2(const coopy::store::DataSheet& sheet,
 	oddness.cell(j,i) = v;
       }
     }
-    
+  
+    bool have_null = false;
     for (int i=0; i<hh; i++) {
-      for (int j=0; j<sheet.width(); j++) {
-	float v = oddness.cell(j,i);
-	if (oddness_accum.cell(0,i)<v) {
-	  oddness_accum.cell(0,i) = v;
+      oddness_accum.cell(0,i) = 0;
+      if (!have_null) {
+	for (int j=0; j<sheet.width(); j++) {
+	  float v = oddness.cell(j,i);
+	  //oddness_accum.cell(0,i) += v/sheet.width();
+	  if (oddness_accum.cell(0,i)<v) {
+	    oddness_accum.cell(0,i) = v;
+	  }
+	  SheetCell c = sheet.cellSummary(j,i);
+	  if (c.escaped) {
+	    have_null = true;
+	    oddness_accum.cell(0,i) = 0;
+	    break;
+	  }
 	}
       }
     }
 
     //oddness_accum.normalize(-1,-1,1);
 
-    /*
+
       Property p;
       p.put("file","-");
       p.put("header",-1);
       CsvFile::write(oddness,p);
       if (oddness_accum.height()>1) {
-      p.put("file","oddness_accum.csv");
+      p.put("file","-");
       CsvFile::write(oddness_accum,p);
       }
-    */
+
     
     int evidence = 0;
     float peak = 0;

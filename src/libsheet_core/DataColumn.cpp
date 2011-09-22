@@ -13,6 +13,7 @@ void Nature::evaluate(const char *txt, bool forward) {
 
   if (s=="NULL") {
     nully.vote(1,1);
+    s = "";
   } else {
     nully.vote(-1,0.1);
   }
