@@ -223,7 +223,7 @@ void DataStat::evaluate2(const coopy::store::DataSheet& sheet,
 
     //oddness_accum.normalize(-1,-1,1);
 
-
+    /*
       Property p;
       p.put("file","-");
       p.put("header",-1);
@@ -232,7 +232,7 @@ void DataStat::evaluate2(const coopy::store::DataSheet& sheet,
       p.put("file","-");
       CsvFile::write(oddness_accum,p);
       }
-
+    */
     
     int evidence = 0;
     float peak = 0;
