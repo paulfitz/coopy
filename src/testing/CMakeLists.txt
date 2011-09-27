@@ -487,6 +487,7 @@ ADD_ROUND_TRIP_TEST(tdiff_quote_me ${TESTS}/quote_me.csv ${TESTS}/quote_me2.csv 
 ADD_ROUND_TRIP_TEST(tdiff_quote_me2 ${TESTS}/quote_me2.csv ${TESTS}/quote_me.csv tdiff)
 ADD_ROUND_TRIP_TEST(color_quote_me ${TESTS}/quote_me.csv ${TESTS}/quote_me2.csv color)
 ADD_ROUND_TRIP_TEST(color_quote_me2 ${TESTS}/quote_me2.csv ${TESTS}/quote_me.csv color)
+ADD_ROUND_TRIP_TEST_BI(column_names_with_spaces ${TESTS}/column_names_with_spaces_v1.csvs ${TESTS}/column_names_with_spaces_v2.csvs tdiff)
 
 #######################################################################
 #######################################################################
