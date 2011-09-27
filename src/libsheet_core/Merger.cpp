@@ -741,7 +741,9 @@ bool Merger::merge(MergerState& state) {
 	change.indicesAfter = local_cols;
 	change.namesAfter = local_col_names;
 	//output.changeColumn(change);
-	cc.push_back(change);
+	if (change.namesBefore!=change.namesAfter) {
+	  cc.push_back(change);
+	}
       }
     }
 
