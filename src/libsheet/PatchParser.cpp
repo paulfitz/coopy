@@ -977,8 +977,12 @@ bool PatchParser::applyTdiff() {
     }
   }
 
+  dbg_printf("  ... patching complete! ...\n");
+
   patcher->mergeDone();
   patcher->mergeAllDone();
+
+  dbg_printf("  ... PatchParser finished ...\n");
 
   return true;
 }

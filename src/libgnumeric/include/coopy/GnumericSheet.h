@@ -44,6 +44,8 @@ public:
 
   virtual bool deleteRow(const RowRef& src);
 
+  virtual bool deleteRows(const RowRef& first, const RowRef& last);
+
   virtual RowRef moveRow(const RowRef& src, const RowRef& base);
 
 

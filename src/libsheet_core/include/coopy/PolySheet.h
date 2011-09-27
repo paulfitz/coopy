@@ -209,6 +209,12 @@ public:
     return sheet->deleteRow((dh==0)?src:src.delta(dh));
   }
 
+  virtual bool deleteRows(const RowRef& first, const RowRef& last) {
+    COOPY_ASSERT(sheet);
+    return sheet->deleteRows((dh==0)?first:first.delta(dh),
+			     (dh==0)?last:last.delta(dh));
+  }
+
   // insert a row before base; if base is invalid insert after all rows
   virtual RowRef insertRow(const RowRef& base) {
     COOPY_ASSERT(sheet);

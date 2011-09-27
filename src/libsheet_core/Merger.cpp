@@ -52,6 +52,8 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
   bool delRow = row_unit.deleted;
   string blank = "__NOT_SET__CSVCOMPARE_SSFOSSIL";
   SheetCell blankCell;
+  blankCell.text = blank;
+  blankCell.escaped = true;
   vector<SheetCell> expandLocal, expandRemote, expandPivot, expandMerge;
   vector<SheetCell> saveLocal;
   vector<int> expandDel;
@@ -155,8 +157,10 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     if (!ignored) {
       if (!compare_string(_l,_r,flags)) {
 	if (_l==blankCell) {
-	  _l = _r;
-	  novel = true;
+	  if (!_r.escaped) {
+	    _l = _r;
+	    novel = true;
+	  }
 	} else {
 	  if (_r!=blankCell) {
 	    // two assertions, do they conflict?

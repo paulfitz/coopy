@@ -56,6 +56,8 @@ int gnumeric_insert_row(GnumericSheetPtr sheet, int before);
 
 int gnumeric_delete_row(GnumericSheetPtr sheet, int at);
 
+int gnumeric_delete_rows(GnumericSheetPtr sheet, int first, int last);
+
 int gnumeric_delete_data(GnumericSheetPtr sheet);
 
 GnumericStylePtr gnumeric_sheet_get_style(GnumericSheetPtr sheet, int x, int y);

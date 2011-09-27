@@ -150,6 +150,17 @@ bool GnumericSheet::deleteRow(const RowRef& src) {
   return true;
 }
 
+bool GnumericSheet::deleteRows(const RowRef& first, const RowRef& last) {
+  int index0 = first.getIndex();
+  int index1 = last.getIndex();
+  if (index0>=h) return true;
+  if (index1>=h) index1 = h-1;
+  int rem = gnumeric_delete_rows(SHEET(implementation),index0,index1);
+  h -= rem;
+  return (rem==(index1-index0+1));
+}
+
+
 RowRef GnumericSheet::moveRow(const RowRef& src, const RowRef& base) {
   int i0 = src.getIndex();
   int i1 = base.getIndex();

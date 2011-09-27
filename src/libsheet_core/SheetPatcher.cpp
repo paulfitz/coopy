@@ -600,13 +600,17 @@ static string clean(const string& s) {
 }
 
 bool SheetPatcher::mergeAllDone() {
+  dbg_printf("SheetPatcher::mergeAllDone\n");
   if (chain) chain->mergeAllDone();
   if (descriptive) {
     PolySheet sheet = getSheet();
     if (!sheet.isValid()) return false;
+    dbg_printf("Adding description column\n");
     sheet.insertColumn(ColumnRef(0)); 
+    dbg_printf("Added description column\n");
     //sheet.insertRow(RowRef(0));
     for (int i=0; i<sheet.height()&&i<activeRow.height(); i++) {
+      dbg_printf("  row %d\n", i);
       string txt = activeRow.cellString(0,i);
       if (txt==""&&killNeutral) {
 	txt = "---";
@@ -680,23 +684,48 @@ bool SheetPatcher::mergeAllDone() {
     }
     int offset = 0;
     bool addedBreak = false;
+    int start_delete = -1;
+    int count_delete = 0;
     for (int i=0; i<(int)show.size(); i++) {
+      dbg_printf("Checking %d...\n", i);
       if (show[i]==0) {	
 	int k = i+offset;
 	if (addedBreak) {
-	  sheet.deleteRow(RowRef(k));
+	  dbg_printf("Deleting row %d\n", k);
+	  if (start_delete==-1) {
+	    start_delete = k;
+	    count_delete = 0;
+	  }
+	  count_delete++;
+	  //sheet.deleteRow(RowRef(k));
 	  offset--;
 	} else {
+	  if (start_delete!=-1) {
+	    dbg_printf("Implementing deletion of %d rows starting at %d\n",
+		       start_delete,
+		       count_delete);
+	    
+	    sheet.deleteRows(RowRef(start_delete),
+			     RowRef(start_delete+count_delete-1));
+	    start_delete = -1;
+	  }
+	  dbg_printf("Adding ... marks\n");
 	  sheet.cellString(0,k,"...");
 	  for (int j=1; j<sheet.width(); j++) {
 	    sheet.cellString(j,k,"...");
 	  }
+	  dbg_printf("Done adding ... marks\n");
 	  addedBreak = true;
 	}
       } else {
 	addedBreak = false;
       }
     }    
+    if (start_delete!=-1) {
+      sheet.deleteRows(RowRef(start_delete),
+		       RowRef(start_delete+count_delete-1));
+      start_delete = -1;
+    }
   }
 
   if (forReview) {

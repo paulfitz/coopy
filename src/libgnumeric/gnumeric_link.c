@@ -458,6 +458,15 @@ int gnumeric_delete_row(GnumericSheetPtr sheet, int at) {
   return 0;
 }
 
+int gnumeric_delete_rows(GnumericSheetPtr sheet, int first, int last) {
+  printf("delete from %d to %d\n", first, last);
+  BEGIN_UNDO;
+  sheet_delete_rows(sheet,first,last-first+1,DO_UNDO,cc);
+  END_UNDO;
+  return last-first+1;
+}
+
+
 int gnumeric_delete_data(GnumericSheetPtr sheet) {
   BEGIN_UNDO;
   int w, h;

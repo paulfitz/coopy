@@ -202,6 +202,14 @@ public:
     return false;
   }
 
+  virtual bool deleteRows(const RowRef& first, const RowRef& last) {
+    for (int i=first.getIndex(); i<=last.getIndex(); i++) {
+      bool ok = deleteRow(RowRef(i));
+      if (!ok) return false;
+    }
+    return true;
+  }
+
   virtual bool deleteData() {
     int h = height();
     for (int i=0; i<h; i++) {
