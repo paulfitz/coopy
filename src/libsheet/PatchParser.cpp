@@ -125,6 +125,11 @@ public:
 	break;
       }
     }
+    if (i==lst.size()) {
+      printf("A move was proposed, but does not make sense\n");
+      exit(1);
+    }
+
     // The moved element is named by either lst[i] or prior.lst[i]
     // We are guaranteed at least one element after this one.
     string mover;
