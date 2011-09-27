@@ -567,6 +567,13 @@ vector<string> normalizedMessage(const string& line) {
     all.push_back(result);
     pending = false;
   }
+  for (int i=0; i<(int)all.size(); i++) {
+    string& result = all[i];
+    if (result[0]=='\'') {
+      result = result.substr(1,result.length()-2);
+    }
+  }
+
   return all;
 }
 
@@ -800,7 +807,13 @@ bool PatchParser::applyTdiff() {
 	}
       }
     }
-    dbg_printf("Got [%s] [%s]\n", line.c_str(), first.c_str());
+    if (coopy_is_verbose()) {
+      dbg_printf("Got: ");
+      for (int i=0; i<(int)msg.size(); i++) {
+	dbg_printf("[%s] ", msg[i].c_str());
+      }
+      dbg_printf("\n");
+    }
     if (first=="@@@") {
       patcher->setSheet(msg[1].c_str());
     } else if (first=="@"||first=="@@") {

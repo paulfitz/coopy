@@ -19,7 +19,7 @@ using namespace coopy::cmp;
 #define OP_CONTEXT "#"
 #define OP_NONE ""
 
-static string celly(const SheetCell& c) {
+static string celly(const SheetCell& c, bool quote_space = false) {
   if (c.text=="NULL"&&!c.escaped) {
     return "\'NULL\'";
   }
@@ -45,6 +45,10 @@ static string celly(const SheetCell& c) {
     case '\'':
       needQuote = true;
       break;
+    case ' ':
+      if (quote_space) {
+	needQuote = true;
+      }
     default:
       if (c.text[i]<32) {
 	needQuote = true;
@@ -57,6 +61,13 @@ static string celly(const SheetCell& c) {
     return quoteSql(c.text,'\'',true);
   }
   return c.text;
+}
+
+static string stringy(const string& s, bool quote_space = false) {
+  SheetCell c;
+  c.text = s;
+  c.escaped = false;
+  return celly(c,quote_space);
 }
 
 MergeOutputTdiff::MergeOutputTdiff() {
@@ -95,7 +106,7 @@ bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
 	fprintf(stderr, "Could not find column to remove\n");
 	exit(1);
       } else {
-	fprintf(out,"@- %s", change.namesBefore[idx].c_str());
+	fprintf(out,"@- %s", stringy(change.namesBefore[idx],true).c_str());
       }
     }
     break;
@@ -106,7 +117,7 @@ bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
 	fprintf(stderr, "Could not find column to insert\n");
 	exit(1);
       } else {
-	fprintf(out,"@+ %s", change.namesAfter[idx].c_str());
+	fprintf(out,"@+ %s", stringy(change.namesAfter[idx],true).c_str());
       }
     }
     break;
@@ -117,7 +128,7 @@ bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
 	fprintf(stderr, "Could not find column to move\n");
 	exit(1);
       } else {
-	fprintf(out,"@: %s", change.namesBefore[idx].c_str());
+	fprintf(out,"@: %s", stringy(change.namesBefore[idx],true).c_str());
       }
     }
     break;
@@ -128,7 +139,7 @@ bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
   }
   fprintf(out, " |");
   for (int i=0; i<(int)change.namesAfter.size(); i++) {
-    fprintf(out,"%s|",change.namesAfter[i].c_str());
+    fprintf(out,"%s|",stringy(change.namesAfter[i]).c_str());
   }
   fprintf(out,"\n");
 
