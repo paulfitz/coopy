@@ -32,6 +32,9 @@ void SchemaSniffer::sniff(bool force) {
   vector<int> indexes = indexSniffer.suggestIndexes();
   bool haveKey = false;
   bool shouldSetKey = true;
+  while (ct.size()<indexes.size()) {
+    ct.push_back(ColumnType());
+  }
   for (int i=0; i<(int)indexes.size(); i++) {
     if (indexes[i]>0) {
       haveKey = true;
@@ -51,8 +54,6 @@ void SchemaSniffer::sniff(bool force) {
   }
   for (int i=0; i<(int)names.size(); i++) {
     ColumnType base = ct[i];
-    if (haveKey) {
-    }
     fallback.addColumn(names[i].c_str(),ct[i]);
   }
   int at = (int)names.size();

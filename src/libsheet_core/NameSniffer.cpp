@@ -65,6 +65,9 @@ void NameSniffer::sniff() {
 	      embed = true;
 	    }
 	  }
+	  while (ct.size()<names.size()) {
+	    ct.push_back(ColumnType());
+	  }
 	  return;
 	}
       }
@@ -82,6 +85,9 @@ void NameSniffer::sniff() {
   if (div<0) {
     // no obvious header
     fake = true;
+    while (ct.size()<names.size()) {
+      ct.push_back(ColumnType());
+    }
     return;
   }
 
@@ -120,12 +126,12 @@ void NameSniffer::sniff() {
     names.clear();
     ct.clear();
     fake = true;
-  } else {
-    while (ct.size()<names.size()) {
-      ct.push_back(ColumnType());
-    }
-    embed = true;
+  } 
+  
+  while (ct.size()<names.size()) {
+    ct.push_back(ColumnType());
   }
+  embed = true;
 }
 
 
