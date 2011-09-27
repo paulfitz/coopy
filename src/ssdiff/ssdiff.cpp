@@ -233,15 +233,18 @@ int main(int argc, char *argv[]) {
     fprintf(stderr,"Failed to read %s\n", argv[0]);
     return 1;
   }
+  flags.local_uri = argv[0];
   if (!_remote.read(argv[1])) {
     fprintf(stderr,"Failed to read %s\n", argv[1]);
     return 1;
   }
+  flags.remote_uri = argv[1];
   if (parent_file!="") {
     if (!_pivot.read(parent_file.c_str())) {
       fprintf(stderr,"Failed to read %s\n", parent_file.c_str());
       return 1;
     }
+    flags.pivot_uri = argv[1];
     pivot = &_pivot;
   } else {
     pivot = &_local;

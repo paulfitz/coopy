@@ -65,6 +65,9 @@ public:
   bool omit_format_name;
   bool fixed_columns;
   bool ignore_case;
+  std::string pivot_uri;
+  std::string local_uri;
+  std::string remote_uri;
 
   CompareFlags() {
     head_trimmed = false;

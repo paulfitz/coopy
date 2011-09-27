@@ -77,8 +77,18 @@ MergeOutputTdiff::MergeOutputTdiff() {
 }
 
 bool MergeOutputTdiff::mergeStart() {
-  if (!getFlags().omit_format_name) {
+  const CompareFlags& flags = getFlags();
+  if (!flags.omit_format_name) {
     fprintf(out,"# tdiff version 0.3\n");
+    if (flags.local_uri!="") {
+      fprintf(out,"# --- %s\n", flags.local_uri.c_str());
+    }
+    if (flags.remote_uri!="") {
+      fprintf(out,"# +++ %s\n", flags.remote_uri.c_str());
+    }
+    if (flags.pivot_uri!="") {
+      fprintf(out,"# ^^^ %s\n", flags.pivot_uri.c_str());
+    }
   }
   return true;
 }
