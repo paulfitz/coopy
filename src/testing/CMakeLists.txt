@@ -590,6 +590,21 @@ ADD_TEST(folding_base ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table
 
 ADD_TEST(folding_json ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table organizations ${TESTS}/fold/contacts.csvs folding_json_result.jsonbook)
 
+
+#######################################################################
+#######################################################################
+
+# check conflicts
+
+ADD_TEST(conflict_with_parent ${ssdiff}  --omit-format-name --output conflict_with_parent.tdiff --parent ${TESTS}/conflict/bridges.csv ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
+ADD_TEST(conflict_with_parent_Compare 
+  ${CMAKE_COMMAND} -E compare_files conflict_with_parent.tdiff ${TESTS}/conflict/bridges_v1_v2_parent.tdiff)
+
+ADD_TEST(conflict_without_parent ${ssdiff}  --output conflict_without_parent.tdiff --omit-format-name ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
+ADD_TEST(conflict_without_parent_Compare 
+  ${CMAKE_COMMAND} -E compare_files conflict_without_parent.tdiff ${TESTS}/conflict/bridges_v1_v2_no_parent.tdiff)
+
+
 #######################################################################
 #######################################################################
 
