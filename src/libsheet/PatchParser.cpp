@@ -567,12 +567,18 @@ vector<string> normalizedMessage(const string& line) {
     all.push_back(result);
     pending = false;
   }
+  
   for (int i=0; i<(int)all.size(); i++) {
     string& result = all[i];
-    if (result[0]=='\'') {
-      result = result.substr(1,result.length()-2);
-    }
+    Stringer::replace(result,"\\n","\n");
+    Stringer::replace(result,"\\r","\r");
+    Stringer::replace(result,"\\\\","\\");
+
+    //if (result[0]=='\'') {
+    //result = result.substr(1,result.length()-2);
+    //}
   }
+ 
 
   return all;
 }
@@ -893,10 +899,10 @@ bool PatchParser::applyTdiff() {
       for (int i=1; i<(int)msg.size(); i++) {
 	TDiffPart part;
 	part.apply(msg[i],false);
-	//printf("key %d [%s] / val %d [%s] / nval %d [%s]\n", 
-	//(int)part.hasKey, part.key.c_str(),
-	//(int)part.hasVal, part.val.toString().c_str(),
-	//     (int)part.hasNval, part.nval.toString().c_str());
+	dbg_printf("key %d [%s] / val %d [%s] / nval %d [%s]\n", 
+		   (int)part.hasKey, part.key.c_str(),
+		   (int)part.hasVal, part.val.toString().c_str(),
+		   (int)part.hasNval, part.nval.toString().c_str());
 
 	assign.push_back(part);
 	if (part.hasKey) { mod = true; }
@@ -936,6 +942,10 @@ bool PatchParser::applyTdiff() {
       for (int i=0; i<(int)assign.size(); i++) {
 	TDiffPart& context = cols[i];
 	TDiffPart& part = assign[i];
+	dbg_printf("   Looking at {{%s // %s // %s // %s}} and {{%s // %s // %s // %s}}\n", 
+		   context.orig.c_str(), context.key.c_str(), context.val.text.c_str(), context.nval.text.c_str(),
+		   part.orig.c_str(), part.key.c_str(), part.val.text.c_str(), part.nval.text.c_str()
+		   );
 	bool conded = false;
 	if (part.hasVal) {
 	  if (context.hasKey&&change.mode!=ROW_CHANGE_INSERT) {

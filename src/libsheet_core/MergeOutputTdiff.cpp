@@ -30,6 +30,10 @@ static string celly(const SheetCell& c, bool quote_space = false) {
   bool lastWasMinus = false;
   for (int i=0; i<(int)c.text.length() && !needQuote; i++) {
     switch (c.text[i]) {
+    case '\n':
+    case '\r':
+      needQuote = true;
+      break;
     case ':':
     case '=':
     case '|':
@@ -57,10 +61,13 @@ static string celly(const SheetCell& c, bool quote_space = false) {
     }
     lastWasMinus = (c.text[i]=='-');
   }
+  string v = c.text;
   if (needQuote) {
-    return quoteSql(c.text,'\'',true);
+    v = quoteSql(c.text,'\'',true);
+    Stringer::replace(v,"\n","\\n");
+    Stringer::replace(v,"\r","\\r");
   }
-  return c.text;
+  return v;
 }
 
 static string stringy(const string& s, bool quote_space = false) {

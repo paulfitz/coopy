@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
       fprintf(stderr,"Failed to read %s\n", parent_file.c_str());
       return 1;
     }
-    flags.pivot_uri = argv[1];
+    flags.pivot_uri = parent_file;
     pivot = &_pivot;
   } else {
     pivot = &_local;

@@ -702,8 +702,8 @@ bool SheetPatcher::mergeAllDone() {
 	} else {
 	  if (start_delete!=-1) {
 	    dbg_printf("Implementing deletion of %d rows starting at %d\n",
-		       start_delete,
-		       count_delete);
+		       count_delete,
+		       start_delete);
 	    
 	    sheet.deleteRows(RowRef(start_delete),
 			     RowRef(start_delete+count_delete-1));

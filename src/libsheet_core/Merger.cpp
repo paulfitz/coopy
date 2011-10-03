@@ -243,8 +243,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
   } else {
 
     if (conflict) {
-      printf("Cannot produce a diff when there are data conflicts\n");
-      return false;
+      //printf("Cannot produce a diff when there are data conflicts\n");
+      fprintf(stderr,"Conflict Alert!\n");
+      //return false;
     }
     if (address!=lastAddress) {
       output.addRow("[for]",address,blank);
@@ -449,19 +450,24 @@ bool Merger::merge(MergerState& state) {
   col_merge.merge(col_local,col_remote,cflags);
 
   dbg_printf("Merging row order...\n");
-  if (col_merge.overlap==0 && diff) {
-    dbg_printf("No overlap, just use remote...\n");
-    row_merge.accum.clear();
-    for (int i=0; i<remote.height(); i++) {
-      MatchUnit unit;
-      unit.pivotUnit = -1;
-      unit.localUnit = -1;
-      unit.remoteUnit = i;
-      unit.deleted = false;
-      row_merge.accum.push_back(unit);
-    }
+
+  if (false) { //trust_ids) {
+    row_merge.merge_by_id(row_local,row_remote,flags);
   } else {
-    row_merge.merge(row_local,row_remote,flags);
+    if (col_merge.overlap==0 && diff) {
+      dbg_printf("No overlap, just use remote...\n");
+      row_merge.accum.clear();
+      for (int i=0; i<remote.height(); i++) {
+	MatchUnit unit;
+	unit.pivotUnit = -1;
+	unit.localUnit = -1;
+	unit.remoteUnit = i;
+	unit.deleted = false;
+	row_merge.accum.push_back(unit);
+      }
+    } else {
+      row_merge.merge(row_local,row_remote,flags);
+    }
   }
 
   conflicts = 0;

@@ -401,12 +401,16 @@ void OrderMerge::merge(const OrderResult& nlocal,
   int base_remote = 0;
   process(0,0,base_local,base_remote,order_local.blen(),order_remote.blen());
 
+  if (!flags.use_order) return;
+
   bool good = false;
   bool more = true;
   list<MatchUnit> canon;
   list<MatchUnit> canon_rem1;
   list<MatchUnit> canon_rem2;
   list<MatchUnit> *canon_src = &accum;
+
+  bool ordered = flags.use_order;
 
   while (more) {
 
@@ -483,13 +487,13 @@ void OrderMerge::merge(const OrderResult& nlocal,
     v.endTransitions();
     
     for (int draw=0; draw<units-1; draw++) {
-      //dbg_printf("DRAW %d\n", draw);
+      dbg_printf("DRAW %d (%d)\n", draw, units);
       v.beginTransitions();
 
       set<int> idx2;
       for (set<int>::const_iterator it1=idx.begin(); it1!=idx.end(); it1++) {
 	int k = (*it1);
-	//dbg_printf("  draw %d k %d\n", draw, k);
+	dbg_printf("  draw %d k %d\n", draw, k);
 	if (k==dud) continue;
 
 	MatchUnit& unit = *mu[k];
@@ -622,8 +626,8 @@ void OrderMerge::merge(const OrderResult& nlocal,
       }
       gct2++;
     }
-    //dbg_printf("Got to length %d of %d...\n",
-    //canon.size(), accum.size());
+    dbg_printf("Got to length %d of %d...\n",
+	       canon.size(), accum.size());
     if (omit==0) {
       //      dbg_printf("No progress made\n");
       more = false;
@@ -680,4 +684,68 @@ void OrderMerge::merge(const OrderResult& nlocal,
   */
 }
 
+
+
+void OrderMerge::merge_by_id(const OrderResult& nlocal,
+			     const OrderResult& nremote,
+			     const CompareFlags& flags) {
+  /*
+  vector<MergeUnit> units;
+  for (int i=0; i<nlocal.alen(); i++) {
+    MatchUnit unit;
+    unit.pivotUnit = -1;
+    unit.localUnit = i;
+    unit.remoteUnit = nlocal.a2b(i);
+    unit.deleted = false;
+    units.push_back(unit);
+  }
+
+
+  bool more = true;
+  
+  int at_local = 0;
+  int at_remote = 0;
+  int size_local = nlocal.alen();
+  int size_remote = nremote.blen();
+  while (more) {
+    int l = -1;
+    int l2r = -1;
+    int r = -1;
+    if (at_local<size_local) {
+      l = at_local;
+      l2r = nlocal.a2b(at_local);
+    }
+    if (at_remote<size_remote) {
+      r = at_remote;
+    }
+    if (l==-1&&r==-1) {
+      more = false;
+    }
+    MatchUnit unit;
+    unit.pivotUnit = -1;
+    unit.localUnit = -1;
+    unit.remoteUnit = -1;
+    unit.deleted = false;
+    if (l!=-1 && l)
+
+	unit.pivotUnit = -1;
+	unit.localUnit = -1;
+	row_merge.accum.push_back(unit);
+
+    if (l!=-1) at_local++;
+    if (r!=-1) at_remote++;
+  }
+
+
+  for (list<MatchUnit>::iterator it=accum.begin();
+       it!=accum.end(); 
+       it++) {
+    if (it->deleted) {
+      canon.push_back(*it);
+      //dbg_printf("     ADDED DELETED -> %d (%d %d %d)\n", canon.size(),
+      //it->pivotUnit, it->localUnit, it->remoteUnit);
+    }
+  }
+  */
+}
 
