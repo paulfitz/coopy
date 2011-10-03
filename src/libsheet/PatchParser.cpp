@@ -590,9 +590,13 @@ public:
   string key;
   SheetCell val;
   SheetCell nval;
+  SheetCell cval;
   bool hasKey;
   bool hasVal;
   bool hasNval;
+  bool hasCval;
+
+  bool conflict;
 
   bool isId;
   bool isFresh;
@@ -603,6 +607,8 @@ public:
     hasKey = false;
     hasVal = false;
     hasNval = false;
+    hasCval = false;
+    conflict = false;
   }
 
   TDiffPart(const string& s, bool columnLike) {
@@ -616,6 +622,7 @@ public:
     bool acceptDouble = true;
     bool allowDouble = false;
     bool quote = false;
+    int cc = -1;
     int state = 0;
     int pre = -2;
     sep = "";
@@ -650,6 +657,9 @@ public:
       } else if (ch=='>'&&state==1) {
 	pre = i-2;
 	sep = "->";
+      } else if (ch=='!') {
+	conflict = true;
+	cc = i;
       } else {
 	state = 0;
       }
@@ -658,7 +668,9 @@ public:
     rem = "";
     if (pre!=-2) {
       result = s.substr(0,pre+1);
+      if (result[0]=='!') result = result.substr(1,result.length()-1);
       rem = s.substr(pre+sep.length()+1,s.length());
+      if (rem[0]=='!') rem = rem.substr(1,rem.length()-1);
     }
     if (hasQuote) {
       result = result.substr(1,result.length()-2);
@@ -738,6 +750,8 @@ public:
     hasKey = false;
     hasVal = false;
     hasNval = false;
+    hasCval = false;
+    conflict = false;
 
     isId = false;
     isFresh = false;
@@ -768,7 +782,26 @@ public:
     if (set1) applyElement(r1,"",sep1,q1,columnLike);
     if (set2) applyElement(r2,sep1,sep2,q2,columnLike);
     if (set3) applyElement(r3,sep2,sep3,q3,columnLike);
+
+    if (conflict) {
+      if (hasNval) {
+	hasCval = true;
+	cval = nval;
+	if (hasVal) {
+	  nval = val;
+	}
+      }
+    }
   }
+
+  string toString() const {
+    SheetCell b;
+    return string("(") + (hasKey?key:b.text) + "," +
+      (hasVal?val:b).text + "," +
+      (hasNval?nval:b).text + "," +
+      (hasNval?cval:b).text + ")";
+}
+
 };
 
 string stringer_encoder(const TDiffPart& part) {
@@ -800,9 +833,15 @@ bool PatchParser::applyTdiff() {
       continue;
     } 
     string first = msg[0];
+    bool conflict = false;
     if (first[0]=='#') {
       dbg_printf("Ignoring comment [%s]\n", line.c_str());
       continue;
+    }
+    if (first[0]=='!') {
+      dbg_printf("Conflict line [%s]\n", line.c_str());
+      conflict = true;
+      first = first.substr(1,first.length()-1);
     }
     if (first.length()>=2) {
       if (first[0]=='/') {
@@ -914,6 +953,7 @@ bool PatchParser::applyTdiff() {
 	  TDiffPart context = a;
 	  context.hasVal = false;
 	  context.hasNval = false;
+	  context.hasCval = false;
 	  a.hasKey = false;
 	  cols.push_back(context);
 	}
@@ -926,6 +966,7 @@ bool PatchParser::applyTdiff() {
       COOPY_ASSERT(assign.size()==cols.size());
 
       RowChange change;
+      change.conflicted = conflict;
       bool allIndex = false;
       if (first=="=") {
 	change.mode = ROW_CHANGE_UPDATE;
@@ -963,6 +1004,9 @@ bool PatchParser::applyTdiff() {
 	if (part.hasNval||change.mode==ROW_CHANGE_INSERT) {
 	  if (part.hasNval) {
 	    change.val[context.key.c_str()] = part.nval;
+	    if (part.hasCval) {
+	      change.conflictingVal[context.key.c_str()] = part.cval;
+	    }
 	  } else {
 	    if (!conded) {
 	      change.val[context.key.c_str()] = part.val;
@@ -1066,15 +1110,15 @@ bool PatchParser::applyColor() {
       RowChange change;
       change.names = activeCol;
       change.allNames = cols;
-      //printf("Cols are %s\n",vector2string(cols).c_str());
+      dbg_printf("Columns are %s\n",vector2string(cols).c_str());
       change.indexes = indexes;
       string code = sheet.cellString(xoff,i);
       string tail2 = "";
       if (code.length()>=2) {
 	tail2 = code.substr(code.length()-2,2);
       }
-      //printf("Code is %s, allowed is %d, needYes is %d\n", code.c_str(), 
-      //allowed, needYes);
+      dbg_printf("Code is %s, allowed is %d, needYes is %d\n", code.c_str(), 
+		 allowed, needYes);
       if (code[0] == '@') {
 	cols.clear();
 	bool acts = false;
@@ -1085,6 +1129,7 @@ bool PatchParser::applyColor() {
 	}
 	for (int j=1+xoff; j<sheet.width(); j++) {
 	  TDiffPart p(sheet.cellString(j,i),false);
+	  dbg_printf("  COLUMN %s\n", p.toString().c_str());
 	  string txt = p.hasNval?p.nval.text:p.val.text;
 	  cols.push_back(txt);
 	  activeCol.push_back(txt);

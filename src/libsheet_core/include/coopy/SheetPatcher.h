@@ -131,9 +131,10 @@ public:
     return descriptive;
   }
 
-  bool markChanges(int r,int width,
+  bool markChanges(const RowChange& change, int r,int width,
 		   std::vector<int>& active_val,
-		   std::vector<coopy::store::SheetCell>& val);
+		   std::vector<coopy::store::SheetCell>& val,
+		   std::vector<coopy::store::SheetCell>& cval);
 
 };
 

@@ -241,9 +241,10 @@ static string colorEncode(const SheetCell& c) {
   return "NULL";
 }
 
-bool SheetPatcher::markChanges(int r,int width,
+bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
 			       std::vector<int>& active_val,
-			       std::vector<SheetCell>& val) {
+			       std::vector<SheetCell>& val,
+			       std::vector<SheetCell>& cval) {
   PolySheet sheet = getSheet();
 
   string separator = "";
@@ -264,23 +265,51 @@ bool SheetPatcher::markChanges(int r,int width,
 	  }
 	}
       }
-      activeRow.cellString(0,r,separator);
+      string init = separator;
+      if (change.conflicted) {
+	init = string("!") + init;
+      }
+      activeRow.cellString(0,r,init);
+      if (change.conflicted) {
+	Poly<Appearance> appear = sheet.getCellAppearance(0,r);
+	if (appear.isValid()) {
+	  appear->begin();
+	  appear->setBackgroundRgb16(FULL_COLOR,
+				     0,
+				     0,
+				     AppearanceRange::full());
+	  appear->end();
+	}
+      }
       if (descriptive) {
 	SheetCell prev = sheet.cellSummary(c,r);
 	string from = prev.toString();
 	if (prev.escaped) from = "";
-	string to = val[c].toString();
+	//string to = val[c].toString();
+	SheetCell to = val[c];
+	bool conflicted = false;
+	if (val[c]!=cval[c]) {
+	  to = cval[c];
+	  conflicted = true;
+	}
 	SheetStyle style;
 	sheet.cellString(c,r,colorEncode(prev) + 
-			 separator + 
-			 colorEncode(val[c]));
+			 (conflicted?init:separator) + 
+			 colorEncode(to));
 	Poly<Appearance> appear = sheet.getCellAppearance(c,r);
 	if (appear.isValid()) {
 	  appear->begin();
-	  appear->setBackgroundRgb16(HALF_COLOR,
-				     HALF_COLOR,
-				     FULL_COLOR,
-				     AppearanceRange::full());
+	  if (conflicted) {
+	    appear->setBackgroundRgb16(FULL_COLOR,
+				       0,
+				       0,
+				       AppearanceRange::full());
+	  } else {
+	    appear->setBackgroundRgb16(HALF_COLOR,
+				       HALF_COLOR,
+				       FULL_COLOR,
+				       AppearanceRange::full());
+	  }
 	  appear->setWeightBold(true,AppearanceRange::full());
 	  appear->end();
 	}
@@ -314,6 +343,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   vector<SheetCell> cond;
   vector<int> active_val;
   vector<SheetCell> val;
+  vector<SheetCell> cval;
   vector<string> allNames = change.allNames;
   int width = sheet.width(); //(int)change.allNames.size();
   /*
@@ -332,6 +362,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     cond.push_back(SheetCell());
     active_val.push_back(0);
     val.push_back(SheetCell());
+    cval.push_back(SheetCell());
   }
   for (RowChange::txt2cell::const_iterator it = change.cond.begin();
        it!=change.cond.end(); it++) {
@@ -350,6 +381,14 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       //printf("  [val] %d %s -> %s\n", idx, it->first.c_str(), it->second.toString().c_str());
       active_val[idx] = 1;
       val[idx] = it->second;
+      cval[idx] = it->second;
+    }
+  }
+  for (RowChange::txt2cell::const_iterator it = change.conflictingVal.begin();
+       it!=change.conflictingVal.end(); it++) {
+    if (name2col.find(it->first)!=name2col.end()) {
+      int idx = name2col[it->first];
+      cval[idx] = it->second;
     }
   }
   
@@ -470,7 +509,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	dbg_printf("%d %s / ", y, sheet.cellString(0,y).c_str());
       }
       dbg_printf("\n");
-      markChanges(r,width,active_val,val);
+      markChanges(change,r,width,active_val,val,cval);
       r++;
       if (r>=sheet.height()) {
 	r = -1;
@@ -489,7 +528,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	return false;
       }
       dbg_printf("Match for assignment\n");
-      markChanges(r,width,active_val,val);
+      markChanges(change,r,width,active_val,val,cval);
       r++;
       if (r>=sheet.height()) {
 	r = -1;

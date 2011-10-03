@@ -73,6 +73,10 @@ bool MergeOutputVerboseDiff::changeRow(const RowChange& change) {
   fprintf(out,"    names: %s\n", vector2string(change.names).c_str());
   fprintf(out,"      all: %s\n", vector2string(change.allNames).c_str());
   fprintf(out,"sequent'l: %s\n", change.sequential?"true":"false");
+  if (change.conflicted) {
+    fprintf(out," conflict: yes\n");
+    fprintf(out,"     alts: %s\n", verbose_encoder(change.names,change.conflictingVal).c_str());
+  }
   if (change.context.beforeCount()!=0) {
     fprintf(out,"  context: covers %d row before this one\n", change.context.beforeCount());
     fprintf(out,"  context: %s\n", verbose_encoder(change.allNames,change.context.getRow(-1)).c_str());

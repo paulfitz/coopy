@@ -133,15 +133,18 @@ public:
   int mode;         // One of ROW_CHANGE_*, see below
   txt2cell cond;    // conditions for a match
   txt2cell val;     // values to be assigned
+  txt2cell conflictingVal;     // values to be assigned
   std::vector<std::string> names;
   std::vector<std::string> allNames;
   txt2bool indexes; // conditions which are indexical, rather than confirming
   bool sequential;
+  bool conflicted;
   RowChangeContext context;
 
   RowChange() {
     mode = ROW_CHANGE_NONE;
     sequential = true;
+    conflicted = false;
   }
 
   std::string modeString() const {

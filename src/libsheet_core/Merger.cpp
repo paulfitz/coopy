@@ -58,7 +58,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
   vector<SheetCell> saveLocal;
   vector<int> expandDel;
   vector<int> existsLocally;
-  map<string,SheetCell> cond, value, value0;
+  map<string,SheetCell> cond, value, value0, conflicted_value;
   vector<string> address;
   vector<string> action;
   int lastCol = -1;
@@ -103,6 +103,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	//printf("I think that %s has name %s\n",
 	//local.cellSummary(lCol,lRow).toString().c_str(),
 	//names[at].c_str());
+	//cond[names[at]] = pivot.cellSummary(pCol,pRow);
 	cond[names[at]] = local.cellSummary(lCol,lRow);
       }
     }
@@ -145,6 +146,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     SheetCell& _r = expandRemote[i];
     SheetCell& _p = expandPivot[i];
     bool novel = false;
+    bool conflicted1 = false;
     bool deleted = (bool)expandDel[i];
     bool ignored = false;
     if (!deleted) {
@@ -172,8 +174,15 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 		novel = true;
 	      }
 	    } else {
+	      fprintf(stderr,"# conflict: {{%s}} vs {{%s}} from {{%s}}\n",
+		      _l.toString().c_str(),
+		      _r.toString().c_str(),
+		      _p.toString().c_str());
 	      conflict = true;
-	      break;
+	      conflicted1 = true;
+	      change = true;
+	      novel = true;
+	      //break;
 	    }
 	  }
 	}
@@ -194,6 +203,10 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
       if (!deleted) {
 	if (novel) {
 	  value[names[at]] = _l;
+	  if (conflicted1) {
+	    //printf("SETTING conflicted value\n");
+	    conflicted_value[names[at]] = _r;
+	  }
 	}
 	at++;
       }
@@ -242,11 +255,13 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     }
   } else {
 
+    /*
     if (conflict) {
       //printf("Cannot produce a diff when there are data conflicts\n");
-      fprintf(stderr,"Conflict Alert!\n");
+      //fprintf(stderr,"Conflict Alert!\n");
       //return false;
     }
+    */
     if (address!=lastAddress) {
       output.addRow("[for]",address,blank);
       lastAddress = address;
@@ -291,7 +306,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     bool haveMove = false;
     rowChange.cond = cond;
     rowChange.val = value;
+    rowChange.conflictingVal = conflicted_value;
     rowChange.names = names;
+    rowChange.conflicted = conflict;
     bool prev_had_row = had_row;
     if (last_local_row!=-1) {
       had_row = true;

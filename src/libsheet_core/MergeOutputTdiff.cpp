@@ -34,6 +34,7 @@ static string celly(const SheetCell& c, bool quote_space = false) {
     case '\r':
       needQuote = true;
       break;
+    case '!':
     case ':':
     case '=':
     case '|':
@@ -222,11 +223,13 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
       ch = ':';
       assign = true;
     }
-    fprintf(out, "%c |",ch);
+    fprintf(out, "%s%c |",change.conflicted?"!":"",ch);
   }
   for (int i=0; i<(int)change.names.size(); i++) {
     string name = change.names[i];
     if (activeColumn[name]) {
+      bool conflict = change.conflictingVal.find(name)!=
+	change.conflictingVal.end();
       bool shown = false;
       bool transition = false; //showForDesign[name]&&showForSelect[name];
       //if (change.cond.find(name)!=change.cond.end() && 
@@ -245,15 +248,25 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
 	  fprintf(out,"*->");
 	}
       }
+      if (conflict) {
+	fprintf(out,"!");
+      }
+
       if (showForCond[name] && select) {
 	fprintf(out,"%s",celly(change.cond.find(name)->second).c_str());
 	transition = true;
 	shown = true;
       }
       if (showForDescribe[name] && update) {
+	SheetCell v;
+	if (conflict) {
+	  v = change.conflictingVal.find(name)->second;
+	} else {
+	  v = change.val.find(name)->second;
+	}
 	fprintf(out,"%s%s",
 		transition?"->":"",
-		celly(change.val.find(name)->second).c_str());
+		celly(v).c_str());
 	if (shown) ok = false; // collision
 	shown = true;
       }
