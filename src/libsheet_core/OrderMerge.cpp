@@ -401,7 +401,7 @@ void OrderMerge::merge(const OrderResult& nlocal,
   int base_remote = 0;
   process(0,0,base_local,base_remote,order_local.blen(),order_remote.blen());
 
-  if (!flags.use_order) return;
+  //if (!flags.use_order) return;
 
   bool good = false;
   bool more = true;
@@ -487,13 +487,13 @@ void OrderMerge::merge(const OrderResult& nlocal,
     v.endTransitions();
     
     for (int draw=0; draw<units-1; draw++) {
-      dbg_printf("DRAW %d (%d)\n", draw, units);
+      //dbg_printf("DRAW %d (%d)\n", draw, units);
       v.beginTransitions();
 
       set<int> idx2;
       for (set<int>::const_iterator it1=idx.begin(); it1!=idx.end(); it1++) {
 	int k = (*it1);
-	dbg_printf("  draw %d k %d\n", draw, k);
+	//dbg_printf("  draw %d k %d\n", draw, k);
 	if (k==dud) continue;
 
 	MatchUnit& unit = *mu[k];
@@ -670,8 +670,8 @@ void OrderMerge::merge(const OrderResult& nlocal,
     if (lCol!=-1&&rCol!=-1) {
       overlap++;
     }
-    //dbg_printf("final match %d: P/L/R %d %d %d %s\n", ct, pCol, lCol, rCol,
-    //deleted?"(deleted)":"");
+    dbg_printf("final match %d: P/L/R %d %d %d %s\n", ct, pCol, lCol, rCol,
+	       deleted?"(deleted)":"");
     ct++;
   }
   dbg_printf("overlap is %d\n", overlap);

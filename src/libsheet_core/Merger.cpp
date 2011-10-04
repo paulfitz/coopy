@@ -397,15 +397,17 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	last_local_row_marked = lRow;
       } else {
 	if (rRow==-1) {
-	  if (haveMove) {
-	    rc.push_back(rowChangeMove);
-	    haveMove = false;
+	  if (pRow!=-1) {
+	    if (haveMove) {
+	      rc.push_back(rowChangeMove);
+	      haveMove = false;
+	    }
+	    output.addRow("[---]",expandLocal,blank);
+	    rowChange.mode = ROW_CHANGE_DELETE;
+	    //output.changeRow(rowChange);
+	    rc.push_back(rowChange);
+	    last_local_row_marked = lRow;
 	  }
-	  output.addRow("[---]",expandLocal,blank);
-	  rowChange.mode = ROW_CHANGE_DELETE;
-	  //output.changeRow(rowChange);
-	  rc.push_back(rowChange);
-	  last_local_row_marked = lRow;
 	} else {
 	  if (value.size()!=0) {
 	    output.addRow("[+]",expandMerge,blank);

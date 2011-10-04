@@ -604,6 +604,13 @@ ADD_TEST(conflict_without_parent ${ssdiff}  --output conflict_without_parent.tdi
 ADD_TEST(conflict_without_parent_Compare 
   ${CMAKE_COMMAND} -E compare_files conflict_without_parent.tdiff ${TESTS}/conflict/bridges_v1_v2_no_parent.tdiff)
 
+# not really conflicts, but related
+
+ADD_TEST(patch_merge ${ssdiff}  --omit-format-name --unordered --output patch_merge.tdiff --parent ${TESTS}/conflict/indexed_bridges.csv ${TESTS}/conflict/indexed_bridges_v1.csv ${TESTS}/conflict/indexed_bridges_v2.csv)
+ADD_TEST(patch_merge_Compare
+  ${CMAKE_COMMAND} -E compare_files patch_merge.tdiff ${TESTS}/conflict/indexed_bridges_v1_v2.tdiff)
+
+
 
 #######################################################################
 #######################################################################
