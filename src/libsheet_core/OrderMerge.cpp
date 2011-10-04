@@ -401,8 +401,6 @@ void OrderMerge::merge(const OrderResult& nlocal,
   int base_remote = 0;
   process(0,0,base_local,base_remote,order_local.blen(),order_remote.blen());
 
-  //if (!flags.use_order) return;
-
   bool good = false;
   bool more = true;
   list<MatchUnit> canon;
@@ -412,251 +410,255 @@ void OrderMerge::merge(const OrderResult& nlocal,
 
   bool ordered = flags.use_order;
 
-  while (more) {
+  if (flags.use_order) {
 
-    int ct = 0;
-    efficient_map<int,int> l2k, r2k, p2k;
-    efficient_map<int,int> it2k;
-    efficient_map<int,MatchUnit *> mu;
-    set<int> availableP;
-    set<int> availableL;
-    set<int> availableR;
-    
-    int lowestL = -2;
-    int lowestR = -2;
-    int gct = 0;
-    for (list<MatchUnit>::iterator it=canon_src->begin();
-	 it!=canon_src->end(); 
-	 it++) {
-      MatchUnit& unit = *it;
-      int pCol = unit.pivotUnit;
-      int lCol = unit.localUnit;
-      int rCol = unit.remoteUnit;
-      bool deleted = unit.deleted;
-      /*dbg_printf("match %d: %d: P/L/R %d %d %d %s\n", 
-		 gct, deleted?-1:ct, pCol, lCol, rCol,
-		 deleted?"(deleted)":"");*/
-      gct++;
-      if (deleted) { continue; }
-      it2k[gct-1] = ct;
-      if ((lCol<lowestL&&lCol>=0)||lowestL==-2) {
-	lowestL = lCol;
-      }
-      if (lCol!=-1) {
-	availableL.insert(lCol);
-      }
-      if ((rCol<lowestR&&rCol>=0)||lowestR==-2) {
-	lowestR = rCol;
-      }
-      if (rCol!=-1) {
-	availableR.insert(rCol);
-      }
-      if (pCol!=-1) {
-	availableP.insert(pCol);
-      }
-      if (pCol>=0) {
-	p2k[pCol] = ct;
-      }
-      if (lCol>=0) {
-	l2k[lCol] = ct;
-      }
-      if (rCol>=0) {
-	r2k[rCol] = ct;
-      }
-      mu[ct] = &unit;
-      ct++;
-    }
-    int units = ct;
-    
-    Viterbi v;
-    
-    int dud = units;
-    v.setSize(units+1,units+2);
-    set<int> idx;
-    
-    v.beginTransitions();
-    if (lowestL>=0) {
-      v.addTransition(l2k[lowestL],l2k[lowestL],0);  
-      idx.insert(l2k[lowestL]);
-    }
-    if (lowestR>=0) {
-      v.addTransition(r2k[lowestR],r2k[lowestR],0);  
-      idx.insert(r2k[lowestR]);
-    }
-    v.addTransition(dud,dud,1);  
-    v.endTransitions();
-    
-    for (int draw=0; draw<units-1; draw++) {
-      //dbg_printf("DRAW %d (%d)\n", draw, units);
-      v.beginTransitions();
+    while (more) {
 
-      set<int> idx2;
-      for (set<int>::const_iterator it1=idx.begin(); it1!=idx.end(); it1++) {
-	int k = (*it1);
-	//dbg_printf("  draw %d k %d\n", draw, k);
-	if (k==dud) continue;
-
-	MatchUnit& unit = *mu[k];
+      int ct = 0;
+      efficient_map<int,int> l2k, r2k, p2k;
+      efficient_map<int,int> it2k;
+      efficient_map<int,MatchUnit *> mu;
+      set<int> availableP;
+      set<int> availableL;
+      set<int> availableR;
+    
+      int lowestL = -2;
+      int lowestR = -2;
+      int gct = 0;
+      for (list<MatchUnit>::iterator it=canon_src->begin();
+	   it!=canon_src->end(); 
+	   it++) {
+	MatchUnit& unit = *it;
 	int pCol = unit.pivotUnit;
 	int lCol = unit.localUnit;
 	int rCol = unit.remoteUnit;
 	bool deleted = unit.deleted;
-
-	//dbg_printf("    match P/L/R %d %d %d %s\n", pCol, lCol, rCol,
-	//deleted?"(deleted)":"");
-
-	if (lCol==-1 && rCol==-1) {
-	  int next = safe_next(p2k,next_avail(availableP,pCol),dud);
-	  v.addTransition(k,next,0);
-	  //dbg_printf("    transition %d %d\n", k, next);
-	  idx2.insert(next);
-	  continue;
+	/*dbg_printf("match %d: %d: P/L/R %d %d %d %s\n", 
+	  gct, deleted?-1:ct, pCol, lCol, rCol,
+	  deleted?"(deleted)":"");*/
+	gct++;
+	if (deleted) { continue; }
+	it2k[gct-1] = ct;
+	if ((lCol<lowestL&&lCol>=0)||lowestL==-2) {
+	  lowestL = lCol;
 	}
-	if (rCol==-1) {
-	  int next = safe_next(l2k,next_avail(availableL,lCol),dud);
-	  v.addTransition(k,next,0);
-	  //dbg_printf("    transition %d %d\n", k, next);
-	  idx2.insert(next);
-	  continue;
+	if (lCol!=-1) {
+	  availableL.insert(lCol);
 	}
-	if (lCol==-1) {
-	  int next = safe_next(r2k,next_avail(availableR,rCol),dud);
-	  v.addTransition(k,next,0);
-	  //dbg_printf("    transition %d %d\n", k, next);
-	  idx2.insert(next);
-	  continue;
+	if ((rCol<lowestR&&rCol>=0)||lowestR==-2) {
+	  lowestR = rCol;
 	}
-	int lnext = safe_next(l2k,next_avail(availableL,lCol),dud);
-	int rnext = safe_next(r2k,next_avail(availableR,rCol),dud);
-	/*
-	  if (lnext==dud||rnext==dud) {
-	  v.addTransition(k,lnext,0);
-	  dbg_printf("    transition %d %d\n", k, lnext);
-	  idx2.insert(lnext);
-	  v.addTransition(k,rnext,0);
-	  dbg_printf("    transition %d %d\n", k, rnext);
-	  idx2.insert(rnext);
-	  continue;
-	  }
-	*/
-	int pnext = safe_next(p2k,next_avail(availableP,pCol),dud);
-	if (lnext!=pnext) {
-	  v.addTransition(k,lnext,0);
-	  //dbg_printf("    transition %d %d\n", k, lnext);
-	  idx2.insert(lnext);
+	if (rCol!=-1) {
+	  availableR.insert(rCol);
 	}
-	if (rnext!=pnext) {
-	  v.addTransition(k,rnext,0);
-	  //dbg_printf("    transition %d %d\n", k, rnext);
-	  idx2.insert(rnext);
+	if (pCol!=-1) {
+	  availableP.insert(pCol);
 	}
-	if (rnext==pnext&&lnext==pnext) {
-	  v.addTransition(k,pnext,0);
-	  //dbg_printf("    transition %d %d\n", k, pnext);
-	  idx2.insert(pnext);
+	if (pCol>=0) {
+	  p2k[pCol] = ct;
 	}
+	if (lCol>=0) {
+	  l2k[lCol] = ct;
+	}
+	if (rCol>=0) {
+	  r2k[rCol] = ct;
+	}
+	mu[ct] = &unit;
+	ct++;
       }
-      idx = idx2;
+      int units = ct;
+    
+      Viterbi v;
+    
+      int dud = units;
+      v.setSize(units+1,units+2);
+      set<int> idx;
+    
+      v.beginTransitions();
+      if (lowestL>=0) {
+	v.addTransition(l2k[lowestL],l2k[lowestL],0);  
+	idx.insert(l2k[lowestL]);
+      }
+      if (lowestR>=0) {
+	v.addTransition(r2k[lowestR],r2k[lowestR],0);  
+	idx.insert(r2k[lowestR]);
+      }
       v.addTransition(dud,dud,1);  
       v.endTransitions();
-    }
+    
+      for (int draw=0; draw<units-1; draw++) {
+	//dbg_printf("DRAW %d (%d)\n", draw, units);
+	v.beginTransitions();
 
-    v.beginTransitions();
-    for (int draw=0; draw<=units; draw++) {
-      v.addTransition(draw,draw,(draw==units));
-    }
-    v.endTransitions();
-    int qo = 1;
+	set<int> idx2;
+	for (set<int>::const_iterator it1=idx.begin(); it1!=idx.end(); it1++) {
+	  int k = (*it1);
+	  //dbg_printf("  draw %d k %d\n", draw, k);
+	  if (k==dud) continue;
 
-    /*
-    if (_csv_verbose) {
-      dbg_printf("Viterbi calculation:\n");
-      int q = v.length()-qo;
-      for (int i=0; i<q; i++) {
+	  MatchUnit& unit = *mu[k];
+	  int pCol = unit.pivotUnit;
+	  int lCol = unit.localUnit;
+	  int rCol = unit.remoteUnit;
+	  bool deleted = unit.deleted;
+
+	  //dbg_printf("    match P/L/R %d %d %d %s\n", pCol, lCol, rCol,
+	  //deleted?"(deleted)":"");
+
+	  if (lCol==-1 && rCol==-1) {
+	    int next = safe_next(p2k,next_avail(availableP,pCol),dud);
+	    v.addTransition(k,next,0);
+	    //dbg_printf("    transition %d %d\n", k, next);
+	    idx2.insert(next);
+	    continue;
+	  }
+	  if (rCol==-1) {
+	    int next = safe_next(l2k,next_avail(availableL,lCol),dud);
+	    v.addTransition(k,next,0);
+	    //dbg_printf("    transition %d %d\n", k, next);
+	    idx2.insert(next);
+	    continue;
+	  }
+	  if (lCol==-1) {
+	    int next = safe_next(r2k,next_avail(availableR,rCol),dud);
+	    v.addTransition(k,next,0);
+	    //dbg_printf("    transition %d %d\n", k, next);
+	    idx2.insert(next);
+	    continue;
+	  }
+	  int lnext = safe_next(l2k,next_avail(availableL,lCol),dud);
+	  int rnext = safe_next(r2k,next_avail(availableR,rCol),dud);
+	  /*
+	    if (lnext==dud||rnext==dud) {
+	    v.addTransition(k,lnext,0);
+	    dbg_printf("    transition %d %d\n", k, lnext);
+	    idx2.insert(lnext);
+	    v.addTransition(k,rnext,0);
+	    dbg_printf("    transition %d %d\n", k, rnext);
+	    idx2.insert(rnext);
+	    continue;
+	    }
+	  */
+	  int pnext = safe_next(p2k,next_avail(availableP,pCol),dud);
+	  if (lnext!=pnext) {
+	    v.addTransition(k,lnext,0);
+	    //dbg_printf("    transition %d %d\n", k, lnext);
+	    idx2.insert(lnext);
+	  }
+	  if (rnext!=pnext) {
+	    v.addTransition(k,rnext,0);
+	    //dbg_printf("    transition %d %d\n", k, rnext);
+	    idx2.insert(rnext);
+	  }
+	  if (rnext==pnext&&lnext==pnext) {
+	    v.addTransition(k,pnext,0);
+	    //dbg_printf("    transition %d %d\n", k, pnext);
+	    idx2.insert(pnext);
+	  }
+	}
+	idx = idx2;
+	v.addTransition(dud,dud,1);  
+	v.endTransitions();
+      }
+
+      v.beginTransitions();
+      for (int draw=0; draw<=units; draw++) {
+	v.addTransition(draw,draw,(draw==units));
+      }
+      v.endTransitions();
+      int qo = 1;
+
+      /*
+	if (_csv_verbose) {
+	dbg_printf("Viterbi calculation:\n");
+	int q = v.length()-qo;
+	for (int i=0; i<q; i++) {
 	int k = v.getPath(i);
 	dbg_printf("*** %d\n", k);
-      }
-    }
-    */
+	}
+	}
+      */
 
-    int q = v.length()-qo;
-    efficient_map<int,int> dups;
-    efficient_map<int,int> accepted;
-    dups[dud] = 1;
-    good = true;
-    //if (v.getPath(q)!=dud) {
-    for (int i=0; i<q; i++) {
-      int k = v.getPath(i);
-      int k2 = k;
-      if (i<q-1) {
-	k2 = v.getPath(i+1);
-      }
-      if (dups.find(k)==dups.end() && dups.find(k2)==dups.end()) {
-	canon.push_back(*mu[k]);
-	//dbg_printf("     ADDED -> %d (%d %d %d)\n", canon.size(),
-	//	   mu[k]->pivotUnit, mu[k]->localUnit, mu[k]->remoteUnit);
-	dups[k] = 1;
-	accepted[k] = 1;
-      } else {
-	//dbg_printf("     hit dodgy match\n");
-	good = false;
-	break;
-      }
-    }
-
-    more = !good;
-    list<MatchUnit> *canon_old_src = canon_src;
-    if (canon_src != &canon_rem1) {
-      canon_src = &canon_rem1;
-    } else {
-      canon_src = &canon_rem2;
-    }
-    canon_src->clear();
-    int gct2 = 0;
-    int omit = 0;
-    for (list<MatchUnit>::iterator it=canon_old_src->begin();
-	 it!=canon_old_src->end(); 
-	 it++) {
-      if (it2k.find(gct2)!=it2k.end()) {
-	if (accepted.find(it2k[gct2])!=accepted.end()) {
-	  omit++;
+      int q = v.length()-qo;
+      efficient_map<int,int> dups;
+      efficient_map<int,int> accepted;
+      dups[dud] = 1;
+      good = true;
+      //if (v.getPath(q)!=dud) {
+      for (int i=0; i<q; i++) {
+	int k = v.getPath(i);
+	int k2 = k;
+	if (i<q-1) {
+	  k2 = v.getPath(i+1);
+	}
+	if (dups.find(k)==dups.end() && dups.find(k2)==dups.end()) {
+	  canon.push_back(*mu[k]);
+	  //dbg_printf("     ADDED -> %d (%d %d %d)\n", canon.size(),
+	  //	   mu[k]->pivotUnit, mu[k]->localUnit, mu[k]->remoteUnit);
+	  dups[k] = 1;
+	  accepted[k] = 1;
 	} else {
-	  canon_src->push_back(*it);
+	  //dbg_printf("     hit dodgy match\n");
+	  good = false;
+	  break;
 	}
       }
-      gct2++;
-    }
-    dbg_printf("Got to length %d of %d...\n",
-	       canon.size(), accum.size());
-    if (omit==0) {
-      //      dbg_printf("No progress made\n");
-      more = false;
-    }
-    dbg_printf("STATUS %d %d / %s, %s\n", canon.size(), accum.size(), good?"good":"no good", more?"more":"no more");
-  }
 
-  if (canon_src!=&accum) {
-    for (list<MatchUnit>::iterator it=canon_src->begin();
-	 it!=canon_src->end(); 
+      more = !good;
+      list<MatchUnit> *canon_old_src = canon_src;
+      if (canon_src != &canon_rem1) {
+	canon_src = &canon_rem1;
+      } else {
+	canon_src = &canon_rem2;
+      }
+      canon_src->clear();
+      int gct2 = 0;
+      int omit = 0;
+      for (list<MatchUnit>::iterator it=canon_old_src->begin();
+	   it!=canon_old_src->end(); 
+	   it++) {
+	if (it2k.find(gct2)!=it2k.end()) {
+	  if (accepted.find(it2k[gct2])!=accepted.end()) {
+	    omit++;
+	  } else {
+	    canon_src->push_back(*it);
+	  }
+	}
+	gct2++;
+      }
+      dbg_printf("Got to length %d of %d...\n",
+		 canon.size(), accum.size());
+      if (omit==0) {
+	//      dbg_printf("No progress made\n");
+	more = false;
+      }
+      dbg_printf("STATUS %d %d / %s, %s\n", canon.size(), accum.size(), good?"good":"no good", more?"more":"no more");
+    }
+
+    if (canon_src!=&accum) {
+      for (list<MatchUnit>::iterator it=canon_src->begin();
+	   it!=canon_src->end(); 
+	   it++) {
+	if (!it->deleted) {
+	  canon.push_back(*it);
+	  //dbg_printf("     ADDED UNORDERED -> %d (%d %d %d)\n", canon.size(),
+	  //it->pivotUnit, it->localUnit, it->remoteUnit);
+	}
+      }
+    }
+
+    for (list<MatchUnit>::iterator it=accum.begin();
+	 it!=accum.end(); 
 	 it++) {
-      if (!it->deleted) {
+      if (it->deleted) {
 	canon.push_back(*it);
-	//dbg_printf("     ADDED UNORDERED -> %d (%d %d %d)\n", canon.size(),
+	//dbg_printf("     ADDED DELETED -> %d (%d %d %d)\n", canon.size(),
 	//it->pivotUnit, it->localUnit, it->remoteUnit);
       }
     }
+    accum = canon;
   }
 
-  for (list<MatchUnit>::iterator it=accum.begin();
-       it!=accum.end(); 
-       it++) {
-    if (it->deleted) {
-      canon.push_back(*it);
-      //dbg_printf("     ADDED DELETED -> %d (%d %d %d)\n", canon.size(),
-      //it->pivotUnit, it->localUnit, it->remoteUnit);
-    }
-  }
-  accum = canon;
   int ct = 0;
   overlap = 0;
   for (list<MatchUnit>::iterator it=accum.begin();
