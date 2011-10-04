@@ -72,7 +72,8 @@ public:
 
       if (!fail) {
 	// sheets are identical!
-	dbg_printf("FastMatch::match identical sheets found\n");
+	dbg_printf("FastMatch::match identical sheets found (%d units)\n",
+		   pass.asel.height());
 	for (int i=0; i<pass.asel.height(); i++) {
 	  pass.asel.cell(0,i) = i;
 	  pass.bsel.cell(0,i) = i;

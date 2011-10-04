@@ -31,7 +31,8 @@ public:
 
   void merge(const OrderResult& nlocal,
 	     const OrderResult& nremote,
-	     const CompareFlags& flags); 
+	     const CompareFlags& flags,
+	     bool columnar); 
 
   void merge_by_id(const OrderResult& nlocal,
 		   const OrderResult& nremote,

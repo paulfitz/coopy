@@ -635,6 +635,10 @@ ADD_TEST(patch_merge_Compare
 
 # sundry bug reports
 
+ADD_TEST(insert_col_bug1 ${ssdiff} --parent ${TESTS}/header/insert/base.csvs ${TESTS}/header/insert/ver1.csvs ${TESTS}/header/insert/ver2.csvs)
+ADD_TEST(insert_col_bug2 ${ssdiff} --parent ${TESTS}/header/insert/base.csvs ${TESTS}/header/insert/ver2.csvs ${TESTS}/header/insert/ver1.csvs)
+
+
 IF (USE_GNUMERIC)
 
   ADD_TEST(peeps_to_xls ${ssformat} ${TESTS}/bug/peeps_0002/people.csvs peeps_to_xls.xls)

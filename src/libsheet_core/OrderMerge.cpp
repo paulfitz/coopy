@@ -381,7 +381,8 @@ static int next_avail(const set<int>& s, int val) {
 
 void OrderMerge::merge(const OrderResult& nlocal,
 		       const OrderResult& nremote,
-		       const CompareFlags& flags) {
+		       const CompareFlags& flags,
+		       bool columnar) {
   this->flags = flags;
   order_local = nlocal;
   order_remote = nremote;
@@ -410,7 +411,7 @@ void OrderMerge::merge(const OrderResult& nlocal,
 
   bool ordered = flags.use_order;
 
-  if (flags.use_order) {
+  if (flags.use_order||columnar) {
 
     while (more) {
 

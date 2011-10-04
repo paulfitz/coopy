@@ -466,7 +466,7 @@ bool Merger::merge(MergerState& state) {
   CompareFlags cflags = flags;
   cflags.head_trimmed = false;
   cflags.tail_trimmed = false;
-  col_merge.merge(col_local,col_remote,cflags);
+  col_merge.merge(col_local,col_remote,cflags,true);
 
   dbg_printf("Merging row order...\n");
 
@@ -485,7 +485,7 @@ bool Merger::merge(MergerState& state) {
 	row_merge.accum.push_back(unit);
       }
     } else {
-      row_merge.merge(row_local,row_remote,flags);
+      row_merge.merge(row_local,row_remote,flags,false);
     }
   }
 
@@ -541,8 +541,8 @@ bool Merger::merge(MergerState& state) {
 	 it!=col_merge.accum.end(); 
 	 it++) {
       MatchUnit& unit = *it;
-      int pCol = unit.localUnit;
-      int lCol = unit.pivotUnit;
+      int pCol = unit.pivotUnit;
+      int lCol = unit.localUnit;
       int rCol = unit.remoteUnit;
       bool deleted = unit.deleted;
       LinkDeclare decl;
@@ -645,6 +645,9 @@ bool Merger::merge(MergerState& state) {
 
     bool fixedColumns = flags.fixed_columns;
 
+    dbg_printf("Column order pre-deletions is %s\n",
+	       vector2string(local_col_names).c_str());
+
     // Pass 1: signal any column deletions
     for (list<MatchUnit>::iterator it=col_merge.accum.begin();
 	 it!=col_merge.accum.end(); 
@@ -686,6 +689,9 @@ bool Merger::merge(MergerState& state) {
     }
 
 
+    dbg_printf("Column order pre-shuffle is %s\n",
+	       vector2string(local_col_names).c_str());
+
     // Pass 2: check order
     vector<int> shuffled_cols;
     for (list<MatchUnit>::iterator it=col_merge.accum.begin();
@@ -693,7 +699,7 @@ bool Merger::merge(MergerState& state) {
 	 it++) {
       MatchUnit& unit = *it;
       //int pCol = unit.localUnit;
-      int lCol = unit.pivotUnit;
+      int lCol = unit.localUnit;
       //int rCol = unit.remoteUnit;
       bool deleted = unit.deleted;
       if (lCol!=-1 && !deleted) {
@@ -713,8 +719,10 @@ bool Merger::merge(MergerState& state) {
     vector<int> move_order;
     
     if (local_cols.size()!=shuffled_cols.size()) {
-      dbg_printf("Match failed %s:%d\n",
-		 __FILE__, __LINE__);
+      dbg_printf("Match failed %s:%d (%d vs %d)\n",
+		 __FILE__, __LINE__,
+		 local_cols.size(), shuffled_cols.size()
+		 );
       fprintf(stderr,"Match failed, please report %s:%d\n",
 	      __FILE__, __LINE__);
       exit(1);
