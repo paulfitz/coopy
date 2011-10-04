@@ -103,7 +103,10 @@ bool MergeOutputTdiff::mergeStart() {
 
 void MergeOutputTdiff::showSheet() {
   if (!sheetNameShown) {
-    fprintf(out,"\n@@@ %s\n\n", sheetName.c_str());
+    const CompareFlags& flags = getFlags();
+    if (!flags.omit_sheet_name) {
+      fprintf(out,"\n@@@ %s\n\n", sheetName.c_str());
+    }
     sheetNameShown = true;
   }
 }

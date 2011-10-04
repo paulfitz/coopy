@@ -44,6 +44,8 @@ int main(int argc, char *argv[]) {
   bool verbose = false;
   bool inplace = false;
   bool help = false;
+  bool omitHeader = false;
+  bool omitSheet = false;
   string output = "-";
   string formatName = "apply";
   string cmd = "";
@@ -59,6 +61,8 @@ int main(int argc, char *argv[]) {
       {"tmp", 1, 0, 't'},
       {"cmd", 1, 0, 'c'},
       {"format", 1, 0, 'f'},
+      {"omit-format-name", 0, 0, 'O'},
+      {"omit-sheet-name", 0, 0, 'P'},
       {0, 0, 0, 0}
     };
 
@@ -89,6 +93,12 @@ int main(int argc, char *argv[]) {
       break;
     case 'c':
       cmd = optarg;
+      break;
+    case 'O':
+      omitHeader = true;
+      break;
+    case 'P':
+      omitSheet = true;
       break;
     default:
       fprintf(stderr, "Unrecognized option\n");
@@ -225,6 +235,12 @@ int main(int argc, char *argv[]) {
   MergeOutputVerboseDiff fakePatcher;
   PatchParser parser(alt,patch_name,cmd);
   CompareFlags flags;
+  if (omitHeader) {
+    flags.omit_format_name = true;
+  }
+  if (omitSheet) {
+    flags.omit_sheet_name = true;
+  }
   alt->startOutput(output,flags);
   alt->setFlags(flags);
   bool ok = parser.apply();

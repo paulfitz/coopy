@@ -1224,7 +1224,7 @@ bool PatchParser::applyColor() {
 	      change.val[col] = nully(c.text.substr(offset+separator.length(),
 						    c.text.length()));
 	    } else {
-	      change.val[col] = nully(c.text);
+	      //change.val[col] = nully(c.text);
 	    }
 	    /*
 	    TDiffPart p(c.text,false,minuses);

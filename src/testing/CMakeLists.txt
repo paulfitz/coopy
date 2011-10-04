@@ -553,6 +553,10 @@ FOREACH(rev all all_but_add just_add)
   ADD_TEST(review_${rev}_compare ${ssdiff} --equal ${TESTS}/review/review_${rev}_result.csv review_${rev}_out.csv)
 ENDFOREACH()
 
+ADD_TEST(review_convert ${sspatch} --output review_convert.tdiff --omit-format-name --omit-sheet-name --format tdiff ${TESTS}/review/review_all.csv)
+ADD_TEST(review_convert_compare ${CMAKE_COMMAND} -E compare_files 
+  review_convert.tdiff ${TESTS}/review/review_all.tdiff)
+
 
 #######################################################################
 #######################################################################

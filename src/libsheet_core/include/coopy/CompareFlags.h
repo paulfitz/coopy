@@ -63,6 +63,7 @@ public:
   bool pivot_sides_with_local;
   bool use_order;
   bool omit_format_name;
+  bool omit_sheet_name;
   bool fixed_columns;
   bool ignore_case;
   std::string pivot_uri;
@@ -81,6 +82,7 @@ public:
     pivot_sides_with_local = false;
     use_order = true;
     omit_format_name = false;
+    omit_sheet_name = false;
     fixed_columns = false;
     ignore_case = false;
   }
