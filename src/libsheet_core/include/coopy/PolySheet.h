@@ -218,13 +218,13 @@ public:
   // insert a row before base; if base is invalid insert after all rows
   virtual RowRef insertRow(const RowRef& base) {
     COOPY_ASSERT(sheet);
-    return sheet->insertRow((dh==0)?base:base.delta(dh));
+    return fixRow(sheet->insertRow((dh==0)?base:base.delta(dh)));
   }
 
   // move a row before base; if base is invalid move after all rows
   virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
     COOPY_ASSERT(sheet);
-    return sheet->moveRow(src,(dh==0)?base:base.delta(dh));
+    return fixRow(sheet->moveRow(src,(dh==0)?base:base.delta(dh)));
   }
 
   virtual bool copyData(const DataSheet& src) {
@@ -397,6 +397,14 @@ public:
   virtual bool addedHeader() {
     COOPY_ASSERT(sheet);
     return sheet->addedHeader();
+  }
+
+private:
+  RowRef fixRow(const RowRef& r) {
+    if (dh==0) return r;
+    int idx = r.getIndex();
+    if (idx==-1) return r;
+    return r.delta(-dh);
   }
 };
 

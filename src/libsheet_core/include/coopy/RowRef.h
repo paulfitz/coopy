@@ -25,6 +25,7 @@ public:
   }
 
   RowRef delta(int dh) const {
+    if (index==-1) return RowRef(index);
     return RowRef(index+dh);
   }
 };

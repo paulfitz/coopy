@@ -45,8 +45,16 @@ int SheetPatcher::matchRow(const std::vector<int>& active_cond,
 	  }
 	}
       }
-      if (match) return r;
+      if (match) {
+	dbg_printf("Found row %d\n", r);
+	return r;
+      }
     }
+  }
+  if (!show) {
+    dbg_printf("No match for update\n");
+    fprintf(stderr,"No match\n");
+    matchRow(active_cond,cond,width,true);
   }
   if (show && rbest>=0) {
     printf("# best match was\n");
@@ -359,6 +367,12 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   }
 
   dbg_printf("\n======================\nRow cursor in: %d\n", rowCursor);
+  if (coopy_is_verbose()) {
+    RowChange c;
+    c = change;
+    c.show();
+  }
+
   if (!change.sequential) rowCursor = -1;
   //map<string,int> dir;
   vector<int> active_cond;
@@ -421,6 +435,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       if (sheet.isSequential()) {
 	RowRef tail(rowCursor);
 	int r = sheet.insertRow(tail).getIndex();
+	dbg_printf("+++ inserted row at %d (%d)\n", r, tail.getIndex());
 	activeRow.insertRow(tail);
 	/*
 	if (rowCursor!=-1) {
@@ -498,7 +513,9 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     {
       if (active_conds>0) {
 	int r = matchRow(active_cond,cond,width);
-	if (r<0) return false;
+	if (r<0) {
+	  return false;
+	}
 	r++;
 	if (r>=sheet.height()) {
 	  r = -1;
@@ -546,9 +563,6 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       bool success = false;
       int r = matchRow(active_cond,cond,width);
       if (r<0) {
-	dbg_printf("No match for update\n");
-	fprintf(stderr,"No match\n");
-	matchRow(active_cond,cond,width,true);
 	rowCursor = -1;
 	return false;
       }

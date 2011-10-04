@@ -435,13 +435,13 @@ ENDMACRO ()
 
 ADD_DIFF_TEST(ssdiff_loc ${TESTS}/loc/loc.csv ${TESTS}/loc/loc_perturb.csv)
 
-MACRO(ADD_ROUND_TRIP_TEST name P1 P2 FORMAT)
+MACRO(ADD_ROUND_TRIP_TEST_BASE name P1 P2 INTERFORMAT FORMAT)
     set(ext ${FORMAT})
     if ("${ext}" STREQUAL "color")
       set(ext "csvs")
     endif()
     set(fname "${name}_patch.${ext}")
-    set(fname2 "${name}_result.csv")
+    set(fname2 "${name}_result.${INTERFORMAT}")
     ADD_TEST(${name}_diff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
       --output ${fname} --format ${FORMAT} ${ARGN} ${P1} ${P2})
     ADD_TEST(${name}_patch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
@@ -450,9 +450,19 @@ MACRO(ADD_ROUND_TRIP_TEST name P1 P2 FORMAT)
       --equals ${fname2} ${P2})
 ENDMACRO ()
 
+MACRO(ADD_ROUND_TRIP_TEST name P1 P2 FORMAT)
+  ADD_ROUND_TRIP_TEST_BASE(${name} ${P1} ${P2} csv ${FORMAT})
+ENDMACRO ()
+
+
 MACRO(ADD_ROUND_TRIP_TEST_BI name P1 P2 FORMAT)
   ADD_ROUND_TRIP_TEST(${name}_forward ${P1} ${P2} ${FORMAT})
   ADD_ROUND_TRIP_TEST(${name}_reverse ${P2} ${P1} ${FORMAT})
+ENDMACRO()
+
+MACRO(ADD_ROUND_TRIP_TEST_BI_BASE name P1 P2 INTER FORMAT)
+  ADD_ROUND_TRIP_TEST_BASE(${name}_forward ${P1} ${P2} ${INTER} ${FORMAT})
+  ADD_ROUND_TRIP_TEST_BASE(${name}_reverse ${P2} ${P1} ${INTER} ${FORMAT})
 ENDMACRO()
 
 foreach(FORMAT csv tdiff color)
@@ -543,6 +553,9 @@ ADD_TEST(csvs_header_equal_csvs ${ssdiff} --equal ${TESTS}/numbers.xls csvs_head
 ADD_TEST(csvs_header_diff ${ssdiff} --verbose --output csvs_header_diff.tdiff --omit-format-name ${TESTS}/numbers.xls csvs_header.csvs)
 ADD_TEST(csvs_header_diff_ok ${CMAKE_COMMAND} -E compare_files 
   csvs_header_diff.tdiff ${TESTS}/results/blank.tdiff)
+
+
+ADD_ROUND_TRIP_TEST_BI_BASE(csvs_diff ${TESTS}/header/broken_bridges.csvs ${TESTS}/header/bridges.csvs csvs tdiff)
 
 #######################################################################
 #######################################################################
