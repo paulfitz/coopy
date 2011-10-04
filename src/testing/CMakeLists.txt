@@ -554,8 +554,9 @@ ADD_TEST(csvs_header_diff ${ssdiff} --verbose --output csvs_header_diff.tdiff --
 ADD_TEST(csvs_header_diff_ok ${CMAKE_COMMAND} -E compare_files 
   csvs_header_diff.tdiff ${TESTS}/results/blank.tdiff)
 
+ADD_ROUND_TRIP_TEST_BI_BASE(csvs_ez_diff ${TESTS}/header/broken_bridges.csvs ${TESTS}/header/bridges.csvs csvs tdiff)
 
-ADD_ROUND_TRIP_TEST_BI_BASE(csvs_diff ${TESTS}/header/broken_bridges.csvs ${TESTS}/header/bridges.csvs csvs tdiff)
+ADD_ROUND_TRIP_TEST_BI_BASE(csvs_col_diff ${TESTS}/header/bridges.csvs ${TESTS}/header/bridges_quark.csvs csvs tdiff)
 
 #######################################################################
 #######################################################################

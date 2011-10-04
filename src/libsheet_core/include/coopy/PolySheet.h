@@ -157,8 +157,11 @@ public:
   virtual bool deleteColumn(const ColumnRef& column) {
     COOPY_ASSERT(sheet);
     bool ok = sheet->deleteColumn(column);
-    if (ok&&owned_schema&&schema!=0/*NULL*/) {
-      schema->deleteColumn(column);
+    if (!ok) return false;
+    SheetSchema *s = getSchema();
+    if (s) {
+      //if (ok&&owned_schema&&schema!=0/*NULL*/) {
+      s->deleteColumn(column);
     }
     return ok;
   }
@@ -167,8 +170,9 @@ public:
     COOPY_ASSERT(sheet);
     ColumnRef result = sheet->insertColumn(base);
     if (!result.isValid()) return result;
-    if (schema) {
-      result = schema->insertColumn(base,ColumnInfo());
+    SheetSchema *s = getSchema();
+    if (s) {
+      result = s->insertColumn(base,ColumnInfo());
     }
     return result;
   }
@@ -179,8 +183,9 @@ public:
     COOPY_ASSERT(sheet);
     ColumnRef result = sheet->insertColumn(base,info);
     if (!result.isValid()) return result;
-    if (schema) {
-      result = schema->insertColumn(base,info);
+    SheetSchema *s = getSchema();
+    if (s) {
+      result = s->insertColumn(base,info);
     }
     return result;
   }
@@ -190,8 +195,9 @@ public:
     COOPY_ASSERT(sheet);
     bool result = sheet->modifyColumn(base,info);
     if (!result) return result;
-    if (schema) {
-      result = schema->modifyColumn(base,info);
+    SheetSchema *s = getSchema();
+    if (s) {
+      result = s->modifyColumn(base,info);
     }
     return result;
   }

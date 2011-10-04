@@ -208,9 +208,10 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 	idx = matchCol(before);
       }
       //bool ok = sheet.insertColumn(ColumnRef(toSheet)).isValid();
-      bool ok = sheet.insertColumn(ColumnRef(idx)).isValid();
-      ColumnRef at = activeCol.insertColumn(ColumnRef(idx));
-      statusCol.insertColumn(ColumnRef(idx));
+      ColumnInfo ci(mover);
+      bool ok = sheet.insertColumn(ColumnRef(idx),ci).isValid();
+      ColumnRef at = activeCol.insertColumn(ColumnRef(idx),ci);
+      statusCol.insertColumn(ColumnRef(idx),ci);
       activeCol.cellString(at.getIndex(),0,mover);
       statusCol.cellString(at.getIndex(),0,"+++");
       if (descriptive) {
