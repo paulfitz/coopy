@@ -42,7 +42,8 @@ private:
 
   int matchRow(const std::vector<int>& active_cond,
 	       const std::vector<coopy::store::SheetCell>& cond,
-	       int width);
+	       int width,
+	       bool show=false);
 
   int matchCol(const std::string& mover);
 

@@ -19,22 +19,45 @@ using namespace coopy::store;
 
 int SheetPatcher::matchRow(const std::vector<int>& active_cond,
 			   const std::vector<SheetCell>& cond,
-			   int width) {
+			   int width, bool show) {
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return false;
   int r = -1;
+  int bct = 0;
+  int rbest = -1;
   for (r=0; r<sheet.height(); r++) {
+    int ct = 0;
     if (activeRow.cellString(0,r)!="---") {
       bool match = true;
       for (int c=0; c<width; c++) {
 	if (active_cond[c]) {
 	  if (sheet.cellSummary(c,r)!=cond[c]) {
 	    match = false;
-	    break;
+	    if (!show) {
+	      break;
+	    }
+	  } else {
+	    ct++;
+	    if (ct>bct) {
+	      bct = ct;
+	      rbest = r;
+	    }
 	  }
 	}
       }
       if (match) return r;
+    }
+  }
+  if (show && rbest>=0) {
+    printf("# best match was\n");
+    for (int c=0; c<width; c++) {
+	if (active_cond[c]) {
+	  if (sheet.cellSummary(c,rbest)!=cond[c]) {
+	    printf("#   %s <-> %s\n",
+		   sheet.cellSummary(c,rbest).text.c_str(),
+		   cond[c].text.c_str());
+	  }
+	}
     }
   }
   return -1;
@@ -524,6 +547,8 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       int r = matchRow(active_cond,cond,width);
       if (r<0) {
 	dbg_printf("No match for update\n");
+	fprintf(stderr,"No match\n");
+	matchRow(active_cond,cond,width,true);
 	rowCursor = -1;
 	return false;
       }

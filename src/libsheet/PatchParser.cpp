@@ -66,6 +66,10 @@ public:
 
   string inferInsert(const PatchColumnNames& prior,
 		     int *dest) {
+    if (lst.size()!=prior.lst.size()+1) {
+      fprintf(stderr, "Error in insertion, final length is %d, original length is %d\n",
+	      lst.size(), prior.lst.size());
+    }
     COOPY_ASSERT(lst.size()==prior.lst.size()+1);
     int i;
     for (i=0; i<(int)prior.lst.size(); i++) {
@@ -618,6 +622,7 @@ public:
 
   string peel(const string& s, string& sep, string& rem, bool& hasQuote) {
     hasQuote = false;
+    char quoter = '\0';
     bool acceptSingle = true;
     bool acceptDouble = true;
     bool allowDouble = false;
@@ -631,6 +636,7 @@ public:
       if ((allowDouble&&ch=='\"'&&acceptDouble)||(ch=='\''&&acceptSingle)) {
 	if (i==0) {
 	  hasQuote = true;
+	  quoter = ch;
 	}
 	state = 0;
 	quote = !quote;
@@ -674,6 +680,11 @@ public:
     }
     if (hasQuote) {
       result = result.substr(1,result.length()-2);
+      if (quoter=='\'') {
+	Stringer::replace(result,"''","'");
+      } else {
+	Stringer::replace(result,"\"\"","\"");
+      }
     }
     return result;
   }
@@ -1079,6 +1090,7 @@ bool PatchParser::applyColor() {
     }
     vector<string> cols;
     vector<string> activeCol;
+    vector<string> origCol;
     vector<string> statusCol;
     RowChange::txt2bool indexes;
     int xoff = 1;
@@ -1145,6 +1157,8 @@ bool PatchParser::applyColor() {
 	    if (act=="+++") {
 	      statusCol[j-1-xoff] = act;
 	      indexes[col] = false;
+	    } else {
+	      origCol.push_back(col);
 	    }
 	    if (act=="---") {
 	      statusCol[j-1-xoff] = act;
@@ -1153,6 +1167,13 @@ bool PatchParser::applyColor() {
 	      activeCol.push_back(col);
 	    }
 	  }
+
+	  NameChange nc;
+	  nc.mode = NAME_CHANGE_DECLARE;
+	  nc.final = false;
+	  nc.names = origCol;
+	  patcher->changeName(nc);
+
 	  for (int j=0; j<(int)cols.size(); j++) {
 	    string act = statusCol[j];
 	    //printf("   [%d] [%s]\n", j, act.c_str());
@@ -1203,7 +1224,7 @@ bool PatchParser::applyColor() {
 	  change.cond[cols[j-1-xoff]] = c;
 	}
 	if (allowed) patcher->changeRow(change);
-      } else if (tail2 == "->") {
+      } else if (tail2 == "->" && code.find("!")==string::npos) {
 	change.mode = ROW_CHANGE_UPDATE;
 	int minuses = 0;
 	string separator = code.substr(code.find("-"),code.length());

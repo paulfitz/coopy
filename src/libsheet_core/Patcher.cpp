@@ -109,3 +109,10 @@ bool Patcher::copyFile(const char *src, const char *dest) {
   fclose(fin);
   return true;
 }
+
+
+void RowChange::show() {
+  MergeOutputVerboseDiff diff;
+  diff.changeRow(*this);
+}
+

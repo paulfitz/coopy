@@ -164,6 +164,8 @@ public:
     }
     return "unknown";
   }
+
+  void show();
 };
 
 class coopy::cmp::NameChange {
