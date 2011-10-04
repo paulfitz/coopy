@@ -104,8 +104,11 @@ ColumnRef GnumericSheet::insertColumn(const ColumnRef& base,
   if (!ok) { printf("fail\n"); return ColumnRef(); }
   w++;
   if (info.hasName()) {
-    if (height()>0) {
-      cellString(index,0,info.getName());
+    string n = info.getName();
+    if (n[0]!='{') {
+      if (height()>0) {
+	cellString(index,0,info.getName());
+      }
     }
   }
   return ColumnRef(index);

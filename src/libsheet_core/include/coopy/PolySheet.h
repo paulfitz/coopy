@@ -179,7 +179,6 @@ public:
 
   virtual ColumnRef insertColumn(const ColumnRef& base, 
 				 const ColumnInfo& info) {
-    printf("Insert col %s (%d)\n", info.getName().c_str(), schema!=NULL);
     COOPY_ASSERT(sheet);
     ColumnRef result = sheet->insertColumn(base,info);
     if (!result.isValid()) return result;
