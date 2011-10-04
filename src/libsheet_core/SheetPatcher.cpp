@@ -17,6 +17,17 @@ using namespace coopy::store;
 #define FULL_COLOR (65535)
 #define HALF_COLOR (65535/2)
 
+static bool null_like(const SheetCell& a) {
+  return a.escaped||a.text==""||a.text=="NULL";
+}
+
+static bool is_match(const SheetCell& a, const SheetCell& b) {
+  return a==b;
+  //if (a==b) return true;
+  //if (!null_like(a)) return false;
+  //return null_like(b);
+}
+
 int SheetPatcher::matchRow(const std::vector<int>& active_cond,
 			   const std::vector<SheetCell>& cond,
 			   int width, bool show) {
@@ -31,7 +42,7 @@ int SheetPatcher::matchRow(const std::vector<int>& active_cond,
       bool match = true;
       for (int c=0; c<width; c++) {
 	if (active_cond[c]) {
-	  if (sheet.cellSummary(c,r)!=cond[c]) {
+	  if (!is_match(sheet.cellSummary(c,r),cond[c])) {
 	    match = false;
 	    if (!show) {
 	      break;
@@ -53,18 +64,16 @@ int SheetPatcher::matchRow(const std::vector<int>& active_cond,
   }
   if (!show) {
     dbg_printf("No match for update\n");
-    fprintf(stderr,"No match\n");
     matchRow(active_cond,cond,width,true);
   }
   if (show && rbest>=0) {
-    printf("# best match was\n");
+    fprintf(stderr,"# No match - closest was:\n");
     for (int c=0; c<width; c++) {
 	if (active_cond[c]) {
-	  if (sheet.cellSummary(c,rbest)!=cond[c]) {
-	    printf("#   %s <-> %s\n",
-		   sheet.cellSummary(c,rbest).text.c_str(),
-		   cond[c].text.c_str());
-	  }
+	  fprintf(stderr,"#   '%s' <-> '%s' %s\n",
+		  sheet.cellSummary(c,rbest).text.c_str(),
+		  cond[c].text.c_str(),
+		  (sheet.cellSummary(c,rbest)!=cond[c])?"FAIL":"OK");
 	}
     }
   }

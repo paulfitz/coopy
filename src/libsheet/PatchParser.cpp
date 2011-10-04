@@ -1221,7 +1221,9 @@ bool PatchParser::applyColor() {
 	change.mode = ROW_CHANGE_DELETE;
 	for (int j=1+xoff; j<sheet.width(); j++) {
 	  SheetCell c = sheet.cellSummary(j,i);
-	  change.cond[cols[j-1-xoff]] = c;
+	  if (!c.escaped) {
+	    change.cond[cols[j-1-xoff]] = c;
+	  }
 	}
 	if (allowed) patcher->changeRow(change);
       } else if (tail2 == "->" && code.find("!")==string::npos) {
@@ -1239,11 +1241,13 @@ bool PatchParser::applyColor() {
 	    string::size_type offset = c.text.find(separator);
 	    if (offset!=string::npos) {
 	      if (!added) {
-		change.cond[col] = nully(c.text.substr(0,offset));
+		SheetCell tmp = nully(c.text.substr(0,offset));
+		change.cond[col] = tmp;
 		done = true;
 	      }
-	      change.val[col] = nully(c.text.substr(offset+separator.length(),
-						    c.text.length()));
+	      SheetCell tmp = nully(c.text.substr(offset+separator.length(),
+						  c.text.length()));
+	      change.val[col] = tmp;
 	    } else {
 	      //change.val[col] = nully(c.text);
 	    }
@@ -1260,7 +1264,9 @@ bool PatchParser::applyColor() {
 	  }
 	  if (!done) {
 	    if (!added) {
-	      change.cond[col] = c;
+	      if (!c.escaped) {
+		change.cond[col] = c;
+	      }
 	    }
 	  }
 	}
