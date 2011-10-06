@@ -1,6 +1,7 @@
 #include <coopy/RemoteSqlSheet.h>
 #include <coopy/RemoteSqlTextBook.h>
 #include <coopy/Dbg.h>
+#include <coopy/MergeOutputSqlDiff.h>
 
 #include <sqlxx.h>
 #include <strutilsxx.h>
@@ -10,6 +11,7 @@
 using namespace std;
 using namespace coopy::store;
 using namespace coopy::store::remotesql;
+using namespace coopy::cmp;
 using namespace sqlxx;
 
 #define SQL_CONNECTION(x) (*((CSQL*)((x)->getSqlInterface())))
@@ -251,3 +253,26 @@ bool RemoteSqlSheet::deleteRow(const RowRef& src) {
   return false;
 }
 
+
+bool RemoteSqlSheet::applyRowCache(const RowCache& cache, int row) {
+  CSQL& SQL = SQL_CONNECTION(book);
+
+  RowChange rc;
+  for (int i=0; i<(int)cache.flags.size(); i++) {
+    if (cache.flags[i]) {
+      rc.val[col2sql[i]] = cache.cells[i];
+    }
+  }
+  SqlText text = MergeOutputSqlDiff::getText(rc,name.c_str());
+
+  string query = string("INSERT INTO ") + text.name + " (" + text.val_columns + ") VALUES (" + text.val_values + ")";
+  string out;
+  CSQLResult *result = SQL.openQuery(query);
+  if (result==NULL) return false;
+  SQL.closeQuery(result);
+
+  printf("Remote SQL insertions are currently incomplete\n");
+
+  h++;
+  return true;
+}

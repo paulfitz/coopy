@@ -46,11 +46,16 @@ bool MergeOutputSqlDiff::changeColumn(const OrderChange& change) {
   return true;
 }
 
-bool MergeOutputSqlDiff::changeRow(const RowChange& change) {
-  string vals;
-  string val_values;
-  string val_columns;
-  string name = quoteSql(sheet_name,'\"',false);
+
+SqlText MergeOutputSqlDiff::getText(const RowChange& change, const char *sheet_name) {
+  SqlText text;
+  string& name = text.name;
+  string& vals = text.vals;
+  string& conds = text.conds;
+  string& val_columns = text.val_columns;
+  string& val_values = text.val_values;
+
+  name = quoteSql(sheet_name,'\"',false);
   for (RowChange::txt2cell::const_iterator it=change.val.begin(); 
        it!=change.val.end(); 
        it++) {
@@ -74,7 +79,6 @@ bool MergeOutputSqlDiff::changeRow(const RowChange& change) {
     }
   }
 
-  string conds;
   for (RowChange::txt2cell::const_iterator it=change.cond.begin(); 
        it!=change.cond.end(); 
        it++) {
@@ -91,6 +95,16 @@ bool MergeOutputSqlDiff::changeRow(const RowChange& change) {
       conds += q;
     }
   }
+  return text;
+}
+
+bool MergeOutputSqlDiff::changeRow(const RowChange& change) {
+  SqlText text = getText(change,sheet_name.c_str());
+  string& name = text.name;
+  string& vals = text.vals;
+  string& conds = text.conds;
+  string& val_columns = text.val_columns;
+  string& val_values = text.val_values;
 
   switch (change.mode) {
   case ROW_CHANGE_INSERT:

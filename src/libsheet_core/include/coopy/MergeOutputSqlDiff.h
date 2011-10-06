@@ -7,9 +7,19 @@
 
 namespace coopy {
   namespace cmp {
+    class SqlText;
     class MergeOutputSqlDiff;
   }
 }
+
+class coopy::cmp::SqlText {
+public:
+  std::string name;
+  std::string vals;
+  std::string conds;
+  std::string val_columns;
+  std::string val_values;
+};
 
 class coopy::cmp::MergeOutputSqlDiff : public MergeOutput {
 private:
@@ -27,6 +37,8 @@ public:
     sheet_name = name;
     return true;
   }
+
+  static SqlText getText(const RowChange& change, const char *sheet_name);
 };
 
 #endif

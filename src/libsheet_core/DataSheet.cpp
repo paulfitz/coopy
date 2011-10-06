@@ -128,13 +128,14 @@ bool DataSheet::copyData(const DataSheet& src) {
 }
 
 bool DataSheet::applyRowCache(const RowCache& cache, int row) {
+  printf("Apply row %d\n", row);
   if (row==-1) {
     fprintf(stderr,"Sheet requires a row\n");
     return false;
   }
   while (row>=height()) {
     insertRow(RowRef(-1));
-    //dbg_printf("adding row..\n");
+    dbg_printf("adding row.. %d\n", height());
   }
   for (int i=0; i<(int)cache.cells.size(); i++) {
     if (cache.flags[i]) {

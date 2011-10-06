@@ -86,6 +86,8 @@ public:
     return true;
   }
 
+  virtual bool applyRowCache(const RowCache& cache, int row);
+
 private:
   RemoteSqlSheetSchema *schema;
   RemoteSqlTextBook *book;
