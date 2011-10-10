@@ -43,6 +43,10 @@ public:
   bool autoIncrement;
   bool autoIncrementSet;
 
+  std::string foreignTable;
+  std::string foreignKey;
+  bool foreignKeySet;
+
   ColumnType() {
     reset();
   }
@@ -63,6 +67,7 @@ public:
     src_name = "";
     autoIncrement = false;
     autoIncrementSet = false;
+    foreignKeySet = false;
   }
 
   // do guess-work
@@ -93,6 +98,10 @@ public:
   
   virtual bool isPrimaryKey() const { return columnType.primaryKey; }
   
+  virtual bool hasForeignKey() const { return columnType.foreignKeySet; }
+
+  virtual bool isForeignKey() const { return columnType.foreignKey!=""; }
+    
   const ColumnType& getColumnType() const { return columnType; }
 
   virtual bool hasType() const { return typeSet; }
