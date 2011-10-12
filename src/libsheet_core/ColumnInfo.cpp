@@ -34,7 +34,9 @@ bool ColumnType::setType(const std::string& name,
     family = COLUMN_FAMILY_CURRENCY;
   }
   if (family==COLUMN_FAMILY_NONE) {
-    fprintf(stderr,"Unrecognized type %s; update src/libsheet_core/ColumnInfo.cpp\n", name.c_str());
+    if (name!="") {
+      fprintf(stderr,"Unrecognized type %s; update src/libsheet_core/ColumnInfo.cpp\n", name.c_str());
+    }
   }
 
   return family!=COLUMN_FAMILY_NONE;

@@ -76,6 +76,13 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
 	       sheet.height());
     dbg_printf("  - Sheet name [%s]\n", 
 	       schema->getSheetName().c_str());
+    if (coopy_is_verbose()) {
+      for (int i=0; i<schema->getColumnCount(); i++) {
+	ColumnInfo info = schema->getColumnInfo(i);
+	dbg_printf("    - column %s type %s\n", info.getName().c_str(),
+		   info.getColumnType().asSqlite(true).c_str());
+      }
+    }
     PolySheet target = readSheet(target_name);
     if (!target.isValid()) {
       if (!addSheet(*schema)) {

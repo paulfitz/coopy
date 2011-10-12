@@ -105,6 +105,27 @@ public:
   const ColumnType& getColumnType() const { return columnType; }
 
   virtual bool hasType() const { return typeSet; }
+
+  void setName(std::string name) {
+    this->name = name;
+    nameSet = true;
+  }
+
+  void setPk(bool pk) {
+    columnType.primaryKeySet = true;
+    columnType.primaryKey = pk;
+  }
+
+  void setReference(std::string t, std::string c) {
+    columnType.foreignKeySet = true;
+    columnType.foreignTable = t;
+    columnType.foreignKey = c;    
+  }
+
+  void setType(const std::string name, const std::string lang = "unknown") {
+    columnType.setType(name,lang);
+    typeSet = true;
+  }
 };
 
 #endif

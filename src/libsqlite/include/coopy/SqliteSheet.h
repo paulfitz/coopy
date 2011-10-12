@@ -4,6 +4,7 @@
 #include <coopy/DataSheet.h>
 #include <coopy/SparseSheet.h>
 #include <coopy/EfficientMap.h>
+#include <coopy/ColumnInfo.h>
 
 #include <vector>
 
@@ -53,11 +54,14 @@ public:
   virtual bool deleteRow(const RowRef& src);
 
   virtual ColumnInfo getColumnInfo(int x) {
+    /*
     ColumnType t;
     t.primaryKey = col2pk[x];
     t.primaryKeySet = true;
     //printf(">> %d %s\n", x, col2sql[x].c_str());
     return ColumnInfo(col2sql[x],t);
+    */
+    return col2sql[x];
   }
 
   virtual int getColumnCount() const {
@@ -94,12 +98,15 @@ private:
   std::string name;
   int w, h;
   std::vector<int> row2sql;
-  std::vector<std::string> col2sql;
+  std::vector<ColumnInfo> col2sql;
+
+  //std::vector<std::string> col2sql;
   std::vector<std::string> primaryKeys;
-  std::vector<bool> col2pk;
+  //std::vector<bool> col2pk;
   SparseStringSheet cache;
   SparseByteSheet cacheFlag;
-  void checkKeys();
+  void checkPrimaryKeys();
+  void checkForeignKeys();
 
 public:
   static bool isReserved(const std::string& name);

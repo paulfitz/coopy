@@ -156,7 +156,7 @@ public:
 
   string toString() const;
 
-  bool apply(const vector<string>& names, const string& novel = "");
+  bool apply(const vector<ColumnInfo>& names, const string& novel = "");
 };
 
 
@@ -287,12 +287,20 @@ bool SqliteSheet::connect() {
   } 
 
   while (sqlite3_step(statement) == SQLITE_ROW) {
-    col2sql.push_back((const char *)sqlite3_column_text(statement,1));
+    const char *col = (const char *)sqlite3_column_text(statement,1);
+    const char *kind = (const char *)sqlite3_column_text(statement,2);
+    ColumnInfo info(col);
+    //printf("col is %s kind is %s\n", col, kind);
+    info.setType(kind,"sqlite");
+    col2sql.push_back(info);
   }
   sqlite3_finalize(statement);
   sqlite3_free(query);
 
-  checkKeys();
+
+
+  checkPrimaryKeys();
+  checkForeignKeys();
 
   cache.resize(w,h,"");
   cacheFlag.resize(w,h,0);
@@ -385,6 +393,20 @@ bool SqliteSheet::create(const SheetSchema& schema) {
       cols += _quoted_single(keys[i]);
     }
     cols += ")";
+  }
+  for (int i=0; i<schema.getColumnCount(); i++) {
+    ColumnInfo ci = schema.getColumnInfo(i);
+    ColumnType ct = ci.getColumnType();
+    if (ct.foreignKeySet) {
+      printf("Should add foreign key\n");
+      cols += ", FOREIGN KEY(";
+      cols += _quoted_single(ci.getName());
+      cols += ") REFERENCES ";      
+      cols += _quoted_single(ct.foreignTable);
+      cols += "(";
+      cols += _quoted_single(ct.foreignKey);
+      cols += ")";
+    }
   }
 
 
@@ -497,7 +519,7 @@ bool SqliteSheet::cellString(int x, int y, const std::string& str, bool escaped)
   }
   query = sqlite3_mprintf("UPDATE %Q SET %Q = %Q WHERE ROWID = %d", 
 			  name.c_str(),
-			  col2sql[x].c_str(),
+			  col2sql[x].getName().c_str(),
 			  tstr,
 			  row2sql[y]);
   //printf(">>> %s\n", query);
@@ -532,7 +554,8 @@ ColumnRef SqliteSheet::moveColumn(const ColumnRef& src,
   string sql_pre = ischema.fetch(db,name.c_str());
   ischema.parse(sql_pre.c_str());
   string cache_sql = ischema.parts[src_index];
-  string cache_name = col2sql[src_index];
+  ColumnInfo cache_info = col2sql[src_index];
+  string cache_name = cache_info.getName();
   ischema.parts.erase(ischema.parts.begin()+src_index);
   col2sql.erase(col2sql.begin()+src_index);
   if (base_index>src_index) {
@@ -540,10 +563,10 @@ ColumnRef SqliteSheet::moveColumn(const ColumnRef& src,
   }
   if (base_index==-1) {
     ischema.parts.push_back(cache_sql);
-    col2sql.push_back(cache_name);
+    col2sql.push_back(cache_info);
   } else {
     ischema.parts.insert(ischema.parts.begin()+base_index,cache_sql);
-    col2sql.insert(col2sql.begin()+base_index,cache_name);
+    col2sql.insert(col2sql.begin()+base_index,cache_info);
   }
   
   return ischema.apply(col2sql)?ColumnRef(base_index):ColumnRef();
@@ -601,7 +624,7 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base,
   string suggest = suggest_base;
   bool found = false;
   for (int i=0; i<(int)col2sql.size(); i++) {
-    string n = col2sql[i];
+    string n = col2sql[i].getName();
     if (n.substr(0,suggest_base.length())==suggest_base) {
       if (n.length()>=suggest.length()) {
 	suggest = n;
@@ -614,6 +637,9 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base,
   }
   string col_name = suggest;
 
+  ColumnInfo info = kind;
+  info.setName(col_name);
+  
   if (index==-1) {
     char *query = sqlite3_mprintf("ALTER TABLE %Q ADD COLUMN %Q",
 				  name.c_str(), col_name.c_str());
@@ -629,7 +655,7 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base,
       return ColumnRef();
     }
     sqlite3_free(query);
-    col2sql.push_back(col_name);
+    col2sql.push_back(info);
     w++;
     return ColumnRef(w-1);
   }
@@ -641,11 +667,11 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base,
   ischema.parse(sql_pre.c_str());
   if (index<0) {
     ischema.parts.push_back(col_sql);
-    col2sql.push_back(col_name);
+    col2sql.push_back(info);
     index = w;
   } else {
     ischema.parts.insert(ischema.parts.begin()+index,col_sql);
-    col2sql.insert(col2sql.begin()+index,col_name);
+    col2sql.insert(col2sql.begin()+index,info);
   }
   if (ischema.apply(col2sql,col_name)) {
     w++;
@@ -735,7 +761,7 @@ bool SqliteSheet::applyRowCache(const RowCache& cache, int row) {
   string vals = "";
   for (int i=0; i<(int)col2sql.size(); i++) {
     if (cache.flags[i]) {
-      string cname = col2sql[i];
+      string cname = col2sql[i].getName();
       if (cname=="" || cname=="*") {
 	fprintf(stderr,"Invalid/unknown column name\n");
 	return false;
@@ -810,7 +836,7 @@ bool SqliteSheet::deleteData() {
 }
 
 
-void SqliteSheet::checkKeys() {
+void SqliteSheet::checkPrimaryKeys() {
   sqlite3 *db = DB(implementation);
   if (db==NULL) return;
 
@@ -827,18 +853,59 @@ void SqliteSheet::checkKeys() {
     sqlite3_free(query);
     return;
   }
-  col2pk.clear();
+  int i = 0;
   while (sqlite3_step(statement) == SQLITE_ROW) {
     char *col = (char *)sqlite3_column_text(statement,1);
     int pk = sqlite3_column_int(statement,5);
     if (pk) {
       primaryKeys.push_back(string(col));
     }
-    col2pk.push_back(pk!=0);
+    col2sql[i].setPk(pk!=0);
+    i++;
   }
   sqlite3_finalize(statement);
   sqlite3_free(query);
 }
+
+
+
+void SqliteSheet::checkForeignKeys() {
+  sqlite3 *db = DB(implementation);
+  if (db==NULL) return;
+
+  sqlite3_stmt *statement = NULL;
+  char *query = NULL;
+
+  query = sqlite3_mprintf("PRAGMA foreign_key_list(%Q)",
+			  this->name.c_str());
+
+  int iresult = sqlite3_prepare_v2(db, query, -1, 
+				   &statement, NULL);
+  if (iresult!=SQLITE_OK) {
+    const char *msg = sqlite3_errmsg(db);
+    if (msg!=NULL) {
+      fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
+    }
+    sqlite3_finalize(statement);
+    sqlite3_free(query);
+  } 
+
+  while (sqlite3_step(statement) == SQLITE_ROW) {
+    const char *ref_table = (const char *)sqlite3_column_text(statement,2);
+    const char *col = (const char *)sqlite3_column_text(statement,3);
+    const char *ref_col = (const char *)sqlite3_column_text(statement,4);
+    //printf("FOREIGN %s: %s %s\n", col, ref_table, ref_col);
+    for (int i=0; i<(int)col2sql.size(); i++) {
+      if (col2sql[i].getName()==col) {
+	col2sql[i].setReference(ref_table,ref_col);
+      }
+    }
+  }
+  sqlite3_finalize(statement);
+  sqlite3_free(query);
+}
+
 
 void SqliteSchema::parse(const char *str) {
   string sql = str;
@@ -946,7 +1013,7 @@ string SqliteSchema::fetch(sqlite3 *db, const char *table) {
 }
 
 
-bool SqliteSchema::apply(const vector<string>& names, const string& novel) {
+bool SqliteSchema::apply(const vector<ColumnInfo>& names, const string& novel) {
   string sql_mod = toString();
 
   //////////////////////////////////////////////////////////////////
@@ -955,7 +1022,7 @@ bool SqliteSchema::apply(const vector<string>& names, const string& novel) {
   string new_column_list = "";
   string ins_column_list = "";
   for (int i=0; i<(int)names.size(); i++) {
-    string base = names[i].c_str();
+    string base = names[i].getName().c_str();
     string add = base;
     if (add.find('\"')!=string::npos) {
       printf("Quoting of sql column names not done yet\n");
