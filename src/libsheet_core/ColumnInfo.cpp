@@ -24,7 +24,7 @@ bool ColumnType::setType(const std::string& name,
     family = COLUMN_FAMILY_REAL;
   } else if (_name == "datetime (short)"||_name=="datetime"||_name=="date") {
     family = COLUMN_FAMILY_DATETIME;
-  } else if (_name=="text"||_name=="varchar") {
+  } else if (_name=="text"||_name=="varchar"||_name.substr(0,7)=="varchar") {
     family = COLUMN_FAMILY_TEXT;
   } else if (_name=="memo"||_name=="hyperlink"||_name=="memo/hyperlink") {
     family = COLUMN_FAMILY_TEXT;

@@ -92,7 +92,9 @@ vector<string> SqliteTextBook::getNamesSql() {
   while (sqlite3_step(statement) == SQLITE_ROW) {
     char *name = (char *)sqlite3_column_text(statement,0);
     //printf("Got name %s\n", name);
-    result.push_back(name);
+    if (string(name)!="SQLITE_SEQUENCE"&&string(name)!="sqlite_sequence") {
+      result.push_back(name);
+    }
   }
   sqlite3_finalize(statement);
 
