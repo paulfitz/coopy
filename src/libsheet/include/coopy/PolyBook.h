@@ -83,18 +83,28 @@ public:
 
   bool isValid() { return book!=NULL; }
 
-  bool read(const char *fname) {
+  bool read(const char *fname, const char *ext = NULL) {
     coopy::store::Property p;
     p.put("file",fname);
+    if (ext!=NULL) {
+      if (ext!="") {
+	p.put("ext",ext);
+      }
+    }
     p.put("can_create",false);
     p.put("should_read",true);
     p.put("should_write",false);
     return attach(p);
   }
 
-  bool attach(const char *fname) {
+  bool attach(const char *fname, const char *ext = NULL) {
     coopy::store::Property p;
     p.put("file",fname);
+    if (ext!=NULL) {
+      if (ext!="") {
+	p.put("ext",ext);
+      }
+    }
     p.put("can_create",true);
     p.put("should_read",true);
     p.put("should_attach",true);
@@ -102,9 +112,14 @@ public:
     return attach(p);
   }
 
-  bool write(const char *fname) {
+  bool write(const char *fname, const char *ext = NULL) {
     coopy::store::Property p;
     p.put("file",fname);
+    if (ext!=NULL) {
+      if (ext!="") {
+	p.put("ext",ext);
+      }
+    }
     p.put("can_create",true);
     p.put("should_read",false);
     p.put("should_write",true);

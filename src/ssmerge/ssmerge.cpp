@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
   bool head_trimmed = false;
   bool tail_trimmed = false;
   std::string output = "-";
+  std::string extension = "";
   bool verbose = false;
   bool indexed = false;
   while (true) {
@@ -26,6 +27,7 @@ int main(int argc, char *argv[]) {
       {"index", 0, 0, 'i'},
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
+      {"format", 1, 0, 'f' },
       {0, 0, 0, 0}
     };
 
@@ -47,6 +49,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'o':
       output = optarg;
+      break;
+    case 'f':
+      extension = optarg;
       break;
     default:
       fprintf(stderr, "Unrecognized option\n");
@@ -72,15 +77,15 @@ int main(int argc, char *argv[]) {
   }
   coopy_set_verbose(verbose);
   PolyBook local, remote, parent;
-  if (!parent.read(argv[0])) {
+  if (!parent.read(argv[0],extension.c_str())) {
     fprintf(stderr,"Failed to read %s\n", argv[0]);
     return 1;
   }
-  if (!local.read(argv[1])) {
+  if (!local.read(argv[1],extension.c_str())) {
     fprintf(stderr,"Failed to read %s\n", argv[1]);
     return 1;
   }
-  if (!remote.read(argv[2])) {
+  if (!remote.read(argv[2],extension.c_str())) {
     fprintf(stderr,"Failed to read %s\n", argv[2]);
     return 1;
   }
@@ -99,7 +104,7 @@ int main(int argc, char *argv[]) {
   } else {
     MergeOutputIndex accum;
     PolyBook book;
-    book.attach(output.c_str());
+    book.attach(output.c_str(),extension.c_str());
     accum.attachBook(book);
     cmp.compare(parent,local,remote,accum,flags);
     book.flush();

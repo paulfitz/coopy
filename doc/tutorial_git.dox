@@ -1,0 +1,93 @@
+/**
+ *
+
+\ingroup all_tutorial
+
+\page tutorial_git Using coopy with git
+
+You can use coopy tools to do smarter merges of tables stored in git.
+Here's a worked example.  Let's make an empty git repository:
+
+\verbatim
+mkdir -p coopy_test/repo
+cd coopy_test/repo
+git init
+\endverbatim
+
+Now, let's place a table in the repository.  There are several options for
+the format we could use.  For simplicity, let's start with a CSV file with
+content like this:
+
+\verbatim
+NAME,DIGIT
+one,1
+two,2
+thre,33
+four,4
+five,5
+\endverbatim
+
+There are two intentional typos on the "thre" line.
+Call this "numbers.csv" and add it to the repository:
+
+\verbatim
+git add numbers.csv
+git commit -m "add csv example"
+\endverbatim
+
+Now, let's tell git to use a custom merge driver for .csv files.
+In the same directory as "numbers.csv", create a file called ".gitattributes"
+containing this:
+\verbatim
+*.csv merge=coopy-csv
+\endverbatim
+Let's add this to the repository too:
+\verbatim
+git add .gitattributes
+git commit -m "add coopy rule"
+\endverbatim
+Now, in $HOME/.gitconfig, add:
+\verbatim
+[merge "coopy-csv"]
+  name = coopy csv data merge
+  driver = ssmerge --format csv --output %A %O %A %B
+\endverbatim
+
+Now let's set up a clone of this repository for testing:
+
+\verbatim
+cd ..   # should be in coopy_test directory now
+git clone repo repo2
+cd repo2
+ls -a   # should see numbers.csv and .gitattributes
+\endverbatim
+
+Good.  Now, to test, we'll make two non-conflicting changes on the same row, 
+and see if they get merged without a problem.  Regular text-based merges
+will choke on this.  So, in repo2, modify "numbers.csv" to make "thre"
+be "three", and commit:
+\verbatim
+git commit -m "fix three" numbers.csv
+\endverbatim
+Now, in repo, modify "numbers.csv" to make "33" be "3", and commit:
+\verbatim
+cd ../repo
+git commit -m "fix 3" numbers.csv
+\endverbatim
+Now try merging:
+\verbatim
+git pull ../repo2
+\endverbatim
+
+Happy result:
+\verbatim
+From ../repo2
+ * branch            HEAD       -> FETCH_HEAD
+Auto-merging numbers.csv
+Merge made by recursive.
+ numbers.csv |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+\endverbatima
+
+ *
+ */

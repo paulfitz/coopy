@@ -134,10 +134,16 @@ bool PolyBook::attach(Property& config) {
   }
   string filename = config.get("file").asString();
   string name = filename;
-  size_t eid = name.rfind(".");
-  string ext = "";
-  if (eid!=string::npos) {
-    ext = name.substr(eid);
+  string ext = config.get("ext").asString();
+  if (ext=="") {
+    size_t eid = name.rfind(".");
+    if (eid!=string::npos) {
+      ext = name.substr(eid);
+    }
+  } else {
+    if (ext[0]!='.') {
+      ext = string(".") + ext;
+    }
   }
   for (size_t i=0; i<ext.length(); i++) {
     ext[i] = tolower(ext[i]);

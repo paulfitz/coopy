@@ -17,7 +17,11 @@ The COOPY project contains programs and libraries to help you:
 \li Supported table formats include CSV, sqlite, mysql, Excel, Access
 (read only).
 
-Here are some tips on how to use these programs:
+\section mainpage_tut Tutorials
+
+\li \ref tutorial_git
+
+\section mainpage_basic Basic usage
 
 \li \ref ssdiff "ssdiff usage".
 \li \ref sspatch "sspatch usage".
@@ -32,6 +36,8 @@ Here are some tips on how to use these programs:
 \if link_examples
 \li \ref merge_example.
 \endif
+
+\section mainpage_ref Reference material
 
 \li \ref patch_format.
 \li \ref table_format.
