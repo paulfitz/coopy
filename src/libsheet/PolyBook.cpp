@@ -47,6 +47,7 @@ public:
     all.push_back(CsvTextBookFactory::makeFactory());
     all.push_back(CsvTextBookFactory::makeCompactFactory());
     all.push_back(new SqliteTextBookFactory);
+    all.push_back(new SqliteTextBookFactory(true));
     getFactories(all,false);
   }
 
@@ -224,6 +225,9 @@ bool PolyBook::attach(Property& config) {
     if (ext==".sqlite") {
       key = "sqlite";
     }
+    if (ext==".sqlitext") {
+      key = "sqlitext";
+    }
     if (ext==".book") {
       key = "book";
     }
@@ -319,6 +323,14 @@ void PolyBook::showFormats() {
   sqlite.addOption("type",STRVAL("sqlite"),"Sqlite family",true);
   sqlite.addOption("file",STRVAL("fname.db"),"File name",true);
   sqlite.show();
+
+
+  FormatDesc sqlitext("SQLITEXT: sqlite-format sql dump");
+  sqlitext.addExtension(".sqlitext","SQL dump of Sqlite database");
+  sqlitext.addDbi("dbi:sqlitext:fname.sql","Force sqlitext interpretation");
+  sqlitext.addOption("type",STRVAL("sqlitext"),"Sqlitext family",true);
+  sqlitext.addOption("file",STRVAL("fname.sql"),"File name",true);
+  sqlitext.show();
   vector<TextBookFactory *> all;
   getFactories(all,true);
   for (int i=0; i<(int)all.size(); i++) {

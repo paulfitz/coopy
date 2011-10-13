@@ -20,7 +20,7 @@ bool ColumnType::setType(const std::string& name,
     family = COLUMN_FAMILY_TEXT;
   } else if (_name == "long integer") {
     family = COLUMN_FAMILY_INTEGER;
-  } else if (_name == "float" || _name=="single" || _name=="double") {
+  } else if (_name == "float" || _name=="single" || _name=="double" || _name == "real") {
     family = COLUMN_FAMILY_REAL;
   } else if (_name == "datetime (short)"||_name=="datetime"||_name=="date") {
     family = COLUMN_FAMILY_DATETIME;
