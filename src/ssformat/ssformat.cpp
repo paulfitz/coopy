@@ -19,6 +19,8 @@ int main(int argc, char *argv[]) {
   bool verbose = false;
   bool help = false;
   string sheetSelection = "";
+  string inputFormat = "";
+  string outputFormat = "";
 
   while (true) {
     int option_index = 0;
@@ -29,6 +31,8 @@ int main(int argc, char *argv[]) {
       {"help", 0, 0, 'H'},
       {"sheet", 1, 0, 's'},
       {"table", 1, 0, 't'},
+      {"input-format", 1, 0, 'F'},
+      {"output-format", 1, 0, 'f'},
       {0, 0, 0, 0}
     };
 
@@ -52,6 +56,12 @@ int main(int argc, char *argv[]) {
     case 's':
     case 't':
       sheetSelection = optarg;
+      break;
+    case 'F':
+      inputFormat = optarg;
+      break;
+    case 'f':
+      outputFormat = optarg;
       break;
     default:
       fprintf(stderr, "Unrecognized option\n");
@@ -81,7 +91,7 @@ int main(int argc, char *argv[]) {
   }
 
   PolyBook src;
-  if (!src.read(argv[0])) {
+  if (!src.read(argv[0],inputFormat.c_str())) {
     fprintf(stderr,"Failed to read %s\n", argv[0]);
     return 1;
   }
@@ -141,7 +151,7 @@ int main(int argc, char *argv[]) {
   if (argc==2) {
     out_file = argv[1];
   }
-  if (!src.write(out_file.c_str())) {
+  if (!src.write(out_file.c_str(),outputFormat.c_str())) {
     fprintf(stderr,"Failed to write %s\n", out_file.c_str());
     return 1;
   }

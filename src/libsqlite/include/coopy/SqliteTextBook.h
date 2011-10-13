@@ -39,7 +39,7 @@ public:
   PolySheet readSheet(const std::string& name);
 
   virtual bool inplace() const {
-    return !textual;
+    return (!textual)&&(!memory);
   }
 
   virtual bool addSheet(const SheetSchema& schema);
@@ -52,6 +52,7 @@ public:
 private:
   void *implementation;
   bool textual;
+  bool memory;
   std::vector<std::string> names;
 
   std::vector<std::string> getNamesSql();
@@ -89,6 +90,10 @@ public:
 	  delete book;
 	  book = NULL;
 	  report.msg = "data transfer failed";
+	  return NULL;
+	}
+	if (!book->inplace()) {
+	  book->save("-",NULL);
 	}
       }
     }

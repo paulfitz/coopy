@@ -19,6 +19,7 @@ using namespace coopy::store::sqlite;
 SqliteTextBook::SqliteTextBook(bool textual) {
   implementation = NULL;
   this->textual = textual;
+  memory = false;
 }
 
 SqliteTextBook::~SqliteTextBook() {
@@ -39,6 +40,10 @@ bool SqliteTextBook::read(const char *fname, bool can_create) {
   string alt_fname = fname;
   if (textual) {
     alt_fname = ":memory:";
+    memory = true;
+  } else if (string(fname)=="-") {
+    alt_fname = ":memory:";
+    memory = true;
   }
 
   int result = sqlite3_open_v2(alt_fname.c_str(),
@@ -57,10 +62,13 @@ bool SqliteTextBook::read(const char *fname, bool can_create) {
 
   if (textual) {
     string txt = "";
-    FILE *fin = fopen(fname,"r");
+    bool console = string(fname)=="-";
+    FILE *fin = stdin;
+    if (!console) {
+      fin = fopen(fname,"r");
+    }
     if (fin==NULL && !can_create) {
 	fprintf(stderr,"Failed to read database %s\n", fname);
-	clear();
 	return false;
     }
     if (fin!=NULL) {
@@ -77,7 +85,9 @@ bool SqliteTextBook::read(const char *fname, bool can_create) {
       sqlite3_exec((sqlite3*)implementation, txt.c_str(), NULL, NULL, NULL);
       //printf("LOADED: [%s]\n", txt.c_str());
     }
-    fclose(fin); fin = NULL;
+    if (fin!=NULL && !console) {
+      fclose(fin); fin = NULL;
+    }
   }
 
   names = getNamesSql();
@@ -86,11 +96,14 @@ bool SqliteTextBook::read(const char *fname, bool can_create) {
 
 bool SqliteTextBook::save(const char *fname, const char *format) {
   if (!textual) {
-    fprintf(stderr,"Error, tried to save an inplace-database\n");
+    fprintf(stderr,"Sorry, cannot write an sqlite database to stdio just yet.\n");
+    return false;
   }
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
-  FILE *fout = fopen(fname,"w");
+  bool console = string(fname)=="-";
+  FILE *fout = stdout;
+  if (!console) fout = fopen(fname,"w");
   if (fout==NULL) return false;
   fprintf(fout,"PRAGMA foreign_keys=OFF;\n");
   fprintf(fout,"BEGIN TRANSACTION;\n");
@@ -171,7 +184,9 @@ bool SqliteTextBook::save(const char *fname, const char *format) {
 
   
   fprintf(fout,"COMMIT;\n");
-  fclose(fout); fout = NULL;
+  if (!console) {
+    fclose(fout); fout = NULL;
+  }
   return true;
 }
 

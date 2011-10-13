@@ -13,6 +13,7 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 int main(int argc, char *argv[]) {
+  CompareFlags flags;
   bool head_trimmed = false;
   bool tail_trimmed = false;
   std::string output = "-";
@@ -28,6 +29,9 @@ int main(int argc, char *argv[]) {
       {"verbose", 0, 0, 'v'},
       {"output", 1, 0, 'o'},
       {"format", 1, 0, 'f' },
+      {"named", 0, 0, 'd'},
+      {"ordered", 0, 0, '1'},
+      {"unordered", 0, 0, '0'},
       {0, 0, 0, 0}
     };
 
@@ -53,6 +57,17 @@ int main(int argc, char *argv[]) {
     case 'f':
       extension = optarg;
       break;
+
+   case 'd':
+      flags.trust_column_names = true;
+      break;
+    case '0':
+      flags.use_order = false;
+      break;
+    case '1':
+      flags.use_order = true;
+      break;
+
     default:
       fprintf(stderr, "Unrecognized option\n");
       return 1;
@@ -89,7 +104,6 @@ int main(int argc, char *argv[]) {
     fprintf(stderr,"Failed to read %s\n", argv[2]);
     return 1;
   }
-  CompareFlags flags;
   flags.head_trimmed = head_trimmed;
   flags.tail_trimmed = tail_trimmed;
   BookCompare cmp;
