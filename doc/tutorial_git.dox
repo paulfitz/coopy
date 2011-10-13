@@ -1,12 +1,52 @@
 /**
  *
 
-\ingroup all_tutorial
-
 \page tutorial_git Using coopy with git
 
 You can use coopy tools to do smarter merges of tables stored in git.
-Here's a worked example.  Let's make an empty git repository:
+
+\li \ref tutorial_git_config
+\li \ref tutorial_git_attr
+\li \ref tutorial_git_worked
+\li \ref tutorial_git_trouble
+\li \ref tutorial_git_useful
+
+The basic steps are:
+\li Add "custom merge driver" lines to your .gitconfig file, to add
+    coopy's \ref ssmerge command as a merge option.
+\li Add format handlers to a .gitattributes file, to make sure
+    the files you want are merged using ssmerge.
+
+\section tutorial_git_config Add custom merge driver
+Find or create a .gitconfig file in your home directory, OR find the file
+.git/config in a repository.  Add to the end of this file lines like 
+this:
+\verbatim
+[merge "coopy-csv"]
+  name = coopy csv data merge
+  driver = ssmerge --format csv --output %A %O %A %B
+\endverbatim
+You'll need a variant of this stanza for each format you want ssmerge
+to handle.  It is best to stick with text formats.
+If ssmerge is not in your path, replace "ssmerge"
+above with something like "/the/full/path/to/ssmerge".
+
+\section tutorial_git_attr Add attributes file
+Find or create a .gitattributes file in the same directory as the
+files you want coopy to handle (there are other options for where to
+put this file, read the gitattributes documentation if you're interested).  
+Add to the end of this file a line or lines like 
+this:
+\verbatim
+*.csv merge=coopy-csv
+\endverbatim
+The .gitattributes file can be placed under version control, so this
+only needs to get set up once.  The custom merge driver step, 
+on the other hand, needs
+to be set up for each collaborator.
+
+\section tutorial_git_worked Worked example
+Let's make an empty git repository:
 
 \verbatim
 mkdir -p coopy_test/repo
@@ -15,8 +55,8 @@ git init
 \endverbatim
 
 Now, let's place a table in the repository.  There are several options for
-the format we could use.  For simplicity, let's start with a CSV file with
-content like this:
+the format we could use.  For simplicity, let's start with a CSV file 
+called "numbers.csv" with content like this:
 
 \verbatim
 NAME,DIGIT
@@ -28,7 +68,7 @@ five,5
 \endverbatim
 
 There are two intentional typos on the "thre" line.
-Call this "numbers.csv" and add it to the repository:
+Add "numbers.csv" to the repository:
 
 \verbatim
 git add numbers.csv
@@ -46,7 +86,8 @@ Let's add this to the repository too:
 git add .gitattributes
 git commit -m "add coopy rule"
 \endverbatim
-Now, in $HOME/.gitconfig, add:
+Now, at the end of $HOME/.gitconfig (create this file if it
+doesn't already exist), add on the following:
 \verbatim
 [merge "coopy-csv"]
   name = coopy csv data merge
@@ -87,7 +128,69 @@ Auto-merging numbers.csv
 Merge made by recursive.
  numbers.csv |   12 ++++++------
  1 files changed, 6 insertions(+), 6 deletions(-)
-\endverbatima
+\endverbatim
+And the contents of numbers.csv should be:
+\verbatim
+NAME,DIGIT
+one,1
+two,2
+three,3
+four,4
+five,5
+\endverbatim
+
+\section tutorial_git_trouble Troubleshooting
+
+If for some reason git doesn't use the coopy merge rule, then something
+like the following message will be shown during merge:
+\verbatim
+remote: Counting objects: 5, done.
+remote: Total 3 (delta 0), reused 0 (delta 0)
+Unpacking objects: 100% (3/3), done.
+From ../repo2
+ * branch            HEAD       -> FETCH_HEAD
+Auto-merging numbers.csv
+CONFLICT (content): Merge conflict in numbers.csv
+Automatic merge failed; fix conflicts and then commit the result.
+\endverbatim
+and numbers.csv will contain the following:
+\verbatim
+NAME,DIGIT
+one,1
+two,2
+<<<<<<< HEAD
+thre,3
+=======
+three,33
+>>>>>>> b37613ebac50b552b4dd967c0f134930361c9070
+four,4
+five,5
+\endverbatim
+This is the regular text merging algorithm.  Undo the merge as 
+follows:
+\verbatim
+git reset --hard HEAD   # remove any uncommitted changes
+\endverbatim
+Then check:
+\li That the .gitconfig exists in your home directory and contains
+    the coopy-csv rule described earlier.
+\li That there is a .gitattributes file in the same directory as
+    numbers.csv, and that it has the contents described earlier.
+\li That the "ssmerge" command is in your path.  If you run "ssmerge"
+    you should see a help message.
+\li That "ssmerge" is a sufficiently recent version.  Running 
+    "ssmerge --format csv" should not give an error message
+    (compare against "ssformat --unknown-option csv")
+
+\section tutorial_git_useful Useful commands for testing
+\verbatim
+git reset --hard HEAD   # remove any uncommitted changes, such as a bad merge
+git reset --hard HEAD^  # remove any uncommitted changes, and revert the last 
+                        # commit
+git pull ../path        # merge in changes from another version of repo
+git pull                # merge in changes from same repo as last time
+\endverbatim
+
 
  *
  */
