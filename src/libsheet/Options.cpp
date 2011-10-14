@@ -177,7 +177,7 @@ int Options::apply(int argc, char *argv[]) {
 
     case 'l':
       PolyBook::showFormats();
-      return 0;
+      exit(0);
       break;
     case 'a':
       option_bool["apply"] = true;
