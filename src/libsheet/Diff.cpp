@@ -21,17 +21,27 @@ static Patcher *createTool(string mode, string version="") {
   return Patcher::createByName(mode.c_str(),version.c_str());
 }
 
+static bool copyFile(const char *src, const char *dest) {
+  return Patcher::copyFile(src,dest);
+}
+
+
 int Diff::apply(const Options& opt) {
   bool verbose = opt.checkBool("verbose");
   bool equality = opt.checkBool("equals");
-  bool apply =  opt.checkBool("apply");
-  std::string output = opt.checkString("output");
+  std::string output = opt.checkString("output","-");
   std::string parent_file = opt.checkString("parent");
   std::string patch_file = opt.checkString("patch");
   std::string cmd = opt.checkString("cmd");
   std::string version = opt.checkString("version");
-  std::string mode = opt.checkString("mode",
-				     opt.isDiffLike()?"tdiff":"merge");
+  std::string tmp = opt.checkString("tmp","");
+  std::string defMode = "tdiff";
+  bool apply = opt.checkBool("apply",false);
+  if (opt.isMergeLike()) defMode = "merge";
+  if (opt.isPatchLike()) defMode = "apply";
+  std::string mode = opt.checkString("mode",defMode.c_str());
+  bool inplace = opt.checkBool("inplace",false);
+  bool showPatch = opt.isPatchLike() && mode=="apply" && !apply;
 
   CompareFlags flags = opt.getCompareFlags();
 
@@ -44,8 +54,10 @@ int Diff::apply(const Options& opt) {
   }
   if (opt.isPatchLike()) {
     if (core.size()>0) {
-      patch_file = core.back();
-      core.erase(core.begin()+core.size()-1);
+      if (cmd==""||core.size()>1) {
+	patch_file = core.back();
+	core.erase(core.begin()+core.size()-1);
+      }
     }
   }
 
@@ -85,6 +97,29 @@ int Diff::apply(const Options& opt) {
     flags.remote_uri = remote_file;
   }
 
+  bool cloned = false;
+  if ((mode=="apply"||mode=="merge")&&!apply) {
+    if (local_file!=""&&local->inplace()&&!inplace&&output!=local_file) {
+      if (output=="-"&&tmp=="") {
+	fprintf(stderr,"Inplace operation; please confirm with --inplace, by specifying an --output, or specify a 'tmp' location to avoid modifying database.\n");
+	return 1;
+      }
+      if (tmp=="") {
+	tmp = output;
+      }
+      dbg_printf("Copy %s -> %s\n", local_file.c_str(), tmp.c_str());
+      if (!copyFile(local_file.c_str(),tmp.c_str())) {
+	fprintf(stderr,"Failed to write %s\n", tmp.c_str());
+	return 1;
+      }
+      cloned = true;
+      if (!_local.read(tmp.c_str())) {
+	fprintf(stderr,"Failed to switch to %s\n", tmp.c_str());
+	return 1;
+      }
+    }
+  }
+
   if (parent_file!="") {
     if (!_pivot.read(parent_file.c_str())) {
       fprintf(stderr,"Failed to read %s\n", parent_file.c_str());
@@ -118,15 +153,16 @@ int Diff::apply(const Options& opt) {
     }
     diff->attachOutputBook(obook);
   }
+
   PolyBook tbook;
-  if (diff->outputStartsFromInput()) {
+  if (diff->outputStartsFromInput()&&!cloned) {
     if (output!="-") {
       if (!_local.write(output.c_str())) {
 	delete diff; diff = NULL;
 	return 1;
       }
-      if (!_local.read(core[0].c_str())) {
-	fprintf(stderr,"Failed to read %s\n", core[0].c_str());
+      if (!_local.read(local_file.c_str())) {
+	fprintf(stderr,"Failed to read %s\n", local_file.c_str());
 	return 1;
       }
       if (!tbook.read(output.c_str())) {
@@ -150,12 +186,14 @@ int Diff::apply(const Options& opt) {
     diff = apply_diff;
     diff->attachBook(*local);
   }
+
   if (!diff->startOutput(output,flags)) {
     fprintf(stderr,"Patch output failed\n");
     delete diff;
     diff = NULL;
     return 1;
   }
+
   if (patch_file==""&&cmd=="") {
     cmp.compare(*pivot,*local,*remote,*diff,flags);
   } else {
@@ -176,11 +214,22 @@ int Diff::apply(const Options& opt) {
       return 1;
     }
   }
-  if (apply) {
+  if (mode=="apply"&&!showPatch) {
     if (diff->getChangeCount()>0) {
       if (!local->inplace()) {
-	if (!local->write(core[0].c_str())) {
-	  fprintf(stderr,"Failed to write %s\n", core[0].c_str());
+	if (!local->write(local_file.c_str())) {
+	  fprintf(stderr,"Failed to write %s\n", local_file.c_str());
+	  return 1;
+	}
+      }
+    }
+  }
+  if (showPatch) {
+    if ((!local->inplace())||(tmp!=output)) {
+      if (output!=local_file || !local->inplace()) {
+	if (!local->write(output.c_str())) {
+	  fprintf(stderr,"Failed to write %s\n", output.c_str());
+	  delete diff; diff = NULL;
 	  return 1;
 	}
       }

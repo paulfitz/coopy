@@ -31,6 +31,7 @@ SET(ssformat ${EXECUTABLE_OUTPUT_PATH}/ssformat${EXE_EXT})
 SET(ssdiff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT})
 SET(sspatch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT})
 SET(ssfold ${EXECUTABLE_OUTPUT_PATH}/ssfold${EXE_EXT})
+SET(ssmerge ${EXECUTABLE_OUTPUT_PATH}/ssmerge${EXE_EXT})
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -656,4 +657,21 @@ ADD_TEST(wide_format_check ${ssdiff} ${TESTS}/bug/wide_0004/wide.csv wide_format
 
 ADD_ROUND_TRIP_TEST_BI(highlighter_small_file ${TESTS}/bug/highlighter_0005/orig.csv ${TESTS}/bug/highlighter_0005/mod.csv tdiff)
 ADD_ROUND_TRIP_TEST_BI(highlighter_small_file_hilite ${TESTS}/bug/highlighter_0005/orig.csv ${TESTS}/bug/highlighter_0005/mod.csv color)
+
+
+#######################################################################
+#######################################################################
+
+# Command line interface
+
+set(NEAT --omit-format-name)
+set(TARG ${TESTS}/numbers_three_23.csv)
+
+foreach(f numbers numbers_change_five numbers_add_row)
+  ADD_TEST(cli_format_sqlite_${f} ${ssformat} ${TESTS}/numbers.csv cli_format_sqlite_${f}.sqlite)
+  ADD_TEST(cli_format_sqlite_${f}_diff ${ssdiff} ${NEAT} --output cli_format_sqlite_${f}_diff.tdiff cli_format_sqlite_${f}.sqlite ${TARG})
+  ADD_TEST(cli_format_sqlite_${f}_patch ${sspatch} --output cli_format_sqlite_${f}_patch.sqlite cli_format_sqlite_${f}.sqlite cli_format_sqlite_${f}_diff.tdiff)
+  ADD_TEST(cli_format_sqlite_${f}_check ${ssdiff} ${NEAT} --equal cli_format_sqlite_${f}_patch.sqlite ${TARG})
+  ADD_TEST(cli_format_sqlite_${f}_merge ${ssmerge} --output cli_format_sqlite_${f}_merge.sqlite ${TESTS}/numbers.csv cli_format_sqlite_${f}.sqlite ${TARG})
+endforeach()
 

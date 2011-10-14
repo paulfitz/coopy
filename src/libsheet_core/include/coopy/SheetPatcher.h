@@ -137,6 +137,10 @@ public:
   virtual bool outputStartsFromInput() {
     return descriptive||merging;
   }
+  
+  virtual bool needOutputBook() {
+    return true;
+  }
 
   bool markChanges(const RowChange& change, int r,int width,
 		   std::vector<int>& active_val,

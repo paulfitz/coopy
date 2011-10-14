@@ -115,7 +115,7 @@ int Options::apply(int argc, char *argv[]) {
       option_bool["verbose"] = true;
       break;
     case 'e':
-      option_bool["equality"] = true;
+      option_bool["equals"] = true;
       break;
     case 'i':
       option_string["mode"] = "index";
