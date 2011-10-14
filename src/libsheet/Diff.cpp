@@ -26,6 +26,20 @@ static bool copyFile(const char *src, const char *dest) {
 }
 
 
+static bool copyBook(PolyBook& src_book, const char *src, const char *dest,
+		     bool *cloned) {
+  PolyBook check;
+  Property p1 = check.getType(src);
+  Property p2 = check.getType(dest);
+  if (p1.get("type").asString()==p2.get("type").asString()) {
+    *cloned = true;
+    return Patcher::copyFile(src,dest);
+  }
+  *cloned = false;
+  return true;
+}
+
+
 int Diff::apply(const Options& opt) {
   bool verbose = opt.checkBool("verbose");
   bool equality = opt.checkBool("equals");
@@ -108,14 +122,15 @@ int Diff::apply(const Options& opt) {
 	tmp = output;
       }
       dbg_printf("Copy %s -> %s\n", local_file.c_str(), tmp.c_str());
-      if (!copyFile(local_file.c_str(),tmp.c_str())) {
+      if (!copyBook(*local,local_file.c_str(),tmp.c_str(),&cloned)) {
 	fprintf(stderr,"Failed to write %s\n", tmp.c_str());
 	return 1;
       }
-      cloned = true;
-      if (!_local.read(tmp.c_str())) {
-	fprintf(stderr,"Failed to switch to %s\n", tmp.c_str());
-	return 1;
+      if (cloned) {
+	if (!_local.read(tmp.c_str())) {
+	  fprintf(stderr,"Failed to switch to %s\n", tmp.c_str());
+	  return 1;
+	}
       }
     }
   }

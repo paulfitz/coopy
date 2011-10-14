@@ -128,6 +128,20 @@ public:
 
   bool attach(coopy::store::Property& config);
 
+  bool expand(coopy::store::Property& config);
+
+  coopy::store::Property getType(const char *fname, const char *ext = NULL) {
+    coopy::store::Property p;
+    p.put("file",fname);
+    if (ext!=NULL) {
+      if (ext!="") {
+	p.put("ext",ext);
+      }
+    }
+    expand(p);
+    return p;
+  }
+
   bool flush();
 
   bool inplace() const {

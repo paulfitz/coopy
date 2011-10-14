@@ -126,13 +126,7 @@ public:
   }
 };
 
-bool PolyBook::attach(Property& config) {
-  dbg_printf("PolyBook::attach %s\n", config.toString().c_str());
-  if (config.check("should_clear")) {
-    if (config.get("should_clear").asBoolean()) {
-      clear();
-    }
-  }
+bool PolyBook::expand(Property& config) {
   string filename = config.get("file").asString();
   string name = filename;
   string ext = config.get("ext").asString();
@@ -265,7 +259,26 @@ bool PolyBook::attach(Property& config) {
     return false;
   }
   config.put("type",key);
+  config.put("expanded_filename",filename.c_str());
+  config.put("expanded_ext",ext.c_str());
 
+  return true;
+}
+
+bool PolyBook::attach(Property& config) {
+  dbg_printf("PolyBook::attach %s\n", config.toString().c_str());
+  if (config.check("should_clear")) {
+    if (config.get("should_clear").asBoolean()) {
+      clear();
+    }
+  }
+
+  bool ok = expand(config);
+  if (!ok) return false;
+
+  string filename = config.get("expanded_filename").asString();
+  string ext = config.get("expanded_ext").asString();
+  
   Factories f;
   AttachConfig ac;
   AttachReport ar;
