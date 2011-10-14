@@ -37,8 +37,16 @@ int Diff::apply(const Options& opt) {
 
   vector<string> core = opt.getCore();
   if (opt.isMergeLike()) {
-    parent_file = core[0];
-    core.erase(core.begin());
+    if (core.size()>0) {
+      parent_file = core[0];
+      core.erase(core.begin());
+    }
+  }
+  if (opt.isPatchLike()) {
+    if (core.size()>0) {
+      patch_file = core.back();
+      core.erase(core.begin()+core.size()-1);
+    }
   }
 
   BookCompare cmp;
