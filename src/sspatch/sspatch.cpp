@@ -9,10 +9,12 @@
 #include <coopy/SheetPatcher.h>
 #include <coopy/MergeOutputVerboseDiff.h>
 #include <coopy/Dbg.h>
+#include <coopy/Diff.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
 using namespace coopy::format;
+using namespace coopy::app;
 
 using namespace std;
 
@@ -41,6 +43,12 @@ bool copy_file(const char *src, const char *dest) {
 }
 
 int main(int argc, char *argv[]) {
+  /*
+  Options opt("sspatch");
+  int r = opt.apply(argc,argv);
+  if (r!=0) return r;
+  */
+
   bool verbose = false;
   bool inplace = false;
   bool help = false;
@@ -162,7 +170,6 @@ int main(int argc, char *argv[]) {
   }
 
   PolyBook local;
-  CsvSheet patch;
   if (!willMod&&!alt->outputStartsFromInput()) {
     local_name = "";
   } else {

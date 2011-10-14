@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <coopy/Diff.h>
 
-using namespace coopy::store;
-using namespace coopy::cmp;
 using namespace coopy::app;
 using namespace std;
 
@@ -20,7 +18,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  if (core.size()<2||help) {
+  if ((core.size()<2&&opt.checkString("patch")=="")||help) {
     printf("Show the difference between two tables/databases/spreadsheets. Call as:\n");
     printf("  ssdiff [--output <filename>] local.csv remote.csv\n");
     printf("\n");

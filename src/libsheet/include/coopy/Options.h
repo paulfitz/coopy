@@ -44,7 +44,11 @@ public:
   }
 
   bool isDiffLike() const {
-    return (name=="ssdiff");
+    return (name=="ssdiff"||name=="sspatch");
+  }
+
+  bool isPatchLike() const {
+    return (name=="sspatch");
   }
 
   bool isMergeLike() const {

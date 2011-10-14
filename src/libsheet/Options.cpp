@@ -49,6 +49,7 @@ int Options::apply(int argc, char *argv[]) {
       {"map", 1, 0, 'm'},
 
       {"omit-format-name", 0, 0, 'O'},
+      {"omit-sheet-name", 0, 0, 'P'},
 
       {"table", 1, 0, 'T'},
 
@@ -60,6 +61,12 @@ int Options::apply(int argc, char *argv[]) {
 
       {"head-trimmed", 0, 0, 0},
       {"tail-trimmed", 0, 0, 0},
+      {"fake", 0, 0, 0},
+      {"inplace", 0, 0, 0},
+      {"tmp", 1, 0, 0},
+      {"patch", 1, 0, 0},
+
+      {"cmd", 1, 0, 'x'},
 
       {0, 0, 0, 0}
     };
@@ -75,6 +82,14 @@ int Options::apply(int argc, char *argv[]) {
 	  flags.head_trimmed = true;
 	} else if (k=="tail-trimmed") {
 	  flags.tail_trimmed = true;
+	} else if (k=="fake") {
+	  option_string["mode"] = "raw";
+	} else if (k=="inplace") {
+	  option_bool["inplace"] = true;
+	} else if (k=="tmp") {
+	  option_string["tmp"] = optarg;
+	} else if (k=="patch") {
+	  option_string["patch"] = optarg;
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;
@@ -140,6 +155,9 @@ int Options::apply(int argc, char *argv[]) {
     case 'O':
       flags.omit_format_name = true;
       break;
+    case 'P':
+      flags.omit_sheet_name = true;
+      break;
 
     case 'f':
       option_string["mode"] = optarg;
@@ -153,6 +171,10 @@ int Options::apply(int argc, char *argv[]) {
     case 'V':
       option_string["version"] = optarg;
       break;
+    case 'x':
+      option_string["cmd"] = optarg;
+      break;
+
     case 'l':
       PolyBook::showFormats();
       return 0;
