@@ -86,8 +86,8 @@ int SheetPatcher::matchCol(const std::string& mover) {
     imover = syn2name[mover];
   }
   for (int i=0; i<activeCol.width(); i++) {
-    //    printf("Checking %s against %s\n", activeCol.cellString(i,0).c_str(),
-    //	   mover.c_str());
+    //printf("Checking %s against %s\n", activeCol.cellString(i,0).c_str(),
+    //mover.c_str());
     if (activeCol.cellString(i,0)==imover) {
       if (statusCol.cellString(i,0)!="---") {
 	return i;
@@ -95,6 +95,8 @@ int SheetPatcher::matchCol(const std::string& mover) {
     }
   }
   fprintf(stderr,"column not found: %s\n", mover.c_str());
+  PolySheet sheet = getSheet();
+  //printf("Working on %s\n", sheet.toString().c_str());
   exit(1);
   return -1;
 }

@@ -169,9 +169,14 @@ bool PolyBook::attach(Property& config) {
     string s = filename + ":";
     int first = 0;
     vector<string> words;
+    char prev = '*';
+    bool last = false;
     for (int i=0; i<(int)s.length(); i++) {
       char ch = s[i];
-      if (ch==':'||ch==';') {
+      if (ch==':'&&(i==s.length()-1||!last)) {
+	if (prev==ch) {
+	  last = true;
+	}
 	string word = s.substr(first,i-first);
 	size_t div = word.find('=');
 	if (div==string::npos) {
@@ -189,6 +194,7 @@ bool PolyBook::attach(Property& config) {
 	}
 	first = i+1;
       }
+      prev = ch;
     }
     if (words.size()>1) {
       config.put("type",words[1]);

@@ -24,10 +24,12 @@ this:
 \verbatim
 [merge "coopy-csv"]
   name = coopy csv data merge
-  driver = ssmerge --format csv --output %A %O %A %B
+  driver = ssmerge --output dbi:csv::file=%A dbi:cvs::file=%O dbi:cvs::file=%A dbi:cvs::file=%B
 \endverbatim
 You'll need a variant of this stanza for each format you want ssmerge
 to handle.  It is best to stick with text formats.
+The "dbi:csv::file=" part above is to force files to be in csv format
+(during merging their filename extensions are not known).
 If ssmerge is not in your path, replace "ssmerge"
 above with something like "/the/full/path/to/ssmerge".
 

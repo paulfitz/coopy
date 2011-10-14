@@ -19,6 +19,7 @@ void NameSniffer::sniff() {
   SheetSchema *schema = sheet.getSchema();
   div = -1;
   if (schema!=NULL) {
+    fake = schema->isGuess();
     if (schema->getColumnCount()==0 && schema->headerHeight()>=0) {
       // minimal schema, not complete
       dbg_printf("Sniffing... minimal schema!\n");

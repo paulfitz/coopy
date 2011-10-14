@@ -37,6 +37,7 @@ private:
   int xoff;
   int yoff;
   bool killNeutral;
+  bool merging;
   coopy::store::NameSniffer *sniffer;
   coopy::store::DataSheet *sniffedSheet;
 
@@ -52,8 +53,9 @@ private:
   bool moveColumn(int idx, int idx2);
 
   SheetPatcher(bool descriptive = false,
-	       bool forReview = false) : descriptive(descriptive),
-					 forReview(forReview)
+	       bool forReview = false,
+	       bool forMerge = false) : descriptive(descriptive),
+    forReview(forReview), merging(forMerge)
   {
     rowCursor = -1;
     summary = false;
@@ -70,6 +72,10 @@ private:
 public:
   static SheetPatcher *createForApply() {
     return new SheetPatcher();
+  }
+
+  static SheetPatcher *createForMerge() {
+    return new SheetPatcher(false,false,true);
   }
 
   static SheetPatcher *createForDescription() {
@@ -129,7 +135,7 @@ public:
   virtual bool mergeAllDone();
 
   virtual bool outputStartsFromInput() {
-    return descriptive;
+    return descriptive||merging;
   }
 
   bool markChanges(const RowChange& change, int r,int width,

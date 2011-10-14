@@ -52,15 +52,17 @@ void SchemaSniffer::sniff(bool force) {
       ct[i].primaryKey = (indexes[i]>0);
     }
   }
+  bool force_guess = true;
   for (int i=0; i<(int)names.size(); i++) {
     ColumnType base = ct[i];
     fallback.addColumn(names[i].c_str(),ct[i]);
+    force_guess = false;
   }
   int at = (int)names.size();
   string col = Stringer::getSpreadsheetColumnName(at);
   //char col[3] = "A2";
   while ((int)fallback.getColumnCount()<sheet->width()) {
-    fallback.addColumn((col + "2").c_str(),ct[at]);
+    fallback.addColumn(col.c_str(),ct[at]);
     col = Stringer::nextSpreadsheetColumnName(col);
     at++;
   }
@@ -68,7 +70,7 @@ void SchemaSniffer::sniff(bool force) {
   fallback.setHasSheetName(sheet->hasSheetName());
   fallback.setHeaderHeight(nameSniffer.getHeaderHeight());
   schema = &fallback;
-  fallback.setGuess(nameSniffer.isFake());
+  fallback.setGuess(nameSniffer.isFake()||force_guess);
 }
 
 SheetSchema *SchemaSniffer::suggestSchema() {

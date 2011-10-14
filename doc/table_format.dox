@@ -47,5 +47,13 @@ a mysql database called "db":
 }
 \endverbatim
 
+More example dbi strings:
+\verbatim
+dbi:csv:file=hello          # file "hello" is in csv format
+dbi:csv::file=hello:there   # file "hello:there" is in csv format
+# the use of "::" means that the following key/value pair is the
+# last one, and ":" characters should no longer be used as a divider.
+\endverbatim
+
  *
  */
