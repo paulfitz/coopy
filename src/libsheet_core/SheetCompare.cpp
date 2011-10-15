@@ -173,6 +173,28 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     spivot.sniff();
     slocal.sniff();
     sremote.sniff();
+
+    dbg_printf("SheetCompare::compare wrapping sheets\n");
+
+    dlocal = PolySheet(&_local,false);
+    dlocal.setSchema(slocal.suggestSchema(),false);
+    dlocal.hideHeaders();
+    plocal = &dlocal;
+    //printf("LOCAL IS %s [%s]\n", plocal->toString().c_str(),
+    //slocal.suggestSchema()->toString().c_str());
+
+    dremote = PolySheet(&_remote,false);
+    dremote.setSchema(sremote.suggestSchema(),false);
+    dremote.hideHeaders();
+    premote = &dremote;
+    //printf("REMOTE IS %s\n", premote->toString().c_str());
+
+    dpivot = PolySheet(&_pivot,false);
+    dpivot.setSchema(spivot.suggestSchema(),false);
+    dpivot.hideHeaders();
+    ppivot = &dpivot;
+
+    /*
     if (!_local.hasExternalColumnNames()) {
       dbg_printf("SheetCompare::compare wrap local sheet\n");
       dlocal = PolySheet(&_local,false);
@@ -194,6 +216,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
       dpivot.setSchema(spivot.suggestSchema(),false);
       ppivot = &dpivot;
     }
+    */
   }
 
   DataSheet& pivot = *ppivot;

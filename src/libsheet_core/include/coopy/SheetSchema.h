@@ -85,6 +85,10 @@ public:
   virtual bool setHeaderHeight(int hh) {
     return false;
   }
+
+  virtual std::string toString() const {
+    return "unknown-schema";
+  }
 };
 
 class coopy::store::SimpleSheetSchema : public SheetSchema {
@@ -202,7 +206,21 @@ public:
     return true;
   }
 
-
+  virtual std::string toString() const {
+    std::string r = "";
+    r += "sheet ";
+    r += getSheetName();
+    r += " header height ";
+    int h = headerHeight();
+    if (h>0) {
+      r += ">0";
+    } else if (h==0) {
+      r += "=0";
+    } else {
+      r += "<0";
+    }
+    return r;
+  }
 };
 
 #endif

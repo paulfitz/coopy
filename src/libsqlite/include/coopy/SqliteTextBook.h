@@ -28,7 +28,8 @@ public:
 
   virtual bool read(const char *fname, bool can_create = true);
 
-  virtual bool save(const char *fname, const char *format);
+  virtual bool save(const char *fname, const char *format, 
+		    bool itextual = false);
 
   virtual bool open(const Property& config);
   
@@ -93,7 +94,7 @@ public:
 	  return NULL;
 	}
 	if (!book->inplace()) {
-	  book->save("-",NULL);
+	  book->save("-",NULL,true);
 	}
       }
     }
@@ -114,7 +115,7 @@ public:
       if (config.prevBook!=NULL) {
 	SqliteTextBook *prev = dynamic_cast<SqliteTextBook *>(config.prevBook);
 	if (prev!=NULL) {
-	  bool ok = prev->save(config.fname.c_str(),NULL);
+	  bool ok = prev->save(config.fname.c_str(),NULL,true);
 	  if (!ok) {
 	    report.success = false;
 	    report.msg = "failed to save file";
@@ -138,7 +139,7 @@ public:
       if (config.prevBook!=NULL) {
 	book->copy(*config.prevBook,config.options);
 	if (config.shouldWrite) {
-	  book->save(config.fname.c_str(),NULL);
+	  book->save(config.fname.c_str(),NULL,true);
 	}
       }
     }

@@ -374,6 +374,9 @@ public:
       if (getSchema()==0/*NULL*/) {
 	setRowOffset(1);
 	return true;
+      } else {
+	setRowOffset(getSchema()->headerHeight());
+	return true;
       }
     }
     return false;

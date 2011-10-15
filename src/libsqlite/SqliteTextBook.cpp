@@ -94,9 +94,10 @@ bool SqliteTextBook::read(const char *fname, bool can_create) {
   return true;
 }
 
-bool SqliteTextBook::save(const char *fname, const char *format) {
-  if (!textual) {
-    fprintf(stderr,"Sorry, cannot write an sqlite database to stdio just yet.\n");
+bool SqliteTextBook::save(const char *fname, const char *format,
+			  bool itextual) {
+  if (!itextual) {
+    fprintf(stderr,"Sorry, cannot write an sqlite database this way just yet.\n");
     return false;
   }
   sqlite3 *db = DB(implementation);
