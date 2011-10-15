@@ -399,7 +399,11 @@ endforeach()
 
 # EXCEL testing
 
+set(EXCEL)
+
 IF (USE_GNUMERIC)
+
+  set(EXCEL xls)
 
   ADD_TEST2(excel_diff ${TESTS}/result_excel_diff.csv
     ssdiff --verbose --version 0.2 --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
@@ -667,8 +671,8 @@ ADD_ROUND_TRIP_TEST_BI(highlighter_small_file_hilite ${TESTS}/bug/highlighter_00
 set(NEAT --omit-format-name)
 set(TARG ${TESTS}/numbers_three_23.csv)
 
-foreach(format1 sqlite csv sqlitext)
-  foreach(format2 sqlite csv sqlitext)
+foreach(format1 sqlite csv sqlitext jsonbook ${EXCEL})
+  foreach(format2 sqlite csv sqlitext jsonbook ${EXCEL})
     foreach(input numbers numbers_change_five numbers_add_row)
       SET(f ${format1}_${format2}_${input})
       ADD_TEST(cli_format_${f} ${ssformat} ${TESTS}/${input}.csv cli_format_${f}.${format1})
