@@ -79,6 +79,14 @@ Options::Options(const char *name) : name(name) {
       "omit-sheet-name",
       "omit any sheet/table name from diff"),
 
+  add(OPTION_FOR_FORMAT,
+      "header",
+      "extract column names only"),
+
+  add(OPTION_FOR_FORMAT,
+      "index",
+      "extract content of key columns only"),
+
   add(OPTION_PATCH_FORMAT,
       "*tdiff",
       "vaguely similar to a standard unix diff");
@@ -427,10 +435,10 @@ void Options::beginHelp() {
 
 void Options::addUsage(const char *usage) {
   printf("  %s\n", usage);
-  printf("\n");
 }
 
 void Options::addDescription(const char *desc) {
+  printf("\n");
   printf("%s\n", desc);
   printf("\n");
   printf("Options\n");

@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (core.size()<1||help) {
+    /*
     printf("Call with input file and desired output file. Examples:\n");
     printf("  ssformat input.csv output.sqlite\n");
     printf("  ssformat input.sqlite output.csvs\n");
@@ -53,6 +54,14 @@ int main(int argc, char *argv[]) {
     printf("  ssformat --header people.csv # show just the header line, if one is detected\n");
     printf("  ssformat --index people.csv  # show just the key columns, if detected\n");
     printf("If the output file is omitted, it is set to standard output\n");
+    */
+
+    opt.beginHelp();
+    opt.addUsage("ssformat [options] <file>");
+    opt.addUsage("ssformat [options] <file1> <file2>");
+    opt.addDescription("Reformat tables/databases/spreadsheets.");
+    opt.showOptions(OPTION_FOR_FORMAT);
+    opt.endHelp();
     return 1;
   }
 
