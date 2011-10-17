@@ -52,7 +52,7 @@ int Diff::apply(const Options& opt) {
   std::string defMode = "tdiff";
   bool apply = opt.checkBool("apply",false);
   if (opt.isMergeLike()) defMode = "merge";
-  if (opt.isPatchLike()) defMode = "apply";
+  if (opt.isPatchLike()&&!opt.isRediffLike()) defMode = "apply";
   std::string mode = opt.checkString("mode",defMode.c_str());
   bool inplace = opt.checkBool("inplace",false);
   bool showPatch = opt.isPatchLike() && mode=="apply" && !apply;

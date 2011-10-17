@@ -3,6 +3,8 @@
 
 #include <coopy/Options.h>
 
+#include <algorithm>
+
 #define QUOTED_BASE(x) # x
 #define QUOTED_VERSION(x) QUOTED_BASE(x)
 
@@ -10,6 +12,99 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 using namespace coopy::app;
+
+void Options::add(int cov, const char *name, const char *desc) {
+  Option o;
+  o.coverage = cov;
+  o.desc = desc;
+  string n(name);
+  if (n[0]=='*') {
+    n = n.substr(1,n.length());
+    o.is_default = true;
+  }
+  string::size_type idx = n.find("=");
+  if (idx!=string::npos) {
+    o.long_name = n.substr(0,idx);
+    o.arg = n.substr(idx+1,n.length());
+  } else {
+    o.long_name = n;
+  }
+  opts.push_back(o);
+}
+
+
+Options::Options(const char *name) : name(name) {
+  addTransform("output=OUTPUTFILE",
+	       "direct output to this file (default is standard output)");
+  add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
+      "format=FORMAT",
+      "set difference format for output:");
+  add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_PATCH|OPTION_FOR_FORMAT,
+      "input-formats",
+      "list supported input database formats");
+  addTransform("patch-formats",
+	       "list supported patch formats");
+  addCompare("id=COLUMN",
+	     "set primary key (repeat option for multi-column key)");
+  addCompare("bid=COLUMN",
+	     "boost a column (repeat option for multiple columns)");
+  addCompare("named",
+	     "trust names of columns (saves work checking for column renames)");
+  addCompare("unordered",
+	     "neglect order of rows (saves work)");
+  addCompare("fixed-columns",
+	     "ignore new or removed columns");
+  addCompare("head-trimmed",
+	     "ignore rows removed at the beginning of a table (such as a log file)");
+  addCompare("tail-trimmed",
+	     "ignore rows removed at the end of a table (such as a log file)");
+  add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_FORMAT,
+      "table=TABLE",
+      "operate on a single named table of a workbook/database");
+  add(OPTION_FOR_DIFF,
+      "apply",
+      "apply difference between <file1> and <file2> immediately to <file1>");
+  add(OPTION_FOR_DIFF,
+      "parent=PARENT",
+      "use named workbook/database as common ancestor in difference calculations");
+  add(OPTION_FOR_MERGE|OPTION_FOR_PATCH,
+      "inplace",
+      "if modifications are made, make them in place without a copy");
+
+  add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
+      "omit-format-name",
+      "omit any version-dependent header from diff"),
+
+  add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
+      "omit-sheet-name",
+      "omit any sheet/table name from diff"),
+
+  add(OPTION_PATCH_FORMAT,
+      "*tdiff",
+      "vaguely similar to a standard unix diff");
+  add(OPTION_PATCH_FORMAT,
+      "raw",
+      "verbose diff format for debugging");
+  add(OPTION_PATCH_FORMAT,
+      "sql",
+      "SQL format (data diffs only)");
+  add(OPTION_PATCH_FORMAT,
+      "hilite",
+      "colorful spreadsheet format");
+  add(OPTION_PATCH_FORMAT,
+      "review",
+      "spreadsheet diff format suitable for quickly accepting or rejecting changes");
+  add(OPTION_PATCH_FORMAT,
+      "index",
+      "tabular output showing relationship between rows and columns");
+  add(OPTION_PATCH_FORMAT,
+      "csv",
+      "csv-compatible diff format");
+}
+
+std::string Options::getVersion() const {
+  return QUOTED_VERSION(COOPY_VERSION);
+}
 
 int Options::apply(int argc, char *argv[]) {
   core.clear();
@@ -62,7 +157,7 @@ int Options::apply(int argc, char *argv[]) {
       {"output", 1, 0, 'o'},
       {"format-version", 1, 0, 'V'},
       {"parent", 1, 0, 'p'},
-      {"list-formats", 0, 0, 'l'},
+      {"input-formats", 0, 0, 'l'},
       {"help", 0, 0, 'h'},
 
       {"head-trimmed", 0, 0, 0},
@@ -75,6 +170,7 @@ int Options::apply(int argc, char *argv[]) {
       {"cmd", 1, 0, 'x'},
 
       {"version", 0, 0, 0},
+      {"patch-formats", 0, 0, 0},
 
       {0, 0, 0, 0}
     };
@@ -104,9 +200,12 @@ int Options::apply(int argc, char *argv[]) {
 	  option_string["input-format"] = optarg;
 	} else if (k=="output-format") {
 	  option_string["output-format"] = optarg;
+	} else if (k=="patch-formats") {
+	  showOptions(OPTION_PATCH_FORMAT);
+	  exit(0);
 	} else if (k=="version") {
 	  option_bool["version"] = true;
-	  printf("%s\n", QUOTED_VERSION(COOPY_VERSION));
+	  printf("%s\n", getVersion().c_str());
 	  exit(0);
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
@@ -226,8 +325,116 @@ int Options::apply(int argc, char *argv[]) {
   for (int i=0; i<argc; i++) {
     core.push_back(argv[i]);
   }
-
   return 0;
 }
 
+class OptionCompare {
+public:
+  bool operator() (const Option& o1, const Option& o2) {
+    if (o1.is_default&&!o2.is_default) return true;
+    if (o2.is_default&&!o1.is_default) return false;
+    return (o1.long_name<o2.long_name);
+  }
+};
 
+void Options::showOptions(int filter) {
+  bool flaggy = true;
+  int start = 2;
+  int len = 15;
+  if (filter==OPTION_PATCH_FORMAT) {
+    flaggy = false;
+    len = 6;
+    start = 18;
+  }
+
+  vector<Option> mopts = opts;
+  sort(mopts.begin(),mopts.end(),OptionCompare());
+
+  /*
+  for (int i=0; i<80; i++) {
+    printf("%d", i/10);
+  }
+  printf("\n");
+  for (int i=0; i<80; i++) {
+    printf("%d", i%10);
+  }
+  printf("\n");
+  */
+  
+  for (int i=0; i<(int)mopts.size(); i++) {
+    Option& o = mopts[i];
+    int tot = start+len+1;
+    int w = 78;
+    if (o.coverage&filter) {
+      printf("% *c",start,' ');
+      string pre = o.long_name;
+      if (flaggy) {
+	pre = string("--")+pre;
+      }
+      if (o.arg!="") {
+	pre += "=";
+	pre += o.arg;
+      }
+      if (pre.length()>len) {
+	printf("%s\n", pre.c_str());
+	printf("% *c",start,' ');
+	pre = "";
+      }
+      while (pre.length()<len) pre += " ";
+      printf("%s ", pre.c_str());
+
+      string desc = o.desc;
+      if (o.is_default) {
+	desc = string("[default] ") + desc;
+      }
+      if (desc.length()<=w-tot) {
+	printf("%s\n", desc.c_str());
+      } else {
+	string txt = desc;
+	while (txt.length()>0) {
+	  string next = txt.substr(0,w-tot+1);
+	  if (next.length()>w-tot) {
+	    string::size_type at = next.rfind(" ");
+	    if (at!=string::npos) {
+	      next = txt.substr(0,at);
+	      txt = txt.substr(at+1,txt.length());
+	    } else {
+	      next = txt.substr(0,w-tot);
+	      txt = txt.substr(w-tot,txt.length());
+	    }
+	  } else {
+	    txt = "";
+	  }
+	  printf("%s\n", next.c_str());
+	  if (txt.length()>0) {
+	    printf("% *c", tot, ' ');
+	  }
+	}
+      }
+      if (o.long_name=="format") {
+	showOptions(OPTION_PATCH_FORMAT);
+      }
+    }
+  }
+}
+
+
+void Options::beginHelp() {
+  printf("%s version %s\n", name.c_str(), getVersion().c_str());
+  printf("Usage\n");
+  printf("\n");
+}
+
+void Options::addUsage(const char *usage) {
+  printf("  %s\n", usage);
+  printf("\n");
+}
+
+void Options::addDescription(const char *desc) {
+  printf("%s\n", desc);
+  printf("\n");
+  printf("Options\n");
+}
+
+void Options::endHelp() {
+}

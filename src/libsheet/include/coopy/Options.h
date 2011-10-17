@@ -10,9 +10,36 @@
 
 namespace coopy {
   namespace app {
+    class Option;
     class Options;
   }
 }
+
+enum {
+  OPTION_FOR_DIFF = 1,
+  OPTION_FOR_PATCH = 2,
+  OPTION_FOR_MERGE = 4,
+  OPTION_FOR_FORMAT = 8,
+  OPTION_FOR_REDIFF = 16,
+  OPTION_FOR_COMPARE = OPTION_FOR_DIFF|OPTION_FOR_MERGE,
+  OPTION_FOR_ALL = 31,
+  OPTION_PATCH_FORMAT = 32,
+};
+
+class coopy::app::Option {
+public:
+  std::string long_name;
+  std::string arg;
+  std::string desc;
+  int coverage;
+  bool is_default;
+
+  Option() {
+    coverage = 0;
+    is_default = false;
+  }
+};
+
 
 /**
  *
@@ -21,6 +48,8 @@ namespace coopy {
  */
 class coopy::app::Options {
 public:
+  Options();
+
   int apply(int argc, char *argv[]);
 
   const std::vector<std::string>& getCore() const { return core; }
@@ -40,20 +69,48 @@ public:
 
   bool isHelp() const { return checkBool("help"); }
 
-  Options(const char *name) : name(name) {
-  }
+  Options(const char *name);
 
   bool isDiffLike() const {
-    return (name=="ssdiff"||name=="sspatch");
+    return (name=="ssdiff"||name=="ssrediff"||name=="sspatch");
   }
 
   bool isPatchLike() const {
-    return (name=="sspatch");
+    return (name=="sspatch")||(name=="ssrediff");
+  }
+
+  bool isRediffLike() const {
+    return (name=="ssrediff");
   }
 
   bool isMergeLike() const {
     return (name=="ssmerge");
   }
+
+  std::string getVersion() const;
+
+  void add(int coverage, const char *name, const char *desc);
+
+  void addAll(const char *name, const char *desc) {
+    add(OPTION_FOR_ALL,name,desc);
+  }
+
+  void addTransform(const char *name, const char *desc) {
+    add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_PATCH|OPTION_FOR_REDIFF,name,desc);
+  }
+
+  void addCompare(const char *name, const char *desc) {
+    add(OPTION_FOR_COMPARE,name,desc);
+  }
+
+  void showOptions(int filter);
+
+
+  void beginHelp();
+  void addUsage(const char *usage);
+  void addDescription(const char *desc);
+  void endHelp();
+
 private:
   std::string name;
   std::vector<std::string> core;
@@ -61,6 +118,7 @@ private:
   std::map<std::string,bool> option_bool;
   std::map<std::string,std::string> option_string;
   coopy::store::PolyBook mapping;
+  std::vector<Option> opts;
 };
 
 #endif
