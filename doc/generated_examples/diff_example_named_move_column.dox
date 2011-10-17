@@ -42,8 +42,10 @@ The result of comparing the tables are:
 \section diff_example_named_move_column_tdiff_output tdiff output
 \verbatim
 # tdiff version 0.3
+# --- /home/paulfitz/cvs/coopy/tests/named_numbers.csv
+# +++ /home/paulfitz/cvs/coopy/tests/named_numbers_flip_column.csv
 @@ |NAME|DIGIT|
-@: NAME |DIGIT|NAME|
+@: DIGIT |DIGIT|NAME|
 \endverbatim
  
 \section diff_example_named_move_column_highlighter_output highlighter output
@@ -51,7 +53,7 @@ The result of comparing the tables are:
 <tr>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">!</td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">&gt;</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">&lt;</td>
 </tr>
 <tr>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>\@</b></td>
@@ -69,19 +71,9 @@ The result of comparing the tables are:
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">two</td>
 </tr>
 <tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">3</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">three</td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">4</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">four</td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">5</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">five</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
 </tr>
 </table>
  

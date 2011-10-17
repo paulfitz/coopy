@@ -21,8 +21,8 @@ int main(int argc, char *argv[]) {
 
   if (core.size()<3||help) {
     opt.beginHelp();
-    opt.addUsage("ssmerge [options] <parent> <file1> <file2>");
-    opt.addDescription("Merge table/database/spreadsheets with a common ancestor.");
+    opt.addUsage("ssmerge [options] FILE1 FILE2 FILE3");
+    opt.addDescription("Merge table/database/spreadsheets. The first file must be a common ancestor of the remaining two.");
     opt.showOptions(OPTION_FOR_MERGE);
     opt.endHelp();
     return 1;

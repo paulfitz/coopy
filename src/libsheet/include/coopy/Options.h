@@ -103,13 +103,21 @@ public:
     add(OPTION_FOR_COMPARE,name,desc);
   }
 
-  void showOptions(int filter);
+  void showOptions(int filter) {
+    option_filter = filter;
+  }
 
 
   void beginHelp();
   void addUsage(const char *usage);
   void addDescription(const char *desc);
   void endHelp();
+
+  const std::vector<Option>& getOptionList() const { return opts; }
+  const std::string& getName() const { return name; }
+  const std::vector<std::string>& getUsages() const { return usages; }
+  const std::string& getDescription() const { return description; }
+  int getOptionFilter() const { return option_filter; }
 
 private:
   std::string name;
@@ -119,6 +127,9 @@ private:
   std::map<std::string,std::string> option_string;
   coopy::store::PolyBook mapping;
   std::vector<Option> opts;
+  std::vector<std::string> usages;
+  std::string description;
+  int option_filter;
 };
 
 #endif

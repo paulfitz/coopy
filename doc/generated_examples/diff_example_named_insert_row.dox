@@ -43,6 +43,8 @@ The result of comparing the tables are:
 \section diff_example_named_insert_row_tdiff_output tdiff output
 \verbatim
 # tdiff version 0.3
+# --- /home/paulfitz/cvs/coopy/tests/named_numbers.csv
+# +++ /home/paulfitz/cvs/coopy/tests/named_numbers_add_row.csv
 * |NAME=five|
 + |NAME:->six|DIGIT:->6|
 \endverbatim
@@ -65,9 +67,9 @@ The result of comparing the tables are:
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">2</td>
 </tr>
 <tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">three</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">3</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
 </tr>
 <tr>
 <td  style=""></td>

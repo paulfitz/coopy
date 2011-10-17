@@ -1,48 +1,48 @@
 /**
  *
 
-@page sspatch sspatch
+@page ssformat ssformat
 
-Modify a table/database/spreadsheet to integrate the changes described
-in a pre-computed difference.
-
-
-
-\section sspatch_usage Usage
- \li sspatch [options] DATAFILE PATCHFILE
-
-
-\section sspatch_index Index
-  \li \ref sspatch_options
-  \li \ref sspatch_options_detail
-  \li \ref sspatch_patch
-  \li \ref sspatch_table
-  \li \ref sspatch_version
-
-
-\section sspatch_options Option summary
- \li \ref sspatch_main_inplace "--inplace"
- \li \ref sspatch_main_input-formats "--input-formats"
- \li \ref sspatch_main_output "--output=OUTPUTFILE"
- \li \ref sspatch_main_patch-formats "--patch-formats"
-
-
-\section sspatch_options_detail Option details
-\anchor sspatch_main_inplace <b>--inplace</b> <br />if modifications are made, make them in place without a copy
-
-
-\anchor sspatch_main_input-formats <b>--input-formats</b> <br />list supported input database formats
-
-
-\anchor sspatch_main_output <b>--output=OUTPUTFILE</b> <br />direct output to this file (default is standard output)
-
-
-\anchor sspatch_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
+Reformat tables/databases/spreadsheets.
 
 
 
+\section ssformat_usage Usage
+ \li ssformat [options] FILE
+ \li ssformat [options] FILE1 FILE2
 
-\section sspatch_patch Patch formats
+
+\section ssformat_index Index
+  \li \ref ssformat_options
+  \li \ref ssformat_options_detail
+  \li \ref ssformat_patch
+  \li \ref ssformat_table
+  \li \ref ssformat_version
+
+
+\section ssformat_options Option summary
+ \li \ref ssformat_main_header "--header"
+ \li \ref ssformat_main_index "--index"
+ \li \ref ssformat_main_input-formats "--input-formats"
+ \li \ref ssformat_main_table "--table=TABLE"
+
+
+\section ssformat_options_detail Option details
+\anchor ssformat_main_header <b>--header</b> <br />extract column names only
+
+
+\anchor ssformat_main_index <b>--index</b> <br />extract content of key columns only
+
+
+\anchor ssformat_main_input-formats <b>--input-formats</b> <br />list supported input database formats
+
+
+\anchor ssformat_main_table <b>--table=TABLE</b> <br />operate on a single named table of a workbook/database
+
+
+
+
+\section ssformat_patch Patch formats
   \li <b>tdiff</b>: <i>[default]</i> vaguely similar to a standard unix diff
   \li <b>csv</b>: csv-compatible diff format
   \li <b>hilite</b>: colorful spreadsheet format
@@ -52,7 +52,7 @@ in a pre-computed difference.
   \li <b>sql</b>: SQL format (data diffs only)
 
 
-\section sspatch_table Database/spreadsheet file formats
+\section ssformat_table Database/spreadsheet file formats
 CSV: plain-text delimiter-separated family of formats<br />
   \li<b>.csv</b>: Comma-separated values
   \li<b>.tsv</b>: Tab-separated values
@@ -122,8 +122,8 @@ MYSQL: database connector<br />
 
 
 
-\section sspatch_version Version
-sspatch version 0.5.6
+\section ssformat_version Version
+ssformat version 0.5.6
 
 
  *

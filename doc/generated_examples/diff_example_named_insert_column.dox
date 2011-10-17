@@ -42,16 +42,18 @@ The result of comparing the tables are:
 \section diff_example_named_insert_column_tdiff_output tdiff output
 \verbatim
 # tdiff version 0.3
+# --- /home/paulfitz/cvs/coopy/tests/named_numbers.csv
+# +++ /home/paulfitz/cvs/coopy/tests/named_numbers_wide.csv
 @@ |NAME|DIGIT|
 @+ FRENCH |NAME|DIGIT|FRENCH|
 @+ UNARY |NAME|DIGIT|FRENCH|UNARY|
-@ |NAME=|FRENCH->|UNARY->|
-= |NAME|FRENCH|UNARY|
-= |one|un|.|
-= |two|deux|..|
-= |three|trois|...|
-= |four|quatre|....|
-= |five|cinq|.....|
+@ |NAME=|FRENCH=|UNARY=|
+= |NAME|*->FRENCH|*->UNARY|
+= |one|*->un|*->.|
+= |two|*->deux|*->..|
+= |three|*->trois|*->...|
+= |four|*->quatre|*->....|
+= |five|*->cinq|*->.....|
 \endverbatim
  
 \section diff_example_named_insert_column_highlighter_output highlighter output
@@ -68,48 +70,44 @@ The result of comparing the tables are:
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>\@-&gt;</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>NAME</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>DIGIT</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;FRENCH</b></td>
-<td colspan="2"  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;UNARY</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>NULL-&gt;FRENCH</b></td>
+<td colspan="2"  valign="bottom"  align="left"  style=" font-size:10pt;"><b>NULL-&gt;UNARY</b></td>
 </tr>
 <tr>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">one</td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">1</td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;un</b></td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;.</b></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;un</b></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;.</b></td>
 <td  style=""></td>
 </tr>
 <tr>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">two</td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">2</td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;deux</b></td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;..</b></td>
-<td  style=""></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;deux</b></td>
+<td colspan="2"  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;..</b></td>
 </tr>
 <tr>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">three</td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">3</td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;trois</b></td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;...</b></td>
-<td  style=""></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;trois</b></td>
+<td colspan="2"  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;...</b></td>
 </tr>
 <tr>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">four</td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">4</td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;quatre</b></td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;....</b></td>
-<td  style=""></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;quatre</b></td>
+<td colspan="2"  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;....</b></td>
 </tr>
 <tr>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">five</td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;">5</td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;cinq</b></td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>-&gt;.....</b></td>
-<td  style=""></td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;cinq</b></td>
+<td colspan="2"  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>NULL-&gt;.....</b></td>
 </tr>
 </table>
  

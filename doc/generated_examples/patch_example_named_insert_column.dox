@@ -39,16 +39,18 @@ The output, input, and patch are:
 \section patch_example_named_insert_column_ref2 patch.tdiff
 \verbatim
 # tdiff version 0.3
+# --- /home/paulfitz/cvs/coopy/tests/named_numbers.csv
+# +++ /home/paulfitz/cvs/coopy/tests/named_numbers_wide.csv
 @@ |NAME|DIGIT|
 @+ FRENCH |NAME|DIGIT|FRENCH|
 @+ UNARY |NAME|DIGIT|FRENCH|UNARY|
-@ |NAME=|FRENCH->|UNARY->|
-= |NAME|FRENCH|UNARY|
-= |one|un|.|
-= |two|deux|..|
-= |three|trois|...|
-= |four|quatre|....|
-= |five|cinq|.....|
+@ |NAME=|FRENCH=|UNARY=|
+= |NAME|*->FRENCH|*->UNARY|
+= |one|*->un|*->.|
+= |two|*->deux|*->..|
+= |three|*->trois|*->...|
+= |four|*->quatre|*->....|
+= |five|*->cinq|*->.....|
 \endverbatim
 
  *

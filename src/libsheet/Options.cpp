@@ -13,6 +13,265 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 using namespace coopy::app;
 
+
+
+
+
+class OptionCompare {
+public:
+  bool operator() (const Option& o1, const Option& o2) {
+    if (o1.is_default&&!o2.is_default) return true;
+    if (o2.is_default&&!o1.is_default) return false;
+    return (o1.long_name<o2.long_name);
+  }
+};
+
+class OptionRender {
+public:
+  virtual void render(const Options& opt) = 0;
+};
+
+class OptionRenderCmdLine : public OptionRender {
+public:
+  void showOptions(const Options& opt, int filter);
+  virtual void render(const Options& opt);
+};
+
+class OptionRenderDoxygen : public OptionRender {
+public:
+  void showOptions(const Options& opt, int filter, const string& prefix,
+		   bool detailed = false, bool compact = false);
+  virtual void render(const Options& opt);
+};
+
+void OptionRenderCmdLine::showOptions(const Options& opt, int filter) {
+  bool flaggy = true;
+  int start = 2;
+  int len = 15;
+  if (filter==OPTION_PATCH_FORMAT) {
+    flaggy = false;
+    len = 6;
+    start = 18;
+  }
+
+  vector<Option> mopts = opt.getOptionList();
+  sort(mopts.begin(),mopts.end(),OptionCompare());
+
+  /*
+  for (int i=0; i<80; i++) {
+    printf("%d", i/10);
+  }
+  printf("\n");
+  for (int i=0; i<80; i++) {
+    printf("%d", i%10);
+  }
+  printf("\n");
+  */
+  
+  for (int i=0; i<(int)mopts.size(); i++) {
+    Option& o = mopts[i];
+    int tot = start+len+1;
+    int w = 78;
+    if (o.coverage&filter) {
+      printf("% *c",start,' ');
+      string pre = o.long_name;
+      if (flaggy) {
+	pre = string("--")+pre;
+      }
+      if (o.arg!="") {
+	pre += "=";
+	pre += o.arg;
+      }
+      if (pre.length()>len) {
+	printf("%s\n", pre.c_str());
+	printf("% *c",start,' ');
+	pre = "";
+      }
+      while (pre.length()<len) pre += " ";
+      printf("%s ", pre.c_str());
+
+      string desc = o.desc;
+      if (o.is_default) {
+	desc = string("[default] ") + desc;
+      }
+      if (desc.length()<=w-tot) {
+	printf("%s\n", desc.c_str());
+      } else {
+	string txt = desc;
+	while (txt.length()>0) {
+	  string next = txt.substr(0,w-tot+1);
+	  if (next.length()>w-tot) {
+	    string::size_type at = next.rfind(" ");
+	    if (at!=string::npos) {
+	      next = txt.substr(0,at);
+	      txt = txt.substr(at+1,txt.length());
+	    } else {
+	      next = txt.substr(0,w-tot);
+	      txt = txt.substr(w-tot,txt.length());
+	    }
+	  } else {
+	    txt = "";
+	  }
+	  printf("%s\n", next.c_str());
+	  if (txt.length()>0) {
+	    printf("% *c", tot, ' ');
+	  }
+	}
+      }
+      if (o.long_name=="format") {
+	showOptions(opt,OPTION_PATCH_FORMAT);
+      }
+    }
+  }
+}
+
+void OptionRenderCmdLine::render(const Options& opt) {
+  printf("%s version %s\n", opt.getName().c_str(), opt.getVersion().c_str());
+  printf("Usage\n");
+  printf("\n");
+  const vector<string>& usages = opt.getUsages();
+  for (int i=0; i<(int)usages.size(); i++) {
+    printf("  %s\n", usages[i].c_str());
+  }
+  printf("\n");
+  const string& desc = opt.getDescription();
+  printf("%s\n", desc.c_str());
+  printf("\n");
+  printf("Options\n");
+  int f = opt.getOptionFilter();
+  showOptions(opt,f);
+}
+
+
+void OptionRenderDoxygen::showOptions(const Options& opt, int filter,
+				      const string& prefix, bool detailed,
+				      bool compact) {
+  bool flaggy = (filter!=OPTION_PATCH_FORMAT);
+  vector<Option> mopts = opt.getOptionList();
+  sort(mopts.begin(),mopts.end(),OptionCompare());
+
+  
+  for (int i=0; i<(int)mopts.size(); i++) {
+    Option& o = mopts[i];
+    if (o.coverage&filter) {
+      string pre = o.long_name;
+      if (flaggy) {
+	pre = string("--")+pre;
+      }
+      if (o.arg!="") {
+	pre += "=";
+	pre += o.arg;
+      }
+      
+      string anchor = prefix + "_" + o.long_name;
+      string desc = o.desc;
+      if (o.is_default) {
+	desc = string("<i>[default]</i> ") + desc;
+      }
+      if (!detailed) {
+	  printf(" \\li \\ref %s \"%s\"\n", anchor.c_str(), pre.c_str());
+      } else if (compact) {
+	printf("  \\li <b>%s</b>: ", pre.c_str());
+	printf("%s\n", desc.c_str());
+      } else {
+	printf("\\anchor %s <b>%s</b> <br />", anchor.c_str(), pre.c_str());	
+	printf("%s\n\n\n", desc.c_str());
+      }
+    }
+  }
+}
+
+void OptionRenderDoxygen::render(const Options& opt) {
+  printf("/**\n");
+  printf(" *\n\n");
+
+  printf("@page %s %s\n\n", opt.getName().c_str(),
+	 opt.getName().c_str());
+
+  printf("%s\n\n", opt.getDescription().c_str());
+
+  printf("\n\n\\section %s_usage Usage\n", opt.getName().c_str());
+  const vector<string>& usages = opt.getUsages();
+  for (int i=0; i<(int)usages.size(); i++) {
+    printf(" \\li %s\n", usages[i].c_str());
+  }
+  printf("\n\n\\section %s_index Index\n", opt.getName().c_str());
+  printf("  \\li \\ref %s_options\n", opt.getName().c_str());
+  printf("  \\li \\ref %s_options_detail\n", opt.getName().c_str());
+  printf("  \\li \\ref %s_patch\n", opt.getName().c_str());
+  printf("  \\li \\ref %s_table\n", opt.getName().c_str());
+  printf("  \\li \\ref %s_version\n", opt.getName().c_str());
+
+  printf("\n\n\\section %s_options Option summary\n", opt.getName().c_str());
+
+  int f = opt.getOptionFilter();
+  string anchor = opt.getName() + "_main";
+  showOptions(opt,f,anchor);
+
+  printf("\n\n\\section %s_options_detail Option details\n", opt.getName().c_str());
+  showOptions(opt,f,anchor,true);
+
+  printf("\n\n\\section %s_patch Patch formats\n", opt.getName().c_str());
+  showOptions(opt,OPTION_PATCH_FORMAT,anchor,true,true);
+
+  printf("\n\n\\section %s_table Database/spreadsheet file formats\n", opt.getName().c_str());
+  vector<FormatDesc> descs = PolyBook::getFormatList();
+  for (int i=0; i<(int)descs.size(); i++) {
+    const FormatDesc& fd = descs[i];
+    printf("%s<br />\n", fd.name.c_str());
+    for (int i=0; i<(int)fd.exts.size(); i++) {
+      printf("  \\li<b>%s</b>: %s\n",
+	     fd.exts[i].ext.c_str(),
+	     fd.exts[i].notes.c_str());
+    }
+    const vector<FormatDesc::Option>& opts = fd.opts;
+    if (opts.size()>0) {
+      string result;
+      printf("  \\li<b>.json</b>: {<br />\n");
+      for (int i=0; i<(int)opts.size(); i++) {
+	const FormatDesc::Option& o = opts[i];
+	result += "      \"";
+	result += o.tag;
+	result += "\": ";
+	PolyValue v = o.val;
+	if (o.val.isString()) {
+	  result += "\"";
+	}
+	result += o.val.asString();
+	if (o.val.isString()) {
+	  result += "\"";
+	}
+	if (i<(int)opts.size()-1) {
+	  result += ",";
+	}
+	result += "<br />\n";
+      }
+      printf("%s}\n", result.c_str());
+    }
+    const vector<FormatDesc::Dbi>& dbis = fd.dbis;
+    for (int i=0; i<(int)dbis.size(); i++) {
+      printf("  \\li <b>%s</b>", dbis[i].ex.c_str());
+      if (dbis[i].notes!="") {
+	printf(" (%s) ", dbis[i].notes.c_str());
+      }
+      printf("\n");
+    }
+    printf("\n\n");
+  }
+
+  printf("\n\n\\section %s_version Version\n", opt.getName().c_str());
+
+  printf("%s version %s\n", opt.getName().c_str(), opt.getVersion().c_str());
+
+  printf("\n\n");
+  printf(" *\n");
+  printf(" */\n");
+}
+
+
+
+
+
 void Options::add(int cov, const char *name, const char *desc) {
   Option o;
   o.coverage = cov;
@@ -38,7 +297,7 @@ Options::Options(const char *name) : name(name) {
 	       "direct output to this file (default is standard output)");
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
       "format=FORMAT",
-      "set difference format for output:");
+      "set difference format for output");
   add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_PATCH|OPTION_FOR_FORMAT,
       "input-formats",
       "list supported input database formats");
@@ -63,7 +322,7 @@ Options::Options(const char *name) : name(name) {
       "operate on a single named table of a workbook/database");
   add(OPTION_FOR_DIFF,
       "apply",
-      "apply difference between <file1> and <file2> immediately to <file1>");
+      "apply difference between FILE1 and FILE2 immediately to FILE1");
   add(OPTION_FOR_DIFF,
       "parent=PARENT",
       "use named workbook/database as common ancestor in difference calculations");
@@ -180,6 +439,8 @@ int Options::apply(int argc, char *argv[]) {
       {"version", 0, 0, 0},
       {"patch-formats", 0, 0, 0},
 
+      {"help-doxygen", 0, 0, 0},
+
       {0, 0, 0, 0}
     };
 
@@ -209,8 +470,12 @@ int Options::apply(int argc, char *argv[]) {
 	} else if (k=="output-format") {
 	  option_string["output-format"] = optarg;
 	} else if (k=="patch-formats") {
-	  showOptions(OPTION_PATCH_FORMAT);
+	  OptionRenderCmdLine render;
+	  render.showOptions(*this,OPTION_PATCH_FORMAT);
 	  exit(0);
+	} else if (k=="help-doxygen") {
+	  option_bool["help"] = true;
+	  option_bool["help-doxygen"] = true;
 	} else if (k=="version") {
 	  option_bool["version"] = true;
 	  printf("%s\n", getVersion().c_str());
@@ -336,113 +601,27 @@ int Options::apply(int argc, char *argv[]) {
   return 0;
 }
 
-class OptionCompare {
-public:
-  bool operator() (const Option& o1, const Option& o2) {
-    if (o1.is_default&&!o2.is_default) return true;
-    if (o2.is_default&&!o1.is_default) return false;
-    return (o1.long_name<o2.long_name);
-  }
-};
-
-void Options::showOptions(int filter) {
-  bool flaggy = true;
-  int start = 2;
-  int len = 15;
-  if (filter==OPTION_PATCH_FORMAT) {
-    flaggy = false;
-    len = 6;
-    start = 18;
-  }
-
-  vector<Option> mopts = opts;
-  sort(mopts.begin(),mopts.end(),OptionCompare());
-
-  /*
-  for (int i=0; i<80; i++) {
-    printf("%d", i/10);
-  }
-  printf("\n");
-  for (int i=0; i<80; i++) {
-    printf("%d", i%10);
-  }
-  printf("\n");
-  */
-  
-  for (int i=0; i<(int)mopts.size(); i++) {
-    Option& o = mopts[i];
-    int tot = start+len+1;
-    int w = 78;
-    if (o.coverage&filter) {
-      printf("% *c",start,' ');
-      string pre = o.long_name;
-      if (flaggy) {
-	pre = string("--")+pre;
-      }
-      if (o.arg!="") {
-	pre += "=";
-	pre += o.arg;
-      }
-      if (pre.length()>len) {
-	printf("%s\n", pre.c_str());
-	printf("% *c",start,' ');
-	pre = "";
-      }
-      while (pre.length()<len) pre += " ";
-      printf("%s ", pre.c_str());
-
-      string desc = o.desc;
-      if (o.is_default) {
-	desc = string("[default] ") + desc;
-      }
-      if (desc.length()<=w-tot) {
-	printf("%s\n", desc.c_str());
-      } else {
-	string txt = desc;
-	while (txt.length()>0) {
-	  string next = txt.substr(0,w-tot+1);
-	  if (next.length()>w-tot) {
-	    string::size_type at = next.rfind(" ");
-	    if (at!=string::npos) {
-	      next = txt.substr(0,at);
-	      txt = txt.substr(at+1,txt.length());
-	    } else {
-	      next = txt.substr(0,w-tot);
-	      txt = txt.substr(w-tot,txt.length());
-	    }
-	  } else {
-	    txt = "";
-	  }
-	  printf("%s\n", next.c_str());
-	  if (txt.length()>0) {
-	    printf("% *c", tot, ' ');
-	  }
-	}
-      }
-      if (o.long_name=="format") {
-	showOptions(OPTION_PATCH_FORMAT);
-      }
-    }
-  }
-}
-
 
 void Options::beginHelp() {
-  printf("%s version %s\n", name.c_str(), getVersion().c_str());
-  printf("Usage\n");
-  printf("\n");
 }
 
 void Options::addUsage(const char *usage) {
-  printf("  %s\n", usage);
+  usages.push_back(usage);
 }
 
 void Options::addDescription(const char *desc) {
-  printf("\n");
-  printf("%s\n", desc);
-  printf("\n");
-  printf("Options\n");
+  description = desc;
 }
 
+
 void Options::endHelp() {
+  if (option_bool["help-doxygen"]) {
+    OptionRenderDoxygen render;
+    render.render(*this);
+    return;
+  }
+  OptionRenderCmdLine render;
+  render.render(*this);
 }
+
+

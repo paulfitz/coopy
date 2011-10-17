@@ -259,5 +259,5 @@ diff_apply numbers.xls numbers_change_five.xls xls_update_cell
 
 merge_apply numbers.csv numbers_change_five.csv numbers_flip_column.csv change_cell_and_flip_columns
 merge_apply numbers_wide.csv numbers_wide_flip_pair1.csv numbers_wide_flip_pair2.csv flip_columns_locally_and_remotely
-merge_apply test001_base.csv test001_spell.csv test001_col.csv big_merge_with_lots_of_changes
+# merge_apply test001_base.csv test001_spell.csv test001_col.csv big_merge_with_lots_of_changes # too confusing
 merge_apply test005_base.csv test005_fix_typo_add.csv test005_replace_column_and_reorder.csv altitude_typo_fix_and_reorder

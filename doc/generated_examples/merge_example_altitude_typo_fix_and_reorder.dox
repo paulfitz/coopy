@@ -17,7 +17,7 @@ ssmerge test005_base.csv test005_fix_typo_add.csv test005_replace_column_and_reo
 \section merge_example_altitude_typo_fix_and_reorder_output output
 <table>
   <tr><td>Probe A</td><td>Probe C</td><td>Probe D</td><td>Comment</td><td>Altitude</td></tr>
-  <tr><td>5</td><td>7</td><td>NULL</td><td>Smooth flight</td><td>500</td></tr>
+  <tr><td>5</td><td>7</td><td></td><td>Smooth flight</td><td>500</td></tr>
   <tr><td>10</td><td>30</td><td>5</td><td>Wing vibration</td><td>1000</td></tr>
   <tr><td>15</td><td>52</td><td>10</td><td>Wing vibration</td><td>2000</td></tr>
   <tr><td>3</td><td>89</td><td>15</td><td>Ominous silence</td><td>3000</td></tr>

@@ -42,6 +42,8 @@ The result of comparing the tables are:
 \section diff_example_named_fix_a_cell_tdiff_output tdiff output
 \verbatim
 # tdiff version 0.3
+# --- /home/paulfitz/cvs/coopy/tests/named_numbers_three_23.csv
+# +++ /home/paulfitz/cvs/coopy/tests/named_numbers.csv
 = |NAME=three|DIGIT=23->3|
 \endverbatim
  

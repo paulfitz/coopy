@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
   if ((core.size()<2&&opt.checkString("patch")=="")||help) {
     opt.beginHelp();
-    opt.addUsage("ssdiff [options] <file1> <file2>");
+    opt.addUsage("ssdiff [options] FILE1 FILE2");
     opt.addDescription("Show the difference between two tables/databases/spreadsheets.");
     opt.showOptions(OPTION_FOR_DIFF);
     opt.endHelp();

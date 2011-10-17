@@ -36,7 +36,8 @@ extern TextBook *readHelper(const char *fname,
 			    const char *ext,
 			    const char *data);
 
-extern void getFactories(vector<TextBookFactory *>& lst, bool preview);
+extern void getFactories(vector<TextBookFactory *>& lst);
+extern void getFactoriesList(vector<FormatDesc>& descs);
 
 class Factories {
 public:
@@ -48,7 +49,7 @@ public:
     all.push_back(CsvTextBookFactory::makeCompactFactory());
     all.push_back(new SqliteTextBookFactory);
     all.push_back(new SqliteTextBookFactory(true));
-    getFactories(all,false);
+    getFactories(all);
   }
 
   ~Factories() {
@@ -322,9 +323,10 @@ bool PolyBook::flush() {
 
 #define STRVAL PolyValue::makeString
 
-void PolyBook::showFormats() {
-  printf("Supported formats\n");
-  printf("-----------------\n\n");
+std::vector<FormatDesc> PolyBook::getFormatList() {
+
+  vector<FormatDesc> descs;
+
   FormatDesc csv("CSV: plain-text delimiter-separated family of formats");
   csv.addExtension(".csv","Comma-separated values");
   csv.addExtension(".tsv","Tab-separated values");
@@ -332,7 +334,7 @@ void PolyBook::showFormats() {
   csv.addOption("type",STRVAL("csv"),"CSV family",true);
   csv.addOption("file",STRVAL("fname.dsv"),"File name",true);
   csv.addOption("delimiter",STRVAL("|"),"Delimiter character",true);
-  csv.show();
+  descs.push_back(csv);
 
   //printf("  file extensions: .csv .tsv .ssv\n");
   //printf("  .json options:   { \"type\": \"csv\", \"file\": \"fname.csv\", \"delimiter\": \",\", \"header\": 0, }\n");
@@ -341,7 +343,7 @@ void PolyBook::showFormats() {
   sqlite.addDbi("dbi:sqlite:fname.db","Force sqlite interpretation");
   sqlite.addOption("type",STRVAL("sqlite"),"Sqlite family",true);
   sqlite.addOption("file",STRVAL("fname.db"),"File name",true);
-  sqlite.show();
+  descs.push_back(sqlite);
 
 
   FormatDesc sqlitext("SQLITEXT: sqlite-format sql dump");
@@ -349,14 +351,22 @@ void PolyBook::showFormats() {
   sqlitext.addDbi("dbi:sqlitext:fname.sql","Force sqlitext interpretation");
   sqlitext.addOption("type",STRVAL("sqlitext"),"Sqlitext family",true);
   sqlitext.addOption("file",STRVAL("fname.sql"),"File name",true);
-  sqlitext.show();
-  vector<TextBookFactory *> all;
-  getFactories(all,true);
-  for (int i=0; i<(int)all.size(); i++) {
-    if (all[i]!=NULL) {
-      delete all[i];
-    }
+  descs.push_back(sqlitext);
+
+  getFactoriesList(descs);
+  
+  return descs;
+}
+
+void PolyBook::showFormats() {
+  vector<FormatDesc> descs = getFormatList();
+  
+  printf("Supported formats\n");
+  printf("-----------------\n\n");
+  for (int i=0; i<(int)descs.size(); i++) {
+    descs[i].show();
   }
+
   printf("Tips:\n");
   printf("*  Most spreadsheet/database formats support a 'table' option to restrict\n");
   printf("   input/output to a named table or tables\n");

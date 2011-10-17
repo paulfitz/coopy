@@ -39,6 +39,8 @@ The output, input, and patch are:
 \section patch_example_update_cell_ref2 patch.tdiff
 \verbatim
 # tdiff version 0.3
+# --- /home/paulfitz/cvs/coopy/tests/named_numbers.csv
+# +++ /home/paulfitz/cvs/coopy/tests/named_numbers_change_five.csv
 = |NAME=five->fyffe|
 \endverbatim
 

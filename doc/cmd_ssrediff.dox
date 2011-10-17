@@ -1,48 +1,51 @@
 /**
  *
 
-@page sspatch sspatch
+@page ssrediff ssrediff
 
-Modify a table/database/spreadsheet to integrate the changes described
-in a pre-computed difference.
-
-
-
-\section sspatch_usage Usage
- \li sspatch [options] DATAFILE PATCHFILE
-
-
-\section sspatch_index Index
-  \li \ref sspatch_options
-  \li \ref sspatch_options_detail
-  \li \ref sspatch_patch
-  \li \ref sspatch_table
-  \li \ref sspatch_version
-
-
-\section sspatch_options Option summary
- \li \ref sspatch_main_inplace "--inplace"
- \li \ref sspatch_main_input-formats "--input-formats"
- \li \ref sspatch_main_output "--output=OUTPUTFILE"
- \li \ref sspatch_main_patch-formats "--patch-formats"
-
-
-\section sspatch_options_detail Option details
-\anchor sspatch_main_inplace <b>--inplace</b> <br />if modifications are made, make them in place without a copy
-
-
-\anchor sspatch_main_input-formats <b>--input-formats</b> <br />list supported input database formats
-
-
-\anchor sspatch_main_output <b>--output=OUTPUTFILE</b> <br />direct output to this file (default is standard output)
-
-
-\anchor sspatch_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
+Reformat a file describing differences between spreadsheets or databases.
 
 
 
+\section ssrediff_usage Usage
+ \li ssrediff [options] PATCH_FILE
 
-\section sspatch_patch Patch formats
+
+\section ssrediff_index Index
+  \li \ref ssrediff_options
+  \li \ref ssrediff_options_detail
+  \li \ref ssrediff_patch
+  \li \ref ssrediff_table
+  \li \ref ssrediff_version
+
+
+\section ssrediff_options Option summary
+ \li \ref ssrediff_main_format "--format=FORMAT"
+ \li \ref ssrediff_main_omit-format-name "--omit-format-name"
+ \li \ref ssrediff_main_omit-sheet-name "--omit-sheet-name"
+ \li \ref ssrediff_main_output "--output=OUTPUTFILE"
+ \li \ref ssrediff_main_patch-formats "--patch-formats"
+
+
+\section ssrediff_options_detail Option details
+\anchor ssrediff_main_format <b>--format=FORMAT</b> <br />set difference format for output
+
+
+\anchor ssrediff_main_omit-format-name <b>--omit-format-name</b> <br />omit any version-dependent header from diff
+
+
+\anchor ssrediff_main_omit-sheet-name <b>--omit-sheet-name</b> <br />omit any sheet/table name from diff
+
+
+\anchor ssrediff_main_output <b>--output=OUTPUTFILE</b> <br />direct output to this file (default is standard output)
+
+
+\anchor ssrediff_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
+
+
+
+
+\section ssrediff_patch Patch formats
   \li <b>tdiff</b>: <i>[default]</i> vaguely similar to a standard unix diff
   \li <b>csv</b>: csv-compatible diff format
   \li <b>hilite</b>: colorful spreadsheet format
@@ -52,7 +55,7 @@ in a pre-computed difference.
   \li <b>sql</b>: SQL format (data diffs only)
 
 
-\section sspatch_table Database/spreadsheet file formats
+\section ssrediff_table Database/spreadsheet file formats
 CSV: plain-text delimiter-separated family of formats<br />
   \li<b>.csv</b>: Comma-separated values
   \li<b>.tsv</b>: Tab-separated values
@@ -122,8 +125,8 @@ MYSQL: database connector<br />
 
 
 
-\section sspatch_version Version
-sspatch version 0.5.6
+\section ssrediff_version Version
+ssrediff version 0.5.6
 
 
  *

@@ -3,101 +3,159 @@
 
 @page ssmerge ssmerge
 
-This does a three-way merge of a spreadsheet.  Currently supported
-formats are delimiter-separated values (comma, tab, or semicolon).
+Merge table/database/spreadsheets. The first file must be a common ancestor of the remaining two.
 
-\if link_internal
-Here are the ways you can use ssmerge:
-- \ref ssmerge_base
-- \ref ssmerge_common_usage
-- \ref ssmerge_direct_output
-- \ref ssmerge_head_trimmed
-- \ref ssmerge_tail_trimmed
-\endif
 
-@section ssmerge_base ssmerge
 
-The utility gives a friendly message if called with no arguments
-to confirm that it exists, and to give tips on where to get started
-using it.  At the time of writing, that output is:
+\section ssmerge_usage Usage
+ \li ssmerge [options] FILE1 FILE2 FILE3
 
-\verbatim
-Merge spreadsheets, with sensible treatment of changes:
-  ssmerge [--output output.csv] parent.csv local.csv remote.csv
-Note: parent.csv should be a 'common ancestor' of the other two.
-The merged or conflicting result will be placed in the specified output file.
-If one or more inputs have been trimmed, let ssmerge know so it won't
-treat trimming as implying deletion:
-  ssmerge [--head-trimmed] [--tail-trimmed] parent.csv local.csv remote.csv
-\endverbatim
 
-@section ssmerge_common_usage ssmerge parent.csv local.csv remote.csv
+\section ssmerge_index Index
+  \li \ref ssmerge_options
+  \li \ref ssmerge_options_detail
+  \li \ref ssmerge_patch
+  \li \ref ssmerge_table
+  \li \ref ssmerge_version
 
-When called with three files, ssmerge will assume that the first is a
-common ancestor of the other two.  It will infer changes between that
-"parent" and each of the other two (called the "local" and "remote"
-files).  It will attempt to generate a new spreadsheet that
-incorporates both sets of changes.  By default, that spreadsheet
-is output to standard output.  For example, if parent.csv is:
-\verbatim
-one,1
-two,2
-thri,23
-four,4
-five,5
-\endverbatim
-and local.csv corrects "23" to be "3":
-\verbatim
-one,1
-two,2
-thri,3
-four,4
-five,5
-\endverbatim
-and remote.csv corrects "thri" to be "three":
-\verbatim
-one,1
-two,2
-three,23
-four,4
-five,5
-\endverbatim
-then the output of ssmerge should contain both fixes:
-\verbatim
-one,1
-two,2
-three,3
-four,4
-five,5
-\endverbatim
 
-Likewise, more complex manipulations like reordering columns and
-inserting/deleting rows should be merged if they do not 
-\if link_examples
-conflict (see \ref merge_example).
-\else
-conflict.
-\endif
+\section ssmerge_options Option summary
+ \li \ref ssmerge_main_bid "--bid=COLUMN"
+ \li \ref ssmerge_main_fixed-columns "--fixed-columns"
+ \li \ref ssmerge_main_head-trimmed "--head-trimmed"
+ \li \ref ssmerge_main_id "--id=COLUMN"
+ \li \ref ssmerge_main_inplace "--inplace"
+ \li \ref ssmerge_main_input-formats "--input-formats"
+ \li \ref ssmerge_main_named "--named"
+ \li \ref ssmerge_main_output "--output=OUTPUTFILE"
+ \li \ref ssmerge_main_patch-formats "--patch-formats"
+ \li \ref ssmerge_main_table "--table=TABLE"
+ \li \ref ssmerge_main_tail-trimmed "--tail-trimmed"
+ \li \ref ssmerge_main_unordered "--unordered"
 
-@section ssmerge_direct_output ssmerge --output out.csv parent.csv local.csv remote.csv
 
-The output of ssmerge is by default standard output.  It can be redirected
-to a file using the "--output" option.  The output can have be of a different
-format to the inputs.
+\section ssmerge_options_detail Option details
+\anchor ssmerge_main_bid <b>--bid=COLUMN</b> <br />boost a column (repeat option for multiple columns)
 
-@section ssmerge_head_trimmed ssmerge --head-trimmed parent.csv local.csv remote.csv
 
-Warn ssmerge that the inputs may have had their heads trimmed.  In
-other words, rows at the beginning of these files may have been
-removed (typically to save space).  With this warning, ssmerge will
-not assume that a row that disappears between the parent and
-the local/remote input was deliberately deleted, if that row's location
-should have been before the first row actually present.
+\anchor ssmerge_main_fixed-columns <b>--fixed-columns</b> <br />ignore new or removed columns
 
-@section ssmerge_tail_trimmed ssmerge --tail-trimmed parent.csv local.csv remote.csv
 
-Just like \ref ssmerge_head_trimmed "head trimming", but at the end of files rather than
-the beginning.  Head and tail trimming flags may be used together.
+\anchor ssmerge_main_head-trimmed <b>--head-trimmed</b> <br />ignore rows removed at the beginning of a table (such as a log file)
+
+
+\anchor ssmerge_main_id <b>--id=COLUMN</b> <br />set primary key (repeat option for multi-column key)
+
+
+\anchor ssmerge_main_inplace <b>--inplace</b> <br />if modifications are made, make them in place without a copy
+
+
+\anchor ssmerge_main_input-formats <b>--input-formats</b> <br />list supported input database formats
+
+
+\anchor ssmerge_main_named <b>--named</b> <br />trust names of columns (saves work checking for column renames)
+
+
+\anchor ssmerge_main_output <b>--output=OUTPUTFILE</b> <br />direct output to this file (default is standard output)
+
+
+\anchor ssmerge_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
+
+
+\anchor ssmerge_main_table <b>--table=TABLE</b> <br />operate on a single named table of a workbook/database
+
+
+\anchor ssmerge_main_tail-trimmed <b>--tail-trimmed</b> <br />ignore rows removed at the end of a table (such as a log file)
+
+
+\anchor ssmerge_main_unordered <b>--unordered</b> <br />neglect order of rows (saves work)
+
+
+
+
+\section ssmerge_patch Patch formats
+  \li <b>tdiff</b>: <i>[default]</i> vaguely similar to a standard unix diff
+  \li <b>csv</b>: csv-compatible diff format
+  \li <b>hilite</b>: colorful spreadsheet format
+  \li <b>index</b>: tabular output showing relationship between rows and columns
+  \li <b>raw</b>: verbose diff format for debugging
+  \li <b>review</b>: spreadsheet diff format suitable for quickly accepting or rejecting changes
+  \li <b>sql</b>: SQL format (data diffs only)
+
+
+\section ssmerge_table Database/spreadsheet file formats
+CSV: plain-text delimiter-separated family of formats<br />
+  \li<b>.csv</b>: Comma-separated values
+  \li<b>.tsv</b>: Tab-separated values
+  \li<b>.ssv</b>: Semicolon-separated values
+  \li<b>.json</b>: {<br />
+      "type": "csv",<br />
+      "file": "fname.dsv",<br />
+      "delimiter": "|"<br />
+}
+
+
+SQLITE: file-based database<br />
+  \li<b>.sqlite</b>: Sqlite database file
+  \li<b>.json</b>: {<br />
+      "type": "sqlite",<br />
+      "file": "fname.db"<br />
+}
+  \li <b>dbi:sqlite:fname.db</b> (Force sqlite interpretation) 
+
+
+SQLITEXT: sqlite-format sql dump<br />
+  \li<b>.sqlitext</b>: SQL dump of Sqlite database
+  \li<b>.json</b>: {<br />
+      "type": "sqlitext",<br />
+      "file": "fname.sql"<br />
+}
+  \li <b>dbi:sqlitext:fname.sql</b> (Force sqlitext interpretation) 
+
+
+JSONBOOK: Spreadsheet formats in json<br />
+  \li<b>.jsonbook</b>: Json spreadsheet
+
+
+GNUMERIC: Spreadsheet formats (via gnumeric)<br />
+  \li<b>.xls</b>: Excel spreadsheet
+  \li<b>.xlsx</b>: Excel spreadsheet
+  \li<b>.gnumeric</b>: Gnumeric spreadsheet
+  \li<b>.json</b>: {<br />
+      "type": "gnumeric",<br />
+      "file": "fname.sheet"<br />
+}
+  \li <b>dbi:gnumeric:fname.sheet</b> (Force Gnumeric interpretation) 
+
+
+MDB: Access database format (via Mdbtools, READ-ONLY)<br />
+  \li<b>.mdb</b>: Access database file
+  \li<b>.json</b>: {<br />
+      "type": "access",<br />
+      "file": "fname.db"<br />
+}
+  \li <b>dbi:access:fname.db</b> (Force Access interpretation) 
+
+
+MYSQL: database connector<br />
+  \li<b>.json</b>: {<br />
+      "type": "mysql",<br />
+      "database": "db_name",<br />
+      "host": "localhost",<br />
+      "port": "1111",<br />
+      "username": "root",<br />
+      "password": "****"<br />
+}
+  \li <b>dbi:mysql:database_name</b> (Use default port, username, etc) 
+  \li <b>dbi:mysql:database_name:username=USER:password=PASS</b>
+  \li <b>dbi:mysql:database_name:host=HOST:port=PORT</b>
+
+
+
+
+\section ssmerge_version Version
+ssmerge version 0.5.6
+
 
  *
  */

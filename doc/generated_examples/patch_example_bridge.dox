@@ -45,6 +45,8 @@ The output, input, and patch are:
 \section patch_example_bridge_ref2 patch.tdiff
 \verbatim
 # tdiff version 0.3
+# --- /home/paulfitz/cvs/coopy/tests/broken_bridges.csv
+# +++ /home/paulfitz/cvs/coopy/tests/bridges.csv
 * |bridge=Brooklyn|
 + |bridge:->Manhattan|designer:->G. Lindenthal|length:->1470|
 = |bridge=Williamsburg|designer=D. Duck->L. L. Buck|

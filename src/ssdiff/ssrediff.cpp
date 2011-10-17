@@ -20,8 +20,9 @@ int main(int argc, char *argv[]) {
 
   if (core.size()<1||help) {
     opt.beginHelp();
-    opt.addUsage("ssrediff [options] <patch>");
-    opt.addDescription("Reformat a diff file.");
+    opt.addUsage("ssrediff [options] PATCHFILE");
+    opt.addUsage("ssrediff [options] DATAFILE PATCHFILE");
+    opt.addDescription("Reformat a tabular diff file. Converting to hilite/review formats will require\nsupplying the original spreadsheet/database.");
     opt.showOptions(OPTION_FOR_REDIFF);
     opt.endHelp();
 

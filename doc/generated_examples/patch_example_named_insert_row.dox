@@ -40,6 +40,8 @@ The output, input, and patch are:
 \section patch_example_named_insert_row_ref2 patch.tdiff
 \verbatim
 # tdiff version 0.3
+# --- /home/paulfitz/cvs/coopy/tests/named_numbers.csv
+# +++ /home/paulfitz/cvs/coopy/tests/named_numbers_add_row.csv
 * |NAME=five|
 + |NAME:->six|DIGIT:->6|
 \endverbatim

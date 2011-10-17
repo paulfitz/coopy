@@ -39,8 +39,10 @@ The output, input, and patch are:
 \section patch_example_named_move_column_ref2 patch.tdiff
 \verbatim
 # tdiff version 0.3
+# --- /home/paulfitz/cvs/coopy/tests/named_numbers.csv
+# +++ /home/paulfitz/cvs/coopy/tests/named_numbers_flip_column.csv
 @@ |NAME|DIGIT|
-@: NAME |DIGIT|NAME|
+@: DIGIT |DIGIT|NAME|
 \endverbatim
 
  *

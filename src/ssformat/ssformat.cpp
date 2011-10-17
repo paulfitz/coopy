@@ -16,7 +16,7 @@ using namespace coopy::app;
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  Options opt("ssdiff");
+  Options opt("ssformat");
   int r = opt.apply(argc,argv);
   if (r!=0) return r;
 
@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
     */
 
     opt.beginHelp();
-    opt.addUsage("ssformat [options] <file>");
-    opt.addUsage("ssformat [options] <file1> <file2>");
+    opt.addUsage("ssformat [options] FILE");
+    opt.addUsage("ssformat [options] FILE1 FILE2");
     opt.addDescription("Reformat tables/databases/spreadsheets.");
     opt.showOptions(OPTION_FOR_FORMAT);
     opt.endHelp();

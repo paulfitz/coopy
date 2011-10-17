@@ -42,11 +42,13 @@ using namespace coopy::store::json;
 
 #define STRVAL PolyValue::makeString
 
-void getFactories(vector<TextBookFactory *>& lst,bool preview) {
+void gatherFactories(vector<TextBookFactory *>& lst,
+		     vector<FormatDesc>& descs,
+		     bool preview) {
   if (preview) {
     FormatDesc desc("JSONBOOK: Spreadsheet formats in json");
     desc.addExtension(".jsonbook","Json spreadsheet");
-    desc.show();
+    descs.push_back(desc);
   } else {
     lst.push_back(new JsonBookFactory());
   }  
@@ -59,7 +61,7 @@ void getFactories(vector<TextBookFactory *>& lst,bool preview) {
     desc.addDbi("dbi:gnumeric:fname.sheet","Force Gnumeric interpretation");
     desc.addOption("type",STRVAL("gnumeric"),"Gnumeric family",true);
     desc.addOption("file",STRVAL("fname.sheet"),"File name",true);
-    desc.show();
+    descs.push_back(desc);
   } else {
     lst.push_back(new GnumericTextBookFactory());
   }
@@ -71,7 +73,7 @@ void getFactories(vector<TextBookFactory *>& lst,bool preview) {
     desc.addDbi("dbi:access:fname.db","Force Access interpretation");
     desc.addOption("type",STRVAL("access"),"Access family",true);
     desc.addOption("file",STRVAL("fname.db"),"File name",true);
-    desc.show();
+    descs.push_back(desc);
   } else {
     lst.push_back(new AccessTextBookFactory());
   }
@@ -88,11 +90,21 @@ void getFactories(vector<TextBookFactory *>& lst,bool preview) {
     desc.addOption("port",STRVAL("1111"),"Port number",true);
     desc.addOption("username",STRVAL("root"),"Username",true);
     desc.addOption("password",STRVAL("****"),"Password",true);
-    desc.show();
+    descs.push_back(desc);
   } else {
     lst.push_back(new RemoteSqlTextBookFactory("mysql"));
   }
 #endif
+}
+
+void getFactories(vector<TextBookFactory *>& lst) {
+  vector<FormatDesc> descs;
+  gatherFactories(lst,descs,false);
+}
+
+void getFactoriesList(vector<FormatDesc>& descs) {
+  vector<TextBookFactory *> lst;
+  gatherFactories(lst,descs,true);
 }
 
 TextBook *readHelper(const char *fname,

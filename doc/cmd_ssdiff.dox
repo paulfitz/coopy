@@ -3,116 +3,175 @@
 
 @page ssdiff ssdiff
 
-This shows the difference between two tables or sets of tables.
-A variety of formats are supported (see \ref table_format).
-The difference between the tables is by default represented
-as a TDIFF file (see \ref patch_format_tdiff).  A typical usage of
-ssdiff is from the command-line to compare two files:
-\verbatim
-ssdiff version1.csv version2.sqlite
-\endverbatim
+Show the difference between two tables/databases/spreadsheets.
 
-\if link_internal
-Here are the options you can use with ssdiff:
-- \ref ssdiff_base
-- \ref ssdiff_common_usage
-- \ref ssdiff_direct_output
-- \ref ssdiff_parent
-- \ref ssdiff_format_csv
-- \ref ssdiff_format_raw
-\endif
 
-Comparisons between distinct formats are possible (e.g. Excel against MySQL).
-The difference will include ordering information if all tables being 
-compared have meaningful row order; otherwise ordering information is
-omitted.
 
-@section ssdiff_base ssdiff
+\section ssdiff_usage Usage
+ \li ssdiff [options] FILE1 FILE2
 
-The utility gives a friendly message if called with no arguments
-to confirm that it exists, and to give tips on where to get started
-using it.  At the time of writing, that output is:
 
-\verbatim
-Show the difference between two tables/databases/spreadsheets. Call as:
-  ssdiff [--output <filename>] local.csv remote.csv
+\section ssdiff_index Index
+  \li \ref ssdiff_options
+  \li \ref ssdiff_options_detail
+  \li \ref ssdiff_patch
+  \li \ref ssdiff_table
+  \li \ref ssdiff_version
 
-To list supported input formats:
-  ssdiff --list-formats
 
-The difference can be shown in different output formats:
-  ssdiff --format tdiff local.csv modified.csv  # default format
-  ssdiff --format hilite local.csv modified.csv # colorful format, best used
-                                                  with --output out.xls
-  ssdiff --format csv local.csv modified.csv    # CSV-compatible diff format
-  ssdiff --format raw local.csv modified.csv    # verbose format for debugging
-  ssdiff --format sql local.csv modified.csv    # SQL format
-  ssdiff --format index local.csv modified.csv  # table showing matching rows
+\section ssdiff_options Option summary
+ \li \ref ssdiff_main_apply "--apply"
+ \li \ref ssdiff_main_bid "--bid=COLUMN"
+ \li \ref ssdiff_main_fixed-columns "--fixed-columns"
+ \li \ref ssdiff_main_format "--format=FORMAT"
+ \li \ref ssdiff_main_head-trimmed "--head-trimmed"
+ \li \ref ssdiff_main_id "--id=COLUMN"
+ \li \ref ssdiff_main_input-formats "--input-formats"
+ \li \ref ssdiff_main_named "--named"
+ \li \ref ssdiff_main_omit-format-name "--omit-format-name"
+ \li \ref ssdiff_main_omit-sheet-name "--omit-sheet-name"
+ \li \ref ssdiff_main_output "--output=OUTPUTFILE"
+ \li \ref ssdiff_main_parent "--parent=PARENT"
+ \li \ref ssdiff_main_patch-formats "--patch-formats"
+ \li \ref ssdiff_main_table "--table=TABLE"
+ \li \ref ssdiff_main_tail-trimmed "--tail-trimmed"
+ \li \ref ssdiff_main_unordered "--unordered"
 
-The default matching algorithm is very general.  Generality can be traded for
-speed with the following options:
-  ssdiff --id COL1 --id COL2 local.csv modified.csv # declare primary key
-  ssdiff --named local.csv modified.csv   # trust names of columns
 
-It is possible to immediately apply a difference as a patch:
-  ssdiff --apply local.xls modified.csv   # modifies local.xls
-\endverbatim
+\section ssdiff_options_detail Option details
+\anchor ssdiff_main_apply <b>--apply</b> <br />apply difference between FILE1 and FILE2 immediately to FILE1
 
-@section ssdiff_common_usage ssdiff orig.csv mod.csv
-When called with two files, ssdiff will assume that the first is the
-reference "original" and the second is a modified version that we
-wish to describe in terms of the original.
-It will infer changes between the two, and generate a description
-of those changes.  By default, this description is produced in
-a human-readable format.  By default also,
-this description is output to standard output.  
-For example, if orig.csv is:
-\verbatim
-one,1
-two,2
-three,23
-four,4
-five,5
-\endverbatim
-and mod.csv corrects "23" to be "3":
-\verbatim
-one,1
-two,2
-three,3
-four,4
-five,5
-\endverbatim
-then the output of ssdiff will be (at the time of writing):
-\verbatim
-# tdiff version 0.3
-= |A=three|B=23->3|
-\endverbatim
 
-\if link_examples
-See \ref diff_example for more.
-\endif
+\anchor ssdiff_main_bid <b>--bid=COLUMN</b> <br />boost a column (repeat option for multiple columns)
 
-@section ssdiff_direct_output ssdiff --output out.txt orig.csv mod.csv
 
-The output of ssdiff is by default standard output.  It can be redirected
-to a file using the "--output" option.
+\anchor ssdiff_main_fixed-columns <b>--fixed-columns</b> <br />ignore new or removed columns
 
-@section ssdiff_parent ssdiff --parent parent.txt orig.csv mod.csv
 
-It is possible to specify a common ancestor of orig.csv and mod.csv
-if desired, with the parent option.  See \ref ssmerge for more 
-information on the role of a common ancestor.
+\anchor ssdiff_main_format <b>--format=FORMAT</b> <br />set difference format for output
 
-@section ssdiff_format_csv ssdiff --format csv orig.csv mod.csv
 
-This is a terse format that shows modifications in a CSV-compatible way.
+\anchor ssdiff_main_head-trimmed <b>--head-trimmed</b> <br />ignore rows removed at the beginning of a table (such as a log file)
 
-@section ssdiff_format_raw ssdiff --format raw orig.csv mod.csv
 
-This sets the output format to "raw", a very verbose format that shows
-all transformations generated by the underlying merge algorithm.
+\anchor ssdiff_main_id <b>--id=COLUMN</b> <br />set primary key (repeat option for multi-column key)
+
+
+\anchor ssdiff_main_input-formats <b>--input-formats</b> <br />list supported input database formats
+
+
+\anchor ssdiff_main_named <b>--named</b> <br />trust names of columns (saves work checking for column renames)
+
+
+\anchor ssdiff_main_omit-format-name <b>--omit-format-name</b> <br />omit any version-dependent header from diff
+
+
+\anchor ssdiff_main_omit-sheet-name <b>--omit-sheet-name</b> <br />omit any sheet/table name from diff
+
+
+\anchor ssdiff_main_output <b>--output=OUTPUTFILE</b> <br />direct output to this file (default is standard output)
+
+
+\anchor ssdiff_main_parent <b>--parent=PARENT</b> <br />use named workbook/database as common ancestor in difference calculations
+
+
+\anchor ssdiff_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
+
+
+\anchor ssdiff_main_table <b>--table=TABLE</b> <br />operate on a single named table of a workbook/database
+
+
+\anchor ssdiff_main_tail-trimmed <b>--tail-trimmed</b> <br />ignore rows removed at the end of a table (such as a log file)
+
+
+\anchor ssdiff_main_unordered <b>--unordered</b> <br />neglect order of rows (saves work)
+
+
+
+
+\section ssdiff_patch Patch formats
+  \li <b>tdiff</b>: <i>[default]</i> vaguely similar to a standard unix diff
+  \li <b>csv</b>: csv-compatible diff format
+  \li <b>hilite</b>: colorful spreadsheet format
+  \li <b>index</b>: tabular output showing relationship between rows and columns
+  \li <b>raw</b>: verbose diff format for debugging
+  \li <b>review</b>: spreadsheet diff format suitable for quickly accepting or rejecting changes
+  \li <b>sql</b>: SQL format (data diffs only)
+
+
+\section ssdiff_table Database/spreadsheet file formats
+CSV: plain-text delimiter-separated family of formats<br />
+  \li<b>.csv</b>: Comma-separated values
+  \li<b>.tsv</b>: Tab-separated values
+  \li<b>.ssv</b>: Semicolon-separated values
+  \li<b>.json</b>: {<br />
+      "type": "csv",<br />
+      "file": "fname.dsv",<br />
+      "delimiter": "|"<br />
+}
+
+
+SQLITE: file-based database<br />
+  \li<b>.sqlite</b>: Sqlite database file
+  \li<b>.json</b>: {<br />
+      "type": "sqlite",<br />
+      "file": "fname.db"<br />
+}
+  \li <b>dbi:sqlite:fname.db</b> (Force sqlite interpretation) 
+
+
+SQLITEXT: sqlite-format sql dump<br />
+  \li<b>.sqlitext</b>: SQL dump of Sqlite database
+  \li<b>.json</b>: {<br />
+      "type": "sqlitext",<br />
+      "file": "fname.sql"<br />
+}
+  \li <b>dbi:sqlitext:fname.sql</b> (Force sqlitext interpretation) 
+
+
+JSONBOOK: Spreadsheet formats in json<br />
+  \li<b>.jsonbook</b>: Json spreadsheet
+
+
+GNUMERIC: Spreadsheet formats (via gnumeric)<br />
+  \li<b>.xls</b>: Excel spreadsheet
+  \li<b>.xlsx</b>: Excel spreadsheet
+  \li<b>.gnumeric</b>: Gnumeric spreadsheet
+  \li<b>.json</b>: {<br />
+      "type": "gnumeric",<br />
+      "file": "fname.sheet"<br />
+}
+  \li <b>dbi:gnumeric:fname.sheet</b> (Force Gnumeric interpretation) 
+
+
+MDB: Access database format (via Mdbtools, READ-ONLY)<br />
+  \li<b>.mdb</b>: Access database file
+  \li<b>.json</b>: {<br />
+      "type": "access",<br />
+      "file": "fname.db"<br />
+}
+  \li <b>dbi:access:fname.db</b> (Force Access interpretation) 
+
+
+MYSQL: database connector<br />
+  \li<b>.json</b>: {<br />
+      "type": "mysql",<br />
+      "database": "db_name",<br />
+      "host": "localhost",<br />
+      "port": "1111",<br />
+      "username": "root",<br />
+      "password": "****"<br />
+}
+  \li <b>dbi:mysql:database_name</b> (Use default port, username, etc) 
+  \li <b>dbi:mysql:database_name:username=USER:password=PASS</b>
+  \li <b>dbi:mysql:database_name:host=HOST:port=PORT</b>
+
+
+
+
+\section ssdiff_version Version
+ssdiff version 0.5.6
+
 
  *
  */
-
-

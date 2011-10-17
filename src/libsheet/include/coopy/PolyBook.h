@@ -4,6 +4,7 @@
 #include <coopy/TextBook.h>
 #include <coopy/PolySheet.h>
 #include <coopy/Property.h>
+#include <coopy/FormatDesc.h>
 
 namespace coopy {
   namespace store {
@@ -186,6 +187,8 @@ public:
   }
 
   static void showFormats();
+
+  static std::vector<FormatDesc> getFormatList();
 
   static bool copyFile(const char *src, const char *dest);
 

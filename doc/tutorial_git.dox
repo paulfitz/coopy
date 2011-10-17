@@ -1,9 +1,9 @@
 /**
  *
 
-\page tutorial_git Using coopy with git
+\page tutorial_git Using ssmerge with git
 
-You can use coopy tools to do smarter merges of tables stored in git.
+You can use \ref ssmerge to do smarter merges of tables stored in git.
 
 \li \ref tutorial_git_config
 \li \ref tutorial_git_attr
