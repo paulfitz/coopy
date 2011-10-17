@@ -24,6 +24,12 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/BookHook.cpp.in ${BOOK_HOOK0}
 ADD_LIBRARY(sheet_plus_csv_sql CsvFile.cpp PatchParser.cpp 
   Options.cpp Diff.cpp
   CsvTextBook.cpp ShortTextBook.cpp JsonProperty.cpp JsonBook.cpp)
+
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Options.cpp 
+    APPEND PROPERTY COMPILE_DEFINITIONS 
+    COOPY_VERSION=${COOPY_VERSION})
+
+
 TARGET_LINK_LIBRARIES(sheet_plus_csv_sql sheet_core sqlite csv jsoncpp)
 export(TARGETS sheet_plus_csv_sql APPEND FILE ${COOPY_DEPENDENCIES})
 

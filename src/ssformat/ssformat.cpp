@@ -8,75 +8,41 @@
 #include <coopy/CsvTextBook.h>
 #include <coopy/Dbg.h>
 #include <coopy/CompareFlags.h>
+#include <coopy/Options.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
+using namespace coopy::app;
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  bool extractHeader = false;
-  bool extractIndex = false;
-  bool verbose = false;
-  bool help = false;
+  Options opt("ssdiff");
+  int r = opt.apply(argc,argv);
+  if (r!=0) return r;
+
+  bool extractHeader = opt.checkBool("header");
+  bool extractIndex = opt.checkBool("index");
+  bool verbose = opt.checkBool("verbose");
+  bool help = opt.checkBool("help");
+  string inputFormat = opt.checkString("input-format");
+  string outputFormat = opt.checkString("output-format");
   string sheetSelection = "";
-  string inputFormat = "";
-  string outputFormat = "";
-
-  while (true) {
-    int option_index = 0;
-    static struct option long_options[] = {
-      {"verbose", 0, 0, 'v'},
-      {"header", 0, 0, 'h'},
-      {"index", 0, 0, 'i'},
-      {"help", 0, 0, 'H'},
-      {"sheet", 1, 0, 's'},
-      {"table", 1, 0, 't'},
-      {"input-format", 1, 0, 'F'},
-      {"output-format", 1, 0, 'f'},
-      {0, 0, 0, 0}
-    };
-
-    int c = getopt_long(argc, argv, "",
-			long_options, &option_index);
-    if (c==-1) break;
-    switch (c) {
-    case 'v':
-      verbose = true;
-      coopy_set_verbose(true);
-      break;
-    case 'h':
-      extractHeader = true;
-      break;
-    case 'H':
-      help = true;
-      break;
-    case 'i':
-      extractIndex = true;
-      break;
-    case 's':
-    case 't':
-      sheetSelection = optarg;
-      break;
-    case 'F':
-      inputFormat = optarg;
-      break;
-    case 'f':
-      outputFormat = optarg;
-      break;
-    default:
-      fprintf(stderr, "Unrecognized option\n");
-      return 1;
-    }
+  if (opt.getCompareFlags().tables.size()>1) {
+    fprintf(stderr,"sorry, can only select one table right now\n");
+    return 1;
+  }
+  if (opt.getCompareFlags().tables.size()==1) {
+    sheetSelection = *(opt.getCompareFlags().tables.begin());
   }
 
-  if (optind<argc-2) {
+  const vector<string>& core = opt.getCore();
+
+  if (core.size()>2) {
     fprintf(stderr, "Options not understood\n");
     return 1;
   }
-  argc -= optind;
-  argv += optind;
 
-  if (argc<1||help) {
+  if (core.size()<1||help) {
     printf("Call with input file and desired output file. Examples:\n");
     printf("  ssformat input.csv output.sqlite\n");
     printf("  ssformat input.sqlite output.csvs\n");
@@ -91,8 +57,8 @@ int main(int argc, char *argv[]) {
   }
 
   PolyBook src;
-  if (!src.read(argv[0],inputFormat.c_str())) {
-    fprintf(stderr,"Failed to read %s\n", argv[0]);
+  if (!src.read(core[0].c_str(),inputFormat.c_str())) {
+    fprintf(stderr,"Failed to read %s\n", core[0].c_str());
     return 1;
   }
   if (sheetSelection!="") {
@@ -148,8 +114,8 @@ int main(int argc, char *argv[]) {
     src.take(book);
   }
   string out_file = "-";
-  if (argc==2) {
-    out_file = argv[1];
+  if (core.size()==2) {
+    out_file = core[1];
   }
   if (!src.write(out_file.c_str(),outputFormat.c_str())) {
     fprintf(stderr,"Failed to write %s\n", out_file.c_str());

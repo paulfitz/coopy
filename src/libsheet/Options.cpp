@@ -3,6 +3,9 @@
 
 #include <coopy/Options.h>
 
+#define QUOTED_BASE(x) # x
+#define QUOTED_VERSION(x) QUOTED_BASE(x)
+
 using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -28,6 +31,8 @@ int Options::apply(int argc, char *argv[]) {
       {"format-index", 0, 0, 'i'},
 
       {"format", 1, 0, 'f'},
+      {"input-format", 1, 0, 0},
+      {"output-format", 1, 0, 0},
 
       {"apply", 0, 0, 'a'},
 
@@ -50,11 +55,12 @@ int Options::apply(int argc, char *argv[]) {
 
       {"omit-format-name", 0, 0, 'O'},
       {"omit-sheet-name", 0, 0, 'P'},
+      {"header", 0, 0, 0},
 
       {"table", 1, 0, 'T'},
 
       {"output", 1, 0, 'o'},
-      {"version", 1, 0, 'V'},
+      {"format-version", 1, 0, 'V'},
       {"parent", 1, 0, 'p'},
       {"list-formats", 0, 0, 'l'},
       {"help", 0, 0, 'h'},
@@ -67,6 +73,8 @@ int Options::apply(int argc, char *argv[]) {
       {"patch", 1, 0, 0},
 
       {"cmd", 1, 0, 'x'},
+
+      {"version", 0, 0, 0},
 
       {0, 0, 0, 0}
     };
@@ -90,6 +98,16 @@ int Options::apply(int argc, char *argv[]) {
 	  option_string["tmp"] = optarg;
 	} else if (k=="patch") {
 	  option_string["patch"] = optarg;
+	} else if (k=="header") {
+	  option_bool["header"] = true;
+	} else if (k=="input-format") {
+	  option_string["input-format"] = optarg;
+	} else if (k=="output-format") {
+	  option_string["output-format"] = optarg;
+	} else if (k=="version") {
+	  option_bool["version"] = true;
+	  printf("%s\n", QUOTED_VERSION(COOPY_VERSION));
+	  exit(0);
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;
@@ -119,6 +137,7 @@ int Options::apply(int argc, char *argv[]) {
       break;
     case 'i':
       option_string["mode"] = "index";
+      option_bool["index"] = true;
       break;
     case 'd':
       flags.trust_column_names = true;
