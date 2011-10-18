@@ -2,6 +2,7 @@
 #define COOPY_MERGEOUTPUTSQLDIFF
 
 #include <coopy/MergeOutput.h>
+#include <coopy/Dbg.h>
 
 #include <string>
 
@@ -26,7 +27,7 @@ private:
   std::string sheet_name;
 public:
   MergeOutputSqlDiff() {
-    sheet_name = "sheet";
+    sheet_name = coopy_get_default_table_name();
   }
 
   virtual bool wantDiff() { return true; }

@@ -143,7 +143,7 @@ extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p, int quoted) {
     }
   }
   if (sheet==NULL) {
-    state->addSheet("sheet",false);
+    state->addSheet(coopy_get_default_table_name(),false);
     sheet = state->sheet;
   }
   if (sheet!=NULL) {

@@ -19,6 +19,7 @@ The COOPY project contains programs and libraries to help you:
 
 \section mainpage_tut Tutorials
 
+\li \ref tutorial_diff
 \li \ref tutorial_git
 
 \section mainpage_basic Command line tools

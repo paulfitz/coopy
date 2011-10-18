@@ -246,6 +246,11 @@ function merge_apply {
     fi
 }
 
+for f in `cd ../doc/tables; ls *.csv`; do
+    echo $f
+    show_file ../doc/tables/$f csv > ../doc/tables/$f.html
+done
+
 diff_apply broken_bridges.csv bridges.csv bridge
 for pre in "named_"; do
   diff_apply ${pre}numbers.csv ${pre}numbers_flip_column.csv ${pre}move_column
@@ -261,3 +266,4 @@ merge_apply numbers.csv numbers_change_five.csv numbers_flip_column.csv change_c
 merge_apply numbers_wide.csv numbers_wide_flip_pair1.csv numbers_wide_flip_pair2.csv flip_columns_locally_and_remotely
 # merge_apply test001_base.csv test001_spell.csv test001_col.csv big_merge_with_lots_of_changes # too confusing
 merge_apply test005_base.csv test005_fix_typo_add.csv test005_replace_column_and_reorder.csv altitude_typo_fix_and_reorder
+

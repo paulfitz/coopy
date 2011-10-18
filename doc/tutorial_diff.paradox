@@ -1,0 +1,67 @@
+/**
+ *
+
+\page tutorial_diff Contribute to data collection projects using ssdiff
+
+You can use \ref ssdiff to summarize changes you've made
+between two versions of a table (or tables).  Suppose you
+are a bridge geek, and have been working with this 
+table of New York bridges compiled by a friend:
+
+@table bridge_broken
+bridge,designer,length
+Brooklyn,J. A. Roebling,1595
+Williamsburg,D. Duck,1600
+Queensborough,Palmer & Hornbostel,1182
+Triborough,O. H. Ammann,"1380,383"
+Bronx Whitestone,O. H. Ammann,2300
+Throgs Neck,O. H. Ammann,1800
+George Washington,O. H. Ammann,3500
+Spamspan,S. Spamington,10000
+@endtable
+
+That table has some problems (D. Duck? Spamington?). So you fix them.
+
+@table bridge
+bridge,designer,length
+Brooklyn,J. A. Roebling,1595
+Manhattan,G. Lindenthal,1470
+Williamsburg,L. L. Buck,1600
+Queensborough,Palmer & Hornbostel,1182
+Triborough,O. H. Ammann,"1380,383"
+Bronx Whitestone,O. H. Ammann,2300
+Throgs Neck,O. H. Ammann,1800
+George Washington,O. H. Ammann,3500
+@endtable
+
+As a public-spirited type, you'd like to offer your fixes to your friend.
+But you don't want to spend much time at it.
+The easiest would be to just send your updated table.
+But that may be ignored, since there's no clear signal of what you've
+changed and whether it is worthwhile.
+So you run a quick diff and instead send this:
+
+@diff bridge_broken bridge hilite
+
+(produced with <tt>ssdiff --format hilite --output patch.xls FILE1 FILE2</tt>)
+
+Or, if you and your friend are more unix-y, this:
+
+\verbatim
+@diff bridge_broken bridge tdiff
+\endverbatim
+
+(produced with <tt>ssdiff FILE1 FILE2</tt>)
+
+Or, if you and your friend are more database-y, this:
+\verbatim
+@diff bridge_broken bridge sql --default-table bridges
+\endverbatim
+(produced with <tt>ssdiff --format sql --default-table bridges FILE1 FILE2</tt>)
+
+Now your friend can quickly see what changes you made, and 
+update her/his own table either manually or using \ref sspatch.
+
+ *
+ */
+

@@ -1,7 +1,12 @@
 
 #include <coopy/Dbg.h>
 
+#include <string>
+using namespace std;
+
 bool _csv_verbose = false;
+
+string coopy_default_table_name = "sheet";
 
 #ifdef __linux__
 #include <execinfo.h>
@@ -33,4 +38,12 @@ void coopy_set_verbose(bool verbose) {
 
 bool coopy_is_verbose() {
   return _csv_verbose;
+}
+
+void coopy_set_default_table_name(const char *name) {
+  coopy_default_table_name = name;
+}
+
+const char *coopy_get_default_table_name() {
+  return coopy_default_table_name.c_str();
 }

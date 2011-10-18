@@ -411,7 +411,7 @@ public:
   std::string name;
   PolySheet sheet;
 
-  FakeBook() : name("sheet") {
+  FakeBook() : name(coopy_get_default_table_name()) {
   }
 
   virtual std::vector<std::string> getNames() {
@@ -928,7 +928,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
 
     SimpleSheetSchema *schema = new SimpleSheetSchema;
     COOPY_ASSERT(schema);
-    schema->setSheetName("sheet");
+    schema->setSheetName(coopy_get_default_table_name());
     FoldFactor factor;
     factor.practice = true;
     factor.selector = &sel;

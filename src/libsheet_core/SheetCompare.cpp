@@ -252,7 +252,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
       SheetSchema *schema = slocal.suggestSchema();
       COOPY_ASSERT(schema!=NULL);
       std::string sname = schema->getSheetName();
-      if (sname=="") sname = "sheet";
+      if (sname=="") sname = coopy_get_default_table_name();
       fprintf(stderr,"*** Not all ID columns found for %s\n", 
 	      sname.c_str());
       dbg_printf("*** Not all ID columns found for %s\n", 

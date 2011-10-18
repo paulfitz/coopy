@@ -317,6 +317,8 @@ Options::Options(const char *name) : name(name) {
 	     "ignore rows removed at the beginning of a table (such as a log file)");
   addCompare("tail-trimmed",
 	     "ignore rows removed at the end of a table (such as a log file)");
+  addAll("default-table=TABLE",
+	 "name to use when a table name is needed and not supplied");
   add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_FORMAT,
       "table=TABLE",
       "operate on a single named table of a workbook/database");
@@ -438,6 +440,7 @@ int Options::apply(int argc, char *argv[]) {
 
       {"version", 0, 0, 0},
       {"patch-formats", 0, 0, 0},
+      {"default-table", 1, 0, 0},
 
       {"help-doxygen", 0, 0, 0},
 
@@ -469,6 +472,8 @@ int Options::apply(int argc, char *argv[]) {
 	  option_string["input-format"] = optarg;
 	} else if (k=="output-format") {
 	  option_string["output-format"] = optarg;
+	} else if (k=="default-table") {
+	  coopy_set_default_table_name(optarg);
 	} else if (k=="patch-formats") {
 	  OptionRenderCmdLine render;
 	  render.showOptions(*this,OPTION_PATCH_FORMAT);

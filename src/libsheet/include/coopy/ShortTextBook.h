@@ -4,6 +4,7 @@
 #include <coopy/TextBook.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/TextBookFactory.h>
+#include <coopy/Dbg.h>
 
 namespace coopy {
   namespace store {
@@ -22,7 +23,7 @@ public:
   int provides;
   CsvSheet sheet;
 
-  ShortTextBook() : name("sheet") {
+  ShortTextBook() : name(coopy_get_default_table_name()) {
     provides = 0;
   }
 

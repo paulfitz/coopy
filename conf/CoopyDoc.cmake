@@ -1,4 +1,23 @@
 
+file(GLOB paradox ${CMAKE_SOURCE_DIR}/doc/*.paradox)
+set(PARADOXES)
+foreach(f ${paradox})
+  get_filename_component(pbase ${f} NAME_WE)
+  message(STATUS "${f} ${pbase}")
+  set(ODIR ${CMAKE_BINARY_DIR}/dox)
+  set(ONAME ${pbase}.dox)
+  ADD_CUSTOM_COMMAND(OUTPUT ${ODIR}/${ONAME}
+    COMMAND mkdir -p ${ODIR}
+    COMMAND ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh ${f} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} > ${ODIR}/${ONAME}
+    MAIN_DEPENDENCY ${f}
+    DEPENDS ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh csv2html ssdiff
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+  set(PARADOXES ${PARADOXES} ${ODIR}/${ONAME})
+endforeach()
+
+
+
 find_program(DOXYGEN_EXE NAMES doxygen)
 mark_as_advanced(DOXYGEN_EXE)
 if (DOXYGEN_EXE)
@@ -17,7 +36,6 @@ if (DOXYGEN_EXE)
     if (GENERATE_LATEX)
       set(FILE_PATTERNS "*.dox")
       set(ENABLED_SECTIONS "link_internal")
-      #set(EXCLUDE "${CMAKE_SOURCE_DIR}/doc/generated_examples ${CMAKE_SOURCE_DIR}/doc/example.dox ${CMAKE_SOURCE_DIR}/doc/diff_example.dox ${CMAKE_SOURCE_DIR}/doc/merge_example.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_csv_v_0_2.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_human.dox")
       set(EXCLUDE "${CMAKE_SOURCE_DIR}/doc/generated_examples/merge_example_big_merge_with_lots_of_changes.dox ${CMAKE_SOURCE_DIR}/doc/example.dox ${CMAKE_SOURCE_DIR}/doc/diff_example.dox ${CMAKE_SOURCE_DIR}/doc/merge_example.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_csv_v_0_2.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_human.dox")
     endif ()
     if (GENERATE_MAN)
@@ -32,7 +50,12 @@ if (DOXYGEN_EXE)
     endif ()
     configure_file(${CMAKE_SOURCE_DIR}/conf/coopy_doxygen.conf.in
       ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf IMMEDIATE)
-    add_custom_target(${mode} COMMAND ${DOXYGEN_EXE} ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf)
+
+
+    add_custom_target(${mode} 
+      COMMAND ${DOXYGEN_EXE} ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf
+      DEPENDS ${PARADOXES})
+
   endforeach ()
 endif ()
 
