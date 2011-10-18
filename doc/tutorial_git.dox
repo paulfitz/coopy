@@ -24,7 +24,7 @@ this:
 \verbatim
 [merge "coopy-csv"]
   name = coopy csv data merge
-  driver = ssmerge --output dbi:csv::file=%A dbi:cvs::file=%O dbi:cvs::file=%A dbi:cvs::file=%B
+  driver = ssmerge --output dbi:csv::file=%A dbi:csv::file=%O dbi:csv::file=%A dbi:csv::file=%B
 \endverbatim
 You'll need a variant of this stanza for each format you want ssmerge
 to handle.  It is best to stick with text formats.
