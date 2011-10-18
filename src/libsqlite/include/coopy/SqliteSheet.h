@@ -134,6 +134,10 @@ public:
   virtual bool providesPrimaryKeys() const {
     return true;
   }
+
+  virtual bool isShadow() const {
+    return true;
+  }
 };
 
 #endif

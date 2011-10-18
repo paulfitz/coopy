@@ -250,8 +250,14 @@ int Diff::apply(const Options& opt) {
       }
     }
   }
+  bool conflicted = diff->isConflicted();
   delete diff;
   diff = NULL;
+
+  if (opt.isMergeLike()) {
+    fprintf(stderr,"Conflict detected.\n");
+    if (conflicted) return 1;
+  }
 
   return 0;
 }

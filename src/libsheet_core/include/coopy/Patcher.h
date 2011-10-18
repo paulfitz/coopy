@@ -133,7 +133,8 @@ public:
   int mode;         // One of ROW_CHANGE_*, see below
   txt2cell cond;    // conditions for a match
   txt2cell val;     // values to be assigned
-  txt2cell conflictingVal;     // values to be assigned
+  txt2cell conflictingVal;
+  txt2cell conflictingParentVal;
   std::vector<std::string> names;
   std::vector<std::string> allNames;
   txt2bool indexes; // conditions which are indexical, rather than confirming
@@ -219,12 +220,14 @@ protected:
   coopy::store::PolySheet patch_sheet;
   coopy::store::TextBook *patch_book;
   coopy::store::TextBook *output_book;
+  bool conflicted;
 public:
   Patcher() {
     ct = 0;
     out = stdout;
     patch_book = 0;
     output_book = 0;
+    conflicted = false;
   }
 
   virtual ~Patcher() {}
@@ -383,6 +386,14 @@ public:
   }
 
   static bool copyFile(const char *src, const char *dest);
+
+  virtual void setConflicted() {
+    conflicted = true;
+  }
+
+  bool isConflicted() const {
+    return conflicted;
+  }
 };
 
 

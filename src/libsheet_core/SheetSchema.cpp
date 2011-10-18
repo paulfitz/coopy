@@ -1,4 +1,5 @@
 #include <coopy/SheetSchema.h>
+#include <coopy/Stringer.h>
 
 using namespace coopy::store;
 
@@ -14,5 +15,24 @@ SheetSchema *SheetSchema::clone() const {
     ss->addColumn(inf.getName().c_str(),inf.getColumnType());
   }
   return ss;
+}
+
+
+std::string SimpleSheetSchema::toString() const {
+  std::string r = "";
+  r += "sheet ";
+  r += getSheetName();
+  r += " header height ";
+  int h = headerHeight();
+  if (h>0) {
+    r += ">0";
+  } else if (h==0) {
+    r += "=0";
+  } else {
+    r += "<0";
+  }
+  r += " columns ";
+  r += stringer_encoder(getColumnCount());
+  return r;
 }
 

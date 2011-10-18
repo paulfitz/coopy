@@ -58,7 +58,8 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
   vector<SheetCell> saveLocal;
   vector<int> expandDel;
   vector<int> existsLocally;
-  map<string,SheetCell> cond, value, value0, conflicted_value;
+  map<string,SheetCell> cond, value, value0, conflicted_value,
+    conflicted_parent_value;
   vector<string> address;
   vector<string> action;
   int lastCol = -1;
@@ -182,6 +183,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	      conflicted1 = true;
 	      change = true;
 	      novel = true;
+	      output.setConflicted();
 	      //break;
 	    }
 	  }
@@ -206,6 +208,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	  if (conflicted1) {
 	    //printf("SETTING conflicted value\n");
 	    conflicted_value[names[at]] = _r;
+	    conflicted_parent_value[names[at]] = _p;
 	  }
 	}
 	at++;
@@ -307,6 +310,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     rowChange.cond = cond;
     rowChange.val = value;
     rowChange.conflictingVal = conflicted_value;
+    rowChange.conflictingParentVal = conflicted_parent_value;
     rowChange.names = names;
     rowChange.conflicted = conflict;
     bool prev_had_row = had_row;

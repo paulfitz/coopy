@@ -287,23 +287,26 @@ static string colorEncode(const SheetCell& c) {
 bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
 			       std::vector<int>& active_val,
 			       std::vector<SheetCell>& val,
-			       std::vector<SheetCell>& cval) {
+			       std::vector<SheetCell>& cval,
+			       std::vector<SheetCell>& pval) {
   PolySheet sheet = getSheet();
 
   string separator = "";
   for (int c=0; c<width; c++) {
     if (active_val[c]) {
-      if (separator=="") {
-	separator = "->";
-	bool more = true;
-	while (more) {
-	  more = false;
-	  for (int i=0; i<width; i++) {
-	    SheetCell prev = sheet.cellSummary(i,r);
-	    if (prev.text.find(separator)!=string::npos) {
-	      separator = string("-") + separator;
-	      more = true;
-	      break;
+      if (descriptive) {
+	if (separator=="") {
+	  separator = "->";
+	  bool more = true;
+	  while (more) {
+	    more = false;
+	    for (int i=0; i<width; i++) {
+	      SheetCell prev = sheet.cellSummary(i,r);
+	      if (prev.text.find(separator)!=string::npos) {
+		separator = string("-") + separator;
+		more = true;
+		break;
+	      }
 	    }
 	  }
 	}
@@ -357,11 +360,48 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
 	  appear->end();
 	}
       } else {
-	sheet.cellSummary(c,r,val[c]);
+	if (change.conflicted) {
+	  sheet.cellSummary(conflictColumn,r,SheetCell("CONFLICT",false));
+	  SheetCell from = pval[c];
+	  SheetCell to = val[c];
+	  SheetCell alt = cval[c];
+	  if (to!=alt) {
+	    string ctxt = 
+	      "((( " + from.toString() + " ))) " +
+	      to.toString() + " /// " + alt.toString();
+	    sheet.cellSummary(c,r,SheetCell(ctxt,false));
+	  }
+	} else {
+	  sheet.cellSummary(c,r,val[c]);
+	}
       }
     }
   }
   return true;
+}
+
+bool SheetPatcher::handleConflicts() {
+  if (readyForConflicts) return true;
+  if (descriptive) return true;
+  if (!merging) return false;
+  for (int i=0; i<(int)column_names.size(); i++) {
+    if (column_names[i]=="_MERGE_") {
+      readyForConflicts = true;
+      conflictColumn = i;
+      return true;
+    }
+  }
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return false;
+
+  //printf("SCHEMA %s\n", sheet.getSchema()->toString().c_str()); exit(1)
+
+  ColumnInfo con("_MERGE_");
+  con.setType("text","sqlite");
+  ColumnRef at = sheet.insertColumn(ColumnRef(-1),con);
+  readyForConflicts = at.isValid();
+  conflictColumn = at.getIndex();
+  return readyForConflicts;
 }
 
 bool SheetPatcher::changeRow(const RowChange& change) {
@@ -370,8 +410,15 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) {
-    fprintf(stderr,"No sheet available to patch\n");
+    fprintf(stderr,"No sheet available to patch.\n");
     return false;
+  }
+
+  if (change.conflicted) {
+    if (!handleConflicts()) {
+      fprintf(stderr,"Cannot handle conflicts.\n");
+      return false;
+    }
   }
 
   if (activeRow.height()!=sheet.height() || activeRow.width()!=1) {
@@ -393,6 +440,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   vector<int> active_val;
   vector<SheetCell> val;
   vector<SheetCell> cval;
+  vector<SheetCell> pval;
   vector<string> allNames = change.allNames;
   int width = sheet.width(); //(int)change.allNames.size();
   /*
@@ -412,6 +460,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     active_val.push_back(0);
     val.push_back(SheetCell());
     cval.push_back(SheetCell());
+    pval.push_back(SheetCell());
   }
   for (RowChange::txt2cell::const_iterator it = change.cond.begin();
        it!=change.cond.end(); it++) {
@@ -431,6 +480,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       active_val[idx] = 1;
       val[idx] = it->second;
       cval[idx] = it->second;
+      pval[idx] = it->second;
     }
   }
   for (RowChange::txt2cell::const_iterator it = change.conflictingVal.begin();
@@ -438,6 +488,13 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     if (name2col.find(it->first)!=name2col.end()) {
       int idx = name2col[it->first];
       cval[idx] = it->second;
+    }
+  }
+  for (RowChange::txt2cell::const_iterator it = change.conflictingParentVal.begin();
+       it!=change.conflictingParentVal.end(); it++) {
+    if (name2col.find(it->first)!=name2col.end()) {
+      int idx = name2col[it->first];
+      pval[idx] = it->second;
     }
   }
   
@@ -561,7 +618,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	dbg_printf("%d %s / ", y, sheet.cellString(0,y).c_str());
       }
       dbg_printf("\n");
-      markChanges(change,r,width,active_val,val,cval);
+      markChanges(change,r,width,active_val,val,cval,pval);
       r++;
       if (r>=sheet.height()) {
 	r = -1;
@@ -579,7 +636,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	return false;
       }
       dbg_printf("Match for assignment\n");
-      markChanges(change,r,width,active_val,val,cval);
+      markChanges(change,r,width,active_val,val,cval,pval);
       r++;
       if (r>=sheet.height()) {
 	r = -1;

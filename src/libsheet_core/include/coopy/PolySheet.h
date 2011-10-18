@@ -160,8 +160,10 @@ public:
     if (!ok) return false;
     SheetSchema *s = getSchema();
     if (s) {
-      //if (ok&&owned_schema&&schema!=0/*NULL*/) {
-      s->deleteColumn(column);
+      if (!s->isShadow()) {
+	//if (ok&&owned_schema&&schema!=0/*NULL*/) {
+	s->deleteColumn(column);
+      }
     }
     return ok;
   }
@@ -172,7 +174,10 @@ public:
     if (!result.isValid()) return result;
     SheetSchema *s = getSchema();
     if (s) {
-      result = s->insertColumn(base,ColumnInfo());
+      if (!s->isShadow()) {
+	ColumnRef result2 = s->insertColumn(base,ColumnInfo());
+	COOPY_ASSERT(result2.getIndex()==result.getIndex());
+      }
     }
     return result;
   }
@@ -184,7 +189,10 @@ public:
     if (!result.isValid()) return result;
     SheetSchema *s = getSchema();
     if (s) {
-      result = s->insertColumn(base,info);
+      if (!s->isShadow()) {
+	ColumnRef result2 = s->insertColumn(base,info);
+	COOPY_ASSERT(result2.getIndex()==result.getIndex());
+      }
     }
     return result;
   }
@@ -196,7 +204,9 @@ public:
     if (!result) return result;
     SheetSchema *s = getSchema();
     if (s) {
-      result = s->modifyColumn(base,info);
+      if (!s->isShadow()) {
+	result = s->modifyColumn(base,info);
+      }
     }
     return result;
   }

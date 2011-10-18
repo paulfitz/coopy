@@ -633,6 +633,9 @@ ADD_TEST(patch_merge ${ssdiff}  --omit-format-name --unordered --output patch_me
 ADD_TEST(patch_merge_Compare
   ${CMAKE_COMMAND} -E compare_files patch_merge.tdiff ${TESTS}/conflict/indexed_bridges_v1_v2.tdiff)
 
+# check results
+ADD_TEST(ssmerge_conflict_fails ${ssmerge} ${TESTS}/conflict/bridges.csv ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
+SET_PROPERTY(TEST ssmerge_conflict_fails PROPERTY WILL_FAIL TRUE)
 
 
 #######################################################################

@@ -89,6 +89,10 @@ public:
   virtual std::string toString() const {
     return "unknown-schema";
   }
+
+  virtual bool isShadow() const {
+    return false;
+  }
 };
 
 class coopy::store::SimpleSheetSchema : public SheetSchema {
@@ -192,11 +196,13 @@ public:
 				 const ColumnInfo& info) {
     int index = column.getIndex();
     if (index==-1) {
-      return addColumn(info.getName().c_str());
+      bool ok = addColumn(info.getName().c_str());
+      if (!ok) return ColumnRef();
+      return ColumnRef(getColumnCount()-1);
     }
     columns.insert(columns.begin()+column.getIndex(),info.getName().c_str());
     kinds.insert(kinds.begin()+column.getIndex(),info.getColumnType());
-    return true;
+    return column;
   }
 
   virtual bool modifyColumn(const ColumnRef& column, 
@@ -206,21 +212,7 @@ public:
     return true;
   }
 
-  virtual std::string toString() const {
-    std::string r = "";
-    r += "sheet ";
-    r += getSheetName();
-    r += " header height ";
-    int h = headerHeight();
-    if (h>0) {
-      r += ">0";
-    } else if (h==0) {
-      r += "=0";
-    } else {
-      r += "<0";
-    }
-    return r;
-  }
+  virtual std::string toString() const;
 };
 
 #endif

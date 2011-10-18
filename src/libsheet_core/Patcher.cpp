@@ -61,6 +61,8 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
     result = new MergeOutputIndex;
   } else if (mode=="merge") {
     result = SheetPatcher::createForMerge();
+  } else if (mode=="accum") {
+    result = new MergeOutputAccum;
   }
   return result;
 }

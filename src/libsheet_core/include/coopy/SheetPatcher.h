@@ -34,6 +34,8 @@ private:
   int changeCount;
   bool descriptive;
   bool forReview;
+  bool readyForConflicts;
+  int conflictColumn;
   int xoff;
   int yoff;
   bool killNeutral;
@@ -67,6 +69,8 @@ private:
     sniffer = 0/*NULL*/;
     sniffedSheet = 0/*NULL*/;
     killNeutral = false;
+    readyForConflicts = false;
+    conflictColumn = -1;
   }
 
 public:
@@ -134,6 +138,11 @@ public:
 
   virtual bool mergeAllDone();
 
+  virtual void setConflicted() {
+    if (chain) chain->setConflicted();
+    Patcher::setConflicted();
+  }
+
   virtual bool outputStartsFromInput() {
     return descriptive||merging;
   }
@@ -145,8 +154,11 @@ public:
   bool markChanges(const RowChange& change, int r,int width,
 		   std::vector<int>& active_val,
 		   std::vector<coopy::store::SheetCell>& val,
-		   std::vector<coopy::store::SheetCell>& cval);
+		   std::vector<coopy::store::SheetCell>& cval,
+		   std::vector<coopy::store::SheetCell>& pval);
 
+
+  bool handleConflicts();
 };
 
 #endif
