@@ -637,6 +637,13 @@ ADD_TEST(patch_merge_Compare
 ADD_TEST(ssmerge_conflict_fails ${ssmerge} ${TESTS}/conflict/bridges.csv ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
 SET_PROPERTY(TEST ssmerge_conflict_fails PROPERTY WILL_FAIL TRUE)
 
+ADD_TEST(ssmerge_conflict2_fails ${ssmerge} --output ssmerge_conflict2.csv ${TESTS}/named_numbers.csv ${TESTS}/named_numbers_change_five.csv ${TESTS}/named_numbers_change_five_alt.csv)
+SET_PROPERTY(TEST ssmerge_conflict2_fails PROPERTY WILL_FAIL TRUE)
+
+ADD_TEST(ssmerge_conflict2_header ${ssformat} --header ssmerge_conflict2.csv ssmerge_conflict2_header.csv)
+
+ADD_TEST(ssmerge_conflict2_header_check ${ssdiff} --equal --verbose ssmerge_conflict2_header.csv ${TESTS}/named_numbers_merge_header.csv)
+
 
 #######################################################################
 #######################################################################

@@ -393,6 +393,7 @@ bool SheetPatcher::handleConflicts() {
   }
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return false;
+  sheet.mustHaveSchema();
 
   //printf("SCHEMA %s\n", sheet.getSchema()->toString().c_str()); exit(1)
 

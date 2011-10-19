@@ -193,6 +193,14 @@ public:
 	ColumnRef result2 = s->insertColumn(base,info);
 	COOPY_ASSERT(result2.getIndex()==result.getIndex());
       }
+      if (info.hasName()) {
+	if (!sheet->hasExternalColumnNames()) {
+	  if (s->headerHeight()>0) {
+	    sheet->cellString(result.getIndex(),s->headerHeight()-1,
+			      info.getName());
+	  }
+	}
+      }
     }
     return result;
   }
@@ -416,6 +424,8 @@ public:
     COOPY_ASSERT(sheet);
     return sheet->addedHeader();
   }
+
+  bool mustHaveSchema();
 
 private:
   RowRef fixRow(const RowRef& r) {

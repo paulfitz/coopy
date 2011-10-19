@@ -5,10 +5,16 @@ IF (COMPILE_PLAIN_EXECUTABLES)
   ADD_EXECUTABLE(csvmerge ssmerge.cpp)
   TARGET_LINK_LIBRARIES(csvmerge sheet)
   INSTALL(TARGETS csvmerge COMPONENT ${CSVBIN} DESTINATION bin)
+
+  ADD_EXECUTABLE(csvresolve ssresolve.cpp)
+  TARGET_LINK_LIBRARIES(csvresolve sheet)
+  INSTALL(TARGETS csvresolve COMPONENT ${CSVBIN} DESTINATION bin)
 ENDIF ()
 
 ADD_EXECUTABLE(ssmerge ssmerge.cpp)
 TARGET_LINK_LIBRARIES(ssmerge sheet_full)
-
 INSTALL(TARGETS ssmerge COMPONENT ${BIGBIN} DESTINATION bin)
 
+ADD_EXECUTABLE(ssresolve ssresolve.cpp)
+TARGET_LINK_LIBRARIES(ssresolve sheet_full)
+INSTALL(TARGETS ssresolve COMPONENT ${BIGBIN} DESTINATION bin)
