@@ -5,6 +5,7 @@
 #include <coopy/IndexSniffer.h>
 
 #include <set>
+#include <list>
 #include <algorithm>
 
 #include <stdio.h>
@@ -191,6 +192,25 @@ int BookCompare::resolve(coopy::store::TextBook& pivot,
 			 coopy::store::TextBook& local, 
 			 coopy::store::TextBook& remote, 
 			 Patcher& output, const CompareFlags& flags) {
+  string resolve = flags.resolve;
+  bool use_remote = false;
+  bool use_local = false;
+  if (resolve=="theirs"||resolve[0]=='r'||resolve[0]=='R') {
+    use_remote = true;
+  } else if (resolve=="ours"||resolve[0]=='l'||resolve[0]=='L') {
+    use_local = true;
+  } else if (resolve=="old"||resolve=="neither"||resolve[0]=='p'||resolve[0]=='P') {
+    // ok
+  } else {
+    if (resolve=="") {
+      fprintf(stderr,
+	      "Please choose one of --theirs / --ours / --neither for conflict resolution.\n");
+    } else
+      fprintf(stderr,
+	      "Do not understand choice '%s' for conflict resolution.\n",
+	      resolve.c_str());
+    return 1;
+  }
 
   output.setFlags(flags);
   output.mergeStart();
@@ -229,9 +249,6 @@ int BookCompare::resolve(coopy::store::TextBook& pivot,
 	oc.subject = i;
       }
     }
-    output.changeName(nc0);
-    output.changeColumn(oc);
-    output.changeName(nc1);
 
     sheet.hideHeaders();
     int w = sheet.width();
@@ -255,6 +272,7 @@ int BookCompare::resolve(coopy::store::TextBook& pivot,
     }
     // end logic dup
 
+    list<RowChange> rcs;
     for (int y=0; y<h; y++) {
       string state = sheet.cellString(idx,y);
       if (state!="CONFLICT") continue;
@@ -270,11 +288,24 @@ int BookCompare::resolve(coopy::store::TextBook& pivot,
 	rc.cond[col] = v;
 	ConflictCell cc;
 	if (cc.parse(v)) {
-	  rc.val[col] = SheetCell("<resolving not implemented yet>",false);
-	  //rc.val[col] = cc.local;//cc.remote;//cc.pivot;
+	  if (use_local) {
+	    rc.val[col] = cc.local;
+	  } else if (use_remote) {
+	    rc.val[col] = cc.remote;
+	  } else {
+	    rc.val[col] = cc.pivot;
+	  }
 	}
       }
-      output.changeRow(rc);
+      //output.changeRow(rc);
+      rcs.push_back(rc);
+    }
+
+    output.changeName(nc0);
+    output.changeColumn(oc);
+    output.changeName(nc1);
+    for (list<RowChange>::iterator it=rcs.begin(); it!=rcs.end(); it++) {
+      output.changeRow(*it);
     }
 
     output.mergeDone();

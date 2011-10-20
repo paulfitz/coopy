@@ -348,6 +348,22 @@ Options::Options(const char *name) : name(name) {
       "index",
       "extract content of key columns only"),
 
+  add(OPTION_FOR_RESOLVE,
+      "theirs",
+      "in case of conflict use cell value that wasn't the local choice"),
+
+  add(OPTION_FOR_RESOLVE,
+      "ours",
+      "in case of conflict use cell value that was the local choice"),
+
+  add(OPTION_FOR_RESOLVE,
+      "neither",
+      "in case of conflict use cell value from common ancestor"),
+
+  add(OPTION_FOR_RESOLVE,
+      "dry-run",
+      "make no changes, just describe what would happen"),
+
   add(OPTION_PATCH_FORMAT,
       "*tdiff",
       "vaguely similar to a standard unix diff");
@@ -399,6 +415,7 @@ int Options::apply(int argc, char *argv[]) {
       {"output-format", 1, 0, 0},
 
       {"apply", 0, 0, 'a'},
+      {"dry-run", 0, 0, 0},
 
       {"equals", 0, 0, 'e'},
       {"index", 0, 0, 'i'},
@@ -436,6 +453,10 @@ int Options::apply(int argc, char *argv[]) {
       {"tmp", 1, 0, 0},
       {"patch", 1, 0, 0},
       {"resolve", 1, 0, 0},
+
+      {"theirs", 0, 0, 0},
+      {"ours", 0, 0, 0},
+      {"neither", 0, 0, 0},
 
       {"cmd", 1, 0, 'x'},
 
@@ -489,6 +510,17 @@ int Options::apply(int argc, char *argv[]) {
 	} else if (k=="resolve") {
 	  option_bool["resolving"] = true;
 	  option_string["resolve"] = optarg;
+	} else if (k=="theirs") {
+	  option_bool["resolving"] = true;
+	  option_string["resolve"] = "theirs";
+	} else if (k=="ours") {
+	  option_bool["resolving"] = true;
+	  option_string["resolve"] = "ours";
+	} else if (k=="neither") {
+	  option_bool["resolving"] = true;
+	  option_string["resolve"] = "parent";
+	} else if (k=="dry-run") {
+	  option_bool["apply"] = false;
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;

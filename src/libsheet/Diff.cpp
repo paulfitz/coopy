@@ -52,7 +52,7 @@ int Diff::apply(const Options& opt) {
   std::string tmp = opt.checkString("tmp","");
   std::string resolve = opt.checkString("resolve","");
   std::string defMode = "tdiff";
-  bool apply = opt.checkBool("apply",false);
+  bool apply = opt.checkBool("apply",opt.isResolveLike()?true:false);
   if (opt.isMergeLike()) defMode = "merge";
   if (opt.isPatchLike()&&!opt.isRediffLike()) defMode = "apply";
   std::string mode = opt.checkString("mode",defMode.c_str());
@@ -225,12 +225,19 @@ int Diff::apply(const Options& opt) {
   } else {
     flags.resolving = true;
     flags.resolve = resolve;
+    if (flags.remote_uri == "") {
+      flags.remote_uri = flags.local_uri;
+    }
     cmp.resolve(*pivot,*local,*remote,*diff,flags);
   }
 
   diff->stopOutput(output,flags);
   if (diff->needOutputBook()) {
-    obook.flush();
+    if (obook.isValid()) {
+      obook.flush();
+    } else {
+      local->flush();
+    }
   }
   if (diff->outputStartsFromInput()) {
     if (!tbook.write(output.c_str())) {
