@@ -19,6 +19,11 @@ public:
 	      coopy::store::TextBook& remote, 
 	      Patcher& output, const CompareFlags& flags);
   
+  int resolve(coopy::store::TextBook& pivot, 
+	      coopy::store::TextBook& local, 
+	      coopy::store::TextBook& remote, 
+	      Patcher& output, const CompareFlags& flags);
+  
   void setVerbose(bool verbose);
 };
 

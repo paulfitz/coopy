@@ -43,12 +43,14 @@ static bool copyBook(PolyBook& src_book, const char *src, const char *dest,
 int Diff::apply(const Options& opt) {
   bool verbose = opt.checkBool("verbose");
   bool equality = opt.checkBool("equals");
+  bool resolving = opt.checkBool("resolving")||opt.isResolveLike();
   std::string output = opt.checkString("output","-");
   std::string parent_file = opt.checkString("parent");
   std::string patch_file = opt.checkString("patch");
   std::string cmd = opt.checkString("cmd");
   std::string version = opt.checkString("version");
   std::string tmp = opt.checkString("tmp","");
+  std::string resolve = opt.checkString("resolve","");
   std::string defMode = "tdiff";
   bool apply = opt.checkBool("apply",false);
   if (opt.isMergeLike()) defMode = "merge";
@@ -209,16 +211,23 @@ int Diff::apply(const Options& opt) {
     return 1;
   }
 
-  if (patch_file==""&&cmd=="") {
-    cmp.compare(*pivot,*local,*remote,*diff,flags);
-  } else {
-    diff->setFlags(flags);
-    PatchParser parser(diff,patch_file,cmd);
-    bool ok = parser.apply();
-    if (!ok) {
-      fprintf(stderr,"Patch failed\n");
+  if (!resolving) {
+    if (patch_file==""&&cmd=="") {
+      cmp.compare(*pivot,*local,*remote,*diff,flags);
+    } else {
+      diff->setFlags(flags);
+      PatchParser parser(diff,patch_file,cmd);
+      bool ok = parser.apply();
+      if (!ok) {
+	fprintf(stderr,"Patch failed\n");
+      }
     }
+  } else {
+    flags.resolving = true;
+    flags.resolve = resolve;
+    cmp.resolve(*pivot,*local,*remote,*diff,flags);
   }
+
   diff->stopOutput(output,flags);
   if (diff->needOutputBook()) {
     obook.flush();

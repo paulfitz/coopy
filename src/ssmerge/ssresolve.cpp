@@ -14,12 +14,12 @@ int main(int argc, char *argv[]) {
   bool help = opt.checkBool("help");
 
   const vector<string>& core = opt.getCore();
-  if (core.size()>3) {
+  if (core.size()>1) {
     fprintf(stderr, "Options not understood\n");
     return 1;
   }
 
-  if (core.size()<3||help) {
+  if (core.size()<1||help) {
     opt.beginHelp();
     opt.addUsage("ssresolve [options] FILE");
     opt.addDescription("Resolve a file with conflicts from ssmerge.");

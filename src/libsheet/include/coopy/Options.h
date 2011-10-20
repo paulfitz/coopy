@@ -73,7 +73,7 @@ public:
   Options(const char *name);
 
   bool isDiffLike() const {
-    return (name=="ssdiff"||name=="ssrediff"||name=="sspatch");
+    return (name=="ssdiff"||name=="ssrediff"||name=="sspatch"||name=="ssresolve");
   }
 
   bool isPatchLike() const {
@@ -82,6 +82,10 @@ public:
 
   bool isRediffLike() const {
     return (name=="ssrediff");
+  }
+
+  bool isResolveLike() const {
+    return (name=="ssresolve");
   }
 
   bool isMergeLike() const {

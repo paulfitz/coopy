@@ -69,6 +69,8 @@ public:
   std::string pivot_uri;
   std::string local_uri;
   std::string remote_uri;
+  bool resolving;
+  std::string resolve;
 
   CompareFlags() {
     head_trimmed = false;
@@ -85,6 +87,7 @@ public:
     omit_sheet_name = false;
     fixed_columns = false;
     ignore_case = false;
+    resolving = false;
   }
 
   ~CompareFlags() {

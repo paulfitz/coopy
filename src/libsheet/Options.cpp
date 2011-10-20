@@ -435,6 +435,7 @@ int Options::apply(int argc, char *argv[]) {
       {"inplace", 0, 0, 0},
       {"tmp", 1, 0, 0},
       {"patch", 1, 0, 0},
+      {"resolve", 1, 0, 0},
 
       {"cmd", 1, 0, 'x'},
 
@@ -485,6 +486,9 @@ int Options::apply(int argc, char *argv[]) {
 	  option_bool["version"] = true;
 	  printf("%s\n", getVersion().c_str());
 	  exit(0);
+	} else if (k=="resolve") {
+	  option_bool["resolving"] = true;
+	  option_string["resolve"] = optarg;
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;

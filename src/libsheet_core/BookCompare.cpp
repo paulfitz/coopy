@@ -2,6 +2,7 @@
 #include <coopy/SheetCompare.h>
 #include <coopy/Dbg.h>
 #include <coopy/CsvWrite.h>
+#include <coopy/IndexSniffer.h>
 
 #include <set>
 #include <algorithm>
@@ -144,3 +145,143 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
 void BookCompare::setVerbose(bool verbose) {
   _csv_verbose = verbose;
 }
+
+class ConflictCell {
+public:
+  SheetCell local, remote, pivot;
+  bool have_local;
+  bool have_remote;
+  bool have_pivot;
+
+  ConflictCell() { reset(); }
+
+  void reset() {
+    local = remote = pivot = SheetCell();
+    have_local = have_remote = have_pivot = false;
+  }
+
+  bool parse(const SheetCell& src);
+};
+
+bool ConflictCell::parse(const SheetCell& src) {
+  reset();
+
+  if (src.text.substr(0,3)!="(((") return false;
+
+  // current format: ((( pivot ))) local /// remote
+  // not worrying about null or quoting yet
+
+  string::size_type pivot_start = 4;
+  string::size_type pivot_end = src.text.find(" ))) ");
+  if (pivot_end == string::npos) return false;
+  string::size_type local_start = pivot_end + 5;
+  string::size_type local_end = src.text.find(" /// ");
+  if (local_end == string::npos) return false;
+  string::size_type remote_start = local_end + 5;
+  local = SheetCell(src.text.substr(local_start,local_end-local_start),false);
+  remote = SheetCell(src.text.substr(remote_start,src.text.length()),false);
+  pivot = SheetCell(src.text.substr(pivot_start,pivot_end-pivot_start),false);
+  have_local = have_remote = have_pivot = true;
+
+  return true;
+}
+
+
+int BookCompare::resolve(coopy::store::TextBook& pivot, 
+			 coopy::store::TextBook& local, 
+			 coopy::store::TextBook& remote, 
+			 Patcher& output, const CompareFlags& flags) {
+
+  output.setFlags(flags);
+  output.mergeStart();
+
+  vector<string> local_names = local.getNames();
+  for (int i=0; i<(int)local_names.size(); i++) {
+    PolySheet sheet = local.readSheetByIndex(i);
+    if (!sheet.isValid()) continue;
+    sheet.mustHaveSchema();
+    SheetSchema *ss = sheet.getSchema();
+    if (!ss) continue;
+    int idx = ss->getColumnIndexByName("_MERGE_");
+    if (idx<0) continue;
+    output.setSheet(local_names[i].c_str());
+    NameChange nc0;
+    nc0.mode = NAME_CHANGE_DECLARE;
+    nc0.final = false;
+    nc0.constant = false;
+    NameChange nc1;
+    nc1.mode = NAME_CHANGE_DECLARE;
+    nc1.final = true;
+    nc1.constant = false;
+
+    OrderChange oc;
+    oc.mode = ORDER_CHANGE_DELETE;
+    for (int i=0; i<ss->getColumnCount(); i++) {
+      string name = ss->getColumnInfo(i).getName();
+      oc.indicesBefore.push_back(i);
+      oc.namesBefore.push_back(name);
+      nc0.names.push_back(name);
+      if (name!="_MERGE_") {
+	oc.indicesAfter.push_back(i);
+	oc.namesAfter.push_back(name);
+	nc1.names.push_back(name);
+      } else {
+	oc.subject = i;
+      }
+    }
+    output.changeName(nc0);
+    output.changeColumn(oc);
+    output.changeName(nc1);
+
+    sheet.hideHeaders();
+    int w = sheet.width();
+    int h = sheet.height();
+    vector<string> onames = nc0.names;
+    vector<string> names = nc1.names;
+
+    // logic dupe from Merger.cpp
+    NameSniffer ns(sheet,flags);
+    IndexSniffer localIndex(sheet,flags,ns);
+    vector<int> index_flags = localIndex.suggestIndexes();
+    RowChange::txt2bool indexes;
+    bool atLeastOne = false;
+    for (int i=0; i<(int)names.size(); i++) {
+      string name = names[i];
+      indexes[name] = (index_flags[i]>0);
+      atLeastOne = atLeastOne||indexes[name];
+    }
+    if (!atLeastOne) {
+      indexes.clear();
+    }
+    // end logic dup
+
+    for (int y=0; y<h; y++) {
+      string state = sheet.cellString(idx,y);
+      if (state!="CONFLICT") continue;
+      RowChange rc;
+      rc.mode = ROW_CHANGE_UPDATE;
+      rc.indexes = indexes;
+      rc.allNames = nc1.names;
+      rc.names = nc1.names;
+      for (int x=0; x<w; x++) {
+	if (x==idx) continue;
+	SheetCell v = sheet.cellSummary(x,y);
+	string col = onames[x];
+	rc.cond[col] = v;
+	ConflictCell cc;
+	if (cc.parse(v)) {
+	  rc.val[col] = SheetCell("<resolving not implemented yet>",false);
+	  //rc.val[col] = cc.local;//cc.remote;//cc.pivot;
+	}
+      }
+      output.changeRow(rc);
+    }
+
+    output.mergeDone();
+  }
+  output.mergeAllDone();
+
+  return 0;
+}
+
+

@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
     }
     src.take(book);
   }
+
   string out_file = "-";
   if (core.size()==2) {
     out_file = core[1];
