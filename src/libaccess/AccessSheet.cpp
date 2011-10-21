@@ -60,7 +60,7 @@ bool AccessSheet::connect() {
   //////////////////////////////////////////////////////////////////
   // Check keys
 
-  if (config.flag("indexes",true)) {
+  if (config.flag("indexes",false)) {
     for (int i=0;i<table->num_idxs;i++) {
       MdbIndex *idx = (MdbIndex *)g_ptr_array_index(table->indices,i);
       if (idx->index_type==1) {
