@@ -270,8 +270,10 @@ int Diff::apply(const Options& opt) {
   diff = NULL;
 
   if (opt.isMergeLike()) {
-    fprintf(stderr,"Conflict detected.\n");
-    if (conflicted) return 1;
+    if (conflicted) {
+      fprintf(stderr,"Conflict detected.\n");
+      return 1;
+    }
   }
 
   return 0;
