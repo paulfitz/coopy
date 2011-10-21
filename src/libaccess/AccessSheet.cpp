@@ -99,7 +99,7 @@ bool AccessSheet::connect() {
 	val = "<MEDIA>";
 	escaped = true;
       } else if (!bound_lens[j]) {
-	val = "";
+	val = "NULL";
 	escaped = true;
       } else {
 	val = bound_values[j];
@@ -146,7 +146,7 @@ std::string AccessSheet::cellString(int x, int y, bool& escaped) const {
   const unsigned char *f = cacheFlag.pcell_const(x,y);
   if (f!=NULL) {
     escaped = true;
-    return "";
+    return "NULL";
   }
   const string *c = cache.pcell_const(x,y);
   if (c!=NULL) {

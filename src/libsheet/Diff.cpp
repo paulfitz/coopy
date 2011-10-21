@@ -43,7 +43,7 @@ static bool copyBook(PolyBook& src_book, const char *src, const char *dest,
 int Diff::apply(const Options& opt) {
   bool verbose = opt.checkBool("verbose");
   bool equality = opt.checkBool("equals");
-  bool resolving = opt.checkBool("resolving")||opt.isResolveLike();
+  bool resolving = opt.isResolveLike(); //opt.checkBool("resolving")
   std::string output = opt.checkString("output","-");
   std::string parent_file = opt.checkString("parent");
   std::string patch_file = opt.checkString("patch");
@@ -224,7 +224,6 @@ int Diff::apply(const Options& opt) {
     }
   } else {
     flags.resolving = true;
-    flags.resolve = resolve;
     if (flags.remote_uri == "") {
       flags.remote_uri = flags.local_uri;
     }

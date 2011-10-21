@@ -195,11 +195,11 @@ int BookCompare::resolve(coopy::store::TextBook& pivot,
   string resolve = flags.resolve;
   bool use_remote = false;
   bool use_local = false;
-  if (resolve=="theirs"||resolve[0]=='r'||resolve[0]=='R') {
+  if (resolve=="theirs") {
     use_remote = true;
-  } else if (resolve=="ours"||resolve[0]=='l'||resolve[0]=='L') {
+  } else if (resolve=="ours") {
     use_local = true;
-  } else if (resolve=="old"||resolve=="neither"||resolve[0]=='p'||resolve[0]=='P') {
+  } else if (resolve=="neither") {
     // ok
   } else {
     if (resolve=="") {

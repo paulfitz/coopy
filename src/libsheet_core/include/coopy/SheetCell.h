@@ -28,11 +28,13 @@ public:
   SheetCell(int x);
 
   bool operator==(const SheetCell& alt) const {
-    return text==alt.text && escaped==alt.escaped;
+    if (escaped!=alt.escaped) return false;
+    return text==alt.text;
   }
 
   bool operator!=(const SheetCell& alt) const {
-    return text!=alt.text || escaped!=alt.escaped;
+    if (escaped!=alt.escaped) return true;
+    return text!=alt.text;
   }
   
   std::string toString() const {

@@ -509,16 +509,16 @@ int Options::apply(int argc, char *argv[]) {
 	  exit(0);
 	} else if (k=="resolve") {
 	  option_bool["resolving"] = true;
-	  option_string["resolve"] = optarg;
+	  flags.resolve = option_string["resolve"] = optarg;
 	} else if (k=="theirs") {
 	  option_bool["resolving"] = true;
-	  option_string["resolve"] = "theirs";
+	  flags.resolve = option_string["resolve"] = "theirs";
 	} else if (k=="ours") {
 	  option_bool["resolving"] = true;
-	  option_string["resolve"] = "ours";
+	  flags.resolve = option_string["resolve"] = "ours";
 	} else if (k=="neither") {
 	  option_bool["resolving"] = true;
-	  option_string["resolve"] = "parent";
+	  flags.resolve = option_string["resolve"] = "neither";
 	} else if (k=="dry-run") {
 	  option_bool["apply"] = false;
 	} else {

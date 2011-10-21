@@ -28,6 +28,17 @@ static string normalize_string(string low, const CompareFlags& flags) {
 
 static bool compare_string(const SheetCell& a, const SheetCell& b,
 			   const CompareFlags& flags) {
+  if (a.escaped&&b.escaped) {
+    string blank = "__NOT_SET__CSVCOMPARE_SSFOSSIL";
+    if (a.text!="NULL"&&a.text!=blank) {
+      printf("huh a '%s'\n", a.text.c_str());
+      exit(1);
+    }
+    if (b.text!="NULL"&&b.text!=blank) {
+      printf("huh b '%s'\n", b.text.c_str());
+      exit(1);
+    }
+  }
   if (!flags.ignore_case) {
     return a==b;
   }
@@ -175,15 +186,35 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 		novel = true;
 	      }
 	    } else {
-	      fprintf(stderr,"# conflict: {{%s}} vs {{%s}} from {{%s}}\n",
-		      _l.toString().c_str(),
-		      _r.toString().c_str(),
-		      _p.toString().c_str());
-	      conflict = true;
-	      conflicted1 = true;
-	      change = true;
-	      novel = true;
-	      output.setConflicted();
+	      string resolve = flags.resolve;
+	      if (resolve=="") {
+		fprintf(stderr,"# conflict: {{%s}} vs {{%s}} from {{%s}}\n",
+			_l.toString().c_str(),
+			_r.toString().c_str(),
+			_p.toString().c_str());
+		conflict = true;
+		conflicted1 = true;
+		change = true;
+		novel = true;
+		output.setConflicted();
+	      } else {
+		fprintf(stderr,"# auto-resolving conflict: ours:{{%s}} vs theirs:{{%s}} from neither:{{%s}} -- picking %s\n",
+			_l.toString().c_str(),
+			_r.toString().c_str(),
+			_p.toString().c_str(),
+			resolve.c_str());
+		if (resolve=="ours") {
+		  // do nothing
+		} else if (resolve=="theirs") {
+		  _l = _r;
+		  change = true;
+		  novel = true;
+		} else if (resolve=="parent") {
+		  _l = _p;
+		  change = true;
+		  novel = true;
+		}
+	      }
 	      //break;
 	    }
 	  }
