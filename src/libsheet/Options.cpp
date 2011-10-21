@@ -544,6 +544,7 @@ int Options::apply(int argc, char *argv[]) {
       break;
     case 'v':
       option_bool["verbose"] = true;
+      coopy_set_verbose(true);
       break;
     case 'e':
       option_bool["equals"] = true;
