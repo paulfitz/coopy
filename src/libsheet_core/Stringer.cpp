@@ -49,20 +49,22 @@ string quoteSql(string x, char del, bool alwaysQuote) {
   bool quote = false;
   bool easy = true;
   string result = x;
+  char del2 = del;
+  if (del=='[') del2 = ']';
   for (int i=0; i<(int)x.length(); i++) {
     char ch = x[i];
     if ((ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z')||(ch>='0'&&ch<='9')||
 	ch=='_') {
       // ok
     } else {
-      if (ch==del) {
+      if (ch==del||ch==del2) {
 	easy = false;
       }
       quote = true;
     }
   }
   if ((alwaysQuote||quote)&&easy) {
-    result = string() + del + x + del;
+    result = string() + del + x + del2;
   } else if (!easy) {
     result = del;
     for (int i=0; i<(int)x.length(); i++) {
@@ -70,10 +72,10 @@ string quoteSql(string x, char del, bool alwaysQuote) {
 	result += x[i];
       } else {
 	result += del;
-	result += del;
+	result += del2;
       }
     }
-    result += del;
+    result += del2;
   }
   return result;
 }

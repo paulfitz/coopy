@@ -10,9 +10,23 @@
 using namespace std;
 using namespace coopy::cmp;
 
+static void getSqlQuote(const CompareFlags *flags, char *key, char *val) {
+  char k = '\"';
+  char v = '\'';
+  if (flags!=NULL) {
+    if (flags->variant=="access") {
+      k = '[';
+      v = '\'';
+    }
+  }
+  *key = k;
+  *val = v;
+}
 
 bool MergeOutputSqlDiff::changeColumn(const OrderChange& change) {
-  string name = quoteSql(sheet_name,'\"',false);
+  char k, v;
+  getSqlQuote(&getFlags(),&k,&v);
+  string name = quoteSql(sheet_name,k,false);
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
     {
@@ -21,7 +35,7 @@ bool MergeOutputSqlDiff::changeColumn(const OrderChange& change) {
 	fprintf(stderr, "Could not find column to remove\n");
 	exit(1);
       } else {
-	string c = quoteSql(change.namesBefore[idx],'\"',false);
+	string c = quoteSql(change.namesBefore[idx],k,false);
 	fprintf(out,"ALTER TABLE %s DROP COLUMN %s;\n",
 		name.c_str(),
 		c.c_str());
@@ -35,7 +49,7 @@ bool MergeOutputSqlDiff::changeColumn(const OrderChange& change) {
 	fprintf(stderr, "Could not find column to insert\n");
 	exit(1);
       } else {
-	string c = quoteSql(change.namesAfter[idx],'\"',false);
+	string c = quoteSql(change.namesAfter[idx],k,false);
 	fprintf(out,"ALTER TABLE %s ADD COLUMN %s;\n",
 		name.c_str(),
 		c.c_str());
@@ -47,15 +61,18 @@ bool MergeOutputSqlDiff::changeColumn(const OrderChange& change) {
 }
 
 
-SqlText MergeOutputSqlDiff::getText(const RowChange& change, const char *sheet_name) {
+SqlText MergeOutputSqlDiff::getText(const RowChange& change, const char *sheet_name, const CompareFlags *flags) {
   SqlText text;
   string& name = text.name;
   string& vals = text.vals;
   string& conds = text.conds;
   string& val_columns = text.val_columns;
   string& val_values = text.val_values;
+  char del1 = '\"';
+  char del2 = '\'';
+  getSqlQuote(flags,&del1,&del2);
 
-  name = quoteSql(sheet_name,'\"',false);
+  name = quoteSql(sheet_name,del1,false);
   for (RowChange::txt2cell::const_iterator it=change.val.begin(); 
        it!=change.val.end(); 
        it++) {
@@ -65,7 +82,7 @@ SqlText MergeOutputSqlDiff::getText(const RowChange& change, const char *sheet_n
       val_values += ", ";
     }
     // Should dig up good default quoting rules
-    string c = quoteSql(it->first,'\"',false);
+    string c = quoteSql(it->first,del1,false);
     vals += c;
     val_columns += c;
     vals += "=";
@@ -73,7 +90,7 @@ SqlText MergeOutputSqlDiff::getText(const RowChange& change, const char *sheet_n
       vals += "NULL";
       val_values += "NULL";
     } else {
-      string q = quoteSql(it->second.text,'\'',true);
+      string q = quoteSql(it->second.text,del2,true);
       vals += q;
       val_values += q;
     }
@@ -85,13 +102,13 @@ SqlText MergeOutputSqlDiff::getText(const RowChange& change, const char *sheet_n
     if (it!=change.cond.begin()) {
       conds += " AND ";
     }
-    string c = quoteSql(it->first,'\"',false);
+    string c = quoteSql(it->first,del1,false);
     conds += c;
     conds += "=";
     if (it->second.escaped) {
       conds += "NULL";
     } else {
-      string q = quoteSql(it->second.text,'\'',true);
+      string q = quoteSql(it->second.text,del2,true);
       conds += q;
     }
   }
@@ -99,7 +116,8 @@ SqlText MergeOutputSqlDiff::getText(const RowChange& change, const char *sheet_n
 }
 
 bool MergeOutputSqlDiff::changeRow(const RowChange& change) {
-  SqlText text = getText(change,sheet_name.c_str());
+  SqlText text = getText(change,sheet_name.c_str(),
+			 &getFlags());
   string& name = text.name;
   string& vals = text.vals;
   string& conds = text.conds;

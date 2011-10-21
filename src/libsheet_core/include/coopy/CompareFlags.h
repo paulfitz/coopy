@@ -71,6 +71,7 @@ public:
   std::string remote_uri;
   bool resolving;
   std::string resolve;
+  std::string variant;
 
   CompareFlags() {
     head_trimmed = false;

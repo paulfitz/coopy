@@ -453,6 +453,7 @@ int Options::apply(int argc, char *argv[]) {
       {"tmp", 1, 0, 0},
       {"patch", 1, 0, 0},
       {"resolve", 1, 0, 0},
+      {"variant", 1, 0, 0},
 
       {"theirs", 0, 0, 0},
       {"ours", 0, 0, 0},
@@ -507,6 +508,8 @@ int Options::apply(int argc, char *argv[]) {
 	  option_bool["version"] = true;
 	  printf("%s\n", getVersion().c_str());
 	  exit(0);
+	} else if (k=="variant") {
+	  flags.variant = optarg;
 	} else if (k=="resolve") {
 	  option_bool["resolving"] = true;
 	  flags.resolve = option_string["resolve"] = optarg;

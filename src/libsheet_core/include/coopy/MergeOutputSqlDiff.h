@@ -39,7 +39,8 @@ public:
     return true;
   }
 
-  static SqlText getText(const RowChange& change, const char *sheet_name);
+  static SqlText getText(const RowChange& change, const char *sheet_name,
+			 const CompareFlags *flags = NULL);
 };
 
 #endif
