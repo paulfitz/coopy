@@ -188,7 +188,7 @@ public:
 
   static void showFormats();
 
-  static std::vector<FormatDesc> getFormatList();
+  static std::vector<coopy::store::FormatDesc> getFormatList();
 
   static bool copyFile(const char *src, const char *dest);
 

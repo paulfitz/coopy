@@ -41,6 +41,7 @@
 #include <coopy/PolySheet.h>
 #include <coopy/PolyBook.h>
 #include <coopy/BookCompare.h>
+#include <coopy/FormatDesc.h>
 %}
 %include <coopy/RefCount.h>
 %include <coopy/Appearance.h>
