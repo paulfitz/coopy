@@ -64,8 +64,30 @@ public:
     return vector2string(data);
   }
 
-  string inferInsert(const PatchColumnNames& prior,
-		     int *dest) {
+  void autoStart(PatchColumnNames& prior,
+		 const char *name,
+		 bool add,
+		 bool mv) {
+    if (name!=NULL && prior.lst.size()==0) {
+      int idx = 0;
+      for (int i=0; i<(int)lst.size(); i++) {
+	if (lst[i]!=name||mv) {
+	  prior.lst.push_back(lst[i]);
+	  prior.indices.push_back(idx);
+	  idx++;
+	}
+      }
+      if (!add && !mv) {
+	prior.lst.push_back(name);
+	prior.indices.push_back(idx);
+      }
+    }
+  }
+
+  string inferInsert(PatchColumnNames& prior,
+		     int *dest,
+		     const char *name = NULL) {
+    autoStart(prior,name,true,false);
     if (lst.size()!=prior.lst.size()+1) {
       fprintf(stderr, "Error in insertion, final length is %d, original length is %d\n",
 	      lst.size(), prior.lst.size());
@@ -101,8 +123,10 @@ public:
     return mover;
   }
 
-  string inferDelete(const PatchColumnNames& prior,
-		     int *src) {
+  string inferDelete(PatchColumnNames& prior,
+		     int *src,
+		     const char *name = NULL) {
+    autoStart(prior,name,false,false);
     COOPY_ASSERT(lst.size()==prior.lst.size()-1);
     int i;
     for (i=0; i<(int)lst.size(); i++) {
@@ -119,16 +143,30 @@ public:
     return mover;
   }
 
-  string inferMove(const PatchColumnNames& prior,
+  string inferMove(PatchColumnNames& prior,
 		   int *src,
-		   int *dest) {
+		   int *dest,
+		   const char *name = NULL) {
+    autoStart(prior,name,false,true);
     COOPY_ASSERT(lst.size()==prior.lst.size());
     int i;
+    bool useName = false;
     for (i=0; i<(int)lst.size(); i++) {
       if (lst[i]!=prior.lst[i]) {
 	break;
       }
     }
+    if (i==lst.size()) {
+      if (name!=NULL) {
+	for (i=0; i<(int)lst.size(); i++) {
+	  if (lst[i]==name) {
+	    useName = true;
+	    break;
+	  }
+	}
+      }
+    }
+
     if (i==lst.size()) {
       printf("A move was proposed, but does not make sense\n");
       exit(1);
@@ -137,10 +175,14 @@ public:
     // The moved element is named by either lst[i] or prior.lst[i]
     // We are guaranteed at least one element after this one.
     string mover;
-    if (prior.lst[i+1]==lst[i]) {
-      mover = prior.lst[i];
+    if (!useName) {
+      if (prior.lst[i+1]==lst[i]) {
+	mover = prior.lst[i];
+      } else {
+	mover = lst[i];
+      }
     } else {
-      mover = lst[i];
+      mover = name;
     }
 
     int isrc = -1;
@@ -909,7 +951,8 @@ bool PatchParser::applyTdiff() {
       names.read(ocols,0);
       names2.read(ncols,0);
       if (first=="@:") {
-	string mover = names2.inferMove(names,&change.subject,&change.object);
+	string mover = names2.inferMove(names,&change.subject,&change.object,
+					msg[1].c_str());
 	dbg_printf("Moving columns to %s (%s moves // subj %d obj %d)\n", 
 		   names2.toString().c_str(),
 		   mover.c_str(),
@@ -917,14 +960,14 @@ bool PatchParser::applyTdiff() {
 		   change.object);
 	change.mode = ORDER_CHANGE_MOVE;
       } else if (first=="@+") {
-	string mover = names2.inferInsert(names,&change.subject);
+	string mover = names2.inferInsert(names,&change.subject,msg[1].c_str());
 	dbg_printf("Inserting columns to %s (%s insert // subj %d)\n", 
 		   names2.toString().c_str(),
 		   mover.c_str(),
 		   change.subject);
 	change.mode = ORDER_CHANGE_INSERT;
       } else if (first=="@-") {
-	string mover = names2.inferDelete(names,&change.subject);
+	string mover = names2.inferDelete(names,&change.subject,msg[1].c_str());
 	dbg_printf("Deleting columns from %s (%s delete // subj %d)\n", 
 		   names2.toString().c_str(),
 		   mover.c_str(),

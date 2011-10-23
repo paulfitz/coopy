@@ -340,6 +340,10 @@ Options::Options(const char *name) : name(name) {
       "omit-sheet-name",
       "omit any sheet/table name from diff"),
 
+  add(OPTION_FOR_PATCH,
+      "cmd=CMD",
+      "specify a patch with a string rather than as a file (tdiff format)"),
+
   add(OPTION_FOR_FORMAT,
       "header",
       "extract column names only"),
