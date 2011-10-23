@@ -34,6 +34,7 @@ private:
   int changeCount;
   bool descriptive;
   bool forReview;
+  bool declaredNames;
   bool readyForConflicts;
   int conflictColumn;
   int xoff;
@@ -71,6 +72,7 @@ private:
     killNeutral = false;
     readyForConflicts = false;
     conflictColumn = -1;
+    declaredNames = false;
   }
 
 public:

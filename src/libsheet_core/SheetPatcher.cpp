@@ -415,6 +415,11 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     return false;
   }
 
+  if (!declaredNames) {
+    if (chain) chain->declareNames(change.allNames,false);
+    declareNames(change.allNames,false);
+  }
+
   if (change.conflicted) {
     if (!handleConflicts()) {
       fprintf(stderr,"Cannot handle conflicts.\n");
@@ -657,6 +662,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 
 bool SheetPatcher::declareNames(const std::vector<std::string>& names, 
 				bool final) {
+  declaredNames = true;
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return false;
   if (chain) chain->declareNames(names,final);
@@ -671,6 +677,9 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
       for (int i=0; i<(int)names.size(); i++) {
 	if (names[i]!=activeCol.cellString(i,0)) {
 	  if (names[i][0]=='[') {
+	    //printf("Adding synonym '%s' '%s'\n",
+	    //names[i].c_str(),
+	    //	   activeCol.cellString(i,0).c_str());
 	    syn2name[names[i]] = activeCol.cellString(i,0);
 	    name2syn[activeCol.cellString(i,0)] = names[i];
 	  }

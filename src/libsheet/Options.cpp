@@ -2,6 +2,8 @@
 #include <getopt.h>
 
 #include <coopy/Options.h>
+#include <coopy/CsvSheet.h>
+#include <coopy/CsvWrite.h>
 
 #include <algorithm>
 
@@ -395,6 +397,35 @@ std::string Options::getVersion() const {
   return QUOTED_VERSION(COOPY_VERSION);
 }
 
+
+static void generateExample(const string& name) {
+  CsvSheet csv;
+  csv.addField("NAME",false);
+  csv.addField("DIGIT",false);
+  csv.addRecord();
+  csv.addField("one",false);
+  csv.addField("1",false);
+  csv.addRecord();
+  csv.addField("two",false);
+  csv.addField("2",false);
+  csv.addRecord();
+  csv.addField("three",false);
+  csv.addField("3",false);
+  csv.addRecord();
+  csv.addField("four",false);
+  csv.addField("4",false);
+  csv.addRecord();
+  csv.addField("five",false);
+  csv.addField("5",false);
+  csv.addRecord();
+  if (name=="numbers.csv") {
+    fprintf(stderr,"* generating numbers.csv\n");
+    if (CsvFile::write(csv,"numbers.csv")) {
+      exit(1);
+    }
+  }
+}
+
 int Options::apply(int argc, char *argv[]) {
   core.clear();
   flags = CompareFlags();
@@ -470,6 +501,7 @@ int Options::apply(int argc, char *argv[]) {
       {"default-table", 1, 0, 0},
 
       {"help-doxygen", 0, 0, 0},
+      {"example", 1, 0, 0},
 
       {0, 0, 0, 0}
     };
@@ -528,6 +560,8 @@ int Options::apply(int argc, char *argv[]) {
 	  flags.resolve = option_string["resolve"] = "neither";
 	} else if (k=="dry-run") {
 	  option_bool["apply"] = false;
+	} else if (k=="example") {
+	  generateExample(optarg);
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;

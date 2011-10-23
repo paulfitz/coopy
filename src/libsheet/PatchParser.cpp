@@ -1017,6 +1017,14 @@ bool PatchParser::applyTdiff() {
       while (assign.size()<cols.size()) {
 	cols.erase(cols.begin()+assign.size());
       }
+      if (cols.size()<assign.size()) {
+	if (cols.size()==0) {
+	  for (int i=0; i<(int)assign.size(); i++) {
+	    //cols.push_back(TDiffPart(Stringer::getSpreadsheetColumnName(i),true));
+	    cols.push_back(TDiffPart(string("[")+stringer_encoder(i)+"]",true));
+	  }
+	}
+      }
       COOPY_ASSERT(assign.size()==cols.size());
 
       RowChange change;
