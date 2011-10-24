@@ -53,6 +53,11 @@ public:
   virtual void render(const Options& opt);
 };
 
+static void addSpaces(int n) {
+  for (int i=0; i<n; i++) {
+    printf(" ");
+  }
+}
 
 static void wrapText(const string& desc, int w, int tot) {
   string txt = desc;
@@ -76,7 +81,7 @@ static void wrapText(const string& desc, int w, int tot) {
     printf("%s\n", next.c_str());
     if (txt.length()>0) {
       if (tot>0) {
-	printf("% *c", tot, ' ');
+	addSpaces(tot);
       }
     }
   }
@@ -99,7 +104,7 @@ void OptionRenderCmdLine::showOptions(const Options& opt, int filter) {
     Option& o = mopts[i];
     int tot = start+len+1;
     if (o.coverage&filter) {
-      printf("% *c",start,' ');
+      addSpaces(start);
       string pre = o.long_name;
       if (flaggy) {
 	pre = string("--")+pre;
@@ -110,7 +115,7 @@ void OptionRenderCmdLine::showOptions(const Options& opt, int filter) {
       }
       if (pre.length()>len) {
 	printf("%s\n", pre.c_str());
-	printf("% *c",start,' ');
+	addSpaces(start);
 	pre = "";
       }
       while (pre.length()<len) pre += " ";
