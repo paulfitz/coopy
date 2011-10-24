@@ -14,6 +14,7 @@ Show the difference between two tables/databases/spreadsheets.
 \section ssdiff_index Index
   \li \ref ssdiff_options
   \li \ref ssdiff_options_detail
+  \li \ref ssdiff_examples
   \li \ref ssdiff_patch
   \li \ref ssdiff_table
   \li \ref ssdiff_version
@@ -22,6 +23,7 @@ Show the difference between two tables/databases/spreadsheets.
 \section ssdiff_options Option summary
  \li \ref ssdiff_main_apply "--apply"
  \li \ref ssdiff_main_bid "--bid=COLUMN"
+ \li \ref ssdiff_main_default-table "--default-table=TABLE"
  \li \ref ssdiff_main_fixed-columns "--fixed-columns"
  \li \ref ssdiff_main_format "--format=FORMAT"
  \li \ref ssdiff_main_head-trimmed "--head-trimmed"
@@ -45,6 +47,9 @@ Show the difference between two tables/databases/spreadsheets.
 \anchor ssdiff_main_bid <b>--bid=COLUMN</b> <br />boost a column (repeat option for multiple columns)
 
 
+\anchor ssdiff_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
+
+
 \anchor ssdiff_main_fixed-columns <b>--fixed-columns</b> <br />ignore new or removed columns
 
 
@@ -60,7 +65,7 @@ Show the difference between two tables/databases/spreadsheets.
 \anchor ssdiff_main_input-formats <b>--input-formats</b> <br />list supported input database formats
 
 
-\anchor ssdiff_main_named <b>--named</b> <br />trust names of columns (saves work checking for column renames)
+\anchor ssdiff_main_named <b>--named</b> <br />trust names of columns, omitting checks for column renames
 
 
 \anchor ssdiff_main_omit-format-name <b>--omit-format-name</b> <br />omit any version-dependent header from diff
@@ -84,8 +89,48 @@ Show the difference between two tables/databases/spreadsheets.
 \anchor ssdiff_main_tail-trimmed <b>--tail-trimmed</b> <br />ignore rows removed at the end of a table (such as a log file)
 
 
-\anchor ssdiff_main_unordered <b>--unordered</b> <br />neglect order of rows (saves work)
+\anchor ssdiff_main_unordered <b>--unordered</b> <br />treat order of rows as unimportant
 
+
+
+
+\section ssdiff_examples Examples
+You can generate test file(s) for the examples that follow:
+\verbatim
+ssdiff --example numbers.csv
+ssdiff --example numbers.sqlite
+ssdiff --example numbers_buggy.csv
+ssdiff --example numbers_buggy.sqlite
+\endverbatim
+
+
+
+
+\subsection ssdiff_examples_1 Example 1
+\verbatim
+ssdiff numbers_buggy.csv numbers.csv
+\endverbatim
+Compare two tables. Output goes to standard output.
+
+
+
+
+
+\subsection ssdiff_examples_2 Example 2
+\verbatim
+ssdiff --unordered numbers_buggy.csv numbers.csv
+\endverbatim
+Compare two tables, neglecting row order.
+
+
+
+
+
+\subsection ssdiff_examples_3 Example 3
+\verbatim
+ssdiff --format sql numbers_buggy.sqlite numbers.sqlite
+\endverbatim
+Compare two databases, with output in SQL format.
 
 
 
@@ -170,7 +215,7 @@ MYSQL: database connector<br />
 
 
 \section ssdiff_version Version
-ssdiff version 0.5.6
+ssdiff version 0.5.7
 
 
  *

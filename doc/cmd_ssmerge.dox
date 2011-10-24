@@ -14,6 +14,7 @@ Merge table/database/spreadsheets. The first file must be a common ancestor of t
 \section ssmerge_index Index
   \li \ref ssmerge_options
   \li \ref ssmerge_options_detail
+  \li \ref ssmerge_examples
   \li \ref ssmerge_patch
   \li \ref ssmerge_table
   \li \ref ssmerge_version
@@ -21,6 +22,7 @@ Merge table/database/spreadsheets. The first file must be a common ancestor of t
 
 \section ssmerge_options Option summary
  \li \ref ssmerge_main_bid "--bid=COLUMN"
+ \li \ref ssmerge_main_default-table "--default-table=TABLE"
  \li \ref ssmerge_main_fixed-columns "--fixed-columns"
  \li \ref ssmerge_main_head-trimmed "--head-trimmed"
  \li \ref ssmerge_main_id "--id=COLUMN"
@@ -38,6 +40,9 @@ Merge table/database/spreadsheets. The first file must be a common ancestor of t
 \anchor ssmerge_main_bid <b>--bid=COLUMN</b> <br />boost a column (repeat option for multiple columns)
 
 
+\anchor ssmerge_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
+
+
 \anchor ssmerge_main_fixed-columns <b>--fixed-columns</b> <br />ignore new or removed columns
 
 
@@ -53,7 +58,7 @@ Merge table/database/spreadsheets. The first file must be a common ancestor of t
 \anchor ssmerge_main_input-formats <b>--input-formats</b> <br />list supported input database formats
 
 
-\anchor ssmerge_main_named <b>--named</b> <br />trust names of columns (saves work checking for column renames)
+\anchor ssmerge_main_named <b>--named</b> <br />trust names of columns, omitting checks for column renames
 
 
 \anchor ssmerge_main_output <b>--output=OUTPUTFILE</b> <br />direct output to this file (default is standard output)
@@ -68,8 +73,58 @@ Merge table/database/spreadsheets. The first file must be a common ancestor of t
 \anchor ssmerge_main_tail-trimmed <b>--tail-trimmed</b> <br />ignore rows removed at the end of a table (such as a log file)
 
 
-\anchor ssmerge_main_unordered <b>--unordered</b> <br />neglect order of rows (saves work)
+\anchor ssmerge_main_unordered <b>--unordered</b> <br />treat order of rows as unimportant
 
+
+
+
+\section ssmerge_examples Examples
+You can generate test file(s) for the examples that follow:
+\verbatim
+ssmerge --example numbers.csv
+ssmerge --example numbers_buggy.csv
+ssmerge --example numbers_buggy_add.csv
+ssmerge --example numbers_conflict.csv
+\endverbatim
+
+
+
+
+\subsection ssmerge_examples_1 Example 1
+\verbatim
+ssmerge numbers_buggy.csv numbers.csv numbers_buggy_add.csv
+\endverbatim
+Merge two CSV tables (numbers.csv and numbers_buggy_add.csv) with a common ancestor (numbers_buggy.csv).
+
+
+
+
+
+\subsection ssmerge_examples_2 Example 2
+\verbatim
+ssmerge --theirs numbers_buggy.csv numbers.csv numbers_conflict.csv
+\endverbatim
+Merge numbers.csv and numbers_conflict.csv (with common ancestor numbers_buggy.csv), deferring to numbers_conflict.csv in the case of conflict.
+
+
+
+
+
+\subsection ssmerge_examples_3 Example 3
+\verbatim
+ssmerge --ours numbers_buggy.csv numbers.csv numbers_conflict.csv
+\endverbatim
+Merge numbers.csv and numbers_conflict.csv (with common ancestor numbers_buggy.csv), deferring to numbers.csv in the case of conflict.
+
+
+
+
+
+\subsection ssmerge_examples_4 Example 4
+\verbatim
+ssmerge --inplace --theirs numbers_buggy.csv numbers.csv numbers_conflict.csv
+\endverbatim
+Merge directly into numbers.csv.  Without --inplace, output goes to standard output.
 
 
 
@@ -154,7 +209,7 @@ MYSQL: database connector<br />
 
 
 \section ssmerge_version Version
-ssmerge version 0.5.6
+ssmerge version 0.5.7
 
 
  *

@@ -3,24 +3,27 @@
 
 @page sspatch sspatch
 
-Modify a table/database/spreadsheet to integrate the changes described
-in a pre-computed difference.
+Modify a table/database/spreadsheet to integrate the changes described in a pre-computed difference.
 
 
 
 \section sspatch_usage Usage
  \li sspatch [options] DATAFILE PATCHFILE
+ \li sspatch [options] --cmd PATCHSTRING DATAFILE
 
 
 \section sspatch_index Index
   \li \ref sspatch_options
   \li \ref sspatch_options_detail
+  \li \ref sspatch_examples
   \li \ref sspatch_patch
   \li \ref sspatch_table
   \li \ref sspatch_version
 
 
 \section sspatch_options Option summary
+ \li \ref sspatch_main_cmd "--cmd=CMD"
+ \li \ref sspatch_main_default-table "--default-table=TABLE"
  \li \ref sspatch_main_inplace "--inplace"
  \li \ref sspatch_main_input-formats "--input-formats"
  \li \ref sspatch_main_output "--output=OUTPUTFILE"
@@ -28,6 +31,12 @@ in a pre-computed difference.
 
 
 \section sspatch_options_detail Option details
+\anchor sspatch_main_cmd <b>--cmd=CMD</b> <br />specify a patch (in tdiff format) with a string rather than as a file, useful to make a quick change to a table that does not merit a full patch file
+
+
+\anchor sspatch_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
+
+
 \anchor sspatch_main_inplace <b>--inplace</b> <br />if modifications are made, make them in place without a copy
 
 
@@ -39,6 +48,96 @@ in a pre-computed difference.
 
 \anchor sspatch_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
 
+
+
+
+\section sspatch_examples Examples
+You can generate test file(s) for the examples that follow:
+\verbatim
+sspatch --example numbers.csv
+sspatch --example numbers_buggy.csv
+sspatch --example numbers_buggy.sqlite
+sspatch --example numbers_patch.tdiff
+\endverbatim
+
+
+
+
+\subsection sspatch_examples_1 Example 1
+\verbatim
+sspatch numbers_buggy.csv numbers_patch.tdiff
+\endverbatim
+Apply a patch to a table. Output goes to standard output. Input file is untouched.
+
+
+
+
+
+\subsection sspatch_examples_2 Example 2
+\verbatim
+sspatch --inplace numbers_buggy.csv numbers_patch.tdiff
+\endverbatim
+Apply a patch to a table. Input file is modified.
+
+
+
+
+
+\subsection sspatch_examples_3 Example 3
+\verbatim
+sspatch --tmp tmp.sqlite numbers_buggy.sqlite numbers_patch.tdiff
+\endverbatim
+Apply a patch to a sqlite database. Input file is not modified. Space for a temporary database is needed to do this. If not supplied, sspatch will ask for it.
+
+
+
+
+
+\subsection sspatch_examples_4 Example 4
+\verbatim
+sspatch - numbers_patch.tdiff < numbers_buggy.csv
+\endverbatim
+Apply a patch to a table read from standard input.
+
+
+
+
+
+\subsection sspatch_examples_5 Example 5
+\verbatim
+sspatch numbers_buggy.csv - < numbers_patch.tdiff
+\endverbatim
+Apply a patch read from standard input.
+
+
+
+
+
+\subsection sspatch_examples_6 Example 6
+\verbatim
+sspatch --cmd "+ |two|2|" numbers_buggy.csv
+\endverbatim
+Add a new row to a table.
+
+
+
+
+
+\subsection sspatch_examples_7 Example 7
+\verbatim
+sspatch --cmd "- |NAME=four|" numbers.csv
+\endverbatim
+Remove a row from a table
+
+
+
+
+
+\subsection sspatch_examples_8 Example 8
+\verbatim
+sspatch --cmd "= |NAME=four|DIGIT:*->4|" numbers_buggy.csv
+\endverbatim
+Change the DIGIT column on a row with NAME=four.
 
 
 
@@ -123,7 +222,7 @@ MYSQL: database connector<br />
 
 
 \section sspatch_version Version
-sspatch version 0.5.6
+sspatch version 0.5.7
 
 
  *

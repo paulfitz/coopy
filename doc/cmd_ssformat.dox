@@ -21,6 +21,7 @@ Reformat tables/databases/spreadsheets.
 
 
 \section ssformat_options Option summary
+ \li \ref ssformat_main_default-table "--default-table=TABLE"
  \li \ref ssformat_main_header "--header"
  \li \ref ssformat_main_index "--index"
  \li \ref ssformat_main_input-formats "--input-formats"
@@ -28,6 +29,9 @@ Reformat tables/databases/spreadsheets.
 
 
 \section ssformat_options_detail Option details
+\anchor ssformat_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
+
+
 \anchor ssformat_main_header <b>--header</b> <br />extract column names only
 
 
@@ -40,91 +44,3 @@ Reformat tables/databases/spreadsheets.
 \anchor ssformat_main_table <b>--table=TABLE</b> <br />operate on a single named table of a workbook/database
 
 
-
-
-\section ssformat_patch Patch formats
-  \li <b>tdiff</b>: <i>[default]</i> vaguely similar to a standard unix diff
-  \li <b>csv</b>: csv-compatible diff format
-  \li <b>hilite</b>: colorful spreadsheet format
-  \li <b>index</b>: tabular output showing relationship between rows and columns
-  \li <b>raw</b>: verbose diff format for debugging
-  \li <b>review</b>: spreadsheet diff format suitable for quickly accepting or rejecting changes
-  \li <b>sql</b>: SQL format (data diffs only)
-
-
-\section ssformat_table Database/spreadsheet file formats
-CSV: plain-text delimiter-separated family of formats<br />
-  \li<b>.csv</b>: Comma-separated values
-  \li<b>.tsv</b>: Tab-separated values
-  \li<b>.ssv</b>: Semicolon-separated values
-  \li<b>.json</b>: {<br />
-      "type": "csv",<br />
-      "file": "fname.dsv",<br />
-      "delimiter": "|"<br />
-}
-
-
-SQLITE: file-based database<br />
-  \li<b>.sqlite</b>: Sqlite database file
-  \li<b>.json</b>: {<br />
-      "type": "sqlite",<br />
-      "file": "fname.db"<br />
-}
-  \li <b>dbi:sqlite:fname.db</b> (Force sqlite interpretation) 
-
-
-SQLITEXT: sqlite-format sql dump<br />
-  \li<b>.sqlitext</b>: SQL dump of Sqlite database
-  \li<b>.json</b>: {<br />
-      "type": "sqlitext",<br />
-      "file": "fname.sql"<br />
-}
-  \li <b>dbi:sqlitext:fname.sql</b> (Force sqlitext interpretation) 
-
-
-JSONBOOK: Spreadsheet formats in json<br />
-  \li<b>.jsonbook</b>: Json spreadsheet
-
-
-GNUMERIC: Spreadsheet formats (via gnumeric)<br />
-  \li<b>.xls</b>: Excel spreadsheet
-  \li<b>.xlsx</b>: Excel spreadsheet
-  \li<b>.gnumeric</b>: Gnumeric spreadsheet
-  \li<b>.json</b>: {<br />
-      "type": "gnumeric",<br />
-      "file": "fname.sheet"<br />
-}
-  \li <b>dbi:gnumeric:fname.sheet</b> (Force Gnumeric interpretation) 
-
-
-MDB: Access database format (via Mdbtools, READ-ONLY)<br />
-  \li<b>.mdb</b>: Access database file
-  \li<b>.json</b>: {<br />
-      "type": "access",<br />
-      "file": "fname.db"<br />
-}
-  \li <b>dbi:access:fname.db</b> (Force Access interpretation) 
-
-
-MYSQL: database connector<br />
-  \li<b>.json</b>: {<br />
-      "type": "mysql",<br />
-      "database": "db_name",<br />
-      "host": "localhost",<br />
-      "port": "1111",<br />
-      "username": "root",<br />
-      "password": "****"<br />
-}
-  \li <b>dbi:mysql:database_name</b> (Use default port, username, etc) 
-  \li <b>dbi:mysql:database_name:username=USER:password=PASS</b>
-  \li <b>dbi:mysql:database_name:host=HOST:port=PORT</b>
-
-
-
-
-\section ssformat_version Version
-ssformat version 0.5.6
-
-
- *
- */
