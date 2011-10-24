@@ -246,8 +246,9 @@ void OptionRenderDoxygen::render(const Options& opt) {
   printf("\n\n\\section %s_options_detail Option details\n", opt.getName().c_str());
   showOptions(opt,f,anchor,true);
 
-  if (examples.size()==0) return;
-  printf("\n\n\\section %s_examples Examples\n", opt.getName().c_str());
+  if (examples.size()>0) {
+    printf("\n\n\\section %s_examples Examples\n", opt.getName().c_str());
+  }
 
   const vector<string> reqs = opt.getExampleReqs();
   if (reqs.size()>0) {
