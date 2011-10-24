@@ -146,9 +146,7 @@ void OptionRenderCmdLine::render(const Options& opt) {
   showOptions(opt,f);
 
   const vector<Example>& examples = opt.getExamples();
-
   if (examples.size()==0) return;
-
   printf("\n");
   printf("Examples\n");
 
@@ -167,7 +165,6 @@ void OptionRenderCmdLine::render(const Options& opt) {
     printf("  %s\n", eg.code.c_str());
     printf("    ");
     wrapText(eg.desc,w,4);
-    //printf("    %s\n", eg.desc.c_str());
   }
 }
 
@@ -224,9 +221,13 @@ void OptionRenderDoxygen::render(const Options& opt) {
   for (int i=0; i<(int)usages.size(); i++) {
     printf(" \\li %s\n", usages[i].c_str());
   }
+  const vector<Example>& examples = opt.getExamples();
   printf("\n\n\\section %s_index Index\n", opt.getName().c_str());
   printf("  \\li \\ref %s_options\n", opt.getName().c_str());
   printf("  \\li \\ref %s_options_detail\n", opt.getName().c_str());
+  if (examples.size()>0) {
+    printf("  \\li \\ref %s_examples\n", opt.getName().c_str());
+  }
   printf("  \\li \\ref %s_patch\n", opt.getName().c_str());
   printf("  \\li \\ref %s_table\n", opt.getName().c_str());
   printf("  \\li \\ref %s_version\n", opt.getName().c_str());
@@ -239,6 +240,30 @@ void OptionRenderDoxygen::render(const Options& opt) {
 
   printf("\n\n\\section %s_options_detail Option details\n", opt.getName().c_str());
   showOptions(opt,f,anchor,true);
+
+  if (examples.size()==0) return;
+  printf("\n\n\\section %s_examples Examples\n", opt.getName().c_str());
+
+  const vector<string> reqs = opt.getExampleReqs();
+  if (reqs.size()>0) {
+    printf("You can generate test file(s) for the examples that follow:\n");
+    printf("\\verbatim\n");
+    for (int i=0; i<(int)reqs.size(); i++) {
+      printf("%s --example %s\n", opt.getName().c_str(), reqs[i].c_str());
+    }
+    printf("\\endverbatim\n");
+    printf("\n\n");
+  }
+
+  for (int i=0; i<(int)examples.size(); i++) {
+    if (i>0) printf("\n\n");
+    const Example& eg = examples[i];
+    printf("\n\n\\subsection %s_examples_%d Example %d\n", 
+	   opt.getName().c_str(),
+	   i+1, i+1);
+    printf("\\verbatim\n%s\n\\endverbatim\n", eg.code.c_str());
+    printf("%s\n\n",eg.desc.c_str());
+  }
 
   printf("\n\n\\section %s_patch Patch formats\n", opt.getName().c_str());
   showOptions(opt,OPTION_PATCH_FORMAT,anchor,true,true);
