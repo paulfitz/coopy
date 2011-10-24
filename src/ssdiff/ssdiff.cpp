@@ -23,6 +23,12 @@ int main(int argc, char *argv[]) {
     opt.addUsage("ssdiff [options] FILE1 FILE2");
     opt.addDescription("Show the difference between two tables/databases/spreadsheets.");
     opt.showOptions(OPTION_FOR_DIFF);
+    opt.addExample("ssdiff numbers_buggy.csv numbers.csv",
+		   "Compare two tables. Output goes to standard output.").require("numbers_buggy.csv").require("numbers.csv");
+    opt.addExample("ssdiff --unordered numbers_buggy.csv numbers.csv",
+		   "Compare two tables, neglecting row order.").require("numbers_buggy.csv").require("numbers.csv");
+    opt.addExample("ssdiff --format sql numbers_buggy.sqlite numbers.sqlite",
+		   "Compare two databases, with output in SQL format.").require("numbers_buggy.sqlite").require("numbers.sqlite");
     opt.endHelp();
 
     return 1;

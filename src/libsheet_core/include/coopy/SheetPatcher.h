@@ -45,6 +45,7 @@ private:
   coopy::store::DataSheet *sniffedSheet;
 
   int matchRow(const std::vector<int>& active_cond,
+	       const std::vector<std::string>& active_name,
 	       const std::vector<coopy::store::SheetCell>& cond,
 	       int width,
 	       bool show=false);

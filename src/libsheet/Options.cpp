@@ -4,6 +4,7 @@
 #include <coopy/Options.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/CsvWrite.h>
+#include <coopy/Coopy.h>
 
 #include <algorithm>
 
@@ -35,6 +36,12 @@ public:
 
 class OptionRenderCmdLine : public OptionRender {
 public:
+  int w;
+
+  OptionRenderCmdLine() {
+    w = 78;
+  }
+
   void showOptions(const Options& opt, int filter);
   virtual void render(const Options& opt);
 };
@@ -45,6 +52,35 @@ public:
 		   bool detailed = false, bool compact = false);
   virtual void render(const Options& opt);
 };
+
+
+static void wrapText(const string& desc, int w, int tot) {
+  string txt = desc;
+  if (txt.length()>0) {
+    txt[0] = toupper(txt[0]);
+  }
+  while (txt.length()>0) {
+    string next = txt.substr(0,w-tot+1);
+    if (next.length()>w-tot) {
+      string::size_type at = next.rfind(" ");
+      if (at!=string::npos) {
+	next = txt.substr(0,at);
+	txt = txt.substr(at+1,txt.length());
+      } else {
+	next = txt.substr(0,w-tot);
+	txt = txt.substr(w-tot,txt.length());
+      }
+    } else {
+      txt = "";
+    }
+    printf("%s\n", next.c_str());
+    if (txt.length()>0) {
+      if (tot>0) {
+	printf("% *c", tot, ' ');
+      }
+    }
+  }
+}
 
 void OptionRenderCmdLine::showOptions(const Options& opt, int filter) {
   bool flaggy = true;
@@ -59,21 +95,9 @@ void OptionRenderCmdLine::showOptions(const Options& opt, int filter) {
   vector<Option> mopts = opt.getOptionList();
   sort(mopts.begin(),mopts.end(),OptionCompare());
 
-  /*
-  for (int i=0; i<80; i++) {
-    printf("%d", i/10);
-  }
-  printf("\n");
-  for (int i=0; i<80; i++) {
-    printf("%d", i%10);
-  }
-  printf("\n");
-  */
-  
   for (int i=0; i<(int)mopts.size(); i++) {
     Option& o = mopts[i];
     int tot = start+len+1;
-    int w = 78;
     if (o.coverage&filter) {
       printf("% *c",start,' ');
       string pre = o.long_name;
@@ -96,30 +120,7 @@ void OptionRenderCmdLine::showOptions(const Options& opt, int filter) {
       if (o.is_default) {
 	desc = string("[default] ") + desc;
       }
-      if (desc.length()<=w-tot) {
-	printf("%s\n", desc.c_str());
-      } else {
-	string txt = desc;
-	while (txt.length()>0) {
-	  string next = txt.substr(0,w-tot+1);
-	  if (next.length()>w-tot) {
-	    string::size_type at = next.rfind(" ");
-	    if (at!=string::npos) {
-	      next = txt.substr(0,at);
-	      txt = txt.substr(at+1,txt.length());
-	    } else {
-	      next = txt.substr(0,w-tot);
-	      txt = txt.substr(w-tot,txt.length());
-	    }
-	  } else {
-	    txt = "";
-	  }
-	  printf("%s\n", next.c_str());
-	  if (txt.length()>0) {
-	    printf("% *c", tot, ' ');
-	  }
-	}
-      }
+      wrapText(desc, w, tot);
       if (o.long_name=="format") {
 	showOptions(opt,OPTION_PATCH_FORMAT);
       }
@@ -137,11 +138,37 @@ void OptionRenderCmdLine::render(const Options& opt) {
   }
   printf("\n");
   const string& desc = opt.getDescription();
-  printf("%s\n", desc.c_str());
+  wrapText(desc,w,0);
+  //printf("%s\n", desc.c_str());
   printf("\n");
   printf("Options\n");
   int f = opt.getOptionFilter();
   showOptions(opt,f);
+
+  const vector<Example>& examples = opt.getExamples();
+
+  if (examples.size()==0) return;
+
+  printf("\n");
+  printf("Examples\n");
+
+  const vector<string> reqs = opt.getExampleReqs();
+  if (reqs.size()>0) {
+    printf("  You can generate test file(s) to use with the examples that follow:\n");
+    for (int i=0; i<(int)reqs.size(); i++) {
+      printf("    %s --example %s\n", opt.getName().c_str(), reqs[i].c_str());
+    }
+    printf("\n");
+  }
+
+  for (int i=0; i<(int)examples.size(); i++) {
+    if (i>0) printf("\n");
+    const Example& eg = examples[i];
+    printf("  %s\n", eg.code.c_str());
+    printf("    ");
+    wrapText(eg.desc,w,4);
+    //printf("    %s\n", eg.desc.c_str());
+  }
 }
 
 
@@ -310,9 +337,9 @@ Options::Options(const char *name) : name(name) {
   addCompare("bid=COLUMN",
 	     "boost a column (repeat option for multiple columns)");
   addCompare("named",
-	     "trust names of columns (saves work checking for column renames)");
+	     "trust names of columns, omitting checks for column renames");
   addCompare("unordered",
-	     "neglect order of rows (saves work)");
+	     "treat order of rows as unimportant");
   addCompare("fixed-columns",
 	     "ignore new or removed columns");
   addCompare("head-trimmed",
@@ -344,7 +371,7 @@ Options::Options(const char *name) : name(name) {
 
   add(OPTION_FOR_PATCH,
       "cmd=CMD",
-      "specify a patch with a string rather than as a file (tdiff format)"),
+      "specify a patch (in tdiff format) with a string rather than as a file, useful to make a quick change to a table that does not merit a full patch file"),
 
   add(OPTION_FOR_FORMAT,
       "header",
@@ -397,9 +424,7 @@ std::string Options::getVersion() const {
   return QUOTED_VERSION(COOPY_VERSION);
 }
 
-
-static void generateExample(const string& name) {
-  CsvSheet csv;
+static void generateNumbers(CsvSheet& csv, bool buggy, bool addy) {
   csv.addField("NAME",false);
   csv.addField("DIGIT",false);
   csv.addRecord();
@@ -418,12 +443,58 @@ static void generateExample(const string& name) {
   csv.addField("five",false);
   csv.addField("5",false);
   csv.addRecord();
-  if (name=="numbers.csv") {
-    fprintf(stderr,"* generating numbers.csv\n");
-    if (CsvFile::write(csv,"numbers.csv")) {
-      exit(1);
-    }
+  
+  if (buggy) {
+    csv.cellString(1,4,"999");
+    csv.deleteRow(RowRef(3));
   }
+
+  if (addy) {
+    RowRef r = csv.insertRow(RowRef(-1));
+    csv.cellString(0,r.getIndex(),"six");
+    csv.cellString(1,r.getIndex(),"6");
+    r = csv.insertRow(RowRef(-1));
+    csv.cellString(0,r.getIndex(),"seven");
+    csv.cellString(1,r.getIndex(),"7");
+    csv.insertRow(RowRef(1));
+    csv.cellString(0,1,"zero");
+    csv.cellString(1,1,"0");
+  }
+}
+
+static bool generateExample(const string& name) {
+  if (name=="numbers.csv"||name=="numbers_buggy.csv"||
+      name=="numbers_add.csv"||name=="numbers_add.sqlite"||
+      name=="numbers_buggy_add.csv"||name=="numbers_buggy_add.sqlite"||
+      name=="numbers.sqlite"||name=="numbers_buggy.sqlite") {
+    CsvSheet csv;
+    generateNumbers(csv,name.find("_buggy")!=string::npos,
+		    name.find("_add")!=string::npos);
+
+    WrapBook book1(csv,false);
+    book1.addReference();
+    PolyBook book2;
+    book2.take(&book1);
+    if (!book2.write(name.c_str())) {
+      fprintf(stderr,"* failed to generate %s\n", name.c_str());
+      return false;
+    }
+    fprintf(stderr,"* generated %s\n", name.c_str());
+    return true;
+  }
+  if (name=="numbers_patch.tdiff") {
+    CsvSheet csv1, csv2;
+    generateNumbers(csv1,true,false);
+    generateNumbers(csv2,false,false);
+    Coopy coopy;
+    coopy.setOutput("numbers_patch.tdiff");
+    if (coopy.compare(csv1,csv2)) {
+      fprintf(stderr,"* generated %s\n", name.c_str());
+      return true;
+    }
+    fprintf(stderr,"* failed to generate %s\n", name.c_str());
+  }
+  return false;
 }
 
 int Options::apply(int argc, char *argv[]) {
@@ -561,7 +632,11 @@ int Options::apply(int argc, char *argv[]) {
 	} else if (k=="dry-run") {
 	  option_bool["apply"] = false;
 	} else if (k=="example") {
-	  generateExample(optarg);
+	  bool ok = generateExample(optarg);
+	  if (!ok) {
+	    exit(1);
+	  }
+	  option_bool["gen"] = true;
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;
@@ -681,6 +756,9 @@ int Options::apply(int argc, char *argv[]) {
   for (int i=0; i<argc; i++) {
     core.push_back(argv[i]);
   }
+  if (option_bool.find("gen")!=option_bool.end()) {
+    exit(0);
+  }
   return 0;
 }
 
@@ -705,6 +783,24 @@ void Options::endHelp() {
   }
   OptionRenderCmdLine render;
   render.render(*this);
+}
+
+
+
+const std::vector<std::string> Options::getExampleReqs() const {
+  map<string,int> reqs;
+  for (int i=0; i<(int)examples.size(); i++) {
+    const Example& eg = examples[i];
+    for (int j=0; j<(int)eg.reqs.size(); j++) {
+      reqs[eg.reqs[j]] = 1;
+    }
+  }
+  vector<string> reqs_flat;
+  for (map<string,int>::iterator it=reqs.begin(); it!=reqs.end(); it++) {
+    reqs_flat.push_back(it->first);
+  }
+  sort(reqs_flat.begin(),reqs_flat.end());
+  return reqs_flat;
 }
 
 

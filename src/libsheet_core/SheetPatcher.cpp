@@ -29,10 +29,31 @@ static bool is_match(const SheetCell& a, const SheetCell& b) {
 }
 
 int SheetPatcher::matchRow(const std::vector<int>& active_cond,
+			   const std::vector<std::string>& active_name,
 			   const std::vector<SheetCell>& cond,
 			   int width, bool show) {
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return false;
+  {
+    int c;
+    for (c=0; c<width; c++) {
+      if (active_cond[c]) {
+	if (cond[c].text != active_name[c]) {
+	  break;
+	}
+      }
+    }
+    if (c==width) {
+      //printf("WORKING WITH: %s // %s\n", sheet.toString().c_str(),
+      //vector2string(sheet.getNestedDescription()).c_str());
+      //if (sheet.hasRowOffset()||sheet.hasExternalColumnNames()) {
+      if (sheet.getSchema()&&!sheet.hasExternalColumnNames()) {
+	dbg_printf("HEADER LINE MATCH\n");
+	return -2;
+      }
+    }
+  }
+
   int r = -1;
   int bct = 0;
   int rbest = -1;
@@ -64,7 +85,7 @@ int SheetPatcher::matchRow(const std::vector<int>& active_cond,
   }
   if (!show) {
     dbg_printf("No match for update\n");
-    matchRow(active_cond,cond,width,true);
+    matchRow(active_cond,active_name,cond,width,true);
   }
   if (show && rbest>=0) {
     fprintf(stderr,"# No match - closest was:\n");
@@ -441,6 +462,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   if (!change.sequential) rowCursor = -1;
   //map<string,int> dir;
   vector<int> active_cond;
+  vector<string> active_name;
   int active_conds = 0;
   vector<SheetCell> cond;
   vector<int> active_val;
@@ -462,6 +484,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   for (int i=0; i<width; i++) {
     //dir[allNames[i]] = i;
     active_cond.push_back(0);
+    active_name.push_back("");
     cond.push_back(SheetCell());
     active_val.push_back(0);
     val.push_back(SheetCell());
@@ -476,6 +499,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       active_cond[idx] = 1;
       active_conds++;
       cond[idx] = it->second;
+      active_name[idx] = it->first;
     }
   }
   for (RowChange::txt2cell::const_iterator it = change.val.begin();
@@ -557,7 +581,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
     break;
   case ROW_CHANGE_DELETE:
     {
-      int r = matchRow(active_cond,cond,width);
+      int r = matchRow(active_cond,active_name,cond,width);
       if (r<0) return false;
       RowRef row(r);
       rowCursor = r;
@@ -587,11 +611,15 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   case ROW_CHANGE_CONTEXT:
     {
       if (active_conds>0) {
-	int r = matchRow(active_cond,cond,width);
-	if (r<0) {
-	  return false;
+	int r = matchRow(active_cond,active_name,cond,width);
+	if (r!=-2) {
+	  if (r<0) {
+	    return false;
+	  }
+	  r++;
+	} else {
+	  r = 0;
 	}
-	r++;
 	if (r>=sheet.height()) {
 	  r = -1;
 	}
@@ -606,7 +634,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   case ROW_CHANGE_MOVE:
     {
       bool success = false;
-      int r = matchRow(active_cond,cond,width);
+      int r = matchRow(active_cond,active_name,cond,width);
       if (r<0) return false;
       RowRef from(r);
       RowRef to(rowCursor);
@@ -636,7 +664,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   case ROW_CHANGE_UPDATE:
     {
       bool success = false;
-      int r = matchRow(active_cond,cond,width);
+      int r = matchRow(active_cond,active_name,cond,width);
       if (r<0) {
 	rowCursor = -1;
 	return false;
@@ -669,7 +697,7 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
   if (config.trustNames==false) {
     if (!descriptive) {
       if ((int)names.size()!=sheet.width()) {
-	fprintf(stderr,"* ERROR: name mismatch\n");
+	//fprintf(stderr,"* ERROR: name mismatch\n");
 	return false;
       }
     }

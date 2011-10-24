@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
     opt.addUsage("ssmerge [options] FILE1 FILE2 FILE3");
     opt.addDescription("Merge table/database/spreadsheets. The first file must be a common ancestor of the remaining two.");
     opt.showOptions(OPTION_FOR_MERGE);
+    opt.addExample("ssmerge numbers_buggy.csv numbers.csv numbers_buggy_add.csv",
+		   "Apply a patch to a table read from standard input.").require("numbers_buggy.csv").require("numbers.csv").require("numbers_buggy_add.csv");
     opt.endHelp();
     return 1;
   }

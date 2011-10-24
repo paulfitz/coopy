@@ -104,6 +104,9 @@ int Diff::apply(const Options& opt) {
     }
     flags.local_uri = local_file;
   }
+  if (inplace) {
+    output = local_file;
+  }
 
   if (remote_file!="") {
     if (!_remote.read(remote_file.c_str())) {

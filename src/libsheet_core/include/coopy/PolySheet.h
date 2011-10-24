@@ -355,6 +355,13 @@ public:
     return true;
   }
 
+  virtual bool hasRowOffset() const {
+    if (dh==0 && sheet) {
+      return sheet->hasRowOffset();
+    }
+    return dh!=0;
+  }
+
   bool setRowOffset() {
     COOPY_ASSERT(sheet);
     if (dh>0) return true;

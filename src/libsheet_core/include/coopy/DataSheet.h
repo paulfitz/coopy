@@ -323,6 +323,10 @@ public:
     return true;
   }
 
+  virtual bool hasRowOffset() const {
+    return false;
+  }
+
 private:
   std::string hash_cache;
 };

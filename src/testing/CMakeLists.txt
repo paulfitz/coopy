@@ -696,3 +696,20 @@ foreach(format1 sqlite csv sqlitext jsonbook ${EXCEL})
   endforeach()
 endforeach()
 
+#######################################################################
+#######################################################################
+
+# Keep examples working
+
+ADD_TEST(example_ssmerge1 ${ssmerge} 
+  --output example_ssmerge1.csv
+  ${TESTS}/examples/numbers_buggy.csv
+  ${TESTS}/examples/numbers.csv
+  ${TESTS}/examples/numbers_buggy_add.csv)
+
+ADD_TEST(example_ssmerge1_compare ${ssdiff} --equals 
+  example_ssmerge1.csv
+  ${TESTS}/examples/numbers_more.csv)
+
+
+

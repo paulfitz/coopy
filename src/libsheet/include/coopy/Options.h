@@ -11,6 +11,7 @@
 namespace coopy {
   namespace app {
     class Option;
+    class Example;
     class Options;
   }
 }
@@ -38,6 +39,18 @@ public:
   Option() {
     coverage = 0;
     is_default = false;
+  }
+};
+
+class coopy::app::Example {
+public:
+  std::string code;
+  std::string desc;
+  std::vector<std::string> reqs;
+
+  Example& require(std::string req) {
+    reqs.push_back(req);
+    return *this;
   }
 };
 
@@ -116,11 +129,21 @@ public:
   void beginHelp();
   void addUsage(const char *usage);
   void addDescription(const char *desc);
+  Example& addExample(const char *code, const char *desc) {
+    Example eg;
+    eg.code = code;
+    eg.desc = desc;
+    examples.push_back(eg);
+    return examples.back();
+  }
+
   void endHelp();
 
   const std::vector<Option>& getOptionList() const { return opts; }
   const std::string& getName() const { return name; }
   const std::vector<std::string>& getUsages() const { return usages; }
+  const std::vector<Example>& getExamples() const { return examples; }
+  const std::vector<std::string> getExampleReqs() const;
   const std::string& getDescription() const { return description; }
   int getOptionFilter() const { return option_filter; }
 
@@ -132,6 +155,7 @@ private:
   std::map<std::string,std::string> option_string;
   coopy::store::PolyBook mapping;
   std::vector<Option> opts;
+  std::vector<Example> examples;
   std::vector<std::string> usages;
   std::string description;
   int option_filter;
