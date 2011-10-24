@@ -424,7 +424,8 @@ std::string Options::getVersion() const {
   return QUOTED_VERSION(COOPY_VERSION);
 }
 
-static void generateNumbers(CsvSheet& csv, bool buggy, bool addy) {
+static void generateNumbers(CsvSheet& csv, bool buggy, bool addy, 
+			    bool conflict) {
   csv.addField("NAME",false);
   csv.addField("DIGIT",false);
   csv.addRecord();
@@ -460,16 +461,26 @@ static void generateNumbers(CsvSheet& csv, bool buggy, bool addy) {
     csv.cellString(0,1,"zero");
     csv.cellString(1,1,"0");
   }
+
+  if (conflict) {
+    if (buggy||addy) {
+      fprintf(stderr,"* cannot make what you want\n");
+      exit(1);
+    }
+    csv.cellString(1,4,"444");
+  }
 }
 
 static bool generateExample(const string& name) {
   if (name=="numbers.csv"||name=="numbers_buggy.csv"||
       name=="numbers_add.csv"||name=="numbers_add.sqlite"||
       name=="numbers_buggy_add.csv"||name=="numbers_buggy_add.sqlite"||
+      name=="numbers_conflict.csv"||name=="numbers_conflict.sqlite"||
       name=="numbers.sqlite"||name=="numbers_buggy.sqlite") {
     CsvSheet csv;
     generateNumbers(csv,name.find("_buggy")!=string::npos,
-		    name.find("_add")!=string::npos);
+		    name.find("_add")!=string::npos,
+		    name.find("_conflict")!=string::npos);
 
     WrapBook book1(csv,false);
     book1.addReference();
@@ -484,8 +495,8 @@ static bool generateExample(const string& name) {
   }
   if (name=="numbers_patch.tdiff") {
     CsvSheet csv1, csv2;
-    generateNumbers(csv1,true,false);
-    generateNumbers(csv2,false,false);
+    generateNumbers(csv1,true,false,false);
+    generateNumbers(csv2,false,false,false);
     Coopy coopy;
     coopy.setOutput("numbers_patch.tdiff");
     if (coopy.compare(csv1,csv2)) {

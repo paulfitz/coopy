@@ -25,7 +25,13 @@ int main(int argc, char *argv[]) {
     opt.addDescription("Merge table/database/spreadsheets. The first file must be a common ancestor of the remaining two.");
     opt.showOptions(OPTION_FOR_MERGE);
     opt.addExample("ssmerge numbers_buggy.csv numbers.csv numbers_buggy_add.csv",
-		   "Apply a patch to a table read from standard input.").require("numbers_buggy.csv").require("numbers.csv").require("numbers_buggy_add.csv");
+		   "Merge two CSV tables (numbers.csv and numbers_buggy_add.csv) with a common ancestor (numbers_buggy.csv).").require("numbers_buggy.csv").require("numbers.csv").require("numbers_buggy_add.csv");
+    opt.addExample("ssmerge --theirs numbers_buggy.csv numbers.csv numbers_conflict.csv",
+		   "Merge numbers.csv and numbers_conflict.csv (with common ancestor numbers_buggy.csv), deferring to numbers_conflict.csv in the case of conflict.").require("numbers_buggy.csv").require("numbers.csv").require("numbers_conflict.csv");
+    opt.addExample("ssmerge --ours numbers_buggy.csv numbers.csv numbers_conflict.csv",
+		   "Merge numbers.csv and numbers_conflict.csv (with common ancestor numbers_buggy.csv), deferring to numbers.csv in the case of conflict.").require("numbers_buggy.csv").require("numbers.csv").require("numbers_conflict.csv");
+    opt.addExample("ssmerge --inplace --theirs numbers_buggy.csv numbers.csv numbers_conflict.csv",
+		   "Merge directly into numbers.csv.  Without --inplace, output goes to standard output.").require("numbers_buggy.csv").require("numbers.csv").require("numbers_conflict.csv");
     opt.endHelp();
     return 1;
   }
