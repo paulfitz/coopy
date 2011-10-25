@@ -790,8 +790,7 @@ bool SheetPatcher::mergeAllDone() {
   if (descriptive) {
     PolySheet sheet = getSheet();
     if (!sheet.isValid()) return false;
-    dbg_printf("Adding description column\n");
-    sheet.insertColumn(ColumnRef(0)); 
+    sheet.insertColumn(ColumnRef(0)); //,ColumnInfo("_ACTION_")); 
     dbg_printf("Added description column\n");
     //sheet.insertRow(RowRef(0));
     for (int i=0; i<sheet.height()&&i<activeRow.height(); i++) {

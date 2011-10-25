@@ -27,6 +27,7 @@ The COOPY project contains programs and libraries to help you:
 \li \ref ssdiff
 \li \ref sspatch
 \li \ref ssmerge
+\li \ref ssresolve
 \li \ref ssformat
 \li \ref ssrediff
 

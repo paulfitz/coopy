@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     opt.addExample("ssmerge --inplace --theirs numbers_buggy.csv numbers.csv numbers_conflict.csv",
 		   "Merge directly into numbers.csv.  Without --inplace, output goes to standard output.").require("numbers_buggy.csv").require("numbers.csv").require("numbers_conflict.csv");
     opt.endHelp();
-    return 1;
+    return help?0:1;
   }
 
   Diff diff;

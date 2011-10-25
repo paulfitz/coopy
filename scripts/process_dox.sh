@@ -70,6 +70,13 @@ while read -r line; do
 	fi
 	continue
     fi
+    m=`expr match "$line" "@autodoc"`
+    if [ "$m" = "8" ]; then
+	set -- $line
+	cmd=$2
+	$bin/bin/$cmd --help-dox || exit 1	
+	continue
+    fi
     if $table_mode ; then
 	echo "$line" >> $cache
     else

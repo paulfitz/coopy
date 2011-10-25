@@ -12,6 +12,7 @@ namespace coopy {
   namespace app {
     class Option;
     class Example;
+    typedef Example Recipe;
     class Options;
   }
 }
@@ -53,7 +54,6 @@ public:
     return *this;
   }
 };
-
 
 /**
  *
@@ -136,6 +136,13 @@ public:
     examples.push_back(eg);
     return examples.back();
   }
+  Recipe& addRecipe(const char *name, const char *code) {
+    Recipe eg;
+    eg.desc = name;
+    eg.code = code;
+    recipes[name] = eg;
+    return recipes[name];
+  }
 
   void endHelp();
 
@@ -144,6 +151,7 @@ public:
   const std::vector<std::string>& getUsages() const { return usages; }
   const std::vector<Example>& getExamples() const { return examples; }
   const std::vector<std::string> getExampleReqs() const;
+  const std::vector<std::string> getExampleRecipes(const std::vector<std::string>& reqs) const;
   const std::string& getDescription() const { return description; }
   int getOptionFilter() const { return option_filter; }
 
@@ -156,6 +164,7 @@ private:
   coopy::store::PolyBook mapping;
   std::vector<Option> opts;
   std::vector<Example> examples;
+  std::map<std::string,Recipe> recipes;
   std::vector<std::string> usages;
   std::string description;
   int option_filter;

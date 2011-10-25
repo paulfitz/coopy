@@ -29,9 +29,10 @@ int main(int argc, char *argv[]) {
 		   "Compare two tables, neglecting row order.").require("numbers_buggy.csv").require("numbers.csv");
     opt.addExample("ssdiff --format sql numbers_buggy.sqlite numbers.sqlite",
 		   "Compare two databases, with output in SQL format.").require("numbers_buggy.sqlite").require("numbers.sqlite");
+    opt.addExample("ssdiff --format hilite --output review.csv numbers_buggy.csv numbers.csv","Generate tabular diff for eyeballing. If ssdiff is compiled with gnumeric support, and output format is *.xls, color highlighting is added.").require("numbers_buggy.csv").require("numbers_buggy.csv").require("numbers.csv");
     opt.endHelp();
 
-    return 1;
+    return help?0:1;
   }
 
   Diff diff;

@@ -159,7 +159,13 @@ void OptionRenderCmdLine::render(const Options& opt) {
   if (reqs.size()>0) {
     printf("  You can generate test file(s) to use with the examples that follow:\n");
     for (int i=0; i<(int)reqs.size(); i++) {
-      printf("    %s --example %s\n", opt.getName().c_str(), reqs[i].c_str());
+      if (reqs[i][0]!='_') {
+	printf("    %s --test-file %s\n", opt.getName().c_str(), reqs[i].c_str());
+      }
+    }
+    const vector<string> recipes = opt.getExampleRecipes(reqs);
+    for (int i=0; i<(int)recipes.size(); i++) {
+      printf("    %s\n", recipes[i].c_str());
     }
     printf("\n");
   }
@@ -255,7 +261,7 @@ void OptionRenderDoxygen::render(const Options& opt) {
     printf("You can generate test file(s) for the examples that follow:\n");
     printf("\\verbatim\n");
     for (int i=0; i<(int)reqs.size(); i++) {
-      printf("%s --example %s\n", opt.getName().c_str(), reqs[i].c_str());
+      printf("%s --test-file %s\n", opt.getName().c_str(), reqs[i].c_str());
     }
     printf("\\endverbatim\n");
     printf("\n\n");
@@ -614,7 +620,7 @@ int Options::apply(int argc, char *argv[]) {
       {"default-table", 1, 0, 0},
 
       {"help-doxygen", 0, 0, 0},
-      {"example", 1, 0, 0},
+      {"test-file", 1, 0, 0},
 
       {0, 0, 0, 0}
     };
@@ -673,7 +679,7 @@ int Options::apply(int argc, char *argv[]) {
 	  flags.resolve = option_string["resolve"] = "neither";
 	} else if (k=="dry-run") {
 	  option_bool["apply"] = false;
-	} else if (k=="example") {
+	} else if (k=="test-file") {
 	  bool ok = generateExample(optarg);
 	  if (!ok) {
 	    exit(1);
@@ -816,8 +822,9 @@ void Options::addDescription(const char *desc) {
   description = desc;
 }
 
-
 void Options::endHelp() {
+  addRecipe("_numbers_patch.tdiff","ssdiff --output numbers_patch.tdiff numbers_buggy.csv numbers.csv").require("numbers_buggy.csv").require("numbers.csv");
+  addRecipe("_numbers_muddle.csv","ssmerge --output numbers_muddle.csv numbers_buggy.csv numbers.csv numbers_conflict.csv").require("numbers_buggy.csv").require("numbers.csv").require("numbers_conflict.csv");
   if (option_bool["help-doxygen"]) {
     OptionRenderDoxygen render;
     render.render(*this);
@@ -834,15 +841,34 @@ const std::vector<std::string> Options::getExampleReqs() const {
   for (int i=0; i<(int)examples.size(); i++) {
     const Example& eg = examples[i];
     for (int j=0; j<(int)eg.reqs.size(); j++) {
+      string name = eg.reqs[j];
+      if (name[0]=='_') {
+	const Recipe& recipe = recipes.find(name)->second;
+	for (int k=0; k<(int)recipe.reqs.size(); k++) {
+	  reqs[recipe.reqs[k]] = 1;
+	}
+      }
       reqs[eg.reqs[j]] = 1;
     }
   }
+
   vector<string> reqs_flat;
   for (map<string,int>::iterator it=reqs.begin(); it!=reqs.end(); it++) {
     reqs_flat.push_back(it->first);
   }
   sort(reqs_flat.begin(),reqs_flat.end());
+
   return reqs_flat;
 }
 
+
+const std::vector<std::string> Options::getExampleRecipes(const std::vector<std::string>& reqs) const {
+  std::vector<std::string> result;
+  for (int i=0; i<(int)reqs.size(); i++) {
+    if (recipes.find(reqs[i])!=recipes.end()) {
+      result.push_back(recipes.find(reqs[i])->second.code);
+    }
+  }
+  return result;
+}
 

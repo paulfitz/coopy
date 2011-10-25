@@ -97,10 +97,10 @@ Show the difference between two tables/databases/spreadsheets.
 \section ssdiff_examples Examples
 You can generate test file(s) for the examples that follow:
 \verbatim
-ssdiff --example numbers.csv
-ssdiff --example numbers.sqlite
-ssdiff --example numbers_buggy.csv
-ssdiff --example numbers_buggy.sqlite
+ssdiff --test-file numbers.csv
+ssdiff --test-file numbers.sqlite
+ssdiff --test-file numbers_buggy.csv
+ssdiff --test-file numbers_buggy.sqlite
 \endverbatim
 
 
@@ -131,6 +131,16 @@ Compare two tables, neglecting row order.
 ssdiff --format sql numbers_buggy.sqlite numbers.sqlite
 \endverbatim
 Compare two databases, with output in SQL format.
+
+
+
+
+
+\subsection ssdiff_examples_4 Example 4
+\verbatim
+ssdiff --format hilite --output review.csv numbers_buggy.csv numbers.csv
+\endverbatim
+Generate tabular diff for eyeballing. If ssdiff is compiled with gnumeric support, and output format is *.xls, color highlighting is added.
 
 
 

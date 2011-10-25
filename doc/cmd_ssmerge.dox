@@ -81,10 +81,10 @@ Merge table/database/spreadsheets. The first file must be a common ancestor of t
 \section ssmerge_examples Examples
 You can generate test file(s) for the examples that follow:
 \verbatim
-ssmerge --example numbers.csv
-ssmerge --example numbers_buggy.csv
-ssmerge --example numbers_buggy_add.csv
-ssmerge --example numbers_conflict.csv
+ssmerge --test-file numbers.csv
+ssmerge --test-file numbers_buggy.csv
+ssmerge --test-file numbers_buggy_add.csv
+ssmerge --test-file numbers_conflict.csv
 \endverbatim
 
 

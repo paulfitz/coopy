@@ -1,0 +1,142 @@
+/**
+*
+
+\page tutorial_diff Contribute to data collection projects using ssdiff
+
+You can use \ref ssdiff to summarize changes you've made
+between two versions of a table (or tables).  Suppose you
+are a bridge geek, and have been working with this
+table of New York bridges compiled by a friend:
+
+<table>
+  <tr><td>bridge</td><td>designer</td><td>length</td></tr>
+  <tr><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
+  <tr><td>Williamsburg</td><td>D. Duck</td><td>1600</td></tr>
+  <tr><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td>1182</td></tr>
+  <tr><td>Triborough</td><td>O. H. Ammann</td><td>1380,383</td></tr>
+  <tr><td>Bronx Whitestone</td><td>O. H. Ammann</td><td>2300</td></tr>
+  <tr><td>Throgs Neck</td><td>O. H. Ammann</td><td>1800</td></tr>
+  <tr><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
+  <tr><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
+</table>
+
+That table has some problems (D. Duck? Spamington?). So you fix them.
+
+<table>
+  <tr><td>bridge</td><td>designer</td><td>length</td></tr>
+  <tr><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
+  <tr><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
+  <tr><td>Williamsburg</td><td>L. L. Buck</td><td>1600</td></tr>
+  <tr><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td>1182</td></tr>
+  <tr><td>Triborough</td><td>O. H. Ammann</td><td>1380,383</td></tr>
+  <tr><td>Bronx Whitestone</td><td>O. H. Ammann</td><td>2300</td></tr>
+  <tr><td>Throgs Neck</td><td>O. H. Ammann</td><td>1800</td></tr>
+  <tr><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
+</table>
+
+As a public-spirited type, you'd like to offer your fixes to your friend.
+But you don't want to spend much time at it.
+The easiest would be to just send your updated table.
+But that may be ignored, since there's no clear signal of what you've
+changed and whether it is worthwhile.
+So you run a quick diff and instead send this:
+
+<p><table >
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>\@</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>bridge</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>designer</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>length</b></td>
+<td  style=""><b></b></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Brooklyn</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">J. A. Roebling</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1595</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>+++</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>Manhattan</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>G. Lindenthal</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>1470</b></td>
+<td  bgcolor="#7FFF7F" style="background:#7FFF7F;"><b></b></td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Williamsburg</td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>D. Duck-&gt;L. L. Buck</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1600</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Queensborough</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Palmer &amp; Hornbostel</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1182</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Triborough</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td colspan="2"  valign="bottom"  align="left"  style=" font-size:10pt;">1380,383</td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Throgs Neck</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1800</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">George Washington</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">3500</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><b>---</b></td>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">Spamspan</span></td>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">S. Spamington</span></td>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">10000</span></td>
+<td  bgcolor="#FF7F7F" style="background:#FF7F7F;"><span style="text-decoration: line-through;"></span></td>
+</tr>
+</table>
+
+(produced with <tt>ssdiff --format hilite --output patch.xls FILE1 FILE2</tt>)
+
+Or, if you and your friend are more unix-y, this:
+
+\verbatim
+* |bridge=Brooklyn|
++ |bridge:->Manhattan|designer:->G. Lindenthal|length:->1470|
+= |bridge=Williamsburg|designer=D. Duck->L. L. Buck|
+- |bridge=Spamspan|
+\endverbatim
+
+(produced with <tt>ssdiff FILE1 FILE2</tt>)
+
+Or, if you and your friend are more database-y, this:
+\verbatim
+INSERT INTO bridges (bridge, designer, length) VALUES ('Manhattan', 'G. Lindenthal', '1470');
+UPDATE bridges SET designer='L. L. Buck' WHERE bridge='Williamsburg' AND designer='D. Duck' AND length='1600';
+DELETE FROM bridges WHERE bridge='Spamspan' AND designer='S. Spamington' AND length='10000';
+\endverbatim
+(produced with <tt>ssdiff --format sql --default-table bridges FILE1 FILE2</tt>)
+
+Now your friend can quickly see what changes you made, and
+update her/his own table either manually or using \ref sspatch.
+
+*
+*/
+

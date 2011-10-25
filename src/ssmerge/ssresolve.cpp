@@ -24,8 +24,14 @@ int main(int argc, char *argv[]) {
     opt.addUsage("ssresolve [options] FILE");
     opt.addDescription("Resolve a file with conflicts from ssmerge.");
     opt.showOptions(OPTION_FOR_RESOLVE);
+    opt.addExample("ssresolve --ours numbers_muddle.csv",
+		   "Resolve conflicts in favor of local/left values.").require("_numbers_muddle.csv");
+    opt.addExample("ssresolve --theirs numbers_muddle.csv",
+		   "Resolve conflicts in favor of remote/right values.").require("_numbers_muddle.csv");
+    opt.addExample("ssresolve --neither numbers_muddle.csv",
+		   "Resolve conflicts in favor of ancestral values.").require("_numbers_muddle.csv");
     opt.endHelp();
-    return 1;
+    return help?0:1;
   }
 
   Diff diff;

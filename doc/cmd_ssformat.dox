@@ -15,6 +15,7 @@ Reformat tables/databases/spreadsheets.
 \section ssformat_index Index
   \li \ref ssformat_options
   \li \ref ssformat_options_detail
+  \li \ref ssformat_examples
   \li \ref ssformat_patch
   \li \ref ssformat_table
   \li \ref ssformat_version
@@ -43,6 +44,44 @@ Reformat tables/databases/spreadsheets.
 
 \anchor ssformat_main_table <b>--table=TABLE</b> <br />operate on a single named table of a workbook/database
 
+
+
+
+\section ssformat_examples Examples
+You can generate test file(s) for the examples that follow:
+\verbatim
+ssformat --test-file numbers.csv
+ssformat --test-file numbers.sqlite
+\endverbatim
+
+
+
+
+\subsection ssformat_examples_1 Example 1
+\verbatim
+ssformat numbers.csv numbers_converted.sqlite
+\endverbatim
+Convert CSV format table to an Sqlite database table.
+
+
+
+
+
+\subsection ssformat_examples_2 Example 2
+\verbatim
+ssformat numbers.sqlite numbers_converted.csv
+\endverbatim
+Convert Sqlite database table to a CSV format table.
+
+
+
+
+
+\subsection ssformat_examples_3 Example 3
+\verbatim
+ssformat numbers.sqlite -
+\endverbatim
+Display contents of an Sqlite database table.
 
 
 

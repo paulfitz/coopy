@@ -1,22 +1,26 @@
 
-file(GLOB paradox ${CMAKE_SOURCE_DIR}/doc/*.paradox)
-set(PARADOXES)
-foreach(f ${paradox})
-  get_filename_component(pbase ${f} NAME_WE)
-  message(STATUS "${f} ${pbase}")
-  set(ODIR ${CMAKE_BINARY_DIR}/dox)
-  set(ONAME ${pbase}.dox)
-  ADD_CUSTOM_COMMAND(OUTPUT ${ODIR}/${ONAME}
-    COMMAND mkdir -p ${ODIR}
-    COMMAND ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh ${f} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} > ${ODIR}/${ONAME}
-    MAIN_DEPENDENCY ${f}
-    DEPENDS ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh csv2html ssdiff
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    )
-  set(PARADOXES ${PARADOXES} ${ODIR}/${ONAME})
-endforeach()
+option(DOXYGEN_TRICKS "Process *.paradox files for documentation" FALSE)
 
-
+if (DOXYGEN_TRICKS)
+  file(GLOB paradox ${CMAKE_SOURCE_DIR}/doc/*.paradox)
+  set(PARADOXES)
+  foreach(f ${paradox})
+    get_filename_component(pbase ${f} NAME_WE)
+    message(STATUS "${f} ${pbase}")
+    set(ODIR ${CMAKE_SOURCE_DIR}/doc)
+    # set(ODIR ${CMAKE_BINARY_DIR}/dox)
+    set(ONAME ${pbase}.dox)
+    ADD_CUSTOM_COMMAND(OUTPUT ${ODIR}/${ONAME}
+      COMMAND mkdir -p ${ODIR}
+      COMMAND ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh ${f} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} > ${ODIR}/${ONAME}
+      MAIN_DEPENDENCY ${f}
+      DEPENDS ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh csv2html ssdiff
+      ssresolve ssrediff ssformat sspatch ssmerge
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      )
+    set(PARADOXES ${PARADOXES} ${ODIR}/${ONAME})
+  endforeach()
+endif ()
 
 find_program(DOXYGEN_EXE NAMES doxygen)
 mark_as_advanced(DOXYGEN_EXE)

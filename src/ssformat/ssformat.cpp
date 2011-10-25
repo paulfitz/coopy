@@ -43,26 +43,19 @@ int main(int argc, char *argv[]) {
   }
 
   if (core.size()<1||help) {
-    /*
-    printf("Call with input file and desired output file. Examples:\n");
-    printf("  ssformat input.csv output.sqlite\n");
-    printf("  ssformat input.sqlite output.csvs\n");
-    printf("  ssformat dbi:mysql:database_name:host=localhost:username=root output.sqlite\n");
-    printf("  ssformat input.sqlite\n");
-    printf("Subsets of data can be extracted:\n");
-    printf("  ssformat --table people input.sqlite people.csv # extract single table\n");
-    printf("  ssformat --header people.csv # show just the header line, if one is detected\n");
-    printf("  ssformat --index people.csv  # show just the key columns, if detected\n");
-    printf("If the output file is omitted, it is set to standard output\n");
-    */
-
     opt.beginHelp();
     opt.addUsage("ssformat [options] FILE");
     opt.addUsage("ssformat [options] FILE1 FILE2");
     opt.addDescription("Reformat tables/databases/spreadsheets.");
     opt.showOptions(OPTION_FOR_FORMAT);
+    opt.addExample("ssformat numbers.csv numbers_converted.sqlite",
+		   "Convert CSV format table to an Sqlite database table.").require("numbers.csv");
+    opt.addExample("ssformat numbers.sqlite numbers_converted.csv",
+		   "Convert Sqlite database table to a CSV format table.").require("numbers.sqlite");
+    opt.addExample("ssformat numbers.sqlite -",
+		   "Display contents of an Sqlite database table.").require("numbers.sqlite");
     opt.endHelp();
-    return 1;
+    return help?0:1;
   }
 
   PolyBook src;

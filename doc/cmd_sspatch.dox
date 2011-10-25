@@ -54,10 +54,10 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
 \section sspatch_examples Examples
 You can generate test file(s) for the examples that follow:
 \verbatim
-sspatch --example numbers.csv
-sspatch --example numbers_buggy.csv
-sspatch --example numbers_buggy.sqlite
-sspatch --example numbers_patch.tdiff
+sspatch --test-file _numbers_patch.tdiff
+sspatch --test-file numbers.csv
+sspatch --test-file numbers_buggy.csv
+sspatch --test-file numbers_buggy.sqlite
 \endverbatim
 
 
