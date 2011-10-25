@@ -24,6 +24,7 @@ Reformat tables/databases/spreadsheets.
 \section ssformat_options Option summary
  \li \ref ssformat_main_default-table "--default-table=TABLE"
  \li \ref ssformat_main_header "--header"
+ \li \ref ssformat_main_help "--help"
  \li \ref ssformat_main_index "--index"
  \li \ref ssformat_main_input-formats "--input-formats"
  \li \ref ssformat_main_table "--table=TABLE"
@@ -34,6 +35,9 @@ Reformat tables/databases/spreadsheets.
 
 
 \anchor ssformat_main_header <b>--header</b> <br />extract column names only
+
+
+\anchor ssformat_main_help <b>--help</b> <br />show how to use this program
 
 
 \anchor ssformat_main_index <b>--index</b> <br />extract content of key columns only

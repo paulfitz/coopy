@@ -24,9 +24,10 @@ enum {
   OPTION_FOR_FORMAT = 8,
   OPTION_FOR_REDIFF = 16,
   OPTION_FOR_RESOLVE = 32,
+  OPTION_FOR_COOPY = 64,
   OPTION_FOR_COMPARE = OPTION_FOR_DIFF|OPTION_FOR_MERGE,
-  OPTION_FOR_ALL = 63,
-  OPTION_PATCH_FORMAT = 64,
+  OPTION_FOR_ALL = 127,
+  OPTION_PATCH_FORMAT = 128,
 };
 
 class coopy::app::Option {
@@ -72,6 +73,10 @@ public:
   bool checkBool(const char *name, bool fallback=false) const { 
     if (option_bool.find(name)==option_bool.end()) return fallback;
     return option_bool.find(name)->second; 
+  }
+
+  void setBool(const char *name, bool val) {
+    option_bool[name] = val;
   }
 
   std::string checkString(const char *name, const char *fallback="") const { 

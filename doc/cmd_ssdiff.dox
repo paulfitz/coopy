@@ -27,6 +27,7 @@ Show the difference between two tables/databases/spreadsheets.
  \li \ref ssdiff_main_fixed-columns "--fixed-columns"
  \li \ref ssdiff_main_format "--format=FORMAT"
  \li \ref ssdiff_main_head-trimmed "--head-trimmed"
+ \li \ref ssdiff_main_help "--help"
  \li \ref ssdiff_main_id "--id=COLUMN"
  \li \ref ssdiff_main_input-formats "--input-formats"
  \li \ref ssdiff_main_named "--named"
@@ -57,6 +58,9 @@ Show the difference between two tables/databases/spreadsheets.
 
 
 \anchor ssdiff_main_head-trimmed <b>--head-trimmed</b> <br />ignore rows removed at the beginning of a table (such as a log file)
+
+
+\anchor ssdiff_main_help <b>--help</b> <br />show how to use this program
 
 
 \anchor ssdiff_main_id <b>--id=COLUMN</b> <br />set primary key (repeat option for multi-column key)

@@ -15,7 +15,7 @@ if (DOXYGEN_TRICKS)
       COMMAND ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh ${f} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} > ${ODIR}/${ONAME}
       MAIN_DEPENDENCY ${f}
       DEPENDS ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh csv2html ssdiff
-      ssresolve ssrediff ssformat sspatch ssmerge
+      ssresolve ssrediff ssformat sspatch ssmerge coopy
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       )
     set(PARADOXES ${PARADOXES} ${ODIR}/${ONAME})

@@ -1,0 +1,69 @@
+/**
+ *
+
+@page tutorial_coopy coopy under the hood
+
+The <b>coopy</b> program is a graphical interface for "pulling"
+new or updated repositories onto one's computer, and for "pushing"
+modified repositories out to a server.
+
+The program deliberately eliminates a lot of options and alternatives
+to keep things simple.  Advanced users may wish to migrate to
+the \ref ssfossil command-line tool.  It is fine to use both on the
+same repository.
+
+\section coopy_repository What is a repository?
+
+A repository is a collection of files.  For <b>coopy</b>, collections
+of files are managed by \ref ssfossil "fossil", a distributed
+version control system.  What does this mean?
+
+\li A revision history is kept for all files in the collection.
+\li The repository can be "cloned" on another computer or another
+location, in such a way that changes to the repository can be
+passed on easily.
+\li Clones of the repository can be changed by different people,
+and then have those changes merged intelligently.
+
+\section coopy_find_repository Finding a repository
+
+You can find or create a fossil repository online.  Here are known
+services for doing this:
+\li <a href="http://share.find.coop">share.find.coop</a> (the creators of Coopy)
+\li <a href="http://www.chiselapp.com">chiselapp.com</a>
+You can also create a new repository offline using
+the fossil or \ref ssfossil program.
+
+\section coopy_get_repository Cloning a repository
+
+To clone a repository, run coopy, then click on the "PULL" button.
+Select a new, empty directory.  You will then be prompted for a 
+link to pull from.  You can get such links from the services
+in \ref coopy_find_repository.  If all goes well, the empty
+directory will be filled with files from the repository,
+and a window will open to let you browse those files.
+
+\section coopy_change_repository Making changes to a repository
+
+Files in a repository may be freely modified on your computer.
+When you want your modifications to be written to the
+original location of the repository, click on the "PUSH" button.
+
+\section coopy_files What are all these funny files?
+
+There are some special files that fossil uses to store information
+about a repository.  They are:
+\li _FOSSIL_: this file identifies a directory as a fossil repository.
+\li manifest: this is a list of all managed files in the repository.
+\li manifest.uuid: this is a unique identifier.
+In addition, coopy will place this file in the same directory:
+\li repository.coopy: this is a database containing information about
+the repository.  In fossil terms, this is the "real" repository, and
+the rest is just a "view" or "source tree".  So as not to confuse
+people who have not used a version control system before, the coopy
+program does not emphasize this distinction.  The fossil or \ref ssfossil
+program can be used to create multiple views of the same fossil
+repository.
+
+ *
+ */

@@ -23,6 +23,7 @@ Resolve a file with conflicts from ssmerge.
 \section ssresolve_options Option summary
  \li \ref ssresolve_main_default-table "--default-table=TABLE"
  \li \ref ssresolve_main_dry-run "--dry-run"
+ \li \ref ssresolve_main_help "--help"
  \li \ref ssresolve_main_neither "--neither"
  \li \ref ssresolve_main_ours "--ours"
  \li \ref ssresolve_main_theirs "--theirs"
@@ -33,6 +34,9 @@ Resolve a file with conflicts from ssmerge.
 
 
 \anchor ssresolve_main_dry-run <b>--dry-run</b> <br />make no changes, just describe what would happen
+
+
+\anchor ssresolve_main_help <b>--help</b> <br />show how to use this program
 
 
 \anchor ssresolve_main_neither <b>--neither</b> <br />in case of conflict use cell value from common ancestor

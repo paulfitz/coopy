@@ -239,8 +239,14 @@ void OptionRenderDoxygen::render(const Options& opt) {
   if (examples.size()>0) {
     printf("  \\li \\ref %s_examples\n", opt.getName().c_str());
   }
-  printf("  \\li \\ref %s_patch\n", opt.getName().c_str());
-  printf("  \\li \\ref %s_table\n", opt.getName().c_str());
+  bool show_patch = opt.checkBool("show-patch",true);
+  bool show_input_format = opt.checkBool("show-input-format",true);
+  if (show_patch) {
+    printf("  \\li \\ref %s_patch\n", opt.getName().c_str());
+  }
+  if (show_input_format) {
+    printf("  \\li \\ref %s_table\n", opt.getName().c_str());
+  }
   printf("  \\li \\ref %s_version\n", opt.getName().c_str());
 
   printf("\n\n\\section %s_options Option summary\n", opt.getName().c_str());
@@ -277,52 +283,56 @@ void OptionRenderDoxygen::render(const Options& opt) {
     printf("%s\n\n",eg.desc.c_str());
   }
 
-  printf("\n\n\\section %s_patch Patch formats\n", opt.getName().c_str());
-  showOptions(opt,OPTION_PATCH_FORMAT,anchor,true,true);
+  if (show_patch) {
+    printf("\n\n\\section %s_patch Patch formats\n", opt.getName().c_str());
+    showOptions(opt,OPTION_PATCH_FORMAT,anchor,true,true);
+  }
 
-  printf("\n\n\\section %s_table Database/spreadsheet file formats\n", opt.getName().c_str());
-  vector<FormatDesc> descs = PolyBook::getFormatList();
-  for (int i=0; i<(int)descs.size(); i++) {
-    const FormatDesc& fd = descs[i];
-    printf("%s<br />\n", fd.name.c_str());
-    for (int i=0; i<(int)fd.exts.size(); i++) {
-      printf("  \\li<b>%s</b>: %s\n",
-	     fd.exts[i].ext.c_str(),
-	     fd.exts[i].notes.c_str());
-    }
-    const vector<FormatDesc::Option>& opts = fd.opts;
-    if (opts.size()>0) {
-      string result;
-      printf("  \\li<b>.json</b>: {<br />\n");
-      for (int i=0; i<(int)opts.size(); i++) {
-	const FormatDesc::Option& o = opts[i];
-	result += "      \"";
-	result += o.tag;
-	result += "\": ";
-	PolyValue v = o.val;
-	if (o.val.isString()) {
-	  result += "\"";
-	}
-	result += o.val.asString();
-	if (o.val.isString()) {
-	  result += "\"";
-	}
-	if (i<(int)opts.size()-1) {
-	  result += ",";
-	}
-	result += "<br />\n";
+  if (show_input_format) {
+    printf("\n\n\\section %s_table Database/spreadsheet file formats\n", opt.getName().c_str());
+    vector<FormatDesc> descs = PolyBook::getFormatList();
+    for (int i=0; i<(int)descs.size(); i++) {
+      const FormatDesc& fd = descs[i];
+      printf("%s<br />\n", fd.name.c_str());
+      for (int i=0; i<(int)fd.exts.size(); i++) {
+	printf("  \\li<b>%s</b>: %s\n",
+	       fd.exts[i].ext.c_str(),
+	       fd.exts[i].notes.c_str());
       }
-      printf("%s}\n", result.c_str());
-    }
-    const vector<FormatDesc::Dbi>& dbis = fd.dbis;
-    for (int i=0; i<(int)dbis.size(); i++) {
-      printf("  \\li <b>%s</b>", dbis[i].ex.c_str());
-      if (dbis[i].notes!="") {
-	printf(" (%s) ", dbis[i].notes.c_str());
+      const vector<FormatDesc::Option>& opts = fd.opts;
+      if (opts.size()>0) {
+	string result;
+	printf("  \\li<b>.json</b>: {<br />\n");
+	for (int i=0; i<(int)opts.size(); i++) {
+	  const FormatDesc::Option& o = opts[i];
+	  result += "      \"";
+	  result += o.tag;
+	  result += "\": ";
+	  PolyValue v = o.val;
+	  if (o.val.isString()) {
+	    result += "\"";
+	  }
+	  result += o.val.asString();
+	  if (o.val.isString()) {
+	    result += "\"";
+	  }
+	  if (i<(int)opts.size()-1) {
+	    result += ",";
+	  }
+	  result += "<br />\n";
+	}
+	printf("%s}\n", result.c_str());
       }
-      printf("\n");
+      const vector<FormatDesc::Dbi>& dbis = fd.dbis;
+      for (int i=0; i<(int)dbis.size(); i++) {
+	printf("  \\li <b>%s</b>", dbis[i].ex.c_str());
+	if (dbis[i].notes!="") {
+	  printf(" (%s) ", dbis[i].notes.c_str());
+	}
+	printf("\n");
+      }
+      printf("\n\n");
     }
-    printf("\n\n");
   }
 
   printf("\n\n\\section %s_version Version\n", opt.getName().c_str());
@@ -359,6 +369,8 @@ void Options::add(int cov, const char *name, const char *desc) {
 
 
 Options::Options(const char *name) : name(name) {
+  addAll("help",
+	 "show how to use this program");
   addTransform("output=OUTPUTFILE",
 	       "direct output to this file (default is standard output)");
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
@@ -383,8 +395,9 @@ Options::Options(const char *name) : name(name) {
 	     "ignore rows removed at the beginning of a table (such as a log file)");
   addCompare("tail-trimmed",
 	     "ignore rows removed at the end of a table (such as a log file)");
-  addAll("default-table=TABLE",
-	 "name to use when a table name is needed and not supplied");
+  add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_FORMAT|OPTION_FOR_PATCH|OPTION_FOR_RESOLVE|OPTION_FOR_REDIFF,
+      "default-table=TABLE",
+      "name to use when a table name is needed and not supplied");
   add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_FORMAT,
       "table=TABLE",
       "operate on a single named table of a workbook/database");
@@ -400,39 +413,71 @@ Options::Options(const char *name) : name(name) {
 
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
       "omit-format-name",
-      "omit any version-dependent header from diff"),
+      "omit any version-dependent header from diff");
 
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
       "omit-sheet-name",
-      "omit any sheet/table name from diff"),
+      "omit any sheet/table name from diff");
 
   add(OPTION_FOR_PATCH,
       "cmd=CMD",
-      "specify a patch (in tdiff format) with a string rather than as a file, useful to make a quick change to a table that does not merit a full patch file"),
+      "specify a patch (in tdiff format) with a string rather than as a file, useful to make a quick change to a table that does not merit a full patch file");
 
   add(OPTION_FOR_FORMAT,
       "header",
-      "extract column names only"),
+      "extract column names only");
 
   add(OPTION_FOR_FORMAT,
       "index",
-      "extract content of key columns only"),
+      "extract content of key columns only");
 
   add(OPTION_FOR_RESOLVE,
       "theirs",
-      "in case of conflict use cell value that wasn't the local choice"),
+      "in case of conflict use cell value that wasn't the local choice");
 
   add(OPTION_FOR_RESOLVE,
       "ours",
-      "in case of conflict use cell value that was the local choice"),
+      "in case of conflict use cell value that was the local choice");
 
   add(OPTION_FOR_RESOLVE,
       "neither",
-      "in case of conflict use cell value from common ancestor"),
+      "in case of conflict use cell value from common ancestor");
 
   add(OPTION_FOR_RESOLVE,
       "dry-run",
-      "make no changes, just describe what would happen"),
+      "make no changes, just describe what would happen");
+
+  add(OPTION_FOR_COOPY,
+      "gui",
+      "force GUI to be shown");
+
+  add(OPTION_FOR_COOPY,
+      "silent",
+      "keep output to a minimum");
+
+  add(OPTION_FOR_COOPY,
+      "pull",
+      "pull in data from remote repository to local clone");
+
+  add(OPTION_FOR_COOPY,
+      "push",
+      "push out data to remote repository from local clone");
+
+  add(OPTION_FOR_COOPY,
+      "key=KEY",
+      "use specified key when adding or exporting a spreadsheet/database");
+
+  add(OPTION_FOR_COOPY,
+      "add=FILE",
+      "attach the given spreadsheet/database to the repository");
+
+  add(OPTION_FOR_COOPY,
+      "export=FILE",
+      "export the given spreadsheet/database from the repository");
+
+  add(OPTION_FOR_COOPY,
+      "message=MESSAGE",
+      "use the specified message as a log entry");
 
   add(OPTION_PATCH_FORMAT,
       "*tdiff",

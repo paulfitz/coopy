@@ -3,67 +3,98 @@
 
 @page coopy coopy
 
-The <b>coopy</b> program is a graphical interface for "pulling"
-new or updated repositories onto one's computer, and for "pushing"
-modified repositories out to a server.
+Manage a repository of spreadsheets and databases. Usually run without options, for a graphical interface.
 
-The program deliberately eliminates a lot of options and alternatives
-to keep things simple.  Advanced users may wish to migrate to
-the \ref ssfossil command-line tool.  It is fine to use both on the
-same repository.
 
-\section coopy_repository What is a repository?
 
-A repository is a collection of files.  For <b>coopy</b>, collections
-of files are managed by \ref ssfossil "fossil", a distributed
-version control system.  What does this mean?
+\section coopy_usage Usage
+ \li coopy [options]
+ \li coopy [options] DIRECTORY
 
-\li A revision history is kept for all files in the collection.
-\li The repository can be "cloned" on another computer or another
-location, in such a way that changes to the repository can be
-passed on easily.
-\li Clones of the repository can be changed by different people,
-and then have those changes merged intelligently.
 
-\section coopy_find_repository Finding a repository
+\section coopy_index Index
+  \li \ref coopy_options
+  \li \ref coopy_options_detail
+  \li \ref coopy_examples
+  \li \ref coopy_version
 
-You can find or create a fossil repository online.  Here are known
-services for doing this:
-\li <a href="http://share.find.coop">share.find.coop</a> (the creators of Coopy)
-\li <a href="http://www.chiselapp.com">chiselapp.com</a>
-You can also create a new repository offline using
-the fossil or \ref ssfossil program.
 
-\section coopy_get_repository Cloning a repository
+\section coopy_options Option summary
+ \li \ref coopy_main_add "--add=FILE"
+ \li \ref coopy_main_export "--export=FILE"
+ \li \ref coopy_main_gui "--gui"
+ \li \ref coopy_main_help "--help"
+ \li \ref coopy_main_key "--key=KEY"
+ \li \ref coopy_main_message "--message=MESSAGE"
+ \li \ref coopy_main_pull "--pull"
+ \li \ref coopy_main_push "--push"
+ \li \ref coopy_main_silent "--silent"
 
-To clone a repository, run coopy, then click on the "PULL" button.
-Select a new, empty directory.  You will then be prompted for a 
-link to pull from.  You can get such links from the services
-in \ref coopy_find_repository.  If all goes well, the empty
-directory will be filled with files from the repository,
-and a window will open to let you browse those files.
 
-\section coopy_change_repository Making changes to a repository
+\section coopy_options_detail Option details
+\anchor coopy_main_add <b>--add=FILE</b> <br />attach the given spreadsheet/database to the repository
 
-Files in a repository may be freely modified on your computer.
-When you want your modifications to be written to the
-original location of the repository, click on the "PUSH" button.
 
-\section coopy_files What are all these funny files?
+\anchor coopy_main_export <b>--export=FILE</b> <br />export the given spreadsheet/database from the repository
 
-There are some special files that fossil uses to store information
-about a repository.  They are:
-\li _FOSSIL_: this file identifies a directory as a fossil repository.
-\li manifest: this is a list of all managed files in the repository.
-\li manifest.uuid: this is a unique identifier.
-In addition, coopy will place this file in the same directory:
-\li repository.coopy: this is a database containing information about
-the repository.  In fossil terms, this is the "real" repository, and
-the rest is just a "view" or "source tree".  So as not to confuse
-people who have not used a version control system before, the coopy
-program does not emphasize this distinction.  The fossil or \ref ssfossil
-program can be used to create multiple views of the same fossil
-repository.
+
+\anchor coopy_main_gui <b>--gui</b> <br />force GUI to be shown
+
+
+\anchor coopy_main_help <b>--help</b> <br />show how to use this program
+
+
+\anchor coopy_main_key <b>--key=KEY</b> <br />use specified key when adding or exporting a spreadsheet/database
+
+
+\anchor coopy_main_message <b>--message=MESSAGE</b> <br />use the specified message as a log entry
+
+
+\anchor coopy_main_pull <b>--pull</b> <br />pull in data from remote repository to local clone
+
+
+\anchor coopy_main_push <b>--push</b> <br />push out data to remote repository from local clone
+
+
+\anchor coopy_main_silent <b>--silent</b> <br />keep output to a minimum
+
+
+
+
+\section coopy_examples Examples
+
+
+\subsection coopy_examples_1 Example 1
+\verbatim
+coopy
+\endverbatim
+run the coopy GUI from the current directory. All the actions in these examples can be achieved from the GUI.
+
+
+
+
+
+\subsection coopy_examples_2 Example 2
+\verbatim
+coopy --key=people --add=people.xls
+\endverbatim
+add people.xls to the repository, with key 'people'.
+
+
+
+
+
+\subsection coopy_examples_3 Example 3
+\verbatim
+coopy --key=orgs --export=organizations.sqlite
+\endverbatim
+export organizations.sqlite from the repository, with key 'orgs'.
+
+
+
+\section coopy_version Version
+coopy version 0.5.7
+
 
  *
  */

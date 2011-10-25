@@ -41,6 +41,7 @@
 #include <iostream>
 
 #include <coopy/Dbg.h>
+#include <coopy/Options.h>
 
 static bool __coopy_verbose = false;
 static bool verb() { return __coopy_verbose; }
@@ -92,9 +93,17 @@ class CoopyApp: public wxApp {
 public:
     CoopyApp() {
         silent = false;
+        force_happy = false;
     }
 
     virtual bool OnInit();
+
+    virtual int OnRun() {
+        if (!force_happy) {
+            return wxApp::OnRun();
+        }
+        return 0;
+    }
 
     virtual void OnInitCmdLine(wxCmdLineParser& parser);
     virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
@@ -107,6 +116,7 @@ public:
     static bool fossil_autoend;
     static bool silent;
     static int fossil_result;
+    static bool force_happy;
 };
 
 string CoopyApp::fossil_object;
@@ -116,11 +126,13 @@ string CoopyApp::fossil_key;
 string CoopyApp::fossil_repo;
 bool CoopyApp::fossil_autoend = false;
 bool CoopyApp::silent = false;
+bool CoopyApp::force_happy = false;
 int CoopyApp::fossil_result = 0;
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
-    { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters"),
-      wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+    { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters") },
+    { wxCMD_LINE_SWITCH, wxT("H"), wxT("help-dox"), wxT("prepare doxygen help") },
+    //wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
     { wxCMD_LINE_SWITCH, wxT("g"), wxT("gui"), wxT("force show GUI") },
     { wxCMD_LINE_SWITCH, wxT("v"), wxT("verbose"), wxT("show debug information") },
     { wxCMD_LINE_SWITCH, wxT("l"), wxT("silent"), wxT("keep it quiet") },
@@ -152,6 +164,31 @@ void CoopyApp::OnInitCmdLine(wxCmdLineParser& parser) {
 }
  
 bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
+    bool help = parser.Found(wxT("h"));
+    bool help_dox = parser.Found(wxT("H"));
+    if (help||help_dox) {
+        coopy::app::Options opt("coopy");
+        if (help_dox) {
+            opt.setBool("help-doxygen",true);
+        }
+        opt.setBool("show-patch",false);
+        opt.setBool("show-input-format",false);
+        opt.beginHelp();
+        opt.addUsage("coopy [options]");
+        opt.addUsage("coopy [options] DIRECTORY");
+        opt.addDescription("Manage a repository of spreadsheets and databases. Usually run without options, for a graphical interface.");
+        opt.showOptions(OPTION_FOR_COOPY);
+        opt.addExample("coopy",
+                       "run the coopy GUI from the current directory. All the actions in these examples can be achieved from the GUI.");
+        opt.addExample("coopy --key=people --add=people.xls",
+                       "add people.xls to the repository, with key 'people'.");
+        opt.addExample("coopy --key=orgs --export=organizations.sqlite",
+                       "export organizations.sqlite from the repository, with key 'orgs'.");
+        opt.endHelp();
+        force_happy = true;
+        return true;
+    }
+
     silent = parser.Found(wxT("l"));
 
     //wxString location;

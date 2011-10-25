@@ -24,6 +24,7 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
 \section sspatch_options Option summary
  \li \ref sspatch_main_cmd "--cmd=CMD"
  \li \ref sspatch_main_default-table "--default-table=TABLE"
+ \li \ref sspatch_main_help "--help"
  \li \ref sspatch_main_inplace "--inplace"
  \li \ref sspatch_main_input-formats "--input-formats"
  \li \ref sspatch_main_output "--output=OUTPUTFILE"
@@ -35,6 +36,9 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
 
 
 \anchor sspatch_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
+
+
+\anchor sspatch_main_help <b>--help</b> <br />show how to use this program
 
 
 \anchor sspatch_main_inplace <b>--inplace</b> <br />if modifications are made, make them in place without a copy

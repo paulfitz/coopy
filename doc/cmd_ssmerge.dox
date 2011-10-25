@@ -25,6 +25,7 @@ Merge table/database/spreadsheets. The first file must be a common ancestor of t
  \li \ref ssmerge_main_default-table "--default-table=TABLE"
  \li \ref ssmerge_main_fixed-columns "--fixed-columns"
  \li \ref ssmerge_main_head-trimmed "--head-trimmed"
+ \li \ref ssmerge_main_help "--help"
  \li \ref ssmerge_main_id "--id=COLUMN"
  \li \ref ssmerge_main_inplace "--inplace"
  \li \ref ssmerge_main_input-formats "--input-formats"
@@ -47,6 +48,9 @@ Merge table/database/spreadsheets. The first file must be a common ancestor of t
 
 
 \anchor ssmerge_main_head-trimmed <b>--head-trimmed</b> <br />ignore rows removed at the beginning of a table (such as a log file)
+
+
+\anchor ssmerge_main_help <b>--help</b> <br />show how to use this program
 
 
 \anchor ssmerge_main_id <b>--id=COLUMN</b> <br />set primary key (repeat option for multi-column key)

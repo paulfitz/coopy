@@ -30,6 +30,7 @@ The COOPY project contains programs and libraries to help you:
 \li \ref ssresolve
 \li \ref ssformat
 \li \ref ssrediff
+\li \ref coopy
 
 \if link_examples
 \li \ref diff_example.
@@ -47,7 +48,7 @@ The COOPY project contains programs and libraries to help you:
 \li \ref table_format.
 
 \li \ref ssfossil reference.
-\li \ref coopy graphical interface reference.
+\li \ref tutorial_coopy
 \if link_code
 \li <a href="annotated.html">Classes</a> used in implementation.
 \endif
