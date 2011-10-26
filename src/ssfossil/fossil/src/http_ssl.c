@@ -195,6 +195,7 @@ char *connStr ;
       warning = "WARNING: Certificate doesn't match the "
                 "saved certificate for this host!";
     }
+    /*
     prompt = mprintf("\nUnknown SSL certificate:\n\n%s\n\n%s\n"
                      "Accept certificate [a=always/y/N]? ", desc, warning);
     BIO_free(mem);
@@ -211,6 +212,9 @@ char *connStr ;
       ssl_save_certificate(cert);
     }
     blob_reset(&ans);
+    */
+
+    BIO_free(mem);
   }
   X509_free(cert);
   return 0;
