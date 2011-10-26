@@ -298,6 +298,8 @@ private:
     string next;
     bool logging;
     bool showing;
+    bool writeAuthorizationFailed;
+    wxString autoSyncTip;
     list<string> results;
     list<string> fileCache;
     list<string> updateCache;
@@ -423,6 +425,18 @@ public:
         log_box->AppendText(conv(string(buf)));
         log_box->AppendText(wxT("\n"));
         */
+
+        if (str.Contains(wxT("Autosync: "))) {
+            autoSyncTip = str.Mid(wxString(wxT("Autosync: ")).Len());
+            autoSyncTip.Trim(false);
+            autoSyncTip.Trim(true);
+        }
+        if (str.Contains(wxT("not authorized to write"))) {
+            writeAuthorizationFailed = true;
+        }
+        if (str.Contains(wxT("login failed"))) {
+            writeAuthorizationFailed = true;
+        }
         
         if (showing||force) {
             bool ok = true;
@@ -474,7 +488,7 @@ public:
             addLog(wxT("TROUBLE in CoopyTown..."));
             addLog(wxT("* Is repository link valid?"));
             fail = true;
-            if (next!="revertable") {
+            if (next!="revertable"&&next!="retryable") {
                 background = false;
                 CoopyApp::fossil_result = 1;
                 CheckEnd();
@@ -506,17 +520,20 @@ public:
         } else if (n=="push") {
             wxCommandEvent ev;
             OnPush(ev);
-        } else if (n=="revertable") {
+        } else if (n=="revertable"||n=="retryable") {
             if (fail) {
-                addLog(wxT("Reverting..."));
-                int argc = 2;
-                char *argv[] = {
-                    fossil(),
-                    (char*)"revert",
-                    NULL };
-                ssfossil(argc,argv,true);
-                updatePivots(false);
-                CheckEnd();
+                if (n=="revertable") {
+                    addLog(wxT("Reverting..."));
+                    int argc = 2;
+                    char *argv[] = {
+                        fossil(),
+                        (char*)"revert",
+                        NULL };
+                    ssfossil(argc,argv,true);
+                    updatePivots(false);
+                    CheckEnd();
+                }
+                repush();
             } else {
                 updatePivots(true);
                 addLog(wxT("Online repository updated successfully."));
@@ -670,6 +687,8 @@ public:
 
     bool addFile();
 
+    void repush();
+
 enum
     {
         TEXT_Main = wxID_HIGHEST + 1,
@@ -802,12 +821,14 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
     }
     if (op1 == wxT("update")) {
         addLog(wxT(" \n \nLooking for changes online..."));
+    } else if (op1 == wxT("push")) {
+        addLog(wxT(" \n \nPushing changes from your computer..."));
     } else if (op1 == wxT("changes")) {
         addLog(wxT(" \n \nChecking for changes on this computer..."));
     } else if (op1 == wxT("commit")) {
         addLog(wxT(" \n \nSending changes from your computer..."));
     }
-    showing = (op1 == wxT("update")) || (op1 == wxT("commit"));
+    showing = (op1 == wxT("update")) || (op1 == wxT("commit")) || (op1 == wxT("push"));
     for (int i=0; i<argc; i++) {
         //printf("[%s] ", conv(arr[i]).c_str());
         cmd[i] = (wxChar*)((const wxChar *)arr[i]);
@@ -1573,6 +1594,55 @@ void CoopyFrame::OnCreate(wxCommandEvent& event) {
 }
 
 
+void CoopyFrame::repush() {
+    if (source=="") {
+        source = conv(autoSyncTip);
+    }
+    printf("source is %s\n", source.c_str());
+    wxURL url = conv(source);
+    wxTextEntryDialog dlg1(NULL, wxT("Username needed to access the repository"), wxT("Enter username"), url.GetUser());
+    wxPasswordEntryDialog dlg2(NULL, wxT("Password needed to access the repository"), wxT("Enter password"), url.GetPassword());
+    if (dlg1.ShowModal()!=wxID_OK) return;
+    if (dlg2.ShowModal()!=wxID_OK) return;
+
+    wxString username = dlg1.GetValue();
+    wxString pword = dlg2.GetValue();
+    wxString protocol = url.GetScheme();
+    if (protocol.IsEmpty()) {
+        protocol = wxT("http");
+    }
+    wxString current = url.BuildURI();
+    int firstAt = current.Find('@');
+    if (firstAt!=wxNOT_FOUND) {
+        current = current.Mid(firstAt+1);
+    }
+    firstAt = current.Find(wxT("://"));
+    if (firstAt!=wxNOT_FOUND) {
+        current = current.Mid(firstAt+3);
+    }
+    current = protocol + wxT("://") + username + wxT(":") + pword + 
+        wxT("@") + current;
+    source = conv(current);
+    printf("Source set to %s\n", source.c_str());
+    
+
+    /*
+        source = string("http://") +
+            FOSSIL_USERNAME + ":" + conv(dlg.GetValue()) + "@" +
+            FOSSIL_ROOT + FOSSIL_REPO;
+        printf("Source set to %s\n", source.c_str());
+    */
+
+    int argc = 3;
+    char *argv[] = {
+        fossil(),
+        (char*)"push",
+        (char*)source.c_str(),
+        NULL };
+    next = "retryable";
+    ssfossil(argc,argv);
+}
+
 void CoopyFrame::OnPush(wxCommandEvent& event) {
     int argc = 3;
     char *argv[] = {
@@ -1584,6 +1654,7 @@ void CoopyFrame::OnPush(wxCommandEvent& event) {
 }
 
 void CoopyFrame::OnCommit(wxCommandEvent& event) {
+    writeAuthorizationFailed = false;
     //printf("Should commit\n");
     //startStream();
     if (havePath()) {
@@ -1675,6 +1746,8 @@ CoopyFrame::CoopyFrame(const wxString& title, const wxPoint& pos, const wxSize& 
     path = "";
     source = "";
     commit_message = "";
+
+    writeAuthorizationFailed = false;
 
     wxMenu *menuFile = new wxMenu;
 
