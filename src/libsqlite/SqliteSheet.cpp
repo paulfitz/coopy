@@ -898,7 +898,7 @@ void SqliteSheet::checkForeignKeys() {
     //printf("FOREIGN %s: %s %s\n", col, ref_table, ref_col);
     for (int i=0; i<(int)col2sql.size(); i++) {
       if (col2sql[i].getName()==col) {
-	col2sql[i].setReference(ref_table,ref_col);
+	col2sql[i].setReference(ref_table,ref_col?ref_col:"");
       }
     }
   }

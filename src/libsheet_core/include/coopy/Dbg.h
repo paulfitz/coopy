@@ -10,6 +10,9 @@ extern bool _csv_verbose;
 void coopy_set_verbose(bool verbose);
 bool coopy_is_verbose();
 
+void coopy_set_strict(bool strict);
+bool coopy_is_strict();
+
 void coopy_set_default_table_name(const char *name);
 const char *coopy_get_default_table_name();
  

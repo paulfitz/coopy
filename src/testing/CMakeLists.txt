@@ -684,6 +684,15 @@ ADD_TEST(patch_with_table_parameter1_compare ${ssdiff}
   patch_with_table_parameter1.csvs
   ${TESTS}/book/contact_dreamer.csvs)
 
+ADD_TEST(format_fossil_repo ${ssformat} 
+  ${TESTS}/fossil/empty_fossil_repo.fossil
+  format_fossil_repo.csvs)
+
+ADD_TEST(format_fossil_repo_strict ${ssformat} 
+  --strict
+  ${TESTS}/fossil/empty_fossil_repo.fossil
+  format_fossil_repo.csvs)
+
 #######################################################################
 #######################################################################
 

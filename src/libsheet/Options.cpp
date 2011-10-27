@@ -661,6 +661,7 @@ int Options::apply(int argc, char *argv[]) {
       {"cmd", 1, 0, 'x'},
 
       {"version", 0, 0, 0},
+      {"strict", 0, 0, 0},
       {"patch-formats", 0, 0, 0},
       {"default-table", 1, 0, 0},
 
@@ -708,6 +709,8 @@ int Options::apply(int argc, char *argv[]) {
 	  option_bool["version"] = true;
 	  printf("%s\n", getVersion().c_str());
 	  exit(0);
+	} else if (k=="strict") {
+	  coopy_set_strict(true);
 	} else if (k=="variant") {
 	  flags.variant = optarg;
 	} else if (k=="resolve") {

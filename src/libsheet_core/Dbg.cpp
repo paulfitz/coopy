@@ -5,6 +5,7 @@
 using namespace std;
 
 bool _csv_verbose = false;
+bool _csv_strict = false;
 
 string coopy_default_table_name = "sheet";
 
@@ -38,6 +39,14 @@ void coopy_set_verbose(bool verbose) {
 
 bool coopy_is_verbose() {
   return _csv_verbose;
+}
+
+void coopy_set_strict(bool strict) {
+  _csv_strict = strict;
+}
+
+bool coopy_is_strict() {
+  return _csv_strict;
 }
 
 void coopy_set_default_table_name(const char *name) {
