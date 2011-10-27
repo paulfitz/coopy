@@ -67,7 +67,8 @@ static void diff_file(
 
     /* Compute and output the differences */
     blob_zero(&out);
-    text_diff(pFile1, &file2, &out, 5, ignoreEolWs);
+    //text_diff(pFile1, &file2, &out, 5, ignoreEolWs);
+    csvs_diff(pFile1, &file2, &out);
     printf("--- %s\n+++ %s\n", zName, zName);
     printf("%s\n", blob_str(&out));
 
