@@ -63,6 +63,30 @@ For now, save the database as an *.xls file, and it will open:
 
 \image html screenshot/coopy_xls.png "The numbers spreadsheet."
 
+\section tutorial_coopy_writing Pushing out
+
+THIS IS MESSY, CLEAN-UP DUE.
+
+Change a number in your *.xls file.  Click "Push out".  You won't have
+permissions to do so, so you'll be prompted for a username/password.
+
+Go to chiselapp.com and set up an account.  Give your username
+on Chisel to
+Coopy when it asks.  Then think of a password, and give it to Coopy
+when it asks.  Coopy will then give you a "project code".  Hang on
+to that code.  On chisel, click "Create Repository".  Fill in
+any repository name you like, and give the password and project code:
+
+\image html screenshot/chisel_repo.png "Chisel."
+
+Now you can advance in Coopy.  Replace the URL with something like:
+
+https://chiselapp.com/user/coopy/repository/test_clone/index
+
+from chisel.  Now, the "Push out" should run to completion.
+
+From then on, Coopy will pull/push to this repository.
+
 \section tutorial_coopy_repository What is a repository?
 
 A repository is a collection of files.  For <b>coopy</b>, collections
