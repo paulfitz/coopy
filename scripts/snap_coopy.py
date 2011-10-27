@@ -14,6 +14,11 @@ import os
 import shutil
 import time
 
+lnk="http://localhost:8080"
+
+# lnk="https://chiselapp.com/user/coopy/repository/coopy_demo/index"
+    
+
 def xdotool(cmd):
     cmd = "xdotool "+cmd
     print cmd
@@ -62,7 +67,7 @@ delay = 2
 def snap(name):
     time.sleep(delay)
     # fname = bin + "/../doc/images/screenshot/coopy_" + name + ".png"
-    fname = /tmp/coopy_snaps/coopy_" + name + ".png"
+    fname = "/tmp/coopy_snaps/coopy_" + name + ".png"
     take_snapshot(fname,"png")
 
 do_over = True
@@ -92,8 +97,6 @@ if do_over:
     app.button('Open').click()
     snap("open")
 
-    lnk="https://chiselapp.com/user/coopy/repository/coopy_demo/index"
-    
     dlg = app.window("Enter repository link",True)
     dlg.child(roleName = 'text').text = lnk
     
