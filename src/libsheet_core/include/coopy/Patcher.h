@@ -221,6 +221,7 @@ protected:
   coopy::store::TextBook *patch_book;
   coopy::store::TextBook *output_book;
   bool conflicted;
+  bool pending;
 public:
   Patcher() {
     ct = 0;
@@ -228,6 +229,7 @@ public:
     patch_book = 0;
     output_book = 0;
     conflicted = false;
+    pending = true;
   }
 
   virtual ~Patcher() {}
@@ -295,10 +297,7 @@ public:
     return false;
   }
 
-  virtual bool setFlags(const CompareFlags& flags) {
-    this->flags = flags;
-    out = flags.out;
-  }
+  virtual bool setFlags(const CompareFlags& flags);
 
   const CompareFlags& getFlags() const {
     return flags;
@@ -346,14 +345,9 @@ public:
     patch_sheet = sheet;
   }
 
-  void attachBook(coopy::store::TextBook& book) {
-    patch_book = &book;
-    attachSheet(book.readSheetByIndex(0));
-  }
+  void attachBook(coopy::store::TextBook& book);
   
-  virtual coopy::store::PolySheet getSheet() {
-    return patch_sheet;
-  }
+  virtual coopy::store::PolySheet getSheet();
 
   coopy::store::TextBook *getBook() {
     return patch_book;

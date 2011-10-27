@@ -87,15 +87,23 @@ int SheetPatcher::matchRow(const std::vector<int>& active_cond,
     dbg_printf("No match for update\n");
     matchRow(active_cond,active_name,cond,width,true);
   }
-  if (show && rbest>=0) {
-    fprintf(stderr,"# No match - closest was:\n");
-    for (int c=0; c<width; c++) {
+  if (show) {
+    fprintf(stderr,"# No match for update");
+    if (sheet.getSchema()) {
+      fprintf(stderr," in %s",sheet.getSchema()->getSheetName().c_str()); 
+    }
+    if (rbest>=0) {
+      fprintf(stderr," - closest was:\n"); 
+      for (int c=0; c<width; c++) {
 	if (active_cond[c]) {
 	  fprintf(stderr,"#   '%s' <-> '%s' %s\n",
 		  sheet.cellSummary(c,rbest).text.c_str(),
 		  cond[c].text.c_str(),
 		  (sheet.cellSummary(c,rbest)!=cond[c])?"FAIL":"OK");
 	}
+      }
+    } else {
+      fprintf(stderr,"\n");
     }
   }
   return -1;

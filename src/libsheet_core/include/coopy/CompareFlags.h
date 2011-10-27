@@ -52,6 +52,7 @@ public:
   bool tail_trimmed;
   FILE *out;
   std::set<std::string> tables;
+  std::vector<std::string> ordered_tables;
   std::vector<std::string> ids;
   std::vector<int> ids_local;
   std::vector<int> ids_remote;

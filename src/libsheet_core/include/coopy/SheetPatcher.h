@@ -134,6 +134,12 @@ public:
     this->config = change;
     return true; 
   }
+
+  virtual bool setFlags(const CompareFlags& flags) {
+    if (chain) chain->setFlags(flags);
+    return Patcher::setFlags(flags);
+  }
+
   virtual bool changeColumn(const OrderChange& change);
   virtual bool changeRow(const RowChange& change);
   virtual bool declareNames(const std::vector<std::string>& names, bool final);

@@ -673,6 +673,17 @@ ADD_ROUND_TRIP_TEST_BI(highlighter_small_file ${TESTS}/bug/highlighter_0005/orig
 ADD_ROUND_TRIP_TEST_BI(highlighter_small_file_hilite ${TESTS}/bug/highlighter_0005/orig.csv ${TESTS}/bug/highlighter_0005/mod.csv color)
 
 
+ADD_TEST(patch_with_table_parameter1 ${sspatch} 
+  --table organizations
+  --cmd "= |id=4|title=*->Dreamer Stealer|"
+  --output patch_with_table_parameter1.csvs
+  ${TESTS}/book/contact_base.csvs)
+
+ADD_TEST(patch_with_table_parameter1_compare ${ssdiff} 
+  --equals
+  patch_with_table_parameter1.csvs
+  ${TESTS}/book/contact_dreamer.csvs)
+
 #######################################################################
 #######################################################################
 

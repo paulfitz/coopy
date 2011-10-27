@@ -115,6 +115,31 @@ bool Patcher::copyFile(const char *src, const char *dest) {
   return true;
 }
 
+bool Patcher::setFlags(const CompareFlags& flags) {
+  this->flags = flags;
+  out = flags.out;
+}
+
+void Patcher::attachBook(coopy::store::TextBook& book) {
+  patch_book = &book;
+  pending  = true;
+}
+
+coopy::store::PolySheet Patcher::getSheet() {
+  if (pending) {
+    pending = false;
+    coopy::store::TextBook *pbook = getBook();
+    if (pbook) {
+      if (flags.tables.size()>0) {
+	attachSheet(pbook->readSheet(flags.ordered_tables[0]));
+      } else {
+	attachSheet(pbook->readSheetByIndex(0));
+      }
+    }
+  }
+  return patch_sheet;
+}
+
 
 void RowChange::show() {
   MergeOutputVerboseDiff diff;

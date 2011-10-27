@@ -14,42 +14,40 @@ bool DataBook::operator==(const DataBook& alt) const {
   DataBook *b2 = (DataBook *)&alt;
   vector<string> names = b1->getNames();
   vector<string> altNames = b2->getNames();
-  if (names.size()!=1 || altNames.size()!=1) {
-    fprintf(stderr,"Comparison not yet implemented in %s:%d\n", __FILE__,
-	    __LINE__);
-    exit(1);
-  }
-
-  PolySheet s1 = b1->readSheet(names[0]);
-  SchemaSniffer sniffer1(s1,names[0].c_str());
-  if (s1.getSchema()==NULL) {
-    s1.setSchema(sniffer1.suggestSchema(),false);
-  }
-  s1.hideHeaders();
-  PolySheet s2 = b2->readSheet(altNames[0]);
-  SchemaSniffer sniffer2(s2,altNames[0].c_str());
-  if (s2.getSchema()==NULL) {
-    s2.setSchema(sniffer2.suggestSchema(),false);
-  }
-  s2.hideHeaders();
-  if (s1.width()!=s2.width() || s1.height()!=s2.height()) {
-    dbg_printf("Size mismatch, %dx%d vs %dx%d\n",
-	       s1.width(), s1.height(),
-	       s2.width(), s2.height());
+  if (names.size()!=altNames.size()) {
     return false;
   }
-  for (int j=0; j<s1.height(); j++) {
-    for (int i=0; i<s1.width(); i++) {
-      if (s1.cellSummary(i,j)!=s2.cellSummary(i,j)) {
-	printf("Mismatch on cell %d,%d: '%s' vs '%s'\n",
-	       i,j, 
-	       s1.cellSummary(i,j).toString().c_str(),
-	       s2.cellSummary(i,j).toString().c_str());
-	return false;
+  for (int k=0; k<names.size(); k++) {
+    PolySheet s1 = b1->readSheet(names[k]);
+    SchemaSniffer sniffer1(s1,names[k].c_str());
+    if (s1.getSchema()==NULL) {
+      s1.setSchema(sniffer1.suggestSchema(),false);
+    }
+    s1.hideHeaders();
+    PolySheet s2 = b2->readSheet(altNames[k]);
+    SchemaSniffer sniffer2(s2,altNames[k].c_str());
+    if (s2.getSchema()==NULL) {
+      s2.setSchema(sniffer2.suggestSchema(),false);
+    }
+    s2.hideHeaders();
+    if (s1.width()!=s2.width() || s1.height()!=s2.height()) {
+      dbg_printf("Size mismatch, %dx%d vs %dx%d\n",
+		 s1.width(), s1.height(),
+		 s2.width(), s2.height());
+      return false;
+    }
+    for (int j=0; j<s1.height(); j++) {
+      for (int i=0; i<s1.width(); i++) {
+	if (s1.cellSummary(i,j)!=s2.cellSummary(i,j)) {
+	  printf("Mismatch on cell %d,%d: '%s' vs '%s'\n",
+		 i,j, 
+		 s1.cellSummary(i,j).toString().c_str(),
+		 s2.cellSummary(i,j).toString().c_str());
+	  return false;
+	}
       }
     }
   }
-
   
   return true;
 }
