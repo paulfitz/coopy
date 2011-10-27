@@ -39,6 +39,10 @@ public:
     return true;
   }
 
+  virtual bool canWrite() const { 
+    return false; 
+  }
+
   virtual bool addSheet(const SheetSchema& schema);
 
 

@@ -224,7 +224,16 @@ public:
   // move a column before base; if base is invalid move after all columns
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {
     COOPY_ASSERT(sheet);
-    return sheet->moveColumn(src,base);
+    ColumnRef result = sheet->moveColumn(src,base);
+    if (!result.isValid()) return result;
+    SheetSchema *s = getSchema();
+    if (s) {
+      if (!s->isShadow()) {
+	ColumnRef result2 = s->moveColumn(src,base);
+	COOPY_ASSERT(result2.getIndex()==result.getIndex());
+      }
+    }
+    return result;
   }
 
   virtual bool deleteRow(const RowRef& src) {

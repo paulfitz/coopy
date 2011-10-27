@@ -152,6 +152,14 @@ public:
     return false;
   }
 
+  virtual bool canWrite() const { 
+    if (book) {
+      return book->inplace();
+    }
+    return false;
+  }
+
+
   virtual bool copy(const DataBook& alt, const Property& options);
 
   virtual bool addSheet(const SheetSchema& schema) {

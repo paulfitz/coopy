@@ -124,8 +124,46 @@ int SheetPatcher::matchCol(const std::string& mover) {
 
 int SheetPatcher::updateCols() {
   PolySheet sheet = getSheet();
+  /*
+  {
+    printf("<activeCol>");
+    for (int i=0; i<activeCol.width(); i++) {
+      string name = activeCol.cellString(i,0);
+      printf(" %s", name.c_str());
+    }
+    printf("\n");
+    SheetSchema *ss = sheet.getSchema();
+    if (ss!=NULL) {
+      printf("<schema>   ");
+      for (int i=0; i<ss->getColumnCount(); i++) {
+	string name = ss->getColumnInfo(i).getName();
+	printf(" %s", name.c_str());
+      }
+      printf("\n");
+      for (int i=0; i<ss->getColumnCount(); i++) {
+	string name = ss->getColumnInfo(i).getName();
+	if (i<activeCol.width()) {
+	  string name2 = activeCol.cellString(i,0);
+	  if (name!=name2) {
+	    printf("    %s <---> %s\n", name.c_str(), name2.c_str());
+	    exit(1);
+	    break;
+	  }
+	}
+      }
+    }
+    printf("<sheet>    ");
+    for (int i=0; i<sheet.width(); i++) {
+      string name = sheet.cellString(i,0);
+      printf(" %s", name.c_str());
+    }
+    printf("\n");
+  }
+  */
   if (activeCol.width()!=sheet.width()) {
-    printf("activeCol drift\n");
+    printf("* Please report bug: activeCol drift, %s %d\n",
+	   __FILE__,
+	   __LINE__);
     exit(1);
   }
   name2col.clear();

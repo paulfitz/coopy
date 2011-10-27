@@ -76,6 +76,12 @@ public:
     return ColumnRef();
   }
 
+  virtual ColumnRef moveColumn(const ColumnRef& src, 
+			       const ColumnRef& base) {
+    fprintf(stderr, "Don't know how to insert column in schema\n");
+    return ColumnRef();
+  }
+
   virtual bool modifyColumn(const ColumnRef& column, 
 			    const ColumnInfo& info) {
     fprintf(stderr, "Don't know how to modify column in schema\n");
@@ -190,6 +196,36 @@ public:
     columns.erase(columns.begin()+column.getIndex());
     kinds.erase(kinds.begin()+column.getIndex());
     return true;
+  }
+
+  virtual ColumnRef moveColumn(const ColumnRef& src, 
+			       const ColumnRef& base) {
+    int w = columns.size();
+    int offset = base.getIndex();
+    if (offset>=(int)w) return ColumnRef();
+    int offset_src = src.getIndex();
+    int offset_del = offset_src;
+    if (offset_del<0||offset_del>=w) return ColumnRef();
+    int final = offset;
+    if (offset<=offset_del&&offset!=-1) {
+      offset_del++;
+    } else {
+      final--;
+    }
+    if (offset>=0) {
+      columns.insert(columns.begin()+offset,columns[offset_src]);
+      kinds.insert(kinds.begin()+offset,kinds[offset_src]);
+    } else {
+      columns.push_back(columns[offset_src]);
+      kinds.push_back(kinds[offset_src]);
+    }
+    columns.erase(columns.begin()+offset_del);
+    kinds.erase(kinds.begin()+offset_del);
+
+    if (offset<0) {
+      return ColumnRef(w-1);
+    }
+    return ColumnRef(final);
   }
 
   virtual ColumnRef insertColumn(const ColumnRef& column, 

@@ -40,6 +40,8 @@ public:
     return false;
   }
 
+  virtual bool canWrite() const { return true; }
+
   bool operator==(const DataBook& alt) const;
 
   virtual bool copy(const DataBook& alt, const Property& options);

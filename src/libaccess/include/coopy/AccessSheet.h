@@ -61,6 +61,8 @@ public:
     return false;
   }
 
+  virtual bool canWrite() { return false; }
+
 private:
   AccessSheetSchema *schema;
   Property config;

@@ -120,7 +120,7 @@ int Diff::apply(const Options& opt) {
   if ((mode=="apply"||mode=="merge")&&!apply) {
     if (local_file!=""&&local->inplace()&&!inplace&&output!=local_file) {
       if (output=="-"&&tmp=="") {
-	fprintf(stderr,"Inplace operation; please confirm with --inplace, by specifying an --output, or specify a 'tmp' location to avoid modifying database.\n");
+	fprintf(stderr,"Please specify --inplace, or given an --output, or specify a 'tmp' location to avoid modifying database.\n");
 	return 1;
       }
       if (tmp=="") {
