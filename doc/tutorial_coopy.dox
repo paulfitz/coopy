@@ -1,7 +1,7 @@
 /**
  *
 
-@page tutorial_coopy coopy under the hood
+@page tutorial_coopy Coopy: the tutorial
 
 The <b>coopy</b> program is a graphical interface for "pulling"
 new or updated repositories onto one's computer, and for "pushing"
@@ -12,7 +12,58 @@ to keep things simple.  Advanced users may wish to migrate to
 the \ref ssfossil command-line tool.  It is fine to use both on the
 same repository.
 
-\section coopy_repository What is a repository?
+\section tutorial_coopy_example Getting comfortable
+
+When you start the Coopy program, you see something like this:
+
+\image html screenshot/coopy_main.png "Here's Coopy!  Click Pull-in."
+
+Let's download a repository, just to get a sense for how it works.
+Click on the "Pull in" button to pull data in to your computer from
+the web, and you'll see:
+
+\image html screenshot/coopy_pull.png "Select or create an empty directory."
+
+What Coopy is looking for here is a fresh, clean,
+empty directory in which to store a bunch of repository files.  
+It is a good idea to create a new folder for this purpose.
+
+Once you've given Coopy an empty directory to fool around in, you're
+prompted for an address of a repository:
+
+\image html screenshot/coopy_open.png "What to put here?"
+
+What the heck do we put here?  Repositories live on the web, and
+have addresses like any webpage.  We could make our own, but for
+now let's use one I've prepared earlier - this:
+
+https://chiselapp.com/user/coopy/repository/coopy_demo/index
+
+If you click on that link, you'll see something that has
+a little logo of a fossil and looks like a website.  Don't bother
+with this stuff yet, we'll come back to it later.  For now, just
+paste in the link to Coopy:
+
+\image html screenshot/coopy_open2.png "Fill in demo repository link."
+
+Click OK, and Coopy chirps away merrily to itself:
+
+\image html screenshot/coopy_after_pull.png "Our first repository has arrived!"
+
+No error messages, that's good.  The "Spreadsheets/Tables" are has 
+changed.  It is a list of databases in the repository.
+There is just one, called "numbers".  Double-click on it
+and we're asked what we want to save the database as:
+
+\image html screenshot/coopy_save_as.png "Save numbers database as..."
+
+You can choose to save the database in a number of formats: principally
+Excel, Sqlite, or CSV (for single-table databases).  The choice is yours.  
+For now, save the database as an *.xls file, and it will open:
+
+\image html screenshot/coopy_xls.png "The numbers spreadsheet."
+
+\section tutorial_coopy_repository What is a repository?
 
 A repository is a collection of files.  For <b>coopy</b>, collections
 of files are managed by \ref ssfossil "fossil", a distributed
@@ -25,7 +76,7 @@ passed on easily.
 \li Clones of the repository can be changed by different people,
 and then have those changes merged intelligently.
 
-\section coopy_find_repository Finding a repository
+\section tutorial_coopy_find_repository Finding a repository
 
 You can find or create a fossil repository online.  Here are known
 services for doing this:
@@ -34,22 +85,22 @@ services for doing this:
 You can also create a new repository offline using
 the fossil or \ref ssfossil program.
 
-\section coopy_get_repository Cloning a repository
+\section tutorial_coopy_get_repository Cloning a repository
 
 To clone a repository, run coopy, then click on the "PULL" button.
 Select a new, empty directory.  You will then be prompted for a 
 link to pull from.  You can get such links from the services
-in \ref coopy_find_repository.  If all goes well, the empty
+in \ref tutorial_coopy_find_repository.  If all goes well, the empty
 directory will be filled with files from the repository,
 and a window will open to let you browse those files.
 
-\section coopy_change_repository Making changes to a repository
+\section tutorial_coopy_change_repository Making changes to a repository
 
 Files in a repository may be freely modified on your computer.
 When you want your modifications to be written to the
 original location of the repository, click on the "PUSH" button.
 
-\section coopy_files What are all these funny files?
+\section tutorial_coopy_files What are all these funny files?
 
 There are some special files that fossil uses to store information
 about a repository.  They are:

@@ -300,6 +300,7 @@ private:
     bool showing;
     bool writeAuthorizationFailed;
     wxString autoSyncTip;
+    wxString projectCodeTip;
     list<string> results;
     list<string> fileCache;
     list<string> updateCache;
@@ -430,6 +431,16 @@ public:
             autoSyncTip = str.Mid(wxString(wxT("Autosync: ")).Len());
             autoSyncTip.Trim(false);
             autoSyncTip.Trim(true);
+        }
+        if (str.Contains(wxT("Server: "))) {
+            autoSyncTip = str.Mid(wxString(wxT("Server: ")).Len());
+            autoSyncTip.Trim(false);
+            autoSyncTip.Trim(true);
+        }
+        if (str.Contains(wxT("project-code: "))) {
+            projectCodeTip = str.Mid(wxString(wxT("project-code: ")).Len());
+            projectCodeTip.Trim(false);
+            projectCodeTip.Trim(true);
         }
         if (str.Contains(wxT("not authorized to write"))) {
             writeAuthorizationFailed = true;
@@ -932,6 +943,8 @@ bool CoopyFrame::OnInit() {
     list_box = new wxListBox(this,ID_LISTBOX, wxPoint(10,10), wxSize(200,100),
                              0, choices, wxLB_SINGLE | wxLB_ALWAYS_SB |
                              wxHSCROLL);
+    list_box->SetLabel(wxT("keys"));
+    list_box->SetName(wxT("keys"));
 
     //dir_box->SetTextCtrlProportion(0);
 
@@ -1595,15 +1608,29 @@ void CoopyFrame::OnCreate(wxCommandEvent& event) {
 
 
 void CoopyFrame::repush() {
+    {
+        int argc = 2;
+        char *argv[] = {
+            fossil(),
+            (char*)"info",
+            NULL };
+        ssfossil(argc,argv,true);
+    }
     if (source=="") {
         source = conv(autoSyncTip);
     }
-    printf("source is %s\n", source.c_str());
     wxURL url = conv(source);
+    printf("source is %s\n", source.c_str());
     wxTextEntryDialog dlg1(NULL, wxT("Username needed to access the repository"), wxT("Enter username"), url.GetUser());
     wxPasswordEntryDialog dlg2(NULL, wxT("Password needed to access the repository"), wxT("Enter password"), url.GetPassword());
+    wxTextEntryDialog dlg3(NULL, wxT("Repository link"), wxT("Enter repository"), conv(source));
+    wxTextEntryDialog dlg4(NULL, wxT("Clone to new repository?\nIf cloning, copy this project code:"), wxT("Clone repository?"), projectCodeTip);
     if (dlg1.ShowModal()!=wxID_OK) return;
     if (dlg2.ShowModal()!=wxID_OK) return;
+    if (dlg4.ShowModal()==wxID_OK) {
+        if (dlg3.ShowModal()!=wxID_OK) return;
+        url = dlg3.GetValue();
+    }
 
     wxString username = dlg1.GetValue();
     wxString pword = dlg2.GetValue();
@@ -1620,11 +1647,14 @@ void CoopyFrame::repush() {
     if (firstAt!=wxNOT_FOUND) {
         current = current.Mid(firstAt+3);
     }
-    current = protocol + wxT("://") + username + wxT(":") + pword + 
-        wxT("@") + current;
+    if (!username.IsEmpty()) {
+        current = protocol + wxT("://") + username + wxT(":") + pword + 
+            wxT("@") + current;
+    } else {
+        current = protocol + wxT("://") + current;
+    }
     source = conv(current);
     printf("Source set to %s\n", source.c_str());
-    
 
     /*
         source = string("http://") +
@@ -1726,9 +1756,18 @@ void CoopyFrame::OnCommit(wxCommandEvent& event) {
                     return;
                 }
             } else {
-                msg = "No changes!";
-                addLog(wxT("No changes to push"));
-                CheckEnd();
+                int argc = 2;
+                // commit currently fails if called twice, unless username
+                // specified (need to remove some global state from fossil)
+                char *argv[] = {
+                    fossil(),
+                    (char*)"push",
+                    NULL };
+                next = "revertable";
+                ssfossil(argc,argv);
+                //msg = "No changes!";
+                //addLog(wxT("No changes to push"));
+                //CheckEnd();
             }
             //}
     }
