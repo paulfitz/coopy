@@ -29,6 +29,7 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
  \li \ref sspatch_main_input-formats "--input-formats"
  \li \ref sspatch_main_output "--output=OUTPUTFILE"
  \li \ref sspatch_main_patch-formats "--patch-formats"
+ \li \ref sspatch_main_table "--table=TABLE"
 
 
 \section sspatch_options_detail Option details
@@ -51,6 +52,9 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
 
 
 \anchor sspatch_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
+
+
+\anchor sspatch_main_table <b>--table=TABLE</b> <br />operate on a single named table of a workbook/database
 
 
 
