@@ -12,7 +12,7 @@ to keep things simple.  Advanced users may wish to migrate to
 the \ref ssfossil command-line tool.  It is fine to use both on the
 same repository.
 
-\section tutorial_coopy_example Getting comfortable
+\section tutorial_coopy_start Getting started
 
 When you start the Coopy program, you see something like this:
 
@@ -27,7 +27,9 @@ designed by a computer scientist, sorry...
 appears here.  Just now, there are none.  We need to set up a repository
 first.
 
-Let's download a repository, just to get a sense for how it works.
+\section tutorial_coopy_pull_in Pulling in a repository
+
+To do anything useful with Coopy, we need to get a repository.
 Click on the "Pull in" button to pull data in to your computer from
 the web, and you'll see:
 
@@ -76,11 +78,13 @@ nothing, install OpenOffice, Gnumeric, or something along those lines).
 
 \image html screenshot/coopy_xls.png "The numbers spreadsheet."
 
-\section tutorial_coopy_writing Pushing out
+\section tutorial_coopy_writing Pushing out a repository
 
-THIS IS MESSY, CLEAN-UP DUE.
+Change some number in your *.xls file, then save it.  Click "Push out".  
+You'll be prompted for a brief description of your changes, write
+anything you like here.
 
-Change a number in your *.xls file.  Click "Push out".  You won't have
+You won't have
 permissions to do so, so you'll be prompted for a username/password.
 
 Go to chiselapp.com and set up an account.  Give your username

@@ -14,10 +14,19 @@ import os
 import shutil
 import time
 
-lnk="http://localhost:8080"
+# lnk="http://localhost:8080"
+lnk="/tmp/coopy_base/test.fossil"
+delay = 0
 
 # lnk="https://chiselapp.com/user/coopy/repository/coopy_demo/index"
-    
+# delay = 2
+
+def fossil(cmd):
+    cmd = "fossil "+cmd
+    print cmd
+    f=os.popen(cmd)
+    f.close()
+
 
 def xdotool(cmd):
     cmd = "xdotool "+cmd
@@ -62,7 +71,6 @@ def take_snapshot(fname,fmt):
     print("Snapshot %s"%fname)
 
 bin = os.getcwd()
-delay = 2
 
 def snap(name):
     time.sleep(delay)
@@ -73,6 +81,7 @@ def snap(name):
 do_over = True
 
 os.chdir("/tmp")
+
 if do_over:
     shutil.rmtree("coopy_demo",True)
     os.mkdir("coopy_demo")
@@ -121,8 +130,8 @@ print numbers.actions
 numbers.doAction('activate')
 dlg = app.dialog("Save File As _?",True)
 resize_name("Save File As _?")
-shutil.rmtree("/tmp/numbers.xls",True)
-dlg.child(roleName = 'text').text = "/tmp/numbers.xls"
+shutil.rmtree("numbers.xls",True)
+dlg.child(roleName = 'text').text = "numbers.xls"
 snap("save_as")
 dlg.button('Save').click()
 # dlg.button('Cancel').click()
@@ -130,10 +139,13 @@ dlg.button('Save').click()
 #app.menu('File').click()
 #snap("file")
 
+
+
 app.button('Exit').click()
 
-resize_class("gnumeric")
-focus_class("gnumeric")
-app2 = tree.root.application("gnumeric")
-snap("xls")
-app2.menu('File').menuItem('Quit').click()
+if False:
+    resize_class("gnumeric")
+    focus_class("gnumeric")
+    app2 = tree.root.application("gnumeric")
+    snap("xls")
+    app2.menu('File').menuItem('Quit').click()

@@ -117,7 +117,16 @@ public:
     static bool silent;
     static int fossil_result;
     static bool force_happy;
+    static wxFrame *store_frame;
+
+    void OnKey(wxKeyEvent&);
+
+    DECLARE_EVENT_TABLE()
 };
+
+BEGIN_EVENT_TABLE(CoopyApp, wxApp)
+  EVT_KEY_DOWN(CoopyApp::OnKey)
+END_EVENT_TABLE()
 
 string CoopyApp::fossil_object;
 string CoopyApp::fossil_action;
@@ -128,6 +137,7 @@ bool CoopyApp::fossil_autoend = false;
 bool CoopyApp::silent = false;
 bool CoopyApp::force_happy = false;
 int CoopyApp::fossil_result = 0;
+wxFrame *CoopyApp::store_frame = NULL;
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters") },
@@ -276,6 +286,7 @@ private:
     wxTextCtrl *src_box;
     wxTextCtrl *dest_box;
     wxDirPickerCtrl *dir_box;
+    string dir_box_path;
     wxTimer *timer;
     wxListBox *list_box;
     wxInputStream *report;
@@ -700,6 +711,9 @@ public:
 
     void repush();
 
+    void OnFocusDbList() {
+        list_box->SetFocus();
+    }
 enum
     {
         TEXT_Main = wxID_HIGHEST + 1,
@@ -758,6 +772,8 @@ void FossilProcess::OnTerminate(int pid, int status)
 bool CoopyApp::OnInit()
 {
     CoopyFrame *frame = new CoopyFrame( _T("Coopy"), wxPoint(50,50), wxSize(450,340) );
+
+    store_frame = frame;
 
     //g_hwnd = (long int)(frame->GetHandle());
 
@@ -903,24 +919,14 @@ bool CoopyFrame::OnInit() {
     askDestination = true;
     showing = true;
 
-    timer = new wxTimer(this,ID_Tick);
+    wxPanel *panel = new wxPanel(this, wxID_ANY,
+                                 wxDefaultPosition, wxSize(400,400));
+
+    timer = new wxTimer(panel,ID_Tick);
 
     SetIcon(wxIcon((char**)appicon_xpm));
 
     topsizer = new wxBoxSizer( wxVERTICAL );
-
-    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-    
-    //create two buttons that are horizontally unstretchable, 
-    // with an all-around border with a width of 10 and implicit top alignment
-    button_sizer->Add(
-                      new wxButton( this, wxID_OK, _T("&Reset") ),
-                      wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10));       
-    
-    button_sizer->Add(
-                      new wxButton( this, ID_Quit, _T("E&xit") ),
-                      wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10));    
-
 
     wxSizerFlags tflags = 
         wxSizerFlags(0).Align(wxALIGN_LEFT).Border(wxLEFT|wxRIGHT|wxTOP, 10);
@@ -934,17 +940,17 @@ bool CoopyFrame::OnInit() {
     
     wxBoxSizer *dir_bar = new wxBoxSizer( wxHORIZONTAL );
 
-    dir_box = new wxDirPickerCtrl(this,TEXT_Dir, wxT(""),
+    /*
+    dir_box = new wxDirPickerCtrl(panel,TEXT_Dir, wxT(""),
                                   wxT("Select a folder"),
                                   wxDefaultPosition,
                                   wxSize(300,-1));
+    */
     const wxString choices[] = {
     };
-    list_box = new wxListBox(this,ID_LISTBOX, wxPoint(10,10), wxSize(200,100),
+    list_box = new wxListBox(panel,ID_LISTBOX, wxPoint(10,10), wxSize(200,100),
                              0, choices, wxLB_SINGLE | wxLB_ALWAYS_SB |
                              wxHSCROLL);
-    list_box->SetLabel(wxT("keys"));
-    list_box->SetName(wxT("keys"));
 
     //dir_box->SetTextCtrlProportion(0);
 
@@ -963,28 +969,31 @@ bool CoopyFrame::OnInit() {
         } else {
             path = conv(name.GetPath());
         }
-        dir_box->SetPath(conv(path));
+        //dir_box->SetPath(conv(path));
+        dir_box_path = path;
         askPath = false;
     } else {
 #ifdef __LINUX__
-        dir_box->SetPath(::wxGetCwd());
+        //dir_box->SetPath(::wxGetCwd());
+        dir_box_path = conv(::wxGetCwd());
 #else
         wxStandardPaths sp;
-        dir_box->SetPath(sp.GetDocumentsDir());
+        //dir_box->SetPath(sp.GetDocumentsDir());
+        dir_box_path = sp.GetDocumentsDir();
 #endif
     }
 
-    dir_bar->Add(dir_box,lflags);
-    dir_bar->Add(new wxButton( this, ID_Sync, _T("Pull &in") ),
+    //dir_bar->Add(dir_box,lflags);
+    dir_bar->Add(new wxButton( panel, ID_Sync, _T("Pull &in") ),
                     lflags);
-    dir_bar->Add(new wxButton( this, ID_Commit, _T("Push &out") ),
+    dir_bar->Add(new wxButton( panel, ID_Commit, _T("Push &out") ),
                     lflags);
-    dir_bar->Add(new wxButton( this, ID_Create, _T("Create &repository") ),
+    dir_bar->Add(new wxButton( panel, ID_Create, _T("Create &repository") ),
                     lflags);
     topsizer->Add(dir_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
 
     
-    log_box = new wxTextCtrl(this, TEXT_Main, conv(string("Coopy facilitates cooperative data-collection projects. \nSee http://") + SITE_NAME + " if you need a repository link.\nWarning: this is alpha software, keep backups of your data.\n"), 
+    log_box = new wxTextCtrl(panel, TEXT_Main, conv(string("Coopy facilitates cooperative data-collection projects. \nSee http://") + SITE_NAME + " if you need a repository link.\nWarning: this is alpha software, keep backups of your data.\n"), 
                              wxDefaultPosition, wxSize(620,200),  
                              wxTE_MULTILINE | wxTE_RICH, 
                              wxDefaultValidator, wxTextCtrlNameStr);
@@ -992,14 +1001,32 @@ bool CoopyFrame::OnInit() {
     //handler.setCtrl(*log_box);
 
     topsizer->Add(log_box);
-    topsizer->Add(new wxStaticText(this,-1,_T("Spreadsheets/Tables"),
+    topsizer->Add(new wxStaticText(panel,-1,_T("Spreadsheets/&Tables"),
                                   wxDefaultPosition,
                                   wxSize(200,-1)),lflags);
     topsizer->Add(list_box);
+
+
+    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
+    
+    //create two buttons that are horizontally unstretchable, 
+    // with an all-around border with a width of 10 and implicit top alignment
+    button_sizer->Add(
+                      new wxButton( panel, wxID_OK, _T("&Reset") ),
+                      wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10));       
+    
+    button_sizer->Add(
+                      new wxButton( panel, ID_Quit, _T("E&xit") ),
+                      wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10));    
+
+
+
     topsizer->Add(button_sizer,wxSizerFlags(0).Align(wxALIGN_RIGHT));
 
-    SetSizer(topsizer);
+    panel->SetSizer(topsizer);
     topsizer->SetSizeHints(this);
+
+    panel->SetFocus();
 
     if (!askPath) {
         updateSettings(true);
@@ -1031,8 +1058,9 @@ bool CoopyFrame::OnInit() {
 
 
 bool CoopyFrame::havePath() {
-    if (dir_box) {
-        string ref = conv(dir_box->GetPath());
+    //if (dir_box) 
+    {
+        string ref = dir_box_path; //conv(dir_box->GetPath());
         if (ref!=path) {
             path = ref;
         }
@@ -1095,10 +1123,12 @@ bool CoopyFrame::havePath() {
         wxSetWorkingDirectory(conv(path));
     }
 
-    if (dir_box) {
-        string ref = conv(dir_box->GetPath());
+    //if (dir_box) 
+    {
+        string ref = dir_box_path; //conv(dir_box->GetPath());
         if (ref!=path && path!="") {
-            dir_box->SetPath(conv(path));
+            //dir_box->SetPath(conv(path));
+            dir_box_path = path;
         }
     }
 
@@ -1818,6 +1848,21 @@ void CoopyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
     wxMessageBox(_T("Welcome to coopy!\n\
 Now go back to work."),
                  _T("About coopy"), wxOK | wxICON_INFORMATION, this);
+}
+
+void CoopyApp::OnKey(wxKeyEvent& e) {
+    if(e.GetModifiers() == wxMOD_ALT) {
+        switch(e.GetKeyCode()) {
+        case 'S':
+            ((CoopyFrame *)store_frame)->OnFocusDbList();
+            break;
+        default:
+            e.Skip();
+            break;
+        }
+    } else {
+        e.Skip();
+    }
 }
 
 
