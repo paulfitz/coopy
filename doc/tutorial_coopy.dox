@@ -1,20 +1,24 @@
 /**
  *
 
-@page tutorial_coopy Coopy: the tutorial
+@page tutorial_coopy Using Coopy to collaborate on spreadsheets and databases
 
 The <b>coopy</b> program is a graphical interface for "pulling"
 new or updated repositories onto one's computer, and for "pushing"
-modified repositories out to a server.
-
-The program deliberately eliminates a lot of options and alternatives
-to keep things simple.  Advanced users may wish to migrate to
-the \ref ssfossil command-line tool.  It is fine to use both on the
+modified repositories out to a server.  It is specialized for 
+spreadsheets and databases.
+Advanced users who need maximum flexibility may wish to try to
+the \ref ssfossil command-line tool rather than the 
+\ref coopy program.  It is fine to use both on the
 same repository.
+
+\li \ref tutorial_coopy_start
+\li \ref tutorial_coopy_pull_in
+\li \ref tutorial_coopy_push_out
 
 \section tutorial_coopy_start Getting started
 
-When you start the Coopy program, you see something like this:
+When you start the \ref coopy program, you see something like this:
 
 \image html screenshot/coopy_main.png "Here's Coopy!"
 
@@ -78,23 +82,59 @@ nothing, install OpenOffice, Gnumeric, or something along those lines).
 
 \image html screenshot/coopy_xls.png "The numbers spreadsheet."
 
-\section tutorial_coopy_writing Pushing out a repository
+\section tutorial_coopy_push_out Pushing out a repository
 
-Change some number in your *.xls file, then save it.  Click "Push out".  
-You'll be prompted for a brief description of your changes, write
-anything you like here.
+Change some number in your *.xls file, then save it.  
 
-You won't have
-permissions to do so, so you'll be prompted for a username/password.
+\image html screenshot/coopy_xls2.png "Making a change..."
 
-Go to chiselapp.com and set up an account.  Give your username
-on Chisel to
-Coopy when it asks.  Then think of a password, and give it to Coopy
-when it asks.  Coopy will then give you a "project code".  Hang on
-to that code.  On chisel, click "Create Repository".  Fill in
-any repository name you like, and give the password and project code:
+Now to send the updates to the repository, we click the "Push out" button.
+We're prompted to make a brief description of our changes (called a 
+commit message).  Write anything you like here.  Typically this should
+be a brief message that will let a collaborator understand your change
+quickly.
+
+\image html screenshot/coopy_commit2.png "Add a commit message."
+
+The next thing that is likely to happen is an access denied message.  
+Repositories
+can be set up so that random folks can commit changes to them, but normally
+you need a username and password.  Let's see how things work if you
+have a username/password, and then come back to what you can do otherwse.
+
+\image html screenshot/coopy_access_denied_username.png "Access denied."
+
+Fill out a username and password:
+
+\image html screenshot/coopy_username.png "Username."
+\image html screenshot/coopy_pw.png "Password."
+
+And we're done:
+
+\image html screenshot/coopy_write_done.png "A successful push."
+
+However, for the demo repository we've been using, you don't have
+a username/password, and I'm not going to give you one (to make sure
+the demo stays working exactly as shown above).  No problem, you 
+can make your own repository.
+
+For example, you can go to <a href="chiselapp.com">chiselapp.com</a>
+and set up an account.  Make a repository there:
 
 \image html screenshot/chisel_repo.png "Chisel."
+
+If you will be starting the repository empty, there's nothing 
+special you need to do.  If you want to be able to push the
+demo repository to it, then you need to give it the same "project code".
+You can get the project code from Coopy by clicking "Set up repository"
+and "Create new repository".
+
+Give your username on Chisel to Coopy when it
+asks.  Then think of a password, and give it to Coopy when it asks.
+Coopy will then give you a "project code".  Hang on to that code.  On
+chisel, click "Create Repository".  Fill in any repository name you
+like, and give the password and project code:
+
 
 Now you can advance in Coopy.  Replace the URL with something like:
 

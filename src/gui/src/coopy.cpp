@@ -43,8 +43,7 @@
 #include <coopy/Dbg.h>
 #include <coopy/Options.h>
 
-static bool __coopy_verbose = false;
-static bool verb() { return __coopy_verbose; }
+static bool verb() { coopy_is_verbose(); }
 
 // hack to remove warning
 #define static const
@@ -235,7 +234,6 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
         fossil_action = "push";
     }
     if (parser.Found(wxT("v"))) {
-        __coopy_verbose = true;
         coopy_set_verbose(true);
     }
     fossil_autoend = false;
@@ -307,6 +305,7 @@ private:
     string fossil_path;
     ostream *stream;
     string next;
+    string retry;
     bool logging;
     bool showing;
     bool writeAuthorizationFailed;
@@ -372,7 +371,7 @@ public:
         Destroy();
     }
 
-    void OnOK(wxCommandEvent& event);
+    void OnReset(wxCommandEvent& event);
 
     virtual bool OnInit();
 
@@ -459,8 +458,13 @@ public:
         if (str.Contains(wxT("login failed"))) {
             writeAuthorizationFailed = true;
         }
-        
-        if (showing||force) {
+
+        bool needed = false;
+        if (str.Contains(wxT("Error: "))) {
+            needed = true;
+        }
+
+        if (showing||force||needed) {
             bool ok = true;
             if ((str[0]>='0'&&str[0]<='9')||str[0]<32) {
                 ok = false;
@@ -509,7 +513,11 @@ public:
         if (status!=0) {
             addLog(wxT("TROUBLE in CoopyTown..."));
             addLog(wxT("* Is repository link valid?"));
+            //addLog(wxString(wxT("  => ")) + conv(source));
             fail = true;
+            if (retry!="") {
+                next = "retryable";
+            }
             if (next!="revertable"&&next!="retryable") {
                 background = false;
                 CoopyApp::fossil_result = 1;
@@ -555,8 +563,13 @@ public:
                     updatePivots(false);
                     CheckEnd();
                 }
-                repush();
+                if (n=="retryable") {
+                    string r = retry;
+                    retry = "";
+                    repush(r);
+                }
             } else {
+                retry = "";
                 updatePivots(true);
                 addLog(wxT("Online repository updated successfully."));
                 CheckEnd();
@@ -709,7 +722,9 @@ public:
 
     bool addFile();
 
-    void repush();
+    bool Sync();
+
+    void repush(const string& retry2);
 
     void OnFocusDbList() {
         list_box->SetFocus();
@@ -729,6 +744,7 @@ enum
         ID_About,
         ID_Tick,
         ID_Create,
+        ID_Reset,
     };
 };
 
@@ -809,7 +825,7 @@ BEGIN_EVENT_TABLE(CoopyFrame, wxFrame)
     EVT_MENU(ID_Commit, CoopyFrame::OnCommit)
     EVT_MENU(ID_Create, CoopyFrame::OnCreate)
     EVT_MENU(ID_About, CoopyFrame::OnAbout)
-    EVT_BUTTON(wxID_OK, CoopyFrame::OnOK)
+    EVT_BUTTON(ID_Reset, CoopyFrame::OnReset)
     EVT_BUTTON(ID_Quit, CoopyFrame::OnQuit)
     EVT_BUTTON(ID_Sync, CoopyFrame::OnSync)
     EVT_BUTTON(ID_Undo, CoopyFrame::OnUndo)
@@ -855,7 +871,7 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
     } else if (op1 == wxT("commit")) {
         addLog(wxT(" \n \nSending changes from your computer..."));
     }
-    showing = (op1 == wxT("update")) || (op1 == wxT("commit")) || (op1 == wxT("push"));
+    showing = (op1 == wxT("update")) || (op1 == wxT("commit")) || (op1 == wxT("push")) || (op1 == wxT("pull")) || (op1 == wxT("clone"));
     for (int i=0; i<argc; i++) {
         //printf("[%s] ", conv(arr[i]).c_str());
         cmd[i] = (wxChar*)((const wxChar *)arr[i]);
@@ -988,7 +1004,7 @@ bool CoopyFrame::OnInit() {
                     lflags);
     dir_bar->Add(new wxButton( panel, ID_Commit, _T("Push &out") ),
                     lflags);
-    dir_bar->Add(new wxButton( panel, ID_Create, _T("Create &repository") ),
+    dir_bar->Add(new wxButton( panel, ID_Create, _T("&Set up repository") ),
                     lflags);
     topsizer->Add(dir_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
 
@@ -1001,7 +1017,7 @@ bool CoopyFrame::OnInit() {
     //handler.setCtrl(*log_box);
 
     topsizer->Add(log_box);
-    topsizer->Add(new wxStaticText(panel,-1,_T("Spreadsheets/&Tables"),
+    topsizer->Add(new wxStaticText(panel,-1,_T("Spreadsheets/Tables"),
                                   wxDefaultPosition,
                                   wxSize(200,-1)),lflags);
     topsizer->Add(list_box);
@@ -1012,7 +1028,7 @@ bool CoopyFrame::OnInit() {
     //create two buttons that are horizontally unstretchable, 
     // with an all-around border with a width of 10 and implicit top alignment
     button_sizer->Add(
-                      new wxButton( panel, wxID_OK, _T("&Reset") ),
+                      new wxButton( panel, ID_Reset, _T("&Reset") ),
                       wxSizerFlags(0).Align(wxALIGN_RIGHT).Border(wxALL, 10));       
     
     button_sizer->Add(
@@ -1067,6 +1083,7 @@ bool CoopyFrame::havePath() {
     }
 
     if (path=="" || askPath) {
+        source = "";
         wxDirDialog dlg(NULL, wxT("Select directory to work in"), 
                         conv(path),
                         wxDD_DEFAULT_STYLE); // | wxDD_DIR_MUST_EXIST);
@@ -1485,6 +1502,8 @@ string("http://") +
         }
     }
 
+    printf("Source is %s\n", source.c_str());
+
     return source!="";
 }
 
@@ -1531,7 +1550,7 @@ bool CoopyFrame::haveDestination() {
     return destination!="";
 }
 
-void CoopyFrame::OnOK(wxCommandEvent& ev) {
+void CoopyFrame::OnReset(wxCommandEvent& ev) {
     askPath = true;
     askSource = true;
     askDestination = true;
@@ -1539,12 +1558,13 @@ void CoopyFrame::OnOK(wxCommandEvent& ev) {
     if (dest_box) { dest_box->ChangeValue(wxT("")); }
 }
 
-void CoopyFrame::OnSync(wxCommandEvent& event) {
-    //printf("Syncing...\n");
-    next = "";
+bool CoopyFrame::Sync() {
+    printf("Syncing...\n");
+    retry = "clone";
+    next = "retryable";
     //startStream();
     if (havePath()) {
-        //printf("Should pull %s\n", path.c_str());
+        printf("Should pull %s\n", path.c_str());
         wxChar sep = wxFileName::GetPathSeparator();
         wxString target = conv(path) + sep + wxT("repository.coopy");
         if (!wxFileExists(target)) {
@@ -1555,9 +1575,9 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
         }
         string ctarget = conv(target);
         if (!wxFileExists(target)) {
-            //printf("Could not find %s\n", ctarget.c_str());
+            printf("Could not find %s\n", ctarget.c_str());
             if (haveSource()) {
-                //printf("Need to clone %s\n", ctarget.c_str());
+                printf("Need to clone %s\n", ctarget.c_str());
                 int argc = 4;
                 char *argv[] = {
                     fossil(),
@@ -1570,9 +1590,9 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
                 //}
                 next = "sync";
                 ssfossil(argc,argv);
-                return;
+                return true;
             } else {
-                return;
+                return false;
             }
         }
         if (wxFileExists(target)) {
@@ -1587,7 +1607,7 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
                     NULL };
                 next = "sync";
                 ssfossil(argc,argv);
-                return;
+                return true;
             }
             if (wxFileExists(view_target)) {
                 // make sure we have autosync
@@ -1605,7 +1625,7 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
                 int argc = 2;
                 char *argv[] = {
                     fossil(),
-                    (char*)"update",
+                    (char*)"pull",
                     NULL };
                 next = "view_sync";
                 ssfossil(argc,argv);
@@ -1614,6 +1634,12 @@ void CoopyFrame::OnSync(wxCommandEvent& event) {
     }
     //updateSettings(true);
     //endStream();
+    return false;
+}
+
+void CoopyFrame::OnSync(wxCommandEvent& event) {
+    retry = "pull";
+    Sync();
 }
 
 
@@ -1633,11 +1659,34 @@ void CoopyFrame::OnUndo(wxCommandEvent& event) {
 
 void CoopyFrame::OnCreate(wxCommandEvent& event) {
     //printf("Create!\n");
-    ::wxLaunchDefaultBrowser(wxT(SITE_NAME_CREATE));
+    //::wxLaunchDefaultBrowser(wxT(SITE_NAME_CREATE));
+    retry = "";
+    repush("");
 }
 
 
-void CoopyFrame::repush() {
+void CoopyFrame::repush(const string& retry2) {
+    bool has_dir = (dir_box_path!="" && !askPath);
+
+    wxString choices[] = { 
+        wxT("Connect to a repository"), 
+        wxT("Set username and password"), 
+        wxT("Create new repository"), 
+        wxT("Change directory"),
+    };
+
+    int CHOICE_CONNECT=0;
+    int CHOICE_USERNAME=1;
+    int CHOICE_NEW=2;
+    int CHOICE_DIR=3;
+
+    wxSingleChoiceDialog dlg(this, (retry2!="")?wxT("Access denied.  What would you like to do?"):wxT("What would you like to do?"),
+                             (retry2!="")?wxT("Access denied"):wxT("Set up repository"), has_dir?4:3, choices);
+    
+    if (dlg.ShowModal() != wxID_OK) {
+        return;
+    }
+ 
     {
         int argc = 2;
         char *argv[] = {
@@ -1646,21 +1695,45 @@ void CoopyFrame::repush() {
             NULL };
         ssfossil(argc,argv,true);
     }
+
+    int choice = dlg.GetSelection();
+
     if (source=="") {
         source = conv(autoSyncTip);
     }
     wxURL url = conv(source);
     printf("source is %s\n", source.c_str());
-    wxTextEntryDialog dlg1(NULL, wxT("Username needed to access the repository"), wxT("Enter username"), url.GetUser());
-    wxPasswordEntryDialog dlg2(NULL, wxT("Password needed to access the repository"), wxT("Enter password"), url.GetPassword());
-    wxTextEntryDialog dlg3(NULL, wxT("Repository link"), wxT("Enter repository"), conv(source));
-    wxTextEntryDialog dlg4(NULL, wxT("Clone to new repository?\nIf cloning, copy this project code:"), wxT("Clone repository?"), projectCodeTip);
-    if (dlg1.ShowModal()!=wxID_OK) return;
-    if (dlg2.ShowModal()!=wxID_OK) return;
-    if (dlg4.ShowModal()==wxID_OK) {
+
+    if (choice==CHOICE_DIR) {
+        askPath = true;
+        havePath();
+        return;
+    }
+
+    if (choice==CHOICE_NEW) {
+        if (!projectCodeTip.IsEmpty()) {
+            wxTextEntryDialog dlg4(NULL, wxT("You'll need this project code:"), wxT("Project code"), projectCodeTip);
+            if (dlg4.ShowModal()!=wxID_OK) return;
+        }
+        wxTextEntryDialog dlg3(NULL, wxT("Repository link"), wxT("Enter repository"), conv(source));
         if (dlg3.ShowModal()!=wxID_OK) return;
         url = dlg3.GetValue();
+
     }
+    if (choice==CHOICE_CONNECT) {
+        /*
+        if (has_dir) {
+        } else {
+        */
+        Sync();
+        return;
+    }
+
+    wxString user = url.GetUser();
+    wxTextEntryDialog dlg1(NULL, wxT("Username needed to access the repository"), wxT("Enter username"), user);
+    if (dlg1.ShowModal()!=wxID_OK) return;
+    wxPasswordEntryDialog dlg2(NULL, wxT("Password needed to access the repository"), wxT("Enter password"), url.GetPassword());
+    if (dlg2.ShowModal()!=wxID_OK) return;
 
     wxString username = dlg1.GetValue();
     wxString pword = dlg2.GetValue();
@@ -1693,14 +1766,21 @@ void CoopyFrame::repush() {
         printf("Source set to %s\n", source.c_str());
     */
 
-    int argc = 3;
-    char *argv[] = {
-        fossil(),
-        (char*)"push",
-        (char*)source.c_str(),
-        NULL };
-    next = "retryable";
-    ssfossil(argc,argv);
+    {
+        next = "retryable";
+        retry = retry2;
+        if (retry2!="clone") {
+            int argc = 3;
+            char *argv[] = {
+                fossil(),
+                (char*)retry2.c_str(),
+                (char*)source.c_str(),
+                NULL };
+            ssfossil(argc,argv);
+        } else {
+            Sync();
+        }
+    }
 }
 
 void CoopyFrame::OnPush(wxCommandEvent& event) {
@@ -1714,6 +1794,7 @@ void CoopyFrame::OnPush(wxCommandEvent& event) {
 }
 
 void CoopyFrame::OnCommit(wxCommandEvent& event) {
+    retry = "push";
     writeAuthorizationFailed = false;
     //printf("Should commit\n");
     //startStream();
@@ -1822,7 +1903,7 @@ CoopyFrame::CoopyFrame(const wxString& title, const wxPoint& pos, const wxSize& 
 
     menuFile->Append( ID_Sync, _T("Pull &in...") );
     menuFile->Append( ID_Commit, _T("Push &out...") );
-    menuFile->Append( ID_Create, _T("Create &repository...") );
+    menuFile->Append( ID_Create, _T("Set up &repository...") );
     menuFile->Append( ID_About, _T("&About...") );
     menuFile->AppendSeparator();
     menuFile->Append( ID_Quit, _T("E&xit") );
@@ -1853,7 +1934,7 @@ Now go back to work."),
 void CoopyApp::OnKey(wxKeyEvent& e) {
     if(e.GetModifiers() == wxMOD_ALT) {
         switch(e.GetKeyCode()) {
-        case 'S':
+        case 'T':
             ((CoopyFrame *)store_frame)->OnFocusDbList();
             break;
         default:

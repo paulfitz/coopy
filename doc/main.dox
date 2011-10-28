@@ -20,6 +20,7 @@ The COOPY project contains programs and libraries to help you:
 \section mainpage_tut Tutorials
 
 \li \ref tutorial_diff
+\li \ref tutorial_coopy
 \li \ref tutorial_git
 
 \section mainpage_basic Command line tools
@@ -48,7 +49,6 @@ The COOPY project contains programs and libraries to help you:
 \li \ref table_format.
 
 \li \ref ssfossil reference.
-\li \ref tutorial_coopy
 \if link_code
 \li <a href="annotated.html">Classes</a> used in implementation.
 \endif
