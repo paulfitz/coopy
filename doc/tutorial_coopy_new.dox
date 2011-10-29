@@ -3,7 +3,7 @@
 
 @page tutorial_coopy_new Creating a new repository for Coopy
 
-A repository is a collection of files.  For <b>coopy</b>, collections
+A repository is a collection of files.  For Coopy, collections
 of files are managed by \ref ssfossil "fossil", a distributed
 version control system.  What does this mean?
 
@@ -21,6 +21,7 @@ Here are known
 hosting services for fossil repositories:
 \li <a href="http://www.chiselapp.com">chiselapp.com</a>
 \li <a href="http://share.find.coop">share.find.coop</a>
+
 You can find this list by starting
 \ref coopy, then clicking on "Set up repository":
 
