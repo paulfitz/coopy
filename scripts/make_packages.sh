@@ -85,7 +85,7 @@ while [ ! "k$1" = "k" ]; do
     fi
 
     if [ "k$1" = "ksrc" ]; then
-	# rm -rf /tmp/coopysrc
+	rm -rf /tmp/coopysrc
 	mkdir -p /tmp/coopysrc
 	cd /tmp/coopysrc || exit 1
 	git clone git://github.com/paulfitz/coopy.git || {
