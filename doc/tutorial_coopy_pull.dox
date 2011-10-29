@@ -41,7 +41,8 @@ prompted for an address of a repository:
 \image html screenshot/coopy_open.png "What to put here?"
 
 What the heck do we put here?  Repositories live on the web, and
-have addresses like any webpage.  We could make our own, but for
+have addresses like any webpage.  We could make our own
+(see \ref tutorial_coopy_new), but for
 now let's use one I've prepared earlier - this:
 
 https://chiselapp.com/user/coopy/repository/coopy_demo/index
