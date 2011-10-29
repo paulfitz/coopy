@@ -3,7 +3,7 @@
 from sys import argv
 import gtk
 
-def take_snapshot(fname,fmt):
+def take_snapshot(fname,fmt,border):
     screenw = gtk.gdk.screen_width()
     screenh = gtk.gdk.screen_height()
     root = gtk.gdk.screen_get_default()
@@ -36,8 +36,11 @@ base = argv[1]
 name = argv[2]
 fmt = "png"
 fname = base + name + "." + fmt
+border = True
+if len(argv)>=4:
+    border = False
 
-if not(take_snapshot(fname,fmt)):
+if not(take_snapshot(fname,fmt,border)):
     exit(1)
 
 

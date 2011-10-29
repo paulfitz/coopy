@@ -1,0 +1,81 @@
+/**
+ *
+
+@page tutorial_coopy_pull Pulling in a repository with Coopy
+
+The <b>coopy</b> program is a graphical interface for "pulling"
+new or updated repositories onto one's computer, and for "pushing"
+modified repositories out to a server.  It is specialized for 
+spreadsheets and databases.
+Advanced users who need maximum flexibility may wish to try to
+the \ref ssfossil command-line tool rather than the 
+\ref coopy program.  It is fine to use both on the
+same repository.
+
+When you start the \ref coopy program, you see something like this:
+
+\image html screenshot/coopy_main.png "Here's Coopy!"
+
+Here are the main parts of the interface:
+ \li Buttons!  
+ \li A big text box, called the "activity log".  When we start working with 
+Coopy, messages will roll past in this box.  This is a user interface 
+designed by a computer scientist, sorry...
+ \li A box labeled "Spreadsheets/Tables".  A list of available databases
+appears here.  Just now, there are none.  We need to set up a repository
+first.
+
+To do anything useful with Coopy, we need to get a repository.
+Click on the "Pull in" button to pull data in to your computer from
+the web, and you'll see:
+
+\image html screenshot/coopy_pull.png "Select or create an empty directory."
+
+What Coopy is looking for here is a fresh, clean,
+empty directory in which to store a bunch of repository files.  
+It is a good idea to create a new folder for this purpose.
+
+Once you've given Coopy an empty directory to fool around in, you're
+prompted for an address of a repository:
+
+\image html screenshot/coopy_open.png "What to put here?"
+
+What the heck do we put here?  Repositories live on the web, and
+have addresses like any webpage.  We could make our own, but for
+now let's use one I've prepared earlier - this:
+
+https://chiselapp.com/user/coopy/repository/coopy_demo/index
+
+If you click on that link, you'll see something that has
+a little logo of a fossil.  Don't bother
+poking around there yet, we'll come back to it later.  For now, just
+paste in the link to Coopy:
+
+\image html screenshot/coopy_open2.png "Fill in demo repository link."
+
+Click OK, and Coopy chirps away merrily to itself, throwing 
+messages into the activity log:
+
+\image html screenshot/coopy_after_pull.png "Our first repository has arrived!"
+
+No error messages, that's good.  The "Spreadsheets/Tables" area has 
+changed.  It gives a list of databases in the repository.
+There is in fact just one, called "numbers".  Double-click on it,
+and you're asked where you want to save the database, and in what
+format:
+
+\image html screenshot/coopy_save_as.png "Save database as..."
+
+You can choose to save the database in a number of formats: principally
+Excel, Sqlite, or CSV (for single-table databases).  The choice is yours.  
+For now, save the database as an *.xls file, and it will open in 
+whatever you use to view spreadsheets on your computer (if you have 
+nothing, install OpenOffice, Gnumeric, or something along those lines).
+
+\image html screenshot/coopy_xls.png "The numbers spreadsheet."
+
+What happens when we start making changes in the spreadsheet?  That's
+the topic of this tutorial: \ref tutorial_coopy_push.
+
+ *
+ */

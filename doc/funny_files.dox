@@ -1,0 +1,22 @@
+/**
+*
+
+@page funny_files What are all these funny files in a Coopy directory?
+
+There are some special files that fossil uses to store information
+about a repository.  They are:
+\li _FOSSIL_: this file identifies a directory as a fossil repository.
+\li manifest: this is a list of all managed files in the repository.
+\li manifest.uuid: this is a unique identifier.
+In addition, coopy will place this file in the same directory:
+\li repository.coopy: this is a database containing information about
+the repository.  In fossil terms, this is the "real" repository, and
+the rest is just a "view" or "source tree".  So as not to confuse
+people who have not used a version control system before, the coopy
+program does not emphasize this distinction.  The fossil or \ref ssfossil
+program can be used to create multiple views of the same fossil
+repository.
+
+
+*
+*/

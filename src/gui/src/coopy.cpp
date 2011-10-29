@@ -1669,19 +1669,23 @@ void CoopyFrame::repush(const string& retry2) {
     bool has_dir = (dir_box_path!="" && !askPath);
 
     wxString choices[] = { 
-        wxT("Connect to a repository"), 
+        wxT("Connect to an existing repository"), 
         wxT("Set username and password"), 
-        wxT("Create new repository"), 
+        wxT("Create empty new repository"), 
+        wxT("Fork current repository"), 
         wxT("Change directory"),
+        wxT("Show project code"),
     };
 
     int CHOICE_CONNECT=0;
     int CHOICE_USERNAME=1;
     int CHOICE_NEW=2;
-    int CHOICE_DIR=3;
+    int CHOICE_FORK=3;
+    int CHOICE_DIR=4;
+    int CHOICE_CODE=5;
 
     wxSingleChoiceDialog dlg(this, (retry2!="")?wxT("Access denied.  What would you like to do?"):wxT("What would you like to do?"),
-                             (retry2!="")?wxT("Access denied"):wxT("Set up repository"), has_dir?4:3, choices);
+                             (retry2!="")?wxT("Access denied"):wxT("Set up repository"), has_dir?6:4, choices);
     
     if (dlg.ShowModal() != wxID_OK) {
         return;
@@ -1710,11 +1714,56 @@ void CoopyFrame::repush(const string& retry2) {
         return;
     }
 
-    if (choice==CHOICE_NEW) {
-        if (!projectCodeTip.IsEmpty()) {
-            wxTextEntryDialog dlg4(NULL, wxT("You'll need this project code:"), wxT("Project code"), projectCodeTip);
-            if (dlg4.ShowModal()!=wxID_OK) return;
+    if (choice==CHOICE_CODE||choice==CHOICE_FORK) {
+        if (projectCodeTip.IsEmpty()) {
+            wxMessageDialog dlg(NULL, wxT("Please connect to an existing repository first"), wxT("No repository"), 
+                                wxOK|wxICON_ERROR);
+            dlg.ShowModal();
+            return;
         }
+    }
+
+    if (choice==CHOICE_CODE) {
+        wxTextEntryDialog dlg(NULL, wxT("Here is the project code.\nThis may be needed when forking a repository."), wxT("Project code"), projectCodeTip);
+        dlg.ShowModal();
+        return;
+    }
+
+    wxString target = wxT("");
+    if (choice==CHOICE_NEW||choice==CHOICE_FORK) {
+        wxString choices[] = { 
+            wxT("chiselapp.com"), 
+            wxT("share.find.coop"), 
+            wxT("I've already made the new repository"), 
+        };
+
+        wxString full_choices[] = {
+            wxT("http://chiselapp.com"),
+            wxT("http://share.find.coop/repo/new/"),
+        };
+        
+        wxSingleChoiceDialog 
+            dlg(this, wxT("Please select a host for your new repository."),
+                wxT("Select host"), (choice==CHOICE_FORK)?3:2, choices);
+
+        if (dlg.ShowModal() != wxID_OK) {
+            return;
+        }
+
+        int choice2 = dlg.GetSelection();
+        if (choice2<2) {
+            target = full_choices[choice2];
+            ::wxLaunchDefaultBrowser(target);
+        }
+        if (choice!=CHOICE_FORK) {
+            return;
+        }
+    }
+
+    if (choice==CHOICE_FORK) {
+        wxTextEntryDialog dlg4(NULL, wxT("If asked, here is the project code:"), wxT("Project code"), projectCodeTip);
+        if (dlg4.ShowModal()!=wxID_OK) return;
+
         wxTextEntryDialog dlg3(NULL, wxT("Repository link"), wxT("Enter repository"), conv(source));
         if (dlg3.ShowModal()!=wxID_OK) return;
         url = dlg3.GetValue();

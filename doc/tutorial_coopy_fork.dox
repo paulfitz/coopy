@@ -1,0 +1,51 @@
+/**
+ *
+
+@page tutorial_coopy_fork Forking a repository for Coopy
+
+Suppose you pulled in the demo repository in \ref tutorial_coopy_pull,
+then made modifications to it, but didn't want to (or couldn't) push 
+those modifications back to the original repository.
+One option is to fork the repository and store it elsewhere.
+
+The procedure is just like \ref tutorial_coopy_new, except with
+one wrinkle: when making your new repository, you need to give it
+a "project code" that is identical to the one you pulled in.  You 
+can find that code by clicking on the "Set up repository" link:
+
+\image html screenshot/coopy_main.png "Click on: Set up repository"
+
+\image html screenshot/coopy_select_code.png "Select: Show project code"
+
+When we choose the project code option, Coopy gives us a big string 
+of numbers and letters:
+
+\image html screenshot/coopy_code.png "Project code"
+
+We will need the code a little later, don't worry about it for now,
+just be aware of where to find it.  Clicking on the "Set up repository" link
+again and this time select the "fork repository" option:
+
+\image html screenshot/coopy_select_fork.png "Fork repository option"
+
+We get a list of possible hosts for our repository:
+
+\image html screenshot/coopy_fork_host.png "Fork host"
+
+Suppose we pick the first one.  Then we follow the same sequence as in
+\ref tutorial_coopy_new, up to this point:
+
+\image html screenshot/coopy_chisel_create.png "Create repository"
+
+Here we get the project code from Coopy and fill it in in 
+the "Override project code" slot.  Then,
+we get the repository link just like in \ref tutorial_coopy_new,
+and give it to Coopy:
+
+\image html screenshot/coopy_enter_fork.png "Provide new repository link"
+
+Now, we continue on to provide a username and 
+password to Coopy as in \ref tutorial_coopy_push.  Done!
+
+ *
+ */

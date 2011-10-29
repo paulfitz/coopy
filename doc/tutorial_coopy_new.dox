@@ -1,0 +1,73 @@
+/**
+ *
+
+@page tutorial_coopy_new Creating a new repository for Coopy
+
+A repository is a collection of files.  For <b>coopy</b>, collections
+of files are managed by \ref ssfossil "fossil", a distributed
+version control system.  What does this mean?
+
+\li A revision history is kept for all files in the collection.
+\li The repository can be "cloned" on another computer or another
+location, in such a way that changes to the repository can be
+passed on easily.
+\li Clones of the repository can be changed by different people,
+and then have those changes merged intelligently.
+
+It is possible to set up a repository using
+the fossil or \ref ssfossil program. 
+Alternatively, you can find or create a fossil repository online.  
+Here are known
+hosting services for fossil repositories:
+\li <a href="http://www.chiselapp.com">chiselapp.com</a>
+\li <a href="http://share.find.coop">share.find.coop</a>
+You can find this list by starting
+\ref coopy, then clicking on "Set up repository":
+
+\image html screenshot/coopy_main.png "Click on: Set up repository"
+
+\image html screenshot/coopy_new.png "Select: Create new repository"
+
+When we choose the new repository option, we are offered a list of 
+hosts:
+
+\image html screenshot/coopy_host.png "Select a host."
+
+Choose a website to host your repository.  You can also 
+have your own website to host
+a fossil repository (see 
+<a href='http://fossil-scm.org/index.html/doc/trunk/www/quickstart.wiki#serversetup'>self-hosting instructions</a>), you don't need to stick with
+this list.  For now, let's go with 
+<a href="http://chiselapp.com">chiselapp.com</a>.
+
+\image html screenshot/coopy_chisel_front.png "Chisel"
+
+After you register and log in, you'll see a dashboard that
+looks like this (except emptier):
+
+\image html screenshot/coopy_chisel_dashboard.png "Chisel dashboard"
+
+To make a repository, click on "Create repository".
+
+\image html screenshot/coopy_chisel_create.png "Create repository"
+
+Set the repository up as you like.  The "Override project code" field
+is not needed when setting up a fresh, empty repository.  Once you've
+set up a repository, on the dashboard find a link to it, like the
+one shown in a box here:
+
+\image html screenshot/coopy_chisel_link.png "Find the repository link"
+
+When you click that link, you should see a page in a different
+style with a picture of a fossil.  This is your repository,
+and the link shown in your browser is the "repository link"
+that Coopy needs.
+
+\image html screenshot/coopy_chisel_fossil.png "Fossil"
+
+You could now follow the instructions in this tutorial: \ref tutorial_coopy_pull.  Just replace the demo repository link with your own.
+You can also follow this tutorial: \ref tutorial_coopy_push, using
+your Chiselapp username, and the password you chose for the repository.
+
+ *
+ */
