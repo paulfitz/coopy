@@ -995,7 +995,7 @@ bool CoopyFrame::OnInit() {
 #else
         wxStandardPaths sp;
         //dir_box->SetPath(sp.GetDocumentsDir());
-        dir_box_path = sp.GetDocumentsDir();
+        dir_box_path = conv(sp.GetDocumentsDir());
 #endif
     }
 
