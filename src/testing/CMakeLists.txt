@@ -19,19 +19,16 @@ TARGET_LINK_LIBRARIES(make_sheet sheet)
 
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 
-# path may need modification on windows
-IF (MINGW)
-  SET(EXE_EXT ".exe")
-ELSE ()
-  SET(EXE_EXT "")
-ENDIF()
-SET(testprg ${EXECUTABLE_OUTPUT_PATH}/test_sheet${EXE_EXT})
-SET(testprg_viterbi ${EXECUTABLE_OUTPUT_PATH}/test_viterbi${EXE_EXT})
-SET(ssformat ${EXECUTABLE_OUTPUT_PATH}/ssformat${EXE_EXT})
-SET(ssdiff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT})
-SET(sspatch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT})
-SET(ssfold ${EXECUTABLE_OUTPUT_PATH}/ssfold${EXE_EXT})
-SET(ssmerge ${EXECUTABLE_OUTPUT_PATH}/ssmerge${EXE_EXT})
+get_target_property(testprg test_sheet LOCATION)
+get_target_property(testprg_viterbi test_viterbi LOCATION)
+get_target_property(ssformat ssformat LOCATION)
+get_target_property(ssdiff ssdiff LOCATION)
+get_target_property(sspatch sspatch LOCATION)
+get_target_property(ssfold ssfold LOCATION)
+get_target_property(ssmerge ssmerge LOCATION)
+if (COMPILE_GUI)
+  get_target_property(coopy coopy LOCATION)
+endif ()
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -715,6 +712,41 @@ foreach(format1 sqlite csv sqlitext jsonbook ${EXCEL})
     endforeach()
   endforeach()
 endforeach()
+
+#######################################################################
+#######################################################################
+
+if (COMPILE_GUI)
+
+  set(TC test_coopy)
+  add_test(coopy_space_prep0 ${CMAKE_COMMAND} -E remove -f test_coopy)
+  add_test(coopy_space_prep1 ${CMAKE_COMMAND} -E make_directory test_coopy)
+  add_test(coopy_space_prep3 ${CMAKE_COMMAND} -E make_directory ${TC}/store)
+  add_test(coopy_space_prep4 ${CMAKE_COMMAND} -E make_directory ${TC}/clone1)
+  add_test(coopy_space_prep5 ${CMAKE_COMMAND} -E make_directory ${TC}/clone2)
+
+  add_test(coopy_space_new ${coopy} --new ${TC}/store)
+  add_test(coopy_space_clone1 ${coopy} --clone=${TC}/store ${TC}/clone1)
+  add_test(coopy_space_clone2 ${coopy} --clone=${TC}/store ${TC}/clone2)
+
+  add_test(coopy_space_data ${ssformat} ${TESTS}/coopy/mini-people.csvs
+    ${TC}/people.xls)
+
+  add_test(coopy_space_data_add ${coopy} --key=people --add=${TC}/people.xls ${TC}/clone1)
+  add_test(coopy_space_data_push ${coopy} -m "add people" --push ${TC}/clone1)
+  add_test(coopy_space_data_pull ${coopy} --pull ${TC}/clone2)
+  add_test(coopy_space_data_export ${coopy} --key=people --export=${TC}/people2.xls ${TC}/clone2)
+
+  add_test(coopy_space_data_mod ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Noemi->Nomers|" ${TC}/clone2)
+  add_test(coopy_space_data_push2 ${coopy} -m "change Noemi's name" --push ${TC}/clone2)
+  add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
+  set_property(TEST coopy_space_data_changed PROPERTY WILL_FAIL TRUE)
+
+  add_test(coopy_space_data_pull2 ${coopy} --pull ${TC}/clone1)
+  add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
+
+endif ()
+
 
 #######################################################################
 #######################################################################

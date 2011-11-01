@@ -112,6 +112,7 @@ public:
     static string fossil_message;
     static string fossil_key;
     static string fossil_repo;
+    static string fossil_target;
     static bool fossil_autoend;
     static bool silent;
     static int fossil_result;
@@ -132,6 +133,7 @@ string CoopyApp::fossil_action;
 string CoopyApp::fossil_message;
 string CoopyApp::fossil_key;
 string CoopyApp::fossil_repo;
+string CoopyApp::fossil_target;
 bool CoopyApp::fossil_autoend = false;
 bool CoopyApp::silent = false;
 bool CoopyApp::force_happy = false;
@@ -143,12 +145,15 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("H"), wxT("help-dox"), wxT("prepare doxygen help") },
     //wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
     { wxCMD_LINE_SWITCH, wxT("g"), wxT("gui"), wxT("force show GUI") },
+    { wxCMD_LINE_SWITCH, wxT("n"), wxT("new"), wxT("new repository") },
+    { wxCMD_LINE_OPTION, wxT("c"), wxT("clone"), wxT("clone repository"),
+      wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_SWITCH, wxT("v"), wxT("verbose"), wxT("show debug information") },
     { wxCMD_LINE_SWITCH, wxT("l"), wxT("silent"), wxT("keep it quiet") },
     //{ wxCMD_LINE_OPTION, wxT("r"), wxT("res"), wxT("set resource location"),
     //wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_SWITCH, wxT("p"), wxT("pull"), wxT("pull in data") },
-    { wxCMD_LINE_SWITCH, wxT("c"), wxT("push"), wxT("push out data") },
+    { wxCMD_LINE_SWITCH, wxT("s"), wxT("push"), wxT("push out data") },
     { wxCMD_LINE_OPTION, wxT("k"), wxT("key"), wxT("key for adding/export"),
       wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_OPTION, wxT("r"), wxT("repo"), wxT("repository link"),
@@ -209,6 +214,15 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     if (parser.Found(wxT("k"),&key)) {
         fossil_key = conv(key);
     }
+    if (parser.Found(wxT("n"))) {
+        fossil_action = "new";
+    }
+    if (parser.Found(wxT("c"),&key)) {
+        fossil_action = "clone";
+        wxFileName name = wxFileName::FileName(key);
+        name.MakeAbsolute();
+        fossil_target = conv(name.GetFullPath());
+    }
     if (parser.Found(wxT("r"),&key)) {
         fossil_repo = conv(key);
     }
@@ -230,7 +244,7 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     if (parser.Found(wxT("p"))) {
         fossil_action = "pull";
     }
-    if (parser.Found(wxT("c"))) {
+    if (parser.Found(wxT("s"))) {
         fossil_action = "push";
     }
     if (parser.Found(wxT("v"))) {
@@ -379,6 +393,9 @@ public:
     void OnPush(wxCommandEvent& event);
     void OnCommit(wxCommandEvent& event);
     void OnCreate(wxCommandEvent& event);
+    bool OnCreateRepo(wxCommandEvent& event);
+    bool OnCloneRepo(wxCommandEvent& event);
+    bool OnOpenRepo(bool back = true);
     void OnUndo(wxCommandEvent& event);
 
     bool havePath();
@@ -863,7 +880,9 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
         addLog(wxT("Command: [") + op + wxT("]"));
     }
     if (op1 == wxT("update")) {
-        addLog(wxT(" \n \nLooking for changes online..."));
+        addLog(wxT(" \n \nUpdating repository..."));
+    } else if (op1 == wxT("new")) {
+        addLog(wxT(" \n \nCreating new repository..."));
     } else if (op1 == wxT("push")) {
         addLog(wxT(" \n \nPushing changes from your computer..."));
     } else if (op1 == wxT("changes")) {
@@ -871,7 +890,7 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
     } else if (op1 == wxT("commit")) {
         addLog(wxT(" \n \nSending changes from your computer..."));
     }
-    showing = (op1 == wxT("update")) || (op1 == wxT("commit")) || (op1 == wxT("push")) || (op1 == wxT("pull")) || (op1 == wxT("clone"));
+    showing = (op1 == wxT("update")) || (op1 == wxT("commit")) || (op1 == wxT("push")) || (op1 == wxT("pull")) || (op1 == wxT("clone")) || (op1 == wxT("new"));
     for (int i=0; i<argc; i++) {
         //printf("[%s] ", conv(arr[i]).c_str());
         cmd[i] = (wxChar*)((const wxChar *)arr[i]);
@@ -896,13 +915,13 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
     proc->Redirect();
     //if(::wxExecute(conv(cmd), wxEXEC_ASYNC, proc) == 0){
     if(::wxExecute(cmd, wxEXEC_ASYNC, proc) == 0){
-        cerr<<"Process launch error"<<endl;
+        fprintf(stderr,"Fossil error (1)\n");
         exit(1);
     }
     reportErr = proc->GetErrorStream();
     report = proc->GetInputStream();
     if (report==NULL||reportErr==NULL) {
-        cerr<<"Process stream error"<<endl;
+        fprintf(stderr,"Fossil error (2)\n");
         exit(1);
     }
     if (!sync) {
@@ -1054,6 +1073,14 @@ bool CoopyFrame::OnInit() {
             //printf("Should push\n");
             wxCommandEvent ev;
             OnCommit(ev);
+        }
+        if (CoopyApp::fossil_action=="new") {
+            wxCommandEvent ev;
+            OnCreateRepo(ev);
+        }
+        if (CoopyApp::fossil_action=="clone") {
+            wxCommandEvent ev;
+            OnCloneRepo(ev);
         }
         if (CoopyApp::fossil_action=="pull") {
             //printf("Should pull\n");
@@ -1558,43 +1585,77 @@ void CoopyFrame::OnReset(wxCommandEvent& ev) {
     if (dest_box) { dest_box->ChangeValue(wxT("")); }
 }
 
-bool CoopyFrame::Sync() {
-    printf("Syncing...\n");
-    retry = "clone";
-    next = "retryable";
-    //startStream();
+bool CoopyFrame::OnCloneRepo(wxCommandEvent& event) {
+    next = "";
+    retry = "";
+    string src = CoopyApp::fossil_target;
+    wxURL url = conv(src);
+    if (!url.HasScheme()) {
+        wxChar sep = wxFileName::GetPathSeparator();
+        wxFileName name = wxFileName::FileName(conv(src));
+        if (!wxFile::Exists(name.GetFullPath())) {
+            src = src + conv(sep) + "repository.coopy";
+        }
+    }
     if (havePath()) {
-        printf("Should pull %s\n", path.c_str());
         wxChar sep = wxFileName::GetPathSeparator();
         wxString target = conv(path) + sep + wxT("repository.coopy");
         if (!wxFileExists(target)) {
-            wxString target2 = conv(path) + sep + wxT("clone.fossil");
-            if (wxFileExists(target2)) {
-                target = target2;
-            }
+            int argc = 4;
+            string t = conv(target);
+            char *argv[] = {
+                fossil(),
+                (char*)"clone",
+                (char*)src.c_str(),
+                (char*)t.c_str(),
+                NULL };
+            ssfossil(argc,argv,true);
         }
-        string ctarget = conv(target);
         if (!wxFileExists(target)) {
-            printf("Could not find %s\n", ctarget.c_str());
-            if (haveSource()) {
-                printf("Need to clone %s\n", ctarget.c_str());
-                int argc = 4;
-                char *argv[] = {
-                    fossil(),
-                    (char*)"clone",
-                    (char*)source.c_str(),
-                    (char*)ctarget.c_str(),
-                    NULL };
-                //for (int i=0; i<argc; i++) {
-                    //printf("HAVE %s\n", argv[i]);
-                //}
-                next = "sync";
-                ssfossil(argc,argv);
-                return true;
-            } else {
-                return false;
-            }
+            exit(1);
         }
+        return OnOpenRepo(false);
+    }
+    return false;
+}
+
+bool CoopyFrame::OnCreateRepo(wxCommandEvent& event) {
+    next = "";
+    retry = "";
+    if (havePath()) {
+        wxChar sep = wxFileName::GetPathSeparator();
+        wxString target = conv(path) + sep + wxT("repository.coopy");
+        if (!wxFileExists(target)) {
+            int argc = 3;
+            string t = conv(target);
+            char *argv[] = {
+                fossil(),
+                (char*)"new",
+                (char*)t.c_str(),
+                NULL };
+            ssfossil(argc,argv,true);
+        }
+        if (!wxFileExists(target)) {
+            exit(1);
+        }
+        /*
+        if (wxFileExists(target)) {
+            Sync();
+        }
+        */
+        next = "";
+        return OnOpenRepo(false);
+    }
+    return false;
+}
+
+
+bool CoopyFrame::OnOpenRepo(bool back) {
+    if (havePath()) {
+        printf("Should open %s\n", path.c_str());
+        wxChar sep = wxFileName::GetPathSeparator();
+        wxString target = conv(path) + sep + wxT("repository.coopy");
+        string ctarget = conv(target);
         if (wxFileExists(target)) {
             wxString view_target = conv(path) + sep + wxT("_FOSSIL_");
             if (!wxFileExists(view_target)) {
@@ -1605,9 +1666,13 @@ bool CoopyFrame::Sync() {
                     (char*)"open",
                     (char*)ctarget.c_str(),
                     NULL };
-                next = "sync";
-                ssfossil(argc,argv);
-                return true;
+                if (back) {
+                    next = "sync";
+                }
+                ssfossil(argc,argv,true);
+                if (back) {
+                    return true;
+                }
             }
             if (wxFileExists(view_target)) {
                 // make sure we have autosync
@@ -1625,15 +1690,47 @@ bool CoopyFrame::Sync() {
                 int argc = 2;
                 char *argv[] = {
                     fossil(),
-                    (char*)"pull",
+                    (char*)"update",
                     NULL };
-                next = "view_sync";
-                ssfossil(argc,argv);
+                if (back) {
+                    next = "view_sync";
+                }
+                ssfossil(argc,argv,!back);
             }
         }
     }
-    //updateSettings(true);
-    //endStream();
+}
+
+bool CoopyFrame::Sync() {
+    printf("Syncing...\n");
+    retry = "clone";
+    next = "retryable";
+    if (havePath()) {
+        printf("Should pull %s\n", path.c_str());
+        wxChar sep = wxFileName::GetPathSeparator();
+        wxString target = conv(path) + sep + wxT("repository.coopy");
+        string ctarget = conv(target);
+        if (!wxFileExists(target)) {
+            printf("Could not find %s\n", ctarget.c_str());
+            if (haveSource()) {
+                printf("Need to clone %s\n", ctarget.c_str());
+                int argc = 4;
+                char *argv[] = {
+                    fossil(),
+                    (char*)"clone",
+                    (char*)source.c_str(),
+                    (char*)ctarget.c_str(),
+                    NULL };
+                next = "sync";
+                ssfossil(argc,argv);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        next = "sync";
+        return OnOpenRepo(true);
+    }
     return false;
 }
 

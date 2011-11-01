@@ -14,7 +14,9 @@ cd $BASE || exit 1
 mkdir -p store
 cd store || exit 1
 echo "* Creating empty repository in $PWD"
-fossil new repository.coopy || exit 1
+coopy --new || exit 1
+echo " "
+# fossil new repository.coopy || exit 1
 
 # fossil gets upset if ancestor isn't clearly older
 sleep 1
@@ -25,8 +27,10 @@ mkdir -p clone1
 cd clone1 || exit 1
 CLONE1=$PWD
 echo "* Cloning repository in $PWD"
-fossil clone ../store/repository.coopy repository.coopy || exit 1
-fossil open repository.coopy || exit 1
+coopy --clone=../store
+#fossil clone ../store/repository.coopy repository.coopy || exit 1
+#fossil open repository.coopy || exit 1
+echo " "
 
 # clone and view repository in "clone2"
 cd $BASE
@@ -34,8 +38,10 @@ mkdir -p clone2
 cd clone2 || exit 1
 CLONE2=$PWD
 echo "* Cloning repository in $PWD"
-fossil clone ../store/repository.coopy repository.coopy || exit 1
-fossil open repository.coopy || exit 1
+coopy --clone=../store
+#fossil clone ../store/repository.coopy repository.coopy || exit 1
+#fossil open repository.coopy || exit 1
+echo " "
 
 # okay, we are ready to start pushing data
 cd $CLONE1 || exit 1
