@@ -348,7 +348,7 @@ bool WideSheetManager::mergeToLocal(const char *localName,
     pivot = &_local;
   }
 
-  SheetPatcher *diff = SheetPatcher::createForApply();
+  SheetPatcher *diff = SheetPatcher::createForMerge();
   COOPY_ASSERT(diff);
   MergeOutputTdiff nested_diff;
   diff->attachBook(*local);

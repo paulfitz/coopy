@@ -26,6 +26,7 @@ get_target_property(ssdiff ssdiff LOCATION)
 get_target_property(sspatch sspatch LOCATION)
 get_target_property(ssfold ssfold LOCATION)
 get_target_property(ssmerge ssmerge LOCATION)
+get_target_property(ssresolve ssresolve LOCATION)
 if (COMPILE_GUI)
   get_target_property(coopy coopy LOCATION)
   set(coopy ${coopy} --delay)
@@ -722,7 +723,7 @@ if (COMPILE_GUI)
   IF (USE_GNUMERIC)
 
     set(TC test_coopy)
-    add_test(coopy_space_prep0 ${CMAKE_COMMAND} -E remove -f test_coopy)
+    add_test(coopy_space_prep0 ${CMAKE_COMMAND} -E remove_directory test_coopy)
     add_test(coopy_space_prep1 ${CMAKE_COMMAND} -E make_directory test_coopy)
     add_test(coopy_space_prep3 ${CMAKE_COMMAND} -E make_directory ${TC}/store)
     add_test(coopy_space_prep4 ${CMAKE_COMMAND} -E make_directory ${TC}/clone1)
@@ -758,7 +759,18 @@ if (COMPILE_GUI)
 
     add_test(coopy_space_ages_match  ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
 
+    add_test(coopy_space_conflict_change1 ${sspatch} --inplace ${TC}/people.xls --cmd "= |Name=Paul|Zip:*->07028|")
+    add_test(coopy_space_conflict_change2 ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Paul|Zip:*->99999|")
 
+    add_test(coopy_space_conflict_push1 ${coopy} -m "change ZIP" --push ${TC}/clone1)
+    add_test(coopy_space_conflict_pull1 ${coopy} --pull ${TC}/clone2)
+
+    add_test(coopy_space_conflict_unresolved ${ssresolve} ${TC}/people2.xls)
+    set_property(TEST coopy_space_conflict_unresolved PROPERTY WILL_FAIL TRUE)
+
+    add_test(coopy_space_conflict_resolve ${ssresolve} --theirs ${TC}/people2.xls)
+     add_test(coopy_space_conflict_resolved ${ssresolve} ${TC}/people2.xls)
+ 
   endif ()
 
 endif ()

@@ -3,7 +3,7 @@
 BUILD_DIR=$PWD
 BIN_DIR=$PWD/bin
 SSFORMAT=$BIN_DIR/ssformat 
-COOPY="$BIN_DIR/coopy"
+COOPY="$BIN_DIR/coopy --delay"
 
 BASE=$BUILD_DIR/test_coopy
 rm -rf $BASE
@@ -85,11 +85,9 @@ echo Success
 
 # pair of changes
 cd $BASE
-sleep 2
+sleep 1
 sspatch --inplace people.xls --cmd "= |Name=Paul|Age:*->37|"
 sspatch --inplace people2.xls --cmd "= |Name=Leo|Age:*->4|"
-sleep 2
-
 
 # commit 1
 echo "CHANGE PAUL"
@@ -100,7 +98,6 @@ $COOPY -m "change Paul" --push
 echo "CHANGE LEO"
 cd $CLONE2
 $COOPY --pull
-sleep 2
 $COOPY -m "change Leo" --push
 
 # pull 2
@@ -111,3 +108,28 @@ cd $BASE
 ssdiff --equal people.xls people2.xls || exit 1
 
 echo Success
+
+# pair of incompatible changes
+cd $BASE
+sleep 1
+sspatch --inplace people.xls --cmd "= |Name=Paul|Zip:*->07028|"
+sspatch --inplace people2.xls --cmd "= |Name=Paul|Zip:*->99999|"
+
+# commit 1
+echo "CHANGE PAUL"
+cd $CLONE1
+$COOPY -m "change Paul" --push
+
+# commit 2
+echo "CHANGE LEO"
+cd $CLONE2
+$COOPY --pull
+
+# $COOPY -m "change Leo" --push
+
+# pull 2
+# cd $CLONE1
+# $COOPY --pull
+
+# cd $BASE
+# ssdiff --equal people.xls people2.xls || exit 1

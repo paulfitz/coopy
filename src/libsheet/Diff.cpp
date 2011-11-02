@@ -41,6 +41,7 @@ static bool copyBook(PolyBook& src_book, const char *src, const char *dest,
 
 
 int Diff::apply(const Options& opt) {
+  bool resolved = true;
   bool verbose = opt.checkBool("verbose");
   bool equality = opt.checkBool("equals");
   bool resolving = opt.isResolveLike(); //opt.checkBool("resolving")
@@ -230,7 +231,24 @@ int Diff::apply(const Options& opt) {
     if (flags.remote_uri == "") {
       flags.remote_uri = flags.local_uri;
     }
-    cmp.resolve(*pivot,*local,*remote,*diff,flags);
+    if (!opt.checkBool("resolving")) {
+      vector<string> names = local->getNames();
+      for (int j=0; j<names.size(); j++) {
+	PolySheet t = local->readSheetByIndex(j);
+	t.mustHaveSchema();
+	SheetSchema *ss = t.getSchema();
+	if (ss) {
+	  for (int i=0; i<ss->getColumnCount(); i++) {
+	    string s = ss->getColumnInfo(i).getName();
+	    if (s=="_MERGE_") {
+	      resolved = false;
+	    }
+	  }
+	}
+      }
+    } else {
+      cmp.resolve(*pivot,*local,*remote,*diff,flags);
+    }
   }
 
   diff->stopOutput(output,flags);
@@ -277,6 +295,10 @@ int Diff::apply(const Options& opt) {
       fprintf(stderr,"Conflict detected.\n");
       return 1;
     }
+  }
+  if (!resolved) {
+      fprintf(stderr,"Conflict unresolved.\n");
+      return 1;
   }
 
   return 0;

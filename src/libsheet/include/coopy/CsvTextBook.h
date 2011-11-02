@@ -53,11 +53,14 @@ public:
 
   bool readCsvsData(const char *data, int len);
 
+  std::string writeCsvsData();
+
   bool writeCsvs(const char *fname) {
     return write(fname,this,compact);
   }
 
-  static bool write(const char *fname, TextBook *book, bool compact);
+  static bool write(const char *fname, TextBook *book, bool compact,
+		    std::string *output = NULL);
 
   //  virtual bool open(const Property& config);
 

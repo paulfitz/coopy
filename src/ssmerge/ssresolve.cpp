@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
     opt.addUsage("ssresolve [options] FILE");
     opt.addDescription("Resolve a file with conflicts from ssmerge.");
     opt.showOptions(OPTION_FOR_RESOLVE);
+    opt.addExample("ssresolve numbers_muddle.csv",
+		   "Check if file is resolved.").require("_numbers_muddle.csv");
     opt.addExample("ssresolve --ours numbers_muddle.csv",
 		   "Resolve conflicts in favor of local/left values.").require("_numbers_muddle.csv");
     opt.addExample("ssresolve --theirs numbers_muddle.csv",

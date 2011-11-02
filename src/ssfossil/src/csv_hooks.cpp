@@ -60,9 +60,9 @@ int blob_to_csv(Blob *pIn, CsvSheet& csv) {
   return 0;
 }
 
-int blob_to_csvs(Blob *pIn, CsvTextBook& csv) {
+int blob_to_csvs(Blob *pIn, CsvTextBook& csvs) {
   if (pIn==NULL) return -1;
-  if (!csv.readCsvsData(blob_buffer(pIn),blob_size(pIn))) {
+  if (!csvs.readCsvsData(blob_buffer(pIn),blob_size(pIn))) {
     return -1;
   }
   return 0;
@@ -70,16 +70,12 @@ int blob_to_csvs(Blob *pIn, CsvTextBook& csv) {
 
 
 void blob_show_csv(const DataSheet& csv, const SheetStyle& style, Blob *pOut) {
-  //blob_appendf(pOut,"CSV: %dx%d\n",csv.width(),csv.height());
-  //for (int y=0;y<csv.height();y++) {
-  //for (int x=0;x<csv.width();x++) {
-  //blob_appendf(pOut,"%s ",csv.cell(x,y).c_str());
-  //}
-  //blob_appendf(pOut,"\n");
-  //}
   blob_appendf(pOut,"%s",csv.encode(style).c_str());
 }
 
+void blob_show_csvs(CsvTextBook& csvs, Blob *pOut) {
+  blob_appendf(pOut,"%s",csvs.writeCsvsData().c_str());
+}
 
 /*
   return 1 if a result has been set, otherwise 0; -1 aborts.
@@ -91,18 +87,29 @@ int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut) {
     printf("VERSION 1 [%s]\n", blob_buffer(pV1));
     printf("VERSION 2 [%s]\n", blob_buffer(pV2));
   }
-  CsvSheet csv0, csv1, csv2;
-  if (blob_to_csv(pPivot,csv0)==0 && 
-      blob_to_csv(pV1,csv1)==0 && 
-      blob_to_csv(pV2,csv2)==0) {
-    SheetCompare merger;
-    MergeOutputAccum result;
+  CsvTextBook csvs0(true);
+  CsvTextBook csvs1(true);
+  CsvTextBook csvs2(true);
+  if (blob_to_csvs(pPivot,csvs0)==0 && 
+      blob_to_csvs(pV1,csvs1)==0 && 
+      blob_to_csvs(pV2,csvs2)==0) {
+    BookCompare merger;
+    Patcher *p = Patcher::createByName("merge");
+    if (!p) {
+      fprintf(stderr,"Out of memory.\n");
+      exit(1);
+    }
+    p->attachOutputBook(csvs1);
+    //MergeOutputAccum result;
     CompareFlags flags;
-    if (merger.compare(csv0,csv1,csv2,result,flags)==0) {
+    int r = merger.compare(csvs0,csvs1,csvs2,*p,flags);
+    delete p;
+    p = NULL;
+    if (r==0) {
       blob_zero(pOut);
       //blob_appendf(pOut,"Hello from %s:%d\n", __FILE__, __LINE__);
       //blob_appendf(pOut,"Conflict resolution is being modified.\n");
-      blob_show_csv(result.getSheet(),csv1.getStyle(),pOut);
+      blob_show_csvs(csvs1,pOut);
       return 1;
     }
   }

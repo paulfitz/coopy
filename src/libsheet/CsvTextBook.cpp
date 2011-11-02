@@ -35,6 +35,13 @@ bool CsvTextBook::readCsvsData(const char *data, int len) {
   return true;
 }
 
+
+std::string CsvTextBook::writeCsvsData() {
+  string result;
+  write(NULL,this,true,&result);
+  return result;
+}
+
 bool CsvTextBook::readCsvs(const char *fname) {
   if (compact) {
     clear();
@@ -83,40 +90,63 @@ bool CsvTextBook::readCsvs(const char *fname) {
   return true;
 }
 
-bool CsvTextBook::write(const char *fname, TextBook *book, bool compact) {
+bool CsvTextBook::write(const char *fname, TextBook *book, bool compact,
+			std::string *output) {
+  if (fname==NULL && output==NULL) return false;
   vector<string> names = book->getNames();
   if (compact) {
     Property p;
-    p.put("file",fname);
+    if (fname) {
+      p.put("file",fname);
+    }
     int len = (int)names.size();
     for (int i=0; i<len; i++) {
       if (book->namedSheets() || len>1) {
 	FILE *fp = NULL;
-	if (string(fname)=="-") {
-	  fp = stdout;
-	} else {
-	  fp = fopen(fname,(i>0)?"ab":"wb");
-	  if (!fp) {
-	    fprintf(stderr,"CsvTextBook: could not open %s\n", fname);
-	    return false;
+	if (fname) {
+	  if (string(fname)=="-") {
+	    fp = stdout;
+	  } else {
+	    fp = fopen(fname,(i>0)?"ab":"wb");
+	    if (!fp) {
+	      fprintf(stderr,"CsvTextBook: could not open %s\n", fname);
+	      return false;
+	    }
 	  }
 	}
 	if (i>0) {
 	  // use Windows encoding, since UNIX is more forgiving
-	  fprintf(fp," \r\n");
+	  string eol = " \r\n";
+	  if (fp) {
+	    fprintf(fp,eol.c_str());
+	  } else {
+	    *output += eol;
+	  }
 	}
 	// use Windows encoding, since UNIX is more forgiving
-	fprintf(fp,"== %s ==\r\n", names[i].c_str());
-	if (fp!=stdout) {
-	  fclose(fp);
-	  fp = NULL;
+	if (fp) {
+	  fprintf(fp,"== %s ==\r\n", names[i].c_str());
+	} else {
+	  *output += "== ";
+	  *output += names[i];
+	  *output += " ==\r\n";
+	}
+	if (fp) {
+	  if (fp!=stdout) {
+	    fclose(fp);
+	    fp = NULL;
+	  }
 	}
 	p.put("append",true);
 	p.put("mark_header",true);
       }
       PolySheet sheet = book->readSheetByIndex(i);
       dbg_printf("  writing CSVS sheet %s\n", names[i].c_str());
-      CsvFile::write(sheet,p);
+      if (!output) {
+	CsvFile::write(sheet,p);
+      } else {
+	*output += CsvFile::writeString(sheet,p);
+      }
     }
     return true;
   }

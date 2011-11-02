@@ -7,6 +7,7 @@
 
 using namespace coopy::store;
 using namespace coopy::cmp;
+using namespace std;
 
 int CsvFile::write(const DataSheet& src, const char *fname) {
   Property p;
@@ -14,25 +15,28 @@ int CsvFile::write(const DataSheet& src, const char *fname) {
   return write(src,p);
 }
 
-int CsvFile::write(const DataSheet& src, const Property& config) {
+static int write(const DataSheet& src, const Property& config,
+		 string *output) {
   dbg_printf("Writing a %dx%d csv file\n", src.width(), src.height());
   std::string fname = config.get("file",PolyValue::makeString("-")).asString();
   SheetStyle style;
   FILE *fp = NULL;
-  if (fname=="-") {
-    fp = stdout;
-    //SheetStyle style;
-    //std::string result = src.encode(style);
-    //printf("%s",result.c_str());
-  } else {
-    bool append = config.get("append",
-			     PolyValue::makeBoolean(false)).asBoolean();
-    fp = fopen(fname.c_str(),append?"ab":"wb");
-    if (!fp) {
-      fprintf(stderr,"CsvFile: could not open %s\n", fname.c_str());
-      exit(1);
+  if (!output) {
+    if (fname=="-") {
+      fp = stdout;
+      //SheetStyle style;
+      //std::string result = src.encode(style);
+      //printf("%s",result.c_str());
+    } else {
+      bool append = config.get("append",
+			       PolyValue::makeBoolean(false)).asBoolean();
+      fp = fopen(fname.c_str(),append?"ab":"wb");
+      if (!fp) {
+	fprintf(stderr,"CsvFile: could not open %s\n", fname.c_str());
+	exit(1);
+      }
+      style.setFromFilename(fname.c_str());
     }
-    style.setFromFilename(fname.c_str());
   }
   style.setFromProperty(config);
   bool wantHeader = true;
@@ -72,18 +76,35 @@ int CsvFile::write(const DataSheet& src, const Property& config) {
 	  result += "\r\n";
 	  style.setMarkHeader(false);
 	}
-	fwrite(result.c_str(),1,result.length(),fp);
+	if (fp) {
+	  fwrite(result.c_str(),1,result.length(),fp);
+	} else {
+	  *output += result;
+	}
       }
     }
   }
 
   std::string result = src.encode(style);
-  fwrite(result.c_str(),1,result.length(),fp);
-  if (fp!=stdout) {
-    fclose(fp);
-    fp = NULL;
+  if (fp) {
+    fwrite(result.c_str(),1,result.length(),fp);
+    if (fp!=stdout) {
+      fclose(fp);
+      fp = NULL;
+    }
+  } else {
+    *output += result;
   }
   return 0;
 }
 
 
+int CsvFile::write(const DataSheet& src, const Property& config) {
+  return ::write(src,config,NULL);
+}
+
+string CsvFile::writeString(const DataSheet& src, const Property& config) {
+  string result;
+  int r = ::write(src,config,&result);
+  return result;
+}
