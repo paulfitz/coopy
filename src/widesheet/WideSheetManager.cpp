@@ -322,7 +322,7 @@ bool WideSheetManager::mergeToLocal(const char *localName,
 				    const char *remoteName,
 				    const char *pivotName,
 				    const char *logName) {
-  printf("HELLO merge to local\n");
+  printf("merging...\n");
   PolyBook _pivot;
   PolyBook *pivot;
   PolyBook _local;

@@ -40,6 +40,8 @@
 #include <map>
 #include <iostream>
 
+#include <unistd.h>
+
 #include <coopy/Dbg.h>
 #include <coopy/Options.h>
 
@@ -167,6 +169,7 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
       wxCMD_LINE_VAL_STRING, 0  },
     { wxCMD_LINE_PARAM, NULL, NULL, wxT("input file"), wxCMD_LINE_VAL_STRING,
       wxCMD_LINE_PARAM_OPTIONAL },
+    { wxCMD_LINE_SWITCH, wxT("d"), wxT("delay"), wxT("add fossil delay") },
     { wxCMD_LINE_NONE },
 };
 
@@ -216,6 +219,11 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     }
     if (parser.Found(wxT("n"))) {
         fossil_action = "new";
+    }
+    if (parser.Found(wxT("d"))) {
+        // command-line use of coopy currently can run into trouble
+        // with timestamps if commands issued in quick succession
+        sleep(1);
     }
     if (parser.Found(wxT("c"),&key)) {
         fossil_action = "clone";
@@ -323,6 +331,7 @@ private:
     bool logging;
     bool showing;
     bool writeAuthorizationFailed;
+    bool writeWouldFork;
     wxString autoSyncTip;
     wxString projectCodeTip;
     list<string> results;
@@ -472,6 +481,9 @@ public:
         if (str.Contains(wxT("not authorized to write"))) {
             writeAuthorizationFailed = true;
         }
+        if (str.Contains(wxT("would fork"))) {
+            writeWouldFork = true;
+        }
         if (str.Contains(wxT("login failed"))) {
             writeAuthorizationFailed = true;
         }
@@ -529,7 +541,9 @@ public:
         bool fail = false;
         if (status!=0) {
             addLog(wxT("TROUBLE in CoopyTown..."));
-            addLog(wxT("* Is repository link valid?"));
+            if (!writeWouldFork) {
+                addLog(wxT("* Is repository link valid?"));
+            }
             //addLog(wxString(wxT("  => ")) + conv(source));
             fail = true;
             if (retry!="") {
@@ -1256,6 +1270,8 @@ bool CoopyFrame::pushListing(bool reverse) {
             wxFileName remoteName = wxFileName::FileName(conv(remote));
             if (!localName.FileExists()) continue;
             if (!remoteName.FileExists()) continue;
+            printf("local %s remote %s %d\n", local.c_str(),
+                   remote.c_str(), reverse);
             wxFileName pivotName = wxFileName::FileName(conv(remote+".pivot"));
             wxFileName markName = wxFileName::FileName(conv(remote+".mark"));
             wxFileName logName = wxFileName::FileName(conv(remote+".log"));
@@ -1281,6 +1297,11 @@ bool CoopyFrame::pushListing(bool reverse) {
                     bool ok = ws.importSheet(str.c_str());
                     if (ok) {
                         updateCache.push_back(str);
+                        if (!markName.FileExists()) {
+                            wxFile f;
+                            f.Create(markName.GetFullPath());
+                        }
+                        markName.Touch();
                     }
                 }
 
@@ -1311,11 +1332,13 @@ bool CoopyFrame::pushListing(bool reverse) {
                         wxCopyFile(remoteName.GetFullPath(),
                                    pivotName.GetFullPath(),
                                    true);
+                        /*
                         if (!markName.FileExists()) {
                             wxFile f;
                             f.Create(markName.GetFullPath());
                         }
                         markName.Touch();
+                        */
                         addLogFile(logName);
                     } else {
                         addLog(wxT("Could not merge with online version, there is a conflicting change"));
@@ -1351,6 +1374,7 @@ bool CoopyFrame::updatePivots(bool success) {
         */
         string remote = str + ".csvs";
         wxCopyFile(conv(remote),conv(remote+".pivot"),true);
+        /*
         if (success) {
             wxFileName markName(conv(remote+".mark"));
             if (!markName.FileExists()) {
@@ -1359,6 +1383,7 @@ bool CoopyFrame::updatePivots(bool success) {
             }
             markName.Touch();
         }
+        */
     }
     return true;
 }
@@ -1763,6 +1788,13 @@ void CoopyFrame::OnCreate(wxCommandEvent& event) {
 
 
 void CoopyFrame::repush(const string& retry2) {
+    if (writeWouldFork) {
+        wxMessageDialog dlg(NULL, wxT("There have been updates to the repository.\nPlease pull those updates in before pushing yours out."), wxT("Cannot push"), 
+                            wxOK|wxICON_INFORMATION);
+        dlg.ShowModal();
+        return;
+    }
+
     bool has_dir = (dir_box_path!="" && !askPath);
 
     wxString choices[] = { 
@@ -1941,6 +1973,7 @@ void CoopyFrame::OnPush(wxCommandEvent& event) {
 
 void CoopyFrame::OnCommit(wxCommandEvent& event) {
     retry = "push";
+    writeWouldFork = false;
     writeAuthorizationFailed = false;
     //printf("Should commit\n");
     //startStream();
@@ -2043,6 +2076,7 @@ CoopyFrame::CoopyFrame(const wxString& title, const wxPoint& pos, const wxSize& 
     source = "";
     commit_message = "";
 
+    writeWouldFork = false;
     writeAuthorizationFailed = false;
 
     wxMenu *menuFile = new wxMenu;

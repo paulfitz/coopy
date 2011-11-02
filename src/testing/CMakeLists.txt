@@ -28,6 +28,7 @@ get_target_property(ssfold ssfold LOCATION)
 get_target_property(ssmerge ssmerge LOCATION)
 if (COMPILE_GUI)
   get_target_property(coopy coopy LOCATION)
+  set(coopy ${coopy} --delay)
 endif ()
 
 ############################################################################
@@ -718,32 +719,47 @@ endforeach()
 
 if (COMPILE_GUI)
 
-  set(TC test_coopy)
-  add_test(coopy_space_prep0 ${CMAKE_COMMAND} -E remove -f test_coopy)
-  add_test(coopy_space_prep1 ${CMAKE_COMMAND} -E make_directory test_coopy)
-  add_test(coopy_space_prep3 ${CMAKE_COMMAND} -E make_directory ${TC}/store)
-  add_test(coopy_space_prep4 ${CMAKE_COMMAND} -E make_directory ${TC}/clone1)
-  add_test(coopy_space_prep5 ${CMAKE_COMMAND} -E make_directory ${TC}/clone2)
+  IF (USE_GNUMERIC)
 
-  add_test(coopy_space_new ${coopy} --new ${TC}/store)
-  add_test(coopy_space_clone1 ${coopy} --clone=${TC}/store ${TC}/clone1)
-  add_test(coopy_space_clone2 ${coopy} --clone=${TC}/store ${TC}/clone2)
+    set(TC test_coopy)
+    add_test(coopy_space_prep0 ${CMAKE_COMMAND} -E remove -f test_coopy)
+    add_test(coopy_space_prep1 ${CMAKE_COMMAND} -E make_directory test_coopy)
+    add_test(coopy_space_prep3 ${CMAKE_COMMAND} -E make_directory ${TC}/store)
+    add_test(coopy_space_prep4 ${CMAKE_COMMAND} -E make_directory ${TC}/clone1)
+    add_test(coopy_space_prep5 ${CMAKE_COMMAND} -E make_directory ${TC}/clone2)
+    
+    add_test(coopy_space_new ${coopy} --new ${TC}/store)
+    add_test(coopy_space_clone1 ${coopy} --clone=${TC}/store ${TC}/clone1)
+    add_test(coopy_space_clone2 ${coopy} --clone=${TC}/store ${TC}/clone2)
+    
+    add_test(coopy_space_data ${ssformat} ${TESTS}/coopy/mini-people.csvs
+      ${TC}/people.xls)
+    
+    add_test(coopy_space_data_add ${coopy} --key=people --add=${TC}/people.xls ${TC}/clone1)
+    add_test(coopy_space_data_push ${coopy} -m "add people" --push ${TC}/clone1)
+    add_test(coopy_space_data_pull ${coopy} --pull ${TC}/clone2)
+    add_test(coopy_space_data_export ${coopy} --key=people --export=${TC}/people2.xls ${TC}/clone2)
 
-  add_test(coopy_space_data ${ssformat} ${TESTS}/coopy/mini-people.csvs
-    ${TC}/people.xls)
+    add_test(coopy_space_data_mod ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Noemi->Nomers|")
+    add_test(coopy_space_data_push2 ${coopy} -m "change Noemi's name" --push ${TC}/clone2)
+    add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
+    set_property(TEST coopy_space_data_changed PROPERTY WILL_FAIL TRUE)
 
-  add_test(coopy_space_data_add ${coopy} --key=people --add=${TC}/people.xls ${TC}/clone1)
-  add_test(coopy_space_data_push ${coopy} -m "add people" --push ${TC}/clone1)
-  add_test(coopy_space_data_pull ${coopy} --pull ${TC}/clone2)
-  add_test(coopy_space_data_export ${coopy} --key=people --export=${TC}/people2.xls ${TC}/clone2)
+    add_test(coopy_space_data_pull2 ${coopy} --pull ${TC}/clone1)
+    add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
 
-  add_test(coopy_space_data_mod ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Noemi->Nomers|" ${TC}/clone2)
-  add_test(coopy_space_data_push2 ${coopy} -m "change Noemi's name" --push ${TC}/clone2)
-  add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
-  set_property(TEST coopy_space_data_changed PROPERTY WILL_FAIL TRUE)
+    add_test(coopy_space_age_change1 ${sspatch} --inplace ${TC}/people.xls --cmd "= |Name=Paul|Age:*->37|")
+    add_test(coopy_space_age_change2 ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Leo|Age:*->4|")
 
-  add_test(coopy_space_data_pull2 ${coopy} --pull ${TC}/clone1)
-  add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
+    add_test(coopy_space_age_push1 ${coopy} -m "change Paul's age" --push ${TC}/clone1)
+    add_test(coopy_space_age_pull1 ${coopy} --pull ${TC}/clone2)
+    add_test(coopy_space_age_push2 ${coopy} -m "change Leo's age" --push ${TC}/clone2)
+    add_test(coopy_space_age_pull2 ${coopy} --pull ${TC}/clone1)
+
+    add_test(coopy_space_ages_match  ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
+
+
+  endif ()
 
 endif ()
 
