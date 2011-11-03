@@ -227,9 +227,14 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     }
     if (parser.Found(wxT("c"),&key)) {
         fossil_action = "clone";
-        wxFileName name = wxFileName::FileName(key);
-        name.MakeAbsolute();
-        fossil_target = conv(name.GetFullPath());
+        wxURL url = key;
+        if (!url.HasScheme()) {
+            wxFileName name = wxFileName::FileName(key);
+            name.MakeAbsolute();
+            fossil_target = conv(name.GetFullPath());
+        } else {
+            fossil_target = conv(key);
+        }
     }
     if (parser.Found(wxT("r"),&key)) {
         fossil_repo = conv(key);
@@ -585,16 +590,12 @@ public:
             if (fail) {
                 if (n=="revertable") {
                     addLog(wxT("Reverting..."));
-                    int argc = 2;
-                    char *argv[] = {
-                        fossil(),
-                        (char*)"revert",
-                        NULL };
-                    ssfossil(argc,argv,true);
-                    updatePivots(false);
+                    revert();
                     CheckEnd();
                 }
                 if (n=="retryable") {
+                    addLog(wxT("Reverting..."));
+                    revert();
                     string r = retry;
                     retry = "";
                     repush(r);
@@ -607,6 +608,16 @@ public:
             }
             background = false;
         }
+    }
+
+    void revert() {
+        int argc = 2;
+        char *argv[] = {
+            fossil(),
+            (char*)"revert",
+            NULL };
+        ssfossil(argc,argv,true);
+        updatePivots(false);
     }
 
     list<string> getChanges() {
@@ -1261,7 +1272,7 @@ bool CoopyFrame::pushListing(bool reverse) {
         //printf("checking %s\n", it->c_str());
         if (it->rfind(".csvs")!=string::npos) {
             string str = it->substr(0,it->rfind(".csvs"));
-            printf("checking %s -> %s\n", it->c_str(), str.c_str());
+            //printf("checking %s -> %s\n", it->c_str(), str.c_str());
             string local = ws.getFile(str.c_str());
             if (local=="") continue;
             string remote = *it;
@@ -1270,8 +1281,8 @@ bool CoopyFrame::pushListing(bool reverse) {
             wxFileName remoteName = wxFileName::FileName(conv(remote));
             if (!localName.FileExists()) continue;
             if (!remoteName.FileExists()) continue;
-            printf("local %s remote %s %d\n", local.c_str(),
-                   remote.c_str(), reverse);
+            //printf("local %s remote %s %d\n", local.c_str(),
+            //     remote.c_str(), reverse);
             wxFileName pivotName = wxFileName::FileName(conv(remote+".pivot"));
             wxFileName markName = wxFileName::FileName(conv(remote+".mark"));
             wxFileName logName = wxFileName::FileName(conv(remote+".log"));
@@ -1297,11 +1308,13 @@ bool CoopyFrame::pushListing(bool reverse) {
                     bool ok = ws.importSheet(str.c_str());
                     if (ok) {
                         updateCache.push_back(str);
+                        /*
                         if (!markName.FileExists()) {
                             wxFile f;
                             f.Create(markName.GetFullPath());
                         }
                         markName.Touch();
+                        */
                     }
                 }
 
@@ -1367,14 +1380,16 @@ bool CoopyFrame::updatePivots(bool success) {
          it != files.end();
          it++) {
         string str = (*it);
+
         /*
         printf("update pivot for %s: %s\n", 
                success?"success":"failure",
                str.c_str());
         */
+
         string remote = str + ".csvs";
         wxCopyFile(conv(remote),conv(remote+".pivot"),true);
-        /*
+
         if (success) {
             wxFileName markName(conv(remote+".mark"));
             if (!markName.FileExists()) {
@@ -1383,7 +1398,6 @@ bool CoopyFrame::updatePivots(bool success) {
             }
             markName.Touch();
         }
-        */
     }
     return true;
 }
@@ -1483,6 +1497,8 @@ bool CoopyFrame::openFile(const wxString& str, bool export_only) {
         if (fname!="") {
             ws.setFile(key.c_str(),fname.c_str());
             ws.exportSheet(key.c_str());
+            updateCache.push_back(key);
+            updatePivots(true);
         } else {
             return false;
         }
@@ -1554,7 +1570,7 @@ string("http://") +
         }
     }
 
-    printf("Source is %s\n", source.c_str());
+    //printf("Source is %s\n", source.c_str());
 
     return source!="";
 }
@@ -1677,7 +1693,7 @@ bool CoopyFrame::OnCreateRepo(wxCommandEvent& event) {
 
 bool CoopyFrame::OnOpenRepo(bool back) {
     if (havePath()) {
-        printf("Should open %s\n", path.c_str());
+        //printf("Should open %s\n", path.c_str());
         wxChar sep = wxFileName::GetPathSeparator();
         wxString target = conv(path) + sep + wxT("repository.coopy");
         string ctarget = conv(target);
@@ -1695,9 +1711,9 @@ bool CoopyFrame::OnOpenRepo(bool back) {
                     next = "sync";
                 }
                 ssfossil(argc,argv,true);
-                if (back) {
-                    return true;
-                }
+                //if (back) {
+                //return true;
+                //}
             }
             if (wxFileExists(view_target)) {
                 // make sure we have autosync
@@ -1723,22 +1739,27 @@ bool CoopyFrame::OnOpenRepo(bool back) {
                 ssfossil(argc,argv,!back);
             }
         }
+        if (!back) {
+            updateSettings(true);
+            updateListing();
+            pushListing(true);
+        }
     }
 }
 
 bool CoopyFrame::Sync() {
-    printf("Syncing...\n");
+    //printf("Syncing...\n");
     retry = "clone";
     next = "retryable";
     if (havePath()) {
-        printf("Should pull %s\n", path.c_str());
+        //printf("Should pull %s\n", path.c_str());
         wxChar sep = wxFileName::GetPathSeparator();
         wxString target = conv(path) + sep + wxT("repository.coopy");
         string ctarget = conv(target);
         if (!wxFileExists(target)) {
-            printf("Could not find %s\n", ctarget.c_str());
+            //printf("Could not find %s\n", ctarget.c_str());
             if (haveSource()) {
-                printf("Need to clone %s\n", ctarget.c_str());
+                //printf("Need to clone %s\n", ctarget.c_str());
                 int argc = 4;
                 char *argv[] = {
                     fossil(),
@@ -1792,8 +1813,10 @@ void CoopyFrame::repush(const string& retry2) {
         wxMessageDialog dlg(NULL, wxT("There have been updates to the repository.\nPlease pull those updates in before pushing yours out."), wxT("Cannot push"), 
                             wxOK|wxICON_INFORMATION);
         dlg.ShowModal();
+        CheckEnd();
         return;
     }
+    CheckEnd();
 
     bool has_dir = (dir_box_path!="" && !askPath);
 
@@ -1835,7 +1858,7 @@ void CoopyFrame::repush(const string& retry2) {
         source = conv(autoSyncTip);
     }
     wxURL url = conv(source);
-    printf("source is %s\n", source.c_str());
+    //printf("source is %s\n", source.c_str());
 
     if (choice==CHOICE_DIR) {
         askPath = true;
@@ -1935,7 +1958,7 @@ void CoopyFrame::repush(const string& retry2) {
         current = protocol + wxT("://") + current;
     }
     source = conv(current);
-    printf("Source set to %s\n", source.c_str());
+    //printf("Source set to %s\n", source.c_str());
 
     /*
         source = string("http://") +

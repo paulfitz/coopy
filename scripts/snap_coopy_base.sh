@@ -57,6 +57,10 @@ rm -f $base*.png
 function snapper() {
     scrot -u "$1$2.png"
 }
+function no_coopy() {
+    killall coopy 2> /dev/null
+    killall -9 coopy 2> /dev/null
+}
 snapshot="snapper"
 
 default_size="628 300"
@@ -72,7 +76,8 @@ rm -rf coopy_demo
 mkdir coopy_demo
 cd coopy_demo
 
-killall coopy 2> /dev/null
-killall -9 coopy 2> /dev/null
-$coopy &
+no_coopy
+if [ "k$NO_AUTOSTART" = "k" ]; then
+  $coopy &
+fi
 
