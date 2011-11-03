@@ -254,7 +254,12 @@ bool PatchParser::apply() {
   if (fname!="") {
     sniffer.open(fname.c_str());
   } else {
-    sniffer.setString(oneliner.c_str());
+    string txt = "";
+    for (int i=0; i<(int)oneliners.size(); i++) {
+      txt += oneliners[i];
+      txt += "\n";
+    }
+    sniffer.setString(txt.c_str());
   }
 
   Format format = sniffer.getFormat();

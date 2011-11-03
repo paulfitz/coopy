@@ -20,12 +20,16 @@ public:
   Patcher *patcher;
   coopy::store::Property config;
   std::string fname;
-  std::string oneliner;
+  std::vector<std::string> oneliners;
 
   PatchParser(Patcher *patcher,
-	      const std::string& fname,
-	      const std::string& cmd) : 
-    patcher(patcher), fname(fname), oneliner(cmd)
+	      const std::vector<std::string>& cmd) : 
+    patcher(patcher), oneliners(cmd)
+    {}
+
+  PatchParser(Patcher *patcher,
+	      const std::string& fname) :
+    patcher(patcher), fname(fname)
     {}
     
   bool apply();

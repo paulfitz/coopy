@@ -818,7 +818,8 @@ int Options::apply(int argc, char *argv[]) {
       option_string["version"] = optarg;
       break;
     case 'x':
-      option_string["cmd"] = optarg;
+      option_bool["cmd"] = true;
+      addStringToList("cmd",optarg);
       break;
 
     case 'l':

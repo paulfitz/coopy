@@ -48,7 +48,7 @@ int Diff::apply(const Options& opt) {
   std::string output = opt.checkString("output","-");
   std::string parent_file = opt.checkString("parent");
   std::string patch_file = opt.checkString("patch");
-  std::string cmd = opt.checkString("cmd");
+  bool have_cmd = opt.isStringList("cmd");
   std::string version = opt.checkString("version");
   std::string tmp = opt.checkString("tmp","");
   std::string resolve = opt.checkString("resolve","");
@@ -71,7 +71,7 @@ int Diff::apply(const Options& opt) {
   }
   if (opt.isPatchLike()) {
     if (core.size()>0) {
-      if (cmd==""||core.size()>1) {
+      if ((!have_cmd)||core.size()>1) {
 	patch_file = core.back();
 	core.erase(core.begin()+core.size()-1);
       }
@@ -216,12 +216,18 @@ int Diff::apply(const Options& opt) {
   }
 
   if (!resolving) {
-    if (patch_file==""&&cmd=="") {
+    if (patch_file==""&&(!have_cmd)) {
       cmp.compare(*pivot,*local,*remote,*diff,flags);
     } else {
       diff->setFlags(flags);
-      PatchParser parser(diff,patch_file,cmd);
-      bool ok = parser.apply();
+      bool ok = false;
+      if (have_cmd) {
+	PatchParser parser(diff,opt.getStringList("cmd"));
+	ok = parser.apply();
+      } else {
+	PatchParser parser(diff,patch_file);
+	ok = parser.apply();
+      }
       if (!ok) {
 	fprintf(stderr,"Patch failed\n");
       }

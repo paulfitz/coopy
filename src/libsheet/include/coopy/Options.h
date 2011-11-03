@@ -79,9 +79,24 @@ public:
     option_bool[name] = val;
   }
 
+  void addStringToList(const char *name, const char *val) {
+    if (option_list.find(name)==option_list.end()) {
+      option_list[name] = std::vector<std::string>();
+    }
+    option_list[name].push_back(val);
+  }
+
   std::string checkString(const char *name, const char *fallback="") const { 
     if (option_string.find(name)==option_string.end()) return fallback;
     return option_string.find(name)->second; 
+  }
+
+  bool isStringList(const char *name) const {
+    return option_list.find(name)!=option_list.end();
+  }
+
+  const std::vector<std::string>& getStringList(const char *name) const {
+    return option_list.find(name)->second;
   }
 
   bool isVerbose() const { return checkBool("verbose"); }
@@ -166,6 +181,7 @@ private:
   coopy::cmp::CompareFlags flags;
   std::map<std::string,bool> option_bool;
   std::map<std::string,std::string> option_string;
+  std::map<std::string,std::vector<std::string> > option_list;
   coopy::store::PolyBook mapping;
   std::vector<Option> opts;
   std::vector<Example> examples;
