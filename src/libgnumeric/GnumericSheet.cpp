@@ -216,6 +216,7 @@ public:
 
   GnumericAppearance(GnumericSheetPtr sheet, int x, int y, int mode) : 
     sheet(sheet),x(x), y(y), mode(mode) {
+    style = 0/*NULL*/;
   }
 
   bool begin() {

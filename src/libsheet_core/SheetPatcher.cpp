@@ -384,14 +384,16 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
       }
       activeRow.cellString(0,r,init);
       if (change.conflicted) {
-	Poly<Appearance> appear = sheet.getCellAppearance(0,r);
-	if (appear.isValid()) {
-	  appear->begin();
-	  appear->setBackgroundRgb16(FULL_COLOR,
-				     0,
-				     0,
-				     AppearanceRange::full());
-	  appear->end();
+	if (descriptive) {
+	  Poly<Appearance> appear = sheet.getCellAppearance(0,r);
+	  if (appear.isValid()) {
+	    appear->begin();
+	    appear->setBackgroundRgb16(FULL_COLOR,
+				       0,
+				       0,
+				       AppearanceRange::full());
+	    appear->end();
+	  }
 	}
       }
       if (descriptive) {
@@ -429,6 +431,18 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
       } else {
 	if (change.conflicted) {
 	  sheet.cellSummary(conflictColumn,r,SheetCell("CONFLICT",false));
+	  //printf("AT %d %d\n", conflictColumn,r);
+
+	  Poly<Appearance> appear = sheet.getCellAppearance(conflictColumn,r);
+	  if (appear.isValid()) {
+	    appear->begin();
+	    appear->setBackgroundRgb16(HALF_COLOR,
+				       HALF_COLOR,
+				       FULL_COLOR,
+				       AppearanceRange::full());
+	    appear->end();
+	  }
+
 	  SheetCell from = pval[c];
 	  SheetCell to = val[c];
 	  SheetCell alt = cval[c];
@@ -437,6 +451,15 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
 	      "((( " + from.toString() + " ))) " +
 	      to.toString() + " /// " + alt.toString();
 	    sheet.cellSummary(c,r,SheetCell(ctxt,false));
+	    Poly<Appearance> appear = sheet.getCellAppearance(c,r);
+	    if (appear.isValid()) {
+	      appear->begin();
+	      appear->setBackgroundRgb16(FULL_COLOR,
+					 HALF_COLOR,
+					 HALF_COLOR,
+					 AppearanceRange::full());
+	      appear->end();
+	    }
 	  }
 	} else {
 	  sheet.cellSummary(c,r,val[c]);
