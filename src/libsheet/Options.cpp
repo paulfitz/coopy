@@ -549,7 +549,8 @@ static void generateNumbers(CsvSheet& csv, bool buggy, bool addy,
       fprintf(stderr,"* cannot make what you want\n");
       exit(1);
     }
-    csv.cellString(1,4,"444");
+    csv.deleteRow(RowRef(3));
+    csv.cellString(1,3,"444");
   }
 }
 

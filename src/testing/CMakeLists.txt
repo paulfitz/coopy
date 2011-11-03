@@ -791,5 +791,26 @@ ADD_TEST(example_ssmerge1_compare ${ssdiff} --equals
   example_ssmerge1.csv
   ${TESTS}/examples/numbers_more.csv)
 
+ADD_TEST(example_ssmerge2 ${ssmerge} 
+  --output example_ssmerge2.csv
+  ${TESTS}/examples/numbers_buggy.csv 
+  ${TESTS}/examples/numbers.csv 
+  ${TESTS}/examples/numbers_conflict.csv)
+SET_PROPERTY(TEST example_ssmerge2 PROPERTY WILL_FAIL TRUE)
+
+foreach (RESOLVER ours theirs neither)
+
+  ADD_TEST(example_ssmerge_${RESOLVER} ${ssmerge} 
+    --output example_ssmerge_${RESOLVER}.csv
+    --${RESOLVER}
+    ${TESTS}/examples/numbers_buggy.csv 
+    ${TESTS}/examples/numbers.csv 
+    ${TESTS}/examples/numbers_conflict.csv)
+
+  ADD_TEST(example_ssmerge_${RESOLVER}_compare ${ssdiff} --equals 
+    example_ssmerge_${RESOLVER}.csv
+    ${TESTS}/examples/numbers_merge_${RESOLVER}.csv)
+
+endforeach()
 
 

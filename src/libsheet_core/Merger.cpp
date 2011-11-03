@@ -209,7 +209,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 		  _l = _r;
 		  change = true;
 		  novel = true;
-		} else if (resolve=="parent") {
+		} else if (resolve=="neither") {
 		  _l = _p;
 		  change = true;
 		  novel = true;
