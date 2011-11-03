@@ -60,6 +60,8 @@ function snapper() {
 function no_coopy() {
     killall coopy 2> /dev/null
     killall -9 coopy 2> /dev/null
+    killall gnumeric 2> /dev/null
+    killall -9 gnumeric 2> /dev/null
 }
 snapshot="snapper"
 

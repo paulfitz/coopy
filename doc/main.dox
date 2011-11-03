@@ -24,6 +24,7 @@ The COOPY project contains programs and libraries to help you:
 \li \ref tutorial_coopy_new
 \li \ref tutorial_coopy_push
 \li \ref tutorial_coopy_fork
+\li \ref tutorial_coopy_conflict
 \li \ref tutorial_git
 
 \section mainpage_basic Command line tools
