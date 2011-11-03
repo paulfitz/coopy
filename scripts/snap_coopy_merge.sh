@@ -18,18 +18,18 @@ cd $C1
 coopy --clone=http://coopy:coopy@localhost:8080 || exit 1
 coopy --export=numbers.xls --key=numbers || exit 1
 sleep 1
-sspatch --inplace numbers.xls --cmd "= |DIGIT=4->9|"
+sspatch --inplace numbers.xls --cmd "+ |spam|42|" --cmd "- |DIGIT=3|" --cmd "= |DIGIT=5->55|"
 coopy --push -m "better starting point"
 
 cd $C2
 coopy --clone=http://coopy:coopy@localhost:8080 || exit 1
 coopy --export=numbers2.xls --key=numbers || exit 1
 
-snap_xls $C1/numbers.xls conflicted_start
-sspatch --inplace $C1/numbers.xls --cmd "= |DIGIT=9->4|"
-snap_xls $C1/numbers.xls conflicted_theirs
-sspatch --inplace $C2/numbers2.xls --cmd "= |DIGIT=9->44|"
-snap_xls $C2/numbers2.xls conflicted_ours
+snap_xls $C1/numbers.xls merged_start
+sspatch --inplace $C1/numbers.xls --cmd "* |NAME=*|DIGIT=2|" --cmd "+ |three|3|"
+snap_xls $C1/numbers.xls merged_theirs
+sspatch --inplace $C2/numbers2.xls --cmd "- |NAME=spam|" --cmd "= |DIGIT=55->5|"
+snap_xls $C2/numbers2.xls merged_ours
 
 cd $C1
 coopy --push -m "mod1"
@@ -45,4 +45,4 @@ sleep 1
 cd $C2
 coopy --pull 
 
-snap_xls numbers2.xls conflicted_excel
+snap_xls numbers2.xls merged_excel

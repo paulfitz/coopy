@@ -57,12 +57,27 @@ rm -f $base*.png
 function snapper() {
     scrot -u "$1$2.png"
 }
+
 function no_coopy() {
     killall coopy 2> /dev/null
     killall -9 coopy 2> /dev/null
     killall gnumeric 2> /dev/null
     killall -9 gnumeric 2> /dev/null
 }
+
+function snap_xls() {
+    no_coopy
+    gnumeric $1&
+    sleep 2
+    dlg=`$mark`
+    xdotool getactivewindow windowsize $default_size
+    $tick
+    $focus $dlg
+    xdotool key Down Down Down Down Right
+    $snapshot $base $2
+    no_coopy
+}
+
 snapshot="snapper"
 
 default_size="628 300"
