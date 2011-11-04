@@ -267,7 +267,9 @@ void OptionRenderDoxygen::render(const Options& opt) {
     printf("You can generate test file(s) for the examples that follow:\n");
     printf("\\verbatim\n");
     for (int i=0; i<(int)reqs.size(); i++) {
-      printf("%s --test-file %s\n", opt.getName().c_str(), reqs[i].c_str());
+      if (reqs[i][0]!='_') {
+	printf("%s --test-file %s\n", opt.getName().c_str(), reqs[i].c_str());
+      }
     }
     printf("\\endverbatim\n");
     printf("\n\n");

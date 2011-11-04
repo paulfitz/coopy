@@ -28,6 +28,8 @@ if (DOXYGEN_EXE)
   foreach (mode html latex man)
     string(TOUPPER ${mode} mode_upper)
     set(ENABLED_SECTIONS)
+    set(INPUT "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/doc")
+    set(RECURSIVE YES)
     set(EXCLUDE)
     set(GENERATE_LATEX NO)
     set(GENERATE_HTML NO)
@@ -38,11 +40,19 @@ if (DOXYGEN_EXE)
       set(ENABLED_SECTIONS "link_code link_examples link_internal")
     endif ()
     if (GENERATE_LATEX)
+      include(CoopyDocLatex)
+      set(INPUT ${CMAKE_SOURCE_DIR}/doc/images)
+      foreach (i ${LATEX_MANUAL_DOCS})
+	set(INPUT "${INPUT} ${CMAKE_SOURCE_DIR}/doc/${i}")
+      endforeach()
+      set(RECURSIVE YES)
       set(FILE_PATTERNS "*.dox")
       set(ENABLED_SECTIONS "link_internal")
-      set(EXCLUDE "${CMAKE_SOURCE_DIR}/doc/generated_examples/merge_example_big_merge_with_lots_of_changes.dox ${CMAKE_SOURCE_DIR}/doc/example.dox ${CMAKE_SOURCE_DIR}/doc/diff_example.dox ${CMAKE_SOURCE_DIR}/doc/merge_example.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_csv_v_0_2.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_human.dox")
+      set(EXCLUDE "${CMAKE_SOURCE_DIR}/doc/generated_examples/merge_example_big_merge_with_lots_of_changes.dox ${CMAKE_SOURCE_DIR}/doc/example.dox ${CMAKE_SOURCE_DIR}/doc/diff_example.dox ${CMAKE_SOURCE_DIR}/doc/merge_example.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_csv_v_0_2.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_csv_v_0_4.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_csv.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_human.dox")
     endif ()
     if (GENERATE_MAN)
+      set(INPUT "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/doc")
+      set(RECURSIVE YES)
       set(FILE_PATTERNS "cmd_*.dox")
       set(ENABLED_SECTIONS "link_internal")
     endif ()
@@ -55,10 +65,15 @@ if (DOXYGEN_EXE)
     configure_file(${CMAKE_SOURCE_DIR}/conf/coopy_doxygen.conf.in
       ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf IMMEDIATE)
 
+    make_directory(${CMAKE_BINARY_DIR}/layout/${mode})
 
     add_custom_target(${mode} 
       COMMAND ${DOXYGEN_EXE} ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf
       DEPENDS ${PARADOXES})
+
+    add_custom_target(${mode}_layout
+      COMMAND ${DOXYGEN_EXE} -l ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf
+      DEPENDS ${PARADOXES} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/layout/${mode})
 
   endforeach ()
 endif ()

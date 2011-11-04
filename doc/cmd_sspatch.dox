@@ -62,7 +62,6 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
 \section sspatch_examples Examples
 You can generate test file(s) for the examples that follow:
 \verbatim
-sspatch --test-file _numbers_patch.tdiff
 sspatch --test-file numbers.csv
 sspatch --test-file numbers_buggy.csv
 sspatch --test-file numbers_buggy.sqlite
@@ -230,7 +229,7 @@ MYSQL: database connector<br />
 
 
 \section sspatch_version Version
-sspatch version 0.5.7
+sspatch version 0.5.8
 
 
  *

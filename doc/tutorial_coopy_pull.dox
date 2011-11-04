@@ -15,6 +15,7 @@ same repository.
 When you start the \ref coopy program, you see something like this:
 
 \image html screenshot/coopy_main.png "Here's Coopy!"
+\image latex screenshot/coopy_main.pdf "Here's Coopy!" width=10cm
 
 Here are the main parts of the interface:
  \li Buttons!  
@@ -30,6 +31,7 @@ Click on the "Pull in" button to pull data in to your computer from
 the web, and you'll see:
 
 \image html screenshot/coopy_pull.png "Select or create an empty directory."
+\image latex screenshot/coopy_pull.pdf "Select or create an empty directory." width=10cm
 
 What Coopy is looking for here is a fresh, clean,
 empty directory in which to store a bunch of repository files.  
@@ -39,6 +41,7 @@ Once you've given Coopy an empty directory to fool around in, you're
 prompted for an address of a repository:
 
 \image html screenshot/coopy_open.png "What to put here?"
+\image latex screenshot/coopy_open.pdf "What to put here?" width=6cm
 
 What the heck do we put here?  Repositories live on the web, and
 have addresses like any webpage.  We could make our own
@@ -53,11 +56,13 @@ poking around there yet, we'll come back to it later.  For now, just
 paste in the link to Coopy:
 
 \image html screenshot/coopy_open2.png "Fill in demo repository link."
+\image latex screenshot/coopy_open2.pdf "Fill in demo repository link." width=6cm
 
 Click OK, and Coopy chirps away merrily to itself, throwing 
 messages into the activity log:
 
 \image html screenshot/coopy_after_pull.png "Our first repository has arrived!"
+\image latex screenshot/coopy_after_pull.pdf "Our first repository has arrived!" width=10cm
 
 No error messages, that's good.  The "Spreadsheets/Tables" area has 
 changed.  It gives a list of databases in the repository.
@@ -66,6 +71,7 @@ and you're asked where you want to save the database, and in what
 format:
 
 \image html screenshot/coopy_save_as.png "Save database as..."
+\image latex screenshot/coopy_save_as.pdf "Save database as..." width=10cm
 
 You can choose to save the database in a number of formats: principally
 Excel, Sqlite, or CSV (for single-table databases).  The choice is yours.  
@@ -74,6 +80,7 @@ whatever you use to view spreadsheets on your computer (if you have
 nothing, install OpenOffice, Gnumeric, or something along those lines).
 
 \image html screenshot/coopy_xls.png "The numbers spreadsheet."
+\image latex screenshot/coopy_xls.pdf "The numbers spreadsheet." width=10cm
 
 What happens when we start making changes in the spreadsheet?  That's
 the topic of this tutorial: \ref tutorial_coopy_push.

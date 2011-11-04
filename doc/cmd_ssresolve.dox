@@ -53,7 +53,6 @@ Resolve a file with conflicts from ssmerge.
 \section ssresolve_examples Examples
 You can generate test file(s) for the examples that follow:
 \verbatim
-ssresolve --test-file _numbers_muddle.csv
 ssresolve --test-file numbers.csv
 ssresolve --test-file numbers_buggy.csv
 ssresolve --test-file numbers_conflict.csv
@@ -64,6 +63,16 @@ ssresolve --test-file numbers_conflict.csv
 
 \subsection ssresolve_examples_1 Example 1
 \verbatim
+ssresolve numbers_muddle.csv
+\endverbatim
+Check if file is resolved.
+
+
+
+
+
+\subsection ssresolve_examples_2 Example 2
+\verbatim
 ssresolve --ours numbers_muddle.csv
 \endverbatim
 Resolve conflicts in favor of local/left values.
@@ -72,7 +81,7 @@ Resolve conflicts in favor of local/left values.
 
 
 
-\subsection ssresolve_examples_2 Example 2
+\subsection ssresolve_examples_3 Example 3
 \verbatim
 ssresolve --theirs numbers_muddle.csv
 \endverbatim
@@ -82,7 +91,7 @@ Resolve conflicts in favor of remote/right values.
 
 
 
-\subsection ssresolve_examples_3 Example 3
+\subsection ssresolve_examples_4 Example 4
 \verbatim
 ssresolve --neither numbers_muddle.csv
 \endverbatim
@@ -171,7 +180,7 @@ MYSQL: database connector<br />
 
 
 \section ssresolve_version Version
-ssresolve version 0.5.7
+ssresolve version 0.5.8
 
 
  *

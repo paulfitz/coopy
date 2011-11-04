@@ -58,7 +58,6 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 \section ssrediff_examples Examples
 You can generate test file(s) for the examples that follow:
 \verbatim
-ssrediff --test-file _numbers_patch.tdiff
 ssrediff --test-file numbers.csv
 ssrediff --test-file numbers_buggy.csv
 \endverbatim
@@ -175,7 +174,7 @@ MYSQL: database connector<br />
 
 
 \section ssrediff_version Version
-ssrediff version 0.5.7
+ssrediff version 0.5.8
 
 
  *

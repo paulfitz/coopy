@@ -1,0 +1,14 @@
+tutorial_coopy_pull
+tutorial_coopy_new
+tutorial_coopy_push
+tutorial_coopy_fork
+tutorial_coopy_conflict
+tutorial_diff
+ssdiff
+sspatch
+ssmerge
+ssresolve
+ssformat
+ssrediff
+ssfossil
+coopy
