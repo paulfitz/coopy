@@ -71,11 +71,12 @@ if (DOXYGEN_EXE)
       COMMAND ${DOXYGEN_EXE} ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf
       DEPENDS ${PARADOXES})
 
-    add_custom_target(${mode}_layout
-      COMMAND ${DOXYGEN_EXE} -l ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf
-      DEPENDS ${PARADOXES} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/layout/${mode})
-
   endforeach ()
+endif ()
+
+if (DOXYGEN_TRICKS)
+  add_custom_target(xpdf 
+    COMMAND ${CMAKE_SOURCE_DIR}/scripts/make_pdf.sh)
 endif ()
 
 configure_file(${CMAKE_SOURCE_DIR}/doc/tdiff/tdiff_spec_draft.html

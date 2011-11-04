@@ -24,11 +24,24 @@ for f in `cd $DOC; ls *.dox`; do
 	    if [ ! "k$m" = "k0" ] ; then
 		echo "$line"
 		img=`echo "$line" | sed "s/.* html //" | sed "s/.png .*//"`
-		conv="convert $IMAGE/$img.png $IMAGE_OUT/$img.pdf"
-		width=`identify -format "%w" $IMAGE/$img.png`
-		let cm=$width/60
-		# echo "$conv" 1>&2
-		$conv
+		need_update=true
+		if [ -e $IMAGE_OUT/$img.png.mark.png ]; then
+		    if [ $IMAGE_OUT/$img.png.mark.png -nt $IMAGE/$img.png ]; then
+			need_update=false
+			# echo "SKIPPY $img" 1>&2
+		    fi
+		fi
+		let cm=1
+		if $need_update; then
+		    echo "UPDATING $img" 1>&2
+		    convert $IMAGE/$img.png $IMAGE_OUT/$img.pdf || exit 1
+		    cp $IMAGE/$img.png $IMAGE_OUT/$img.png.mark.png
+		    width=`identify -format "%w" $IMAGE/$img.png`
+		    let cm=$width/60
+		    echo $cm > $IMAGE_OUT/$img.png.width
+		else
+		    cm=`cat $IMAGE_OUT/$img.png.width`
+		fi
 		echo "$line" | sed "s/ html / latex /" | sed "s/\.png/.pdf/" | sed "s/$/ width=${cm}cm/"
 	    else
 		m=`expr match "$line" ".*image latex"`
