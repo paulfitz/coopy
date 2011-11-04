@@ -21,7 +21,11 @@ echo  "# from doc/pdf_order.txt" >> $LIST_FILE
 echo -n "set (LATEX_MANUAL_DOCS" >> $LIST_FILE
 cd ../doc || exit 1
 for tag in `cat $ORDER_FILE`; do
-    fname=`grep -l -H "@page $tag " *.dox`
+    if [ "k$tag" = "kmain" ]; then
+	fname="main.dox"
+    else
+	fname=`grep -l -H "@page $tag " *.dox`
+    fi
     echo "$tag -> $fname"
     echo -n " $fname" >> $LIST_FILE
 done

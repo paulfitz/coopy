@@ -1,9 +1,11 @@
+main
 tutorial_coopy_pull
 tutorial_coopy_new
 tutorial_coopy_push
 tutorial_coopy_fork
 tutorial_coopy_conflict
 tutorial_diff
+tutorial_git
 ssdiff
 sspatch
 ssmerge
@@ -12,3 +14,7 @@ ssformat
 ssrediff
 ssfossil
 coopy
+patch_format
+table_format
+funny_files
+related

@@ -77,6 +77,9 @@ endif ()
 if (DOXYGEN_TRICKS)
   add_custom_target(xpdf 
     COMMAND ${CMAKE_SOURCE_DIR}/scripts/make_pdf.sh)
+  add_custom_target(guide 
+    ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/gendoc/latex/refman.pdf ${CMAKE_SOURCE_DIR}/CoopyGuide.pdf
+    DEPENDS xpdf)
 endif ()
 
 configure_file(${CMAKE_SOURCE_DIR}/doc/tdiff/tdiff_spec_draft.html
