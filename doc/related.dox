@@ -5,6 +5,8 @@
 
 (limited to free and open source projects)
 
+\li <a href="http://datacouch.com">datacouch</a>, turn spreadsheets into APIs, fork datasets.
+\li <a href="http://code.google.com/p/google-refine/">google-refine</a>, a power tool for working with messy data.
 \li <a href="http://www.diffkit.org/">diffkit</a>, diff for tables, targets enterprises.
 \li <a href="http://code.google.com/p/google-diff-match-patch/">google-diff-match-patch</a>, for synchronizing plain text.
 \li <a href="http://www.thefoolonthehill.net/drupal/Spreadsheet%20Compare/">SpreadSheet Compare</a>, an Excel plugin.
