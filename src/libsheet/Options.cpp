@@ -502,6 +502,9 @@ Options::Options(const char *name) : name(name) {
   add(OPTION_PATCH_FORMAT,
       "csv",
       "csv-compatible diff format");
+  add(OPTION_PATCH_FORMAT,
+      "ops",
+      "summarize modified rows in a table");
 }
 
 std::string Options::getVersion() const {
