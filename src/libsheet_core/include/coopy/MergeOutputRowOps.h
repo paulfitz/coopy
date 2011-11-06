@@ -24,6 +24,7 @@ public:
   virtual bool setSheet(const char *name) {
     sheet_name = name;
     ops.clear();
+    return true;
   }
 
   virtual bool needOutputBook() {
