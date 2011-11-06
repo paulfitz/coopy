@@ -31,11 +31,11 @@ static bool compare_string(const SheetCell& a, const SheetCell& b,
   if (a.escaped&&b.escaped) {
     string blank = "__NOT_SET__CSVCOMPARE_SSFOSSIL";
     if (a.text!="NULL"&&a.text!=blank) {
-      printf("huh a '%s'\n", a.text.c_str());
+      printf("sorry, coopy produced an inconsistent null type (a) '%s'\n", a.text.c_str());
       exit(1);
     }
     if (b.text!="NULL"&&b.text!=blank) {
-      printf("huh b '%s'\n", b.text.c_str());
+      printf("sorry, coopy produced an inconsistent null type (b) '%s'\n", b.text.c_str());
       exit(1);
     }
   }

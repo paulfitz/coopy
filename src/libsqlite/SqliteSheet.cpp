@@ -451,7 +451,7 @@ std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
   const unsigned char *f = cacheFlag.pcell_const(x,y);
   if (f!=NULL) {
     escaped = true;
-    return "";
+    return "NULL";
   }
   const string *c = cache.pcell_const(x,y);
   if (c!=NULL) {
@@ -462,7 +462,7 @@ std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
 
   sqlite3 *db = DB(implementation);
   escaped = true;
-  if (db==NULL) return "";
+  if (db==NULL) return "NULL";
 
   sqlite3_stmt *statement = NULL;
   char *query = NULL;
