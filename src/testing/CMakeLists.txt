@@ -27,6 +27,7 @@ get_target_property(sspatch sspatch LOCATION)
 get_target_property(ssfold ssfold LOCATION)
 get_target_property(ssmerge ssmerge LOCATION)
 get_target_property(ssresolve ssresolve LOCATION)
+get_target_property(ssrediff ssrediff LOCATION)
 if (COMPILE_GUI)
   get_target_property(coopy coopy LOCATION)
   set(coopy ${coopy} --delay)
@@ -714,6 +715,14 @@ foreach(format1 sqlite csv sqlitext jsonbook ${EXCEL})
     endforeach()
   endforeach()
 endforeach()
+
+#######################################################################
+#######################################################################
+
+# ops format
+
+ADD_TEST(ops_format ${ssrediff} --format ops --output ops_format.csvs ${TESTS}/review/review_all.tdiff)
+ADD_TEST(ops_format_compare ${ssdiff} --equal ops_format.csvs ${TESTS}/review/review_all.ops)
 
 #######################################################################
 #######################################################################
