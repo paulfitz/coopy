@@ -104,6 +104,7 @@ Resolve conflicts in favor of ancestral values.
   \li <b>csv</b>: csv-compatible diff format
   \li <b>hilite</b>: colorful spreadsheet format
   \li <b>index</b>: tabular output showing relationship between rows and columns
+  \li <b>ops</b>: summarize modified rows in a table
   \li <b>raw</b>: verbose diff format for debugging
   \li <b>review</b>: spreadsheet diff format suitable for quickly accepting or rejecting changes
   \li <b>sql</b>: SQL format (data diffs only)

@@ -1,7 +1,7 @@
 /**
 *
 
-@page tutorial_diff Contribute to data collection projects using ssdiff
+\page tutorial_diff Contribute to data collection projects using ssdiff
 
 You can use \ref ssdiff to summarize changes you've made
 between two versions of a table (or tables).  Suppose you

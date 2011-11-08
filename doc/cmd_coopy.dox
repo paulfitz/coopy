@@ -21,11 +21,13 @@ Manage a repository of spreadsheets and databases. Usually run without options, 
 
 \section coopy_options Option summary
  \li \ref coopy_main_add "--add=FILE"
+ \li \ref coopy_main_clone "--clone=URL"
  \li \ref coopy_main_export "--export=FILE"
  \li \ref coopy_main_gui "--gui"
  \li \ref coopy_main_help "--help"
  \li \ref coopy_main_key "--key=KEY"
  \li \ref coopy_main_message "--message=MESSAGE"
+ \li \ref coopy_main_new "--new"
  \li \ref coopy_main_pull "--pull"
  \li \ref coopy_main_push "--push"
  \li \ref coopy_main_silent "--silent"
@@ -33,6 +35,9 @@ Manage a repository of spreadsheets and databases. Usually run without options, 
 
 \section coopy_options_detail Option details
 \anchor coopy_main_add <b>--add=FILE</b> <br />attach the given spreadsheet/database to the repository
+
+
+\anchor coopy_main_clone <b>--clone=URL</b> <br />clone the given repository
 
 
 \anchor coopy_main_export <b>--export=FILE</b> <br />export the given spreadsheet/database from the repository
@@ -48,6 +53,9 @@ Manage a repository of spreadsheets and databases. Usually run without options, 
 
 
 \anchor coopy_main_message <b>--message=MESSAGE</b> <br />use the specified message as a log entry
+
+
+\anchor coopy_main_new <b>--new</b> <br />create a new, empty repository
 
 
 \anchor coopy_main_pull <b>--pull</b> <br />pull in data from remote repository to local clone
