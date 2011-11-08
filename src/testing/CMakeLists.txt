@@ -745,10 +745,10 @@ if (COMPILE_GUI)
     add_test(coopy_space_data ${ssformat} ${TESTS}/coopy/mini-people.csvs
       ${TC}/people.xls)
     
-    add_test(coopy_space_data_add ${coopy} --key=people --add=${TC}/people.xls ${TC}/clone1)
+    add_test(coopy_space_data_add ${coopy} --key=ppl --add=${TC}/people.xls ${TC}/clone1)
     add_test(coopy_space_data_push ${coopy} -m "add people" --push ${TC}/clone1)
     add_test(coopy_space_data_pull ${coopy} --pull ${TC}/clone2)
-    add_test(coopy_space_data_export ${coopy} --key=people --export=${TC}/people2.xls ${TC}/clone2)
+    add_test(coopy_space_data_export ${coopy} --key=ppl --export=${TC}/people2.xls ${TC}/clone2)
 
     add_test(coopy_space_data_mod ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Noemi->Nomers|")
     add_test(coopy_space_data_push2 ${coopy} -m "change Noemi's name" --push ${TC}/clone2)

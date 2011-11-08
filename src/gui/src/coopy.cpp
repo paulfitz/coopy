@@ -197,6 +197,8 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
         opt.showOptions(OPTION_FOR_COOPY);
         opt.addExample("coopy",
                        "run the coopy GUI from the current directory. All the actions in these examples can be achieved from the GUI.");
+        opt.addExample("coopy --new",
+                       "create a new empty repository in the current directory.");
         opt.addExample("coopy --key=people --add=people.xls",
                        "add people.xls to the repository, with key 'people'.");
         opt.addExample("coopy --key=orgs --export=organizations.sqlite",
@@ -223,7 +225,7 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     if (parser.Found(wxT("d"))) {
         // command-line use of coopy currently can run into trouble
         // with timestamps if commands issued in quick succession
-        sleep(1);
+        sleep(2);
     }
     if (parser.Found(wxT("c"),&key)) {
         fossil_action = "clone";
@@ -760,7 +762,8 @@ public:
 
     bool openFile(const wxString& str, bool export_only = false);
 
-    bool createFile(const char *local_name = NULL);
+    bool createFile(const char *local_name = NULL,
+                    const char *key_name = NULL);
 
     bool addFile();
 
@@ -1113,7 +1116,8 @@ bool CoopyFrame::OnInit() {
             OnSync(ev);
         }
         if (CoopyApp::fossil_action=="add") {
-            createFile(CoopyApp::fossil_message.c_str());
+            createFile(CoopyApp::fossil_message.c_str(),
+                       CoopyApp::fossil_key.c_str());
             CheckEnd();
         }
         if (CoopyApp::fossil_action=="export") {
@@ -1403,11 +1407,14 @@ bool CoopyFrame::updatePivots(bool success) {
 }
 
 
-bool CoopyFrame::createFile(const char *local_name) {
+bool CoopyFrame::createFile(const char *local_name, const char *key_name) {
     wxString meat = wxT("example_name");
     wxRegEx re(wxT("[^a-zA-Z0-9]"));
     if (local_name!=NULL) {
         std::string ll(local_name);
+        if (key_name!=NULL) {
+            ll = key_name;
+        }
         wxString n(conv(ll));
         wxFileName f = wxFileName::FileName(n);
         meat = f.GetName();
