@@ -478,6 +478,14 @@ Options::Options(const char *name) : name(name) {
       "export the given spreadsheet/database from the repository");
 
   add(OPTION_FOR_COOPY,
+      "clone=URL",
+      "clone the given repository");
+
+  add(OPTION_FOR_COOPY,
+      "new",
+      "create a new, empty repository");
+
+  add(OPTION_FOR_COOPY,
       "message=MESSAGE",
       "use the specified message as a log entry");
 
