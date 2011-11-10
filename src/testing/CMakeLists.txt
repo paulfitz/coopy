@@ -693,6 +693,12 @@ ADD_TEST(format_fossil_repo_strict ${ssformat}
   ${TESTS}/fossil/empty_fossil_repo.fossil
   format_fossil_repo.csvs)
 
+
+ADD_TEST(runon_tdiff_direct ${ssrediff} --format ops  --output runon_tdiff1.csvs ${TESTS}/bug/rediff/patch.tdiff)
+ADD_TEST(runon_tdiff_regen ${ssrediff} --format tdiff --output runon_regen.tdiff ${TESTS}/bug/rediff/patch.tdiff)
+ADD_TEST(runon_tdiff_indirect ${ssrediff} --format ops  --output runon_tdiff2.csvs runon_regen.tdiff)
+ADD_TEST(runon_tdiff_match ${ssdiff} --equals runon_tdiff1.csvs runon_tdiff2.csvs)
+
 #######################################################################
 #######################################################################
 

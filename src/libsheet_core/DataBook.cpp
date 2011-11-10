@@ -15,6 +15,9 @@ bool DataBook::operator==(const DataBook& alt) const {
   vector<string> names = b1->getNames();
   vector<string> altNames = b2->getNames();
   if (names.size()!=altNames.size()) {
+    dbg_printf("Table count mismatch, %d vs %d\n",
+	       names.size(),
+	       altNames.size());
     return false;
   }
   for (int k=0; k<names.size(); k++) {

@@ -339,7 +339,7 @@ bool MergeOutputTdiff::changeRow(const RowChange& change,
     }
 
     // no way yet to communicate CONTEXT request
-    lops.push_back(op);
+    lops.push_back(op + name);
     showForSelect[name] = shouldMatch;
     showForDescribe[name] = shouldAssign;
     showForCond[name] = shouldCond;
@@ -434,9 +434,9 @@ bool MergeOutputTdiff::changeName(const NameChange& change) {
 
 
 bool MergeOutputTdiff::setSheet(const char *name) {
+  flushRows();
   sheetNameShown = false;
   sheetName = name;
-  flushRows();
   return true;
 }
 
