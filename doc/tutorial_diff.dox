@@ -1,7 +1,11 @@
+/usr/bin/html2ps
+/usr/bin/ssconvert
+/usr/bin/ps2pdf
+/usr/bin/pdfcrop
 /**
 *
 
-\page tutorial_diff Contribute to data collection projects using ssdiff
+@page tutorial_diff Contribute to data collection projects using ssdiff
 
 You can use \ref ssdiff to summarize changes you've made
 between two versions of a table (or tables).  Suppose you
@@ -41,9 +45,10 @@ But that may be ignored, since there's no clear signal of what you've
 changed and whether it is worthwhile.
 So you run a quick diff and instead send this:
 
+\htmlonly
 <p><table >
 <tr>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>\@</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>@</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>bridge</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>designer</b></td>
 <td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>length</b></td>
@@ -112,6 +117,14 @@ So you run a quick diff and instead send this:
 <td  bgcolor="#FF7F7F" style="background:#FF7F7F;"><span style="text-decoration: line-through;"></span></td>
 </tr>
 </table>
+\endhtmlonly
+\latexonly
+\begin{center}
+\endlatexonly
+\image latex images/screenshot/tutorial_diff_0.pdf
+\latexonly
+\end{center}
+\endlatexonly
 
 (produced with <tt>ssdiff --format hilite --output patch.xls FILE1 FILE2</tt>)
 
@@ -127,11 +140,11 @@ Or, if you and your friend are more unix-y, this:
 (produced with <tt>ssdiff FILE1 FILE2</tt>)
 
 Or, if you and your friend are more database-y, this:
-\verbatim
+\code
 INSERT INTO bridges (bridge, designer, length) VALUES ('Manhattan', 'G. Lindenthal', '1470');
 UPDATE bridges SET designer='L. L. Buck' WHERE bridge='Williamsburg' AND designer='D. Duck' AND length='1600';
 DELETE FROM bridges WHERE bridge='Spamspan' AND designer='S. Spamington' AND length='10000';
-\endverbatim
+\endcode
 (produced with <tt>ssdiff --format sql --default-table bridges FILE1 FILE2</tt>)
 
 Now your friend can quickly see what changes you made, and

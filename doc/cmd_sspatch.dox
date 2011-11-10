@@ -1,3 +1,7 @@
+/usr/bin/html2ps
+/usr/bin/ssconvert
+/usr/bin/ps2pdf
+/usr/bin/pdfcrop
 /**
  *
 

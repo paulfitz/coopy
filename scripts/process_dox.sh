@@ -7,6 +7,18 @@ bin="$3"
 CSV2HTML="$bin/bin/csv2html"
 SSDIFF="$bin/bin/ssdiff"
 
+BASE=`dirname $fname`
+IMG_DIR="images/screenshot"
+mkdir -p $BASE/$IMG_DIR
+SRC="$fname"
+
+which html2ps || exit 1
+which ssconvert || exit 1
+which ps2pdf || exit 1
+which pdfcrop || exit 1
+
+width=""
+x=0
 function show_file {
     local fname="$1"
     local format="$2"
@@ -20,7 +32,34 @@ function show_file {
 	    echo "Failed to ssconvert $fname" 1>&2
 	    exit 1
 	fi
-	cat /tmp/tmp.html | grep -v caption | grep -v exporter | sed "s/&rt;/>/g" | sed "s/\@/\\\\@/g" | sed "s/border=.1.//g" | sed "s|</*font[^<>]*>||g" | sed "s/FOO/$PROB/"
+	cat /tmp/tmp.html | grep -v caption | grep -v exporter | sed "s/&rt;/>/g" | sed "s/border=.1.//g" | sed "s|</*font[^<>]*>||g" | sed "s/FOO/$PROB/" > /tmp/tmp2.html
+	# cat /tmp/tmp.html | grep -v caption | grep -v exporter | sed "s/&rt;/>/g" | sed "s/\@/\\\\@/g" | sed "s/border=.1.//g" | sed "s|</*font[^<>]*>||g" | sed "s/FOO/$PROB/" > /tmp/tmp2.html
+	echo "\\htmlonly"
+	cat /tmp/tmp2.html
+	echo "\\endhtmlonly"
+	(
+	# cp /tmp/tmp2.html /tmp/tmp2.txt
+	rm -rf /tmp/tmp2.ps /tmp/tmp.pdf /tmp/tmp2.pdf
+	html2ps --colour /tmp/tmp2.html > /tmp/tmp2.ps
+	ps2pdf -dEPSCrop /tmp/tmp2.ps /tmp/tmp.pdf
+	pdfcrop --margins 10 /tmp/tmp.pdf /tmp/tmp2.pdf
+	) > /dev/null
+	bname=`basename $SRC .paradox`
+	iname="$IMG_DIR/${bname}_${x}.pdf"
+	echo mv /tmp/tmp2.pdf $BASE/$iname 1>&2
+	mv /tmp/tmp2.pdf $BASE/$iname
+	if [ ! "k$width" = "k" ]; then
+	    echo "\\image latex $iname \"\" width=$width"
+	else
+	    echo "\\latexonly"
+	    echo "\\begin{center}"
+	    echo "\\endlatexonly"
+	    echo "\\image latex $iname"
+	    echo "\\latexonly"
+	    echo "\\end{center}"
+	    echo "\\endlatexonly"
+	fi
+	let x=x+1
     elif [ "k$format" = "kcsv" ]; then
 	$CSV2HTML $fname | sed "s/&rt;/>/g" | sed "s/\@/\\\\@/g"
     else
@@ -28,6 +67,7 @@ function show_file {
 	cat $fname || exit 1
 	echo "\endverbatim"
     fi
+    width=""
 }
 
 
@@ -51,6 +91,11 @@ while read -r line; do
 	table_mode=false
 	show_file $cache csv
 	continue
+    fi
+    m=`expr match "$line" "@width"`
+    if [ "$m" = "6" ]; then
+	set -- $line
+	width="$2"
     fi
     m=`expr match "$line" "@diff"`
     if [ "$m" = "5" ]; then

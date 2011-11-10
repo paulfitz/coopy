@@ -15,13 +15,15 @@ IMAGE="$SRC/doc/images"
 IMAGE_OUT="$BASE/doc/images"
 mkdir -p $IMAGE_OUT/screenshot
 DOC="$SRC/doc"
+html=false
 for f in `cd $DOC; ls *.dox`; do
-    if grep -q "image html" $DOC/$f; then
+    if egrep -q "image ((html)|(latex))" $DOC/$f; then
 	echo $f
 	awk 1 $DOC/$f | {
 	while IFS='' read -r line; do
 	    m=`expr match "$line" ".*image html"`
 	    if [ ! "k$m" = "k0" ] ; then
+		html=true
 		echo "$line"
 		img=`echo "$line" | sed "s/.* html //" | sed "s/.png .*//"`
 		need_update=true
@@ -37,7 +39,7 @@ for f in `cd $DOC; ls *.dox`; do
 		    convert $IMAGE/$img.png $IMAGE_OUT/$img.pdf || exit 1
 		    cp $IMAGE/$img.png $IMAGE_OUT/$img.png.mark.png
 		    width=`identify -format "%w" $IMAGE/$img.png`
-		    let cm=$width/60
+		    let cm=$width/45
 		    echo $cm > $IMAGE_OUT/$img.png.width
 		else
 		    cm=`cat $IMAGE_OUT/$img.png.width`
@@ -47,7 +49,14 @@ for f in `cd $DOC; ls *.dox`; do
 		m=`expr match "$line" ".*image latex"`
 		if [ "k$m" = "k0" ] ; then
 		    echo "$line"
+		else
+		    if $html; then
+			echo -n
+		    else
+			echo "$line"
+		    fi
 		fi
+		html=false
 	    fi
 	done
 	} > /tmp/coopy_rewrite.dox

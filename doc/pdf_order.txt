@@ -14,7 +14,9 @@ ssformat
 ssrediff
 ssfossil
 coopy
-patch_format
-table_format
-funny_files
 related
+funny_files
+patch_format
+patch_format_tdiff
+patch_format_csv
+table_format

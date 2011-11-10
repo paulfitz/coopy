@@ -1,7 +1,7 @@
 /**
  *
 
-\page tutorial_diff Contribute to data collection projects using ssdiff
+@page tutorial_diff Contribute to data collection projects using ssdiff
 
 You can use \ref ssdiff to summarize changes you've made
 between two versions of a table (or tables).  Suppose you
@@ -54,9 +54,9 @@ Or, if you and your friend are more unix-y, this:
 (produced with <tt>ssdiff FILE1 FILE2</tt>)
 
 Or, if you and your friend are more database-y, this:
-\verbatim
+\code
 @diff bridge_broken bridge sql --default-table bridges
-\endverbatim
+\endcode
 (produced with <tt>ssdiff --format sql --default-table bridges FILE1 FILE2</tt>)
 
 Now your friend can quickly see what changes you made, and 

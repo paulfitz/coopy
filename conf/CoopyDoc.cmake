@@ -48,7 +48,7 @@ if (DOXYGEN_EXE)
       set(RECURSIVE YES)
       set(FILE_PATTERNS "*.dox")
       set(ENABLED_SECTIONS "link_internal")
-      set(EXCLUDE "${CMAKE_SOURCE_DIR}/doc/generated_examples/merge_example_big_merge_with_lots_of_changes.dox ${CMAKE_SOURCE_DIR}/doc/example.dox ${CMAKE_SOURCE_DIR}/doc/diff_example.dox ${CMAKE_SOURCE_DIR}/doc/merge_example.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_csv_v_0_2.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_csv_v_0_4.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_csv.dox ${CMAKE_SOURCE_DIR}/doc/patch_format_human.dox")
+      set(EXCLUDE)
     endif ()
     if (GENERATE_MAN)
       set(INPUT "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/doc")
@@ -79,7 +79,10 @@ if (DOXYGEN_TRICKS)
     COMMAND ${CMAKE_SOURCE_DIR}/scripts/make_pdf.sh)
   add_custom_target(guide 
     ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/gendoc/latex/refman.pdf ${CMAKE_SOURCE_DIR}/CoopyGuide.pdf
-    DEPENDS xpdf)
+    DEPENDS xpdf
+    ${CMAKE_SOURCE_DIR}/scripts/fix_images.sh
+    ${CMAKE_SOURCE_DIR}/scripts/fix_order.sh
+    )
 endif ()
 
 configure_file(${CMAKE_SOURCE_DIR}/doc/tdiff/tdiff_spec_draft.html

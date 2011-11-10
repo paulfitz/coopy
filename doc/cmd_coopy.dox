@@ -1,3 +1,7 @@
+/usr/bin/html2ps
+/usr/bin/ssconvert
+/usr/bin/ps2pdf
+/usr/bin/pdfcrop
 /**
  *
 
@@ -84,6 +88,16 @@ run the coopy GUI from the current directory. All the actions in these examples 
 
 \subsection coopy_examples_2 Example 2
 \verbatim
+coopy --new
+\endverbatim
+create a new empty repository in the current directory.
+
+
+
+
+
+\subsection coopy_examples_3 Example 3
+\verbatim
 coopy --key=people --add=people.xls
 \endverbatim
 add people.xls to the repository, with key 'people'.
@@ -92,7 +106,7 @@ add people.xls to the repository, with key 'people'.
 
 
 
-\subsection coopy_examples_3 Example 3
+\subsection coopy_examples_4 Example 4
 \verbatim
 coopy --key=orgs --export=organizations.sqlite
 \endverbatim
