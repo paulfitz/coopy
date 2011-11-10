@@ -26,6 +26,8 @@ int main(int argc, char *argv[]) {
     opt.showOptions(OPTION_FOR_REDIFF);
     opt.addExample("ssrediff --format sql numbers_patch.tdiff",
 		   "Convert tdiff format file to SQL").require("_numbers_patch.tdiff");
+    opt.addExample("ssrediff --format sql --act update numbers_patch.tdiff",
+		   "Convert tdiff format file to SQL, showing updates only").require("_numbers_patch.tdiff");
     opt.addExample("ssrediff --format csv numbers_patch.tdiff",
 		   "Convert tdiff format file to a CSV-readable diff format").require("_numbers_patch.tdiff");
     opt.addExample("ssrediff --format hilite --output review.csv numbers_buggy.csv numbers_patch.tdiff",

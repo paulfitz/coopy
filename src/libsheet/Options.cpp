@@ -421,9 +421,13 @@ Options::Options(const char *name) : name(name) {
       "omit-sheet-name",
       "omit any sheet/table name from diff");
 
+  add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
+      "act=ACT",
+      "filter for one type of change to rows (update, insert, delete)");
+
   add(OPTION_FOR_PATCH,
       "cmd=CMD",
-      "specify a patch (in tdiff format) with a string rather than as a file, useful to make a quick change to a table that does not merit a full patch file");
+      "specify an action inline in tdiff format");
 
   add(OPTION_FOR_FORMAT,
       "header",
@@ -679,6 +683,8 @@ int Options::apply(int argc, char *argv[]) {
       {"patch-formats", 0, 0, 0},
       {"default-table", 1, 0, 0},
 
+      {"act", 1, 0, 0},
+
       {"help-doxygen", 0, 0, 0},
       {"test-file", 1, 0, 0},
 
@@ -747,6 +753,21 @@ int Options::apply(int argc, char *argv[]) {
 	    exit(1);
 	  }
 	  option_bool["gen"] = true;
+	} else if (k=="act") {
+	  string act = optarg;
+	  if (act=="+") act = "insert";
+	  if (act=="-") act = "delete";
+	  if (act=="=") act = "update";
+	  if (act=="upsert") {
+	    flags.acts.insert("update");
+	    flags.acts.insert("insert");
+	  } else if (act=="update"||act=="insert"||act=="delete") {
+	    flags.acts.insert(act);
+	  } else {
+	    fprintf(stderr,"Unknown action %s\n", act.c_str());
+	    fprintf(stderr,"Try: update, insert, delete\n");
+	    return 1;
+	  }
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;

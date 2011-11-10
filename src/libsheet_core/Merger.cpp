@@ -399,58 +399,64 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	output.addRow("[-]",expandLocal,blank);
       }
       if (lRow==-1) {
-	if (haveMove) {
-	  rc.push_back(rowChangeMove);
-	  haveMove = false;
-	}
-	output.addRow("[+++]",expandMerge,blank);
-	rowChange.mode = ROW_CHANGE_INSERT;
-	//output.changeRow(rowChange);
-	//printf("last_local_row_marked %d last_local_row %d lRow %d\n",
-	//last_local_row_marked, last_local_row, lRow);
-	if (last_local_row>=0) {
-	  if (last_local_row_marked!=last_local_row) {
-	    RowChange alt = lastRowChange;
-	    alt.mode = ROW_CHANGE_CONTEXT;
-	    if (flags.use_order) {
-	      rc.push_back(alt);
+	if (flags.canInsert()) {
+	  if (haveMove) {
+	    rc.push_back(rowChangeMove);
+	    haveMove = false;
+	  }
+	  output.addRow("[+++]",expandMerge,blank);
+	  rowChange.mode = ROW_CHANGE_INSERT;
+	  //output.changeRow(rowChange);
+	  //printf("last_local_row_marked %d last_local_row %d lRow %d\n",
+	  //last_local_row_marked, last_local_row, lRow);
+	  if (last_local_row>=0) {
+	    if (last_local_row_marked!=last_local_row) {
+	      RowChange alt = lastRowChange;
+	      alt.mode = ROW_CHANGE_CONTEXT;
+	      if (flags.use_order) {
+		rc.push_back(alt);
+	      }
+	    }
+	  } else {
+	    if (!(prev_had_row||had_foreign_row||allGone)) {
+	      RowChange alt;
+	      alt.mode = ROW_CHANGE_CONTEXT;
+	      if (flags.use_order) {
+		rc.push_back(alt);
+	      }
 	    }
 	  }
-	} else {
-	  if (!(prev_had_row||had_foreign_row||allGone)) {
-	    RowChange alt;
-	    alt.mode = ROW_CHANGE_CONTEXT;
-	    if (flags.use_order) {
-	      rc.push_back(alt);
-	    }
+	  rc.push_back(rowChange);
+	  if (last_local_row<0) {
+	    had_foreign_row = true;
 	  }
+	  last_local_row_marked = lRow;
 	}
-	rc.push_back(rowChange);
-	if (last_local_row<0) {
-	  had_foreign_row = true;
-	}
-	last_local_row_marked = lRow;
       } else {
 	if (rRow==-1) {
-	  if (pRow!=-1) {
-	    if (haveMove) {
-	      rc.push_back(rowChangeMove);
-	      haveMove = false;
+	  if (flags.canDelete()) {
+	    if (pRow!=-1) {
+	      if (haveMove) {
+		rc.push_back(rowChangeMove);
+		haveMove = false;
+	      }
+	      output.addRow("[---]",expandLocal,blank);
+	      rowChange.mode = ROW_CHANGE_DELETE;
+	      //output.changeRow(rowChange);
+	      rc.push_back(rowChange);
+	      last_local_row_marked = lRow;
 	    }
-	    output.addRow("[---]",expandLocal,blank);
-	    rowChange.mode = ROW_CHANGE_DELETE;
-	    //output.changeRow(rowChange);
-	    rc.push_back(rowChange);
-	    last_local_row_marked = lRow;
 	  }
 	} else {
-	  if (value.size()!=0) {
-	    output.addRow("[+]",expandMerge,blank);
-	    rowChange.mode = haveMove?ROW_CHANGE_MOVE:ROW_CHANGE_UPDATE;
-	    haveMove = false;
-	    //output.changeRow(rowChange);
-	    rc.push_back(rowChange);
-	    last_local_row_marked = lRow;
+	  if (flags.canUpdate()) {
+	    if (value.size()!=0) {
+	      output.addRow("[+]",expandMerge,blank);
+	      rowChange.mode = haveMove?ROW_CHANGE_MOVE:ROW_CHANGE_UPDATE;
+	      haveMove = false;
+	      //output.changeRow(rowChange);
+	      rc.push_back(rowChange);
+	      last_local_row_marked = lRow;
+	    }
 	  }
 	}
       }

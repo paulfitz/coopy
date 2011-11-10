@@ -222,10 +222,10 @@ int Diff::apply(const Options& opt) {
       diff->setFlags(flags);
       bool ok = false;
       if (have_cmd) {
-	PatchParser parser(diff,opt.getStringList("cmd"));
+	PatchParser parser(diff,opt.getStringList("cmd"),flags);
 	ok = parser.apply();
       } else {
-	PatchParser parser(diff,patch_file);
+	PatchParser parser(diff,patch_file,flags);
 	ok = parser.apply();
       }
       if (!ok) {

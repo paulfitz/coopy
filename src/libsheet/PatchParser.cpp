@@ -516,7 +516,9 @@ bool PatchParser::applyCsv() {
 	    //printf("assign %s %s\n", change.names[i].c_str(), val.toString().c_str());
 	  }
 	}
-	ok = patcher->changeRow(change);
+	if (flags.canUpdate()) {
+	  ok = patcher->changeRow(change);
+	}
 	needSelector = true;
       } else if (cmd1=="insert") {
 	sequential = true;
@@ -534,7 +536,9 @@ bool PatchParser::applyCsv() {
 	    change.val[change.names[i]] = val;
 	  }
 	}
-	patcher->changeRow(change);	
+	if (flags.canInsert()) {
+	  patcher->changeRow(change);	
+	}
 	needSelector = true;
       } else if (cmd1=="delete") {
 	sequential = true;
@@ -552,7 +556,9 @@ bool PatchParser::applyCsv() {
 	    change.cond[change.names[i]] = val;
 	  }
 	}
-	ok = patcher->changeRow(change);	
+	if (flags.canDelete()) {
+	  ok = patcher->changeRow(change);	
+	}
 	needSelector = true;
       } else {
 	fail = true;
@@ -1035,16 +1041,21 @@ bool PatchParser::applyTdiff() {
       RowChange change;
       change.conflicted = conflict;
       bool allIndex = false;
+      bool skip = false;
       if (first=="=") {
 	change.mode = ROW_CHANGE_UPDATE;
+	skip = !flags.canUpdate();
       } else if (first=="-") {
 	change.mode = ROW_CHANGE_DELETE;
+	skip = !flags.canDelete();
       } else if (first=="+") {
 	change.mode = ROW_CHANGE_INSERT;
+	skip = !flags.canInsert();
       } else if (first=="*") {
 	change.mode = ROW_CHANGE_CONTEXT;
       } else if (first==":") {
 	change.mode = ROW_CHANGE_MOVE;
+	skip = !flags.canUpdate();
       }
       change.indexes.clear();
       for (int i=0; i<(int)assign.size(); i++) {
@@ -1094,7 +1105,9 @@ bool PatchParser::applyTdiff() {
       }
       change.allNames = allNames;
       dbg_printf("  ... change row ...\n");
-      patcher->changeRow(change);
+      if (!skip) {
+	patcher->changeRow(change);
+      }
     }
   }
 
@@ -1272,7 +1285,9 @@ bool PatchParser::applyColor() {
 	  SheetCell c = sheet.cellSummary(j,i);
 	  change.val[cols[j-1-xoff]] = c;
 	}
-	if (allowed) patcher->changeRow(change);
+	if (flags.canInsert()) {
+	  if (allowed) patcher->changeRow(change);
+	}
       } else if (code == "---") {
 	change.mode = ROW_CHANGE_DELETE;
 	for (int j=1+xoff; j<sheet.width(); j++) {
@@ -1281,7 +1296,9 @@ bool PatchParser::applyColor() {
 	    change.cond[cols[j-1-xoff]] = c;
 	  }
 	}
-	if (allowed) patcher->changeRow(change);
+	if (flags.canDelete()) {
+	  if (allowed) patcher->changeRow(change);
+	}
       } else if (tail2 == "->" && code.find("!")==string::npos) {
 	change.mode = ROW_CHANGE_UPDATE;
 	int minuses = 0;
@@ -1326,7 +1343,9 @@ bool PatchParser::applyColor() {
 	    }
 	  }
 	}
-	if (allowed) patcher->changeRow(change);
+	if (flags.canUpdate()) {
+	  if (allowed) patcher->changeRow(change);
+	}
       } else {
 	if (i<sheet.height()-1) {
 	  if (sheet.cellString(xoff,i+1)=="+++") {

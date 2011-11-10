@@ -52,6 +52,7 @@ public:
   bool tail_trimmed;
   FILE *out;
   std::set<std::string> tables;
+  std::set<std::string> acts;
   std::vector<std::string> ordered_tables;
   std::vector<std::string> ids;
   std::vector<int> ids_local;
@@ -98,6 +99,21 @@ public:
 
   bool setOutput(const CompareOutput& o) {
     out = o.out;
+  }
+
+  bool canInsert() const {
+    if (acts.size()==0) return true;
+    return acts.find("insert")!=acts.end();
+  }
+
+  bool canDelete() const {
+    if (acts.size()==0) return true;
+    return acts.find("delete")!=acts.end();
+  }
+
+  bool canUpdate() const {
+    if (acts.size()==0) return true;
+    return acts.find("update")!=acts.end();
   }
 };
 
