@@ -470,3 +470,18 @@ void MergeOutputTdiff::flushRows() {
   rowCache.clear();
 }
 
+bool MergeOutputTdiff::changePool(const PoolChange& change) {
+  fprintf(out,"<=> |");
+  for (int i=0; i<(int)change.pool.size(); i++) {
+    string key = change.pool[i].tableName + ".";
+    key += change.pool[i].fieldName;
+    fprintf(out,"%s",stringy(key).c_str());
+    if (change.pool[i].invented) {
+      fprintf(out,"=");
+    }
+    fprintf(out,"|");
+  }
+  fprintf(out,"\n");
+  return true;
+}
+

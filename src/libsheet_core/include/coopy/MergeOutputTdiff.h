@@ -67,6 +67,7 @@ public:
 
   void flushRows();
 
+  virtual bool changePool(const PoolChange& change);
 };
 
 #endif

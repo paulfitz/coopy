@@ -925,6 +925,25 @@ bool PatchParser::applyTdiff() {
     }
     if (first=="@@@") {
       patcher->setSheet(msg[1].c_str());
+    } else if (first=="<=>") {
+      PoolChange pc;
+      for (int i=1; i<(int)msg.size(); i++) {
+	TDiffPart part(msg[i],true);
+	if (part.hasKey) {
+	  TableField f;
+	  string f2 = part.key;
+	  string f1 = "";
+	  if (f2.find(".")!=string::npos) {
+	    f1 = f2.substr(0,f2.find("."));
+	    f2 = f2.substr(f2.find(".")+1,f2.length());
+	  }
+	  f.tableName = f1;
+	  f.fieldName = f2;
+	  f.invented = part.isId;
+	  pc.pool.push_back(f);
+	}
+      }
+      patcher->changePool(pc);
     } else if (first=="@"||first=="@@") {
       vector<string> names;
       cols.clear();

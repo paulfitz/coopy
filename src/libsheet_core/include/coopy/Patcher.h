@@ -18,6 +18,8 @@ namespace coopy {
     class RowChangeContext;
     class RowChange;
     class NameChange;
+    class TableField;
+    class PoolChange;
     class LinkDeclare;
     class Patcher;
 
@@ -63,6 +65,29 @@ public:
     complete = true;
     trustNames = false;
   }
+};
+
+class coopy::cmp::TableField {
+public:
+  std::string tableName;
+  std::string fieldName;
+  bool invented;
+
+  TableField() {
+    invented = false;
+  }
+
+  TableField(const std::string& tableName,
+	     const std::string& fieldName,
+	     bool invented = false) : tableName(tableName),
+    fieldName(fieldName),
+    invented(invented) {
+    }
+};
+
+class coopy::cmp::PoolChange {
+public:
+  std::vector<coopy::cmp::TableField> pool;
 };
 
 class coopy::cmp::OrderChange {
@@ -241,6 +266,8 @@ public:
   virtual bool changeColumn(const OrderChange& change) { return false; }
 
   virtual bool changeRow(const RowChange& change) { return false; }
+
+  virtual bool changePool(const PoolChange& change) { return false; }
 
   virtual bool declareLink(const LinkDeclare& decl) { return false; }
 
