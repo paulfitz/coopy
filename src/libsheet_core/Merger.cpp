@@ -835,7 +835,7 @@ bool Merger::merge(MergerState& state) {
     // LINKIT
 
     if (link) {
-      if (!fixedColumns) {
+      if (local_col_names!=original_col_names) {
 	local_names.sniff();
 	remote_names.sniff();
       

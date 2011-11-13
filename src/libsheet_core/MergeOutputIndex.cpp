@@ -44,7 +44,6 @@ bool MergeOutputIndex::setSheet(const char *name) {
     return false;
   }
 
-  SimpleSheetSchema links_column_schema;
   links_column_schema.setSheetName((string(name) + "_columns").c_str());
   links_column_schema.addColumn("pivot",ColumnType("INTEGER"));
   links_column_schema.addColumn("local",ColumnType("INTEGER"));
@@ -67,6 +66,9 @@ static SheetCell link_cell(int x) {
 }
 
 bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
+  if (!links.isValid()) {
+    setSheet("sheet");
+  }
   
   dbg_printf("LINK %d %d %d %d\n",
 	 decl.mode,

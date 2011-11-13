@@ -21,8 +21,10 @@ public:
 
   coopy::store::PolySheet links;
   coopy::store::PolySheet links_column;
-  coopy::store::SheetSchema links_column_schema;
+  coopy::store::SimpleSheetSchema links_column_schema;
   coopy::store::PolySheet identity;
+
+  virtual bool wantDiff() { return true; }
 
   virtual bool mergeStart();
 
@@ -31,8 +33,6 @@ public:
   virtual bool setSheet(const char *name);
 
   virtual bool declareLink(const LinkDeclare& decl);
-
-  virtual bool wantDiff() { return false; }
 
   virtual bool wantLinks() { return true; }
 
