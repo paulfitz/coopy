@@ -751,6 +751,8 @@ if (COMPILE_GUI)
     add_test(coopy_space_data ${ssformat} ${TESTS}/coopy/mini-people.csvs
       ${TC}/people.xls)
     
+    add_test(coopy_space_data_pause ${coopy} --delay --silent ${TC}/store)
+    
     add_test(coopy_space_data_add ${coopy} --key=ppl --add=${TC}/people.xls ${TC}/clone1)
     add_test(coopy_space_data_push ${coopy} -m "add people" --push ${TC}/clone1)
     add_test(coopy_space_data_pull ${coopy} --pull ${TC}/clone2)
@@ -760,6 +762,8 @@ if (COMPILE_GUI)
     add_test(coopy_space_data_push2 ${coopy} -m "change Noemi's name" --push ${TC}/clone2)
     add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
     set_property(TEST coopy_space_data_changed PROPERTY WILL_FAIL TRUE)
+
+    add_test(coopy_space_data_pause2 ${coopy} --delay --silent ${TC}/store)
 
     add_test(coopy_space_data_pull2 ${coopy} --pull ${TC}/clone1)
     add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
@@ -776,6 +780,8 @@ if (COMPILE_GUI)
 
     add_test(coopy_space_conflict_change1 ${sspatch} --inplace ${TC}/people.xls --cmd "= |Name=Paul|Zip:*->07028|")
     add_test(coopy_space_conflict_change2 ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Paul|Zip:*->99999|")
+
+    add_test(coopy_space_data_pause3 ${coopy} --delay --silent ${TC}/store)
 
     add_test(coopy_space_conflict_push1 ${coopy} -m "change ZIP" --push ${TC}/clone1)
     add_test(coopy_space_conflict_pull1 ${coopy} --pull ${TC}/clone2)

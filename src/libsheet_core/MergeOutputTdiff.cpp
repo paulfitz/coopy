@@ -81,6 +81,7 @@ static string stringy(const string& s, bool quote_space = false) {
 MergeOutputTdiff::MergeOutputTdiff() {
   setSheet("");
   sheetNameShown = true;
+  sheetNameBreakShown = true;
   lastWasFactored = false;
 }
 
@@ -101,13 +102,22 @@ bool MergeOutputTdiff::mergeStart() {
   return true;
 }
 
-void MergeOutputTdiff::showSheet() {
+void MergeOutputTdiff::showSheet(bool bound) {
   if (!sheetNameShown) {
     const CompareFlags& flags = getFlags();
     if (!flags.omit_sheet_name) {
-      fprintf(out,"\n@@@ %s\n\n", sheetName.c_str());
+      fprintf(out,"\n@@@ %s\n", sheetName.c_str());
     }
     sheetNameShown = true;
+    sheetNameBreakShown = false;
+  }
+  if (!bound) {
+    if (!sheetNameBreakShown) {
+      if (!flags.omit_sheet_name) {
+	fprintf(out,"\n");
+      }
+      sheetNameBreakShown = true;
+    }
   }
 }
 
@@ -436,6 +446,7 @@ bool MergeOutputTdiff::changeName(const NameChange& change) {
 bool MergeOutputTdiff::setSheet(const char *name) {
   flushRows();
   sheetNameShown = false;
+  sheetNameBreakShown = true;
   sheetName = name;
   return true;
 }
@@ -471,9 +482,13 @@ void MergeOutputTdiff::flushRows() {
 }
 
 bool MergeOutputTdiff::changePool(const PoolChange& change) {
-  fprintf(out,"<=> |");
+  showSheet(true);
+  fprintf(out,"x %s |", change.poolName.c_str());
   for (int i=0; i<(int)change.pool.size(); i++) {
-    string key = change.pool[i].tableName + ".";
+    string key = change.pool[i].tableName;
+    if (key!="") {
+      key += ".";
+    }
     key += change.pool[i].fieldName;
     fprintf(out,"%s",stringy(key).c_str());
     if (change.pool[i].invented) {

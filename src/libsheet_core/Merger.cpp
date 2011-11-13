@@ -262,6 +262,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	     (int)expandRemote.size());
   */
 
+  /*
   if (link) {
     LinkDeclare decl;
     decl.mode = LINK_DECLARE_MERGE;
@@ -272,6 +273,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     decl.rc_deleted = delRow;
     output.declareLink(decl);
   }
+  */
 
   if (!diff) {
     if (conflict) {
@@ -532,108 +534,6 @@ bool Merger::merge(MergerState& state) {
 
   conflicts = 0;
   dbg_printf("Order merges are done...\n");
-
-  if (link) {
-    local_names.sniff();
-    remote_names.sniff();
-
-    /*
-    // perspective: LOCAL, COLUMN
-    for (int i=0; i<local.width(); i++) {
-      LinkDeclare decl;
-      decl.mode = LINK_DECLARE_LOCAL;
-      decl.column = true;
-      decl.rc_id_pivot = col_local.a2b(i);
-      decl.rc_id_local = i;
-      decl.rc_id_remote = -1;
-      if (decl.rc_id_pivot!=-1) {
-	decl.rc_id_remote = col_remote.b2a(decl.rc_id_pivot);
-      }
-      decl.rc_deleted = 0;
-      decl.rc_str_local = local_names.suggestColumnName(i);
-      if (decl.rc_id_remote!=-1) {
-	decl.rc_str_remote = remote_names.suggestColumnName(decl.rc_id_remote);
-      }
-      output.declareLink(decl);      
-    }
-
-    // perspective: REMOTE, COLUMN
-    for (int i=0; i<remote.width(); i++) {
-      LinkDeclare decl;
-      decl.mode = LINK_DECLARE_REMOTE;
-      decl.column = true;
-      decl.rc_id_pivot = col_remote.a2b(i);
-      decl.rc_id_local = -1;
-      if (decl.rc_id_pivot!=-1) {
-	decl.rc_id_local = col_local.b2a(decl.rc_id_pivot);
-      }
-      decl.rc_id_remote = i;
-      decl.rc_deleted = 0;
-      decl.rc_str_remote = remote_names.suggestColumnName(i);
-      if (decl.rc_id_local!=-1) {
-	decl.rc_str_local = local_names.suggestColumnName(decl.rc_id_local);
-      }
-      output.declareLink(decl);      
-    }
-    */
-
-    // perspective: MERGE, COLUMN
-    for (list<MatchUnit>::iterator it=col_merge.accum.begin();
-	 it!=col_merge.accum.end(); 
-	 it++) {
-      MatchUnit& unit = *it;
-      int pCol = unit.pivotUnit;
-      int lCol = unit.localUnit;
-      int rCol = unit.remoteUnit;
-      bool deleted = unit.deleted;
-      LinkDeclare decl;
-      decl.mode = LINK_DECLARE_MERGE;
-      decl.column = true;
-      decl.rc_id_pivot = pCol;
-      decl.rc_id_local = lCol;
-      decl.rc_id_remote = rCol;
-      decl.rc_deleted = deleted;
-      if (lCol!=-1) {
-	decl.rc_str_local = local_names.suggestColumnName(lCol);
-      }
-      if (rCol!=-1) {
-	decl.rc_str_remote = remote_names.suggestColumnName(rCol);
-      }
-      output.declareLink(decl);
-    }
-
-    /*
-    // perspective: LOCAL, ROW
-    for (int i=0; i<local.height(); i++) {
-      LinkDeclare decl;
-      decl.mode = LINK_DECLARE_LOCAL;
-      decl.column = false;
-      decl.rc_id_pivot = row_local.a2b(i);
-      decl.rc_id_local = i;
-      decl.rc_id_remote = -1;
-      if (decl.rc_id_pivot!=-1) {
-	decl.rc_id_remote = row_remote.b2a(decl.rc_id_pivot);
-      }
-      decl.rc_deleted = 0;
-      output.declareLink(decl);      
-    }
-
-    // perspective: REMOTE, ROW
-    for (int i=0; i<remote.height(); i++) {
-      LinkDeclare decl;
-      decl.mode = LINK_DECLARE_REMOTE;
-      decl.column = false;
-      decl.rc_id_pivot = row_remote.a2b(i);
-      decl.rc_id_local = -1;
-      if (decl.rc_id_pivot!=-1) {
-	decl.rc_id_local = row_local.b2a(decl.rc_id_pivot);
-      }
-      decl.rc_id_remote = i;
-      decl.rc_deleted = 0;
-      output.declareLink(decl);      
-    }
-    */
-  }
 
   allGone = false;
   if (diff) {
@@ -908,6 +808,16 @@ bool Merger::merge(MergerState& state) {
 	  unit.pivotUnit = -1;
 	}
 
+	if (link) {
+	  LinkDeclare decl;
+	  decl.mode = LINK_DECLARE_MERGE;
+	  decl.column = false;
+	  decl.rc_id_pivot = unit.pivotUnit;
+	  decl.rc_id_local = unit.localUnit;
+	  decl.rc_id_remote = unit.remoteUnit;
+	  decl.rc_deleted = unit.deleted;
+	  output.declareLink(decl);
+	}
 	if (unit.remoteUnit!=-1 || !allGone) {
 	  bool ok = mergeRow(pivot,local,remote,unit,output,flags,rc);
 	  if (!ok) { return false; }
@@ -920,6 +830,41 @@ bool Merger::merge(MergerState& state) {
     }
 
     //printf(">>> %s %d\n", __FILE__, __LINE__);
+
+
+    // LINKIT
+
+    if (link) {
+      if (!fixedColumns) {
+	local_names.sniff();
+	remote_names.sniff();
+      
+	// perspective: MERGE, COLUMN
+	for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+	     it!=col_merge.accum.end(); 
+	     it++) {
+	  MatchUnit& unit = *it;
+	  int pCol = unit.pivotUnit;
+	  int lCol = unit.localUnit;
+	  int rCol = unit.remoteUnit;
+	  bool deleted = unit.deleted;
+	  LinkDeclare decl;
+	  decl.mode = LINK_DECLARE_MERGE;
+	  decl.column = true;
+	  decl.rc_id_pivot = pCol;
+	  decl.rc_id_local = lCol;
+	  decl.rc_id_remote = rCol;
+	  decl.rc_deleted = deleted;
+	  if (lCol!=-1) {
+	    decl.rc_str_local = local_names.suggestColumnName(lCol);
+	  }
+	  if (rCol!=-1) {
+	    decl.rc_str_remote = remote_names.suggestColumnName(rCol);
+	  }
+	  output.declareLink(decl);
+	}
+      }
+    }
 
     if (!fixedColumns) {
       NameChange nc;
@@ -1004,6 +949,17 @@ bool Merger::merge(MergerState& state) {
     //int _l = unit.localUnit;
     //int _p = unit.pivotUnit;
     //int _r = unit.remoteUnit;
+    if (link) {
+      LinkDeclare decl;
+      decl.mode = LINK_DECLARE_MERGE;
+      decl.column = false;
+      decl.rc_id_pivot = unit.pivotUnit;
+      decl.rc_id_local = unit.localUnit;
+      decl.rc_id_remote = unit.remoteUnit;
+      decl.rc_deleted = unit.deleted;
+      output.declareLink(decl);
+    }
+
     bool deleted = unit.deleted;
     if (!deleted) {
       vector<RowChange> rc;

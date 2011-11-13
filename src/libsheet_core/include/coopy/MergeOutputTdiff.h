@@ -29,6 +29,7 @@ public:
   bool showedColumns;
   std::string sheetName;
   bool sheetNameShown;
+  bool sheetNameBreakShown;
   bool lastWasFactored;
 
   std::vector<coopy::cmp::RowChange> rowCache;
@@ -63,7 +64,7 @@ public:
 
   virtual bool setSheet(const char *name);
 
-  void showSheet();
+  void showSheet(bool bound = false);
 
   void flushRows();
 

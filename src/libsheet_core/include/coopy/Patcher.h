@@ -87,6 +87,7 @@ public:
 
 class coopy::cmp::PoolChange {
 public:
+  std::string poolName;
   std::vector<coopy::cmp::TableField> pool;
 };
 
