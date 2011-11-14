@@ -32,12 +32,18 @@ void IndexSniffer::sniff() {
     if (schema->providesPrimaryKeys()) {
       flags.clear();
       len = w;
+      bool got_something = false;
       for (int i=0; i<w; i++) {
 	ColumnInfo info = schema->getColumnInfo(i);
 	flags.push_back(info.isPrimaryKey()?1:0);
+	got_something = got_something || info.isPrimaryKey();
       }
-      guessed = false;
-      return;
+      if (got_something) {
+	guessed = false;
+	return;
+      } else {
+	flags.clear();
+      }
     }
   }
 
