@@ -52,6 +52,8 @@ private:
 	       int width,
 	       bool show=false);
 
+  void checkHeader();
+
   int matchCol(const std::string& mover);
 
   int updateCols();

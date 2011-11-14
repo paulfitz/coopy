@@ -68,6 +68,7 @@ public:
   bool omit_format_name;
   bool omit_sheet_name;
   bool fixed_columns;
+  bool assume_header;
   bool ignore_case;
   std::string pivot_uri;
   std::string local_uri;
@@ -93,6 +94,7 @@ public:
     ignore_case = false;
     resolving = false;
     has_pivot = true;
+    assume_header = true;
   }
 
   ~CompareFlags() {

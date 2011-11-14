@@ -440,7 +440,7 @@ ENDMACRO ()
 
 ADD_DIFF_TEST(ssdiff_loc ${TESTS}/loc/loc.csv ${TESTS}/loc/loc_perturb.csv)
 
-MACRO(ADD_ROUND_TRIP_TEST_BASE name P1 P2 INTERFORMAT FORMAT)
+MACRO(ADD_ROUND_TRIP_TEST_BASE name P1 P2 INTERFORMAT FORMAT DIFF_EXTRA)
     set(ext ${FORMAT})
     if ("${ext}" STREQUAL "color")
       set(ext "csvs")
@@ -448,7 +448,7 @@ MACRO(ADD_ROUND_TRIP_TEST_BASE name P1 P2 INTERFORMAT FORMAT)
     set(fname "${name}_patch.${ext}")
     set(fname2 "${name}_result.${INTERFORMAT}")
     ADD_TEST(${name}_diff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
-      --output ${fname} --format ${FORMAT} ${ARGN} ${P1} ${P2})
+      --output ${fname} --format ${FORMAT} ${ARGN} ${P1} ${P2} ${DIFF_EXTRA})
     ADD_TEST(${name}_patch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
       --output ${fname2} ${P1} ${fname})
     ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
@@ -456,7 +456,11 @@ MACRO(ADD_ROUND_TRIP_TEST_BASE name P1 P2 INTERFORMAT FORMAT)
 ENDMACRO ()
 
 MACRO(ADD_ROUND_TRIP_TEST name P1 P2 FORMAT)
-  ADD_ROUND_TRIP_TEST_BASE(${name} ${P1} ${P2} csv ${FORMAT})
+  ADD_ROUND_TRIP_TEST_BASE(${name} ${P1} ${P2} csv ${FORMAT} "")
+ENDMACRO ()
+
+MACRO(ADD_ROUND_TRIP_TEST_HEADERLESS name P1 P2 FORMAT)
+  ADD_ROUND_TRIP_TEST_BASE(${name} ${P1} ${P2} csv ${FORMAT} "--headerless")
 ENDMACRO ()
 
 
@@ -466,8 +470,8 @@ MACRO(ADD_ROUND_TRIP_TEST_BI name P1 P2 FORMAT)
 ENDMACRO()
 
 MACRO(ADD_ROUND_TRIP_TEST_BI_BASE name P1 P2 INTER FORMAT)
-  ADD_ROUND_TRIP_TEST_BASE(${name}_forward ${P1} ${P2} ${INTER} ${FORMAT})
-  ADD_ROUND_TRIP_TEST_BASE(${name}_reverse ${P2} ${P1} ${INTER} ${FORMAT})
+  ADD_ROUND_TRIP_TEST_BASE(${name}_forward ${P1} ${P2} ${INTER} ${FORMAT} "")
+  ADD_ROUND_TRIP_TEST_BASE(${name}_reverse ${P2} ${P1} ${INTER} ${FORMAT} "")
 ENDMACRO()
 
 foreach(FORMAT csv tdiff color)
@@ -483,10 +487,11 @@ foreach(FORMAT csv tdiff color)
 	get_filename_component(F2 ${T2} NAME_WE)
 	string(REPLACE "named_numbers_" "" F1 ${F1})
 	string(REPLACE "named_numbers_" "" F2 ${F2})
-	ADD_ROUND_TRIP_TEST(rtnn_${F1}_${F2}_${FORMAT} ${TESTS}/${T1} ${TESTS}/${T2} ${FORMAT})
+	  # tests need to be headerless since header nobbled
+	ADD_ROUND_TRIP_TEST_HEADERLESS(rtnn_${F1}_${F2}_${FORMAT} ${TESTS}/${T1} ${TESTS}/${T2} ${FORMAT})
 	if (NOT "${FORMAT}" STREQUAL "color") # column name sensitivity
-	  ADD_ROUND_TRIP_TEST(rtfn_${F1}_${F2}_${FORMAT} dbi:csv:flip_vertical=1:file=${TESTS}/${T1} ${TESTS}/${T2} ${FORMAT})
-	  ADD_ROUND_TRIP_TEST(rtnf_${F1}_${F2}_${FORMAT} ${TESTS}/${T1} dbi:csv:flip_vertical=1:file=${TESTS}/${T2} ${FORMAT})
+	  ADD_ROUND_TRIP_TEST_HEADERLESS(rtfn_${F1}_${F2}_${FORMAT} dbi:csv:flip_vertical=1:file=${TESTS}/${T1} ${TESTS}/${T2} ${FORMAT})
+	  ADD_ROUND_TRIP_TEST_HEADERLESS(rtnf_${F1}_${F2}_${FORMAT} ${TESTS}/${T1} dbi:csv:flip_vertical=1:file=${TESTS}/${T2} ${FORMAT})
 	endif ()
       endif()
     endforeach()

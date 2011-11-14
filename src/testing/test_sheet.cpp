@@ -13,6 +13,7 @@
 #include <coopy/MergeOutputAccum.h>
 #include <coopy/MergeOutputPatch.h>
 #include <coopy/MergeOutputCsvDiff.h>
+#include <coopy/Dbg.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -46,6 +47,7 @@ int main(int argc, char *argv[]) {
       {"dumb", 0, 0, 'D'},
       {"compare", 2, 0, 'c'},
       {"diff", 0, 0, 'f'},
+      {"verbose", 0, 0, 'v'},
       {0, 0, 0, 0}
     };
 
@@ -53,6 +55,9 @@ int main(int argc, char *argv[]) {
 		    long_options, &option_index);
     if (c==-1) break;
     switch (c) {
+    case 'v':
+      coopy_set_verbose(true);
+      break;
     case 'L':
       printf("Switching to local sheet\n");
       ss = &local;
@@ -180,6 +185,7 @@ int main(int argc, char *argv[]) {
 	  parent = local;
 	}
 	CompareFlags flags;
+	flags.assume_header = false;
 	if (diffMode!="") {
 	  if (diffMode=="csv") {
 	    MergeOutputCsvDiffStable output;

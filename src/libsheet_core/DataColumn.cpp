@@ -82,6 +82,7 @@ void Nature::evaluate(const char *txt, bool forward) {
   int nonintegral = 0;
   int caps = 0;
   int noncaps = 0;
+  int spaces = 0;
   int total = 0;
   for (size_t j=0; j<s.length(); j++) {
     char ch = s[j];
@@ -102,6 +103,9 @@ void Nature::evaluate(const char *txt, bool forward) {
       caps++;
     } else if (ch>='a'&&ch<='z') {
       noncaps++;
+    }
+    if (ch==' ') {
+      spaces++;
     }
     total++;
   }
@@ -128,18 +132,24 @@ void Nature::evaluate(const char *txt, bool forward) {
   } else {
     cappy.vote(-1,1);
   }
+  if (noncaps>=1 && noncaps>total*0.75 && !caps && !spaces) {
+    lowy.vote(1,1);
+  } else {
+    lowy.vote(-1,1);
+  }
 
   text.vote(1,0.1);
 }
 
 void Nature::show() {
-  printf("web %g email %g text %g number %g nully %g cappy %g\n",
+  printf("web %g email %g text %g number %g nully %g cappy %g lowy %g\n",
 	 web.result(),
 	 email.result(),
 	 text.result(),
 	 number.result(),
 	 nully.result(),
-	 cappy.result());
+	 cappy.result(),
+	 lowy.result());
 }
 
 float Nature::compare(const char *txt, bool forward) {
@@ -150,8 +160,8 @@ float Nature::compare(const char *txt, bool forward) {
     n.text.result()*text.result() +
     n.number.result()*number.result() +
     n.nully.result()*nully.result() +
-    n.cappy.result()*cappy.result();
-  //printf("Nully %g vs %g : %g\n", n.nully.result(), nully.result(), dot);
+    n.cappy.result()*cappy.result() +
+    n.lowy.result()*lowy.result();
   return dot;
 }
 

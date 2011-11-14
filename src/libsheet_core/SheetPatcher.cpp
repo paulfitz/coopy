@@ -28,6 +28,25 @@ static bool is_match(const SheetCell& a, const SheetCell& b) {
   //return null_like(b);
 }
 
+void SheetPatcher::checkHeader() {
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return;
+  int c = 0;
+  if (activeCol.width() == sheet.width()) {
+    for (c=0; c<sheet.width(); c++) {
+      if (sheet.cellString(c,0) != activeCol.cellString(c,0)) {
+	break;
+      }
+    }
+  }
+  if (c==sheet.width()) {
+    if (!sheet.hasExternalColumnNames()) {
+      dbg_printf("HEADER LINE NUDGE\n");
+      rowCursor = 1;
+    }
+  }
+}
+
 int SheetPatcher::matchRow(const std::vector<int>& active_cond,
 			   const std::vector<std::string>& active_name,
 			   const std::vector<SheetCell>& cond,
@@ -696,6 +715,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	rowCursor = r;
       } else {
 	rowCursor = 0;
+	checkHeader();
       }
       return true;
     }

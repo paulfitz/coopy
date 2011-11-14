@@ -381,6 +381,9 @@ Options::Options(const char *name) : name(name) {
   add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_PATCH|OPTION_FOR_FORMAT,
       "input-formats",
       "list supported input database formats");
+  add(OPTION_FOR_DIFF|OPTION_FOR_MERGE,
+      "headerless",
+      "treat any embedded column names as regular parts of the table (for formats like CSV)");
   addTransform("patch-formats",
 	       "list supported patch formats");
   addCompare("id=COLUMN",
@@ -682,6 +685,7 @@ int Options::apply(int argc, char *argv[]) {
       {"strict", 0, 0, 0},
       {"patch-formats", 0, 0, 0},
       {"default-table", 1, 0, 0},
+      {"headerless", 0, 0, 0},
 
       {"act", 1, 0, 0},
 
@@ -747,6 +751,8 @@ int Options::apply(int argc, char *argv[]) {
 	  flags.resolve = option_string["resolve"] = "neither";
 	} else if (k=="dry-run") {
 	  option_bool["apply"] = false;
+	} else if (k=="headerless") {
+	  flags.assume_header = false;
 	} else if (k=="test-file") {
 	  bool ok = generateExample(optarg);
 	  if (!ok) {

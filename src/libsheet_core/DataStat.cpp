@@ -10,6 +10,9 @@ using namespace coopy::store;
 using namespace coopy::cmp;
 
 void DataStat::evaluate(const DataSheet& sheet) {
+  CompareFlags flags;
+  evaluate2(sheet,flags);
+  /*
   int hh = 50;
   if (sheet.height()<hh) hh = sheet.height();
   clear();
@@ -82,13 +85,6 @@ void DataStat::evaluate(const DataSheet& sheet) {
       evidence++;
     }
   }
-  /*
-  if (top>=0) {
-    if (evidence<top*2+2) {
-      top = -1;
-    }
-  }
-  */
 
   if (top>=0) {
     // correct type checking
@@ -118,6 +114,7 @@ void DataStat::evaluate(const DataSheet& sheet) {
     dbg_printf("Cannot guess header\n");
   }
   rowDivider = top;
+  */
 }
 
 

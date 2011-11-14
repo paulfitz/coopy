@@ -58,6 +58,7 @@ public:
   Vote type_integer;
   Vote nully;
   Vote cappy;
+  Vote lowy;
 
   void evaluate(const char *txt, bool forward = true);  
 
@@ -77,6 +78,7 @@ public:
     type_integer.clear();
     nully.clear();
     cappy.clear();
+    lowy.clear();
   }
 
   void show();
