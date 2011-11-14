@@ -142,6 +142,7 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
       exit(1);
       return false;
     }
+    links.deleteData();
   }
   
   if (decl.column) {
@@ -155,6 +156,7 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
 	exit(1);
 	return false;
       }
+      links.deleteData();
     }
   }
 
