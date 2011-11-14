@@ -25,6 +25,7 @@ Show the difference between two tables/databases/spreadsheets.
 
 
 \section ssdiff_options Option summary
+ \li \ref ssdiff_main_act "--act=ACT"
  \li \ref ssdiff_main_apply "--apply"
  \li \ref ssdiff_main_bid "--bid=COLUMN"
  \li \ref ssdiff_main_default-table "--default-table=TABLE"
@@ -46,6 +47,9 @@ Show the difference between two tables/databases/spreadsheets.
 
 
 \section ssdiff_options_detail Option details
+\anchor ssdiff_main_act <b>--act=ACT</b> <br />filter for one type of change to rows (update, insert, delete)
+
+
 \anchor ssdiff_main_apply <b>--apply</b> <br />apply difference between FILE1 and FILE2 immediately to FILE1
 
 

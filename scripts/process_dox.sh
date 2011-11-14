@@ -46,8 +46,27 @@ function show_file {
 	) > /dev/null
 	bname=`basename $SRC .paradox`
 	iname="$IMG_DIR/${bname}_${x}.pdf"
-	echo mv /tmp/tmp2.pdf $BASE/$iname 1>&2
-	mv /tmp/tmp2.pdf $BASE/$iname
+	echo cmp /tmp/tmp2.pdf $BASE/$iname 1>&2
+	f=/tmp/tmp2.pdf
+	g="$BASE/$iname"
+	{
+	if [ -e $g ]; then
+	    ModDate="`grep -a '^/ModDate' $g | head -n1`"
+	    CreationDate="`grep -a '^/CreationDate' $g | head -n1`"
+	    ID="`grep -a '^/ID' $g | head -n1`"
+	    echo "ModDate $ModDate"
+	    echo "CreationDate $CreationDate"
+	    echo "ID $ID"  1>&2
+	    sed -i "s|^/ModDate .*|$ModDate|g" $f
+	    sed -i "s|^/CreationDate .*|$CreationDate|g" $f
+	    sed -i "s|^/ID .*|$ID|g" $f
+	fi
+
+	cmp $f $g || (
+	    echo cp /tmp/tmp2.pdf $BASE/$iname
+	    cp /tmp/tmp2.pdf $BASE/$iname
+	)
+	} 1>& 2
 	if [ ! "k$width" = "k" ]; then
 	    echo "\\image latex $iname \"\" width=$width"
 	else

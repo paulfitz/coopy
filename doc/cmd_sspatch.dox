@@ -26,6 +26,7 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
 
 
 \section sspatch_options Option summary
+ \li \ref sspatch_main_act "--act=ACT"
  \li \ref sspatch_main_cmd "--cmd=CMD"
  \li \ref sspatch_main_default-table "--default-table=TABLE"
  \li \ref sspatch_main_help "--help"
@@ -37,7 +38,10 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
 
 
 \section sspatch_options_detail Option details
-\anchor sspatch_main_cmd <b>--cmd=CMD</b> <br />specify a patch (in tdiff format) with a string rather than as a file, useful to make a quick change to a table that does not merit a full patch file
+\anchor sspatch_main_act <b>--act=ACT</b> <br />filter for one type of change to rows (update, insert, delete)
+
+
+\anchor sspatch_main_cmd <b>--cmd=CMD</b> <br />specify an action inline in tdiff format
 
 
 \anchor sspatch_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied

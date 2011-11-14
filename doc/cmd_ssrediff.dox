@@ -26,6 +26,7 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 
 
 \section ssrediff_options Option summary
+ \li \ref ssrediff_main_act "--act=ACT"
  \li \ref ssrediff_main_default-table "--default-table=TABLE"
  \li \ref ssrediff_main_format "--format=FORMAT"
  \li \ref ssrediff_main_help "--help"
@@ -36,6 +37,9 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 
 
 \section ssrediff_options_detail Option details
+\anchor ssrediff_main_act <b>--act=ACT</b> <br />filter for one type of change to rows (update, insert, delete)
+
+
 \anchor ssrediff_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
 
 
@@ -81,6 +85,16 @@ Convert tdiff format file to SQL
 
 \subsection ssrediff_examples_2 Example 2
 \verbatim
+ssrediff --format sql --act update numbers_patch.tdiff
+\endverbatim
+Convert tdiff format file to SQL, showing updates only
+
+
+
+
+
+\subsection ssrediff_examples_3 Example 3
+\verbatim
 ssrediff --format csv numbers_patch.tdiff
 \endverbatim
 Convert tdiff format file to a CSV-readable diff format
@@ -89,7 +103,7 @@ Convert tdiff format file to a CSV-readable diff format
 
 
 
-\subsection ssrediff_examples_3 Example 3
+\subsection ssrediff_examples_4 Example 4
 \verbatim
 ssrediff --format hilite --output review.csv numbers_buggy.csv numbers_patch.tdiff
 \endverbatim
