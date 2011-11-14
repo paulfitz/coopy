@@ -41,6 +41,8 @@ private:
   int yoff;
   bool killNeutral;
   bool merging;
+  bool sheetChange;
+  std::string sheetName;
   coopy::store::NameSniffer *sniffer;
   coopy::store::DataSheet *sniffedSheet;
 

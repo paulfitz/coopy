@@ -835,6 +835,12 @@ bool SheetPatcher::setSheet(const char *name) {
   dbg_printf("Moved to sheet %s\n", name);
   attachSheet(psheet);
   //sheet = &psheet;
+
+  if (sheetName!=name) {
+    sheetName = name;
+    sheetChange = true;
+  }
+
   setNames();
 
   return true;
@@ -842,6 +848,8 @@ bool SheetPatcher::setSheet(const char *name) {
 
 
 bool SheetPatcher::mergeStart() {
+  sheetChange = true;
+  sheetName = "";
   killNeutral = false;
   activeRow.resize(1,0);
   setNames();
@@ -1001,7 +1009,8 @@ bool SheetPatcher::mergeDone() {
 void SheetPatcher::setNames() {
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return;
-  if (&sheet!=sniffedSheet) {
+  if (sheetChange) {
+    sheetChange = false;
     clearNames();
     activeCol.resize(0,1);
     statusCol.resize(0,1);

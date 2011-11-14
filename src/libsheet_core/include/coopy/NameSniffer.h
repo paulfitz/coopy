@@ -54,6 +54,10 @@ public:
 
   virtual std::string suggestColumnName(int col);
 
+  virtual const ColumnType& suggestColumnType(int col) {
+    return ct[col];
+  }
+
   virtual const std::vector<std::string>& suggestNames() const {
     return names;
   }

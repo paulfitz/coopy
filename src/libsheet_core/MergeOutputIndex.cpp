@@ -3,6 +3,7 @@
 
 #include <coopy/EfficientMap.h>
 #include <coopy/Stringer.h>
+#include <coopy/IndexSniffer.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -13,6 +14,8 @@ using namespace std;
 MergeOutputIndex::MergeOutputIndex() {
   implementation = new efficient_map<std::string,int>;
   COOPY_ASSERT(implementation);
+  pending_row = true;
+  sheet_set = false;
 }
 
 MergeOutputIndex::~MergeOutputIndex() {
@@ -21,35 +24,30 @@ MergeOutputIndex::~MergeOutputIndex() {
 }
 
 bool MergeOutputIndex::mergeStart() {
+  pending_row = true;
+  sheet_set = false;
   return true;
 }
 
 bool MergeOutputIndex::setSheet(const char *name) {
+  this->name = name;
+
+  sheet_set = true;
   efficient_map<string,int>& seen = HELPER(implementation);
   seen.clear();
   links_column.clear();
+  links.clear();
+  pending_row = true;
 
-  SimpleSheetSchema ss;
-  ss.setSheetName(name);
-  ss.addColumn("pivot",ColumnType("INTEGER"));
-  ss.addColumn("local",ColumnType("INTEGER"));
-  ss.addColumn("remote",ColumnType("INTEGER"));
-  if (getOutputBook()!=NULL) {
-    links = getOutputBook()->provideSheet(ss);
-  }
-  
-  if (!links.isValid()) {
-    fprintf(stderr,"* Could not generate links sheet\n");
-    exit(1);
-    return false;
-  }
-
+  links_column_schema = SimpleSheetSchema();
   links_column_schema.setSheetName((string(name) + "_columns").c_str());
-  links_column_schema.addColumn("pivot",ColumnType("INTEGER"));
-  links_column_schema.addColumn("local",ColumnType("INTEGER"));
-  links_column_schema.addColumn("remote",ColumnType("INTEGER"));
-  links_column_schema.addColumn("local_name",ColumnType("TEXT"));
-  links_column_schema.addColumn("remote_name",ColumnType("TEXT"));
+  if (flags.has_pivot) {
+    links_column_schema.addColumn("p_offset",ColumnType("INTEGER"));
+  }
+  links_column_schema.addColumn("l_name",ColumnType("TEXT"));
+  links_column_schema.addColumn("r_name",ColumnType("TEXT"));
+  links_column_schema.addColumn("l_offset",ColumnType("INTEGER"));
+  links_column_schema.addColumn("r_offset",ColumnType("INTEGER"));
 
   return true;
 }
@@ -65,11 +63,14 @@ static SheetCell link_cell(int x) {
   return SheetCell();
 }
 
-bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
-  if (!links.isValid()) {
-    setSheet("sheet");
+static SheetCell link_cell(PolySheet& sheet, int x, int y) {
+  if (y<0) {
+    return SheetCell();
   }
-  
+  return sheet.cellSummary(x,y);
+}
+
+bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
   dbg_printf("LINK %d %d %d %d\n",
 	 decl.mode,
 	 decl.rc_id_pivot,
@@ -77,6 +78,72 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
 	 decl.rc_id_remote);
   std::string mode = decl.column?"column":"row";
 
+  if (!sheet_set) {
+    setSheet("sheet");
+  }
+
+  if (pending_row && !decl.column) {
+    pending_row = false;
+    pivot = decl.pivot;
+    //printf("WORKING ON A %d x %d sheet: %s\n", pivot.width(), pivot.height(), pivot.toString().c_str());
+    local = decl.local;
+    remote = decl.remote;
+    if (!pivot.isValid()) {
+      fprintf(stderr,"Table not provided\n");
+      exit(1);
+    }
+    
+    pivot.mustHaveSchema();
+    local.mustHaveSchema();
+    remote.mustHaveSchema();
+    NameSniffer npivot(pivot,flags);
+    NameSniffer nlocal(local,flags);
+    NameSniffer nremote(remote,flags);
+    IndexSniffer xpivot(pivot,flags,npivot);
+    IndexSniffer xlocal(local,flags,nlocal);
+    IndexSniffer xremote(remote,flags,nremote);
+    ipivot = xpivot.suggestIndexes();
+    ilocal = xlocal.suggestIndexes();
+    iremote = xremote.suggestIndexes();
+    //printf("%d %d %d\n", ipivot.size(), ilocal.size(), iremote.size());
+
+    SimpleSheetSchema ss;
+    ss.setSheetName(name.c_str());
+    if (flags.has_pivot) {
+      for (int i=0; i<(int)ipivot.size(); i++) {
+	if (ipivot[i]) {
+	  ss.addColumn((string("p_")+npivot.suggestColumnName(i)).c_str(),
+		       npivot.suggestColumnType(i));
+	}
+      }
+    }
+    {
+      for (int i=0; i<(int)ilocal.size(); i++) {
+	if (ilocal[i]) {
+	  ss.addColumn((string("l_")+nlocal.suggestColumnName(i)).c_str(),
+		       nlocal.suggestColumnType(i));
+	}
+      }
+    }
+    {
+      for (int i=0; i<(int)iremote.size(); i++) {
+	if (iremote[i]) {
+	  ss.addColumn((string("r_")+nremote.suggestColumnName(i)).c_str(),
+		       nremote.suggestColumnType(i));
+	}
+      }
+    }
+    if (getOutputBook()!=NULL) {
+      links = getOutputBook()->provideSheet(ss);
+    }
+    
+    if (!links.isValid()) {
+      fprintf(stderr,"* Could not generate links sheet\n");
+      exit(1);
+      return false;
+    }
+  }
+  
   if (decl.column) {
     if (!links_column.isValid()) {
       if (getOutputBook()!=NULL) {
@@ -117,20 +184,46 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
       Poly<SheetRow> pRow = links_column.insertRow();
       SheetRow& row = *pRow;
       int at = 0;
-      row.setCell(at,link_cell(decl.rc_id_pivot)); at++;
-      row.setCell(at,link_cell(decl.rc_id_local)); at++;
-      row.setCell(at,link_cell(decl.rc_id_remote)); at++;
+      if (flags.has_pivot) {
+	row.setCell(at,link_cell(decl.rc_id_pivot)); at++;
+      }
       //row.setCell(at,SheetCell(decl.rc_deleted?1:0)); at++;
       row.setCell(at,SheetCell(decl.rc_str_local,false)); at++;
       row.setCell(at,SheetCell(decl.rc_str_remote,false)); at++;
+      row.setCell(at,link_cell(decl.rc_id_local)); at++;
+      row.setCell(at,link_cell(decl.rc_id_remote)); at++;
       row.flush();
     } else {
       Poly<SheetRow> pRow = links.insertRow();
       SheetRow& row = *pRow;
       int at = 0;
-      row.setCell(at,link_cell(decl.rc_id_pivot)); at++;
-      row.setCell(at,link_cell(decl.rc_id_local)); at++;
-      row.setCell(at,link_cell(decl.rc_id_remote)); at++;
+      if (flags.has_pivot) {
+	for (int i=0; i<(int)ipivot.size(); i++) {
+	  if (ipivot[i]) {
+	    row.setCell(at,link_cell(pivot,i,decl.rc_id_pivot)); at++;
+	  }
+	}
+      }
+      {
+	for (int i=0; i<(int)ilocal.size(); i++) {
+	  if (ilocal[i]) {
+	    row.setCell(at,link_cell(local,i,decl.rc_id_pivot)); at++;
+	  }
+	}
+      }
+      {
+	for (int i=0; i<(int)iremote.size(); i++) {
+	  if (iremote[i]) {
+	    row.setCell(at,link_cell(remote,i,decl.rc_id_remote)); at++;
+	  }
+	}
+      }
+	/*
+	// not yet ready for showing multi-column keys etc
+	row.setCell(at,link_cell(decl.rc_id_pivot)); at++;
+	row.setCell(at,link_cell(decl.rc_id_local)); at++;
+	row.setCell(at,link_cell(decl.rc_id_remote)); at++;
+	*/
       //row.setCell(at,SheetCell(decl.rc_deleted?1:0)); at++;
       row.flush();
     }

@@ -816,6 +816,9 @@ bool Merger::merge(MergerState& state) {
 	  decl.rc_id_local = unit.localUnit;
 	  decl.rc_id_remote = unit.remoteUnit;
 	  decl.rc_deleted = unit.deleted;
+	  decl.pivot = PolySheet(&pivot,false);
+	  decl.local = PolySheet(&local,false);
+	  decl.remote = PolySheet(&remote,false);
 	  output.declareLink(decl);
 	}
 	if (unit.remoteUnit!=-1 || !allGone) {
@@ -917,7 +920,56 @@ bool Merger::merge(MergerState& state) {
     return true;
   }
 
+
+
   // MERGE
+
+  if (link) {
+    local_names.sniff();
+    remote_names.sniff();
+      
+    // perspective: MERGE, COLUMN
+    bool column_change = false;
+    for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+	 it!=col_merge.accum.end(); 
+	 it++) {
+      MatchUnit& unit = *it;
+      int pCol = unit.pivotUnit;
+      int lCol = unit.localUnit;
+      int rCol = unit.remoteUnit;
+      bool deleted = unit.deleted;
+      if (pCol!=lCol || pCol!=rCol || deleted) {
+	column_change = true;
+      }
+    }
+
+
+    if (column_change) {
+      for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+	   it!=col_merge.accum.end(); 
+	   it++) {
+	MatchUnit& unit = *it;
+	int pCol = unit.pivotUnit;
+	int lCol = unit.localUnit;
+	int rCol = unit.remoteUnit;
+	bool deleted = unit.deleted;
+	LinkDeclare decl;
+	decl.mode = LINK_DECLARE_MERGE;
+	decl.column = true;
+	decl.rc_id_pivot = pCol;
+	decl.rc_id_local = lCol;
+	decl.rc_id_remote = rCol;
+	decl.rc_deleted = deleted;
+	if (lCol!=-1) {
+	  decl.rc_str_local = local_names.suggestColumnName(lCol);
+	}
+	if (rCol!=-1) {
+	  decl.rc_str_remote = remote_names.suggestColumnName(rCol);
+	}
+	output.declareLink(decl);
+      }
+    }
+  }
 
   vector<string> header;
   for (list<MatchUnit>::iterator it=col_merge.accum.begin();
@@ -957,6 +1009,9 @@ bool Merger::merge(MergerState& state) {
       decl.rc_id_local = unit.localUnit;
       decl.rc_id_remote = unit.remoteUnit;
       decl.rc_deleted = unit.deleted;
+      decl.pivot = PolySheet(&pivot,false);
+      decl.local = PolySheet(&local,false);
+      decl.remote = PolySheet(&remote,false);
       output.declareLink(decl);
     }
 

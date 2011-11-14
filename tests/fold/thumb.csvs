@@ -25,9 +25,8 @@ id,title
 == people ==
 id,first,last
 -------------
-1,Tom,Smith
+1,Tom,Thumb
 2,John,Smith
-3,Frank,McMahon
 4,Sam,Fitzpatrick
  
 == ppl2org ==
@@ -35,5 +34,3 @@ id,ppl_id,org_id
 ----------------
 1,1,2
 2,2,2
-3,3,2
-4,3,1

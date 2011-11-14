@@ -1,0 +1,17 @@
+== sheet_columns ==
+l_name,r_name,l_offset,r_offset
+-------------------------------
+NAME,NAME,0,0
+DIGIT,DIGIT,1,1
+,FRENCH,NULL,2
+,UNARY,NULL,3
+ 
+== sheet ==
+l_NAME,r_NAME
+-------------
+NAME,NAME
+one,one
+two,two
+three,three
+four,four
+five,five

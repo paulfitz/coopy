@@ -63,6 +63,7 @@ public:
   coopy::store::DataSheet *mapping;
   coopy::store::DataBook *mapping_book;
   bool pivot_sides_with_local;
+  bool has_pivot;
   bool use_order;
   bool omit_format_name;
   bool omit_sheet_name;
@@ -91,6 +92,7 @@ public:
     fixed_columns = false;
     ignore_case = false;
     resolving = false;
+    has_pivot = true;
   }
 
   ~CompareFlags() {

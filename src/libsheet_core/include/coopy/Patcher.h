@@ -235,6 +235,9 @@ public:
   std::string rc_str_remote;
 
   // should also give all necessary info to show indexes
+  coopy::store::PolySheet pivot;
+  coopy::store::PolySheet local;
+  coopy::store::PolySheet remote;
 };
 
 class coopy::cmp::Patcher {

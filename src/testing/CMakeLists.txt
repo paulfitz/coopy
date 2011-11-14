@@ -796,6 +796,22 @@ if (COMPILE_GUI)
 
 endif ()
 
+#######################################################################
+#######################################################################
+
+# Index format
+
+add_test(index_format_prep ${ssdiff} --format index --output index_format.csvs ${TESTS}/named_numbers.csv ${TESTS}/named_numbers_wide.csv)
+add_test(index_format_compare ${ssdiff} --equals index_format.csvs ${TESTS}/link_nn_nn_wide.csvs)
+
+add_test(index_format_contacts_prep ${sspatch} --output index_format_contacts.csvs ${TESTS}/fold/contacts.csvs --cmd "@@@ people" --cmd "= |first=Tom|last=*->Thumb|" --cmd "- |first=Frank|" --cmd "@@@ ppl2org" --cmd "- |ppl_id=3|" --cmd "- |ppl_id=3|")
+
+add_test(index_format_contacts_compare ${ssdiff} --equals index_format_contacts.csvs ${TESTS}/fold/thumb.csvs)
+
+add_test(index_format_contacts_index ${ssdiff} --format index --output index_format_contacts_index.sqlite ${TESTS}/fold/contacts.csvs index_format_contacts.csvs)
+
+add_test(index_format_contacts_index_compare ${ssdiff} --equals index_format_contacts_index.sqlite ${TESTS}/fold/contacts_to_thumb.csvs)
+
 
 #######################################################################
 #######################################################################

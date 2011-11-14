@@ -151,6 +151,7 @@ int Diff::apply(const Options& opt) {
   } else {
     pivot = &_local;
     flags.pivot_sides_with_local = true;
+    flags.has_pivot = false;
   }
 
   if (equality) {

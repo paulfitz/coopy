@@ -14,17 +14,22 @@ namespace coopy {
 class coopy::cmp::MergeOutputIndex : public MergeOutput {
 private:
   void *implementation;
-public:
-  MergeOutputIndex();
-
-  virtual ~MergeOutputIndex();
 
   coopy::store::PolySheet links;
   coopy::store::PolySheet links_column;
   coopy::store::SimpleSheetSchema links_column_schema;
   coopy::store::PolySheet identity;
+  bool pending_row, sheet_set;
+  coopy::store::PolySheet pivot, local, remote;
+  std::vector<int> ipivot, ilocal, iremote;
+  std::string name;
 
-  virtual bool wantDiff() { return true; }
+public:
+  MergeOutputIndex();
+
+  virtual ~MergeOutputIndex();
+
+  virtual bool wantDiff() { return false; }
 
   virtual bool mergeStart();
 

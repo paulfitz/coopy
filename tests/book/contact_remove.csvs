@@ -23,7 +23,7 @@ id,org_id,loc_id
 3,4,1
  
  == ppl2org ==
-id,ppl_id,org_id
-1,1,2
-2,2,2
-3,3,2
+ppl_id,org_id
+1,2
+2,2
+3,2

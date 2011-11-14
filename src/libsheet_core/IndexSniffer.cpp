@@ -52,11 +52,14 @@ void IndexSniffer::sniff() {
       string v = sheet.cellString(i,j,escaped);
       v += escaped?"*":" ";
       sofar[j] += v;
-      //dbg_printf("checking %d %s\n", j, sofar[j].c_str());
+      dbg_printf("checking %d %s\n", j, sofar[j].c_str());
       if (ct.find(sofar[j])==ct.end()) {
 	ct[sofar[j]] = 1;
       } else {
 	collide++;
+	if (collide==1) {
+	  dbg_printf("first collision is for %s\n", v.c_str());
+	}
       }
     }
     if (collide==0) {
