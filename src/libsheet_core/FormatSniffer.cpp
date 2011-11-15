@@ -104,6 +104,13 @@ Format FormatSniffer::getFormat() {
     return f;
   }
 
+  if (cache.find("@@@ ")!=string::npos) {
+    Format f;
+    f.id = FORMAT_PATCH_TDIFF;
+    f.name = "coopy_patch_tdiff";
+    return f;
+  }
+
   return Format();
 }
 
