@@ -25,6 +25,7 @@ private:
   std::vector<int> columns;
   std::vector<std::string> column_names;
   std::map<std::string,int> name2col;
+  std::map<std::string,coopy::store::PoolColumn *> name2pool;
   std::map<std::string,std::string> syn2name;
   std::map<std::string,std::string> name2syn;
   int rowCursor;
@@ -57,6 +58,8 @@ private:
   int matchCol(const std::string& mover);
 
   int updateCols();
+
+  void updatePool();
 
   bool moveColumn(int idx, int idx2);
 
@@ -147,6 +150,13 @@ public:
   virtual bool changeColumn(const OrderChange& change);
   virtual bool changeRow(const RowChange& change);
   virtual bool declareNames(const std::vector<std::string>& names, bool final);
+
+  virtual bool changePool(const PoolChange& change) {
+    if (chain) chain->changePool(change);
+    bool ok = applyPool(change);
+    updatePool();
+    return ok;
+  }
 
   virtual bool setSheet(const char *name);
 

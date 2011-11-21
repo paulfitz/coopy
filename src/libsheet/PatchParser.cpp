@@ -875,6 +875,7 @@ string stringer_encoder(const TDiffPart& part) {
 
 bool PatchParser::applyTdiff() {
   vector<string> allNames;
+  string table_name = "";
 
   patcher->mergeStart();
 
@@ -924,7 +925,8 @@ bool PatchParser::applyTdiff() {
       dbg_printf("\n");
     }
     if (first=="@@@") {
-      patcher->setSheet(msg[1].c_str());
+      table_name = msg[1];
+      patcher->setSheet(table_name.c_str());
     } else if (first=="x") {
       PoolChange pc;
       if (msg.size()>=2) {
@@ -946,6 +948,7 @@ bool PatchParser::applyTdiff() {
 	  }
 	}
 	pc.poolName = poolName;
+	pc.tableName = table_name;
 	patcher->changePool(pc);
       }
     } else if (first=="@"||first=="@@") {

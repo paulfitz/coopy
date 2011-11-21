@@ -94,8 +94,8 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
 
     PolySheet mapping;
     CompareFlags flags2 = flags;
-    if (flags.mapping_book) {
-      mapping = flags.mapping_book->readSheet(name.c_str());
+    if (flags2.mapping_book) {
+      mapping = flags2.mapping_book->readSheet(name.c_str());
       if (mapping.isValid()) {
 	flags2.mapping = &mapping;
       }
@@ -112,7 +112,8 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
 	  return -1;
 	}
       }
-      int r = cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,flags2);
+      int r = cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,
+			  flags2);
       if (r!=0) return r;
     } else if (local_sheet.isValid()&&pivot_sheet.isValid()&&
 	       !remote_sheet.isValid()) {

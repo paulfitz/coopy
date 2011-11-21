@@ -144,8 +144,24 @@ coopy::store::PolySheet Patcher::getSheet() {
 }
 
 
+bool Patcher::applyPool(const PoolChange& change) {
+  if (flags.pool==NULL) {
+    dbg_printf("NO SINK AVAILABLE FOR POOL CHANGE\n");
+    return false;
+  }
+  std::string poolName = change.poolName;
+  std::string tableName = change.tableName;
+  for (std::vector<coopy::cmp::TableField>::const_iterator it=change.pool.begin(); it!=change.pool.end(); it++) {
+    flags.pool->create(poolName,(it->tableName=="")?tableName:(it->tableName),it->fieldName,it->invented);
+  }
+  return true;
+}
+
+
+
 void RowChange::show() {
   MergeOutputVerboseDiff diff;
   diff.changeRow(*this);
 }
+
 

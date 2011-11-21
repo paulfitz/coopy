@@ -8,6 +8,7 @@
 #include <coopy/PolyBook.h>
 #include <coopy/SheetPatcher.h>
 #include <coopy/PatchParser.h>
+#include <coopy/PoolImpl.h>
 #include <coopy/Options.h>
 
 #include <coopy/Diff.h>
@@ -61,6 +62,8 @@ int Diff::apply(const Options& opt) {
   bool showPatch = opt.isPatchLike() && mode=="apply" && !apply;
 
   CompareFlags flags = opt.getCompareFlags();
+  PoolImpl pool;
+  flags.pool = &pool;
 
   vector<string> core = opt.getCore();
   if (opt.isMergeLike()) {

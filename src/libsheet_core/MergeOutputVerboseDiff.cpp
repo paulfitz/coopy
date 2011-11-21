@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+std::string stringer_encoder(const coopy::cmp::TableField& x) {
+  return x.toString();
+}
+
 #define WANT_MAP2STRING
 #define WANT_VECTOR2STRING
 #include <coopy/Stringer.h>
@@ -102,3 +106,12 @@ bool MergeOutputVerboseDiff::setSheet(const char *name) {
   fprintf(out,"setSheet [%s]\n\n", stringer_encoder(string(name)).c_str());
   return true;
 }
+
+bool MergeOutputVerboseDiff::changePool(const PoolChange& change) {
+  fprintf(out,"changePool: <%s>\n", stringer_encoder(change.poolName).c_str());
+  fprintf(out,"      link  %s\n", vector2string(change.pool).c_str());
+  fprintf(out,"\n");
+  
+  return true;
+}
+

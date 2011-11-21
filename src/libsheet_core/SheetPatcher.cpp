@@ -1040,10 +1040,29 @@ void SheetPatcher::setNames() {
     activeCol.resize(sheet.width(),1);
     statusCol.resize(sheet.width(),1);
     for (int i=0; i<sheet.width(); i++) {
-      activeCol.cellString(i,0,sniffer->suggestColumnName(i));
+      string name = sniffer->suggestColumnName(i);
+      activeCol.cellString(i,0,name);
     }
     updateCols();
+    updatePool();
   }
 }
 
 
+void SheetPatcher::updatePool() {
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return;
+  setNames();
+  if (!sniffer) return;
+  name2pool.clear();
+  for (int i=0; i<sheet.width(); i++) {
+    string name = sniffer->suggestColumnName(i);
+    const CompareFlags& flags = getFlags();
+    if (!flags.pool) continue;
+    //printf("Looking up %s %s\n", sheetName.c_str(), name.c_str());
+    PoolColumn& pc = flags.pool->lookup(sheetName,name);
+    if (!pc.isValid()) continue;
+    //printf("Found a pool at %s %s\n", sheetName.c_str(), name.c_str());
+    name2pool[name] = &pc;
+  }
+}

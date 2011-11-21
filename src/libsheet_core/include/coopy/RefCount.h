@@ -1,6 +1,8 @@
 #ifndef COOPY_REFCOUNT
 #define COOPY_REFCOUNT
 
+#include <coopy/Dbg.h>
+
 namespace coopy {
   namespace store {
     class RefCount;

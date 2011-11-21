@@ -6,6 +6,8 @@
 #include <set>
 #include <string>
 
+#include <coopy/Pool.h>
+
 namespace coopy {
   namespace cmp {
     class CompareFlags;
@@ -76,6 +78,7 @@ public:
   bool resolving;
   std::string resolve;
   std::string variant;
+  coopy::store::Pool *pool;
 
   CompareFlags() {
     head_trimmed = false;
@@ -95,6 +98,7 @@ public:
     resolving = false;
     has_pivot = true;
     assume_header = true;
+    pool = 0 /*NULL*/;
   }
 
   ~CompareFlags() {

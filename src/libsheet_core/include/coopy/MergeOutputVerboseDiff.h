@@ -17,6 +17,7 @@ public:
   virtual bool changeColumn(const OrderChange& change);
   virtual bool changeRow(const RowChange& change);
   virtual bool changeName(const NameChange& change);
+  virtual bool changePool(const PoolChange& change);
 
   virtual bool setSheet(const char *name);
 };

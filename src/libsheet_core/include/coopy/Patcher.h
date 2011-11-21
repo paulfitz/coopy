@@ -83,11 +83,16 @@ public:
     fieldName(fieldName),
     invented(invented) {
     }
+
+  std::string toString() const {
+    return tableName + ":" + fieldName + (invented?"(create)":"");
+  }
 };
 
 class coopy::cmp::PoolChange {
 public:
   std::string poolName;
+  std::string tableName;
   std::vector<coopy::cmp::TableField> pool;
 };
 
@@ -419,6 +424,8 @@ public:
   bool isConflicted() const {
     return conflicted;
   }
+
+  bool applyPool(const PoolChange& change);
 };
 
 
