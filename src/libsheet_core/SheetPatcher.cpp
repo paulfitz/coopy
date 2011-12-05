@@ -630,6 +630,8 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	      fprintf(stderr, "Inserting a %s:%d value against my better judgment\n",
 		      link.get_table_name().c_str(),
 		      link.get_column_name().c_str());
+	    } else {
+	      inserter->invent(c);
 	    }
 	  } else {
 	    inserter->setCell(c,val[c]);

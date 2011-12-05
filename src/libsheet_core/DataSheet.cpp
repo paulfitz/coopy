@@ -192,3 +192,19 @@ std::string DataSheet::getHash(bool cache) const {
   return key;
 }
 
+
+
+bool OrderedSheetRow::invent(int x) {
+  dbg_printf("\n\n*** Maxes need to get cached! Hop to it! %s:%d\n\n\n", __FILE__, __LINE__);
+  
+  int top = -1;
+  for (int i=0; i<sheet->height(); i++) {
+    SheetCell v = sheet->cellSummary(x,i);
+    int v2 = v.asInt();
+    if (v2>top) top = v2;
+  }
+
+  return sheet->cellSummary(x,y,SheetCell(top+1));
+}
+
+

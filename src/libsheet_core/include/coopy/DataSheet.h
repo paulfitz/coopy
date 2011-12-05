@@ -26,10 +26,12 @@ namespace coopy {
 class coopy::store::RowCache {
 public:
   std::vector<bool> flags;
+  std::vector<bool> invent;
   std::vector<SheetCell> cells;
 
   RowCache(int len) {
     flags.resize(len,false);
+    invent.resize(len,false);
     cells.resize(len);
   }
 };
@@ -349,6 +351,8 @@ public:
 
   virtual bool flush() = 0;
 
+  virtual bool invent(int x) = 0;
+
   virtual bool setDelta(int dh) { delta = dh; }
 
   // only valid AFTER flush
@@ -377,6 +381,8 @@ public:
   virtual bool setCell(int x, const SheetCell& c) {
     return sheet->cellSummary(x,y,c);
   }
+
+  virtual bool invent(int x);
 
   virtual bool flush() {
     return true;
@@ -407,6 +413,10 @@ public:
     cache.cells[x] = c;
     cache.flags[x] = true;
     return true;
+  }
+
+  virtual bool invent(int x) {
+    cache.invent[x] = true;
   }
 
   virtual bool flush() {
