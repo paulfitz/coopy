@@ -48,14 +48,9 @@ How to compile:
 
 E.g. on Debian:
   apt-get install gnumeric
+  apt-get build-dep gnumeric
   apt-get source gnumeric
-  cd gnumeric-1.6.3
-  ./configure
-  apt-get install libxml-perl
-  ./configure
-  apt-get install libglade2-dev libgnomeprintui2.2-dev
-  ./configure
-  apt-get install libgsf-1-dev libgoffice-1-dev
+  cd gnumeric-*
   ./configure
   # success! a lot of trouble to go to, given that we won't in fact
   # be compiling the source...
