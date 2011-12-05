@@ -1,0 +1,10 @@
+# tdiff version 0.3
+# --- root.xls
+# +++ bob.xls
+
+@@@ NumberSheet
+
+@ |NAME=|
+= |fyffe->five|
+- |spam|
+

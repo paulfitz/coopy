@@ -856,3 +856,31 @@ foreach (RESOLVER ours theirs neither)
 endforeach()
 
 
+#######################################################################
+#######################################################################
+
+# Keep GUT examples working
+
+ADD_TEST(gut_example_bob_diff ${ssdiff} 
+  --output gut_example_bob_diff.tdiff
+  --omit-format-name
+  ${TESTS}/gut/root.xls
+  ${TESTS}/gut/bob.xls)
+
+ADD_TEST(gut_example_bob_diff_ref ${ssrediff} 
+  --output gut_example_bob_diff_ref.tdiff
+  --omit-format-name
+  ${TESTS}/gut/bobs_mods.tdiff)
+
+ADD_TEST(gut_example_bob_diff_cmp ${CMAKE_COMMAND} -E compare_files 
+  gut_example_bob_diff.tdiff
+  gut_example_bob_diff_ref.tdiff)
+
+ADD_TEST(gut_example_alice_bob ${sspatch} 
+  --output gut_example_alice_bob.xls
+  ${TESTS}/gut/alice.xls
+  gut_example_bob_diff.tdiff)
+
+ADD_TEST(gut_example_alice_bob_cmp ${ssdiff} --equal
+  gut_example_alice_bob.xls
+  ${TESTS}/gut/alice_and_bob.xls)
