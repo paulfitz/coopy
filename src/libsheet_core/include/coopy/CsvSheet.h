@@ -66,6 +66,7 @@ public:
     return false;
   }
 
+  /*
   // Deprecated
   bool insertRow(int index, int width = -1) {
     std::vector<pairCellType> rec;
@@ -82,6 +83,7 @@ public:
     tw = s.w = rec.size();
     return true;
   }
+  */
 
   void addField(const char *s, bool escaped);
 

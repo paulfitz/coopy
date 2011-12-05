@@ -151,8 +151,18 @@ bool DataSheet::applyRowCache(const RowCache& cache, int row,
 
 
 Poly<SheetRow> DataSheet::insertRow() {
-  //printf("attaching sheet for insertion %s\n", desc().c_str());
-  SheetRow *row = new CacheSheetRow(this,height());
+  if (isSequential()) {
+    Poly<SheetRow> row = insertRowOrdered(RowRef(-1));
+    return row;
+  }
+  SheetRow *row = new CacheSheetRow(this);
+  COOPY_ASSERT(row);
+  return Poly<SheetRow>(row,true);
+}
+
+Poly<SheetRow> DataSheet::insertRowOrdered(const RowRef& base) {
+  RowRef at = insertRow(base);
+  OrderedSheetRow *row = new OrderedSheetRow(this,at.getIndex());
   COOPY_ASSERT(row);
   return Poly<SheetRow>(row,true);
 }

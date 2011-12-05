@@ -1068,6 +1068,7 @@ bool FoldTool::fold(PolyBook& src, PolyBook& rdest, FoldOptions& options) {
   sheet.hideHeaders();
   int LIGHT = 0xbb*0x100;
   int DARK = 0x99*0x100;
+  printf("SHEET IS %s\n", sheet.toString().c_str());
   for (int i=0; i<sheet.height(); i++) {
     //printf("i %d zebra %d\n", i, zebra.cell(0,i));
     if (i>0) {

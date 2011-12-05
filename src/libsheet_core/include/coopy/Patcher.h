@@ -426,6 +426,8 @@ public:
   }
 
   bool applyPool(const PoolChange& change);
+
+  bool addPoolsFromFlags(const coopy::store::DataSheet& sheet);
 };
 
 

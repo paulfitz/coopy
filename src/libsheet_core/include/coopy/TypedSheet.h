@@ -199,6 +199,7 @@ public:
     return RowRef(offset2);
   }
 
+  /*
   virtual Poly<SheetRow> insertRow() {
     Poly<SheetRow> pRow = DataSheet::insertRow();
     arr.push_back(std::vector<T>());
@@ -209,15 +210,7 @@ public:
     h++;
     return pRow;
   }
-
-  void insertRowHelper() {
-    arr.push_back(std::vector<T>());
-    std::vector<T>& lst = arr.back();
-    for (int j=0; j<w; j++) {
-      lst.push_back(zero);
-    }
-    h++;
-  }
+  */
 
   virtual bool applySchema(const SheetSchema& ss) {
     arr.clear();
@@ -336,12 +329,6 @@ public:
   // move a row before base; if base is invalid move after all rows
   virtual RowRef moveRow(const RowRef& src, const RowRef& base) {
     return s.moveRow(src,base);
-  }
-
-  virtual Poly<SheetRow> insertRow() {
-    Poly<SheetRow> pRow = DataSheet::insertRow();
-    s.insertRowHelper();
-    return pRow;
   }
 
   virtual bool applySchema(const SheetSchema& ss) {

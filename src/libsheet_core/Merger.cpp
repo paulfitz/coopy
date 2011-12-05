@@ -904,6 +904,9 @@ bool Merger::merge(MergerState& state) {
 	indexes[name] = true;
       }
     }
+    if (rc.size()>0) {
+      output.addPoolsFromFlags(state.local);
+    }
     for (int i=0; i<(int)rc.size(); i++) {
       /*
 	scope for being smarter here about what gets scoped in.

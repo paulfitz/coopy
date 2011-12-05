@@ -14,6 +14,7 @@
 
 using namespace std;
 using namespace coopy::cmp;
+using namespace coopy::store;
 
 int OrderChange::identityToIndex(int id) const {
   //if (id==-1) return -1;
@@ -165,3 +166,29 @@ void RowChange::show() {
 }
 
 
+
+
+bool Patcher::addPoolsFromFlags(const DataSheet& sheet) {
+  if (flags.coined.size()>0) {
+
+    SheetSchema *ss = sheet.getSchema();
+    if (!ss) return false;
+
+    string name = ss->getSheetName();
+
+    for (int j=0; j<(int)flags.coined.size(); j++) {
+      string field = flags.coined[j];
+      for (int i=0; i<ss->getColumnCount(); i++) {
+	string field2 = ss->getColumnInfo(i).getName();
+	if (field==field2) {
+	  PoolChange pc;
+	  pc.poolName = name;
+	  pc.tableName = name;
+	  pc.pool.push_back(TableField("",field,true));
+	  changePool(pc);
+	}
+      }
+    }
+  }
+  return true;
+}

@@ -473,6 +473,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   state.allIdentical = (pivot_hash == local_hash) && 
     (pivot_hash == remote_hash) &&
     (pivot_hash != "");
+
   bool ok = merger.merge(state);
 
   dbg_printf("SheetCompare::compare done\n");

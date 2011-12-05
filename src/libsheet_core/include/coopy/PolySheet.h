@@ -281,7 +281,16 @@ public:
 
   virtual Poly<SheetRow> insertRow() {
     COOPY_ASSERT(sheet);
-    return sheet->insertRow();
+    Poly<SheetRow> row = sheet->insertRow();
+    row->setDelta(-dh);
+    return row;
+  }
+
+  virtual Poly<SheetRow> insertRowOrdered(const RowRef& base) {
+    COOPY_ASSERT(sheet);
+    Poly<SheetRow> row = sheet->insertRowOrdered((dh==0)?base:base.delta(dh));
+    row->setDelta(-dh);
+    return row;
   }
 
   virtual bool applySchema(const SheetSchema& ss) {

@@ -135,6 +135,7 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
     bool ext = target.hasExternalColumnNames()||target.getSchema()!=NULL;
     dbg_printf("  - target.hasExternalColumnNames? %d\n", 
 	       target.hasExternalColumnNames());
+    
     if (schema->headerHeight()>0) {
       if (ext) {
 	start += schema->headerHeight();
@@ -159,8 +160,11 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
 	}
       }
     }
+    dbg_printf("Copying rows from %s to %s\n",
+	       sheet.desc().c_str(), target.desc().c_str());
     for (int i=start; i<sheet.height(); i++) {
-      dbg_printf("Row %d\n", i);
+      dbg_printf("Row %d (src height %d target height %d)\n", i,
+		 sheet.height(),target.height());
       Poly<SheetRow> pRow = target.insertRow();
       SheetRow& row = *pRow;
       for (int j=0; j<sheet.width(); j++) {

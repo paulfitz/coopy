@@ -57,6 +57,7 @@ public:
   std::set<std::string> acts;
   std::vector<std::string> ordered_tables;
   std::vector<std::string> ids;
+  std::vector<std::string> coined;
   std::vector<int> ids_local;
   std::vector<int> ids_remote;
   bool trust_ids;

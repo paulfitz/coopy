@@ -643,6 +643,7 @@ int Options::apply(int argc, char *argv[]) {
 
       {"id", 1, 0, 'k'},
       {"bid", 1, 0, 'b'},
+      {"coin", 1, 0, 0},
 
       {"named", 0, 0, 'd'},
 
@@ -778,6 +779,8 @@ int Options::apply(int argc, char *argv[]) {
 	    fprintf(stderr,"Try: update, insert, delete\n");
 	    return 1;
 	  }
+	} else if (k == "coin") {
+	  flags.coined.push_back(optarg);
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;

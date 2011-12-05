@@ -605,29 +605,52 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
     {
+      RowRef tail(rowCursor);
+      Poly<SheetRow> inserter;
       if (sheet.isSequential()) {
-	RowRef tail(rowCursor);
-	int r = sheet.insertRow(tail).getIndex();
-	dbg_printf("+++ inserted row at %d (%d)\n", r, tail.getIndex());
-	activeRow.insertRow(tail);
-	if (r>=0) {
-	  activeRow.cellString(0,r,"+++");
-	  for (int c=0; c<width; c++) {
-	    if (active_val[c]) {
-	      sheet.cellSummary(c,r,val[c]);
+	inserter = sheet.insertRowOrdered(tail);
+      } else {
+	inserter = sheet.insertRow();
+      }
+      for (int c=0; c<width; c++) {
+	if (active_val[c]) {
+	  PoolColumnLink link;
+	  if (flags.foreign_pool) {
+	    std::map<std::string,coopy::store::PoolColumnLink>::iterator it =
+	      name2pool.find(col2name[c]);
+	    if (it!=name2pool.end()) {
+	      link = it->second;
 	    }
 	  }
-	  if (descriptive) {
-	    Poly<Appearance> appear = sheet.getRowAppearance(r);
-	    if (appear.isValid()) {
-	      appear->begin();
-	      appear->setBackgroundRgb16(HALF_COLOR,
-					 FULL_COLOR,
-					 HALF_COLOR,
-					 AppearanceRange::full());
-	      appear->setWeightBold(true,AppearanceRange::full());
-	      appear->end();
+	  if (link.is_valid()) {
+	    // Skip if inventor
+	    // But should try to recover id to place in pool
+	    
+	    if (!link.is_inventor()) {
+	      fprintf(stderr, "Inserting a %s:%d value against my better judgment\n",
+		      link.get_table_name().c_str(),
+		      link.get_column_name().c_str());
 	    }
+	  } else {
+	    inserter->setCell(c,val[c]);
+	  }
+	}
+      }
+      inserter->flush();
+      if (sheet.isSequential()) {
+	int r = inserter->getRowAfterFlush().getIndex();
+	activeRow.insertRowOrdered(tail);
+	activeRow.cellString(0,r,"+++");
+	if (descriptive) {
+	  Poly<Appearance> appear = sheet.getRowAppearance(r);
+	  if (appear.isValid()) {
+	    appear->begin();
+	    appear->setBackgroundRgb16(HALF_COLOR,
+				       FULL_COLOR,
+				       HALF_COLOR,
+				       AppearanceRange::full());
+	    appear->setWeightBold(true,AppearanceRange::full());
+	    appear->end();
 	  }
 	}
 	r++;
@@ -635,33 +658,6 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	  r = -1;
 	}
 	rowCursor = r;
-      } else {
-	Poly<SheetRow> inserter = sheet.insertRow();
-	for (int c=0; c<width; c++) {
-	  if (active_val[c]) {
-	    PoolColumnLink link;
-	    if (flags.foreign_pool) {
-	      std::map<std::string,coopy::store::PoolColumnLink>::iterator it =
-		name2pool.find(col2name[c]);
-	      if (it!=name2pool.end()) {
-		link = it->second;
-	      }
-	    }
-	    if (link.is_valid()) {
-	      // Skip if inventor
-	      // But should try to recover id to place in pool
-	      
-	      if (!link.is_inventor()) {
-		fprintf(stderr, "Inserting a %s:%d value against my better judgment\n",
-			link.get_table_name().c_str(),
-			link.get_column_name().c_str());
-	      }
-	    } else {
-	      inserter->setCell(c,val[c]);
-	    }
-	  }
-	}
-	inserter->flush();
       }
     }
     break;
@@ -860,6 +856,8 @@ bool SheetPatcher::setSheet(const char *name) {
   }
 
   setNames();
+
+  addPoolsFromFlags(psheet);
 
   return true;
 }

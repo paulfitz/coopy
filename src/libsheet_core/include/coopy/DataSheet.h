@@ -18,6 +18,7 @@ namespace coopy {
     class RowCache;
     class DataSheet;
     class SheetRow;
+    class OrderedSheetRow;
     class CacheSheetRow;
   }
 }
@@ -256,6 +257,8 @@ public:
 
   virtual Poly<SheetRow> insertRow();
 
+  virtual Poly<SheetRow> insertRowOrdered(const RowRef &base);
+
   virtual bool applyRowCache(const RowCache& cache, int row,
 			     SheetCell *result);
 
@@ -333,17 +336,38 @@ private:
 };
 
 class coopy::store::SheetRow : public RefCount {
+public:
+  int delta;
+
+  SheetRow() {
+    delta = 0;
+  }
+
+  virtual SheetCell getCell(int x) const = 0;
+  
+  virtual bool setCell(int x, const SheetCell& c) = 0;
+
+  virtual bool flush() = 0;
+
+  virtual bool setDelta(int dh) { delta = dh; }
+
+  // only valid AFTER flush
+  virtual RowRef getRowAfterFlush() = 0;
+};
+
+
+
+class coopy::store::OrderedSheetRow : public SheetRow {
 protected:
   int y;
   DataSheet *sheet;
 public:
-  SheetRow() {
+  OrderedSheetRow() {
     y = -1;
     sheet = 0 /*NULL*/;
   }
 
-  // only relevant if not subclassed
-  SheetRow(DataSheet *sheet, int y) : sheet(sheet), y(y) {
+  OrderedSheetRow(DataSheet *sheet, int y) : sheet(sheet), y(y) {
   }
 
   virtual SheetCell getCell(int x) const {
@@ -357,6 +381,10 @@ public:
   virtual bool flush() {
     return true;
   }
+
+  virtual RowRef getRowAfterFlush() {
+    return RowRef((y!=-1)?(y+delta):y);
+  }
 };
 
 
@@ -364,13 +392,15 @@ class coopy::store::CacheSheetRow : public SheetRow {
 protected:
   RowCache cache;
   SheetCell result;
+  DataSheet *sheet;
 public:
-  CacheSheetRow(DataSheet *sheet, int y) : SheetRow(sheet,y), 
+  CacheSheetRow(DataSheet *sheet) : SheetRow(), 
     cache(sheet->width()) {
+    this->sheet = sheet;
   }
 
   virtual SheetCell getCell(int x) const {
-    return sheet->cellSummary(x,y);
+    return SheetCell();
   }
   
   virtual bool setCell(int x, const SheetCell& c) {
@@ -380,11 +410,17 @@ public:
   }
 
   virtual bool flush() {
-    return sheet->applyRowCache(cache,y,&result);
+    return sheet->applyRowCache(cache,-1,&result);
   }
 
   SheetCell getResult() {
     return result;
+  }
+
+  virtual RowRef getRowAfterFlush() {
+    if (result.escaped) return -1;
+    int y = result.asInt();
+    return RowRef((y!=-1)?(y+delta):y);
   }
 };
 
