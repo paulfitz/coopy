@@ -43,7 +43,7 @@ IF (COMPILE_GUI)
       ENDIF (NOT MINGW)
       INSTALL(TARGETS ${targ} COMPONENT wizard DESTINATION bin)
     ENDFOREACH ()
-    TARGET_LINK_LIBRARIES(ssmerge_gui sheet)
+    TARGET_LINK_LIBRARIES(ssmerge_gui sheet_full)
     TARGET_LINK_LIBRARIES(coopy widesheet_management)
 
   ELSE (wxWidgets_FOUND)

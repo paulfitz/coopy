@@ -89,7 +89,7 @@ IF (MINGW)
 ELSE (MINGW)
   TARGET_LINK_LIBRARIES(coopy_fossil dl pthread)
 ENDIF (MINGW)
-TARGET_LINK_LIBRARIES(coopy_fossil sheet)
+TARGET_LINK_LIBRARIES(coopy_fossil sheet_full)
 TARGET_LINK_LIBRARIES(coopy_fossil ssrender)
 TARGET_LINK_LIBRARIES(coopy_fossil csv)
 

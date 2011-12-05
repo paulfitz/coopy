@@ -5,17 +5,17 @@ endif ()
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
 
 ADD_EXECUTABLE(test_sheet test_sheet.cpp)
-TARGET_LINK_LIBRARIES(test_sheet sheet)
+TARGET_LINK_LIBRARIES(test_sheet sheet_full)
 
 # need hash_map or unordered_map or something for efficient hashing.
 # hash_map is deprecated under newer gcc versions.
 ADD_DEFINITIONS(-Wno-deprecated)
 
 ADD_EXECUTABLE(test_viterbi test_viterbi.cpp)
-TARGET_LINK_LIBRARIES(test_viterbi sheet)
+TARGET_LINK_LIBRARIES(test_viterbi sheet_full)
 
 ADD_EXECUTABLE(make_sheet make_sheet.cpp)
-TARGET_LINK_LIBRARIES(make_sheet sheet)
+TARGET_LINK_LIBRARIES(make_sheet sheet_full)
 
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 

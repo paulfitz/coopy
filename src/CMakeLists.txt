@@ -30,8 +30,10 @@ if (CREATE_SHARED_LIBRARIES)
 endif()
 
 if (USE_GNUMERIC)
-  set (COMPILE_PLAIN_EXECUTABLES TRUE)
+  option(COMPILE_PLAIN_EXECUTABLES "Compile bins with minimal dependencies" ON)
   link_directories(${GNUMERIC_ROOT}/bin ${GNUMERIC_ROOT}/lib)
+else ()
+  set(COMPILE_PLAIN_EXECUTABLES OFF)
 endif ()
 
 if (COMPILE_PLAIN_EXECUTABLES)

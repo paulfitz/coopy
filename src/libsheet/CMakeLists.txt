@@ -20,8 +20,9 @@ set(BOOK_HOOK0 ${CMAKE_BINARY_DIR}/generated_code/BookHook0.cpp)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/BookHook.cpp.in ${BOOK_HOOK0}
                 IMMEDIATE)
 
-ADD_LIBRARY(sheet_plus_csv_sql CsvFile.cpp PatchParser.cpp 
-  Options.cpp Diff.cpp
+set(NEED_POLYBOOK  PatchParser.cpp Options.cpp Diff.cpp)
+
+ADD_LIBRARY(sheet_plus_csv_sql CsvFile.cpp 
   CsvTextBook.cpp ShortTextBook.cpp JsonProperty.cpp JsonBook.cpp)
 
 set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Options.cpp 
@@ -32,11 +33,13 @@ set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Options.cpp
 TARGET_LINK_LIBRARIES(sheet_plus_csv_sql sheet_core sqlite csv jsoncpp)
 export(TARGETS sheet_plus_csv_sql APPEND FILE ${COOPY_DEPENDENCIES})
 
-ADD_LIBRARY(sheet PolyBook.cpp ${BOOK_HOOK0})
-TARGET_LINK_LIBRARIES(sheet sheet_plus_csv_sql)
-export(TARGETS sheet APPEND FILE ${COOPY_DEPENDENCIES})
+if (COMPILE_PLAIN_EXECUTABLES)
+  ADD_LIBRARY(sheet PolyBook.cpp ${BOOK_HOOK0} ${NEED_POLYBOOK})
+  TARGET_LINK_LIBRARIES(sheet sheet_plus_csv_sql)
+  export(TARGETS sheet APPEND FILE ${COOPY_DEPENDENCIES})
+endif ()
 
-ADD_LIBRARY(sheet_full PolyBook.cpp ${BOOK_HOOK})
+ADD_LIBRARY(sheet_full PolyBook.cpp ${BOOK_HOOK} ${NEED_POLYBOOK})
 TARGET_LINK_LIBRARIES(sheet_full sheet_plus_csv_sql)
 export(TARGETS sheet_full APPEND FILE ${COOPY_DEPENDENCIES})
 #else ()
