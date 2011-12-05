@@ -79,6 +79,7 @@ public:
   std::string resolve;
   std::string variant;
   coopy::store::Pool *pool;
+  bool foreign_pool;
 
   CompareFlags() {
     head_trimmed = false;
@@ -99,6 +100,7 @@ public:
     has_pivot = true;
     assume_header = true;
     pool = 0 /*NULL*/;
+    foreign_pool = false;
   }
 
   ~CompareFlags() {

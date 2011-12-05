@@ -289,9 +289,9 @@ public:
     return sheet->applySchema(ss);
   }
 
-  virtual bool applyRowCache(const RowCache& cache, int row) {
+  virtual bool applyRowCache(const RowCache& cache, int row, SheetCell *result) {
     COOPY_ASSERT(sheet);
-    return sheet->applyRowCache(cache,row);
+    return sheet->applyRowCache(cache,row,result);
   }
 
   virtual bool deleteData() {

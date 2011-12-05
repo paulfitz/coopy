@@ -746,9 +746,8 @@ bool SqliteSheet::deleteRow(const RowRef& src) {
 }
 
 
-bool SqliteSheet::applyRowCache(const RowCache& cache, int row) {
-  // Relies on having default values, to insert "blank row".
-  // This is suboptimal.
+bool SqliteSheet::applyRowCache(const RowCache& cache, int row,
+				SheetCell *result) {
 
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;

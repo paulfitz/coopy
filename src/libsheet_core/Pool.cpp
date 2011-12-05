@@ -18,7 +18,7 @@ bool PoolImpl::create(const std::string& key,
     p = pool.find(key);
     p->second.pool_name = key;
   }
-  PoolLink link;
+  PoolLinkImpl link;
   link.name = key;
   link.invent = invent;
   pool_link[getKey(table_name,column_name)] = link;
@@ -30,30 +30,31 @@ SheetCell PoolImpl::lookup(const std::string& table_name,
 			   const std::string& column_name,
 			   const SheetCell& val,
 			   bool& match) {
-  PoolColumn& col = lookup(table_name,column_name);
-  if (!col.isValid()) {
+  PoolColumnLink col = lookup(table_name,column_name);
+  if (!col.is_valid()) {
     match = false;
     return SheetCell();
   }
   match = true;
-  return col.lookup(val,match);
+  return col.get_column().lookup(val,match);
 }
 
 
 
-PoolColumn& PoolImpl::lookup(const std::string& table_name,
-			     const std::string& column_name) {
+PoolColumnLink PoolImpl::lookup(const std::string& table_name,
+				const std::string& column_name) {
   std::string key = getKey(table_name,column_name);
-  std::map<std::string,PoolLink>::iterator link = pool_link.find(key);
+  std::map<std::string,PoolLinkImpl>::iterator link = pool_link.find(key);
   if (link==pool_link.end()) {
-    return null_column;
+    return PoolColumnLink(null_column,false);
   }
   key = link->second.name;
   std::map<std::string,PoolSlice>::iterator p = pool.find(key);
   if (p==pool.end()) {
-    return null_column;
+    return PoolColumnLink(null_column,false);
   }
-  return p->second;
+  return PoolColumnLink(p->second,link->second.invent,
+			table_name,column_name,link->second.name);
 }
 
 

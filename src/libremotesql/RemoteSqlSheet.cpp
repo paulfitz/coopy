@@ -254,7 +254,8 @@ bool RemoteSqlSheet::deleteRow(const RowRef& src) {
 }
 
 
-bool RemoteSqlSheet::applyRowCache(const RowCache& cache, int row) {
+bool RemoteSqlSheet::applyRowCache(const RowCache& cache, int row,
+				   SheetCell *result) {
   CSQL& SQL = SQL_CONNECTION(book);
 
   RowChange rc;
@@ -267,9 +268,9 @@ bool RemoteSqlSheet::applyRowCache(const RowCache& cache, int row) {
 
   string query = string("INSERT INTO ") + text.name + " (" + text.val_columns + ") VALUES (" + text.val_values + ")";
   string out;
-  CSQLResult *result = SQL.openQuery(query);
-  if (result==NULL) return false;
-  SQL.closeQuery(result);
+  CSQLResult *result2 = SQL.openQuery(query);
+  if (result2==NULL) return false;
+  SQL.closeQuery(result2);
 
   printf("Remote SQL insertions are currently incomplete\n");
 

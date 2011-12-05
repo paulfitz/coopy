@@ -256,7 +256,8 @@ public:
 
   virtual Poly<SheetRow> insertRow();
 
-  virtual bool applyRowCache(const RowCache& cache, int row = -1);
+  virtual bool applyRowCache(const RowCache& cache, int row,
+			     SheetCell *result);
 
   virtual bool applySchema(const SheetSchema& ss) {
     return false;
@@ -362,6 +363,7 @@ public:
 class coopy::store::CacheSheetRow : public SheetRow {
 protected:
   RowCache cache;
+  SheetCell result;
 public:
   CacheSheetRow(DataSheet *sheet, int y) : SheetRow(sheet,y), 
     cache(sheet->width()) {
@@ -378,7 +380,11 @@ public:
   }
 
   virtual bool flush() {
-    return sheet->applyRowCache(cache,y);
+    return sheet->applyRowCache(cache,y,&result);
+  }
+
+  SheetCell getResult() {
+    return result;
   }
 };
 

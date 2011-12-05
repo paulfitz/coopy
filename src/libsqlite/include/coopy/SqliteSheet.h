@@ -70,7 +70,7 @@ public:
 
   virtual SheetSchema *getSchema() const;
 
-  virtual bool applyRowCache(const RowCache& cache, int row);
+  virtual bool applyRowCache(const RowCache& cache, int row, SheetCell *result);
 
   virtual bool deleteData();  
 

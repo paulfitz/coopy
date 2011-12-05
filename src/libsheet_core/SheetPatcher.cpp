@@ -199,6 +199,7 @@ int SheetPatcher::updateCols() {
     //printf("NAME %d %s\n", i, name.c_str());
     if (name!="---") {
       name2col[name] = i;
+      col2name[i] = name;
       if (name2syn.find(name)!=name2syn.end()) {
 	name2col[name2syn[name]] = i;
       }
@@ -281,30 +282,15 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
     }
     break;
   case ORDER_CHANGE_INSERT:
-    //return sheet->insertColumn(ColumnRef(change.subject)).isValid();
     {
       int toSheet = change.identityToIndexAfter(change.subject);
       string mover = change.namesAfter[toSheet];
-      //printf("Adding %s\n", mover.c_str());
-      /*
-      if (toSheet==change.indicesAfter.size()-1) {
-	toSheet = -1;
-      } else {
-	int toId = change.indicesAfter[toSheet+1];
-	toSheet = change.identityToIndex(toId);
-      }
-      */
       string before = "";
       int idx = -1;
       if (toSheet!=change.indicesAfter.size()-1) {
-	//if (toSheet==-1) {
-	//printf("At end\n");
-	//} else {
 	before = change.namesAfter[toSheet+1];
-	//printf("Before %s\n", before.c_str());
 	idx = matchCol(before);
       }
-      //bool ok = sheet.insertColumn(ColumnRef(toSheet)).isValid();
       ColumnInfo ci(mover);
       bool ok = sheet.insertColumn(ColumnRef(idx),ci).isValid();
       ColumnRef at = activeCol.insertColumn(ColumnRef(idx),ci);
@@ -624,13 +610,6 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	int r = sheet.insertRow(tail).getIndex();
 	dbg_printf("+++ inserted row at %d (%d)\n", r, tail.getIndex());
 	activeRow.insertRow(tail);
-	/*
-	if (rowCursor!=-1) {
-	  rowCursor++;
-	  if (rowCursor==sheet->height()) {
-	    rowCursor = -1;
-	  }
-	  }*/
 	if (r>=0) {
 	  activeRow.cellString(0,r,"+++");
 	  for (int c=0; c<width; c++) {
@@ -660,7 +639,26 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	Poly<SheetRow> inserter = sheet.insertRow();
 	for (int c=0; c<width; c++) {
 	  if (active_val[c]) {
-	    inserter->setCell(c,val[c]);
+	    PoolColumnLink link;
+	    if (flags.foreign_pool) {
+	      std::map<std::string,coopy::store::PoolColumnLink>::iterator it =
+		name2pool.find(col2name[c]);
+	      if (it!=name2pool.end()) {
+		link = it->second;
+	      }
+	    }
+	    if (link.is_valid()) {
+	      // Skip if inventor
+	      // But should try to recover id to place in pool
+	      
+	      if (!link.is_inventor()) {
+		fprintf(stderr, "Inserting a %s:%d value against my better judgment\n",
+			link.get_table_name().c_str(),
+			link.get_column_name().c_str());
+	      }
+	    } else {
+	      inserter->setCell(c,val[c]);
+	    }
 	  }
 	}
 	inserter->flush();
@@ -1060,9 +1058,9 @@ void SheetPatcher::updatePool() {
     const CompareFlags& flags = getFlags();
     if (!flags.pool) continue;
     //printf("Looking up %s %s\n", sheetName.c_str(), name.c_str());
-    PoolColumn& pc = flags.pool->lookup(sheetName,name);
-    if (!pc.isValid()) continue;
+    PoolColumnLink pc = flags.pool->lookup(sheetName,name);
+    if (!pc.is_valid()) continue;
     //printf("Found a pool at %s %s\n", sheetName.c_str(), name.c_str());
-    name2pool[name] = &pc;
+    name2pool[name] = pc;
   }
 }

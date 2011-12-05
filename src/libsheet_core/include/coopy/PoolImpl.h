@@ -7,19 +7,19 @@
 
 namespace coopy {
   namespace store {
-    class PoolLink;
+    class PoolLinkImpl;
     class PoolSlice;
     class PoolImpl;
   }
 }
 
 
-class coopy::store::PoolLink {
+class coopy::store::PoolLinkImpl {
 public:
   std::string name;
   bool invent;
 
-  PoolLink() {
+  PoolLinkImpl() {
     invent = 0;
   }
 };
@@ -29,7 +29,7 @@ public:
   std::string pool_name;
   std::map<std::string,SheetCell> item;
 
-  virtual bool isValid() const {
+  virtual bool is_valid() const {
     return pool_name!="";
   }
 
@@ -38,7 +38,7 @@ public:
 
 class coopy::store::PoolImpl : public Pool {
 private:
-  std::map<std::string,PoolLink> pool_link;
+  std::map<std::string,PoolLinkImpl> pool_link;
   std::map<std::string,PoolSlice> pool;
   PoolSlice null_column;
 
@@ -55,8 +55,8 @@ public:
 		      const std::string& column_name,
 		      bool invent);
 
-  virtual PoolColumn& lookup(const std::string& table_name,
-			     const std::string& column_name);
+  virtual PoolColumnLink lookup(const std::string& table_name,
+				const std::string& column_name);
 
   virtual SheetCell lookup(const std::string& table_name,
 			   const std::string& column_name,

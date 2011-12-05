@@ -127,7 +127,8 @@ bool DataSheet::copyData(const DataSheet& src) {
   return true;
 }
 
-bool DataSheet::applyRowCache(const RowCache& cache, int row) {
+bool DataSheet::applyRowCache(const RowCache& cache, int row, 
+			      SheetCell *result) {
   //printf("Apply row %d\n", row);
   if (row==-1) {
     fprintf(stderr,"Sheet requires a row\n");
@@ -141,6 +142,9 @@ bool DataSheet::applyRowCache(const RowCache& cache, int row) {
     if (cache.flags[i]) {
       setCell(i,row,cache.cells[i]);
     }
+  }
+  if (result) {
+    *result = SheetCell();
   }
   return true;
 }

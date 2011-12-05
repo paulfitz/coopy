@@ -692,6 +692,8 @@ int Options::apply(int argc, char *argv[]) {
       {"help-doxygen", 0, 0, 0},
       {"test-file", 1, 0, 0},
 
+      {"foreign", 0, 0, 0},
+
       {0, 0, 0, 0}
     };
 
@@ -753,6 +755,8 @@ int Options::apply(int argc, char *argv[]) {
 	  option_bool["apply"] = false;
 	} else if (k=="headerless") {
 	  flags.assume_header = false;
+	} else if (k=="foreign") {
+	  flags.foreign_pool = true;
 	} else if (k=="test-file") {
 	  bool ok = generateExample(optarg);
 	  if (!ok) {

@@ -25,7 +25,8 @@ private:
   std::vector<int> columns;
   std::vector<std::string> column_names;
   std::map<std::string,int> name2col;
-  std::map<std::string,coopy::store::PoolColumn *> name2pool;
+  std::map<int,std::string> col2name;
+  std::map<std::string,coopy::store::PoolColumnLink> name2pool;
   std::map<std::string,std::string> syn2name;
   std::map<std::string,std::string> name2syn;
   int rowCursor;
