@@ -37,9 +37,6 @@ bool MergeOutputFilter::mergeAllDone() {
 bool MergeOutputFilter::emitRow(const RowUnit& row) {
   string name = row.sheet_name;
   if (name!=last_sheet_name) {
-    if (last_sheet_name!="") {
-      chain->mergeDone();
-    }
     chain->setSheet(name.c_str());
     last_sheet_name = name;
     if (started_sheets.find(name)==started_sheets.end()) {

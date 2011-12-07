@@ -25,6 +25,7 @@ public:
   //std::list<RowUnit *> rows;
 
   SheetUnit() {
+    have_name0 = have_name1 = false;
   }
   
   SheetUnit(const std::string& name) : sheet_name(name) {
