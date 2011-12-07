@@ -1079,9 +1079,11 @@ bool PatchParser::applyTdiff() {
 	skip = !flags.canInsert();
       } else if (first=="*") {
 	change.mode = ROW_CHANGE_CONTEXT;
+	if (!flags.use_order) skip = true;
       } else if (first==":") {
 	change.mode = ROW_CHANGE_MOVE;
 	skip = !flags.canUpdate();
+	if (!flags.use_order) skip = true;
       }
       change.indexes.clear();
       for (int i=0; i<(int)assign.size(); i++) {
@@ -1124,6 +1126,10 @@ bool PatchParser::applyTdiff() {
 	    }
 	  }
 	}
+	// Testing: change all cells to "zig"
+	// if (change.val.find(context.key.c_str())!=change.val.end()) {
+	//   change.val[context.key.c_str()] = SheetCell("zig",false);
+	// }
 	change.names.push_back(context.key.c_str());
       }
       if (change.names.size()>allNames.size()) {

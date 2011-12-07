@@ -65,6 +65,7 @@ public:
   bool trust_column_names;
   coopy::store::DataSheet *mapping;
   coopy::store::DataBook *mapping_book;
+  coopy::store::DataBook *meta_book;
   bool pivot_sides_with_local;
   bool has_pivot;
   bool use_order;
@@ -81,6 +82,7 @@ public:
   std::string variant;
   coopy::store::Pool *pool;
   bool foreign_pool;
+  bool foreign_pool_set;
 
   CompareFlags() {
     head_trimmed = false;
@@ -102,6 +104,8 @@ public:
     assume_header = true;
     pool = 0 /*NULL*/;
     foreign_pool = false;
+    foreign_pool_set = false;
+    meta_book = 0 /*NULL*/;
   }
 
   ~CompareFlags() {

@@ -4,6 +4,8 @@
 #include <coopy/CsvFile.h>
 #include <coopy/CsvTextBook.h>
 #include <coopy/MergeOutputIndex.h>
+#include <coopy/MergeOutputPool.h>
+#include <coopy/MergeOutputFilter.h>
 #include <coopy/BookCompare.h>
 #include <coopy/PolyBook.h>
 #include <coopy/SheetPatcher.h>
@@ -49,6 +51,7 @@ int Diff::apply(const Options& opt) {
   std::string output = opt.checkString("output","-");
   std::string parent_file = opt.checkString("parent");
   std::string patch_file = opt.checkString("patch");
+  std::string meta_file = opt.checkString("meta");
   bool have_cmd = opt.isStringList("cmd");
   std::string version = opt.checkString("version");
   std::string tmp = opt.checkString("tmp","");
@@ -165,6 +168,7 @@ int Diff::apply(const Options& opt) {
   }
 
   Patcher *diff = createTool(mode,version);
+  MergeOutputPool pooler;
   if (diff==NULL) {
     fprintf(stderr,"Failed to create handler for patch mode: '%s'\n",
 	    mode.c_str());
@@ -200,8 +204,10 @@ int Diff::apply(const Options& opt) {
       tbook.copy(_local,p);
     }
     diff->attachBook(tbook);
+    pooler.attachBook(tbook);
   } else {
     diff->attachBook(*local);
+    pooler.attachBook(*local);
   }
 
   if (apply) {
@@ -210,6 +216,7 @@ int Diff::apply(const Options& opt) {
     apply_diff->showSummary(diff);
     diff = apply_diff;
     diff->attachBook(*local);
+    pooler.attachBook(*local);
   }
 
   if (!diff->startOutput(output,flags)) {
@@ -218,19 +225,46 @@ int Diff::apply(const Options& opt) {
     diff = NULL;
     return 1;
   }
+  if (meta_file!="") {
+    pooler.startOutput(output,flags);
+    pooler.setFlags(flags);
+    PatchParser parser(&pooler,meta_file,flags);
+    bool ok = parser.apply();
+    pooler.stopOutput(output,flags);
+    if (!ok) {
+      fprintf(stderr,"Failed to read %s\n", meta_file.c_str());
+      delete diff;
+      diff = NULL;
+      return 1;
+    }
+  }
 
   if (!resolving) {
     if (patch_file==""&&(!have_cmd)) {
       cmp.compare(*pivot,*local,*remote,*diff,flags);
     } else {
       diff->setFlags(flags);
+      bool filter = false;
+      if (flags.ordered_tables.size()>0) {
+	filter = true;
+      }
+      MergeOutputFilter filter_diff(diff);
+      Patcher *active_diff = diff;
+      if (filter) {
+	active_diff = &filter_diff;
+	filter_diff.startOutput(output,flags);
+	filter_diff.setFlags(flags);
+      }
       bool ok = false;
       if (have_cmd) {
-	PatchParser parser(diff,opt.getStringList("cmd"),flags);
+	PatchParser parser(active_diff,opt.getStringList("cmd"),flags);
 	ok = parser.apply();
       } else {
-	PatchParser parser(diff,patch_file,flags);
+	PatchParser parser(active_diff,patch_file,flags);
 	ok = parser.apply();
+      }
+      if (filter) {
+	filter_diff.stopOutput(output,flags);
       }
       if (!ok) {
 	fprintf(stderr,"Patch failed\n");

@@ -403,9 +403,12 @@ Options::Options(const char *name) : name(name) {
   add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_FORMAT|OPTION_FOR_PATCH|OPTION_FOR_RESOLVE|OPTION_FOR_REDIFF,
       "default-table=TABLE",
       "name to use when a table name is needed and not supplied");
-  add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_FORMAT|OPTION_FOR_PATCH,
+  add(OPTION_FOR_FORMAT,
       "table=TABLE",
       "operate on a single named table of a workbook/database");
+  add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_PATCH|OPTION_FOR_REDIFF,
+      "table=TABLE",
+      "filter for a named table of a workbook/database (repeat option for multiple tables)");
   add(OPTION_FOR_DIFF,
       "apply",
       "apply difference between FILE1 and FILE2 immediately to FILE1");
@@ -694,6 +697,9 @@ int Options::apply(int argc, char *argv[]) {
       {"test-file", 1, 0, 0},
 
       {"foreign", 0, 0, 0},
+      {"native", 0, 0, 0},
+
+      {"meta", 1, 0, 0},
 
       {0, 0, 0, 0}
     };
@@ -758,6 +764,10 @@ int Options::apply(int argc, char *argv[]) {
 	  flags.assume_header = false;
 	} else if (k=="foreign") {
 	  flags.foreign_pool = true;
+	  flags.foreign_pool_set = true;
+	} else if (k=="native") {
+	  flags.foreign_pool = false;
+	  flags.foreign_pool_set = true;
 	} else if (k=="test-file") {
 	  bool ok = generateExample(optarg);
 	  if (!ok) {
@@ -781,6 +791,8 @@ int Options::apply(int argc, char *argv[]) {
 	  }
 	} else if (k == "coin") {
 	  flags.coined.push_back(optarg);
+	} else if (k == "meta") {
+	  option_string["meta"] = optarg;
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;

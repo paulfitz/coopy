@@ -627,9 +627,12 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	    // But should try to recover id to place in pool
 	    
 	    if (!link.is_inventor()) {
-	      fprintf(stderr, "Inserting a %s:%d value against my better judgment\n",
+	      fprintf(stderr, "Need a foreign '%s' value for %s:%s (native: %s)\n",
+		      link.get_pool_name().c_str(),
 		      link.get_table_name().c_str(),
-		      link.get_column_name().c_str());
+		      link.get_column_name().c_str(),
+		      val[c].toString().c_str());
+	      exit(1);
 	    } else {
 	      inserter->invent(c);
 	    }
@@ -1062,5 +1065,10 @@ void SheetPatcher::updatePool() {
     if (!pc.is_valid()) continue;
     //printf("Found a pool at %s %s\n", sheetName.c_str(), name.c_str());
     name2pool[name] = pc;
+    CompareFlags& flags2 = getMutableFlags();
+    if (!flags2.foreign_pool_set) {
+      flags2.foreign_pool = true;
+      flags2.foreign_pool_set = true;
+    }
   }
 }

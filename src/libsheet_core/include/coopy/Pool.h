@@ -50,11 +50,17 @@ public:
   PoolColumnLink(const PoolColumnLink& alt) {
       this->column = alt.column;
       this->invent = alt.invent;
+      this->table_name = table_name;
+      this->column_name = column_name;
+      this->pool_name = pool_name;
   }
 
   const PoolColumnLink& operator = (const PoolColumnLink& alt) {
       this->column = alt.column;
       this->invent = alt.invent;
+      this->table_name = alt.table_name;
+      this->column_name = alt.column_name;
+      this->pool_name = alt.pool_name;
       return *this;
   }
   

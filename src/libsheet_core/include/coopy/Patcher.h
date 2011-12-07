@@ -339,6 +339,10 @@ public:
     return flags;
   }
 
+  CompareFlags& getMutableFlags() {
+    return flags;
+  }
+
   // Old stuff, still used but not very important
 
   virtual bool wantDiff() { return true; }

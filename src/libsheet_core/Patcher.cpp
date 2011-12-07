@@ -147,7 +147,7 @@ coopy::store::PolySheet Patcher::getSheet() {
 
 bool Patcher::applyPool(const PoolChange& change) {
   if (flags.pool==NULL) {
-    dbg_printf("NO SINK AVAILABLE FOR POOL CHANGE\n");
+    fprintf(stderr,"No storage available for pool information.\n");
     return false;
   }
   std::string poolName = change.poolName;
@@ -185,6 +185,23 @@ bool Patcher::addPoolsFromFlags(const DataSheet& sheet) {
 	  pc.poolName = name;
 	  pc.tableName = name;
 	  pc.pool.push_back(TableField("",field,true));
+	  changePool(pc);
+	}
+      }
+    }
+  } else {
+    if (flags.pool!=NULL) {
+      SheetSchema *ss = sheet.getSchema();
+      if (!ss) return false;
+      string name = ss->getSheetName();
+      for (int i=0; i<ss->getColumnCount(); i++) {
+	string field2 = ss->getColumnInfo(i).getName();
+	PoolColumnLink link = flags.pool->lookup(name,field2);
+	if (link.is_valid()) {
+	  PoolChange pc;
+	  pc.poolName = link.get_pool_name();
+	  pc.tableName = link.get_table_name();
+	  pc.pool.push_back(TableField("",link.get_column_name(),link.is_inventor()));
 	  changePool(pc);
 	}
       }
