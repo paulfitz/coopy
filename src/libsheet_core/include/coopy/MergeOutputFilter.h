@@ -37,6 +37,11 @@ class coopy::cmp::RowUnit {
 public:
   std::string sheet_name;
   RowChange change;
+
+  RowUnit(const std::string& sheet_name, const RowChange& change) :
+    sheet_name(sheet_name),
+    change(change) {
+  }
 };
 
 /*
@@ -87,8 +92,7 @@ public:
 
   virtual bool changeRow(const RowChange& change) { 
     if (!isActiveTable()) return false;
-    rows.push_back(RowUnit({sheet_name,change}));
-    //getSheetUnit().rows.push_back(&rows.back());
+    rows.push_back(RowUnit(sheet_name,change));
     return true;
   }
 
