@@ -63,6 +63,8 @@ public:
   virtual DataBook& tail() {
     return *this;
   }
+
+  static bool exists(const char *fname);
 };
 
 #endif

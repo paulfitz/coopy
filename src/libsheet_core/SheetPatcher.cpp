@@ -475,6 +475,14 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
   return true;
 }
 
+
+class Invention {
+public:
+  SheetCell origin;
+  int offset;
+  PoolColumnLink link;
+};
+
 bool SheetPatcher::handleConflicts() {
   if (readyForConflicts) return true;
   if (descriptive) return true;
@@ -501,9 +509,6 @@ bool SheetPatcher::handleConflicts() {
 }
 
 bool SheetPatcher::changeRow(const RowChange& change) {
-  changeCount++;
-  if (chain) chain->changeRow(change);
-
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) {
     fprintf(stderr,"No sheet available to patch.\n");
@@ -601,6 +606,10 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       pval[idx] = it->second;
     }
   }
+
+
+  bool result = false;
+  bool defer = false;
   
   switch (change.mode) {
   case ROW_CHANGE_INSERT:
@@ -612,6 +621,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       } else {
 	inserter = sheet.insertRow();
       }
+      vector<Invention> inventions;
       for (int c=0; c<width; c++) {
 	if (active_val[c]) {
 	  PoolColumnLink link;
@@ -622,26 +632,59 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	      link = it->second;
 	    }
 	  }
-	  if (link.is_valid()) {
+	  if (link.isValid()) {
 	    // Skip if inventor
 	    // But should try to recover id to place in pool
 	    
-	    if (!link.is_inventor()) {
-	      fprintf(stderr, "Need a foreign '%s' value for %s:%s (native: %s)\n",
-		      link.get_pool_name().c_str(),
-		      link.get_table_name().c_str(),
-		      link.get_column_name().c_str(),
-		      val[c].toString().c_str());
-	      exit(1);
+	    if (!link.isInventor()) {
+	      bool found = false;
+	      SheetCell v = link.getColumn().lookup(val[c],found);
+	      if (!found) {
+		/*
+		fprintf(stderr, "Problem translating a local value to a remote value. Diagnostics:\n");
+		fprintf(stderr, "  * Table: %s\n", link.getTableName().c_str());
+		fprintf(stderr, "  * Column: %s\n", link.getColumnName().c_str());
+		fprintf(stderr, "  * Value: %s\n", val[c].toString().c_str());
+		fprintf(stderr, "This value is not (yet) present in the '%s' pool. Solutions:\n", link.getPoolName().c_str());
+		fprintf(stderr, "  * Use --table A --table B ... to control order in which tables are updated.\n");
+		fprintf(stderr, "    Try to do more fundamental inserts first, then actions that reference them\n");
+		fprintf(stderr, "  * Or rerun with --native flag if no translation is needed.\n");
+		//fprintf(stderr, "Exit, fatal error.\n");
+		//exit(1);
+		*/
+
+		result = false;
+		defer = true;
+		inserter->undo();
+		break;
+
+	      } else {
+		inserter->setCell(c,v);
+	      }
 	    } else {
 	      inserter->invent(c);
+	      Invention invent = { val[c], c, link };
+	      inventions.push_back(invent);
 	    }
 	  } else {
 	    inserter->setCell(c,val[c]);
 	  }
 	}
       }
+      if (defer) {
+	break;
+      }
       inserter->flush();
+      if (inventions.size()>0) {
+	int r = inserter->getRowAfterFlush().getIndex();
+	for (int i=0; i<(int)inventions.size(); i++) {
+	  Invention& inv = inventions[i];
+	  SheetCell dest = sheet.cellSummary(inv.offset,r);
+	  inv.link.getColumn().put(inv.origin,dest);
+	  dbg_printf("Link %s -> %s\n", inv.origin.toString().c_str(),
+		     dest.toString().c_str());
+	}
+      }
       if (sheet.isSequential()) {
 	int r = inserter->getRowAfterFlush().getIndex();
 	activeRow.insertRowOrdered(tail);
@@ -669,7 +712,10 @@ bool SheetPatcher::changeRow(const RowChange& change) {
   case ROW_CHANGE_DELETE:
     {
       int r = matchRow(active_cond,active_name,cond,width);
-      if (r<0) return false;
+      if (r<0) {
+	result = false;
+	break;
+      }
       RowRef row(r);
       rowCursor = r;
       if (!descriptive) {
@@ -692,7 +738,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       if (rowCursor>=sheet.height()) {
 	rowCursor = -1;
       }
-      return true;
+      result = true;
     }
     break;
   case ROW_CHANGE_CONTEXT:
@@ -701,7 +747,8 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	int r = matchRow(active_cond,active_name,cond,width);
 	if (r!=-2) {
 	  if (r<0) {
-	    return false;
+	    result = false;
+	    break;
 	  }
 	  r++;
 	} else {
@@ -716,14 +763,17 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	rowCursor = 0;
 	checkHeader();
       }
-      return true;
+      result = true;
     }
     break;
   case ROW_CHANGE_MOVE:
     {
       bool success = false;
       int r = matchRow(active_cond,active_name,cond,width);
-      if (r<0) return false;
+      if (r<0) {
+	result = false;
+	break;
+      }
       RowRef from(r);
       RowRef to(rowCursor);
       dbg_printf("Moving %d to %d in sheet of length %d\n", from.getIndex(), to.getIndex(), sheet.height());
@@ -746,7 +796,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	r = -1;
       }
       rowCursor = r;
-      return true;
+      result = true;
     }
     break;
   case ROW_CHANGE_UPDATE:
@@ -755,7 +805,8 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       int r = matchRow(active_cond,active_name,cond,width);
       if (r<0) {
 	rowCursor = -1;
-	return false;
+	result = false;
+	break;
       }
       dbg_printf("Match for assignment\n");
       markChanges(change,r,width,active_val,val,cval,pval);
@@ -765,15 +816,26 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       }
       rowCursor = r;
       dbg_printf("Cursor moved to %d\n", r);
-      return true;
+      result = true;
     }
     break;
   default:
     fprintf(stderr,"* ERROR: unsupported row operation\n");
-    return false;
+    result = false;
     break;
   }
-  return true;
+
+  if (defer) {
+    deferred_rows.push_back(RowUnit(sheetName,change));
+    dbg_printf("DEFERRED a row\n");
+  }
+
+  if (result) {
+    changeCount++;
+    if (chain) chain->changeRow(change);
+  }
+
+  return result;
 }
 
 bool SheetPatcher::declareNames(const std::vector<std::string>& names, 
@@ -1022,6 +1084,30 @@ bool SheetPatcher::mergeAllDone() {
 }
 
 bool SheetPatcher::mergeDone() {
+  int len = -1;
+  int prev_len = -2;
+  do {
+    prev_len = len;
+    len = deferred_rows.size();
+    if (len>0) {
+      dbg_printf("Dealing with deferred rows\n");
+      std::list<RowUnit> cp = deferred_rows;
+      deferred_rows.clear();
+      for (std::list<RowUnit>::iterator it = cp.begin();
+	   it != cp.end(); it++) {
+	RowUnit& unit = *it;
+	if (unit.sheet_name!=sheetName) {
+	  setSheet(unit.sheet_name.c_str());
+	  changeRow(unit.change);
+	}
+      }
+    }
+  } while (len>0 && len!=prev_len);
+  if (len>0) {
+    fprintf(stderr,"Cyclic dependency, cannot apply deferred rows\n");
+    exit(1);
+  }
+
   if (chain) chain->mergeDone();
   return true;
 }
@@ -1062,7 +1148,7 @@ void SheetPatcher::updatePool() {
     if (!flags.pool) continue;
     //printf("Looking up %s %s\n", sheetName.c_str(), name.c_str());
     PoolColumnLink pc = flags.pool->lookup(sheetName,name);
-    if (!pc.is_valid()) continue;
+    if (!pc.isValid()) continue;
     //printf("Found a pool at %s %s\n", sheetName.c_str(), name.c_str());
     name2pool[name] = pc;
     CompareFlags& flags2 = getMutableFlags();

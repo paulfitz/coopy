@@ -16,8 +16,9 @@ namespace coopy {
 class coopy::store::PoolColumn {
 public:
   virtual ~PoolColumn() {}
-  virtual bool is_valid() const = 0;
+  virtual bool isValid() const = 0;
   virtual SheetCell lookup(const SheetCell& val, bool& match) = 0;
+  virtual bool put(const SheetCell& src, const SheetCell& dest) = 0;
 };
 
 class coopy::store::PoolColumnLink {
@@ -64,24 +65,24 @@ public:
       return *this;
   }
   
-  bool is_inventor() { return invent; }
+  bool isInventor() { return invent; }
 
-  PoolColumn& get_column() { return *column; }
+  PoolColumn& getColumn() { return *column; }
 
-  bool is_valid() const {
+  bool isValid() const {
     if (!column) return false;
-    return column->is_valid();
+    return column->isValid();
   }
 
-  std::string get_table_name() const {
+  std::string getTableName() const {
     return table_name;
   }
 
-  std::string get_column_name() const {
+  std::string getColumnName() const {
     return column_name;
   }
 
-  std::string get_pool_name() const {
+  std::string getPoolName() const {
     return pool_name;
   }
 };

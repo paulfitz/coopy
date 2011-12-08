@@ -6,6 +6,9 @@
 
 #include <algorithm>
 
+#include <sys/stat.h>
+#include <unistd.h>
+
 using namespace std;
 using namespace coopy::store;
 
@@ -192,4 +195,12 @@ PolySheet DataBook::provideSheet(const SheetSchema& schema) {
     return readSheet(schema.getSheetName());
   }
   return result;
+}
+
+
+
+bool DataBook::exists(const char *fname) {
+  struct stat s;
+  int result = stat(fname,&s);
+  return (result==0);
 }

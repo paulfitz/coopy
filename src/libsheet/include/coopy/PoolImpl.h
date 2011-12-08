@@ -2,6 +2,7 @@
 #define COOPY_POOLIMPL
 
 #include <coopy/Pool.h>
+#include <coopy/PolyBook.h>
 
 #include <map>
 
@@ -29,15 +30,21 @@ public:
   std::string pool_name;
   std::map<std::string,SheetCell> item;
 
-  virtual bool is_valid() const {
+  virtual bool isValid() const {
     return pool_name!="";
   }
 
   virtual SheetCell lookup(const SheetCell& val, bool& match);
+
+  virtual bool put(const SheetCell& src, const SheetCell& dest) {
+    item[src.toString()] = dest;
+    return true;
+  }
 };
 
 class coopy::store::PoolImpl : public Pool {
 private:
+  PolyBook book;
   std::map<std::string,PoolLinkImpl> pool_link;
   std::map<std::string,PoolSlice> pool;
   PoolSlice null_column;
@@ -49,6 +56,14 @@ private:
   }
 
 public:
+  void attachBook(PolyBook& book) {
+    this->book = book;
+    load();
+  }
+
+  bool load();
+
+  bool save();
 
   virtual bool create(const std::string& key,
 		      const std::string& table_name,

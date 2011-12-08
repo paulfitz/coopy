@@ -20,7 +20,7 @@ set(BOOK_HOOK0 ${CMAKE_BINARY_DIR}/generated_code/BookHook0.cpp)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/BookHook.cpp.in ${BOOK_HOOK0}
                 IMMEDIATE)
 
-set(NEED_POLYBOOK  PatchParser.cpp Options.cpp Diff.cpp)
+set(NEED_POLYBOOK  PatchParser.cpp Options.cpp Diff.cpp PoolImpl.cpp)
 
 ADD_LIBRARY(sheet_plus_csv_sql CsvFile.cpp 
   CsvTextBook.cpp ShortTextBook.cpp JsonProperty.cpp JsonBook.cpp)

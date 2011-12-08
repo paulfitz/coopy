@@ -3,6 +3,7 @@
 
 
 using namespace coopy::store;
+using namespace std;
 
 
 bool PoolImpl::create(const std::string& key,
@@ -31,12 +32,12 @@ SheetCell PoolImpl::lookup(const std::string& table_name,
 			   const SheetCell& val,
 			   bool& match) {
   PoolColumnLink col = lookup(table_name,column_name);
-  if (!col.is_valid()) {
+  if (!col.isValid()) {
     match = false;
     return SheetCell();
   }
   match = true;
-  return col.get_column().lookup(val,match);
+  return col.getColumn().lookup(val,match);
 }
 
 
@@ -55,6 +56,46 @@ PoolColumnLink PoolImpl::lookup(const std::string& table_name,
   }
   return PoolColumnLink(p->second,link->second.invent,
 			table_name,column_name,link->second.name);
+}
+
+bool PoolImpl::load() {
+  dbg_printf("Load pool\n");
+  vector<string> names = book.getNames();
+  for (int k=0; k<(int)names.size(); k++) {
+    string name = names[k];
+    PoolSlice& slice = pool[name] = PoolSlice();
+    slice.pool_name = name;
+    PolySheet sheet = book.readSheet(name);
+    for (int y=0; y<sheet.height(); y++) {
+      slice.item[sheet.cellSummary(0,y).toString()] = sheet.cellSummary(1,y);
+    }
+  }
+  return true;
+}
+
+bool PoolImpl::save() {
+  dbg_printf("Save pool\n");
+  for (map<string,PoolSlice>::iterator it=pool.begin(); it!=pool.end(); it++) {
+    string name = it->first;
+    PoolSlice& pool = it->second;
+    SimpleSheetSchema schema;
+    schema.setSheetName(name.c_str());
+    schema.addColumn("local");
+    schema.addColumn("remote");
+    PolySheet sheet = book.provideSheet(schema);
+    sheet.deleteData();
+    for (map<string,SheetCell>::iterator it2 = pool.item.begin();
+	 it2 != pool.item.end(); it2++) {
+      string from = it2->first;
+      SheetCell to = it2->second;
+      Poly<SheetRow> row = sheet.insertRow();
+      row->setCell(0,SheetCell(from,false)); // fix for escaped cells
+      row->setCell(1,to);
+      row->flush();
+    }
+  }
+
+  return true;
 }
 
 

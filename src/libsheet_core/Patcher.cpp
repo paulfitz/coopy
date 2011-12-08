@@ -197,11 +197,11 @@ bool Patcher::addPoolsFromFlags(const DataSheet& sheet) {
       for (int i=0; i<ss->getColumnCount(); i++) {
 	string field2 = ss->getColumnInfo(i).getName();
 	PoolColumnLink link = flags.pool->lookup(name,field2);
-	if (link.is_valid()) {
+	if (link.isValid()) {
 	  PoolChange pc;
-	  pc.poolName = link.get_pool_name();
-	  pc.tableName = link.get_table_name();
-	  pc.pool.push_back(TableField("",link.get_column_name(),link.is_inventor()));
+	  pc.poolName = link.getPoolName();
+	  pc.tableName = link.getTableName();
+	  pc.pool.push_back(TableField("",link.getColumnName(),link.isInventor()));
 	  changePool(pc);
 	}
       }

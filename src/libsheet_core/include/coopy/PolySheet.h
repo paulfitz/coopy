@@ -303,9 +303,9 @@ public:
     return sheet->applyRowCache(cache,row,result);
   }
 
-  virtual bool deleteData() {
+  virtual bool deleteData(int start = 0) {
     COOPY_ASSERT(sheet);
-    return sheet->deleteData();
+    return sheet->deleteData(dh+start);
   }
 
   virtual bool hasDimension() const {

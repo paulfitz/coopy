@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 
   bool help = opt.checkBool("help");
   const vector<string>& core = opt.getCore();
-  if (core.size()<1 || help) {
+  if ((core.size()<1 && (opt.checkString("mode")=="")) || help) {
     opt.beginHelp();
     opt.addUsage("sspatch [options] DATAFILE PATCHFILE");
     opt.addUsage("sspatch [options] --cmd PATCHSTRING DATAFILE");

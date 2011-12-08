@@ -1024,6 +1024,12 @@ bool PatchParser::applyTdiff() {
       }
  
     } else if (first=="="||first=="-"||first=="+"||first=="*"||first==":") {
+      if (table_name=="") {
+	if (flags.ordered_tables.size()>0) {
+	  table_name = flags.ordered_tables[0];
+	  patcher->setSheet(table_name.c_str());
+	}
+      }
       vector<TDiffPart> assign;
       bool mod = false;
       for (int i=1; i<(int)msg.size(); i++) {

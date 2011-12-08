@@ -114,12 +114,18 @@ public:
     if (book==NULL) return NULL;
 
     if (config.shouldRead) {
-      if (!config.options.check("should_attach")) {
-	dbg_printf("reading csv file %s\n", config.options.get("file").asString().c_str());
-	bool r = book->readCsvs(config.fname.c_str());
-	if (!r) {
-	  delete book;
-	  book = NULL;
+      if (config.options.check("attach_read")||!config.options.check("should_attach")) {
+	bool ok = true;
+	if (config.options.check("attach_read")) {
+	  ok = TextBook::exists(config.fname.c_str());
+	}
+	if (ok) {
+	  dbg_printf("reading csv file %s\n", config.options.get("file").asString().c_str());
+	  bool r = book->readCsvs(config.fname.c_str());
+	  if (!r) {
+	    delete book;
+	    book = NULL;
+	  }
 	}
       }
     }

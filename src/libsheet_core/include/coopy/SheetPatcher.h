@@ -7,8 +7,10 @@
 #include <coopy/TextBook.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/NameSniffer.h>
+#include <coopy/MergeOutputFilter.h>
 
 #include <vector>
+#include <list>
 
 namespace coopy {
   namespace cmp {
@@ -29,6 +31,7 @@ private:
   std::map<std::string,coopy::store::PoolColumnLink> name2pool;
   std::map<std::string,std::string> syn2name;
   std::map<std::string,std::string> name2syn;
+  std::list<RowUnit> deferred_rows;
   int rowCursor;
   bool summary;
   Patcher *chain;

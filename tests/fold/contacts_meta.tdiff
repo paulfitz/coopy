@@ -1,0 +1,18 @@
+@@@ organizations
+x organization |id=|
+
+@@@ people
+x person |id=|
+
+@@@ locations
+x location |id=|
+
+@@@ org2loc
+x org2loc |id=|
+x organization |org_id|
+x location |loc_id|
+
+@@@ ppl2org
+x ppl2org |id=|
+x person |ppl_id|
+x organization |org_id|

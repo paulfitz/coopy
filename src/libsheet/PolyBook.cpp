@@ -13,8 +13,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include <map>
 #include <fstream>
@@ -25,12 +23,6 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::store::sqlite;
 using namespace coopy::format;
-
-static bool exists(const char *fname) {
-  struct stat s;
-  int result = stat(fname,&s);
-  return (result==0);
-}
 
 extern TextBook *readHelper(const char *fname,
 			    const char *ext,

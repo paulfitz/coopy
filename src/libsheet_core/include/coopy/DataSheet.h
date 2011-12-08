@@ -213,10 +213,10 @@ public:
     return true;
   }
 
-  virtual bool deleteData() {
+  virtual bool deleteData(int offset = 0) {
     int h = height();
-    for (int i=0; i<h; i++) {
-      deleteRow(RowRef(0));
+    for (int i=offset; i<h; i++) {
+      deleteRow(RowRef(offset));
     }
     return true;
   }
@@ -357,6 +357,8 @@ public:
 
   // only valid AFTER flush
   virtual RowRef getRowAfterFlush() = 0;
+
+  virtual bool undo() = 0;
 };
 
 
@@ -390,6 +392,10 @@ public:
 
   virtual RowRef getRowAfterFlush() {
     return RowRef((y!=-1)?(y+delta):y);
+  }
+
+  virtual bool undo() {
+    return sheet->deleteRow(y);
   }
 };
 
@@ -431,6 +437,10 @@ public:
     if (result.escaped) return -1;
     int y = result.asInt();
     return RowRef((y!=-1)?(y+delta):y);
+  }
+
+  virtual bool undo() {
+    return true;
   }
 };
 

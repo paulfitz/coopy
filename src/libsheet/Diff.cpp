@@ -52,6 +52,7 @@ int Diff::apply(const Options& opt) {
   std::string parent_file = opt.checkString("parent");
   std::string patch_file = opt.checkString("patch");
   std::string meta_file = opt.checkString("meta");
+  std::string pool_file = opt.checkString("pool");
   bool have_cmd = opt.isStringList("cmd");
   std::string version = opt.checkString("version");
   std::string tmp = opt.checkString("tmp","");
@@ -67,6 +68,14 @@ int Diff::apply(const Options& opt) {
   CompareFlags flags = opt.getCompareFlags();
   PoolImpl pool;
   flags.pool = &pool;
+  PolyBook pool_book;
+  if (pool_file!="") {
+    if (!pool_book.attachReadWrite(pool_file.c_str())) {
+      fprintf(stderr,"Failed to attach %s\n", pool_file.c_str());
+      return 1;
+    }
+    pool.attachBook(pool_book);
+  }
 
   vector<string> core = opt.getCore();
   if (opt.isMergeLike()) {
@@ -303,6 +312,12 @@ int Diff::apply(const Options& opt) {
       local->flush();
     }
   }
+
+  if (pool_file!="") {
+    pool.save();
+    pool_book.flush();
+  }
+
   if (diff->outputStartsFromInput()) {
     if (!tbook.write(output.c_str())) {
       fprintf(stderr,"Failed to write %s\n", output.c_str());

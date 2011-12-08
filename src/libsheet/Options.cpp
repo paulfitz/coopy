@@ -700,6 +700,7 @@ int Options::apply(int argc, char *argv[]) {
       {"native", 0, 0, 0},
 
       {"meta", 1, 0, 0},
+      {"pool", 1, 0, 0},
 
       {0, 0, 0, 0}
     };
@@ -793,6 +794,8 @@ int Options::apply(int argc, char *argv[]) {
 	  flags.coined.push_back(optarg);
 	} else if (k == "meta") {
 	  option_string["meta"] = optarg;
+	} else if (k == "pool") {
+	  option_string["pool"] = optarg;
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;

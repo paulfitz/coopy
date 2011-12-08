@@ -113,6 +113,17 @@ public:
     return attach(p);
   }
 
+  bool attachReadWrite(const char *fname) {
+    coopy::store::Property p;
+    p.put("file",fname);
+    p.put("can_create",true);
+    p.put("should_read",true);
+    p.put("should_attach",true);
+    p.put("should_write",false);
+    p.put("attach_read",true);
+    return attach(p);
+  }
+
   bool write(const char *fname, const char *ext = NULL) {
     coopy::store::Property p;
     p.put("file",fname);

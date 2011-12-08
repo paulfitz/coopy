@@ -730,10 +730,15 @@ endforeach()
 #######################################################################
 #######################################################################
 
-# ops format
+# REDIFF FILTERING
 
 ADD_TEST(ops_format ${ssrediff} --format ops --output ops_format.csvs ${TESTS}/review/review_all.tdiff)
 ADD_TEST(ops_format_compare ${ssdiff} --equal ops_format.csvs ${TESTS}/review/review_all.ops)
+
+ADD_TEST(ssrediff_contacts ${ssdiff} --output ssrediff_contacts.tdiff ${TESTS}/fold/contacts.csvs ${TESTS}/fold/contacts_add_multi.csvs)
+ADD_TEST(ssrediff_contacts_org ${ssrediff} --table organizations --output ssrediff_contacts_org.tdiff ssrediff_contacts.tdiff)
+ADD_TEST(ssrediff_contacts_org_apply ${sspatch} --output ssrediff_contacts_org_apply.csvs ${TESTS}/fold/contacts.csvs ssrediff_contacts_org.tdiff)
+ADD_TEST(ssrediff_contacts_org_check ${ssdiff} --equal ssrediff_contacts_org_apply.csvs ${TESTS}/fold/contacts_add.csvs)
 
 #######################################################################
 #######################################################################
@@ -884,3 +889,17 @@ ADD_TEST(gut_example_alice_bob ${sspatch}
 ADD_TEST(gut_example_alice_bob_cmp ${ssdiff} --equal
   gut_example_alice_bob.xls
   ${TESTS}/gut/alice_and_bob.xls)
+
+
+#######################################################################
+#######################################################################
+
+# Applying to foreign database
+
+ADD_TEST(foreign_contacts_diff ${ssdiff} --output foreign_contacts_diff.tdiff --meta ${TESTS}/fold/contacts_meta.tdiff ${TESTS}/fold/contacts.csvs ${TESTS}/fold/contacts_add.csvs)
+ADD_TEST(foreign_contacts_apply ${sspatch} --output foreign_contacts_apply.csvs ${TESTS}/fold/contacts.csvs foreign_contacts_diff.tdiff)
+ADD_TEST(foreign_contacts_compare ${ssdiff} --equal foreign_contacts_apply.csvs ${TESTS}/fold/contacts_add_foreign.csvs)
+
+ADD_TEST(foreign_contacts_multi_diff ${ssdiff} --output foreign_contacts_multi_diff.tdiff --meta ${TESTS}/fold/contacts_meta.tdiff ${TESTS}/fold/contacts.csvs ${TESTS}/fold/contacts_add_multi.csvs)
+ADD_TEST(foreign_contacts_multi_apply ${sspatch} --output foreign_contacts_multi_apply.csvs ${TESTS}/fold/contacts.csvs foreign_contacts_multi_diff.tdiff)
+ADD_TEST(foreign_contacts_multi_compare ${ssdiff} --equal foreign_contacts_multi_apply.csvs ${TESTS}/fold/contacts_add_multi_foreign.csvs)
