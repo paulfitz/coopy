@@ -134,9 +134,10 @@ int Diff::apply(const Options& opt) {
 
   bool cloned = false;
   if ((mode=="apply"||mode=="merge")&&!apply) {
-    if (local_file!=""&&local->inplace()&&!inplace&&output!=local_file) {
+    if (local_file!=""&&local->inplace()&&local->getNames().size()>0&&!inplace&&output!=local_file) {
       if (output=="-"&&tmp=="") {
-	fprintf(stderr,"Please specify --inplace, or given an --output, or specify a 'tmp' location to avoid modifying database.\n");
+	fprintf(stderr,"This operation would modify an input. Not sure if you want this.\n");
+	fprintf(stderr,"Please specify:\n  --inplace, to confirm you want the input changed.\n  --output OUTPUT_FILE, to redirect the output.\n  --tmp TMP_FILE, use temporary storage to avoid changing the input.\n");
 	return 1;
       }
       if (tmp=="") {
@@ -251,14 +252,20 @@ int Diff::apply(const Options& opt) {
   if (!resolving) {
     diff->setFlags(flags);
     bool filter = false;
-    if (flags.ordered_tables.size()>0 || flags.acts.size()>0) {
-      filter = true;
-    }
     MergeOutputFilter filter_diff(diff);
+    if (flags.ordered_tables.size()>0 || flags.acts.size()>0 || 
+	flags.create_unknown_sheets) {
+      filter = true;
+      if (flags.create_unknown_sheets) {
+	if (diff->getBook()) {
+	  filter_diff.attachBook(*(diff->getBook()));
+	}
+      }
+    }
     Patcher *active_diff = diff;
     if (filter) {
       active_diff = &filter_diff;
-      filter_diff.startOutput(output,flags);
+      filter_diff.startOutput("-",flags);
       filter_diff.setFlags(flags);
     }
     if (patch_file==""&&(!have_cmd)) {
@@ -277,7 +284,7 @@ int Diff::apply(const Options& opt) {
       }
     }
     if (filter) {
-      filter_diff.stopOutput(output,flags);
+      filter_diff.stopOutput("-",flags);
     }
   } else {
     flags.resolving = true;

@@ -233,6 +233,7 @@ bool SqliteSheet::connect() {
     }
     sqlite3_finalize(statement);
     sqlite3_free(query);
+    return false;
   } 
   if (sqlite3_step(statement) == SQLITE_ROW) {
     h = sqlite3_column_int(statement,0);
@@ -259,6 +260,7 @@ bool SqliteSheet::connect() {
     }
     sqlite3_finalize(statement);
     sqlite3_free(query);
+    return false;
   } 
 
   while (sqlite3_step(statement) == SQLITE_ROW) {

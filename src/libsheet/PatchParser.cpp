@@ -927,6 +927,7 @@ bool PatchParser::applyTdiff() {
     if (first=="@@@") {
       table_name = msg[1];
       patcher->setSheet(table_name.c_str());
+      allNames.clear();
     } else if (first=="x") {
       PoolChange pc;
       if (msg.size()>=2) {

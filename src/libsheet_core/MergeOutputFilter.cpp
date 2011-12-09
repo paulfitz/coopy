@@ -3,6 +3,7 @@
 using namespace std;
 
 using namespace coopy::cmp;
+using namespace coopy::store;
 
 bool MergeOutputFilter::mergeAllDone() {
   /*
@@ -59,6 +60,42 @@ bool MergeOutputFilter::emitPreamble(const SheetUnit& preamble) {
   string name = preamble.sheet_name;
   //printf("emit %s?\n", name.c_str());
   if (name==last_sheet_name) { return false; }
+
+  TextBook *book = getBook();
+  if (getFlags().create_unknown_sheets && book) {
+    PolySheet sheet;
+    sheet = book->readSheet(name);
+    if (!sheet.isValid()) {
+      dbg_printf("I need to create %s\n", name.c_str());
+
+      for (std::list<PoolChange>::const_iterator it=preamble.pools.begin();
+	   it != preamble.pools.end(); it++) {
+	dbg_printf("apply pool\n");
+	applyPool(*it);
+      }
+
+      vector<string> names;
+      if (preamble.have_name1) {
+	names = preamble.name1.names;
+      } else if (preamble.have_name0) {
+	names = preamble.name1.names;
+      }
+
+      if (names.size()==0) {
+	fprintf(stderr,"Do not know column names to create %s\n", name.c_str());
+	exit(1);
+      }
+      SimpleSheetSchema sss0, sss1;
+      sss0.setSheetName(name.c_str());
+      for (int i=0; i<(int)names.size(); i++) {
+	sss0.addColumn(names[i].c_str());
+      }
+      book->setPool(getFlags().pool);
+      book->fixSchema(sss0,sss1);
+      book->addSheet(sss1);
+    }
+  }
+
   chain->setSheet(name.c_str());
   last_sheet_name = name;
   if (started_sheets.find(name)!=started_sheets.end()) {

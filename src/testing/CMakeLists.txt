@@ -767,17 +767,20 @@ if (COMPILE_GUI)
     add_test(coopy_space_data_push ${coopy} -m "add people" --push ${TC}/clone1)
     add_test(coopy_space_data_pull ${coopy} --pull ${TC}/clone2)
     add_test(coopy_space_data_export ${coopy} --key=ppl --export=${TC}/people2.xls ${TC}/clone2)
-
+ 
+    add_test(coopy_space_data_pause2 ${coopy} --delay --silent ${TC}/store)
+    
     add_test(coopy_space_data_mod ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Noemi->Nomers|")
     add_test(coopy_space_data_push2 ${coopy} -m "change Noemi's name" --push ${TC}/clone2)
-    add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
-    set_property(TEST coopy_space_data_changed PROPERTY WILL_FAIL TRUE)
+    add_test(coopy_space_data_changed1 ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
+    set_property(TEST coopy_space_data_changed1 PROPERTY WILL_FAIL TRUE)
 
-    add_test(coopy_space_data_pause2 ${coopy} --delay --silent ${TC}/store)
+    add_test(coopy_space_data_pause3 ${coopy} --delay --silent ${TC}/store)
 
     add_test(coopy_space_data_pull2 ${coopy} --pull ${TC}/clone1)
-    add_test(coopy_space_data_changed ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
+    add_test(coopy_space_data_changed2 ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
 
+    add_test(coopy_space_age_pause_prechange ${coopy} --delay --silent ${TC}/store)
     add_test(coopy_space_age_change1 ${sspatch} --inplace ${TC}/people.xls --cmd "= |Name=Paul|Age:*->37|")
     add_test(coopy_space_age_change2 ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Leo|Age:*->4|")
 
@@ -786,12 +789,12 @@ if (COMPILE_GUI)
     add_test(coopy_space_age_push2 ${coopy} -m "change Leo's age" --push ${TC}/clone2)
     add_test(coopy_space_age_pull2 ${coopy} --pull ${TC}/clone1)
 
-    add_test(coopy_space_ages_match  ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
+    add_test(coopy_space_age_match  ${ssdiff} --equal ${TC}/people.xls ${TC}/people2.xls)
 
     add_test(coopy_space_conflict_change1 ${sspatch} --inplace ${TC}/people.xls --cmd "= |Name=Paul|Zip:*->07028|")
     add_test(coopy_space_conflict_change2 ${sspatch} --inplace ${TC}/people2.xls --cmd "= |Name=Paul|Zip:*->99999|")
 
-    add_test(coopy_space_data_pause3 ${coopy} --delay --silent ${TC}/store)
+    add_test(coopy_space_conflict_pause3 ${coopy} --delay --silent ${TC}/store)
 
     add_test(coopy_space_conflict_push1 ${coopy} -m "change ZIP" --push ${TC}/clone1)
     add_test(coopy_space_conflict_pull1 ${coopy} --pull ${TC}/clone2)

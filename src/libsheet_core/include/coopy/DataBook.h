@@ -54,6 +54,8 @@ public:
     return false;
   }
 
+  bool fixSchema(const SheetSchema& in,SimpleSheetSchema& out);
+
   virtual PolySheet provideSheet(const SheetSchema& schema);
 
   virtual std::string desc() const {

@@ -429,7 +429,7 @@ Options::Options(const char *name) : name(name) {
 
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "act=ACT",
-      "filter for one type of change to rows (update, insert, delete, none, schema)");
+      "filter for an action of a particular type (update, insert, delete, none, schema)");
 
   add(OPTION_FOR_PATCH,
       "cmd=CMD",
@@ -598,6 +598,14 @@ static bool generateExample(const string& name) {
     }
     fprintf(stderr,"* generated %s\n", name.c_str());
     return true;
+  }
+  if (name=="directory.sqlite") {
+    PolyBook book;
+    if (book.attach("directory.sqlite")) {
+      return true;
+    }
+    fprintf(stderr,"* failed to generate %s\n", name.c_str());
+    return false;
   }
   if (name=="numbers_patch.tdiff") {
     CsvSheet csv1, csv2;

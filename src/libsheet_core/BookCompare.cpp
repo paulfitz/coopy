@@ -31,13 +31,11 @@ int BookCompare::create(coopy::store::TextBook& local,
     nc.mode = NAME_CHANGE_DECLARE;
     nc.constant = true;
     nc.final = false;
-    nc.loud = true;
     for (int i=0; i<sheet.width(); i++) {
       nc.names.push_back(sniffer.suggestColumnName(i));
     }
-    if (sheet.height()==0) {
-      output.changeName(nc);
-    }
+    nc.loud = (sheet.height()==0);
+    output.changeName(nc);
     for (int i=0; i<sheet.width(); i++) {
       string name = sniffer.suggestColumnName(i);
       PoolColumnLink pc = flags.pool->lookup(sheetName,name);

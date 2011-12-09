@@ -57,7 +57,7 @@ EOF
 ) > people.sheets
 ssformat people.sheets ../people.xls
 echo "* Add people.xls to clone1"
-$COOPY --add=../people.xls || exit 1
+$COOPY --add=../people.xls --key=people || exit 1
 echo "* Push clone1"
 $COOPY -m "add people" --push || exit 1
 

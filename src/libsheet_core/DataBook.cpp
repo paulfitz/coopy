@@ -109,28 +109,8 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
       SheetSchema *pschema = schema;
       SimpleSheetSchema sss;
       if (src.getPool()) {
-	sss.copy(*schema);
-	pschema = &sss;
-	for (int c=0; c<sss.getColumnCount(); c++) {
-	  ColumnInfo info = sss.getColumnInfo(c);
-	  string col_name = info.getName();
-	  PoolColumnLink link = src.getPool()->lookup(name,col_name);
-	  if (link.isValid()) {
-	    if (link.isInventor()) {
-	      ColumnType& t = sss.modifyType(c);
-	      t = ColumnType("INTEGER");
-	      t.autoIncrement = true;
-	      t.autoIncrementSet = true;
-	      t.primaryKey = true;
-	      t.primaryKeySet = true;
-	    } else {
-	      ColumnType& t = sss.modifyType(c);
-	      PoolColumnLink org = src.getPool()->trace(link);
-	      t.foreignKeySet = true;
-	      t.foreignTable = org.getTableName();
-	      t.foreignKey = org.getColumnName();
-	    }
-	  }
+	if (src.fixSchema(*schema,sss)) {
+	  pschema = &sss;
 	}
       }
       if (!addSheet(*pschema)) {
@@ -233,3 +213,37 @@ bool DataBook::exists(const char *fname) {
   int result = stat(fname,&s);
   return (result==0);
 }
+
+
+bool DataBook::fixSchema(const SheetSchema& in,
+			 SimpleSheetSchema& out) {
+  SimpleSheetSchema& sss = out;
+  sss.copy(in);
+  if (getPool()) {
+    for (int c=0; c<sss.getColumnCount(); c++) {
+      ColumnInfo info = sss.getColumnInfo(c);
+      string col_name = info.getName();
+      PoolColumnLink link = getPool()->lookup(sss.getSheetName(),col_name);
+      if (link.isValid()) {
+	if (link.isInventor()) {
+	  ColumnType& t = sss.modifyType(c);
+	  t = ColumnType("INTEGER");
+	  t.autoIncrement = true;
+	  t.autoIncrementSet = true;
+	  t.primaryKey = true;
+	  t.primaryKeySet = true;
+	} else {
+	  ColumnType& t = sss.modifyType(c);
+	  PoolColumnLink org = getPool()->trace(link);
+	  t = ColumnType("INTEGER");
+	  t.foreignKeySet = true;
+	  t.foreignTable = org.getTableName();
+	  t.foreignKey = org.getColumnName();
+	}
+      }
+    }
+    return true;
+  }
+  return false;
+}
+

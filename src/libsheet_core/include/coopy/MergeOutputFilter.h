@@ -93,6 +93,15 @@ public:
 
   virtual bool changeRow(const RowChange& change) { 
     if (!isActiveTable()) return false;
+    SheetUnit unit = getSheetUnit();
+    if (!(unit.have_name0||unit.have_name1)) {
+      NameChange nc;
+      nc.mode = NAME_CHANGE_DECLARE;
+      nc.constant = true;
+      nc.final = true;
+      nc.names = change.allNames;
+      changeName(nc);
+    }
     switch (change.mode) {
     case ROW_CHANGE_INSERT:
       if (!getFlags().canInsert()) { return false; }
