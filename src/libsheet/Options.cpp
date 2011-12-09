@@ -429,7 +429,7 @@ Options::Options(const char *name) : name(name) {
 
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "act=ACT",
-      "filter for one type of change to rows (update, insert, delete, none)");
+      "filter for one type of change to rows (update, insert, delete, none, schema)");
 
   add(OPTION_FOR_PATCH,
       "cmd=CMD",
@@ -702,6 +702,8 @@ int Options::apply(int argc, char *argv[]) {
       {"meta", 1, 0, 0},
       {"pool", 1, 0, 0},
 
+      {"create", 0, 0, 0},
+
       {0, 0, 0, 0}
     };
 
@@ -784,7 +786,7 @@ int Options::apply(int argc, char *argv[]) {
 	  if (act=="upsert") {
 	    flags.acts.insert("update");
 	    flags.acts.insert("insert");
-	  } else if (act=="update"||act=="insert"||act=="delete"||act=="none") {
+	  } else if (act=="update"||act=="insert"||act=="delete"||act=="none"||act=="schema") {
 	    flags.acts.insert(act);
 	  } else {
 	    fprintf(stderr,"Unknown action %s\n", act.c_str());
@@ -797,6 +799,8 @@ int Options::apply(int argc, char *argv[]) {
 	  option_string["meta"] = optarg;
 	} else if (k == "pool") {
 	  option_string["pool"] = optarg;
+	} else if (k == "create") {
+	  flags.create_unknown_sheets = true;
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;

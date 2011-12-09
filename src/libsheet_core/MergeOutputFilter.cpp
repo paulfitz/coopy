@@ -16,6 +16,14 @@ bool MergeOutputFilter::mergeAllDone() {
     for (std::list<RowUnit>::iterator it=rows.begin(); it!=rows.end(); it++) {
       emitRow(*it);
     }
+    if (getFlags().canSchema()) {
+      if (rows.size()==0) {
+	for (std::map<std::string,SheetUnit>::iterator it=sheet_units.begin();
+	     it!=sheet_units.end(); it++) {
+	  emitPreamble(it->second);
+	}
+      }
+    }
   } else {
     const CompareFlags& flags = getFlags();
     // could do with some optimization...
@@ -24,6 +32,11 @@ bool MergeOutputFilter::mergeAllDone() {
       for (std::list<RowUnit>::iterator it=rows.begin(); it!=rows.end(); it++) {
 	if (it->sheet_name == name) {
 	  emitRow(*it);
+	}
+      }
+      if (getFlags().canSchema()) {
+	if (rows.size()==0) {
+	  emitPreamble(sheet_units[name]);
 	}
       }
     }
@@ -37,17 +50,22 @@ bool MergeOutputFilter::mergeAllDone() {
 bool MergeOutputFilter::emitRow(const RowUnit& row) {
   string name = row.sheet_name;
   if (name!=last_sheet_name) {
-    chain->setSheet(name.c_str());
-    last_sheet_name = name;
-    if (started_sheets.find(name)==started_sheets.end()) {
-      emitPreamble(sheet_units[name]);
-      started_sheets[name] = 1;
-    }
+    emitPreamble(sheet_units[name]);
   }
   return chain->changeRow(row.change);
 }
 
 bool MergeOutputFilter::emitPreamble(const SheetUnit& preamble) {
+  string name = preamble.sheet_name;
+  //printf("emit %s?\n", name.c_str());
+  if (name==last_sheet_name) { return false; }
+  chain->setSheet(name.c_str());
+  last_sheet_name = name;
+  if (started_sheets.find(name)!=started_sheets.end()) {
+    return true;
+  }
+  started_sheets[name] = 1;
+
   if (preamble.have_name0) {
     chain->changeName(preamble.name0);
   }

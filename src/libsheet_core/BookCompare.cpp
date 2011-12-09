@@ -17,6 +17,7 @@ using namespace coopy::cmp;
 int BookCompare::create(coopy::store::TextBook& local, 
 			Patcher& output, const CompareFlags& flags) {
   if (!flags.pool) return -1;
+
   vector<string> names = local.getNames();
   output.mergeStart();
   for (int i=0; i<(int)names.size(); i++) {

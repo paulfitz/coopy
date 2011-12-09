@@ -74,6 +74,7 @@ public:
   bool fixed_columns;
   bool assume_header;
   bool ignore_case;
+  bool create_unknown_sheets;
   std::string pivot_uri;
   std::string local_uri;
   std::string remote_uri;
@@ -106,6 +107,7 @@ public:
     foreign_pool = false;
     foreign_pool_set = false;
     meta_book = 0 /*NULL*/;
+    create_unknown_sheets = false;
   }
 
   ~CompareFlags() {
@@ -129,6 +131,11 @@ public:
   bool canUpdate() const {
     if (acts.size()==0) return true;
     return acts.find("update")!=acts.end();
+  }
+
+  bool canSchema() const {
+    if (acts.size()==0) return true;
+    return acts.find("schema")!=acts.end();
   }
 };
 

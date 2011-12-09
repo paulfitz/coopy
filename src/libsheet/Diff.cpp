@@ -249,21 +249,21 @@ int Diff::apply(const Options& opt) {
   }
 
   if (!resolving) {
+    diff->setFlags(flags);
+    bool filter = false;
+    if (flags.ordered_tables.size()>0 || flags.acts.size()>0) {
+      filter = true;
+    }
+    MergeOutputFilter filter_diff(diff);
+    Patcher *active_diff = diff;
+    if (filter) {
+      active_diff = &filter_diff;
+      filter_diff.startOutput(output,flags);
+      filter_diff.setFlags(flags);
+    }
     if (patch_file==""&&(!have_cmd)) {
-      cmp.compare(*pivot,*local,*remote,*diff,flags);
+      cmp.compare(*pivot,*local,*remote,*active_diff,flags);
     } else {
-      diff->setFlags(flags);
-      bool filter = false;
-      if (flags.ordered_tables.size()>0) {
-	filter = true;
-      }
-      MergeOutputFilter filter_diff(diff);
-      Patcher *active_diff = diff;
-      if (filter) {
-	active_diff = &filter_diff;
-	filter_diff.startOutput(output,flags);
-	filter_diff.setFlags(flags);
-      }
       bool ok = false;
       if (have_cmd) {
 	PatchParser parser(active_diff,opt.getStringList("cmd"),flags);
@@ -272,12 +272,12 @@ int Diff::apply(const Options& opt) {
 	PatchParser parser(active_diff,patch_file,flags);
 	ok = parser.apply();
       }
-      if (filter) {
-	filter_diff.stopOutput(output,flags);
-      }
       if (!ok) {
 	fprintf(stderr,"Patch failed\n");
       }
+    }
+    if (filter) {
+      filter_diff.stopOutput(output,flags);
     }
   } else {
     flags.resolving = true;

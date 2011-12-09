@@ -903,7 +903,13 @@ bool SheetPatcher::setSheet(const char *name) {
   // load
   PolySheet psheet;
   attachSheet(psheet);
-  psheet = book->readSheet(name);
+  if (getFlags().create_unknown_sheets) {
+    SimpleSheetSchema ss;
+    ss.setSheetName(name);
+    psheet = book->provideSheet(ss);
+  } else {
+    psheet = book->readSheet(name);
+  }
   if (!psheet.isValid()) {
     if (!book->namedSheets()) {
       psheet = book->readSheetByIndex(0);

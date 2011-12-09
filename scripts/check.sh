@@ -10,4 +10,5 @@ fi
 
 rm -rf src/testing
 cmake . || exit 1
+make || exit 1
 make test || exit 1

@@ -77,6 +77,7 @@ public:
 
   virtual bool setSheet(const char *name) { 
     sheet_name = name;
+    getSheetUnit();
     return true; 
   }
 
@@ -92,12 +93,25 @@ public:
 
   virtual bool changeRow(const RowChange& change) { 
     if (!isActiveTable()) return false;
+    switch (change.mode) {
+    case ROW_CHANGE_INSERT:
+      if (!getFlags().canInsert()) { return false; }
+      break;
+    case ROW_CHANGE_DELETE:
+      if (!getFlags().canDelete()) { return false; }
+      break;
+    case ROW_CHANGE_UPDATE:
+    case ROW_CHANGE_MOVE:
+      if (!getFlags().canUpdate()) { return false; }
+      break;
+    }
     rows.push_back(RowUnit(sheet_name,change));
     return true;
   }
 
   virtual bool changePool(const PoolChange& change) { 
     if (!isActiveTable()) return false;
+    if (!getFlags().canSchema()) return false;
     getSheetUnit().pools.push_back(change);
     return true; 
   }
