@@ -18,6 +18,8 @@ namespace coopy {
 class coopy::store::PoolLinkImpl {
 public:
   std::string name;
+  std::string table_name;
+  std::string column_name;
   bool invent;
 
   PoolLinkImpl() {
@@ -46,6 +48,7 @@ class coopy::store::PoolImpl : public Pool {
 private:
   PolyBook book;
   std::map<std::string,PoolLinkImpl> pool_link;
+  std::map<std::string,PoolLinkImpl *> pool_link_root;
   std::map<std::string,PoolSlice> pool;
   PoolSlice null_column;
 
@@ -77,6 +80,9 @@ public:
 			   const std::string& column_name,
 			   const SheetCell& val,
 			   bool& match);
+
+  virtual PoolColumnLink trace(const PoolColumnLink& src);
+
 };
 
 #endif

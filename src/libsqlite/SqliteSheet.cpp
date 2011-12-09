@@ -398,7 +398,7 @@ bool SqliteSheet::create(const SheetSchema& schema) {
     ColumnInfo ci = schema.getColumnInfo(i);
     ColumnType ct = ci.getColumnType();
     if (ct.foreignKeySet) {
-      printf("Should add foreign key\n");
+      //printf("Should add foreign key\n");
       cols += ", FOREIGN KEY(";
       cols += _quoted_single(ci.getName());
       cols += ") REFERENCES ";      
@@ -470,6 +470,8 @@ std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
   query = sqlite3_mprintf("SELECT * FROM %Q WHERE ROWID = %d", 
 			  name.c_str(),
 			  row2sql[y]);
+
+  //printf("LOOKUP %s\n", query);
  
   int iresult = sqlite3_prepare_v2(db, query, -1, 
 				   &statement, NULL);
@@ -789,6 +791,7 @@ bool SqliteSheet::applyRowCache(const RowCache& cache, int row,
 				cols.c_str(),
 				vals.c_str());
 
+  dbg_printf("INSERT QUERY: %s\n", query);
   int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
   if (iresult!=SQLITE_OK) {
     const char *msg = sqlite3_errmsg(db);
@@ -802,6 +805,18 @@ bool SqliteSheet::applyRowCache(const RowCache& cache, int row,
   sqlite3_free(query);
 
   int rid = (int)sqlite3_last_insert_rowid(db);
+
+  for (int i=0; i<(int)col2sql.size(); i++) {
+    if (cache.invent[i]) {
+      SheetCell c(rid);
+      this->cache.cell(i,h) = c.text;
+      cacheFlag.remove(i,h);
+    }
+  }
+
+  if (result) {
+    *result = SheetCell(h);
+  }
 
   // inconsistent ordering
   row2sql.push_back(rid);

@@ -164,6 +164,10 @@ public:
     return ColumnInfo(columns[x],kinds[x]);
   }
 
+  virtual ColumnType& modifyType(int x) {
+    return kinds[x];
+  }
+
   virtual int getColumnCount() const {
     return columns.size();
   }

@@ -16,6 +16,10 @@ namespace coopy {
 
 class coopy::store::DataBook : public RefCount {
 public:
+  DataBook() {
+    pool = 0/*NULL*/;
+  }
+
   virtual ~DataBook() {}
 
   virtual std::vector<std::string> getNames() = 0;
@@ -64,7 +68,23 @@ public:
     return *this;
   }
 
+  virtual bool setPool(Pool *pool) {
+    this->pool = pool;
+    return true;
+  }
+
+  virtual Pool *getPool() const {
+    return pool;
+  }
+
+  bool applyPool(DataSheet& sheet) {
+    return sheet.setPool(getPool());
+  }
+
   static bool exists(const char *fname);
+
+private:
+  Pool *pool;
 };
 
 #endif

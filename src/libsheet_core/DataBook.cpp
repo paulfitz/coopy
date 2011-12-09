@@ -1,5 +1,6 @@
 #include <coopy/DataBook.h>
 #include <coopy/SchemaSniffer.h>
+#include <coopy/Pool.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,6 +79,7 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
     dbg_printf("Working on %s\n", name.c_str());
     vector<string>::const_iterator it = find(names0.begin(),names0.end(),name);
     PolySheet sheet = src.readSheet(name);
+    src.applyPool(sheet);
     string target_name = name;
     SheetSchema *schema = sheet.getSchema();
     SchemaSniffer sniffer(sheet,name.c_str());
@@ -104,7 +106,34 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
     }
     PolySheet target = readSheet(target_name);
     if (!target.isValid()) {
-      if (!addSheet(*schema)) {
+      SheetSchema *pschema = schema;
+      SimpleSheetSchema sss;
+      if (src.getPool()) {
+	sss.copy(*schema);
+	pschema = &sss;
+	for (int c=0; c<sss.getColumnCount(); c++) {
+	  ColumnInfo info = sss.getColumnInfo(c);
+	  string col_name = info.getName();
+	  PoolColumnLink link = src.getPool()->lookup(name,col_name);
+	  if (link.isValid()) {
+	    if (link.isInventor()) {
+	      ColumnType& t = sss.modifyType(c);
+	      t = ColumnType("INTEGER");
+	      t.autoIncrement = true;
+	      t.autoIncrementSet = true;
+	      t.primaryKey = true;
+	      t.primaryKeySet = true;
+	    } else {
+	      ColumnType& t = sss.modifyType(c);
+	      PoolColumnLink org = src.getPool()->trace(link);
+	      t.foreignKeySet = true;
+	      t.foreignTable = org.getTableName();
+	      t.foreignKey = org.getColumnName();
+	    }
+	  }
+	}
+      }
+      if (!addSheet(*pschema)) {
 	fprintf(stderr, "Failed to create sheet %s\n", name.c_str());
 	return false;
       }

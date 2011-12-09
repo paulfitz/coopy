@@ -20,6 +20,7 @@ namespace coopy {
     class SheetRow;
     class OrderedSheetRow;
     class CacheSheetRow;
+    class Pool;
   }
 }
 
@@ -44,6 +45,10 @@ public:
  */
 class coopy::store::DataSheet : public RefCount {
 public:
+  DataSheet() {
+    pool = 0 /*NULL*/;
+  }
+
   virtual ~DataSheet() {}
 
   /**
@@ -333,8 +338,18 @@ public:
     return false;
   }
 
+  virtual bool setPool(Pool *pool) {
+    this->pool = pool;
+    return true;
+  }
+
+  virtual Pool *getPool() const {
+    return pool;
+  }
+
 private:
   std::string hash_cache;
+  Pool *pool;
 };
 
 class coopy::store::SheetRow : public RefCount {

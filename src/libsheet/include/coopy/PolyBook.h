@@ -222,6 +222,19 @@ public:
       return result;
     }
   }
+
+  virtual bool setPool(Pool *pool) {
+    if (book)
+      return book->setPool(pool);
+    return false;
+  }
+
+  virtual Pool *getPool() const {
+    if (book)
+      return book->getPool();
+    return 0 /*NULL*/;
+  }
+
 };
 
 #endif

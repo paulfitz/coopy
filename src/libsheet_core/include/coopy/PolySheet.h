@@ -452,6 +452,16 @@ public:
 
   bool mustHaveSchema();
 
+  virtual bool setPool(Pool *pool) {
+    COOPY_ASSERT(sheet);
+    return sheet->setPool(pool);
+  }
+
+  virtual Pool *getPool() const {
+    COOPY_ASSERT(sheet);
+    return sheet->getPool();
+  }
+
 private:
   RowRef fixRow(const RowRef& r) {
     if (dh==0) return r;

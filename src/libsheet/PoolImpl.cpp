@@ -22,7 +22,12 @@ bool PoolImpl::create(const std::string& key,
   PoolLinkImpl link;
   link.name = key;
   link.invent = invent;
+  link.table_name = table_name;
+  link.column_name = column_name;
   pool_link[getKey(table_name,column_name)] = link;
+  if (pool_link_root.find(key)==pool_link_root.end() || invent) {
+    pool_link_root[key] = &pool_link[getKey(table_name,column_name)];
+  }
   return true;
 }
 
@@ -56,6 +61,13 @@ PoolColumnLink PoolImpl::lookup(const std::string& table_name,
   }
   return PoolColumnLink(p->second,link->second.invent,
 			table_name,column_name,link->second.name);
+}
+
+
+PoolColumnLink PoolImpl::trace(const PoolColumnLink& src) {
+  PoolLinkImpl *root = pool_link_root[src.getPoolName()];
+  return PoolColumnLink(pool[src.getPoolName()],root->invent,
+			root->table_name,root->column_name,root->name);
 }
 
 bool PoolImpl::load() {

@@ -99,6 +99,8 @@ public:
   virtual PoolColumnLink lookup(const std::string& table_name,
 				const std::string& column_name) = 0;
 
+  virtual PoolColumnLink trace(const PoolColumnLink& src) = 0;
+
   virtual SheetCell lookup(const std::string& table_name,
 			   const std::string& column_name,
 			   const SheetCell& val,

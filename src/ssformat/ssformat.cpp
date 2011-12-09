@@ -9,6 +9,9 @@
 #include <coopy/Dbg.h>
 #include <coopy/CompareFlags.h>
 #include <coopy/Options.h>
+#include <coopy/PoolImpl.h>
+#include <coopy/PatchParser.h>
+#include <coopy/MergeOutputPool.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -63,6 +66,25 @@ int main(int argc, char *argv[]) {
     fprintf(stderr,"Failed to read %s\n", core[0].c_str());
     return 1;
   }
+
+  CompareFlags mflags;
+  std::string meta_file = opt.checkString("meta");
+  PoolImpl pool;
+  mflags.pool = &pool;
+  if (meta_file!="") {
+    MergeOutputPool pooler;
+    pooler.attachBook(src);
+    pooler.startOutput("-",mflags);
+    pooler.setFlags(mflags);
+    PatchParser parser(&pooler,meta_file,mflags);
+    bool ok = parser.apply();
+    pooler.stopOutput("-",mflags);
+    if (!ok) {
+      fprintf(stderr,"Failed to read %s\n", meta_file.c_str());
+      return 1;
+    }
+  }
+
   if (sheetSelection!="") {
     CsvTextBook *book = new CsvTextBook(true);
     if (book==NULL) {
@@ -115,6 +137,8 @@ int main(int argc, char *argv[]) {
     }
     src.take(book);
   }
+
+  src.setPool(&pool);
 
   string out_file = "-";
   if (core.size()==2) {
