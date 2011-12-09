@@ -875,6 +875,13 @@ void SqliteSheet::checkPrimaryKeys() {
       primaryKeys.push_back(string(col));
     }
     col2sql[i].setPk(pk!=0);
+    bool ai = false;
+    if (pk) {
+      if (col2sql[i].getColumnType().family == ColumnType::COLUMN_FAMILY_INTEGER) {
+	ai = true;
+      }
+    }
+    col2sql[i].setAutoIncrement(ai);
     i++;
   }
   sqlite3_finalize(statement);

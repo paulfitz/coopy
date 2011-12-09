@@ -429,7 +429,7 @@ Options::Options(const char *name) : name(name) {
 
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "act=ACT",
-      "filter for one type of change to rows (update, insert, delete)");
+      "filter for one type of change to rows (update, insert, delete, none)");
 
   add(OPTION_FOR_PATCH,
       "cmd=CMD",
@@ -780,10 +780,11 @@ int Options::apply(int argc, char *argv[]) {
 	  if (act=="+") act = "insert";
 	  if (act=="-") act = "delete";
 	  if (act=="=") act = "update";
+	  if (act=="0") act = "none";
 	  if (act=="upsert") {
 	    flags.acts.insert("update");
 	    flags.acts.insert("insert");
-	  } else if (act=="update"||act=="insert"||act=="delete") {
+	  } else if (act=="update"||act=="insert"||act=="delete"||act=="none") {
 	    flags.acts.insert(act);
 	  } else {
 	    fprintf(stderr,"Unknown action %s\n", act.c_str());

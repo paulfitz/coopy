@@ -14,10 +14,78 @@ using namespace std;
 using namespace coopy::store;
 using namespace coopy::cmp;
 
+int BookCompare::create(coopy::store::TextBook& local, 
+			Patcher& output, const CompareFlags& flags) {
+  if (!flags.pool) return -1;
+  vector<string> names = local.getNames();
+  output.mergeStart();
+  for (int i=0; i<(int)names.size(); i++) {
+    string sheetName = names[i];
+    output.setSheet(sheetName.c_str());
+    PolySheet sheet = local.readSheet(sheetName);
+    output.addPoolsFromFlags(sheet);
+    NameSniffer sniffer(sheet,flags);
+    bool addedAuto = false;
+    NameChange nc;
+    nc.mode = NAME_CHANGE_DECLARE;
+    nc.constant = true;
+    nc.final = false;
+    nc.loud = true;
+    for (int i=0; i<sheet.width(); i++) {
+      nc.names.push_back(sniffer.suggestColumnName(i));
+    }
+    if (sheet.height()==0) {
+      output.changeName(nc);
+    }
+    for (int i=0; i<sheet.width(); i++) {
+      string name = sniffer.suggestColumnName(i);
+      PoolColumnLink pc = flags.pool->lookup(sheetName,name);
+      if (!pc.isValid()) {
+	ColumnType t = sniffer.suggestColumnType(i);
+	if (t.autoIncrement&&!addedAuto) {
+	  flags.pool->create(sheetName,sheetName,name,true);
+	  pc = flags.pool->lookup(sheetName,name);
+	  addedAuto = true;
+	}
+	if (t.foreignKey!="") {
+	  flags.pool->create(t.foreignTable,sheetName,name,false);
+	  pc = flags.pool->lookup(sheetName,name);
+	}
+      }
+      if (pc.isValid()) {
+	PoolChange c;
+	c.poolName = pc.getPoolName();
+	c.tableName = pc.getTableName();
+	c.pool.push_back(TableField("",pc.getColumnName(),pc.isInventor()));
+	output.changePool(c);
+      }
+    }
+    for (int y=0; y<sheet.height(); y++) {
+      RowChange rc;
+      rc.mode = ROW_CHANGE_INSERT;
+      rc.names = nc.names;
+      rc.allNames = nc.names;
+      for (int x=0; x<sheet.width(); x++) {
+	string name = sniffer.suggestColumnName(x);
+	rc.val[name] = sheet.cellSummary(x,y);
+      }
+      output.changeRow(rc);
+    }
+  }
+  output.mergeDone();
+  output.mergeAllDone();
+
+  return 0;
+}
+
 int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote, 
 			 Patcher& output, const CompareFlags& flags) {
   // Merge currently based purely on names, no content comparison.
   // Hence a sheet rename cannot be guessed at yet.
+
+  if (!remote.isValid()) {
+    return create(local,output,flags);
+  }
 
   bool pivot_is_local = false;
   bool pivot_is_remote = false;

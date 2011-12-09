@@ -199,10 +199,10 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
 	  bool select = check(showForSelect,change.names[i]);
 	  bool cond = check(showForCond,change.names[i]);
 	  bool view = check(showForDescribe,change.names[i]);
-	  fprintf(out,"%s%s%s|",
+	  fprintf(out,"%s%s|",
 		  change.names[i].c_str(),
-		  select?"=":"",
-		  (view&&!(cond||select))?"=":"");  // = was ->
+		  select?"=":"");
+	  //(view&&!(cond||select))?"":"");  // = was ->
 	}
       }
       fprintf(out,"\n");
@@ -419,6 +419,7 @@ bool MergeOutputTdiff::changeName(const NameChange& change) {
   const vector<string>& names = change.names;
   bool final = change.final;
   bool constant = change.constant;
+  bool loud = change.loud;
   if (!final) {
     activeColumn.clear();
     for (int i=0; i<(int)names.size(); i++) {
@@ -426,7 +427,7 @@ bool MergeOutputTdiff::changeName(const NameChange& change) {
       showForSelect[names[i]] = true;
       showForDescribe[names[i]] = true;
     }
-    if (!constant) {
+    if (loud||!constant) {
       showSheet();
       //fprintf(out, "/* %s %s ","column","name");
       //result.addField(ROW_COL,false);

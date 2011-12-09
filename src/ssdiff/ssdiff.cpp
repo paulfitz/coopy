@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  if ((core.size()<2&&opt.checkString("patch")=="")||help) {
+  if ((core.size()<1&&opt.checkString("patch")=="")||help) {
     opt.beginHelp();
     opt.addUsage("ssdiff [options] FILE1 FILE2");
     opt.addDescription("Show the difference between two tables/databases/spreadsheets.");

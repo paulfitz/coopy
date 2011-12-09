@@ -81,6 +81,10 @@ public:
     return sheet.setPool(getPool());
   }
 
+  virtual bool isValid() const {
+    return true;
+  }
+
   static bool exists(const char *fname);
 
 private:

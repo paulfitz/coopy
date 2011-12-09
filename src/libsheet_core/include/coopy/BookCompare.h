@@ -14,6 +14,9 @@ namespace coopy {
 
 class coopy::cmp::BookCompare {
 public:
+  int create(coopy::store::TextBook& local, 
+	     Patcher& output, const CompareFlags& flags);
+  
   int compare(coopy::store::TextBook& pivot, 
 	      coopy::store::TextBook& local, 
 	      coopy::store::TextBook& remote, 

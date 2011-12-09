@@ -116,6 +116,11 @@ public:
     columnType.primaryKey = pk;
   }
 
+  void setAutoIncrement(bool ai) {
+    columnType.autoIncrementSet = true;
+    columnType.autoIncrement = ai;
+  }
+
   void setReference(std::string t, std::string c) {
     columnType.foreignKeySet = true;
     columnType.foreignTable = t;

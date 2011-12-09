@@ -82,7 +82,7 @@ public:
     return PolySheet();
   }
 
-  bool isValid() { return book!=NULL; }
+  bool isValid() const { return book!=NULL; }
 
   bool read(const char *fname, const char *ext = NULL) {
     coopy::store::Property p;

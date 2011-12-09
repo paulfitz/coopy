@@ -205,12 +205,14 @@ public:
   int mode;
   bool final;
   bool constant;
+  bool loud;
   std::vector<std::string> names;
 
   NameChange() {
     mode = -1;
     final = false;
     constant = false;
+    loud = false;
   }
 
   std::string modeString() const {

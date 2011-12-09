@@ -1142,12 +1142,27 @@ void SheetPatcher::updatePool() {
   setNames();
   if (!sniffer) return;
   name2pool.clear();
+  bool addedAuto = false;
   for (int i=0; i<sheet.width(); i++) {
     string name = sniffer->suggestColumnName(i);
     const CompareFlags& flags = getFlags();
     if (!flags.pool) continue;
     //printf("Looking up %s %s\n", sheetName.c_str(), name.c_str());
     PoolColumnLink pc = flags.pool->lookup(sheetName,name);
+    if (!pc.isValid()) {
+      ColumnType t = sniffer->suggestColumnType(i);
+      if (t.autoIncrement&&!addedAuto) {
+	//printf("Found autoinc'er\n");
+	flags.pool->create(sheetName,sheetName,name,true);
+	pc = flags.pool->lookup(sheetName,name);
+	addedAuto = true;
+      }
+      if (t.foreignKey!="") {
+	//printf("Found xref\n");
+	flags.pool->create(t.foreignTable,sheetName,name,false);
+	pc = flags.pool->lookup(sheetName,name);
+      }
+    }
     if (!pc.isValid()) continue;
     //printf("Found a pool at %s %s\n", sheetName.c_str(), name.c_str());
     name2pool[name] = pc;
