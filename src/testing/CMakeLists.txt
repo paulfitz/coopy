@@ -406,7 +406,7 @@ IF (USE_GNUMERIC)
   set(EXCEL xls)
 
   ADD_TEST2(excel_diff ${TESTS}/result_excel_diff.csv
-    ssdiff --verbose --version 0.2 --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
+    ssdiff --verbose --format-version 0.2 --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
 
   MACRO(TEST_XLS name ref target)
     ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
