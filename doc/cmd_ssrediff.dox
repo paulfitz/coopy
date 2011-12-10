@@ -34,10 +34,11 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
  \li \ref ssrediff_main_omit-sheet-name "--omit-sheet-name"
  \li \ref ssrediff_main_output "--output=OUTPUTFILE"
  \li \ref ssrediff_main_patch-formats "--patch-formats"
+ \li \ref ssrediff_main_table "--table=TABLE"
 
 
 \section ssrediff_options_detail Option details
-\anchor ssrediff_main_act <b>--act=ACT</b> <br />filter for one type of change to rows (update, insert, delete)
+\anchor ssrediff_main_act <b>--act=ACT</b> <br />filter for an action of a particular type (update, insert, delete, none, schema)
 
 
 \anchor ssrediff_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
@@ -59,6 +60,9 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 
 
 \anchor ssrediff_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
+
+
+\anchor ssrediff_main_table <b>--table=TABLE</b> <br />filter for a named table of a workbook/database (repeat option for multiple tables)
 
 
 
@@ -193,7 +197,7 @@ MYSQL: database connector<br />
 
 
 \section ssrediff_version Version
-ssrediff version 0.5.8
+ssrediff version 0.5.9
 
 
  *

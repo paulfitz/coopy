@@ -4,7 +4,7 @@ fname="$1"
 src="$2"
 bin="$3"
 
-CSV2HTML="$bin/bin/csv2html"
+CSV2HTML="$bin/bin/ss2html"
 SSDIFF="$bin/bin/ssdiff"
 
 BASE=`dirname $fname`

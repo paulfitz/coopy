@@ -79,7 +79,7 @@ Merge table/database/spreadsheets. The first file must be a common ancestor of t
 \anchor ssmerge_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
 
 
-\anchor ssmerge_main_table <b>--table=TABLE</b> <br />operate on a single named table of a workbook/database
+\anchor ssmerge_main_table <b>--table=TABLE</b> <br />filter for a named table of a workbook/database (repeat option for multiple tables)
 
 
 \anchor ssmerge_main_tail-trimmed <b>--tail-trimmed</b> <br />ignore rows removed at the end of a table (such as a log file)
@@ -222,7 +222,7 @@ MYSQL: database connector<br />
 
 
 \section ssmerge_version Version
-ssmerge version 0.5.8
+ssmerge version 0.5.9
 
 
  *

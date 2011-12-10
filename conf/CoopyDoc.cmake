@@ -14,7 +14,7 @@ if (DOXYGEN_TRICKS)
       COMMAND mkdir -p ${ODIR}
       COMMAND ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh ${f} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} > ${ODIR}/${ONAME}
       MAIN_DEPENDENCY ${f}
-      DEPENDS ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh csv2html ssdiff
+      DEPENDS ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh ss2html ssdiff
       ssresolve ssrediff ssformat sspatch ssmerge coopy
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       )

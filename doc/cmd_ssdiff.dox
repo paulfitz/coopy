@@ -48,7 +48,7 @@ Show the difference between two tables/databases/spreadsheets.
 
 
 \section ssdiff_options_detail Option details
-\anchor ssdiff_main_act <b>--act=ACT</b> <br />filter for one type of change to rows (update, insert, delete)
+\anchor ssdiff_main_act <b>--act=ACT</b> <br />filter for an action of a particular type (update, insert, delete, none, schema)
 
 
 \anchor ssdiff_main_apply <b>--apply</b> <br />apply difference between FILE1 and FILE2 immediately to FILE1
@@ -99,7 +99,7 @@ Show the difference between two tables/databases/spreadsheets.
 \anchor ssdiff_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
 
 
-\anchor ssdiff_main_table <b>--table=TABLE</b> <br />operate on a single named table of a workbook/database
+\anchor ssdiff_main_table <b>--table=TABLE</b> <br />filter for a named table of a workbook/database (repeat option for multiple tables)
 
 
 \anchor ssdiff_main_tail-trimmed <b>--tail-trimmed</b> <br />ignore rows removed at the end of a table (such as a log file)
@@ -242,7 +242,7 @@ MYSQL: database connector<br />
 
 
 \section ssdiff_version Version
-ssdiff version 0.5.8
+ssdiff version 0.5.9
 
 
  *

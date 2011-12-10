@@ -9,6 +9,7 @@
 #include <coopy/PatchParser.h>
 #include <coopy/SheetPatcher.h>
 #include <coopy/PoolImpl.h>
+#include <coopy/Stringer.h>
 
 #include <algorithm>
 
@@ -61,6 +62,15 @@ static void addSpaces(int n) {
   for (int i=0; i<n; i++) {
     printf(" ");
   }
+}
+
+static void wrapCode(const string& code, int off) {
+  string add = "";
+  for (int i=0; i<off; i++) { add += " "; }
+  string txt = code;
+  Stringer::replace(txt,"\\","\\\n");
+  Stringer::replace(txt,"\n",string("\n")+add);
+  printf("%s%s\n",add.c_str(),txt.c_str());
 }
 
 static void wrapText(const string& desc, int w, int tot) {
@@ -177,7 +187,8 @@ void OptionRenderCmdLine::render(const Options& opt) {
   for (int i=0; i<(int)examples.size(); i++) {
     if (i>0) printf("\n");
     const Example& eg = examples[i];
-    printf("  %s\n", eg.code.c_str());
+    //printf("  %s\n", eg.code.c_str());
+    wrapCode(eg.code,2);
     printf("    ");
     wrapText(eg.desc,w,4);
   }
@@ -285,7 +296,9 @@ void OptionRenderDoxygen::render(const Options& opt) {
     printf("\n\n\\subsection %s_examples_%d Example %d\n", 
 	   opt.getName().c_str(),
 	   i+1, i+1);
-    printf("\\verbatim\n%s\n\\endverbatim\n", eg.code.c_str());
+    printf("\\verbatim\n");
+    wrapCode(eg.code,0);
+    printf("\\endverbatim\n");
     printf("%s\n\n",eg.desc.c_str());
   }
 
