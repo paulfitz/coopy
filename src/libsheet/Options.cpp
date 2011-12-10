@@ -5,6 +5,10 @@
 #include <coopy/CsvSheet.h>
 #include <coopy/CsvWrite.h>
 #include <coopy/Coopy.h>
+#include <coopy/MergeOutputFilter.h>
+#include <coopy/PatchParser.h>
+#include <coopy/SheetPatcher.h>
+#include <coopy/PoolImpl.h>
 
 #include <algorithm>
 
@@ -602,6 +606,47 @@ static bool generateExample(const string& name) {
   if (name=="directory.sqlite") {
     PolyBook book;
     if (book.attach("directory.sqlite")) {
+      string dir = " \n\
+@@@ locations \n\
+x location |id=| \n\
+@ |id|street|city| \n\
++ |1|305 Memorial Drive|Cambridge| \n\
++ |2|Big Crater|Moon| \n\
+\n\
+@@@ org2loc \n\
+x organization |org_id| \n\
+x location |loc_id| \n\
+@ |org_id|loc_id| \n\
++ |1|2| \n\
++ |2|1| \n\
++ |3|1| \n\
++ |3|2| \n\
+\n\
+@@@ organizations \n\
+x organization |id=| \n\
+@ |id|name| \n\
++ |1|Dracula Inc| \n\
++ |2|The Firm| \n\
++ |3|Omni Cooperative| \n\
++ |4|Nonexistence Unlimited| \n\
+";
+
+      PoolImpl pool;
+      CompareFlags flags;
+      flags.create_unknown_sheets = true;
+      flags.clean_sheets = true;
+      flags.pool = &pool;
+      vector<string> cmd;
+      cmd.push_back(dir);
+      SheetPatcher sink;
+      sink.attachBook(book);
+      sink.setFlags(flags);
+      MergeOutputFilter filter(&sink);
+      filter.attachBook(book);
+      filter.setFlags(flags);
+      PatchParser parser(&filter,cmd,flags);
+      parser.apply();
+      book.flush();
       return true;
     }
     fprintf(stderr,"* failed to generate %s\n", name.c_str());

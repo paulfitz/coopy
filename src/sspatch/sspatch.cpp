@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
 		   "Remove a row from a table").require("numbers.csv");
     opt.addExample("sspatch --cmd \"= |NAME=four|DIGIT:*->4|\" numbers_buggy.csv",
 		   "Change the DIGIT column on a row with NAME=four.").require("numbers_buggy.csv");
+    opt.addExample("sspatch --output out.sqlite directory.sqlite --cmd \"+ |42|The New Organization|\"","...").require("directory.sqlite");
     opt.endHelp();
     return help?0:1;
   }

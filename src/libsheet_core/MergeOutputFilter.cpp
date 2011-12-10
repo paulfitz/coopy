@@ -65,7 +65,11 @@ bool MergeOutputFilter::emitPreamble(const SheetUnit& preamble) {
   if (getFlags().create_unknown_sheets && book) {
     PolySheet sheet;
     sheet = book->readSheet(name);
-    if (!sheet.isValid()) {
+    if (sheet.isValid()) {
+      if (getFlags().clean_sheets) {
+	sheet.deleteData();
+      }
+    } else {
       dbg_printf("I need to create %s\n", name.c_str());
 
       for (std::list<PoolChange>::const_iterator it=preamble.pools.begin();

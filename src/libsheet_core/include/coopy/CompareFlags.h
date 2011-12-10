@@ -75,6 +75,7 @@ public:
   bool assume_header;
   bool ignore_case;
   bool create_unknown_sheets;
+  bool clean_sheets;
   std::string pivot_uri;
   std::string local_uri;
   std::string remote_uri;
@@ -108,6 +109,7 @@ public:
     foreign_pool_set = false;
     meta_book = 0 /*NULL*/;
     create_unknown_sheets = false;
+    clean_sheets = false;
   }
 
   ~CompareFlags() {

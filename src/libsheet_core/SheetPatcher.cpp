@@ -840,6 +840,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 
 bool SheetPatcher::declareNames(const std::vector<std::string>& names, 
 				bool final) {
+  bool first = !declaredNames;
   declaredNames = true;
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return false;
@@ -851,13 +852,10 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
 	return false;
       }
     }
-    if (!final) {
+    if (first) {
       for (int i=0; i<(int)names.size(); i++) {
 	if (names[i]!=activeCol.cellString(i,0)) {
 	  if (names[i][0]=='[') {
-	    //printf("Adding synonym '%s' '%s'\n",
-	    //names[i].c_str(),
-	    //	   activeCol.cellString(i,0).c_str());
 	    syn2name[names[i]] = activeCol.cellString(i,0);
 	    name2syn[activeCol.cellString(i,0)] = names[i];
 	  }
@@ -899,6 +897,7 @@ bool SheetPatcher::setSheet(const char *name) {
   columns.clear();
   column_names.clear();
   rowCursor = -1;
+  declaredNames = false;
 
   // load
   PolySheet psheet;
@@ -1098,8 +1097,8 @@ bool SheetPatcher::mergeDone() {
 	RowUnit& unit = *it;
 	if (unit.sheet_name!=sheetName) {
 	  setSheet(unit.sheet_name.c_str());
-	  changeRow(unit.change);
 	}
+	changeRow(unit.change);
       }
     }
   } while (len>0 && len!=prev_len);

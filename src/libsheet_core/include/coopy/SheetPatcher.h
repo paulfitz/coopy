@@ -67,6 +67,7 @@ private:
 
   bool moveColumn(int idx, int idx2);
 
+public:
   SheetPatcher(bool descriptive = false,
 	       bool forReview = false,
 	       bool forMerge = false) : descriptive(descriptive),
@@ -87,7 +88,6 @@ private:
     declaredNames = false;
   }
 
-public:
   static SheetPatcher *createForApply() {
     return new SheetPatcher();
   }

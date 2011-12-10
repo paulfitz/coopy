@@ -594,6 +594,7 @@ vector<string> normalizedMessage(const string& line) {
   bool quote = false;
   bool pending = false;
   bool commit = false;
+  bool haveBars = false;
   for (int i=0; i<(int)line.length(); i++) {
     char ch = line[i];
     if (ch=='\'') {
@@ -613,6 +614,7 @@ vector<string> normalizedMessage(const string& line) {
       if (ch=='|') {
 	pending = true;
 	commit = true;
+	haveBars = true;
       }
     } else {
       white = false;
@@ -620,7 +622,7 @@ vector<string> normalizedMessage(const string& line) {
       pending = true;
     }
   }
-  if (pending&&result!="") {
+  if (pending&&result!=""&&!haveBars) {
     all.push_back(result);
     pending = false;
   }
