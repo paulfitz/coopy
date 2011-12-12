@@ -35,7 +35,12 @@ public:
   patcher(patcher), fname(fname), flags(flags)
   {}
     
+  // deprecated, undesirable name in python
   bool apply();
+
+  bool applyPatch() {
+    return apply();
+  }
 
 private:
   bool applyCsv();

@@ -21,7 +21,10 @@ bool MergeOutputRowOps::changeRow(const RowChange& change) {
       ids = change.allNames;
     }
     for (int i=0; i<(int)ids.size(); i++) {
-      ss.addColumn(ids[i].c_str());
+      ss.addColumn((ids[i] + "0").c_str());
+    }
+    for (int i=0; i<(int)ids.size(); i++) {
+      ss.addColumn((ids[i] + "1").c_str());
     }
     if (getOutputBook()!=NULL) {
       ops = getOutputBook()->provideSheet(ss);
@@ -39,11 +42,20 @@ bool MergeOutputRowOps::changeRow(const RowChange& change) {
   Poly<SheetRow> row = ops.insertRow();
   row->setCell(0,SheetCell(sheet_name.c_str(),false));
   row->setCell(1,SheetCell(change.modeString().c_str(),false));
+  int at = 2;
   for (int i=0; i<(int)ids.size(); i++) {
     string id = ids[i];
     if (change.cond.find(id)!=change.cond.end()) {
-      row->setCell(i+2,change.cond.find(id)->second);
+      row->setCell(at,change.cond.find(id)->second);
     }
+    at++;
+  }
+  for (int i=0; i<(int)ids.size(); i++) {
+    string id = ids[i];
+    if (change.val.find(id)!=change.val.end()) {
+      row->setCell(at,change.val.find(id)->second);
+    }
+    at++;
   }
   row->flush();
 

@@ -4,13 +4,6 @@
 #if defined(SWIGPHP)
 %feature("nodirector") coopy::cmp::Patcher::addRow;
 %feature("nodirector") coopy::cmp::Patcher::changeName;
-/*%feature("director") coopy::cmp::Patcher::changeRow;
-%feature("director") coopy::cmp::Patcher::changeColumn;
-%feature("director") coopy::cmp::Patcher::setSheet;
-%feature("director") coopy::cmp::Patcher::mergeStart;
-%feature("director") coopy::cmp::Patcher::mergeDone;
-%feature("director") coopy::cmp::Patcher::mergeAllDone;
-*/
 #endif
 
 %include "std_string.i"
@@ -20,6 +13,8 @@
 // common name clashes
  //%rename(toString_c) *::toString() const;
 %rename(clone_c) *::clone() const;
+%rename(open_c) *::open(const Property& config);
+%rename(apply_c) *::apply();
 
 #if defined(SWIGJAVA) || defined(SWIGPHP)
 %rename(equals) *::operator==;
@@ -42,6 +37,7 @@
 #include <coopy/PolyBook.h>
 #include <coopy/BookCompare.h>
 #include <coopy/FormatDesc.h>
+#include <coopy/PatchParser.h>
 %}
 %include <coopy/RefCount.h>
 %include <coopy/Appearance.h>
@@ -66,3 +62,4 @@
 %include <coopy/CompareFlags.h>
 %include <coopy/Patcher.h>
 %include <coopy/BookCompare.h>
+%include <coopy/PatchParser.h>

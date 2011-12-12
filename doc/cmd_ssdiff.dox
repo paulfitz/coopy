@@ -45,6 +45,7 @@ Show the difference between two tables/databases/spreadsheets.
  \li \ref ssdiff_main_table "--table=TABLE"
  \li \ref ssdiff_main_tail-trimmed "--tail-trimmed"
  \li \ref ssdiff_main_unordered "--unordered"
+ \li \ref ssdiff_main_variant "--variant=VARIANT"
 
 
 \section ssdiff_options_detail Option details
@@ -106,6 +107,9 @@ Show the difference between two tables/databases/spreadsheets.
 
 
 \anchor ssdiff_main_unordered <b>--unordered</b> <br />treat order of rows as unimportant
+
+
+\anchor ssdiff_main_variant <b>--variant=VARIANT</b> <br />set the desired dialect when using a poorly defined output format (currently for SQL, available variants are: sqlite, access)
 
 
 

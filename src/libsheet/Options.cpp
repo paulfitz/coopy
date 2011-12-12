@@ -395,6 +395,9 @@ Options::Options(const char *name) : name(name) {
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
       "format=FORMAT",
       "set difference format for output");
+  add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
+      "variant=VARIANT",
+      "set the desired dialect when using a poorly defined output format (currently for SQL, available variants are: sqlite, access)");
   add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_PATCH|OPTION_FOR_FORMAT,
       "input-formats",
       "list supported input database formats");

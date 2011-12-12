@@ -206,7 +206,7 @@ bool PolyBook::expand(Property& config) {
     if (ext==".csvs") {
       key = "csvs";
     }
-    if (ext==".xls"||ext==".xlsx"||ext==".gnumeric") {
+    if (ext==".xls"||ext==".xlsx"||ext==".gnumeric"||ext==".ods") {
       key = "gnumeric";
     }
     if (ext==".jsonbook") {

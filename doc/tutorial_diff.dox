@@ -5,7 +5,7 @@
 /**
 *
 
-@page tutorial_diff Contribute to data collection projects using ssdiff
+@page tutorial_diff Visualizing changes using ssdiff
 
 You can use \ref ssdiff to summarize changes you've made
 between two versions of a table (or tables).  Suppose you
@@ -38,12 +38,38 @@ That table has some problems (D. Duck? Spamington?). So you fix them.
   <tr><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
 </table>
 
-As a public-spirited type, you'd like to offer your fixes to your friend.
-But you don't want to spend much time at it.
-The easiest would be to just send your updated table.
-But that may be ignored, since there's no clear signal of what you've
-changed and whether it is worthwhile.
-So you run a quick diff and instead send this:
+As a public-spirited type, you'd like to offer your fixes to your
+friend.  If you both happen to run the same software, chances are it
+has some way of tracking and highlighting your revisions, and everything
+is hunky-dorey.  If not, then this is where sadness often begins.
+Some sad outcomes:
+
+\li You send your edited table to your friend, they say thanks, but
+since they don't have a quick way to see what you changed, or it is
+not in their preferred format, they never get around to actually
+merging in your changed.
+
+\li You try to convince your friend to use the same software as you,
+but they are not convinced.  You argue, and pretty soon you are no longer
+friends.
+
+\li You try to convince your friend to use the same software as you,
+and they agree.  The world becomes just a smidgeon more boring, and
+the status quo crusts over just a little bit more.  Also, every
+problem your friend ever has with that software becomes your fault.
+
+\li You get fed up and don't send the table - too much hassle, too
+little reward.
+
+COOPY can help in several ways, depending on your friend's preferences.
+
+@section tutorial_diff_visualize Presenting differences flexibly
+
+The most basic way that COOPY can help is by letting you quickly prepare
+a summary of the changes you've made, in the style that is most suited to
+your friend.
+For example, if your friend is a spreadsheet user, you can use COOPY
+to prepare a report like this:
 
 \htmlonly
 <p><table >
@@ -126,9 +152,26 @@ So you run a quick diff and instead send this:
 \end{center}
 \endlatexonly
 
-(produced with <tt>ssdiff --format hilite --output patch.xls FILE1 FILE2</tt>)
+(produced with <tt>ssdiff --format hilite --output report.xls FILE1 FILE2</tt>)
 
-Or, if you and your friend are more unix-y, this:
+This makes it very clear what you've changed, and if your friend's software
+understands this format, it could go ahead and apply these changes.
+Currently, only COOPY does, but we're agitating to get it more widely
+supported.
+
+If your friend uses something that speaks SQL, COOPY can produce an
+equivalent report for them, along the lines of:
+\code
+INSERT INTO bridges (bridge, designer, length) VALUES ('Manhattan', 'G. Lindenthal', '1470');
+UPDATE bridges SET designer='L. L. Buck' WHERE bridge='Williamsburg' AND designer='D. Duck' AND length='1600';
+DELETE FROM bridges WHERE bridge='Spamspan' AND designer='S. Spamington' AND length='10000';
+\endcode
+(produced with <tt>ssdiff --format sql --default-table bridges FILE1 FILE2</tt>)
+
+If your friend happens to already be a COOPY fan, you could also send
+COOPY's own preferred format for representing differences, called \ref
+patch_format_tdiff "TDIFF".  This is modeled loosely after a format
+used for contributing to software projects.
 
 \verbatim
 * |bridge=Brooklyn|
@@ -139,16 +182,120 @@ Or, if you and your friend are more unix-y, this:
 
 (produced with <tt>ssdiff FILE1 FILE2</tt>)
 
-Or, if you and your friend are more database-y, this:
-\code
-INSERT INTO bridges (bridge, designer, length) VALUES ('Manhattan', 'G. Lindenthal', '1470');
-UPDATE bridges SET designer='L. L. Buck' WHERE bridge='Williamsburg' AND designer='D. Duck' AND length='1600';
-DELETE FROM bridges WHERE bridge='Spamspan' AND designer='S. Spamington' AND length='10000';
-\endcode
-(produced with <tt>ssdiff --format sql --default-table bridges FILE1 FILE2</tt>)
+With any of these formats, your friend can quickly review the changes you made.
 
-Now your friend can quickly see what changes you made, and
-update her/his own table either manually or using \ref sspatch.
+@section tutorial_diff_apply Merging differences flexibly
+
+Visualizing differences is already useful.  Being able to
+selectively apply those differences is even more useful.
+
+Let's switch perspective now.  Suppose we've received an
+email from a friend, saying they've made some fixes to our
+bridge list, and they've attached this spreadsheet:
+
+\htmlonly
+<p><table >
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>@</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>bridge</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>designer</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>length</b></td>
+<td  style=""><b></b></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Brooklyn</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">J. A. Roebling</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1595</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>+++</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>Manhattan</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>G. Lindenthal</b></td>
+<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>1470</b></td>
+<td  bgcolor="#7FFF7F" style="background:#7FFF7F;"><b></b></td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Williamsburg</td>
+<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>D. Duck-&gt;L. L. Buck</b></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1600</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Queensborough</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Palmer &amp; Hornbostel</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1182</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Triborough</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td colspan="2"  valign="bottom"  align="left"  style=" font-size:10pt;">1380,383</td>
+</tr>
+<tr>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">Throgs Neck</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">1800</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  style=""></td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">George Washington</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
+<td  valign="bottom"  align="left"  style=" font-size:10pt;">3500</td>
+<td  style=""></td>
+</tr>
+<tr>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><b>---</b></td>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">Spamspan</span></td>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">S. Spamington</span></td>
+<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">10000</span></td>
+<td  bgcolor="#FF7F7F" style="background:#FF7F7F;"><span style="text-decoration: line-through;"></span></td>
+</tr>
+</table>
+\endhtmlonly
+\latexonly
+\begin{center}
+\endlatexonly
+\image latex images/screenshot/tutorial_diff_1.pdf
+\latexonly
+\end{center}
+\endlatexonly
+
+That's handy, it is easy to see what has changed.  The L.L.Buck fix
+is important, and how did we forget the Manhattan bridge - but the
+Spamspan bridge shouldn't be deleted (let's imagine we live in a
+parallel universe where S. Spamington is a bona fide designer,
+reknowned for making very long bridges).
+
+It is simple to go ahead and make those changes manually, but we
+feel like doing some yak-shaving (look it up).  The report is
+apparently in something called "hilite diff" format, supported
+by a vast list of programs that currently appears to be exactly
+one: COOPY. So we download the COOPY program, and quickly find out that
+we can just edit the report in anything, remove the lines we don't want
+applied, save the result, and then apply those changes to our
+table with \ref sspatch.  Our information is in a table called "bridges"
+in an Sqlite database, ny.sqlite.  So we change the sheet name in the
+report to "bridges" and do:
+
+\verbatim
+sspatch --inplace ny.sqlite report.xls/csv/...
+\endverbatim
+
+Done!
 
 *
 */

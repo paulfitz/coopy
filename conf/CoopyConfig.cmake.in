@@ -3,5 +3,5 @@ include("@CMAKE_BINARY_DIR@/CoopyDependencies.cmake")
 
 set(Coopy_INCLUDE_DIRS "@SHEET_INCLUDE_DIRS@")
 set(Coopy_LIBRARY_DIRS "@CMAKE_BINARY_DIR@/lib")
-set(Coopy_LIBRARIES sheet)
+set(Coopy_LIBRARIES sheet_full)
 

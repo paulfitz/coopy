@@ -20,6 +20,7 @@ The COOPY project contains programs and libraries to help you:
 \section mainpage_tut Tutorials
 
 \li \ref tutorial_diff
+\li \ref tutorial_hilite
 \li \ref tutorial_coopy_pull
 \li \ref tutorial_coopy_new
 \li \ref tutorial_coopy_push

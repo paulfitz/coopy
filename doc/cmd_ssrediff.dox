@@ -35,6 +35,7 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
  \li \ref ssrediff_main_output "--output=OUTPUTFILE"
  \li \ref ssrediff_main_patch-formats "--patch-formats"
  \li \ref ssrediff_main_table "--table=TABLE"
+ \li \ref ssrediff_main_variant "--variant=VARIANT"
 
 
 \section ssrediff_options_detail Option details
@@ -63,6 +64,9 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 
 
 \anchor ssrediff_main_table <b>--table=TABLE</b> <br />filter for a named table of a workbook/database (repeat option for multiple tables)
+
+
+\anchor ssrediff_main_variant <b>--variant=VARIANT</b> <br />set the desired dialect when using a poorly defined output format (currently for SQL, available variants are: sqlite, access)
 
 
 

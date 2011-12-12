@@ -6,6 +6,7 @@ bin="$3"
 
 CSV2HTML="$bin/bin/ss2html"
 SSDIFF="$bin/bin/ssdiff"
+SSREDIFF="$bin/bin/ssrediff"
 
 BASE=`dirname $fname`
 IMG_DIR="images/screenshot"
@@ -131,6 +132,36 @@ while read -r line; do
 	    show_file ${prefix}result.xls xls
 	else
 	    $SSDIFF $@ --omit-format-name --format $fmt $a $b
+	fi
+	continue
+    fi
+    m=`expr match "$line" "@rediff"`
+    if [ "$m" = "7" ]; then
+	set -- $line
+	a="$prefix$2.csv"
+	b="$prefix$3.csv"
+	fmt=$4
+	fmt2=$5
+	shift
+	shift
+	shift
+	shift
+	shift
+	fname=""
+	if [ "k$fmt" = "khilite" ] ; then
+	    fname="${prefix}result.xls"
+	    $SSDIFF --output "$fname"  --omit-format-name --format $fmt $a $b > /dev/null 2> /dev/null
+	    # show_file ${prefix}result.xls xls
+	else
+	    fname="${prefix}result.tdiff"
+	    $SSDIFF --output "$fname" $@ --omit-format-name --format $fmt $a $b
+	fi
+	if [ "k$fmt2" = "kops" ] ; then
+	    fname2="${prefix}result.csv"
+	    $SSREDIFF --output $fname2 --omit-format-name $@ --format $fmt2 $fname
+	    show_file ${prefix}result.csv csv
+	else
+	    $SSREDIFF --omit-format-name $@ --format $fmt2 $fname
 	fi
 	continue
     fi

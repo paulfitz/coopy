@@ -1,7 +1,7 @@
 == sheet ==
-name,op,bridge,designer,length
-------------------------------
-sheet,context,Brooklyn,"J. A. Roebling",1595
-sheet,insert,,,
-sheet,update,Williamsburg,"D. Duck",1600
-sheet,delete,Spamspan,"S. Spamington",10000
+name,op,bridge0,designer0,length0,bridge1,designer1,length1
+-----------------------------------------------------------
+sheet,context,Brooklyn,"J. A. Roebling",1595,,,
+sheet,insert,,,,Manhattan,"G. Lindenthal",1470
+sheet,update,Williamsburg,"D. Duck",1600,,"L. L. Buck",
+sheet,delete,Spamspan,"S. Spamington",10000,,,
