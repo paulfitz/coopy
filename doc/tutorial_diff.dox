@@ -71,86 +71,18 @@ your friend.
 For example, if your friend is a spreadsheet user, you can use COOPY
 to prepare a report like this:
 
-\htmlonly
-<p><table >
-<tr>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>@</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>bridge</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>designer</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>length</b></td>
-<td  style=""><b></b></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Brooklyn</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">J. A. Roebling</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">1595</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>+++</b></td>
-<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>Manhattan</b></td>
-<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>G. Lindenthal</b></td>
-<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>1470</b></td>
-<td  bgcolor="#7FFF7F" style="background:#7FFF7F;"><b></b></td>
-</tr>
-<tr>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Williamsburg</td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>D. Duck-&gt;L. L. Buck</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">1600</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Queensborough</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Palmer &amp; Hornbostel</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">1182</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Triborough</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
-<td colspan="2"  valign="bottom"  align="left"  style=" font-size:10pt;">1380,383</td>
-</tr>
-<tr>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Throgs Neck</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">1800</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">George Washington</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">3500</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><b>---</b></td>
-<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">Spamspan</span></td>
-<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">S. Spamington</span></td>
-<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">10000</span></td>
-<td  bgcolor="#FF7F7F" style="background:#FF7F7F;"><span style="text-decoration: line-through;"></span></td>
-</tr>
+<table>
+  <tr><th>\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
+  <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
+  <tr><td style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td>1600</td></tr>
+  <tr><td></td><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td>1182</td></tr>
+  <tr><td></td><td>Triborough</td><td>O. H. Ammann</td><td>1380,383</td></tr>
+  <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+  <tr><td></td><td>Throgs Neck</td><td>O. H. Ammann</td><td>1800</td></tr>
+  <tr><td></td><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
+  <tr style="background-color: #ff7f7f;"><td>---</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_diff_0.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 (produced with <tt>ssdiff --format hilite --output report.xls FILE1 FILE2</tt>)
 
@@ -193,86 +125,18 @@ Let's switch perspective now.  Suppose we've received an
 email from a friend, saying they've made some fixes to our
 bridge list, and they've attached this spreadsheet:
 
-\htmlonly
-<p><table >
-<tr>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>@</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>bridge</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>designer</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>length</b></td>
-<td  style=""><b></b></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Brooklyn</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">J. A. Roebling</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">1595</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>+++</b></td>
-<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>Manhattan</b></td>
-<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>G. Lindenthal</b></td>
-<td  bgcolor="#7FFF7F" valign="bottom"  align="left"  style="background:#7FFF7F; font-size:10pt;"><b>1470</b></td>
-<td  bgcolor="#7FFF7F" style="background:#7FFF7F;"><b></b></td>
-</tr>
-<tr>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;"><b>-&gt;</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Williamsburg</td>
-<td  bgcolor="#7F7FFF" valign="bottom"  align="left"  style="background:#7F7FFF; font-size:10pt;"><b>D. Duck-&gt;L. L. Buck</b></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">1600</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Queensborough</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Palmer &amp; Hornbostel</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">1182</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Triborough</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
-<td colspan="2"  valign="bottom"  align="left"  style=" font-size:10pt;">1380,383</td>
-</tr>
-<tr>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">...</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">Throgs Neck</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">1800</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  style=""></td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">George Washington</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">O. H. Ammann</td>
-<td  valign="bottom"  align="left"  style=" font-size:10pt;">3500</td>
-<td  style=""></td>
-</tr>
-<tr>
-<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><b>---</b></td>
-<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">Spamspan</span></td>
-<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">S. Spamington</span></td>
-<td  bgcolor="#FF7F7F" valign="bottom"  align="left"  style="background:#FF7F7F; font-size:10pt;"><span style="text-decoration: line-through;">10000</span></td>
-<td  bgcolor="#FF7F7F" style="background:#FF7F7F;"><span style="text-decoration: line-through;"></span></td>
-</tr>
+<table>
+  <tr><th>\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
+  <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
+  <tr><td style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td>1600</td></tr>
+  <tr><td></td><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td>1182</td></tr>
+  <tr><td></td><td>Triborough</td><td>O. H. Ammann</td><td>1380,383</td></tr>
+  <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+  <tr><td></td><td>Throgs Neck</td><td>O. H. Ammann</td><td>1800</td></tr>
+  <tr><td></td><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
+  <tr style="background-color: #ff7f7f;"><td>---</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_diff_1.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 That's handy, it is easy to see what has changed.  The L.L.Buck fix
 is important, and how did we forget the Manhattan bridge - but the

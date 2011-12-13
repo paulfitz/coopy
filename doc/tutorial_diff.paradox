@@ -8,31 +8,11 @@ between two versions of a table (or tables).  Suppose you
 are a bridge geek, and have been working with this 
 table of New York bridges compiled by a friend:
 
-@table bridge_broken
-bridge,designer,length
-Brooklyn,J. A. Roebling,1595
-Williamsburg,D. Duck,1600
-Queensborough,Palmer & Hornbostel,1182
-Triborough,O. H. Ammann,"1380,383"
-Bronx Whitestone,O. H. Ammann,2300
-Throgs Neck,O. H. Ammann,1800
-George Washington,O. H. Ammann,3500
-Spamspan,S. Spamington,10000
-@endtable
+@show broken_bridges.csv
 
 That table has some problems (D. Duck? Spamington?). So you fix them.
 
-@table bridge
-bridge,designer,length
-Brooklyn,J. A. Roebling,1595
-Manhattan,G. Lindenthal,1470
-Williamsburg,L. L. Buck,1600
-Queensborough,Palmer & Hornbostel,1182
-Triborough,O. H. Ammann,"1380,383"
-Bronx Whitestone,O. H. Ammann,2300
-Throgs Neck,O. H. Ammann,1800
-George Washington,O. H. Ammann,3500
-@endtable
+@show bridges.csv
 
 As a public-spirited type, you'd like to offer your fixes to your
 friend.  If you both happen to run the same software, chances are it
@@ -67,7 +47,7 @@ your friend.
 For example, if your friend is a spreadsheet user, you can use COOPY
 to prepare a report like this:
 
-@diff bridge_broken bridge hilite
+@diff broken_bridges bridges hilite2
 
 (produced with <tt>ssdiff --format hilite --output report.xls FILE1 FILE2</tt>)
 
@@ -79,7 +59,7 @@ supported.
 If your friend uses something that speaks SQL, COOPY can produce an 
 equivalent report for them, along the lines of:
 \code
-@diff bridge_broken bridge sql --default-table bridges
+@diff broken_bridges bridges sql --default-table bridges
 \endcode
 (produced with <tt>ssdiff --format sql --default-table bridges FILE1 FILE2</tt>)
 
@@ -89,7 +69,7 @@ patch_format_tdiff "TDIFF".  This is modeled loosely after a format
 used for contributing to software projects.
 
 \verbatim
-@diff bridge_broken bridge tdiff
+@diff broken_bridges bridges tdiff
 \endverbatim
 
 (produced with <tt>ssdiff FILE1 FILE2</tt>)
@@ -105,7 +85,7 @@ Let's switch perspective now.  Suppose we've received an
 email from a friend, saying they've made some fixes to our 
 bridge list, and they've attached this spreadsheet:
 
-@diff bridge_broken bridge hilite
+@diff broken_bridges bridges hilite2
 
 That's handy, it is easy to see what has changed.  The L.L.Buck fix
 is important, and how did we forget the Manhattan bridge - but the

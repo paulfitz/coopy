@@ -27,29 +27,30 @@ That's a table listing locations, a table listing organizations,
 and a table linking organizations and locations (org2loc).
 Suppose the database holds the following data:
 
-\verbatim
-== locations ==
-id,street,city
---------------
-1,"305 Memorial Drive",Cambridge
-2,"Big Crater",Moon
- 
-== org2loc ==
-org_id,loc_id
--------------
-1,2
-2,1
-3,1
-3,2
- 
-== organizations ==
-id,name
--------
-1,"Dracula Inc"
-2,"The Firm"
-3,"Omni Cooperative"
-4,"Nonexistence Unlimited"
-\endverbatim
+<table>
+  <caption>locations</caption>
+  <tr><th>id</th><th>street</th><th>city</th></tr>
+  <tr><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
+  <tr><td>2</td><td>Big Crater</td><td>Moon</td></tr>
+</table>
+
+<table>
+  <caption>org2loc</caption>
+  <tr><th>org_id</th><th>loc_id</th></tr>
+  <tr><td>1</td><td>2</td></tr>
+  <tr><td>2</td><td>1</td></tr>
+  <tr><td>3</td><td>1</td></tr>
+  <tr><td>3</td><td>2</td></tr>
+</table>
+
+<table>
+  <caption>organizations</caption>
+  <tr><th>id</th><th>name</th></tr>
+  <tr><td>1</td><td>Dracula Inc</td></tr>
+  <tr><td>2</td><td>The Firm</td></tr>
+  <tr><td>3</td><td>Omni Cooperative</td></tr>
+  <tr><td>4</td><td>Nonexistence Unlimited</td></tr>
+</table>
 
 See \ref tutorial_ids_material for how to get a copy of this database
 to play with.  This toy database contains <tt>organizations</tt> and
@@ -66,66 +67,69 @@ Suppose Alice and Bob both have a copy of directory.sqlite.
 Alice adds in a new organization to her copy, "Alice and Company", with a
 location in Denver:
 
-\verbatim
-== locations ==
-id,street,city
---------------
-1,"305 Memorial Drive",Cambridge
-2,"Big Crater",Moon
-3,"10 Ten Street",Denver
- 
-== org2loc ==
-org_id,loc_id
--------------
-1,2
-2,1
-3,1
-3,2
-5,3
- 
-== organizations ==
-id,name
--------
-1,"Dracula Inc"
-2,"The Firm"
-3,"Omni Cooperative"
-4,"Nonexistence Unlimited"
-5,"Alice and Company"
-\endverbatim
+<table>
+  <caption>locations</caption>
+  <tr><th>\@</th><th>id</th><th>street</th><th>city</th></tr>
+  <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
+  <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
+</table>
+
+<table>
+  <caption>org2loc</caption>
+  <tr><th>\@</th><th>org_id</th><th>loc_id</th></tr>
+  <tr><td></td><td>1</td><td>2</td></tr>
+  <tr><td></td><td>2</td><td>1</td></tr>
+  <tr><td></td><td>3</td><td>1</td></tr>
+  <tr><td></td><td>3</td><td>2</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>3</td></tr>
+</table>
+
+<table>
+  <caption>organizations</caption>
+  <tr><th>\@</th><th>id</th><th>name</th></tr>
+  <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
+  <tr><td></td><td>2</td><td>The Firm</td></tr>
+  <tr><td></td><td>3</td><td>Omni Cooperative</td></tr>
+  <tr><td></td><td>4</td><td>Nonexistence Unlimited</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>Alice and Company</td></tr>
+</table>
 
 Bob, in his copy, adds "Bob's World" located on Planet Bob and in Cambridge, and
 notes that "Omni Cooperative" also has a branch on Planet Bob:
 
-\verbatim
-== locations ==
-id,street,city
---------------
-1,"305 Memorial Drive",Cambridge
-2,"Big Crater",Moon
-3,"42 The Boblands","Planet Bob"
- 
-== org2loc ==
-org_id,loc_id
--------------
-1,2
-2,1
-3,1
-3,2
-3,3
-5,1
-5,3
- 
-== organizations ==
-id,name
--------
-1,"Dracula Inc"
-2,"The Firm"
-3,"Omni Cooperative"
-4,"Nonexistence Unlimited"
-5,"Bob's World"
-\endverbatim
+<table>
+  <caption>locations</caption>
+  <tr><th>\@</th><th>id</th><th>street</th><th>city</th></tr>
+  <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
+  <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>42 The Boblands</td><td>Planet Bob</td></tr>
+</table>
 
-Bob then sends a "diff" bob.tdiff to Alice with his changes:
+<table>
+  <caption>org2loc</caption>
+  <tr><th>\@</th><th>org_id</th><th>loc_id</th></tr>
+  <tr><td></td><td>1</td><td>2</td></tr>
+  <tr><td></td><td>2</td><td>1</td></tr>
+  <tr><td></td><td>3</td><td>1</td></tr>
+  <tr><td></td><td>3</td><td>2</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>3</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>1</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>3</td></tr>
+</table>
+
+<table>
+  <caption>organizations</caption>
+  <tr><th>\@</th><th>id</th><th>name</th></tr>
+  <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
+  <tr><td></td><td>2</td><td>The Firm</td></tr>
+  <tr><td></td><td>3</td><td>Omni Cooperative</td></tr>
+  <tr><td></td><td>4</td><td>Nonexistence Unlimited</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>Bob's World</td></tr>
+</table>
+
+Bob then sends a "diff" bob.tdiff to Alice with his changes, either
+in the highlighter format shown above, or as a tdiff file:
 \verbatim
 
 @@@ locations
@@ -152,39 +156,44 @@ would result in garbage, due to conflicting IDs.  But when Alice
 applies Bob's changes using \ref sspatch, she gets a happier
 result:
 
-\verbatim
-== locations ==
-id,street,city
---------------
-1,"305 Memorial Drive",Cambridge
-2,"Big Crater",Moon
-3,"10 Ten Street",Denver
-4,"42 The Boblands","Planet Bob"
- 
-== org2loc ==
-org_id,loc_id
--------------
-1,2
-2,1
-3,1
-3,2
-5,3
-3,4
-6,1
-6,4
- 
-== organizations ==
-id,name
--------
-1,"Dracula Inc"
-2,"The Firm"
-3,"Omni Cooperative"
-4,"Nonexistence Unlimited"
-5,"Alice and Company"
-6,"Bob's World"
-\endverbatim
-(produced with <tt>sspatch --inplace directory.sqlite bob.tdiff</tt>).
+<table>
+  <caption>locations</caption>
+  <tr><th>\@</th><th>id</th><th>street</th><th>city</th></tr>
+  <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
+  <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
+  <tr><td></td><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>4</td><td>42 The Boblands</td><td>Planet Bob</td></tr>
+</table>
 
+<table>
+  <caption>org2loc</caption>
+  <tr><th>\@</th><th>org_id</th><th>loc_id</th></tr>
+  <tr><td></td><td>1</td><td>2</td></tr>
+  <tr><td></td><td>2</td><td>1</td></tr>
+  <tr><td>...</td><td>...</td><td>...</td></tr>
+  <tr><td></td><td>3</td><td>2</td></tr>
+  <tr><td></td><td>5</td><td>3</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>4</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>6</td><td>1</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>6</td><td>4</td></tr>
+</table>
+
+<table>
+  <caption>organizations</caption>
+  <tr><th>\@</th><th>id</th><th>name</th></tr>
+  <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
+  <tr><td></td><td>2</td><td>The Firm</td></tr>
+  <tr><td>...</td><td>...</td><td>...</td></tr>
+  <tr><td></td><td>4</td><td>Nonexistence Unlimited</td></tr>
+  <tr><td></td><td>5</td><td>Alice and Company</td></tr>
+  <tr style="background-color: #7fff7f;"><td>+++</td><td>6</td><td>Bob's World</td></tr>
+</table>
+
+(Command: <tt>sspatch --inplace directory.sqlite bob.tdiff</tt>)
+
+Notice how IDs have been modified appropriately.  They are allocated
+by Sqlite rather than slavishly copied.  If this is not the desired
+behavior, turn on the "--native" flag when calling \ref sspatch.
 
 \section tutorial_ids_material Getting the material used in this example
 

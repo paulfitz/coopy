@@ -48,6 +48,7 @@ private:
   bool merging;
   bool sheetChange;
   std::string sheetName;
+  bool sheetUpdateNeeded;
   coopy::store::NameSniffer *sniffer;
   coopy::store::DataSheet *sniffedSheet;
 
@@ -73,6 +74,7 @@ public:
 	       bool forMerge = false) : descriptive(descriptive),
     forReview(forReview), merging(forMerge)
   {
+    sheetUpdateNeeded = false;
     rowCursor = -1;
     summary = false;
     chain = 0/*NULL*/;
@@ -191,6 +193,8 @@ public:
 
 
   bool handleConflicts();
+
+  bool updateSheet();
 };
 
 #endif

@@ -239,6 +239,7 @@ bool SheetPatcher::moveColumn(int idx, int idx2) {
 }
 
 bool SheetPatcher::changeColumn(const OrderChange& change) {
+  sheetUpdateNeeded = true;
   changeCount++;
   if (chain) chain->changeColumn(change);
 
@@ -509,6 +510,7 @@ bool SheetPatcher::handleConflicts() {
 }
 
 bool SheetPatcher::changeRow(const RowChange& change) {
+  sheetUpdateNeeded = true;
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) {
     fprintf(stderr,"No sheet available to patch.\n");
@@ -898,6 +900,9 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
 }
 
 bool SheetPatcher::setSheet(const char *name) {
+  updateSheet();
+  sheetUpdateNeeded = true;
+
   if (chain) chain->setSheet(name);
 
   TextBook *book = getBook();
@@ -957,6 +962,105 @@ static string clean(const string& s) {
 bool SheetPatcher::mergeAllDone() {
   dbg_printf("SheetPatcher::mergeAllDone\n");
   if (chain) chain->mergeAllDone();
+  updateSheet();
+  return true;
+}
+
+bool SheetPatcher::mergeDone() {
+  int len = -1;
+  int prev_len = -2;
+  do {
+    prev_len = len;
+    len = deferred_rows.size();
+    if (len>0) {
+      dbg_printf("Dealing with deferred rows\n");
+      std::list<RowUnit> cp = deferred_rows;
+      deferred_rows.clear();
+      for (std::list<RowUnit>::iterator it = cp.begin();
+	   it != cp.end(); it++) {
+	RowUnit& unit = *it;
+	if (unit.sheet_name!=sheetName) {
+	  setSheet(unit.sheet_name.c_str());
+	}
+	changeRow(unit.change);
+      }
+    }
+  } while (len>0 && len!=prev_len);
+  if (len>0) {
+    fprintf(stderr,"Cyclic dependency, cannot apply deferred rows\n");
+    exit(1);
+  }
+
+  if (chain) chain->mergeDone();
+  return true;
+}
+
+
+void SheetPatcher::setNames() {
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return;
+  if (sheetChange) {
+    sheetChange = false;
+    clearNames();
+    activeCol.resize(0,1);
+    statusCol.resize(0,1);
+    sniffer = new NameSniffer(sheet,getFlags());
+    COOPY_ASSERT(sniffer);
+    sniffedSheet = &sheet;
+    activeCol.resize(sheet.width(),1);
+    statusCol.resize(sheet.width(),1);
+    for (int i=0; i<sheet.width(); i++) {
+      string name = sniffer->suggestColumnName(i);
+      activeCol.cellString(i,0,name);
+    }
+    updateCols();
+    updatePool();
+  }
+}
+
+
+void SheetPatcher::updatePool() {
+  PolySheet sheet = getSheet();
+  if (!sheet.isValid()) return;
+  setNames();
+  if (!sniffer) return;
+  name2pool.clear();
+  bool addedAuto = false;
+  for (int i=0; i<sheet.width(); i++) {
+    string name = sniffer->suggestColumnName(i);
+    const CompareFlags& flags = getFlags();
+    if (!flags.pool) continue;
+    //printf("Looking up %s %s\n", sheetName.c_str(), name.c_str());
+    PoolColumnLink pc = flags.pool->lookup(sheetName,name);
+    if (!pc.isValid()) {
+      ColumnType t = sniffer->suggestColumnType(i);
+      if (t.autoIncrement&&!addedAuto) {
+	//printf("Found autoinc'er\n");
+	flags.pool->create(sheetName,sheetName,name,true);
+	pc = flags.pool->lookup(sheetName,name);
+	addedAuto = true;
+      }
+      if (t.foreignKey!="") {
+	//printf("Found xref\n");
+	flags.pool->create(t.foreignTable,sheetName,name,false);
+	pc = flags.pool->lookup(sheetName,name);
+      }
+    }
+    if (!pc.isValid()) continue;
+    //printf("Found a pool at %s %s\n", sheetName.c_str(), name.c_str());
+    name2pool[name] = pc;
+    CompareFlags& flags2 = getMutableFlags();
+    if (!flags2.foreign_pool_set) {
+      flags2.foreign_pool = true;
+      flags2.foreign_pool_set = true;
+    }
+  }
+}
+
+
+bool SheetPatcher::updateSheet() {
+  if (!sheetUpdateNeeded) return false;
+
   if (descriptive) {
     PolySheet sheet = getSheet();
     if (!sheet.isValid()) return false;
@@ -1090,96 +1194,8 @@ bool SheetPatcher::mergeAllDone() {
     sheet.cellString(0,0,"Allow? (yes/no)"); 
   }
 
+  sheetUpdateNeeded = false;
+
   return true;
 }
 
-bool SheetPatcher::mergeDone() {
-  int len = -1;
-  int prev_len = -2;
-  do {
-    prev_len = len;
-    len = deferred_rows.size();
-    if (len>0) {
-      dbg_printf("Dealing with deferred rows\n");
-      std::list<RowUnit> cp = deferred_rows;
-      deferred_rows.clear();
-      for (std::list<RowUnit>::iterator it = cp.begin();
-	   it != cp.end(); it++) {
-	RowUnit& unit = *it;
-	if (unit.sheet_name!=sheetName) {
-	  setSheet(unit.sheet_name.c_str());
-	}
-	changeRow(unit.change);
-      }
-    }
-  } while (len>0 && len!=prev_len);
-  if (len>0) {
-    fprintf(stderr,"Cyclic dependency, cannot apply deferred rows\n");
-    exit(1);
-  }
-
-  if (chain) chain->mergeDone();
-  return true;
-}
-
-
-void SheetPatcher::setNames() {
-  PolySheet sheet = getSheet();
-  if (!sheet.isValid()) return;
-  if (sheetChange) {
-    sheetChange = false;
-    clearNames();
-    activeCol.resize(0,1);
-    statusCol.resize(0,1);
-    sniffer = new NameSniffer(sheet,getFlags());
-    COOPY_ASSERT(sniffer);
-    sniffedSheet = &sheet;
-    activeCol.resize(sheet.width(),1);
-    statusCol.resize(sheet.width(),1);
-    for (int i=0; i<sheet.width(); i++) {
-      string name = sniffer->suggestColumnName(i);
-      activeCol.cellString(i,0,name);
-    }
-    updateCols();
-    updatePool();
-  }
-}
-
-
-void SheetPatcher::updatePool() {
-  PolySheet sheet = getSheet();
-  if (!sheet.isValid()) return;
-  setNames();
-  if (!sniffer) return;
-  name2pool.clear();
-  bool addedAuto = false;
-  for (int i=0; i<sheet.width(); i++) {
-    string name = sniffer->suggestColumnName(i);
-    const CompareFlags& flags = getFlags();
-    if (!flags.pool) continue;
-    //printf("Looking up %s %s\n", sheetName.c_str(), name.c_str());
-    PoolColumnLink pc = flags.pool->lookup(sheetName,name);
-    if (!pc.isValid()) {
-      ColumnType t = sniffer->suggestColumnType(i);
-      if (t.autoIncrement&&!addedAuto) {
-	//printf("Found autoinc'er\n");
-	flags.pool->create(sheetName,sheetName,name,true);
-	pc = flags.pool->lookup(sheetName,name);
-	addedAuto = true;
-      }
-      if (t.foreignKey!="") {
-	//printf("Found xref\n");
-	flags.pool->create(t.foreignTable,sheetName,name,false);
-	pc = flags.pool->lookup(sheetName,name);
-      }
-    }
-    if (!pc.isValid()) continue;
-    //printf("Found a pool at %s %s\n", sheetName.c_str(), name.c_str());
-    name2pool[name] = pc;
-    CompareFlags& flags2 = getMutableFlags();
-    if (!flags2.foreign_pool_set) {
-      flags2.foreign_pool = true;
-      flags2.foreign_pool_set = true;
-    }
-  }
-}

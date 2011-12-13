@@ -12,13 +12,17 @@ int main(int argc, char *argv[]) {
   bool verbose = false;
   bool decorate = false;
   bool full = false;
+  bool header = false;
+  bool dox = false;
 
   while (true) {
     int option_index = 0;
     static struct option long_options[] = {
       {"full", 0, 0, 'f'},
       {"decorate", 0, 0, 'd'},
+      {"header", 0, 0, 'h'},
       {"verbose", 0, 0, 'v'},
+      {"dox", 0, 0, 'x'},
       {0, 0, 0, 0}
     };
 
@@ -35,6 +39,12 @@ int main(int argc, char *argv[]) {
       break;
     case 'd':
       decorate = true;
+      break;
+    case 'h':
+      header = true;
+      break;
+    case 'x':
+      dox = true;
       break;
 
     default:
@@ -71,10 +81,12 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   int sz = (int)book.getNames().size();
+  /*
   if (sz>1) {
     fprintf(stderr,"Too many sheets\n");
     return 1;
   }
+  */
   if (sz==0) {
     fprintf(stderr,"No sheet available\n");
     return 1;
@@ -83,9 +95,15 @@ int main(int argc, char *argv[]) {
   CsvRender render;
   render.setDecorate(decorate);
   render.setFull(full);
-  PolySheet sheet = book.readSheetByIndex(0);
-  string result = render.renderHtml(sheet);
-  printf("%s", result.c_str());
+  render.setHeader(header);
+  render.setDox(dox);
 
+  vector<string> names = book.getNames();
+  for (int i=0; i<(int)names.size(); i++) {
+    if (i>0) printf("\n");
+    PolySheet sheet = book.readSheet(names[i]);
+    string result = render.renderHtml(sheet,names[i]);
+    printf("%s", result.c_str());
+  }
   return 0;
 }

@@ -26,12 +26,21 @@ x=0
 function show_file {
     local fname="$1"
     local format="$2"
+    local mode="$3"
+    if [ "k$mode" = "kalt" ] ; then
+	$CSV2HTML --header --dox $fname
+	return
+    fi
     if [ "k$format" = "kxls" ]; then
 	rm -f /tmp/tmp.html
 	# bug in ssconvert :-(
 	#PROB="1380,383"
 	#echo "= |length=$PROB->FOO|" | ( sspatch --inplace $fname - > /dev/null )
-	ssconvert --export-type=Gnumeric_html:html40frag $fname /tmp/tmp.html > /dev/null
+	if [ "k$mode" = "k" ]; then
+	    ssconvert --export-type=Gnumeric_html:html40frag $fname /tmp/tmp.html > /dev/null
+	else
+	    $CSV2HTML --header --dox $fname > /tmp/tmp.html
+	fi
 	if [ ! -e /tmp/tmp.html ] ; then
 	    echo "Failed to ssconvert $fname" 1>&2
 	    exit 1
@@ -136,9 +145,16 @@ while read -r line; do
 	shift
 	shift
 	shift
-	if [ "k$fmt" = "khilite" ] ; then
+	if [ "k$fmt" = "khilite2" ] ; then
+	    rm -f ${prefix}result.xls
+	    $SSDIFF --output ${prefix}result.xls --omit-format-name --format hilite $a $b > /dev/null 2> /dev/null
+	    ## FOR PDF, do alternative
+	    # $CSV2HTML  --dox --header ${prefix}result.xls || exit 1
+	    show_file ${prefix}result.xls xls alt || exit 1
+	elif [ "k$fmt" = "khilite" ] ; then
+	    rm -f ${prefix}result.xls
 	    $SSDIFF --output ${prefix}result.xls --omit-format-name --format $fmt $a $b > /dev/null 2> /dev/null
-	    show_file ${prefix}result.xls xls
+	    show_file ${prefix}result.xls xls || exit 1
 	else
 	    $SSDIFF $@ --omit-format-name --format $fmt $a $b
 	fi
@@ -158,9 +174,11 @@ while read -r line; do
 	shift
 	fname=""
 	if [ "k$fmt" = "khilite" ] ; then
+	    rm -f ${prefix}result.xls
 	    fname="${prefix}result.xls"
 	    $SSDIFF --output "$fname"  --omit-format-name --format $fmt $a $b > /dev/null 2> /dev/null
 	    # show_file ${prefix}result.xls xls
+	    # $CSV2HTML  --dox --header $fname || exit 1
 	else
 	    fname="${prefix}result.tdiff"
 	    $SSDIFF --output "$fname" $@ --omit-format-name --format $fmt $a $b
@@ -186,8 +204,23 @@ while read -r line; do
 	    echo "CANNOT FIND $fname" 1>&2
 	    exit 1
 	fi
-	$SSFORMAT $fname || exit 1
+	$CSV2HTML --header $fname || exit 1
 	$SSFORMAT $fname $prefix`basename $fname`
+	continue
+    fi
+    m=`expr match "$line" "@load"`
+    if [ "$m" = "5" ]; then
+	set -- $line
+	fname=$2
+	if [ -e $ROOT/tests/$fname ]; then
+	    fname="$ROOT/tests/$fname"
+	elif [ -e $ROOT/doc/$fname ]; then
+	    fname="$ROOT/doc/$fname"
+	else
+	    echo "CANNOT FIND $fname" 1>&2
+	    exit 1
+	fi
+	cp $fname $prefix`basename $fname`
 	continue
     fi
     m=`expr match "$line" "@autodoc"`

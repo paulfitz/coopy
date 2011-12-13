@@ -13,7 +13,7 @@ A good clue that you are looking at a highlighter diff is if you see
 annotations like "+++", "---", or "->" in the first column of one
 or more tables in a spreadsheet.  Here is such a table:
 
-@diff bridge_broken bridge hilite
+@diff bridge_broken bridge hilite2
 
 A highlighter diff shows the differences between two versions
 of a spreadsheet.  It says what should be done to the first
