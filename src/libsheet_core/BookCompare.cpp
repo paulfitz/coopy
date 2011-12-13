@@ -26,7 +26,6 @@ int BookCompare::create(coopy::store::TextBook& local,
     PolySheet sheet = local.readSheet(sheetName);
     output.addPoolsFromFlags(sheet);
     NameSniffer sniffer(sheet,flags);
-    bool addedAuto = false;
     NameChange nc;
     nc.mode = NAME_CHANGE_DECLARE;
     nc.constant = true;
@@ -36,29 +35,9 @@ int BookCompare::create(coopy::store::TextBook& local,
     }
     nc.loud = (sheet.height()==0);
     output.changeName(nc);
-    for (int i=0; i<sheet.width(); i++) {
-      string name = sniffer.suggestColumnName(i);
-      PoolColumnLink pc = flags.pool->lookup(sheetName,name);
-      if (!pc.isValid()) {
-	ColumnType t = sniffer.suggestColumnType(i);
-	if (t.autoIncrement&&!addedAuto) {
-	  flags.pool->create(sheetName,sheetName,name,true);
-	  pc = flags.pool->lookup(sheetName,name);
-	  addedAuto = true;
-	}
-	if (t.foreignKey!="") {
-	  flags.pool->create(t.foreignTable,sheetName,name,false);
-	  pc = flags.pool->lookup(sheetName,name);
-	}
-      }
-      if (pc.isValid()) {
-	PoolChange c;
-	c.poolName = pc.getPoolName();
-	c.tableName = pc.getTableName();
-	c.pool.push_back(TableField("",pc.getColumnName(),pc.isInventor()));
-	output.changePool(c);
-      }
-    }
+
+    bool addedAuto = output.addPoolsFromSchema(sheet,sniffer,sheetName);
+
     for (int y=0; y<sheet.height(); y++) {
       RowChange rc;
       rc.mode = ROW_CHANGE_INSERT;

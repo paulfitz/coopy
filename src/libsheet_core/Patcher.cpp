@@ -168,7 +168,7 @@ void RowChange::show() {
 
 
 
-bool Patcher::addPoolsFromFlags(const DataSheet& sheet) {
+bool Patcher::addPoolsFromFlags(const DataSheet& sheet, bool msg) {
   if (flags.coined.size()>0) {
 
     SheetSchema *ss = sheet.getSchema();
@@ -202,10 +202,54 @@ bool Patcher::addPoolsFromFlags(const DataSheet& sheet) {
 	  pc.poolName = link.getPoolName();
 	  pc.tableName = link.getTableName();
 	  pc.pool.push_back(TableField("",link.getColumnName(),link.isInventor()));
-	  changePool(pc);
+	  if (msg) {
+	    changePool(pc);
+	  } else {
+	    applyPool(pc);
+	  }
 	}
       }
     }
   }
   return true;
 }
+
+
+bool Patcher::addPoolsFromSchema(const coopy::store::DataSheet& sheet,
+				 const coopy::store::NameSniffer& sniffer,
+				 const std::string& sheetName,
+				 bool msg) {
+  const CompareFlags& flags = getFlags();
+  bool addedAuto = false;
+  for (int i=0; i<sheet.width(); i++) {
+    string name = sniffer.suggestColumnName(i);
+    PoolColumnLink pc = flags.pool->lookup(sheetName,name);
+    if (!pc.isValid()) {
+      ColumnType t = sniffer.suggestColumnType(i);
+      if (t.autoIncrement&&!addedAuto) {
+	flags.pool->create(sheetName,sheetName,name,true);
+	pc = flags.pool->lookup(sheetName,name);
+	addedAuto = true;
+      }
+      if (t.foreignKey!="") {
+	flags.pool->create(t.foreignTable,sheetName,name,false);
+	pc = flags.pool->lookup(sheetName,name);
+      }
+    }
+    if (pc.isValid()) {
+      PoolChange c;
+      c.poolName = pc.getPoolName();
+      c.tableName = pc.getTableName();
+      c.pool.push_back(TableField("",pc.getColumnName(),pc.isInventor()));
+      if (msg) {
+	changePool(c);
+      } else {
+	applyPool(c);
+      }
+    }
+  }
+  return addedAuto;
+}
+
+
+

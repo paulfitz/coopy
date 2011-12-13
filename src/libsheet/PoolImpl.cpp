@@ -10,7 +10,7 @@ bool PoolImpl::create(const std::string& key,
 		      const std::string& table_name,
 		      const std::string& column_name,
 		      bool invent) {
-  dbg_printf("Pool: %s %s:%s %s\n",
+  dbg_printf("CREATE Pool: %s %s:%s %s\n",
 	     key.c_str(), table_name.c_str(), column_name.c_str(),
 	     invent?"(create)":"");
   std::map<std::string,PoolSlice>::iterator p = pool.find(key);
@@ -32,17 +32,17 @@ bool PoolImpl::create(const std::string& key,
 }
 
 
-SheetCell PoolImpl::lookup(const std::string& table_name,
-			   const std::string& column_name,
-			   const SheetCell& val,
-			   bool& match) {
+PoolRecord& PoolImpl::lookup(const std::string& table_name,
+			     const std::string& column_name,
+			     const SheetCell& val,
+			     bool& match) {
   PoolColumnLink col = lookup(table_name,column_name);
   if (!col.isValid()) {
     match = false;
-    return SheetCell();
+    return dud;
   }
   match = true;
-  return col.getColumn().lookup(val,match);
+  return col.getColumn().lookupMod(val,match);
 }
 
 
@@ -79,7 +79,8 @@ bool PoolImpl::load() {
     slice.pool_name = name;
     PolySheet sheet = book.readSheet(name);
     for (int y=0; y<sheet.height(); y++) {
-      slice.item[sheet.cellSummary(0,y).toString()] = sheet.cellSummary(1,y);
+      PoolRecord rec = {sheet.cellSummary(1,y), false, false, true};
+      slice.item[sheet.cellSummary(0,y).toString()] = rec;
     }
   }
   return true;
@@ -96,10 +97,10 @@ bool PoolImpl::save() {
     schema.addColumn("remote");
     PolySheet sheet = book.provideSheet(schema);
     sheet.deleteData();
-    for (map<string,SheetCell>::iterator it2 = pool.item.begin();
+    for (map<string,PoolRecord>::iterator it2 = pool.item.begin();
 	 it2 != pool.item.end(); it2++) {
       string from = it2->first;
-      SheetCell to = it2->second;
+      SheetCell to = it2->second.cell;
       Poly<SheetRow> row = sheet.insertRow();
       row->setCell(0,SheetCell(from,false)); // fix for escaped cells
       row->setCell(1,to);
@@ -111,11 +112,21 @@ bool PoolImpl::save() {
 }
 
 
-SheetCell PoolSlice::lookup(const SheetCell& val, bool& match) {
-  std::map<std::string,SheetCell>::iterator it = item.find(val.toString());
+const PoolRecord& PoolSlice::lookup(const SheetCell& val, bool& match) const {
+  std::map<std::string,PoolRecord>::const_iterator it = item.find(val.toString());
   if (it==item.end()) {
     match = false;
-    return val;
+    return dud;
+  }
+  match = true;
+  return it->second;
+}
+
+PoolRecord& PoolSlice::lookupMod(const SheetCell& val, bool& match) {
+  std::map<std::string,PoolRecord>::iterator it = item.find(val.toString());
+  if (it==item.end()) {
+    match = false;
+    return dud;
   }
   match = true;
   return it->second;

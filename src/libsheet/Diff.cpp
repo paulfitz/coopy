@@ -64,6 +64,7 @@ int Diff::apply(const Options& opt) {
   std::string mode = opt.checkString("mode",defMode.c_str());
   bool inplace = opt.checkBool("inplace",false);
   bool showPatch = opt.isPatchLike() && mode=="apply" && !apply;
+  bool patchy = opt.isPatchLike()||opt.isRediffLike()||opt.isMergeLike();
 
   CompareFlags flags = opt.getCompareFlags();
   PoolImpl pool;
@@ -251,15 +252,14 @@ int Diff::apply(const Options& opt) {
 
   if (!resolving) {
     diff->setFlags(flags);
-    bool filter = false;
+    bool filter = flags.ordered_tables.size()>0 || flags.acts.size()>0 || 
+      flags.create_unknown_sheets || patchy;
     MergeOutputFilter filter_diff(diff);
-    if (flags.ordered_tables.size()>0 || flags.acts.size()>0 || 
-	flags.create_unknown_sheets) {
+    if (filter) {
       filter = true;
-      if (flags.create_unknown_sheets) {
-	if (diff->getBook()) {
-	  filter_diff.attachBook(*(diff->getBook()));
-	}
+      //if (flags.create_unknown_sheets) {
+      if (diff->getBook()) {
+	filter_diff.attachBook(*(diff->getBook()));
       }
     }
     Patcher *active_diff = diff;

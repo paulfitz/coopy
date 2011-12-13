@@ -638,7 +638,18 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	    
 	    if (!link.isInventor()) {
 	      bool found = false;
-	      SheetCell v = link.getColumn().lookup(val[c],found);
+	      PoolRecord v = link.getColumn().lookup(val[c],found);
+	      if (found) {
+		if (!v.linked) found = false;
+	      } else {
+		if (flags.pool) {
+		  if (flags.pool->isScanned()) {
+		    // if prescanned, then unmarked records can pass through
+		    found = true;
+		    v.cell = val[c];
+		  }
+		}
+	      }
 	      if (!found) {
 		/*
 		fprintf(stderr, "Problem translating a local value to a remote value. Diagnostics:\n");
@@ -659,7 +670,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 		break;
 
 	      } else {
-		inserter->setCell(c,v);
+		inserter->setCell(c,v.cell);
 	      }
 	    } else {
 	      inserter->invent(c);

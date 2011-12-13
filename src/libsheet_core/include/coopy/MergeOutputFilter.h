@@ -23,13 +23,16 @@ public:
   std::list<OrderChange> orders;
   std::list<PoolChange> pools;
   //std::list<RowUnit *> rows;
+  int row_count;
 
   SheetUnit() {
     have_name0 = have_name1 = false;
+    row_count = 0;
   }
   
   SheetUnit(const std::string& name) : sheet_name(name) {
     have_name0 = have_name1 = false;
+    row_count = 0;
   }
 };
 
@@ -60,6 +63,7 @@ private:
   std::list<std::string> sheet_order;
   std::map<std::string, int> started_sheets;
   std::map<std::string, int> desired_sheets;
+  bool active_pool;
 
   SheetUnit& getSheetUnit() {
     std::map<std::string,SheetUnit>::iterator it = sheet_units.find(sheet_name);
@@ -73,6 +77,8 @@ private:
 public:
   MergeOutputFilter(Patcher *next) {
     chain = next;
+    last_sheet_name = "[[ COOPY - SHEET NOT SET ]]";
+    active_pool = false;
   }
 
   virtual bool setSheet(const char *name) { 
@@ -91,37 +97,14 @@ public:
     return true; 
   }
 
-  virtual bool changeRow(const RowChange& change) { 
-    if (!isActiveTable()) return false;
-    SheetUnit unit = getSheetUnit();
-    if (!(unit.have_name0||unit.have_name1)) {
-      NameChange nc;
-      nc.mode = NAME_CHANGE_DECLARE;
-      nc.constant = true;
-      nc.final = true;
-      nc.names = change.allNames;
-      changeName(nc);
-    }
-    switch (change.mode) {
-    case ROW_CHANGE_INSERT:
-      if (!getFlags().canInsert()) { return false; }
-      break;
-    case ROW_CHANGE_DELETE:
-      if (!getFlags().canDelete()) { return false; }
-      break;
-    case ROW_CHANGE_UPDATE:
-    case ROW_CHANGE_MOVE:
-      if (!getFlags().canUpdate()) { return false; }
-      break;
-    }
-    rows.push_back(RowUnit(sheet_name,change));
-    return true;
-  }
+  virtual bool changeRow(const RowChange& change);
 
   virtual bool changePool(const PoolChange& change) { 
     if (!isActiveTable()) return false;
     if (!getFlags().canSchema()) return false;
     getSheetUnit().pools.push_back(change);
+    applyPool(change);
+    active_pool = true;
     return true; 
   }
 
@@ -148,11 +131,23 @@ public:
 
   bool emitPreamble(const SheetUnit& preamble);
 
+  bool emitPreambleIfNeeded(const SheetUnit& preamble);
+
   bool emitRow(const RowUnit& row);
 
   bool isActiveTable() {
     if (desired_sheets.size()==0) return true;
     return desired_sheets.find(sheet_name)!=desired_sheets.end();
+  }
+
+  virtual bool wantDiff() { return true; }
+
+  virtual void setConflicted() {
+    chain->setConflicted();
+  }
+
+  bool isConflicted() const {
+    return chain->isConflicted();
   }
 };
 

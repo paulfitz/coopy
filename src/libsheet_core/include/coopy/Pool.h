@@ -7,18 +7,31 @@
 
 namespace coopy {
   namespace store {
+    class PoolRecord;
     class Pool;
     class PoolColumnLink;
     class PoolColumn;
   }
 }
 
+class coopy::store::PoolRecord {
+public:
+  SheetCell cell;
+  bool novel;
+  bool stale;
+  bool linked;
+};
+
 class coopy::store::PoolColumn {
 public:
   virtual ~PoolColumn() {}
   virtual bool isValid() const = 0;
-  virtual SheetCell lookup(const SheetCell& val, bool& match) = 0;
-  virtual bool put(const SheetCell& src, const SheetCell& dest) = 0;
+
+  virtual PoolRecord& lookupMod(const SheetCell& val, bool& match) = 0;
+
+  virtual const PoolRecord& lookup(const SheetCell& val, bool& match) const = 0;
+
+  virtual PoolRecord& put(const SheetCell& src, const SheetCell& dest) = 0;
 };
 
 class coopy::store::PoolColumnLink {
@@ -88,7 +101,13 @@ public:
 };
 
 class coopy::store::Pool {
+private:
+  bool scanned;
 public:
+  Pool() {
+    scanned = false;
+  }
+
   virtual ~Pool() {}
 
   virtual bool create(const std::string& key,
@@ -101,10 +120,19 @@ public:
 
   virtual PoolColumnLink trace(const PoolColumnLink& src) = 0;
 
-  virtual SheetCell lookup(const std::string& table_name,
-			   const std::string& column_name,
-			   const SheetCell& val,
-			   bool& match) = 0;
+
+  virtual PoolRecord& lookup(const std::string& table_name,
+			     const std::string& column_name,
+			     const SheetCell& val,
+			     bool& match) = 0;
+
+  void setScanned() {
+    scanned = true;
+  }
+
+  bool isScanned() const {
+    return scanned;
+  }
 };
 
 #endif

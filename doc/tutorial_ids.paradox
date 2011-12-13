@@ -1,0 +1,95 @@
+/**
+ *
+  
+@page tutorial_ids Merging tables with diverging IDs
+ 
+It is common to create numeric identifiers for records (rows) when
+inserting them in a table.  Merging two versions of a table modified
+in this way requires special attention, to avoid duplicate identifiers.
+
+\section tutorial_ids_example An example
+ 
+Consider an Sqlite database directory.sqlite with the following schema:
+
+* \code
+* CREATE TABLE locations (id INTEGER PRIMARY KEY,street,city);
+* CREATE TABLE org2loc (org_id INTEGER,loc_id INTEGER, 
+*   FOREIGN KEY(org_id) REFERENCES org2loc(org_id), 
+*   FOREIGN KEY(loc_id) REFERENCES locations(id));
+* CREATE TABLE organizations (id INTEGER PRIMARY KEY,name);
+* \endcode
+
+That's a table listing locations, a table listing organizations,
+and a table linking organizations and locations (org2loc).
+Suppose the database holds the following data:
+
+\verbatim
+@show directory/directory.sqlite
+\endverbatim
+
+See \ref tutorial_ids_material for how to get a copy of this database
+to play with.  This toy database contains <tt>organizations</tt> and 
+<tt>locations</tt>,
+where each organization may have zero, one, or many locations.
+The link between organizations and locations is set up in the <tt>org2loc</tt>
+table.  For example, "The Firm" is located in Cambridge, "Omni Cooperative"
+is in Cambridge and on the Moon, and "Nonexistence Unlimited" is not
+linked to any location.
+
+\section tutorial_ids_diverge Divergence
+
+Suppose Alice and Bob both have a copy of directory.sqlite.
+Alice adds in a new organization to her copy, "Alice and Company", with a
+location in Denver:
+
+\verbatim
+@show directory/directory_alice.sqlite
+\endverbatim
+
+Bob, in his copy, adds "Bob's World" located on Planet Bob and in Cambridge, and
+notes that "Omni Cooperative" also has a branch on Planet Bob:
+
+\verbatim
+@show directory/directory_bob.sqlite
+\endverbatim
+
+Bob then sends a "diff" bob.tdiff to Alice with his changes:
+\verbatim
+@diff directory.sqlite directory_bob.sqlite tdiff
+\endverbatim
+(produced with <tt>ssdiff --output bob.tdiff directory.sqlite directory_bob.sqlite</tt>).
+
+\section tutorial_ids_converge Convergence
+
+A naive application of Bob's changes to Alice's version of the database
+would result in garbage, due to conflicting IDs.  But when Alice 
+applies Bob's changes using \ref sspatch, she gets a happier
+result:
+
+\verbatim
+@show directory/directory_alice_add_bob.sqlite
+\endverbatim
+(produced with <tt>sspatch --inplace directory.sqlite bob.tdiff</tt>).
+
+
+\section tutorial_ids_material Getting the material used in this example
+
+If you want to follow along, you can get a copy of the
+database used in this example by doing:
+\verbatim
+sspatch --test-file directory.sqlite
+\endverbatim
+If you have the sqlite3 tool installed, 
+you can view the database's content with:
+\verbatim
+sqlite3 directory.sqlite .dump    # how to make the database
+sqlite3 directory.sqlite .schema  # structural part of database only
+\endverbatim
+If you don't, you can use COOPY:
+\verbatim
+ssdiff directory.sqlite    # how to make the database
+ssformat directory.sqlite  # non-structural part of database only
+\endverbatim
+
+ *
+ */

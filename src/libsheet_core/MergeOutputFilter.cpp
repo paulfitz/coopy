@@ -6,24 +6,54 @@ using namespace coopy::cmp;
 using namespace coopy::store;
 
 bool MergeOutputFilter::mergeAllDone() {
-  /*
-  for (int i=0; i<(int)sheet_order.size(); i++) {
-    string name = sheet_order[i];
-    SheetUnit& unit = sheet_units[name];
+  Pool *pool = getFlags().pool;
+  if (pool) {
+    // default assumption is that IDs from parent are shared with remote
+    // if assumption is not true, don't do the following.
+
+    map<string,int> seen;
+    for (std::list<RowUnit>::iterator it=rows.begin(); it!=rows.end(); it++) {
+      RowUnit& unit = *it;
+      RowChange& change = unit.change;
+      if (change.mode == ROW_CHANGE_INSERT) {
+	const std::string& name = unit.sheet_name;
+
+	if (seen.find(name)==seen.end()) {
+	  PolySheet sheet;
+	  TextBook *book = getBook();
+	  if (!book) {
+	    fprintf(stderr,"Cannot find input\n");
+	  } else {
+	    sheet = getBook()->readSheet(name);
+	    if (sheet.isValid()) {
+	      addPoolsFromFlags(sheet,false);
+	      NameSniffer sniffer(sheet,getFlags());
+	      addPoolsFromSchema(sheet,sniffer,name,false);
+	    }
+	    seen[name] = 1;
+	  }
+	}
+
+	for (RowChange::txt2cell::const_iterator it = change.val.begin();
+	     it!=change.val.end(); it++) {
+	  PoolColumnLink link = pool->lookup(name,it->first);
+	  if (link.isInventor()) {
+	    PoolRecord& rec = link.getColumn().put(it->second,SheetCell());
+	    rec.linked = false;
+	  }
+	}
+      }
+    }
+    pool->setScanned();
   }
-  */
 
   if (desired_sheets.size()<2) {
     for (std::list<RowUnit>::iterator it=rows.begin(); it!=rows.end(); it++) {
       emitRow(*it);
     }
-    if (getFlags().canSchema()) {
-      if (rows.size()==0) {
-	for (std::map<std::string,SheetUnit>::iterator it=sheet_units.begin();
-	     it!=sheet_units.end(); it++) {
-	  emitPreamble(it->second);
-	}
-      }
+    for (std::map<std::string,SheetUnit>::iterator it=sheet_units.begin();
+	 it!=sheet_units.end(); it++) {
+      emitPreambleIfNeeded(it->second);
     }
   } else {
     const CompareFlags& flags = getFlags();
@@ -35,11 +65,7 @@ bool MergeOutputFilter::mergeAllDone() {
 	  emitRow(*it);
 	}
       }
-      if (getFlags().canSchema()) {
-	if (rows.size()==0) {
-	  emitPreamble(sheet_units[name]);
-	}
-      }
+      emitPreambleIfNeeded(sheet_units[name]);
     }
   }
   chain->mergeDone();
@@ -58,8 +84,9 @@ bool MergeOutputFilter::emitRow(const RowUnit& row) {
 
 bool MergeOutputFilter::emitPreamble(const SheetUnit& preamble) {
   string name = preamble.sheet_name;
-  //printf("emit %s?\n", name.c_str());
+  //printf("emit [%s]?\n", name.c_str());
   if (name==last_sheet_name) { return false; }
+  //printf("emit [%s]!\n", name.c_str());
 
   TextBook *book = getBook();
   if (getFlags().create_unknown_sheets && book) {
@@ -100,7 +127,9 @@ bool MergeOutputFilter::emitPreamble(const SheetUnit& preamble) {
     }
   }
 
-  chain->setSheet(name.c_str());
+  if (name!="") {
+    chain->setSheet(name.c_str());
+  }
   last_sheet_name = name;
   if (started_sheets.find(name)!=started_sheets.end()) {
     return true;
@@ -132,3 +161,44 @@ bool MergeOutputFilter::mergeStart() {
   }
   return chain->mergeStart();
 }
+
+
+bool MergeOutputFilter::emitPreambleIfNeeded(const SheetUnit& preamble) { 
+  if (preamble.row_count==0) {
+    if (getFlags().canSchema()||preamble.orders.size()>0||
+	preamble.pools.size()>0) {
+      return emitPreamble(preamble);
+    }
+  }
+  return true;
+}
+
+
+bool MergeOutputFilter::changeRow(const RowChange& change) { 
+  if (!isActiveTable()) return false;
+  SheetUnit unit = getSheetUnit();
+  if (!(unit.have_name0||unit.have_name1)) {
+    NameChange nc;
+    nc.mode = NAME_CHANGE_DECLARE;
+    nc.constant = true;
+    nc.final = true;
+    nc.names = change.allNames;
+    changeName(nc);
+  }
+  switch (change.mode) {
+  case ROW_CHANGE_INSERT:
+    if (!getFlags().canInsert()) { return false; }
+    break;
+  case ROW_CHANGE_DELETE:
+    if (!getFlags().canDelete()) { return false; }
+    break;
+  case ROW_CHANGE_UPDATE:
+  case ROW_CHANGE_MOVE:
+    if (!getFlags().canUpdate()) { return false; }
+    break;
+  }
+  rows.push_back(RowUnit(sheet_name,change));
+  getSheetUnit().row_count++;
+  return true;
+}
+

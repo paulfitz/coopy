@@ -1,0 +1,29 @@
+
+@@@ locations
+x locations |id=|
+
+@ |id|street|city|
++ |1|305 Memorial Drive|Cambridge|
++ |2|Big Crater|Moon|
++ |3|10 Ten Street|Denver|
+
+@@@ org2loc
+x organizations |org_id|
+x locations |loc_id|
+
+@ |org_id|loc_id|
++ |1|2|
++ |2|1|
++ |3|1|
++ |3|2|
++ |5|3|
+
+@@@ organizations
+x organizations |id=|
+
+@ |id|name|
++ |1|Dracula Inc|
++ |2|The Firm|
++ |3|Omni Cooperative|
++ |4|Nonexistence Unlimited|
++ |5|Alice and Company|

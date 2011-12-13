@@ -10,6 +10,7 @@
 #include <coopy/SheetCell.h>
 #include <coopy/PolySheet.h>
 #include <coopy/TextBook.h>
+#include <coopy/NameSniffer.h>
 
 namespace coopy {
   namespace cmp {
@@ -427,13 +428,18 @@ public:
     conflicted = true;
   }
 
-  bool isConflicted() const {
+  virtual bool isConflicted() const {
     return conflicted;
   }
 
   bool applyPool(const PoolChange& change);
 
-  bool addPoolsFromFlags(const coopy::store::DataSheet& sheet);
+  bool addPoolsFromFlags(const coopy::store::DataSheet& sheet, bool msg=true);
+
+  bool addPoolsFromSchema(const coopy::store::DataSheet& sheet, 
+			  const coopy::store::NameSniffer& sniffer,
+			  const std::string& sheetName,
+			  bool msg=true);
 };
 
 

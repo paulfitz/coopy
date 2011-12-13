@@ -29,18 +29,21 @@ public:
 
 class coopy::store::PoolSlice : public PoolColumn {
 public:
+  PoolRecord dud;
   std::string pool_name;
-  std::map<std::string,SheetCell> item;
+  std::map<std::string,PoolRecord> item;
 
   virtual bool isValid() const {
     return pool_name!="";
   }
 
-  virtual SheetCell lookup(const SheetCell& val, bool& match);
+  virtual PoolRecord& lookupMod(const SheetCell& val, bool& match);
 
-  virtual bool put(const SheetCell& src, const SheetCell& dest) {
-    item[src.toString()] = dest;
-    return true;
+  virtual const PoolRecord& lookup(const SheetCell& val, bool& match) const;
+
+  virtual PoolRecord& put(const SheetCell& src, const SheetCell& dest) {
+    PoolRecord rec = {dest,true,false,true};
+    return item[src.toString()] = rec;
   }
 };
 
@@ -57,6 +60,8 @@ private:
     std::string key = table_name + ":::" + column_name;
     return key;
   }
+
+  PoolRecord dud;
 
 public:
   void attachBook(PolyBook& book) {
@@ -76,10 +81,10 @@ public:
   virtual PoolColumnLink lookup(const std::string& table_name,
 				const std::string& column_name);
 
-  virtual SheetCell lookup(const std::string& table_name,
-			   const std::string& column_name,
-			   const SheetCell& val,
-			   bool& match);
+  virtual PoolRecord& lookup(const std::string& table_name,
+			     const std::string& column_name,
+			     const SheetCell& val,
+			     bool& match);
 
   virtual PoolColumnLink trace(const PoolColumnLink& src);
 

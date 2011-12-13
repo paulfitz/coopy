@@ -1,36 +1,33 @@
 /**
  *
 
-@page tutorial_hilite Applying hilite diffs using sspatch
+@page tutorial_hilite Applying highlighter diffs using sspatch
 
 The COOPY toolbox can report the difference between tables in
-a few difference formats, one of which is called the "hilite" format.
+a number of formats, one of which is called the "hilite" format.
 If someone sends you such a report, what can you do with it?
 
-@section tutorial_hilite_example How to recognize a hilite diff
+@section tutorial_hilite_example How to recognize a highlighter diff
 
-A good clue that you are looking at a hilite diff is if you see
+A good clue that you are looking at a highlighter diff is if you see
 annotations like "+++", "---", or "->" in the first column of one
 or more tables in a spreadsheet.  Here is such a table:
 
 @diff bridge_broken bridge hilite
 
-@section tutorial_hilite_what What is a hilite diff
-
-A hilite diff shows the differences between two versions
+A highlighter diff shows the differences between two versions
 of a spreadsheet.  It says what should be done to the first
 version of the spreadsheet to produce the second - by adding
 rows, removing rows, changing cell values, etc.  The diff
 does not generally show all of the original spreadsheet, just
 parts that have changed and their immediate surroundings.
 
-@section tutorial_hilite_action Applying changes from a hilite diff
+@section tutorial_hilite_action Applying all changes from a highlighter diff
 
-Hilite diffs can be quickly skimmed to understand the
-scope of proposed changes.  Hilite diffs can be applied 
+Highlighter diffs can be applied 
 to a variety of database and spreadsheet formats using
 the sspatch program available in the COOPY toolbox.
-Suppose we have received the hilite diff as "diff.xls".
+Suppose we have received the highlighter diff as a file "diff.xls".
 We can do any of:
 
 \verbatim
@@ -45,14 +42,14 @@ sspatch --inplace dbi:mysql:my_database:username=root diff.xls
 
 See \ref sspatch documentation for options.
 
-@section tutorial_hilite_partial Applying just some changes
+@section tutorial_hilite_partial Applying just some changes from a highlighter diff
 
 Delete any rows from the diff that you don't want (or set the first column
 to empty).  Then \ref tutorial_hilite_action "apply as normal".
 
 @section tutorial_hilite_convert Converting to another format
 
-A hilite diff can be converted to other formats, using \ref ssrediff.  
+A highlighter diff can be converted to other formats, using \ref ssrediff.  
 Here's an SQL translation of the \ref tutorial_hilite_example "above example":
 
 \verbatim
@@ -116,6 +113,8 @@ Row change of type 'delete'
 The equivalent code in Ruby is:
 
 \include bridge.rb
+
+The same code can read TDIFF format diff files.
 
  *
  */

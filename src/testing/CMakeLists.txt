@@ -906,3 +906,17 @@ ADD_TEST(foreign_contacts_compare ${ssdiff} --equal foreign_contacts_apply.csvs 
 ADD_TEST(foreign_contacts_multi_diff ${ssdiff} --output foreign_contacts_multi_diff.tdiff --meta ${TESTS}/fold/contacts_meta.tdiff ${TESTS}/fold/contacts.csvs ${TESTS}/fold/contacts_add_multi.csvs)
 ADD_TEST(foreign_contacts_multi_apply ${sspatch} --output foreign_contacts_multi_apply.csvs ${TESTS}/fold/contacts.csvs foreign_contacts_multi_diff.tdiff)
 ADD_TEST(foreign_contacts_multi_compare ${ssdiff} --equal foreign_contacts_multi_apply.csvs ${TESTS}/fold/contacts_add_multi_foreign.csvs)
+
+foreach (D directory directory_alice directory_bob)
+  ADD_TEST(foreign_directory_${D}_create ${ssdiff} --omit-format --output foreign_directory_${D}.tdiff ${TESTS}/directory/${D}.sqlite)
+  ADD_TEST(foreign_directory_${D}_compare ${CMAKE_COMMAND} -E compare_files foreign_directory_${D}.tdiff ${TESTS}/directory/${D}.tdiff)
+endforeach()
+
+ADD_TEST(foreign_directory_ra_diff ${ssdiff} --output foreign_directory_ra_diff.tdiff ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_alice.sqlite)
+ADD_TEST(foreign_directory_rab_patch ${sspatch} --output foreign_directory_rab.sqlite ${TESTS}/directory/directory_bob.sqlite foreign_directory_ra_diff.tdiff)
+ADD_TEST(foreign_directory_rab_compare ${ssdiff} --equal ${TESTS}/directory/directory_bob_add_alice.sqlite foreign_directory_rab.sqlite)
+
+ADD_TEST(foreign_directory_rb_diff ${ssdiff} --output foreign_directory_rb_diff.tdiff ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_bob.sqlite)
+ADD_TEST(foreign_directory_rba_patch ${sspatch} --output foreign_directory_rba.sqlite ${TESTS}/directory/directory_alice.sqlite foreign_directory_rb_diff.tdiff)
+ADD_TEST(foreign_directory_rba_compare ${ssdiff} --equal ${TESTS}/directory/directory_alice_add_bob.sqlite foreign_directory_rba.sqlite)
+

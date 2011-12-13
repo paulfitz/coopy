@@ -1,17 +1,20 @@
 #!/bin/bash
 
 fname="$1"
-src="$2"
+osrc="$2"
 bin="$3"
 
 CSV2HTML="$bin/bin/ss2html"
 SSDIFF="$bin/bin/ssdiff"
 SSREDIFF="$bin/bin/ssrediff"
+SSFORMAT="$bin/bin/ssformat"
 
 BASE=`dirname $fname`
 IMG_DIR="images/screenshot"
 mkdir -p $BASE/$IMG_DIR
 SRC="$fname"
+
+ROOT="$osrc"
 
 which html2ps || exit 1
 which ssconvert || exit 1
@@ -121,7 +124,13 @@ while read -r line; do
     if [ "$m" = "5" ]; then
 	set -- $line
 	a="$prefix$2.csv"
+	if [ ! -e $a ]; then
+	    a="$prefix$2"
+	fi
 	b="$prefix$3.csv"
+	if [ ! -e $b ]; then
+	    b="$prefix$3"
+	fi
 	fmt=$4
 	shift
 	shift
@@ -163,6 +172,22 @@ while read -r line; do
 	else
 	    $SSREDIFF --omit-format-name $@ --format $fmt2 $fname
 	fi
+	continue
+    fi
+    m=`expr match "$line" "@show"`
+    if [ "$m" = "5" ]; then
+	set -- $line
+	fname=$2
+	if [ -e $ROOT/tests/$fname ]; then
+	    fname="$ROOT/tests/$fname"
+	elif [ -e $ROOT/doc/$fname ]; then
+	    fname="$ROOT/doc/$fname"
+	else
+	    echo "CANNOT FIND $fname" 1>&2
+	    exit 1
+	fi
+	$SSFORMAT $fname || exit 1
+	$SSFORMAT $fname $prefix`basename $fname`
 	continue
     fi
     m=`expr match "$line" "@autodoc"`

@@ -52,9 +52,9 @@ public:
     return sheet.height()-(div+1);
   }
 
-  virtual std::string suggestColumnName(int col);
+  virtual std::string suggestColumnName(int col) const;
 
-  virtual const ColumnType& suggestColumnType(int col) {
+  virtual const ColumnType& suggestColumnType(int col) const {
     return ct[col];
   }
 

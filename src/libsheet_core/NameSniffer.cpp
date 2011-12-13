@@ -136,7 +136,7 @@ void NameSniffer::sniff() {
 }
 
 
-std::string NameSniffer::suggestColumnName(int col) {
+std::string NameSniffer::suggestColumnName(int col) const {
   if (names.size()>0) {
     return names[col];
   }
