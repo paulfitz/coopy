@@ -41,13 +41,13 @@ Alice adds in a new organization to her copy, "Alice and Company", with a
 location in Denver:
 
 @load directory/directory_alice.sqlite
-@diff directory.sqlite directory_alice.sqlite hilite2
+@diff directory.sqlite directory_alice.sqlite hilite
 
 Bob, in his copy, adds "Bob's World" located on Planet Bob and in Cambridge, and
 notes that "Omni Cooperative" also has a branch on Planet Bob:
 
 @load directory/directory_bob.sqlite
-@diff directory.sqlite directory_bob.sqlite hilite2
+@diff directory.sqlite directory_bob.sqlite hilite
 
 Bob then sends a "diff" bob.tdiff to Alice with his changes, either
 in the highlighter format shown above, or as a tdiff file:
@@ -63,7 +63,7 @@ would result in garbage, due to conflicting IDs.  But when Alice
 applies Bob's changes using \ref sspatch, she gets a happier
 result:
 
-@diff directory_alice.sqlite directory_alice_add_bob.sqlite hilite2
+@diff directory_alice.sqlite directory_alice_add_bob.sqlite hilite
 
 (Command: <tt>sspatch --inplace directory.sqlite bob.tdiff</tt>)
 

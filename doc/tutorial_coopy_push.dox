@@ -8,7 +8,7 @@ Do this tutorial first: \ref tutorial_coopy_pull
 Now, change some number in your *.xls file, then save it.  
 
 \image html screenshot/coopy_xls2.png "Making a change..."
-\image latex screenshot/coopy_xls2.pdf "Making a change..." width=10cm
+\image latex screenshot/coopy_xls2.pdf "Making a change..." width=14cm
 
 Now to send the updates to the repository, we click the "Push out" button.
 We're prompted to make a brief description of our changes (called a 
@@ -17,7 +17,7 @@ be a brief message that will let a collaborator understand your change
 quickly.
 
 \image html screenshot/coopy_commit2.png "Add a commit message."
-\image latex screenshot/coopy_commit2.pdf "Add a commit message." width=5cm
+\image latex screenshot/coopy_commit2.pdf "Add a commit message." width=7cm
 
 The next thing that is likely to happen is an access denied message.  
 Repositories
@@ -27,19 +27,19 @@ have a username/password (otherwise consider following:
 \ref tutorial_coopy_fork).
 
 \image html screenshot/coopy_access_denied_username.png "Access denied."
-\image latex screenshot/coopy_access_denied_username.pdf "Access denied." width=5cm
+\image latex screenshot/coopy_access_denied_username.pdf "Access denied." width=7cm
 
 Fill out a username and password:
 
 \image html screenshot/coopy_username.png "Username."
-\image latex screenshot/coopy_username.pdf "Username." width=5cm
+\image latex screenshot/coopy_username.pdf "Username." width=7cm
 \image html screenshot/coopy_pw.png "Password."
-\image latex screenshot/coopy_pw.pdf "Password." width=5cm
+\image latex screenshot/coopy_pw.pdf "Password." width=7cm
 
 And we're done:
 
 \image html screenshot/coopy_write_done.png "A successful push."
-\image latex screenshot/coopy_write_done.pdf "A successful push." width=10cm
+\image latex screenshot/coopy_write_done.pdf "A successful push." width=13cm
 
 If you want to push out to a new repository, follow:
 \ref tutorial_coopy_fork.

@@ -7,31 +7,31 @@ When working collaboratively, conflicts may occasionally happen.
 Suppose Alice and Bob both share the following table with Coopy:
 
 \image html screenshot/coopy_conflicted_start.png "The starting point."
-\image latex screenshot/coopy_conflicted_start.pdf "The starting point." width=10cm
+\image latex screenshot/coopy_conflicted_start.pdf "The starting point." width=13cm
 
 Both independently notice that the number "9" in this table is wrong,
 and fix it.  Bob accidentally goofs:
 
 \image html screenshot/coopy_conflicted_ours.png "Bob's fix"
-\image latex screenshot/coopy_conflicted_ours.pdf "Bob's fix" width=10cm
+\image latex screenshot/coopy_conflicted_ours.pdf "Bob's fix" width=13cm
 
 Alice gets it right:
 
 \image html screenshot/coopy_conflicted_theirs.png "Alice's fix"
-\image latex screenshot/coopy_conflicted_theirs.pdf "Alice's fix" width=10cm
+\image latex screenshot/coopy_conflicted_theirs.pdf "Alice's fix" width=13cm
 
 Suppose Bob pushes his "fix" first to their shared repository.
 When Alice tries to push her fix, Coopy gives this message:
 
 \image html screenshot/coopy_would_fork.png "Pull needed."
-\image latex screenshot/coopy_would_fork.pdf "Pull needed." width=7cm
+\image latex screenshot/coopy_would_fork.pdf "Pull needed." width=9cm
 
 Alice goes ahead and pulls.  Compatible changes would get merged,
 but Coopy doesn't know what to do with the conflicting change.
 So it leaves Alice's table like this:
 
 \image html screenshot/coopy_conflicted_excel.png "Conflicted table"
-\image latex screenshot/coopy_conflicted_excel.pdf "Conflicted table" width=10cm
+\image latex screenshot/coopy_conflicted_excel.pdf "Conflicted table" width=13cm
 
 Alice can recognize that "9" was replaced by either "4" (her choice) or
 "44" (Bob's choice).  Using her magical human intelligence, she decides

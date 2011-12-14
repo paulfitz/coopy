@@ -47,7 +47,7 @@ your friend.
 For example, if your friend is a spreadsheet user, you can use COOPY
 to prepare a report like this:
 
-@diff broken_bridges bridges hilite2
+@diff broken_bridges bridges hilite
 
 (produced with <tt>ssdiff --format hilite --output report.xls FILE1 FILE2</tt>)
 
@@ -85,7 +85,7 @@ Let's switch perspective now.  Suppose we've received an
 email from a friend, saying they've made some fixes to our 
 bridge list, and they've attached this spreadsheet:
 
-@diff broken_bridges bridges hilite2
+@diff broken_bridges bridges hilite
 
 That's handy, it is easy to see what has changed.  The L.L.Buck fix
 is important, and how did we forget the Manhattan bridge - but the

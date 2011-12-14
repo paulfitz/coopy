@@ -26,16 +26,16 @@ You can find this list by starting
 \ref coopy, then clicking on "Set up repository":
 
 \image html screenshot/coopy_main.png "Click on: Set up repository"
-\image latex screenshot/coopy_main.pdf "Click on: Set up repository" width=10cm
+\image latex screenshot/coopy_main.pdf "Click on: Set up repository" width=13cm
 
 \image html screenshot/coopy_new.png "Select: Create new repository"
-\image latex screenshot/coopy_new.pdf "Select: Create new repository" width=5cm
+\image latex screenshot/coopy_new.pdf "Select: Create new repository" width=7cm
 
 When we choose the new repository option, we are offered a list of 
 hosts:
 
 \image html screenshot/coopy_host.png "Select a host."
-\image latex screenshot/coopy_host.pdf "Select a host." width=5cm
+\image latex screenshot/coopy_host.pdf "Select a host." width=7cm
 
 Choose a website to host your repository.  You can also 
 have your own website to host
@@ -45,18 +45,18 @@ this list.  For now, let's go with
 <a href="http://chiselapp.com">chiselapp.com</a>.
 
 \image html screenshot/coopy_chisel_front.png "Chisel"
-\image latex screenshot/coopy_chisel_front.pdf "Chisel" width=10cm
+\image latex screenshot/coopy_chisel_front.pdf "Chisel" width=13cm
 
 After you register and log in, you'll see a dashboard that
 looks like this (except emptier):
 
 \image html screenshot/coopy_chisel_dashboard.png "Chisel dashboard"
-\image latex screenshot/coopy_chisel_dashboard.pdf "Chisel dashboard" width=10cm
+\image latex screenshot/coopy_chisel_dashboard.pdf "Chisel dashboard" width=13cm
 
 To make a repository, click on "Create repository".
 
 \image html screenshot/coopy_chisel_create.png "Create repository"
-\image latex screenshot/coopy_chisel_create.pdf "Create repository" width=10cm
+\image latex screenshot/coopy_chisel_create.pdf "Create repository" width=13cm
 
 Set the repository up as you like.  The "Override project code" field
 is not needed when setting up a fresh, empty repository.  Once you've
@@ -64,7 +64,7 @@ set up a repository, on the dashboard find a link to it, like the
 one shown in a box here:
 
 \image html screenshot/coopy_chisel_link.png "Find the repository link"
-\image latex screenshot/coopy_chisel_link.pdf "Find the repository link" width=10cm
+\image latex screenshot/coopy_chisel_link.pdf "Find the repository link" width=13cm
 
 When you click that link, you should see a page in a different
 style with a picture of a fossil.  This is your repository,
@@ -72,7 +72,7 @@ and the link shown in your browser is the "repository link"
 that Coopy needs.
 
 \image html screenshot/coopy_chisel_fossil.png "Fossil"
-\image latex screenshot/coopy_chisel_fossil.pdf "Fossil" width=10cm
+\image latex screenshot/coopy_chisel_fossil.pdf "Fossil" width=13cm
 
 You could now follow the instructions in this tutorial: \ref tutorial_coopy_pull.  Just replace the demo repository link with your own.
 You can also follow this tutorial: \ref tutorial_coopy_push, using
