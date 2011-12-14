@@ -102,6 +102,16 @@ int main(int argc, char *argv[]) {
   for (int i=0; i<(int)names.size(); i++) {
     if (i>0) printf("\n");
     PolySheet sheet = book.readSheet(names[i]);
+    if (header) {
+      bool ok = false;
+      if (sheet.height()>0 && sheet.width()>0) {
+	string n = sheet.cellString(0,0);
+	if (n!=""&&n!="NULL"&&n!="@"&&n.substr(0,5)!="Allow") {
+	  sheet.mustHaveSchema();
+	  sheet.hideHeaders();
+	}
+      }
+    }
     string result = render.renderHtml(sheet,names[i]);
     printf("%s", result.c_str());
   }

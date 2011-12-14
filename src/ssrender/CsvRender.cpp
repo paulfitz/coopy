@@ -120,7 +120,7 @@ string CsvRender::renderHtml(const DataSheet& sheet, const std::string& title) {
 	row_decorate = string(" class=\"") + row_mode + "\"";
       }
       if (row_color!="") {
-	row_decorate = string(" style=\"background-color: ") + row_color + ";\"";
+	row_decorate = string(" bgcolor=\"") + row_color + "\" style=\"background-color: " + row_color + ";\"";
       }
       result += "  <tr";
       result += row_decorate;
@@ -133,7 +133,7 @@ string CsvRender::renderHtml(const DataSheet& sheet, const std::string& title) {
 	string cell_decorate = "";
 	if (header) {
 	  if (txt.find("->")!=string::npos) {
-	    cell_decorate += " style=\"background-color: #7f7fff;\"";
+	    cell_decorate += " bgcolor=\"#7f7fff\" style=\"background-color: #7f7fff;\"";
 	  }
 	}
 	txt = ml_encode(txt,dox);

@@ -5,6 +5,8 @@ osrc="$2"
 bin="$3"
 target="$4"
 
+echo target is $target 1>&2
+
 CSV2HTML="$bin/bin/ss2html"
 SSDIFF="$bin/bin/ssdiff"
 SSREDIFF="$bin/bin/ssrediff"
@@ -17,10 +19,12 @@ SRC="$fname"
 
 ROOT="$osrc"
 
+{
 which html2ps || exit 1
 which ssconvert || exit 1
 which ps2pdf || exit 1
 which pdfcrop || exit 1
+} 1>&2
 
 width=""
 x=0
@@ -32,25 +36,24 @@ function show_file {
 #	$CSV2HTML --header --dox $fname
 #	return
 #    fi
-    if [ ! "$target" = "kpdf" ] ; then
+    if [ ! "k$target" = "kpdf" ] ; then
 	$CSV2HTML --header --dox $fname
 	return
     fi
-    if [ "k$format" = "kxls" ]; then
+    if [ ! "k$format" = "knonexistent" ]; then
 	rm -f /tmp/tmp.html
 	# bug in ssconvert :-(
 	#PROB="1380,383"
 	#echo "= |length=$PROB->FOO|" | ( sspatch --inplace $fname - > /dev/null )
-	if [ "k$mode" = "k" ]; then
-	    ssconvert --export-type=Gnumeric_html:html40frag $fname /tmp/tmp.html > /dev/null
-	else
-	    $CSV2HTML --header --dox $fname > /tmp/tmp.html
-	fi
+	#ssconvert --export-type=Gnumeric_html:html40frag $fname /tmp/tmp.html > /dev/null
+	$CSV2HTML --header $fname > /tmp/tmp.html
 	if [ ! -e /tmp/tmp.html ] ; then
 	    echo "Failed to ssconvert $fname" 1>&2
 	    exit 1
 	fi
-	cat /tmp/tmp.html | grep -v caption | grep -v exporter | sed "s/&rt;/>/g" | sed "s/border=.1.//g" | sed "s|</*font[^<>]*>||g" | sed "s/FOO/$PROB/" > /tmp/tmp2.html
+	cat /tmp/tmp.html | sed "s/<th/<th bgcolor='#000088'/g" | sed 's|>\([^<]*\)</th>|><font color="#ffffff">\1</font></th>|g' | sed "s|<table|<table border=1|" | sed "s/&rt;/>/g" > /tmp/tmp2.html
+	# cp /tmp/tmp.html /tmp/tmp2.html
+	# cat /tmp/tmp.html | grep -v exporter | sed "s/&rt;/>/g" | sed "s/rborder=.1.//g" | sed "s|</*font[^<>]*>||g" | sed "s/FOO/$PROB/" > /tmp/tmp2.html
 	# cat /tmp/tmp.html | grep -v caption | grep -v exporter | sed "s/&rt;/>/g" | sed "s/\@/\\\\@/g" | sed "s/border=.1.//g" | sed "s|</*font[^<>]*>||g" | sed "s/FOO/$PROB/" > /tmp/tmp2.html
 	echo "\\htmlonly"
 	cat /tmp/tmp2.html
@@ -203,7 +206,7 @@ while read -r line; do
 	    echo "CANNOT FIND $fname" 1>&2
 	    exit 1
 	fi
-	$CSV2HTML --header $fname || exit 1
+	show_file $fname hilite || exit 1
 	$SSFORMAT $fname $prefix`basename $fname`
 	continue
     fi

@@ -5,6 +5,8 @@ tutorial_coopy_push
 tutorial_coopy_fork
 tutorial_coopy_conflict
 tutorial_diff
+tutorial_hilite
+tutorial_ids
 tutorial_git
 ssdiff
 sspatch
@@ -20,4 +22,3 @@ patch_format
 patch_format_tdiff
 patch_format_csv
 table_format
-tutorial_ids

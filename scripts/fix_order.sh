@@ -19,7 +19,7 @@ LIST_FILE_FINAL="$SRC/conf/CoopyDocLatex.cmake"
 echo "# created by scripts/fix_order.sh" > $LIST_FILE
 echo  "# from doc/pdf_order.txt" >> $LIST_FILE
 echo -n "set (LATEX_MANUAL_DOCS" >> $LIST_FILE
-cd ../doc || exit 1
+cd $SRC/doc || exit 1
 for tag in `cat $ORDER_FILE`; do
     if [ "k$tag" = "kmain" ]; then
 	fname="main.dox"
