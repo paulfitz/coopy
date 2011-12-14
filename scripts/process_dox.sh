@@ -3,6 +3,7 @@
 fname="$1"
 osrc="$2"
 bin="$3"
+target="$4"
 
 CSV2HTML="$bin/bin/ss2html"
 SSDIFF="$bin/bin/ssdiff"
@@ -27,7 +28,11 @@ function show_file {
     local fname="$1"
     local format="$2"
     local mode="$3"
-    if [ "k$mode" = "kalt" ] ; then
+#    if [ "k$mode" = "kalt" ] ; then
+#	$CSV2HTML --header --dox $fname
+#	return
+#    fi
+    if [ ! "$target" = "kpdf" ] ; then
 	$CSV2HTML --header --dox $fname
 	return
     fi
@@ -145,13 +150,7 @@ while read -r line; do
 	shift
 	shift
 	shift
-	if [ "k$fmt" = "khilite2" ] ; then
-	    rm -f ${prefix}result.xls
-	    $SSDIFF --output ${prefix}result.xls --omit-format-name --format hilite $a $b > /dev/null 2> /dev/null
-	    ## FOR PDF, do alternative
-	    # $CSV2HTML  --dox --header ${prefix}result.xls || exit 1
-	    show_file ${prefix}result.xls xls alt || exit 1
-	elif [ "k$fmt" = "khilite" ] ; then
+	if [ "k$fmt" = "khilite" ] ; then
 	    rm -f ${prefix}result.xls
 	    $SSDIFF --output ${prefix}result.xls --omit-format-name --format $fmt $a $b > /dev/null 2> /dev/null
 	    show_file ${prefix}result.xls xls || exit 1

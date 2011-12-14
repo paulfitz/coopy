@@ -1,5 +1,6 @@
 
 option(DOXYGEN_TRICKS "Process *.paradox files for documentation" FALSE)
+option(GENERATE_PDF "Generate *.pdf files for documentation" FALSE)
 
 if (DOXYGEN_TRICKS)
   file(GLOB paradox ${CMAKE_SOURCE_DIR}/doc/*.paradox)
@@ -10,9 +11,13 @@ if (DOXYGEN_TRICKS)
     set(ODIR ${CMAKE_SOURCE_DIR}/doc)
     # set(ODIR ${CMAKE_BINARY_DIR}/dox)
     set(ONAME ${pbase}.dox)
+    set(GEN_PDF htmlonly)
+    if (GENERATE_PDF)
+      set(GEN_PDF pdf)
+    endif ()
     ADD_CUSTOM_COMMAND(OUTPUT ${ODIR}/${ONAME}
       COMMAND mkdir -p ${ODIR}
-      COMMAND ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh ${f} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} > ${ODIR}/${ONAME}
+      COMMAND ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh ${f} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${GEN_PDF} > ${ODIR}/${ONAME}
       MAIN_DEPENDENCY ${f}
       DEPENDS ${CMAKE_SOURCE_DIR}/scripts/process_dox.sh ss2html ssdiff
       ssresolve ssrediff ssformat sspatch ssmerge coopy
@@ -75,14 +80,16 @@ if (DOXYGEN_EXE)
 endif ()
 
 if (DOXYGEN_TRICKS)
-  add_custom_target(xpdf 
-    COMMAND ${CMAKE_SOURCE_DIR}/scripts/make_pdf.sh)
-  add_custom_target(guide 
-    ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/gendoc/latex/refman.pdf ${CMAKE_SOURCE_DIR}/CoopyGuide.pdf
-    DEPENDS xpdf
-    ${CMAKE_SOURCE_DIR}/scripts/fix_images.sh
-    ${CMAKE_SOURCE_DIR}/scripts/fix_order.sh
-    )
+  if (GENERATE_PDF)
+    add_custom_target(xpdf 
+      COMMAND ${CMAKE_SOURCE_DIR}/scripts/make_pdf.sh)
+    add_custom_target(guide 
+      ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/gendoc/latex/refman.pdf ${CMAKE_SOURCE_DIR}/CoopyGuide.pdf
+      DEPENDS xpdf
+      ${CMAKE_SOURCE_DIR}/scripts/fix_images.sh
+      ${CMAKE_SOURCE_DIR}/scripts/fix_order.sh
+      )
+  endif()
 endif ()
 
 configure_file(${CMAKE_SOURCE_DIR}/doc/tdiff/tdiff_spec_draft.html
