@@ -952,7 +952,9 @@ bool PatchParser::applyTdiff() {
 	}
 	pc.poolName = poolName;
 	pc.tableName = table_name;
-	patcher->changePool(pc);
+	if (pc.pool.size()>0) {
+	  patcher->changePool(pc);
+	}
       }
     } else if (first=="@"||first=="@@") {
       vector<string> names;

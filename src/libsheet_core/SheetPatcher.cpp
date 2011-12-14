@@ -1024,6 +1024,7 @@ void SheetPatcher::updatePool() {
   if (!sheet.isValid()) return;
   setNames();
   if (!sniffer) return;
+  if (sheetName=="") return;
   name2pool.clear();
   bool addedAuto = false;
   for (int i=0; i<sheet.width(); i++) {
