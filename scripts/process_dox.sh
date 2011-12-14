@@ -11,6 +11,7 @@ CSV2HTML="$bin/bin/ss2html"
 SSDIFF="$bin/bin/ssdiff"
 SSREDIFF="$bin/bin/ssrediff"
 SSFORMAT="$bin/bin/ssformat"
+SSMERGE="$bin/bin/ssmerge"
 
 BASE=`dirname $fname`
 IMG_DIR="images/screenshot"
@@ -36,6 +37,10 @@ function show_file {
 #	$CSV2HTML --header --dox $fname
 #	return
 #    fi
+    if [ "k$format" = "ktxt" ]; then
+	cat $fname
+	return
+    fi
     if [ ! "k$target" = "kpdf" ] ; then
 	$CSV2HTML --header --dox $fname
 	return
@@ -140,65 +145,48 @@ while read -r line; do
     m=`expr match "$line" "@diff"`
     if [ "$m" = "5" ]; then
 	set -- $line
-	a="$prefix$2.csv"
-	if [ ! -e $a ]; then
-	    a="$prefix$2"
-	fi
-	b="$prefix$3.csv"
-	if [ ! -e $b ]; then
-	    b="$prefix$3"
-	fi
-	fmt=$4
-	shift
-	shift
-	shift
-	shift
-	if [ "k$fmt" = "khilite" ] ; then
-	    rm -f ${prefix}result.xls
-	    $SSDIFF --output ${prefix}result.xls --omit-format-name --format $fmt $a $b > /dev/null 2> /dev/null
-	    show_file ${prefix}result.xls xls || exit 1
-	else
-	    $SSDIFF $@ --omit-format-name --format $fmt $a $b
-	fi
+	a="$prefix$2"
+	b="$prefix$3"
+	out="$prefix$4"
+	fmt=$5
+	shift 5
+	rm -f $out
+	$SSDIFF --output $out $@ --omit-format-name --format $fmt $a $b > /dev/null 2> /dev/null
+	continue
+    fi
+    m=`expr match "$line" "@merge"`
+    if [ "$m" = "6" ]; then
+	set -- $line
+	a="$prefix$2"
+	b="$prefix$3"
+	c="$prefix$4"
+	d="$prefix$5"
+	rm -f $d
+	$SSMERGE --output $d $a $b $c > /dev/null 2> /dev/null
 	continue
     fi
     m=`expr match "$line" "@rediff"`
     if [ "$m" = "7" ]; then
 	set -- $line
-	a="$prefix$2.csv"
-	b="$prefix$3.csv"
+	a="$prefix$2"
+	out="$prefix$3"
 	fmt=$4
-	fmt2=$5
-	shift
-	shift
-	shift
-	shift
-	shift
-	fname=""
-	if [ "k$fmt" = "khilite" ] ; then
-	    rm -f ${prefix}result.xls
-	    fname="${prefix}result.xls"
-	    $SSDIFF --output "$fname"  --omit-format-name --format $fmt $a $b > /dev/null 2> /dev/null
-	    # show_file ${prefix}result.xls xls
-	    # $CSV2HTML  --dox --header $fname || exit 1
-	else
-	    fname="${prefix}result.tdiff"
-	    $SSDIFF --output "$fname" $@ --omit-format-name --format $fmt $a $b
-	fi
-	if [ "k$fmt2" = "kops" ] ; then
-	    fname2="${prefix}result.csv"
-	    $SSREDIFF --output $fname2 --omit-format-name $@ --format $fmt2 $fname
-	    show_file ${prefix}result.csv csv
-	else
-	    $SSREDIFF --omit-format-name $@ --format $fmt2 $fname
-	fi
+	shift 4
+	rm -f $out
+	$SSREDIFF --output $out --omit-format-name --format $fmt $a > /dev/null 2> /dev/null
 	continue
     fi
     m=`expr match "$line" "@show"`
     if [ "$m" = "5" ]; then
 	set -- $line
 	fname=$2
-	if [ -e $ROOT/tests/$fname ]; then
+	fmt=$3
+	if [ "k$fmt" = "k" ]; then
+	    fmt="hilite"
+	fi
+	if [ -e $prefix$fname ]; then
+	    fname="$prefix$fname"
+	elif [ -e $ROOT/tests/$fname ]; then
 	    fname="$ROOT/tests/$fname"
 	elif [ -e $ROOT/doc/$fname ]; then
 	    fname="$ROOT/doc/$fname"
@@ -206,8 +194,8 @@ while read -r line; do
 	    echo "CANNOT FIND $fname" 1>&2
 	    exit 1
 	fi
-	show_file $fname hilite || exit 1
-	$SSFORMAT $fname $prefix`basename $fname`
+	show_file $fname $fmt || exit 1
+	cp $fname $prefix`basename $fname`
 	continue
     fi
     m=`expr match "$line" "@load"`

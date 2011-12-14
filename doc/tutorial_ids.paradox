@@ -41,18 +41,21 @@ Alice adds in a new organization to her copy, "Alice and Company", with a
 location in Denver:
 
 @load directory/directory_alice.sqlite
-@diff directory.sqlite directory_alice.sqlite hilite
+@diff directory.sqlite directory_alice.sqlite out.xls hilite
+@show out.xls
 
 Bob, in his copy, adds "Bob's World" located on Planet Bob and in Cambridge, and
 notes that "Omni Cooperative" also has a branch on Planet Bob:
 
 @load directory/directory_bob.sqlite
-@diff directory.sqlite directory_bob.sqlite hilite
+@diff directory.sqlite directory_bob.sqlite out.xls hilite
+@show out.xls
 
 Bob then sends a "diff" bob.tdiff to Alice with his changes, either
 in the highlighter format shown above, or as a tdiff file:
 \verbatim
-@diff directory.sqlite directory_bob.sqlite tdiff
+@diff directory.sqlite directory_bob.sqlite bob.tdiff tdiff 
+@show bob.tdiff txt
 \endverbatim
 (produced with <tt>ssdiff --output bob.tdiff directory.sqlite directory_bob.sqlite</tt>).
 
@@ -63,13 +66,29 @@ would result in garbage, due to conflicting IDs.  But when Alice
 applies Bob's changes using \ref sspatch, she gets a happier
 result:
 
-@diff directory_alice.sqlite directory_alice_add_bob.sqlite hilite
+@diff directory_alice.sqlite directory_alice_add_bob.sqlite out.xls hilite
 
 (Command: <tt>sspatch --inplace directory.sqlite bob.tdiff</tt>)
 
 Notice how IDs have been modified appropriately.  They are allocated
 by Sqlite rather than slavishly copied.  If this is not the desired
 behavior, turn on the "--native" flag when calling \ref sspatch.
+
+If Bob didn't make a patch but instead sent a copy of his database,
+Alice could either use \ref ssdiff followed by \ref sspatch, or
+combine the two steps with \ref ssmerge.  Doing:
+
+\verbatim
+ssmerge --inplace directory.sqlite directory_alice.sqlite directory_bob.sqlite
+\endverbatim
+
+Alice well get:
+
+@merge directory.sqlite directory_alice.sqlite directory_bob.sqlite out.sqlite
+@show out.sqlite
+
+For merging, it is important that Alice has a copy of the last 
+"common ancestor" between her own database and Bob's.
 
 \section tutorial_ids_material Getting the material used in this example
 

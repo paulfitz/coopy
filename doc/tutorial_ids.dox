@@ -152,44 +152,58 @@ would result in garbage, due to conflicting IDs.  But when Alice
 applies Bob's changes using \ref sspatch, she gets a happier
 result:
 
-<table>
-  <caption>locations</caption>
-  <tr><th>\@</th><th>id</th><th>street</th><th>city</th></tr>
-  <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
-  <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
-  <tr><td></td><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
-  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>4</td><td>42 The Boblands</td><td>Planet Bob</td></tr>
-</table>
-
-<table>
-  <caption>org2loc</caption>
-  <tr><th>\@</th><th>org_id</th><th>loc_id</th></tr>
-  <tr><td></td><td>1</td><td>2</td></tr>
-  <tr><td></td><td>2</td><td>1</td></tr>
-  <tr><td>...</td><td>...</td><td>...</td></tr>
-  <tr><td></td><td>3</td><td>2</td></tr>
-  <tr><td></td><td>5</td><td>3</td></tr>
-  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>4</td></tr>
-  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>6</td><td>1</td></tr>
-  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>6</td><td>4</td></tr>
-</table>
-
-<table>
-  <caption>organizations</caption>
-  <tr><th>\@</th><th>id</th><th>name</th></tr>
-  <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
-  <tr><td></td><td>2</td><td>The Firm</td></tr>
-  <tr><td>...</td><td>...</td><td>...</td></tr>
-  <tr><td></td><td>4</td><td>Nonexistence Unlimited</td></tr>
-  <tr><td></td><td>5</td><td>Alice and Company</td></tr>
-  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>6</td><td>Bob's World</td></tr>
-</table>
 
 (Command: <tt>sspatch --inplace directory.sqlite bob.tdiff</tt>)
 
 Notice how IDs have been modified appropriately.  They are allocated
 by Sqlite rather than slavishly copied.  If this is not the desired
 behavior, turn on the "--native" flag when calling \ref sspatch.
+
+If Bob didn't make a patch but instead sent a copy of his database,
+Alice could either use \ref ssdiff followed by \ref sspatch, or
+combine the two steps with \ref ssmerge.  Doing:
+
+\verbatim
+ssmerge --inplace directory.sqlite directory_alice.sqlite directory_bob.sqlite
+\endverbatim
+
+Alice well get:
+
+<table>
+  <caption>locations</caption>
+  <tr><th>id</th><th>street</th><th>city</th></tr>
+  <tr><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
+  <tr><td>2</td><td>Big Crater</td><td>Moon</td></tr>
+  <tr><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
+  <tr><td>4</td><td>42 The Boblands</td><td>Planet Bob</td></tr>
+</table>
+
+<table>
+  <caption>org2loc</caption>
+  <tr><th>org_id</th><th>loc_id</th></tr>
+  <tr><td>1</td><td>2</td></tr>
+  <tr><td>2</td><td>1</td></tr>
+  <tr><td>3</td><td>1</td></tr>
+  <tr><td>3</td><td>2</td></tr>
+  <tr><td>5</td><td>3</td></tr>
+  <tr><td>3</td><td>4</td></tr>
+  <tr><td>6</td><td>1</td></tr>
+  <tr><td>6</td><td>4</td></tr>
+</table>
+
+<table>
+  <caption>organizations</caption>
+  <tr><th>id</th><th>name</th></tr>
+  <tr><td>1</td><td>Dracula Inc</td></tr>
+  <tr><td>2</td><td>The Firm</td></tr>
+  <tr><td>3</td><td>Omni Cooperative</td></tr>
+  <tr><td>4</td><td>Nonexistence Unlimited</td></tr>
+  <tr><td>5</td><td>Alice and Company</td></tr>
+  <tr><td>6</td><td>Bob's World</td></tr>
+</table>
+
+For merging, it is important that Alice has a copy of the last
+"common ancestor" between her own database and Bob's.
 
 \section tutorial_ids_material Getting the material used in this example
 

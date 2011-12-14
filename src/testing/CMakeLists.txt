@@ -920,3 +920,8 @@ ADD_TEST(foreign_directory_rb_diff ${ssdiff} --output foreign_directory_rb_diff.
 ADD_TEST(foreign_directory_rba_patch ${sspatch} --output foreign_directory_rba.sqlite ${TESTS}/directory/directory_alice.sqlite foreign_directory_rb_diff.tdiff)
 ADD_TEST(foreign_directory_rba_compare ${ssdiff} --equal ${TESTS}/directory/directory_alice_add_bob.sqlite foreign_directory_rba.sqlite)
 
+ADD_TEST(foreign_directory_merge_rab ${ssmerge} --output foreign_directory_merge_rab.sqlite ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_alice.sqlite ${TESTS}/directory/directory_bob.sqlite)
+ADD_TEST(foreign_directory_merge_rab_compare ${ssdiff} --equal ${TESTS}/directory/directory_alice_add_bob.sqlite foreign_directory_merge_rab.sqlite)
+
+ADD_TEST(foreign_directory_merge_rba ${ssmerge} --output foreign_directory_merge_rba.sqlite ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_bob.sqlite ${TESTS}/directory/directory_alice.sqlite)
+ADD_TEST(foreign_directory_merge_rba_compare ${ssdiff} --equal ${TESTS}/directory/directory_bob_add_alice.sqlite foreign_directory_merge_rba.sqlite)

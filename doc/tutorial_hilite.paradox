@@ -13,7 +13,10 @@ A good clue that you are looking at a highlighter diff is if you see
 annotations like "+++", "---", or "->" in the first column of one
 or more tables in a spreadsheet.  Here is such a table:
 
-@diff bridge_broken bridge hilite
+@load broken_bridges.csv
+@load bridges.csv
+@diff broken_bridges.csv bridges.csv bridge_report.xls hilite 
+@show bridge_report.xls
 
 A highlighter diff shows the differences between two versions
 of a spreadsheet.  It says what should be done to the first
@@ -53,7 +56,8 @@ A highlighter diff can be converted to other formats, using \ref ssrediff.
 Here's an SQL translation of the \ref tutorial_hilite_example "above example":
 
 \verbatim
-@rediff bridge_broken bridge hilite sql
+@rediff bridge_report.xls out.sql sql
+@show out.sql txt
 \endverbatim
 
 (produced with <tt>ssrediff --format sql diff.xls</tt>).
@@ -61,7 +65,8 @@ Here's an SQL translation of the \ref tutorial_hilite_example "above example":
 Here's a translation to TDIFF, the preferred format for the COOPY 
 toolbox:
 \verbatim
-@rediff bridge_broken bridge hilite tdiff
+@rediff bridge_report.xls out.tdiff tdiff
+@show out.tdiff txt
 \endverbatim
 
 (produced with <tt>ssrediff --format tdiff diff.xls</tt>).
@@ -69,7 +74,8 @@ toolbox:
 Here's a translation to "ROWOPS" format, a simple tabular representation
 of changes this can be useful if you don't have to worry about NULLs.
 
-@rediff bridge_broken bridge hilite ops
+@rediff bridge_report.xls out.csv ops
+@show out.csv
 
 (produced with <tt>ssrediff --format ops diff.xls</tt>).
 
