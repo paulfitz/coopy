@@ -225,7 +225,11 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     if (parser.Found(wxT("d"))) {
         // command-line use of coopy currently can run into trouble
         // with timestamps if commands issued in quick succession
+#ifdef __WIN32__
+        Sleep(1000);
+#else
         sleep(1);
+#endif
     }
     if (parser.Found(wxT("c"),&key)) {
         fossil_action = "clone";
