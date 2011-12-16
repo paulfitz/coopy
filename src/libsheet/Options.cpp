@@ -338,6 +338,11 @@ void OptionRenderDoxygen::render(const Options& opt) {
 	  if (i<(int)opts.size()-1) {
 	    result += ",";
 	  }
+	  if (o.notes!="") {
+	    result += "  <i>// ";
+	    result += o.notes;
+	    result += "</i>";
+	  }
 	  result += "<br />\n";
 	}
 	printf("%s}\n", result.c_str());

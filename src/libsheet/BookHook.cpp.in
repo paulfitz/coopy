@@ -48,6 +48,10 @@ void gatherFactories(vector<TextBookFactory *>& lst,
   if (preview) {
     FormatDesc desc("JSONBOOK: Spreadsheet formats in json");
     desc.addExtension(".jsonbook","Json spreadsheet");
+    desc.addDbi("dbi:jsonbook:fname.sheet",
+		"Force Json spreadsheet interpretation");
+    desc.addOption("type",STRVAL("jsonbook"),"Json spreadsheet",true);
+    desc.addOption("file",STRVAL("fname.sheet"),"File name",true);
     descs.push_back(desc);
   } else {
     lst.push_back(new JsonBookFactory());
@@ -58,6 +62,7 @@ void gatherFactories(vector<TextBookFactory *>& lst,
     desc.addExtension(".xls","Excel spreadsheet");
     desc.addExtension(".xlsx","Excel spreadsheet");
     desc.addExtension(".gnumeric","Gnumeric spreadsheet");
+    desc.addExtension(".ods","OpenOffice/LibreOffice spreadsheet");
     desc.addDbi("dbi:gnumeric:fname.sheet","Force Gnumeric interpretation");
     desc.addOption("type",STRVAL("gnumeric"),"Gnumeric family",true);
     desc.addOption("file",STRVAL("fname.sheet"),"File name",true);
