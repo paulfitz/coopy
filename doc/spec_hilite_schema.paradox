@@ -1,0 +1,27 @@
+/**
+ *
+
+@page spec_hilite_schema Adding, dropping, moving columns
+
+[[[INCOMPLETE]]]
+
+Highlighter diffs can represent changes to the sheet's structure.
+And should do so much more elegantly than COOPY's current lame
+implementation of adding a column:
+
+@load broken_bridges.csv
+@load header/bridges_quark.csvs
+@diff broken_bridges.csv bridges_quark.csvs bridge_report.xls hilite 
+@show bridge_report.xls
+
+and removing a column:
+
+@diff bridges_quark.csvs broken_bridges.csv bridge_report.xls hilite 
+@show bridge_report.xls
+
+and moving a column etc.
+
+
+ *
+ */
+

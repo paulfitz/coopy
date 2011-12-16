@@ -12,27 +12,19 @@ A highlighter diff can however be represented in any tabular format
 with ordered columns and rows.  It is a simple format, 
 easy to parse, yet expressive enough to capture an important
 set of possible differences.
-
 It is intended for spreadsheets containing data, rather then
 spreadsheets with formulae, charts, and the like.
 Highlighter diffs deal with cell content, not formatting.
-When using diffs as patches, this should be borne in mind, 
-and formatting in the sheet being patch preserved.
 
 @section spec_hilite_single Single sheet case, with no schema changes
 
-Consider first the case of a diff with a single sheet.  This is a
-common, important case.  The name of the sheet in the diff matches the
-name of a sheet/table in the two collections being compared.
-Rows in the sheet describe differences between the sheets,
-or add context.
-
-Assume we are comparing two sheets, L and R (for Left/Local
+Assume we are comparing two versions of a 
+sheet/table, L and R (for Left/Local
 and Right/Remote).  L is the "reference" sheet, and we
 describe the difference between it and R in terms of operations
-needed to change L into R.
+needed to change L into R.  The difference is described
+in a "diff sheet" that looks like this:
 
-Here's an example of a single-sheet diff:
 @load broken_bridges.csv
 @load bridges.csv
 @diff broken_bridges.csv bridges.csv bridge_report.xls hilite 
@@ -54,7 +46,7 @@ Here are cell values that can appear in this column:
 "---","the delete tag marks a removed row (relative to L)."
 "->","the update tag marks a row in which at least one cell changed.\n-->, --->, ----> etc. have the same meaning."
 "Blank","A blank string or NULL signals a row of context."
-"...","the context tag signals that unchanges rows are being skipped."
+"...","the skip tag signals that unchanges rows are being skipped."
 "!","The schema tag signals a change in the sheet structure."
 @endtable
 
@@ -64,7 +56,8 @@ The columns after the action column are called the data columns.
 Each column in L and each column in R map onto a data column.
 If the diff contains no schema row ("!"), then
 there are no schema changes between L and R, and the data columns
-map straightforwardly onto columns in L and R.
+map straightforwardly onto columns in L and R.  Here is what the
+data columns contain, for each action tag:
 
 @table actiontag
 "@","cells contain column names."
@@ -87,7 +80,6 @@ filled with a "compound value".
 When a cell in L and R differs, we need to show both values (call them
 Vl and Vr) in a single cell without introducing ambiguity.  We keep this 
 a simple as possible, as follows.
-
 For data where the substring "->" will not occur, and there
 are no ambiguities in the string representation of values, compounds
 are simple:
@@ -98,8 +90,7 @@ compound(Vl,Vr) = string(Vl) + "->" + string(Vr)
 
 So we can get (the string representation of) Vl and Vr by splitting
 the compound value at "->". 
-
-In general, "->" might occur in data.  We optimize ease of interpretation
+But in general, "->" might occur in data.  We optimize ease of interpretation
 of the diff (rather than ease of producing it), by requiring that 
 the update action tag be chosen to avoid collision with the data
 (either per row or over the entire sheet, at the discretion of the
@@ -115,9 +106,9 @@ splitting the compound value at occurance of the action_tag.
 
 @section spec_hilite_string String representation of values
 
-The string representation of Vl and Vr in compound values
-requires some care, for data that contains NULL values
-and where NULLs and blank strings are distinct.
+The string representations of Vl and Vr in compound values
+require some care, in the case of data that contains NULL values
+and for which NULLs and blank strings are distinct.
 If the diff contains any string ending in "NULL" then "NULL-quoting"
 is in effect, and any such string should be interpreted as follows:
 
@@ -134,40 +125,33 @@ through empty cells, rather than as strings.
 
 @section spec_hilite_multiple Multiple sheet case, with no schema changes
 
-Easy!  Just the same as we've done so far, repeated.  For example:
+Easy!  Just the same as we've done so far, repeated,
+with appropriate sheet names.  For example:
 
 @load directory/directory_alice.sqlite
 @diff directory.sqlite directory_alice.sqlite out.xls hilite
 @show out.xls
 
+@section spec_hilite_schema_changes Schema changes?
+
+Not yet nailed down, stub at \ref spec_hilite_schema.
+
 @section spec_hilite_row_order Row order?
 
 This diff format isn't capable of usefully representing reordering of
-rows.
+rows.  This is deliberate.  Obvious modifications that do deal with
+order are complex.  It seems better to simply limit the scope of the format
+and see how useful it works out to be.
 
- *
- */
+@section spec_hilite_implementation Implementations
 
-/**
- *
-
-@page spec_hilite_schema Adding, dropping, moving columns
-
-Highlighter diffs can represent changes to the sheet's structure.
-We are now in spec part CHANGE_COLUMN rather than CORE.
-
-Not fleshed out.
-
-@load broken_bridges.csv
-@load header/bridges_quark.csvs
-@diff broken_bridges.csv bridges_quark.csvs bridge_report.xls hilite 
-@show bridge_report.xls
-
-
-The spec comes in three parts, CORE, COLUMN_CHANGE, and MULTI_SHEET.
-CORE is the important part.  COLUMN_CHANGE and MULTI_SHEET are there
-mostly to harmonize extensions of CORE as they arise.
-
+The COOPY toolbox can generate highlighter diffs, apply them as patches,
+and convert them to other patch formats (such as SQL and tdiff).
+See: \ref tutorial_hilite.  Using COOPY, highlighter diffs can be
+read in C++, Ruby (via wrappers), and Python (via wrappers).  
+It would be great to see native implementations for reading and writing
+highlighter diffs in various languages and (crucially) spreadsheet 
+plugins.
 
  *
  */

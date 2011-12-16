@@ -12,27 +12,19 @@ A highlighter diff can however be represented in any tabular format
 with ordered columns and rows.  It is a simple format,
 easy to parse, yet expressive enough to capture an important
 set of possible differences.
-
 It is intended for spreadsheets containing data, rather then
 spreadsheets with formulae, charts, and the like.
 Highlighter diffs deal with cell content, not formatting.
-When using diffs as patches, this should be borne in mind,
-and formatting in the sheet being patch preserved.
 
 @section spec_hilite_single Single sheet case, with no schema changes
 
-Consider first the case of a diff with a single sheet.  This is a
-common, important case.  The name of the sheet in the diff matches the
-name of a sheet/table in the two collections being compared.
-Rows in the sheet describe differences between the sheets,
-or add context.
-
-Assume we are comparing two sheets, L and R (for Left/Local
+Assume we are comparing two versions of a
+sheet/table, L and R (for Left/Local
 and Right/Remote).  L is the "reference" sheet, and we
 describe the difference between it and R in terms of operations
-needed to change L into R.
+needed to change L into R.  The difference is described
+in a "diff sheet" that looks like this:
 
-Here's an example of a single-sheet diff:
 <table>
   <tr><th>\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
   <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
@@ -62,7 +54,7 @@ Here are cell values that can appear in this column:
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>the delete tag marks a removed row (relative to L).</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">the update tag marks a row in which at least one cell changed.\n-->, --->, ----> etc. have the same meaning.</td></tr>
   <tr><td>Blank</td><td>A blank string or NULL signals a row of context.</td></tr>
-  <tr><td>...</td><td>the context tag signals that unchanges rows are being skipped.</td></tr>
+  <tr><td>...</td><td>the skip tag signals that unchanges rows are being skipped.</td></tr>
   <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td>The schema tag signals a change in the sheet structure.</td></tr>
 </table>
 
@@ -72,7 +64,8 @@ The columns after the action column are called the data columns.
 Each column in L and each column in R map onto a data column.
 If the diff contains no schema row ("!"), then
 there are no schema changes between L and R, and the data columns
-map straightforwardly onto columns in L and R.
+map straightforwardly onto columns in L and R.  Here is what the
+data columns contain, for each action tag:
 
 <table>
   <tr><th>\@</th><th>cells contain column names.</th></tr>
@@ -95,7 +88,6 @@ filled with a "compound value".
 When a cell in L and R differs, we need to show both values (call them
 Vl and Vr) in a single cell without introducing ambiguity.  We keep this
 a simple as possible, as follows.
-
 For data where the substring "->" will not occur, and there
 are no ambiguities in the string representation of values, compounds
 are simple:
@@ -106,8 +98,7 @@ compound(Vl,Vr) = string(Vl) + "->" + string(Vr)
 
 So we can get (the string representation of) Vl and Vr by splitting
 the compound value at "->".
-
-In general, "->" might occur in data.  We optimize ease of interpretation
+But in general, "->" might occur in data.  We optimize ease of interpretation
 of the diff (rather than ease of producing it), by requiring that
 the update action tag be chosen to avoid collision with the data
 (either per row or over the entire sheet, at the discretion of the
@@ -123,9 +114,9 @@ splitting the compound value at occurance of the action_tag.
 
 @section spec_hilite_string String representation of values
 
-The string representation of Vl and Vr in compound values
-requires some care, for data that contains NULL values
-and where NULLs and blank strings are distinct.
+The string representations of Vl and Vr in compound values
+require some care, in the case of data that contains NULL values
+and for which NULLs and blank strings are distinct.
 If the diff contains any string ending in "NULL" then "NULL-quoting"
 is in effect, and any such string should be interpreted as follows:
 
@@ -142,7 +133,8 @@ through empty cells, rather than as strings.
 
 @section spec_hilite_multiple Multiple sheet case, with no schema changes
 
-Easy!  Just the same as we've done so far, repeated.  For example:
+Easy!  Just the same as we've done so far, repeated,
+with appropriate sheet names.  For example:
 
 <table>
   <caption>locations</caption>
@@ -172,43 +164,26 @@ Easy!  Just the same as we've done so far, repeated.  For example:
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>Alice and Company</td></tr>
 </table>
 
+@section spec_hilite_schema_changes Schema changes?
+
+Not yet nailed down, stub at \ref spec_hilite_schema.
+
 @section spec_hilite_row_order Row order?
 
 This diff format isn't capable of usefully representing reordering of
-rows.
+rows.  This is deliberate.  Obvious modifications that do deal with
+order are complex.  It seems better to simply limit the scope of the format
+and see how useful it works out to be.
 
-*
-*/
+@section spec_hilite_implementation Implementations
 
-/**
-*
-
-@page spec_hilite_schema Adding, dropping, moving columns
-
-Highlighter diffs can represent changes to the sheet's structure.
-We are now in spec part CHANGE_COLUMN rather than CORE.
-
-Not fleshed out.
-
-<table>
-  <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td></td><td></td><td>+++</td><td></td></tr>
-  <tr><th>\@</th><th>bridge</th><th>designer</th><th>quark</th><th>length</th></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Brooklyn</td><td>J. A. Roebling</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">NULL->strange</td><td>1595</td></tr>
-  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>charm</td><td>1470</td></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">NULL->up</td><td>1600</td></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">NULL->down</td><td>1182</td></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Triborough</td><td>O. H. Ammann</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">NULL->strange</td><td>1380,383</td></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Bronx Whitestone</td><td>O. H. Ammann</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">NULL->charm</td><td>2300</td></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Throgs Neck</td><td>O. H. Ammann</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">NULL-></td><td>1800</td></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>George Washington</td><td>O. H. Ammann</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">NULL-></td><td>3500</td></tr>
-  <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Spamspan</td><td>S. Spamington</td><td>NULL</td><td>10000</td></tr>
-</table>
-
-
-The spec comes in three parts, CORE, COLUMN_CHANGE, and MULTI_SHEET.
-CORE is the important part.  COLUMN_CHANGE and MULTI_SHEET are there
-mostly to harmonize extensions of CORE as they arise.
-
+The COOPY toolbox can generate highlighter diffs, apply them as patches,
+and convert them to other patch formats (such as SQL and tdiff).
+See: \ref tutorial_hilite.  Using COOPY, highlighter diffs can be
+read in C++, Ruby (via wrappers), and Python (via wrappers).
+It would be great to see native implementations for reading and writing
+highlighter diffs in various languages and (crucially) spreadsheet
+plugins.
 
 *
 */
