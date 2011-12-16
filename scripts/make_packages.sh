@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "k$1" = "k" ]; then
-    echo "Call with any of: mingw linux osx doc"
+    echo "Call with any of: mingw linux osx doc src"
     exit 1
 fi
 
