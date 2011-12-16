@@ -32,6 +32,7 @@ version of the spreadsheet to produce the second - by adding
 rows, removing rows, changing cell values, etc.  The diff
 does not generally show all of the original spreadsheet, just
 parts that have changed and their immediate surroundings.
+See: \ref spec_hilite.
 
 @section tutorial_hilite_action Applying all changes from a highlighter diff
 

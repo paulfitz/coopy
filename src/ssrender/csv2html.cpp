@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
       bool ok = false;
       if (sheet.height()>0 && sheet.width()>0) {
 	string n = sheet.cellString(0,0);
-	if (n!=""&&n!="NULL"&&n!="@"&&n.substr(0,5)!="Allow") {
+	if (n!=""&&n!="NULL"&&n!="!"&&n!="@"&&n.substr(0,5)!="Allow") {
 	  sheet.mustHaveSchema();
 	  sheet.hideHeaders();
 	}

@@ -87,9 +87,13 @@ string CsvRender::renderHtml(const DataSheet& sheet, const std::string& title) {
       string txt = sheet.cellString(0,i);
       string bit = "td";
       string row_color = "";
+      string txt_color = "";
       if (header) {
 	if (txt=="@"||txt=="@@") {
 	  bit = "th";
+	  //row_color = "#aaaaff";
+	} else if (txt=="!") {
+	  row_color = "#aaaaaa";
 	} else if (txt=="+++") {
 	  row_color = "#7fff7f";
 	} else if (txt=="---") {

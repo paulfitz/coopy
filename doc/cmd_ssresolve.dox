@@ -116,17 +116,17 @@ CSV: plain-text delimiter-separated family of formats<br />
   \li<b>.tsv</b>: Tab-separated values
   \li<b>.ssv</b>: Semicolon-separated values
   \li<b>.json</b>: {<br />
-      "type": "csv",<br />
-      "file": "fname.dsv",<br />
-      "delimiter": "|"<br />
+      "type": "csv",  <i>// CSV family</i><br />
+      "file": "fname.dsv",  <i>// File name</i><br />
+      "delimiter": "|"  <i>// Delimiter character</i><br />
 }
 
 
 SQLITE: file-based database<br />
   \li<b>.sqlite</b>: Sqlite database file
   \li<b>.json</b>: {<br />
-      "type": "sqlite",<br />
-      "file": "fname.db"<br />
+      "type": "sqlite",  <i>// Sqlite family</i><br />
+      "file": "fname.db"  <i>// File name</i><br />
 }
   \li <b>dbi:sqlite:fname.db</b> (Force sqlite interpretation) 
 
@@ -134,23 +134,29 @@ SQLITE: file-based database<br />
 SQLITEXT: sqlite-format sql dump<br />
   \li<b>.sqlitext</b>: SQL dump of Sqlite database
   \li<b>.json</b>: {<br />
-      "type": "sqlitext",<br />
-      "file": "fname.sql"<br />
+      "type": "sqlitext",  <i>// Sqlitext family</i><br />
+      "file": "fname.sql"  <i>// File name</i><br />
 }
   \li <b>dbi:sqlitext:fname.sql</b> (Force sqlitext interpretation) 
 
 
 JSONBOOK: Spreadsheet formats in json<br />
   \li<b>.jsonbook</b>: Json spreadsheet
+  \li<b>.json</b>: {<br />
+      "type": "jsonbook",  <i>// Json spreadsheet</i><br />
+      "file": "fname.sheet"  <i>// File name</i><br />
+}
+  \li <b>dbi:jsonbook:fname.sheet</b> (Force Json spreadsheet interpretation) 
 
 
 GNUMERIC: Spreadsheet formats (via gnumeric)<br />
   \li<b>.xls</b>: Excel spreadsheet
   \li<b>.xlsx</b>: Excel spreadsheet
   \li<b>.gnumeric</b>: Gnumeric spreadsheet
+  \li<b>.ods</b>: OpenOffice/LibreOffice spreadsheet
   \li<b>.json</b>: {<br />
-      "type": "gnumeric",<br />
-      "file": "fname.sheet"<br />
+      "type": "gnumeric",  <i>// Gnumeric family</i><br />
+      "file": "fname.sheet"  <i>// File name</i><br />
 }
   \li <b>dbi:gnumeric:fname.sheet</b> (Force Gnumeric interpretation) 
 
@@ -158,20 +164,20 @@ GNUMERIC: Spreadsheet formats (via gnumeric)<br />
 MDB: Access database format (via Mdbtools, READ-ONLY)<br />
   \li<b>.mdb</b>: Access database file
   \li<b>.json</b>: {<br />
-      "type": "access",<br />
-      "file": "fname.db"<br />
+      "type": "access",  <i>// Access family</i><br />
+      "file": "fname.db"  <i>// File name</i><br />
 }
   \li <b>dbi:access:fname.db</b> (Force Access interpretation) 
 
 
 MYSQL: database connector<br />
   \li<b>.json</b>: {<br />
-      "type": "mysql",<br />
-      "database": "db_name",<br />
-      "host": "localhost",<br />
-      "port": "1111",<br />
-      "username": "root",<br />
-      "password": "****"<br />
+      "type": "mysql",  <i>// MYSQL connector</i><br />
+      "database": "db_name",  <i>// Database name</i><br />
+      "host": "localhost",  <i>// Host name</i><br />
+      "port": "1111",  <i>// Port number</i><br />
+      "username": "root",  <i>// Username</i><br />
+      "password": "****"  <i>// Password</i><br />
 }
   \li <b>dbi:mysql:database_name</b> (Use default port, username, etc) 
   \li <b>dbi:mysql:database_name:username=USER:password=PASS</b>

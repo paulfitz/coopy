@@ -4,6 +4,7 @@
 @page patch_format Diff format
 
 \li \ref patch_format_tdiff - this is the main supported format.  It has the aesthetics of classic diffs.
+\li \ref spec_hilite "Highlighter format" - a visual diff format suitable for presentation and review in a spreadsheet program.
 \li \ref patch_format_csv - this is another supported format.  It is a CSV readable file.
 \li \ref patch_format_csv_v_0_2 - an older format, deprecated but still supported.
 \li Raw format - a verbose format useful for debugging.  Cannot be read for patching.
