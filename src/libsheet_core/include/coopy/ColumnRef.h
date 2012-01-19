@@ -7,6 +7,9 @@ namespace coopy {
   }
 }
 
+/**
+ * Reference to a column.
+ */
 class coopy::store::ColumnRef {
 private:
   int index;

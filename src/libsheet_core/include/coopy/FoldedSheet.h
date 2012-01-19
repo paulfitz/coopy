@@ -5,6 +5,9 @@
 #include <coopy/TypedSheet.h>
 
 namespace coopy {
+  /**
+   * Classes for folding tables like origami.
+   */
   namespace fold {
     class FoldedCell;
     class FoldedSheet;

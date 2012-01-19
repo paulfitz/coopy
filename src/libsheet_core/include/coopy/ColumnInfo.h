@@ -11,6 +11,9 @@ namespace coopy {
   }
 }
 
+/**
+ * General column type (text, integer, etc).
+ */
 class coopy::store::ColumnType {
 public:
   enum {
@@ -77,6 +80,9 @@ public:
 };
 
 
+/**
+ * Name and type of column, when available.
+ */
 class coopy::store::ColumnInfo {
 private:
   std::string name;

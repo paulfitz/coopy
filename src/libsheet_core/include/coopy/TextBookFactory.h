@@ -15,6 +15,10 @@ namespace coopy {
 }
 
 
+/**
+ * Options for connecting to a database on the filesystem or
+ * elsewhere.
+ */
 class coopy::store::AttachConfig {
 public:
   std::string fname;
@@ -41,6 +45,11 @@ public:
   void show() const;
 };
 
+/**
+ *
+ * Result of connecting to database.
+ *
+ */
 class coopy::store::AttachReport {
 public:
   bool success;
@@ -59,6 +68,11 @@ public:
   }
 };
 
+/**
+ *
+ * Factory for a particular type of database or spreadsheet.
+ *
+ */
 class coopy::store::TextBookFactory {
 public:
   TextBookFactory();

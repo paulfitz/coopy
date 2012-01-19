@@ -9,6 +9,9 @@ namespace coopy {
   }
 }
 
+/**
+ * Compare columns.
+ */
 class coopy::cmp::ColMan : public Measure {
 public:
   const OrderResult& comp;

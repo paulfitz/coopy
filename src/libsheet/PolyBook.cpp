@@ -380,7 +380,7 @@ bool PolyBook::copyFile(const char *src, const char *dest) {
 }
 
 
-bool PolyBook::copy(const DataBook& alt, const Property& options) {
+bool PolyBook::copy(const TextBook& alt, const Property& options) {
   if (!book)
     book = new CsvTextBook(true);
   if (book)

@@ -171,7 +171,7 @@ public:
   }
 
 
-  virtual bool copy(const DataBook& alt, const Property& options);
+  virtual bool copy(const TextBook& alt, const Property& options);
 
   virtual bool addSheet(const SheetSchema& schema) {
     if (book)
@@ -198,7 +198,7 @@ public:
     return "PolyBook";
   }
 
-  virtual DataBook& tail() {
+  virtual TextBook& tail() {
     if (book) {
       return book->tail();
     }

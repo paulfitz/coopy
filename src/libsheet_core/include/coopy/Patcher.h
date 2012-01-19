@@ -55,6 +55,9 @@ namespace coopy {
   }
 }
 
+/**
+ * Description of a general difference style and options.
+ */
 class coopy::cmp::ConfigChange {
 public:
   bool ordered;
@@ -68,6 +71,9 @@ public:
   }
 };
 
+/**
+ * Name of a specific field within a specific table.
+ */
 class coopy::cmp::TableField {
 public:
   std::string tableName;
@@ -90,6 +96,9 @@ public:
   }
 };
 
+/**
+ * Description of a needed pool for cross-referenced columns.
+ */
 class coopy::cmp::PoolChange {
 public:
   std::string poolName;
@@ -97,6 +106,9 @@ public:
   std::vector<coopy::cmp::TableField> pool;
 };
 
+/**
+ * Description of a column order change.
+ */
 class coopy::cmp::OrderChange {
 public:
   // local-to-global mapping before and after change
@@ -133,6 +145,9 @@ public:
   }
 };
 
+/**
+ * (Unused) description of row context.
+ */
 class coopy::cmp::RowChangeContext {
 public:
   typedef std::map<std::string,coopy::store::SheetCell> row;
@@ -157,6 +172,9 @@ public:
 };
 
 
+/**
+ * Description of a difference between rows.
+ */
 class coopy::cmp::RowChange {
 public:
   typedef std::map<std::string,coopy::store::SheetCell> txt2cell;
@@ -201,6 +219,10 @@ public:
   void show();
 };
 
+
+/**
+ * Declaration of all column names and column order.
+ */
 class coopy::cmp::NameChange {
 public:
   int mode;
@@ -229,6 +251,9 @@ public:
   }
 };
 
+/**
+ * Declaration of the relationship between rows in a set of tables.
+ */
 class coopy::cmp::LinkDeclare {
 public:
   int mode;
@@ -248,6 +273,9 @@ public:
   coopy::store::PolySheet remote;
 };
 
+/**
+ * Base class for all sinks of table differences.
+ */
 class coopy::cmp::Patcher {
 private:
   int ct;

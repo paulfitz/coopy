@@ -14,6 +14,10 @@ namespace coopy {
   }
 }
 
+/**
+ * Compare rows of a table.
+ *
+ */
 template <class map_type> 
 class coopy::cmp::RowManOf : public Measure {
 public:
@@ -117,6 +121,10 @@ public:
   }
 };
 
+/**
+ * Compare rows of a table using multiple methods as appropriate.
+ *
+ */
 class coopy::cmp::CombinedRowMan : public Measure {
 public:
   RowMan man1;

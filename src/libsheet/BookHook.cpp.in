@@ -121,7 +121,7 @@ TextBook *readHelper(const char *fname,
     dbg_printf("Trying with JSON...\n");
     Property p;
     if (!JsonProperty::add(p,fname)) return NULL;
-    DataBook *book = NULL;
+    TextBook *book = NULL;
     string key = p.get("type",PolyValue::makeString("none")).asString();
     if (key=="mysql") {
 #ifdef USE_REMOTE_SQL

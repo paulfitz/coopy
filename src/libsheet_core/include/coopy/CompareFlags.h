@@ -16,10 +16,13 @@ namespace coopy {
   namespace store {
     // forward declarations
     class DataSheet;
-    class DataBook;
+    class TextBook;
   }
 }
 
+/**
+ * Wrapper around output stream for comparison.
+ */
 class coopy::cmp::CompareOutput {
 public:
   FILE *out;
@@ -48,6 +51,9 @@ public:
   }
 };
 
+/**
+ * Flags for controlling table comparison and interpretation.
+ */
 class coopy::cmp::CompareFlags {
 public:
   bool head_trimmed;
@@ -64,8 +70,8 @@ public:
   bool bias_ids;
   bool trust_column_names;
   coopy::store::DataSheet *mapping;
-  coopy::store::DataBook *mapping_book;
-  coopy::store::DataBook *meta_book;
+  coopy::store::TextBook *mapping_book;
+  coopy::store::TextBook *meta_book;
   bool pivot_sides_with_local;
   bool has_pivot;
   bool use_order;

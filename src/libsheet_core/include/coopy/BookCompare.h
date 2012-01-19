@@ -12,6 +12,9 @@ namespace coopy {
   }
 }
 
+/**
+ * Compare or resolve differences between a set of databases.
+ */
 class coopy::cmp::BookCompare {
 public:
   int create(coopy::store::TextBook& local, 

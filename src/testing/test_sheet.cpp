@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <coopy/CsvMerge.h>
+//#include <coopy/CsvMerge.h>
 #include <coopy/CsvFile.h>
 #include <coopy/DataStat.h>
 #include <coopy/SheetCompare.h>
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
       {"local", 0, 0, 'L'},
       {"remote", 0, 0, 'R'},
       {"parent", 0, 0, 'P'},
-      {"dumb", 0, 0, 'D'},
+      //{"dumb", 0, 0, 'D'},
       {"compare", 2, 0, 'c'},
       {"diff", 0, 0, 'f'},
       {"verbose", 0, 0, 'v'},
@@ -129,6 +129,7 @@ int main(int argc, char *argv[]) {
 	dirty = true;
       }
       break;
+      /*
     case 'D':
       printf("Making dumb conflict sheet\n");
       {
@@ -138,6 +139,7 @@ int main(int argc, char *argv[]) {
 	ss = &local;
       }
       break;
+      */
     case 'f': 
       {
 	diffs = 0;

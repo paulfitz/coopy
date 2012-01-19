@@ -415,6 +415,9 @@ public:
 };
 
 
+/**
+ * Cache for row insertion.
+ */
 class coopy::store::CacheSheetRow : public SheetRow {
 protected:
   RowCache cache;

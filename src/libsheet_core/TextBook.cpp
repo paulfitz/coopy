@@ -1,4 +1,4 @@
-#include <coopy/DataBook.h>
+#include <coopy/TextBook.h>
 #include <coopy/SchemaSniffer.h>
 #include <coopy/Pool.h>
 
@@ -13,9 +13,9 @@
 using namespace std;
 using namespace coopy::store;
 
-bool DataBook::operator==(const DataBook& alt) const {
-  DataBook *b1 = (DataBook *)this;
-  DataBook *b2 = (DataBook *)&alt;
+bool TextBook::operator==(const TextBook& alt) const {
+  TextBook *b1 = (TextBook *)this;
+  TextBook *b2 = (TextBook *)&alt;
   vector<string> names = b1->getNames();
   vector<string> altNames = b2->getNames();
   if (names.size()!=altNames.size()) {
@@ -60,9 +60,9 @@ bool DataBook::operator==(const DataBook& alt) const {
 }
 
 
-bool DataBook::copy(const DataBook& alt, const Property& options) {
+bool TextBook::copy(const TextBook& alt, const Property& options) {
   dbg_printf("Copying book\n");
-  DataBook& src = (DataBook &) alt;
+  TextBook& src = (TextBook &) alt;
   vector<string> names = src.getNames();
   vector<string> names0 = getNames();
 
@@ -193,7 +193,7 @@ bool DataBook::copy(const DataBook& alt, const Property& options) {
 }
 
 
-PolySheet DataBook::provideSheet(const SheetSchema& schema) {
+PolySheet TextBook::provideSheet(const SheetSchema& schema) {
   dbg_printf("provideSheet %s for %s\n", schema.getSheetName().c_str(),
 	     desc().c_str());
   PolySheet result = readSheet(schema.getSheetName());
@@ -208,14 +208,14 @@ PolySheet DataBook::provideSheet(const SheetSchema& schema) {
 
 
 
-bool DataBook::exists(const char *fname) {
+bool TextBook::exists(const char *fname) {
   struct stat s;
   int result = stat(fname,&s);
   return (result==0);
 }
 
 
-bool DataBook::fixSchema(const SheetSchema& in,
+bool TextBook::fixSchema(const SheetSchema& in,
 			 SimpleSheetSchema& out) {
   SimpleSheetSchema& sss = out;
   sss.copy(in);

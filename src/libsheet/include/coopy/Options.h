@@ -9,6 +9,9 @@
 #include <coopy/PolyBook.h>
 
 namespace coopy {
+  /**
+   * Helper classes for the standard Coopy command-line tools.
+   */
   namespace app {
     class Option;
     class Example;
