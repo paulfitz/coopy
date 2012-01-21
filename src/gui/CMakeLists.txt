@@ -31,7 +31,7 @@ IF (COMPILE_GUI)
   IF (wxWidgets_FOUND)
     INCLUDE_DIRECTORIES(${wxWidgets_INCLUDE_DIRS})
 
-    FOREACH(targ coopy ssmerge_gui)
+    FOREACH(targ coopy)  # couldn't be bothered maintaining ssmerge_gui
       ADD_EXECUTABLE(${targ} WIN32 src/${targ}.cpp ${DECOR})
       TARGET_LINK_LIBRARIES(${targ} ${wxWidgets_LIBRARIES})
       SET_PROPERTY(TARGET ${targ} 
@@ -43,7 +43,7 @@ IF (COMPILE_GUI)
       ENDIF (NOT MINGW)
       INSTALL(TARGETS ${targ} COMPONENT wizard DESTINATION bin)
     ENDFOREACH ()
-    TARGET_LINK_LIBRARIES(ssmerge_gui sheet_full)
+    # TARGET_LINK_LIBRARIES(ssmerge_gui sheet_full)
     TARGET_LINK_LIBRARIES(coopy widesheet_management)
 
   ELSE (wxWidgets_FOUND)

@@ -128,8 +128,12 @@ bool MergeOutputCsvDiffV0p2::changeRow(const RowChange& change) {
     selectRow(change,"select");
     describeRow(change,"update");
     break;
+  case ROW_CHANGE_MOVE:
+  case ROW_CHANGE_CONTEXT:
+    // ignore row ops that were created after v0.2
+    break;
   default:
-    fprintf(stderr,"  Unknown row operation\n\n");
+    fprintf(stderr,"  Unknown row operation %s\n\n", change.modeString().c_str());
     exit(1);
     break;
   }

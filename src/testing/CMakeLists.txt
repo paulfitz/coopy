@@ -71,7 +71,10 @@ ADD_TEST(company_merge_conflict ${testprg}
   --local --read ${TESTS}/test003_change.csv
   --remote --read ${TESTS}/test003_conflicting_change.csv
   --compare
-  --prop height --assert 5)
+#  --local --write ${TESTS}/result_company_merge_conflicting.csv
+  --remote --read ${TESTS}/result_company_merge_conflicting.csv
+  --diff
+  --prop diffs --assert 0)
 
 ADD_TEST(company_merge_add_col ${testprg}
   --parent --read ${TESTS}/test003_base.csv 
@@ -414,7 +417,7 @@ IF (USE_GNUMERIC)
       ${ARGN})
     ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/gnumeric_ss2html${EXE_EXT} 
       --compare
-        #  test_out_${name}.xls ${ref} ${ref})
+        #test_out_${name}.xls ${ref} ${ref})
 	test_out_${name}.xls test_out_${name}.html ${ref})
   ENDMACRO()
   
@@ -450,7 +453,7 @@ MACRO(ADD_ROUND_TRIP_TEST_BASE name P1 P2 INTERFORMAT FORMAT DIFF_EXTRA)
     ADD_TEST(${name}_diff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
       --output ${fname} --format ${FORMAT} ${ARGN} ${P1} ${P2} ${DIFF_EXTRA})
     ADD_TEST(${name}_patch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
-      --output ${fname2} ${P1} ${fname})
+      --output ${fname2} ${P1} ${fname} ${DIFF_EXTRA})
     ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
       --equals ${fname2} ${P2})
 ENDMACRO ()

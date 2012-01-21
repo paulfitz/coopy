@@ -18,6 +18,9 @@ namespace coopy {
   }
 }
 
+/**
+ * MS Access database (via mdbtools)
+ */
 class coopy::store::mdb::AccessTextBook : public TextBook {
 public:
   AccessTextBook();
@@ -64,6 +67,9 @@ private:
 };
 
 
+/**
+ * Factory for reading from an MS Access database.
+ */
 class coopy::store::mdb::AccessTextBookFactory : public TextBookFactory {
 public:
   virtual std::string getName() {

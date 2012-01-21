@@ -38,6 +38,7 @@
 #include <coopy/BookCompare.h>
 #include <coopy/FormatDesc.h>
 #include <coopy/PatchParser.h>
+#include <coopy/Coopy.h>
 %}
 %include <coopy/RefCount.h>
 %include <coopy/Appearance.h>
@@ -55,7 +56,6 @@
 %include <coopy/DataSheet.h>
 %include <coopy/PolySheet.h>
 
-%include <coopy/DataBook.h>
 %include <coopy/TextBook.h>
 %include <coopy/PolyBook.h>
 
@@ -63,3 +63,5 @@
 %include <coopy/Patcher.h>
 %include <coopy/BookCompare.h>
 %include <coopy/PatchParser.h>
+%include <coopy/Coopy.h>
+%include <coopy/WrapBook.h>

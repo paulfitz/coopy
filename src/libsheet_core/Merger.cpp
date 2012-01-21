@@ -278,16 +278,18 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
   if (!diff) {
     if (conflict) {
       conflicts++;
-      output.addRow("[local]",expandLocal,blank);
-      output.addRow("[conflicting]",expandRemote,blank);
-    } else {
-      if (lRow!=-1 && rRow!=-1) {
+      //output.addRow("[local]",expandLocal,blank);
+      //output.addRow("[conflicting]",expandRemote,blank);
+      /*
+	} else {
+	if (lRow!=-1 && rRow!=-1) {
 	output.addRow("",expandMerge,blank);
-      } else if (lRow!=-1) {
+	} else if (lRow!=-1) {
 	output.addRow("",expandMerge,blank); // local add
-      } else if (rRow!=-1) {
+	} else if (rRow!=-1) {
 	output.addRow("[add]",expandMerge,blank); // remote add
       }
+      */
     }
   } else {
 
@@ -299,11 +301,11 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     }
     */
     if (address!=lastAddress) {
-      output.addRow("[for]",address,blank);
+      //output.addRow("[for]",address,blank);
       lastAddress = address;
     }
     if (address!=lastAddress || action!=lastAction) {
-      output.addRow("[do]",action,blank);
+      //output.addRow("[do]",action,blank);
       lastAction = action;
     }
 
@@ -364,7 +366,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 		RowChange alt = lastRowChange;
 		alt.mode = ROW_CHANGE_CONTEXT;
 		if (flags.use_order) {
-		  rc.push_back(alt);
+		  if (pivot.height()>0) {
+		    rc.push_back(alt);
+		  }
 		}
 	      }
 	    }
@@ -397,16 +401,16 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
       expandMerge.insert(expandMerge.begin(),cbuf);
       expandLocal.insert(expandLocal.begin(),cbuf);
       expandRemote.insert(expandRemote.begin(),cbuf);
-      if (change) {
-	output.addRow("[-]",expandLocal,blank);
-      }
+      //if (change) {
+      //output.addRow("[-]",expandLocal,blank);
+      //}
       if (lRow==-1) {
 	if (flags.canInsert()) {
 	  if (haveMove) {
 	    rc.push_back(rowChangeMove);
 	    haveMove = false;
 	  }
-	  output.addRow("[+++]",expandMerge,blank);
+	  //output.addRow("[+++]",expandMerge,blank);
 	  rowChange.mode = ROW_CHANGE_INSERT;
 	  //output.changeRow(rowChange);
 	  //printf("last_local_row_marked %d last_local_row %d lRow %d\n",
@@ -416,7 +420,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	      RowChange alt = lastRowChange;
 	      alt.mode = ROW_CHANGE_CONTEXT;
 	      if (flags.use_order) {
-		rc.push_back(alt);
+		if (pivot.height()>0) {
+		  rc.push_back(alt);
+		}
 	      }
 	    }
 	  } else {
@@ -424,7 +430,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	      RowChange alt;
 	      alt.mode = ROW_CHANGE_CONTEXT;
 	      if (flags.use_order) {
-		rc.push_back(alt);
+		if (pivot.height()>0) {
+		  rc.push_back(alt);
+		}
 	      }
 	    }
 	  }
@@ -442,7 +450,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 		rc.push_back(rowChangeMove);
 		haveMove = false;
 	      }
-	      output.addRow("[---]",expandLocal,blank);
+	      //output.addRow("[---]",expandLocal,blank);
 	      rowChange.mode = ROW_CHANGE_DELETE;
 	      //output.changeRow(rowChange);
 	      rc.push_back(rowChange);
@@ -452,7 +460,7 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	} else {
 	  if (flags.canUpdate()) {
 	    if (value.size()!=0) {
-	      output.addRow("[+]",expandMerge,blank);
+	      //output.addRow("[+]",expandMerge,blank);
 	      rowChange.mode = haveMove?ROW_CHANGE_MOVE:ROW_CHANGE_UPDATE;
 	      haveMove = false;
 	      //output.changeRow(rowChange);
@@ -736,6 +744,8 @@ bool Merger::merge(MergerState& state) {
 	 it!=col_merge.accum.end(); 
 	 it++) {
       MatchUnit& unit = *it;
+      dbg_printf("Add: UNIT %d (%d/%d/%d)\n", at, 
+		 unit.pivotUnit, unit.localUnit, unit.remoteUnit);
       //int pCol = unit.localUnit;
       int lCol = unit.pivotUnit;
       int rCol = unit.remoteUnit;
@@ -748,6 +758,7 @@ bool Merger::merge(MergerState& state) {
 	local_cols.insert(local_cols.begin()+at,-rCol-1);
 
 	string name = remote_names.suggestColumnName(rCol);
+	dbg_printf("Add: Addition of remote name %s\n", name.c_str());
 	bool collision = false;
 	if (name[0]>='0'&&name[0]<='9') {
 	  name = string("{") + name + "}";
@@ -769,8 +780,8 @@ bool Merger::merge(MergerState& state) {
 	//output.changeColumn(change);
 	cc.push_back(change);
 	at++;
-      }
-      if (lCol!=-1 && !deleted) {
+      } 
+      if (unit.localUnit!=-1 && !deleted) {
 	at++;
       }
     }

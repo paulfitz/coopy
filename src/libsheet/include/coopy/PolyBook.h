@@ -211,18 +211,6 @@ public:
 
   static bool copyFile(const char *src, const char *dest);
 
-  std::string toString() {
-    std::string result;
-    std::vector<std::string> names = getNames();
-    for (int i=0; i<getSheetCount(); i++) {
-      result += names[i];
-      result += ":\n";
-      result += readSheet(names[i]).toString();
-      result += "\n";
-      return result;
-    }
-  }
-
   virtual bool setPool(Pool *pool) {
     if (book)
       return book->setPool(pool);

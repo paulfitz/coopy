@@ -10,8 +10,6 @@ extern "C" {
 }
 
 #include <coopy/SheetCompare.h>
-#include <coopy/MergeOutputAccum.h>
-//#include <coopy/MergeOutputTdiff.h>
 #include <coopy/CsvRender.h>
 #include <coopy/CsvTextBook.h>
 #include <coopy/SheetPatcher.h>
@@ -100,7 +98,6 @@ int csv_merge(Blob *pPivot, Blob *pV1, Blob *pV2, Blob *pOut) {
       exit(1);
     }
     p->attachOutputBook(csvs1);
-    //MergeOutputAccum result;
     CompareFlags flags;
     int r = merger.compare(csvs0,csvs1,csvs2,*p,flags);
     delete p;

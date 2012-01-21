@@ -16,8 +16,21 @@ public:
   std::string name;
   PolySheet sheet;
 
-  WrapBook(DataSheet& sheet, bool owned=false) : sheet(&sheet,owned),
+  WrapBook() {
+    name = "";
+  }
+
+  WrapBook(DataSheet& sheet, bool owned) : sheet(&sheet,owned),
     name(coopy_get_default_table_name()) {
+  }
+
+  WrapBook(PolySheet sheet) : sheet(sheet), 
+    name(coopy_get_default_table_name()) {
+  }
+
+  bool attach(DataSheet& sheet, bool owned=false) {
+    sheet = PolySheet(&sheet,owned);
+    name = coopy_get_default_table_name();
   }
 
   virtual std::vector<std::string> getNames() {

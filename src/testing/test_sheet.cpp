@@ -5,18 +5,16 @@
 
 #include <string>
 
-//#include <coopy/CsvMerge.h>
 #include <coopy/CsvFile.h>
 #include <coopy/DataStat.h>
 #include <coopy/SheetCompare.h>
-#include <coopy/CsvPatch.h>
-#include <coopy/MergeOutputAccum.h>
-#include <coopy/MergeOutputPatch.h>
 #include <coopy/MergeOutputCsvDiff.h>
 #include <coopy/Dbg.h>
+#include <coopy/Coopy.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
+using namespace coopy::app;
 
 int main(int argc, char *argv[]) {
   int c;
@@ -163,9 +161,9 @@ int main(int argc, char *argv[]) {
     case 't':
       {
 	printf("Applying patch ('local') to parent, result goes to local\n");
-	CsvPatch patch;
-	patch.apply(parent,local);
-	local = patch.get();
+	Coopy patch;
+	patch.patch(parent,local);
+	local.copy(parent);
 	ss = &local;
       }
       break;
@@ -194,14 +192,13 @@ int main(int argc, char *argv[]) {
 	    cmp.compare(parent,local,remote,output,flags);
 	    local = output.get();
 	  } else {
-	    MergeOutputPatch output;
-	    cmp.compare(parent,local,remote,output,flags);
-	    local = output.get();
+	    Coopy coopy;
+	    coopy.setFormat("hilite");
+	    coopy.compare(parent,local,remote);
 	  }
 	} else {
-	  MergeOutputAccum output;
-	  cmp.compare(parent,local,remote,output,flags);
-	  local.copyData(output.getSheet());
+	  Coopy coopy;
+	  coopy.merge(parent,local,remote);
 	}
 	ss = &local;
       }

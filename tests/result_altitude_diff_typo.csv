@@ -1,7 +1,6 @@
-[for],0,1,2,3,4,5
-[do],select,,,,,
-[+++],1+1,500,5,10,7,"Smooth flight"
-[-],4,,,,,"Ominous silense"
-[+],4,,,,,"Ominous silence"
-[-],5,,,,,"Ominous silense"
-[+],5,,,,,"Ominous silence"
+@,Altitude,"Probe A","Probe B","Probe C",Comment
++++,500,5,10,7,"Smooth flight"
+,1000,10,20,30,"Wing vibration"
+,2000,15,25,52,"Wing vibration"
+->,3000,3,66,89,"Ominous silense->Ominous silence"
+->,4000,3,42,12,"Ominous silense->Ominous silence"

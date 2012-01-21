@@ -89,6 +89,18 @@ public:
 
   static bool exists(const char *fname);
 
+  std::string toString() {
+    std::string result;
+    std::vector<std::string> names = getNames();
+    for (int i=0; i<(int)names.size(); i++) {
+      result += names[i];
+      result += ":\n";
+      result += readSheet(names[i]).toString();
+      result += "\n";
+      return result;
+    }
+  }
+
 private:
   Pool *pool;
 };

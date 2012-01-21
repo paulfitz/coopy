@@ -29,6 +29,7 @@ static bool is_match(const SheetCell& a, const SheetCell& b) {
 }
 
 void SheetPatcher::checkHeader() {
+  if (flags.assume_header==false) return;
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return;
   int c = 0;
@@ -243,6 +244,8 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
   changeCount++;
   if (chain) chain->changeColumn(change);
 
+  dbg_printf("\n======================\nChange column...\n");
+
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) {
     fprintf(stderr,"No sheet available to patch\n");
@@ -293,6 +296,7 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 	idx = matchCol(before);
       }
       ColumnInfo ci(mover);
+      dbg_printf("Inserting column [%s]\n", mover.c_str());
       bool ok = sheet.insertColumn(ColumnRef(idx),ci).isValid();
       ColumnRef at = activeCol.insertColumn(ColumnRef(idx),ci);
       statusCol.insertColumn(ColumnRef(idx),ci);

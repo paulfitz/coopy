@@ -1,8 +1,6 @@
-[conflict],,,,,
-,Altitude,"Probe A","Probe B","Probe C",Comment
-,500,5,10,7,"Smooth flight"
-,1000,10,20,30,"Wing vibration"
-,2000,15,25,52,"Wing vibration"
-[local],3000,3,66,89,"Ominous silence"
-[conflicting],3000,3,66,89,"Ominous silencce"
-,4000,3,42,12,"Ominous silence"
+Altitude,"Probe A","Probe B","Probe C",Comment,_MERGE_
+500,5,10,7,"Smooth flight",
+1000,10,20,30,"Wing vibration",
+2000,15,25,52,"Wing vibration",
+3000,3,66,89,"((( Ominous silense ))) Ominous silence /// Ominous silencce",CONFLICT
+4000,3,42,12,"Ominous silence",

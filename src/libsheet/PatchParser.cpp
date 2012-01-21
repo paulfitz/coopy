@@ -1187,6 +1187,10 @@ bool PatchParser::applyColor() {
     fprintf(stderr, "Don't know what to do with %s\n", fname.c_str());
     return false;
   }
+  return applyHiliteBook(book);
+}
+
+bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 
   patcher->mergeStart();
 

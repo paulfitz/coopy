@@ -16,6 +16,9 @@ namespace coopy {
   }
 }
 
+/**
+ * MS Access table (via mdbtools)
+ */
 class coopy::store::mdb::AccessSheet : public DataSheet {
 public:
   AccessSheet(void *db, const char *name, const Property& config);
@@ -78,6 +81,9 @@ private:
  
 };
 
+/**
+ * Schema of a MS Access table.
+ */
 class coopy::store::mdb::AccessSheetSchema : public SheetSchema {
 public:
   AccessSheet *sheet;

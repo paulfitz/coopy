@@ -24,6 +24,12 @@ public:
   const coopy::cmp::CompareFlags& flags;
 
   PatchParser(Patcher *patcher,
+	     coopy::cmp::CompareFlags& flags) : 
+    patcher(patcher),
+    flags(flags) 
+  {}
+
+  PatchParser(Patcher *patcher,
 	      const std::vector<std::string>& cmd,
 	      coopy::cmp::CompareFlags& flags) : 
   patcher(patcher), oneliners(cmd), flags(flags)
@@ -41,6 +47,8 @@ public:
   bool applyPatch() {
     return apply();
   }
+
+  bool applyHiliteBook(coopy::store::TextBook& patch);
 
 private:
   bool applyCsv();

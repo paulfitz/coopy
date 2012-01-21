@@ -183,27 +183,7 @@ public:
   }
 
   virtual ColumnRef insertColumn(const ColumnRef& base, 
-				 const ColumnInfo& info) {
-    COOPY_ASSERT(sheet);
-    ColumnRef result = sheet->insertColumn(base,info);
-    if (!result.isValid()) return result;
-    SheetSchema *s = getSchema();
-    if (s) {
-      if (!s->isShadow()) {
-	ColumnRef result2 = s->insertColumn(base,info);
-	COOPY_ASSERT(result2.getIndex()==result.getIndex());
-      }
-      if (info.hasName()) {
-	if (!sheet->hasExternalColumnNames()) {
-	  if (s->headerHeight()>0) {
-	    sheet->cellString(result.getIndex(),s->headerHeight()-1,
-			      info.getName());
-	  }
-	}
-      }
-    }
-    return result;
-  }
+				 const ColumnInfo& info);
 
   virtual bool modifyColumn(const ColumnRef& base, 
 			    const ColumnInfo& info) {
