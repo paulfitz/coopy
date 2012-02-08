@@ -16,7 +16,7 @@ It is intended for spreadsheets containing data, rather then
 spreadsheets with formulae, charts, and the like.
 Highlighter diffs deal with cell content, not formatting.
 
-@section spec_hilite_single Single sheet case, with no schema changes
+@section spec_hilite_single Single sheet case, with fixed columns
 
 Assume we are comparing two versions of a 
 sheet/table, L and R (for Left/Local
@@ -42,12 +42,12 @@ Here are cell values that can appear in this column:
 
 @table actiontag
 "@","the header tag marks a header row, if one exists."
-"+++","the insert tag marks an added row (relative to L)."
-"---","the delete tag marks a removed row (relative to L)."
+"+++","the insert tag marks an added row (present in R, not present in L)."
+"---","the delete tag marks a removed row (present in L, not present in R)."
 "->","the update tag marks a row in which at least one cell changed.\n-->, --->, ----> etc. have the same meaning."
-"Blank","A blank string or NULL signals a row of context."
-"...","the skip tag signals that unchanges rows are being skipped."
-"!","The schema tag signals a change in the sheet structure."
+"Blank","A blank string or NULL marks a row common to L and R."
+"...","the skip tag marks that rows common to L and R are being skipped."
+"!","The schema tag marks a change in the sheet structure."
 @endtable
 
 @section spec_hilite_data Data columns
@@ -55,25 +55,23 @@ Here are cell values that can appear in this column:
 The columns after the action column are called the data columns.
 Each column in L and each column in R map onto a data column.
 If the diff contains no schema row ("!"), then
-there are no schema changes between L and R, and the data columns
+L and R have the same columns, and the data columns
 map straightforwardly onto columns in L and R.  Here is what the
 data columns contain, for each action tag:
 
 @table actiontag
 "@","cells contain column names."
-"+++","cells are copied from R."
-"---","cells are copied from L."
-"->","unchanged cells are copied from either L or R.\n modified cells are shown as compound values, ""Vl->Vr"""
-"Blank","unchanged cells copied from either L or R."
-"...","cells are filled with ""..."""
-"!","Let's not deal with this one yet."
+"+++","cells shown are from R, and not present in L."
+"---","cells shown are from L, and not present in R."
+"->","cells shown are common to both L and R.\n When L and R cells differ, a compound ""Vl->Vr"" cell is shown."
+"Blank","cells shown are common to both L and R."
+"...","skipping rows common to both L and R."
 @endtable
 
-The meaning of insert and delete are straightforward.  In insert, the
-data columns are copied from R, and in delete, the data columns are
-copied from R. For updates, data columns that are common to L and R
-are filled with that common value.  Data columns that differ are
-filled with a "compound value".
+In added rows, the data columns are copied from R, and in deleted
+rows, the data columns are copied from R. For updates, data columns
+that are common to L and R are filled with that common value.  Data
+columns that differ are filled with a "compound value".
 
 @section spec_hilite_compound Compound values
 
@@ -123,7 +121,7 @@ STRING,VALUE
 When possible, NULL values may be represented in the diff directly
 through empty cells, rather than as strings.
 
-@section spec_hilite_multiple Multiple sheet case, with no schema changes
+@section spec_hilite_multiple Multiple sheet case, with fixed columns
 
 Easy!  Just the same as we've done so far, repeated,
 with appropriate sheet names.  For example:
@@ -132,16 +130,32 @@ with appropriate sheet names.  For example:
 @diff directory.sqlite directory_alice.sqlite out.xls hilite
 @show out.xls
 
-@section spec_hilite_schema_changes Schema changes?
+@section spec_hilite_add_columns Adding columns
 
-Not yet nailed down, stub at \ref spec_hilite_schema.
+Highlighter diffs can represent changes to the sheet's structure, by
+adding an initial "schema" row (identified by having an exclamation
+mark in the first column).  Columns to be added are identified with
+a "+++".  For example:
 
-@section spec_hilite_row_order Row order?
+@load broken_bridges.csv
+@load header/bridges_quark.csvs
+@diff broken_bridges.csv bridges_quark.csvs bridge_report.xls hilite 
+@show bridge_report.xls
 
-This diff format isn't capable of usefully representing reordering of
-rows.  This is deliberate.  Obvious modifications that do deal with
-order are complex.  It seems better to simply limit the scope of the format
-and see how useful it works out to be.
+A new action called "+" has been added, to mark rows that have
+no change other than added cells.
+
+@section spec_hilite_remove_columns Removing columns
+
+Columns to be removed are identified with a "---" in the schema row.
+For example:
+
+@diff bridges_quark.csvs broken_bridges.csv bridge_report.xls hilite 
+@show bridge_report.xls
+
+@section spec_hilite_row_order Row and column order?
+
+This spec doesn't deal with order changes.  Suggestions welcome!
 
 @section spec_hilite_implementation Implementations
 

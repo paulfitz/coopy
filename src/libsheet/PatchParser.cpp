@@ -1346,10 +1346,13 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	if (flags.canDelete()) {
 	  if (allowed) patcher->changeRow(change);
 	}
-      } else if (tail2 == "->" && code.find("!")==string::npos) {
+      } else if ((tail2 == "->"||code=="+") && code.find("!")==string::npos) {
 	change.mode = ROW_CHANGE_UPDATE;
 	int minuses = 0;
-	string separator = code.substr(code.find("-"),code.length());
+	string separator;
+	if (code!="+") {
+	  separator = code.substr(code.find("-"),code.length());
+	}
 	for (int j=1+xoff; j<sheet.width(); j++) {
 	  SheetCell c = sheet.cellSummary(j,i);
 	  bool done = false;
@@ -1359,17 +1362,21 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	    //printf("Looking at [%s], separator [%s]\n",
 	    //c.toString().c_str(), separator.c_str());
 	    string::size_type offset = c.text.find(separator);
-	    if (offset!=string::npos) {
-	      if (!added) {
-		SheetCell tmp = nully(c.text.substr(0,offset));
-		change.cond[col] = tmp;
-		done = true;
-	      }
-	      SheetCell tmp = nully(c.text.substr(offset+separator.length(),
-						  c.text.length()));
-	      change.val[col] = tmp;
+	    if (code=="+") {
+	      change.val[col] = c;
 	    } else {
-	      //change.val[col] = nully(c.text);
+	      if (offset!=string::npos) {
+		if (!added) {
+		  SheetCell tmp = nully(c.text.substr(0,offset));
+		  change.cond[col] = tmp;
+		  done = true;
+		}
+		SheetCell tmp = nully(c.text.substr(offset+separator.length(),
+						    c.text.length()));
+		change.val[col] = tmp;
+	      } else if (added) {
+		change.val[col] = c;
+	      }
 	    }
 	    /*
 	    TDiffPart p(c.text,false,minuses);

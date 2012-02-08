@@ -16,7 +16,7 @@ It is intended for spreadsheets containing data, rather then
 spreadsheets with formulae, charts, and the like.
 Highlighter diffs deal with cell content, not formatting.
 
-@section spec_hilite_single Single sheet case, with no schema changes
+@section spec_hilite_single Single sheet case, with fixed columns
 
 Assume we are comparing two versions of a
 sheet/table, L and R (for Left/Local
@@ -50,12 +50,12 @@ Here are cell values that can appear in this column:
 
 <table>
   <tr><th>\@</th><th>the header tag marks a header row, if one exists.</th></tr>
-  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>the insert tag marks an added row (relative to L).</td></tr>
-  <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>the delete tag marks a removed row (relative to L).</td></tr>
+  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>the insert tag marks an added row (present in R, not present in L).</td></tr>
+  <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>the delete tag marks a removed row (present in L, not present in R).</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">the update tag marks a row in which at least one cell changed.\n-->, --->, ----> etc. have the same meaning.</td></tr>
-  <tr><td>Blank</td><td>A blank string or NULL signals a row of context.</td></tr>
-  <tr><td>...</td><td>the skip tag signals that unchanges rows are being skipped.</td></tr>
-  <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td>The schema tag signals a change in the sheet structure.</td></tr>
+  <tr><td>Blank</td><td>A blank string or NULL marks a row common to L and R.</td></tr>
+  <tr><td>...</td><td>the skip tag marks that rows common to L and R are being skipped.</td></tr>
+  <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td>The schema tag marks a change in the sheet structure.</td></tr>
 </table>
 
 @section spec_hilite_data Data columns
@@ -63,25 +63,23 @@ Here are cell values that can appear in this column:
 The columns after the action column are called the data columns.
 Each column in L and each column in R map onto a data column.
 If the diff contains no schema row ("!"), then
-there are no schema changes between L and R, and the data columns
+L and R have the same columns, and the data columns
 map straightforwardly onto columns in L and R.  Here is what the
 data columns contain, for each action tag:
 
 <table>
   <tr><th>\@</th><th>cells contain column names.</th></tr>
-  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>cells are copied from R.</td></tr>
-  <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>cells are copied from L.</td></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">unchanged cells are copied from either L or R.\n modified cells are shown as compound values, "Vl->Vr"</td></tr>
-  <tr><td>Blank</td><td>unchanged cells copied from either L or R.</td></tr>
-  <tr><td>...</td><td>cells are filled with "..."</td></tr>
-  <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td>Let's not deal with this one yet.</td></tr>
+  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>cells shown are from R, and not present in L.</td></tr>
+  <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>cells shown are from L, and not present in R.</td></tr>
+  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">cells shown are common to both L and R.\n When L and R cells differ, a compound "Vl->Vr" cell is shown.</td></tr>
+  <tr><td>Blank</td><td>cells shown are common to both L and R.</td></tr>
+  <tr><td>...</td><td>skipping rows common to both L and R.</td></tr>
 </table>
 
-The meaning of insert and delete are straightforward.  In insert, the
-data columns are copied from R, and in delete, the data columns are
-copied from R. For updates, data columns that are common to L and R
-are filled with that common value.  Data columns that differ are
-filled with a "compound value".
+In added rows, the data columns are copied from R, and in deleted
+rows, the data columns are copied from R. For updates, data columns
+that are common to L and R are filled with that common value.  Data
+columns that differ are filled with a "compound value".
 
 @section spec_hilite_compound Compound values
 
@@ -131,7 +129,7 @@ is in effect, and any such string should be interpreted as follows:
 When possible, NULL values may be represented in the diff directly
 through empty cells, rather than as strings.
 
-@section spec_hilite_multiple Multiple sheet case, with no schema changes
+@section spec_hilite_multiple Multiple sheet case, with fixed columns
 
 Easy!  Just the same as we've done so far, repeated,
 with appropriate sheet names.  For example:
@@ -164,16 +162,52 @@ with appropriate sheet names.  For example:
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>Alice and Company</td></tr>
 </table>
 
-@section spec_hilite_schema_changes Schema changes?
+@section spec_hilite_add_columns Adding columns
 
-Not yet nailed down, stub at \ref spec_hilite_schema.
+Highlighter diffs can represent changes to the sheet's structure, by
+adding an initial "schema" row (identified by having an exclamation
+mark in the first column).  Columns to be added are identified with
+a "+++".  For example:
 
-@section spec_hilite_row_order Row order?
+<table>
+  <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td></td><td></td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">+++</td><td></td></tr>
+  <tr><th>\@</th><th>bridge</th><th>designer</th><th>quark</th><th>length</th></tr>
+  <tr><td>+</td><td>Brooklyn</td><td>J. A. Roebling</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">strange</td><td>1595</td></tr>
+  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>charm</td><td>1470</td></tr>
+  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">up</td><td>1600</td></tr>
+  <tr><td>+</td><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">down</td><td>1182</td></tr>
+  <tr><td>+</td><td>Triborough</td><td>O. H. Ammann</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">strange</td><td>1380,383</td></tr>
+  <tr><td>+</td><td>Bronx Whitestone</td><td>O. H. Ammann</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">charm</td><td>2300</td></tr>
+  <tr><td>+</td><td>Throgs Neck</td><td>O. H. Ammann</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">hairy</td><td>1800</td></tr>
+  <tr><td>+</td><td>George Washington</td><td>O. H. Ammann</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">moody</td><td>3500</td></tr>
+  <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Spamspan</td><td>S. Spamington</td><td></td><td>10000</td></tr>
+</table>
 
-This diff format isn't capable of usefully representing reordering of
-rows.  This is deliberate.  Obvious modifications that do deal with
-order are complex.  It seems better to simply limit the scope of the format
-and see how useful it works out to be.
+A new action called "+" has been added, to mark rows that have
+no change other than added cells.
+
+@section spec_hilite_remove_columns Removing columns
+
+Columns to be removed are identified with a "---" in the schema row.
+For example:
+
+<table>
+  <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td></td><td></td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">---</td><td></td></tr>
+  <tr><th>\@</th><th>bridge</th><th>designer</th><th>quark</th><th>length</th></tr>
+  <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">strange</td><td>1595</td></tr>
+  <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Manhattan</td><td>G. Lindenthal</td><td>charm</td><td>1470</td></tr>
+  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">L. L. Buck->D. Duck</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">up</td><td>1600</td></tr>
+  <tr><td></td><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">down</td><td>1182</td></tr>
+  <tr><td></td><td>Triborough</td><td>O. H. Ammann</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">strange</td><td>1380,383</td></tr>
+  <tr><td>...</td><td>...</td><td>...</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">...</td><td>...</td></tr>
+  <tr><td></td><td>Throgs Neck</td><td>O. H. Ammann</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">hairy</td><td>1800</td></tr>
+  <tr><td></td><td>George Washington</td><td>O. H. Ammann</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">moody</td><td>3500</td></tr>
+  <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Spamspan</td><td>S. Spamington</td><td></td><td>10000</td></tr>
+</table>
+
+@section spec_hilite_row_order Row and column order?
+
+This spec doesn't deal with order changes.  Suggestions welcome!
 
 @section spec_hilite_implementation Implementations
 

@@ -270,6 +270,18 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 	}
       } else {
 	statusCol.cellString(idx,0,"---");
+	if (descriptive) {
+	  Poly<Appearance> appear = sheet.getColAppearance(idx);
+	  if (appear.isValid()) {
+	    appear->begin();
+	    appear->setBackgroundRgb16(FULL_COLOR,
+				       HALF_COLOR,
+				       HALF_COLOR,
+				       AppearanceRange::full());
+	    appear->setStrikethrough(true,AppearanceRange::full());
+	    appear->end();
+	  }
+	}
 	bool gone = true;
 	for (int i=0; i<(int)statusCol.width(); i++) {
 	  if (statusCol.cellString(i,0)=="") {
@@ -368,24 +380,49 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
 			       std::vector<SheetCell>& pval) {
   PolySheet sheet = getSheet();
 
+
+  // Check if there is at least one change that is not just an
+  // addition
+
+  bool have_mod = false;
+  bool have_add = false;
+  for (int c=0; c<width; c++) {
+    if (active_val[c]) {
+      string key = statusCol.cellString(c,0);
+      if (key!="+++"&&key!="---") {
+	have_mod = true;
+      }
+      if (key=="+++") {
+	have_add = true;
+      }
+    }
+  }
+  string row_key = sheet.cellString(0,r);
+
   string separator = "";
   for (int c=0; c<width; c++) {
     if (active_val[c]) {
+      string key = statusCol.cellString(c,0);
+      bool this_mod = (key!="+++");
       if (descriptive) {
-	if (separator=="") {
-	  separator = "->";
-	  bool more = true;
-	  while (more) {
-	    more = false;
-	    for (int i=0; i<width; i++) {
-	      SheetCell prev = sheet.cellSummary(i,r);
-	      if (prev.text.find(separator)!=string::npos) {
-		separator = string("-") + separator;
-		more = true;
-		break;
+	if (have_mod) {
+	  if (separator=="") {
+	    separator = "->";
+	    bool more = true;
+	    while (more) {
+	      more = false;
+	      for (int i=0; i<width; i++) {
+		SheetCell prev = sheet.cellSummary(i,r);
+		if (prev.text.find(separator)!=string::npos) {
+		  separator = string("-") + separator;
+		  more = true;
+		  break;
+		}
 	      }
 	    }
 	  }
+	} else if (have_add) {
+	  separator = "+";
 	}
       }
       string init = separator;
@@ -418,25 +455,38 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
 	  conflicted = true;
 	}
 	SheetStyle style;
-	sheet.cellString(c,r,colorEncode(prev) + 
-			 (conflicted?init:separator) + 
-			 colorEncode(to));
-	Poly<Appearance> appear = sheet.getCellAppearance(c,r);
-	if (appear.isValid()) {
-	  appear->begin();
-	  if (conflicted) {
-	    appear->setBackgroundRgb16(FULL_COLOR,
-				       0,
-				       0,
-				       AppearanceRange::full());
+	if (this_mod||conflicted) {
+	  sheet.cellString(c,r,colorEncode(prev) + 
+			   (conflicted?init:separator) + 
+			   colorEncode(to));
+	} else {
+	  /*
+	  if (row_key=="---"&&key=="+++") {
+	    // no point adding anything here
+	  } else if (row_key=="+++"&&key=="---") {
+	    // no point adding anything here
 	  } else {
-	    appear->setBackgroundRgb16(HALF_COLOR,
-				       HALF_COLOR,
-				       FULL_COLOR,
-				       AppearanceRange::full());
+	  */
+	  sheet.cellSummary(c,r,to);
+	}
+	if (this_mod||conflicted) {
+	  Poly<Appearance> appear = sheet.getCellAppearance(c,r);
+	  if (appear.isValid()) {
+	    appear->begin();
+	    if (conflicted) {
+	      appear->setBackgroundRgb16(FULL_COLOR,
+					 0,
+					 0,
+					 AppearanceRange::full());
+	    } else {
+	      appear->setBackgroundRgb16(HALF_COLOR,
+					 HALF_COLOR,
+					 FULL_COLOR,
+					 AppearanceRange::full());
+	    }
+	    appear->setWeightBold(true,AppearanceRange::full());
+	    appear->end();
 	  }
-	  appear->setWeightBold(true,AppearanceRange::full());
-	  appear->end();
 	}
       } else {
 	if (change.conflicted) {

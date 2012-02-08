@@ -1,6 +1,8 @@
 
 #include <coopy/CsvRender.h>
 
+#include <vector>
+
 using namespace std;
 using namespace coopy::store;
 
@@ -66,10 +68,12 @@ string CsvRender::renderHtml(const DataSheet& sheet, const std::string& title) {
 
     if (header) {
       SheetSchema *schema = sheet.getSchema();
-      if (title!="sheet") {
-	result += "  <caption>";
-	result += title; //schema->getSheetName();
-	result += "</caption>\n";
+      if (caption) {
+	if (title!="sheet") {
+	  result += "  <caption>";
+	  result += title; //schema->getSheetName();
+	  result += "</caption>\n";
+	}
       }
       if (schema!=NULL) {
 	result += "  <tr>";
@@ -82,22 +86,29 @@ string CsvRender::renderHtml(const DataSheet& sheet, const std::string& title) {
       }
     }
 
+    int change_row = -1;
+
     for (int i=0; i<sheet.height(); i++) {
       string row_mode = "";
       string txt = sheet.cellString(0,i);
       string bit = "td";
       string row_color = "";
       string txt_color = "";
+      bool open = true;
       if (header) {
 	if (txt=="@"||txt=="@@") {
 	  bit = "th";
+	  open = false;
 	  //row_color = "#aaaaff";
 	} else if (txt=="!") {
 	  row_color = "#aaaaaa";
+	  change_row = i;
 	} else if (txt=="+++") {
 	  row_color = "#7fff7f";
+	  open = false;
 	} else if (txt=="---") {
 	  row_color = "#ff7f7f";
+	  open = false;
 	}
       }
       if (txt == "[---]" || txt == "---") {
@@ -131,11 +142,21 @@ string CsvRender::renderHtml(const DataSheet& sheet, const std::string& title) {
       result += ">";
       for (int j=0; j<sheet.width(); j++) {
 	string txt = sheet.cellString(j,i);
-	if (j==0&&header) {
-	  if (txt=="NULL") txt = "";
-	}
+	//if (j==0&&header) {
+	if (txt=="NULL") txt = "";
+	//}
 	string cell_decorate = "";
 	if (header) {
+	  if (open) {
+	    if (change_row>=0) {
+	      string change = sheet.cellString(j,change_row);
+	      if (change=="+++") {
+		cell_decorate += " bgcolor=\"#7fff7f\" style=\"background-color: #7fff7f;\"";
+	      } else if (change=="---") {
+		cell_decorate += " bgcolor=\"#ff7f7f\" style=\"background-color: #ff7f7f;\"";
+	      }
+	    }
+	  }
 	  if (txt.find("->")!=string::npos) {
 	    cell_decorate += " bgcolor=\"#7f7fff\" style=\"background-color: #7f7fff;\"";
 	  }

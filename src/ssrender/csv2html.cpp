@@ -99,6 +99,8 @@ int main(int argc, char *argv[]) {
   render.setDox(dox);
 
   vector<string> names = book.getNames();
+  render.setCaption(names.size()>1);
+
   for (int i=0; i<(int)names.size(); i++) {
     if (i>0) printf("\n");
     PolySheet sheet = book.readSheet(names[i]);
