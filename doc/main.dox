@@ -14,22 +14,29 @@ The COOPY project contains programs and libraries to help you:
   merges supported.
 \li Maintain a repository of tables with multiple active contributors
   (see \ref ssfossil and the \ref coopy program).
-\li Supported table formats include CSV, sqlite, mysql, Excel, Access
-(read only).
+\li Supported table formats include CSV, sqlite, mysql, 
+    Access (read-only), Excel, OpenOffice.
 
-\section mainpage_tut Tutorials
+\section mainpage_tut Comparing tables
 
 \li \ref tutorial_diff
 \li \ref tutorial_hilite
 \li \ref tutorial_ids
+
+\section mainpage_coopy Coopy GUI tutorials
 \li \ref tutorial_coopy_pull
 \li \ref tutorial_coopy_new
 \li \ref tutorial_coopy_push
 \li \ref tutorial_coopy_fork
 \li \ref tutorial_coopy_conflict
-\li \ref tutorial_git
+\li \ref funny_files
 
-\section mainpage_basic Command line tools
+\section mainpage_scm Version control
+
+\li \ref tutorial_git
+\li \ref ssfossil reference
+
+\section mainpage_basic Command line tools reference
 
 \li \ref ssdiff
 \li \ref sspatch
@@ -49,15 +56,10 @@ The COOPY project contains programs and libraries to help you:
 \li \ref merge_example.
 \endif
 
-\section mainpage_ref Reference material
+\section mainpage_ref Formats
 
-\li \ref patch_format.
 \li \ref table_format.
-\li \ref funny_files
-\li \ref ssfossil reference.
-\if link_code
-\li <a href="annotated.html">Classes</a> used in implementation.
-\endif
+\li \ref patch_format.
 
 And if COOPY isn't quite right for you?
 \li \ref related.
