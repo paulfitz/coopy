@@ -37,6 +37,7 @@ function show_file {
 #	$CSV2HTML --header --dox $fname
 #	return
 #    fi
+    echo "show_file fname=[$fname] format=[$format] mode=[$mode] target=[$target]" 1>&2
     if [ "k$format" = "ktxt" ]; then
 	cat $fname
 	return
@@ -51,7 +52,8 @@ function show_file {
 	#PROB="1380,383"
 	#echo "= |length=$PROB->FOO|" | ( sspatch --inplace $fname - > /dev/null )
 	#ssconvert --export-type=Gnumeric_html:html40frag $fname /tmp/tmp.html > /dev/null
-	$CSV2HTML --header $fname > /tmp/tmp.html
+	$CSV2HTML --header $fname | sed "s|\\\\n|<br/>|g" > /tmp/tmp.html
+	# grep -q "present in" /tmp/tmp.html && exit 1
 	if [ ! -e /tmp/tmp.html ] ; then
 	    echo "Failed to ssconvert $fname" 1>&2
 	    exit 1

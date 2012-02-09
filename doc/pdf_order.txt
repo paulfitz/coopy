@@ -1,4 +1,5 @@
 main
+spec_hilite
 tutorial_coopy_pull
 tutorial_coopy_new
 tutorial_coopy_push
