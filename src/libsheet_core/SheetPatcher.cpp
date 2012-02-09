@@ -456,9 +456,18 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
 	}
 	SheetStyle style;
 	if (this_mod||conflicted) {
-	  sheet.cellString(c,r,colorEncode(prev) + 
-			   (conflicted?init:separator) + 
-			   colorEncode(to));
+	  if (conflicted&&!pval[c].escaped) {
+	    sheet.cellString(c,r,
+			     colorEncode(pval[c]) + 
+			     (conflicted?init:separator) + 
+			     colorEncode(prev) + 
+			     (conflicted?init:separator) + 
+			     colorEncode(to));
+	  } else {
+	    sheet.cellString(c,r,colorEncode(prev) + 
+			     (conflicted?init:separator) + 
+			     colorEncode(to));
+	  }
 	} else {
 	  /*
 	  if (row_key=="---"&&key=="+++") {

@@ -650,10 +650,12 @@ public:
   SheetCell val;
   SheetCell nval;
   SheetCell cval;
+  SheetCell pval;
   bool hasKey;
   bool hasVal;
   bool hasNval;
   bool hasCval;
+  bool hasPval;
 
   bool conflict;
 
@@ -667,6 +669,7 @@ public:
     hasVal = false;
     hasNval = false;
     hasCval = false;
+    hasPval = false;
     conflict = false;
   }
 
@@ -686,10 +689,13 @@ public:
     int state = 0;
     int pre = -2;
     sep = "";
+    bool first = true;
     for (int i=0; i<(int)s.length(); i++) {
       char ch = s[i];
+      bool was_first = first;
+      first = false;
       if ((allowDouble&&ch=='\"'&&acceptDouble)||(ch=='\''&&acceptSingle)) {
-	if (i==0) {
+	if (was_first) {
 	  hasQuote = true;
 	  quoter = ch;
 	}
@@ -713,14 +719,25 @@ public:
       } else if (ch=='='&&state==0&&pre==-2) {
 	pre = i-1;
 	sep = "=";
+	break;
       } else if (ch=='-'&&state==0&&pre==-2) {
 	state = 1;
       } else if (ch=='>'&&state==1) {
 	pre = i-2;
 	sep = "->";
+	break;
       } else if (ch=='!') {
 	conflict = true;
-	cc = i;
+	if (cc==-1) {
+	  cc = i;
+	  if (i==0) {
+	    first = true;
+	  }
+	} else {
+	  sep = "!";
+	  pre = i-1;
+	  break;
+	}
       } else {
 	state = 0;
       }
@@ -731,7 +748,7 @@ public:
       result = s.substr(0,pre+1);
       if (result[0]=='!') result = result.substr(1,result.length()-1);
       rem = s.substr(pre+sep.length()+1,s.length());
-      if (rem[0]=='!') rem = rem.substr(1,rem.length()-1);
+      //if (rem[0]=='!') rem = rem.substr(1,rem.length()-1);
     }
     if (hasQuote) {
       result = result.substr(1,result.length()-2);
@@ -769,7 +786,7 @@ public:
 
   void applyElement(const string& txt,
 		    const string& pre,
-		    const string& post,
+		    string& post,
 		    bool quoted,
 		    bool columnLike) {
     /*
@@ -778,6 +795,16 @@ public:
 	   quoted?"quoted":"unquoted",
 	   columnLike?"column":"value");
     */
+
+    if (post=="!") {
+      if (checkCell(txt,quoted)) {
+	pval = getCell(txt,quoted);
+	hasPval = true;
+      }
+      post = pre;
+      return;
+    }
+
     if (pre=="") {
       if ((!columnLike)&&(post!="="&&post!=":")) {
 	if (checkCell(txt,quoted)) {
@@ -825,9 +852,10 @@ public:
     string sep1, r1, rem1;
     string sep2, r2, rem2;
     string sep3, r3, rem3;
-    bool q1, q2, q3;
-    bool set1, set2, set3;
-    set1 = set2 = set3 = false;
+    string sep4, r4, rem4;
+    bool q1, q2, q3, q4;
+    bool set1, set2, set3, set4;
+    set1 = set2 = set3 = set4 = false;
 
     r1 = peel(s,sep1,rem1, q1);
     set1 = true;
@@ -837,6 +865,10 @@ public:
       if (sep2!="") {
 	r3 = peel(rem2,sep3,rem3, q3);
 	set3 = true;
+	if (sep3!="") {
+	  r4 = peel(rem3,sep4,rem4, q4);
+	  set4 = true;
+	}
       }
     }
 
@@ -848,6 +880,7 @@ public:
     if (set1) applyElement(r1,"",sep1,q1,columnLike);
     if (set2) applyElement(r2,sep1,sep2,q2,columnLike);
     if (set3) applyElement(r3,sep2,sep3,q3,columnLike);
+    if (set4) applyElement(r4,sep3,sep4,q4,columnLike);
 
     if (conflict) {
       if (hasNval) {
@@ -1123,6 +1156,9 @@ bool PatchParser::applyTdiff() {
 	    change.val[context.key.c_str()] = part.nval;
 	    if (part.hasCval) {
 	      change.conflictingVal[context.key.c_str()] = part.cval;
+	    }
+	    if (part.hasPval) {
+	      change.conflictingParentVal[context.key.c_str()] = part.pval;
 	    }
 	  } else {
 	    if (!conded) {

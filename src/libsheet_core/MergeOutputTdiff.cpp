@@ -267,6 +267,9 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
       }
       if (conflict) {
 	fprintf(out,"!");
+	if (change.conflictingParentVal.find(name)!=change.conflictingParentVal.end()) {
+	  fprintf(out,"%s!",celly(change.conflictingParentVal.find(name)->second).c_str());
+	}
       }
 
       if (showForCond[name] && select) {
