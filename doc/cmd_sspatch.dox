@@ -28,9 +28,12 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
  \li \ref sspatch_main_help "--help"
  \li \ref sspatch_main_inplace "--inplace"
  \li \ref sspatch_main_input-formats "--input-formats"
+ \li \ref sspatch_main_neither "--neither"
+ \li \ref sspatch_main_ours "--ours"
  \li \ref sspatch_main_output "--output=OUTPUTFILE"
  \li \ref sspatch_main_patch-formats "--patch-formats"
  \li \ref sspatch_main_table "--table=TABLE"
+ \li \ref sspatch_main_theirs "--theirs"
 
 
 \section sspatch_options_detail Option details
@@ -52,6 +55,12 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
 \anchor sspatch_main_input-formats <b>--input-formats</b> <br />list supported input database formats
 
 
+\anchor sspatch_main_neither <b>--neither</b> <br />in case of conflict use cell value from common ancestor
+
+
+\anchor sspatch_main_ours <b>--ours</b> <br />in case of conflict use cell value that was the local choice
+
+
 \anchor sspatch_main_output <b>--output=OUTPUTFILE</b> <br />direct output to this file (default is standard output)
 
 
@@ -59,6 +68,9 @@ Modify a table/database/spreadsheet to integrate the changes described in a pre-
 
 
 \anchor sspatch_main_table <b>--table=TABLE</b> <br />filter for a named table of a workbook/database (repeat option for multiple tables)
+
+
+\anchor sspatch_main_theirs <b>--theirs</b> <br />in case of conflict use cell value that wasn't the local choice
 
 
 

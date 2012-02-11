@@ -26,11 +26,14 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
  \li \ref ssrediff_main_default-table "--default-table=TABLE"
  \li \ref ssrediff_main_format "--format=FORMAT"
  \li \ref ssrediff_main_help "--help"
+ \li \ref ssrediff_main_neither "--neither"
  \li \ref ssrediff_main_omit-format-name "--omit-format-name"
  \li \ref ssrediff_main_omit-sheet-name "--omit-sheet-name"
+ \li \ref ssrediff_main_ours "--ours"
  \li \ref ssrediff_main_output "--output=OUTPUTFILE"
  \li \ref ssrediff_main_patch-formats "--patch-formats"
  \li \ref ssrediff_main_table "--table=TABLE"
+ \li \ref ssrediff_main_theirs "--theirs"
  \li \ref ssrediff_main_variant "--variant=VARIANT"
 
 
@@ -47,10 +50,16 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 \anchor ssrediff_main_help <b>--help</b> <br />show how to use this program
 
 
+\anchor ssrediff_main_neither <b>--neither</b> <br />in case of conflict use cell value from common ancestor
+
+
 \anchor ssrediff_main_omit-format-name <b>--omit-format-name</b> <br />omit any version-dependent header from diff
 
 
 \anchor ssrediff_main_omit-sheet-name <b>--omit-sheet-name</b> <br />omit any sheet/table name from diff
+
+
+\anchor ssrediff_main_ours <b>--ours</b> <br />in case of conflict use cell value that was the local choice
 
 
 \anchor ssrediff_main_output <b>--output=OUTPUTFILE</b> <br />direct output to this file (default is standard output)
@@ -60,6 +69,9 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 
 
 \anchor ssrediff_main_table <b>--table=TABLE</b> <br />filter for a named table of a workbook/database (repeat option for multiple tables)
+
+
+\anchor ssrediff_main_theirs <b>--theirs</b> <br />in case of conflict use cell value that wasn't the local choice
 
 
 \anchor ssrediff_main_variant <b>--variant=VARIANT</b> <br />set the desired dialect when using a poorly defined output format (currently for SQL, available variants are: sqlite, access)
