@@ -79,6 +79,31 @@ bool MergeOutputFilter::emitRow(const RowUnit& row) {
   if (name!=last_sheet_name) {
     emitPreamble(sheet_units[name]);
   }
+  string resolve = getFlags().resolve;
+  if (resolve!="") {
+    if (row.change.conflicted) {
+      if (resolve=="ours") {
+	return true;
+      }
+      RowChange change2 = row.change;
+      if (resolve=="theirs") {
+	for (RowChange::txt2cell::iterator it = change2.conflictingVal.begin(); 
+	     it != change2.conflictingVal.end(); it++) {
+	  change2.val[it->first] = it->second;
+	}
+      } else if (resolve=="neither") {
+	for (RowChange::txt2cell::iterator it = 
+	       change2.conflictingParentVal.begin(); 
+	     it != change2.conflictingParentVal.end(); it++) {
+	  change2.val[it->first] = it->second;
+	}
+      }
+      change2.conflictingVal.clear();
+      change2.conflictingParentVal.clear();
+      change2.conflicted = false;
+      return chain->changeRow(change2);
+    }
+  }
   return chain->changeRow(row.change);
 }
 

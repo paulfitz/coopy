@@ -1382,12 +1382,19 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	if (flags.canDelete()) {
 	  if (allowed) patcher->changeRow(change);
 	}
-      } else if ((tail2 == "->"||code=="+") && code.find("!")==string::npos) {
+      } else if ((tail2 == "->"||code=="+")) { // && code.find("!")==string::npos) {
 	change.mode = ROW_CHANGE_UPDATE;
 	int minuses = 0;
-	string separator;
+	string separator, conflict_separator, full_separator;
 	if (code!="+") {
-	  separator = code.substr(code.find("-"),code.length());
+	  separator = code; //code.substr(code.find("-"),code.length());
+	  if (separator[0]=='@') separator = separator.substr(1,separator.length());
+	  if (separator[0]=='@') separator = separator.substr(1,separator.length());
+	  full_separator = separator;
+	  if (separator.find("!")!=string::npos) {
+	    conflict_separator = full_separator;
+	    separator = full_separator.substr(separator.find("!")+1,separator.length());
+	  }
 	}
 	for (int j=1+xoff; j<sheet.width(); j++) {
 	  SheetCell c = sheet.cellSummary(j,i);
@@ -1397,19 +1404,48 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	  if (!c.escaped) {
 	    //printf("Looking at [%s], separator [%s]\n",
 	    //c.toString().c_str(), separator.c_str());
-	    string::size_type offset = c.text.find(separator);
 	    if (code=="+") {
 	      change.val[col] = c;
 	    } else {
+	      string::size_type offset = c.text.find(separator);
 	      if (offset!=string::npos) {
-		if (!added) {
-		  SheetCell tmp = nully(c.text.substr(0,offset));
-		  change.cond[col] = tmp;
-		  done = true;
+		// check for conflict
+		bool conflict = false;
+		if (conflict_separator!="") {
+		  string::size_type coffset = c.text.find(conflict_separator);
+		  if (coffset!=string::npos) {
+		    conflict = true;
+		    string s1 = c.text.substr(0,coffset);
+		    string s2 = c.text.substr(coffset+conflict_separator.length(),
+					      c.text.length());
+		    string::size_type coffset2 = s2.find(conflict_separator);
+		    if (coffset2!=string::npos) {
+		      string s3 = s2.substr(coffset2+conflict_separator.length(),
+					    s2.length());
+		      s2 = s2.substr(0,coffset2);
+		      change.val[col] = nully(s2);
+		      change.cond[col] = nully(s2);
+		      change.conflictingVal[col] = nully(s3);
+		      change.conflictingParentVal[col] = nully(s1);
+		    } else {
+		      change.val[col] = nully(s1);
+		      change.cond[col] = nully(s1);
+		      change.conflictingVal[col] = nully(s2);
+		    }
+		    change.conflicted = true;
+		    done = true;
+		  } 
 		}
-		SheetCell tmp = nully(c.text.substr(offset+separator.length(),
-						    c.text.length()));
-		change.val[col] = tmp;
+		if (!conflict) {
+		  if (!added) {
+		    SheetCell tmp = nully(c.text.substr(0,offset));
+		    change.cond[col] = tmp;
+		    done = true;
+		  }
+		  SheetCell tmp = nully(c.text.substr(offset+separator.length(),
+						      c.text.length()));
+		  change.val[col] = tmp;
+		}
 	      } else if (added) {
 		change.val[col] = c;
 	      }

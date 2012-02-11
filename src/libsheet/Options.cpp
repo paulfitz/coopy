@@ -468,15 +468,15 @@ Options::Options(const char *name) : name(name) {
       "index",
       "extract content of key columns only");
 
-  add(OPTION_FOR_RESOLVE,
+  add(OPTION_FOR_RESOLVE|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "theirs",
       "in case of conflict use cell value that wasn't the local choice");
 
-  add(OPTION_FOR_RESOLVE,
+  add(OPTION_FOR_RESOLVE|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "ours",
       "in case of conflict use cell value that was the local choice");
 
-  add(OPTION_FOR_RESOLVE,
+  add(OPTION_FOR_RESOLVE|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "neither",
       "in case of conflict use cell value from common ancestor");
 

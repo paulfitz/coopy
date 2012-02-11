@@ -400,6 +400,7 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
   string row_key = sheet.cellString(0,r);
 
   string separator = "";
+  string conflict_separator = "";
   for (int c=0; c<width; c++) {
     if (active_val[c]) {
       string key = statusCol.cellString(c,0);
@@ -427,9 +428,27 @@ bool SheetPatcher::markChanges(const RowChange& change, int r,int width,
       }
       string init = separator;
       if (change.conflicted) {
-	init = string("!") + init;
+	if (conflict_separator=="") {
+	  conflict_separator = string("!");
+	  bool more = true;
+	  // this is actually far too conservative
+	  while (more) {
+	    more = false;
+	    for (int i=0; i<width; i++) {
+	      SheetCell prev = sheet.cellSummary(i,r);
+	      if (prev.text.find(conflict_separator)!=string::npos) {
+		conflict_separator = string("-") + conflict_separator;
+		more = true;
+		break;
+	      }
+	    }
+	  }
+	}
+	init = conflict_separator + separator;
       }
-      activeRow.cellString(0,r,init);
+      if (init.length()>activeRow.cellString(0,r).length()) {
+	activeRow.cellString(0,r,init);
+      }
       if (change.conflicted) {
 	if (descriptive) {
 	  Poly<Appearance> appear = sheet.getCellAppearance(0,r);

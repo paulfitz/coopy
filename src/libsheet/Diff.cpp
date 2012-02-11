@@ -253,7 +253,7 @@ int Diff::apply(const Options& opt) {
   if (!resolving) {
     diff->setFlags(flags);
     bool filter = flags.ordered_tables.size()>0 || flags.acts.size()>0 || 
-      flags.create_unknown_sheets || patchy;
+      flags.create_unknown_sheets || patchy || flags.resolve!="";
     MergeOutputFilter filter_diff(diff);
     if (filter) {
       filter = true;

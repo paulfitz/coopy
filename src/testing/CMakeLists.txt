@@ -627,9 +627,23 @@ ADD_TEST(folding_json ${ssfold} --recipe ${TESTS}/fold/fold_org_loc.csvs --table
 
 # check conflicts
 
-ADD_TEST(conflict_with_parent ${ssdiff}  --omit-format-name --output conflict_with_parent.tdiff --parent ${TESTS}/conflict/bridges.csv ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
-ADD_TEST(conflict_with_parent_Compare 
+ADD_TEST(conflict_with_parent_tdiff ${ssdiff}  --omit-format-name --output conflict_with_parent.tdiff --parent ${TESTS}/conflict/bridges.csv ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
+ADD_TEST(conflict_with_parent_tdiff_Compare 
   ${CMAKE_COMMAND} -E compare_files conflict_with_parent.tdiff ${TESTS}/conflict/bridges_v1_v2_parent.tdiff)
+
+ADD_TEST(conflict_with_parent_bang_tdiff ${ssdiff}  --omit-format-name --output conflict_with_parent_bang_tdiff.tdiff --parent ${TESTS}/conflict/bridges.csv ${TESTS}/conflict/bridges_v3.csv ${TESTS}/conflict/bridges_v4.csv)
+ADD_TEST(conflict_with_parent_bang_tdiff_rediff ${ssrediff}  --omit-format-name --output conflict_with_parent_bang_tdiff_rediff.tdiff conflict_with_parent_bang_tdiff.tdiff)
+ADD_TEST(conflict_with_parent_bang_tdiff_Compare 
+  ${CMAKE_COMMAND} -E compare_files conflict_with_parent_bang_tdiff_rediff.tdiff conflict_with_parent_bang_tdiff.tdiff)
+
+
+# Pending - hilite support
+#ADD_TEST(conflict_with_parent_hilite ${ssdiff}  --format hilite --output conflict_with_parent_hilite.csv --parent ${TESTS}/conflict/bridges.csv ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
+#ADD_TEST(conflict_with_parent_hilite_rediff ${ssrediff}  --format tdiff --omit-format-name --output conflict_with_parent_hilite.tdiff conflict_with_parent_hilite.csv)
+#ADD_TEST(conflict_with_parent_hilite_Compare 
+#  ${CMAKE_COMMAND} -E compare_files conflict_with_parent_hilite.tdiff ${TESTS}/conflict/bridges_v1_v2_parent.tdiff)
+
+
 
 ADD_TEST(conflict_without_parent ${ssdiff}  --output conflict_without_parent.tdiff --omit-format-name ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
 ADD_TEST(conflict_without_parent_Compare 
