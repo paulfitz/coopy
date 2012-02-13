@@ -951,3 +951,18 @@ ADD_TEST(foreign_directory_merge_rab_compare ${ssdiff} --equal ${TESTS}/director
 
 ADD_TEST(foreign_directory_merge_rba ${ssmerge} --output foreign_directory_merge_rba.sqlite ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_bob.sqlite ${TESTS}/directory/directory_alice.sqlite)
 ADD_TEST(foreign_directory_merge_rba_compare ${ssdiff} --equal ${TESTS}/directory/directory_bob_add_alice.sqlite foreign_directory_merge_rba.sqlite)
+
+
+#######################################################################
+#######################################################################
+
+# sqlite <-> sqlitext conversions
+
+ADD_TEST(sqlite_sqlitext_base1 ${ssformat} ${TESTS}/bridges.csv sqlite_sqlitext_base.sqlite)
+ADD_TEST(sqlite_sqlitext_base2 ${ssformat} ${TESTS}/bridges.csv sqlite_sqlitext_base.sqlitext)
+ADD_TEST(sqlite_sqlitext_fwd ${ssformat} sqlite_sqlitext_base.sqlite sqlite_sqlitext_base.2.sqlitext)
+ADD_TEST(sqlite_sqlitext_rev ${ssformat} sqlite_sqlitext_base.sqlitext sqlite_sqlitext_base.2.sqlite)
+ADD_TEST(sqlite_sqlitext_fwd_chk ${SSCOMPARE} ${TESTS}/bridges.csv sqlite_sqlitext_base.2.sqlite)
+ADD_TEST(sqlite_sqlitext_rev_chk ${SSCOMPARE} ${TESTS}/bridges.csv sqlite_sqlitext_base.2.sqlitext)
+
+

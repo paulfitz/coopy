@@ -26,7 +26,8 @@ public:
 
   void clear();
 
-  virtual bool read(const char *fname, bool can_create = true);
+  virtual bool read(const char *fname, bool can_create,
+		    const Property& config);
 
   virtual bool save(const char *fname, const char *format, 
 		    bool itextual = false);
@@ -46,6 +47,10 @@ public:
   virtual bool addSheet(const SheetSchema& schema);
 
 
+  virtual bool writtenToFuture() const {
+    return prewrite;
+  }
+
   virtual std::string desc() const {
     return "SqliteBook";
   }
@@ -54,6 +59,9 @@ private:
   void *implementation;
   bool textual;
   bool memory;
+  bool prewrite;
+  std::string hold_temp;
+  
   std::vector<std::string> names;
 
   std::vector<std::string> getNamesSql();
@@ -79,6 +87,8 @@ public:
   }
 	
   TextBook *openNormal(AttachConfig& config, AttachReport& report) {
+    //printf("Hello, opening regular factory for: %s\n",
+    //config.options.toString().c_str());
     SqliteTextBook *book = new SqliteTextBook(textual);
     if (book==NULL) return NULL;
     if (!book->open(config.options)) {
@@ -87,14 +97,16 @@ public:
     }
     if (config.shouldWrite) {
       if (config.prevBook!=NULL) {
-	if (!book->copy(*config.prevBook,config.options)) {
-	  delete book;
-	  book = NULL;
-	  report.msg = "data transfer failed";
-	  return NULL;
-	}
-	if (!book->inplace()) {
-	  book->save("-",NULL,true);
+	if (!config.prevBook->writtenToFuture()) {
+	  if (!book->copy(*config.prevBook,config.options)) {
+	    delete book;
+	    book = NULL;
+	    report.msg = "data transfer failed";
+	    return NULL;
+	  }
+	  if (!book->inplace()) {
+	    book->save("-",NULL,textual);
+	  }
 	}
       }
     }
@@ -115,7 +127,7 @@ public:
       if (config.prevBook!=NULL) {
 	SqliteTextBook *prev = dynamic_cast<SqliteTextBook *>(config.prevBook);
 	if (prev!=NULL) {
-	  bool ok = prev->save(config.fname.c_str(),NULL,true);
+	  bool ok = prev->save(config.fname.c_str(),NULL,textual);
 	  if (!ok) {
 	    report.success = false;
 	    report.msg = "failed to save file";
@@ -129,7 +141,7 @@ public:
     SqliteTextBook *book = new SqliteTextBook(true);
     if (book==NULL) return book;
     bool ok = false;
-    if (book->read(config.fname.c_str(),true)) {
+    if (book->read(config.fname.c_str(),true,config.options)) {
       ok = true;
     }
     if (!ok) {
@@ -139,7 +151,7 @@ public:
       if (config.prevBook!=NULL) {
 	book->copy(*config.prevBook,config.options);
 	if (config.shouldWrite) {
-	  book->save(config.fname.c_str(),NULL,true);
+	  book->save(config.fname.c_str(),NULL,textual);
 	}
       }
     }

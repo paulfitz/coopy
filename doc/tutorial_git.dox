@@ -1,14 +1,16 @@
 /**
  *
 
-@page tutorial_git Using ssmerge with git (advanced)
+@page tutorial_git Using ssmerge with git
 
-You can use \ref ssmerge to do smarter merges of tables stored in git.
+You can configure git to use \ref ssmerge when merging tables in a
+repository.
 
-\li \ref tutorial_git_config
-\li \ref tutorial_git_attr
-\li \ref tutorial_git_worked
+\li \ref tutorial_git_config_csv
+\li \ref tutorial_git_worked_csv
 \li \ref tutorial_git_trouble
+\li \ref tutorial_git_config_sqlite
+\li \ref tutorial_git_worked_sqlite
 \li \ref tutorial_git_useful
 
 The basic steps are:
@@ -17,37 +19,29 @@ The basic steps are:
 \li Add format handlers to a .gitattributes file, to make sure
     the files you want are merged using ssmerge.
 
-\section tutorial_git_config Add custom merge driver
+\section tutorial_git_config_csv Manage CSV files in git with COOPY
 Find or create a .gitconfig file in your home directory, OR find the file
-.git/config in a repository.  Add to the end of this file lines like 
-this:
+.git/config in a repository.  Add these lines to the end of this file,
+to create a "custom merge manager" for CSV files:
 \verbatim
-[merge "coopy-csv"]
-  name = coopy csv data merge
+[merge "coopy-merge-csv"]
+  name = coopy CSV merge
   driver = ssmerge --output dbi:csv::file=%A dbi:csv::file=%O dbi:csv::file=%A dbi:csv::file=%B
 \endverbatim
-You'll need a variant of this stanza for each format you want ssmerge
-to handle.  It is best to stick with text formats.
-The "dbi:csv::file=" part above is to force files to be in csv format
-(during merging their filename extensions are not known).
-If ssmerge is not in your path, replace "ssmerge"
-above with something like "/the/full/path/to/ssmerge".
+If ssmerge is not in your path, add the complete path to "ssmerge" in this file.
+This step needs to be done by each collaborator who wants to use COOPY.
 
-\section tutorial_git_attr Add attributes file
-Find or create a .gitattributes file in the same directory as the
-files you want coopy to handle (there are other options for where to
-put this file, read the gitattributes documentation if you're interested).  
-Add to the end of this file a line or lines like 
-this:
+Now, find or create a .gitattributes file in the same directory as the
+files you want COOPY to handle (there are other options for where to
+put this file, read the gitattributes documentation for details).  
+Place these lines in .gitattributes:
 \verbatim
-*.csv merge=coopy-csv
+*.csv merge=coopy-merge-csv
 \endverbatim
-The .gitattributes file can be placed under version control, so this
-only needs to get set up once.  The custom merge driver step, 
-on the other hand, needs
-to be set up for each collaborator.
+The .gitattributes file may be placed under version control, so this
+only needs to get set up once.
 
-\section tutorial_git_worked Worked example
+\section tutorial_git_worked_csv Worked CSV example
 Let's make an empty git repository:
 
 \verbatim
@@ -56,8 +50,7 @@ cd coopy_test/repo
 git init
 \endverbatim
 
-Now, let's place a table in the repository.  There are several options for
-the format we could use.  For simplicity, let's start with a CSV file 
+Now, let's place a table in the repository.  Let's start with a CSV file 
 called "numbers.csv" with content like this:
 
 \verbatim
@@ -81,7 +74,7 @@ Now, let's tell git to use a custom merge driver for .csv files.
 In the same directory as "numbers.csv", create a file called ".gitattributes"
 containing this:
 \verbatim
-*.csv merge=coopy-csv
+*.csv merge=coopy-merge-csv
 \endverbatim
 Let's add this to the repository too:
 \verbatim
@@ -91,9 +84,9 @@ git commit -m "add coopy rule"
 Now, at the end of $HOME/.gitconfig (create this file if it
 doesn't already exist), add on the following:
 \verbatim
-[merge "coopy-csv"]
-  name = coopy csv data merge
-  driver = ssmerge --format csv --output %A %O %A %B
+[merge "coopy-merge-csv"]
+  name = coopy CSV merge
+  driver = ssmerge --output dbi:csv::file=%A dbi:csv::file=%O dbi:csv::file=%A dbi:csv::file=%B
 \endverbatim
 
 Now let's set up a clone of this repository for testing:
@@ -141,10 +134,22 @@ four,4
 five,5
 \endverbatim
 
-\section tutorial_git_trouble Troubleshooting
+\section tutorial_git_trouble Troubleshooting COOPY with git
+
+Things to check
+\li That the .gitconfig exists in your home directory and contains
+    the needed rules.
+\li That there is a .gitattributes file in the same directory as
+    your tables, and that it has the needed lines.
+\li That the "ssmerge" command is in your path.  If you run "ssmerge"
+    you should see a help message.
+\li That "ssmerge" is a recent version.
+\li That the "ssformat" command is in your path.  If you run "ssformat"
+    you should see a help message.
+\li That "ssformat" is a recent version.
 
 If for some reason git doesn't use the coopy merge rule, then something
-like the following message will be shown during merge:
+like the following message will be shown during CSV merges:
 \verbatim
 remote: Counting objects: 5, done.
 remote: Total 3 (delta 0), reused 0 (delta 0)
@@ -173,16 +178,8 @@ follows:
 \verbatim
 git reset --hard HEAD   # remove any uncommitted changes
 \endverbatim
-Then check:
-\li That the .gitconfig exists in your home directory and contains
-    the coopy-csv rule described earlier.
-\li That there is a .gitattributes file in the same directory as
-    numbers.csv, and that it has the contents described earlier.
-\li That the "ssmerge" command is in your path.  If you run "ssmerge"
-    you should see a help message.
-\li That "ssmerge" is a sufficiently recent version.  Running 
-    "ssmerge --format csv" should not give an error message
-    (compare against "ssformat --unknown-option csv")
+And run through the checks listed earlier in this section.
+See also \ref tutorial_git_useful.
 
 \section tutorial_git_useful Useful commands for testing
 \verbatim
@@ -193,6 +190,155 @@ git pull ../path        # merge in changes from another version of repo
 git pull                # merge in changes from same repo as last time
 \endverbatim
 
+
+\section tutorial_git_config_sqlite Manage Sqlite databases in git with COOPY
+
+There are a few ways to version-control an Sqlite database using
+COOPY and git.  A good option is to use git's filtering
+capabilities to keep the database in a text format in the
+repository (for meaningful diffs), while checked-out versions
+are in Sqlite's native binary format (for fast, easy access).
+
+COOPY can deal with a variety of text formats, including Sqlite's
+text dump format.  COOPY calls this "sqlitext" format.  To
+preserve all Sqlite metadata, this is the best repository format
+to use.
+
+Here's what we need in .gitconfig to convert Sqlite databases
+to and from text format (using \ref ssformat), and to do
+sensible merges (using \ref ssmerge).
+
+\verbatim
+[filter "coopy-filter-sqlite"]
+  smudge = ssformat dbi:sqlitext:file=- dbi:sqlite:file=-
+  clean = ssformat dbi:sqlite:file=- dbi:sqlitext:file=-
+
+[merge "coopy-merge-sqlite"]
+  name = coopy sqlite merge
+  driver = ssmerge --named --unordered --output dbi:sqlitext::file=%A dbi:sqlitext::file=%O dbi:sqlitext::file=%A dbi:sqlitext::file=%B
+\endverbatim
+
+Now, find or create a .gitattributes file in the same directory as the
+files you want COOPY to handle (there are other options for where to
+put this file, read the gitattributes documentation for details).  
+Place these lines in .gitattributes:
+\verbatim
+*.sqlite filter=coopy-filter-sqlite
+*.sqlite merge=coopy-merge-sqlite
+\endverbatim
+The .gitattributes file may be placed under version control, so this
+only needs to get set up once.
+
+\section tutorial_git_worked_sqlite Worked Sqlite example
+
+Let's make an empty git repository:
+
+\verbatim
+mkdir -p coopy_test/repo
+cd coopy_test/repo
+git init
+\endverbatim
+
+Now, let's place a database in the repository.  It should end in the .sqlite
+extension and be an Sqlite database.  For concreteness, we'll generate
+a test database here (but feel free to use your own):
+\verbatim
+ssformat --test-file numbers.sqlite
+\endverbatim
+
+Add "numbers.sqlite" to the repository:
+
+\verbatim
+git add numbers.sqlite
+git commit -m "add sqlite example"
+\endverbatim
+
+Now, follow the setup for .gitconfig and .gitattributes in 
+\ref tutorial_git_config_sqlite.  In summary, you need to add
+this to $HOME/.gitconfig:
+
+\verbatim
+[filter "coopy-filter-sqlite"]
+  smudge = ssformat dbi:sqlitext:file=- dbi:sqlite:file=-
+  clean = ssformat dbi:sqlite:file=- dbi:sqlitext:file=-
+
+[merge "coopy-merge-sqlite"]
+  name = coopy sqlite merge
+  driver = ssmerge --named --unordered --output dbi:sqlitext::file=%A dbi:sqlitext::file=%O dbi:sqlitext::file=%A dbi:sqlitext::file=%B
+\endverbatim
+
+And you should make a .gitattributes file in the same directory as the
+files you want COOPY to handle with these lines in it:
+\verbatim
+*.sqlite filter=coopy-filter-sqlite
+*.sqlite merge=coopy-merge-sqlite
+\endverbatim
+Let's add this to the repository:
+\verbatim
+git add .gitattributes
+git commit -m "add coopy sqlite rule"
+\endverbatim
+
+Now let's set up a clone of this repository for testing:
+
+\verbatim
+cd ..   # should be in coopy_test directory now
+git clone repo repo2
+cd repo2
+ls -a   # should see numbers.sqlite and .gitattributes
+\endverbatim
+
+In the clone, the numbers.sqlite should be a valid Sqlite database.
+It will have been translated to and from a text representation, so
+it is worth checking this.  If there's a problem, see
+\ref tutorial_git_trouble.
+
+Now, to test, we'll make two non-conflicting changes on the same row,
+and see if they get merged without a problem.  In repo2, modify
+"numbers.sqlite" to make "three" be "threepio", using either your
+favorite sqlite editor (e.g. the sqlite3 command-line tool) or 
+sspatch:
+\verbatim
+sspatch numbers.sqlite --inplace --cmd "= |NAME:three->threepio|"
+ssformat numbers.sqlite  # check change
+git commit -m "scramble three" numbers.sqlite
+\endverbatim
+
+Now, in repo, modify "numbers.sqlite" make "3" be "33", and commit:
+\verbatim
+cd ../repo
+sspatch numbers.sqlite --inplace --cmd "= |three|3->33|"
+ssformat numbers.sqlite  # check change
+git commit -m "scramble 3" numbers.sqlite
+\endve
+
+Now try merging:
+\verbatim
+git pull ../repo2
+\endverbatim
+
+Here's what a happy result looks like, if everything is configured well:
+\verbatim
+From ../repo2
+ * branch            HEAD       -> FETCH_HEAD
+Auto-merging numbers.sqlite
+Merge made by recursive.
+ numbers.sqlite |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+\endverbatim
+And the contents of numbers.sqlite should be:
+\verbatim
+== sheet ==
+NAME,DIGIT
+----------
+one,1
+two,2
+threepio,33
+four,4
+five,5
+\endverbatim
+
+If there's a problem, see \ref tutorial_git_trouble.
 
  *
  */

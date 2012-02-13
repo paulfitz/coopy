@@ -98,6 +98,32 @@ public:
     return attach(p);
   }
 
+  bool readAndWillWrite(const char *in_name, const char *in_format,
+			const char *out_name, const char *out_format) {
+    coopy::store::Property p;
+    p.put("file",in_name);
+    if (in_format!=NULL) {
+      if (in_format!="") {
+	p.put("ext",in_format);
+      }
+    }
+    p.put("can_create",false);
+    p.put("should_read",true);
+    p.put("should_write",false);
+
+    Property& po = p.nest("output_info");
+    po.put("file",out_name);
+    if (out_format!=NULL) {
+      if (out_format!="") {
+	po.put("ext",out_format);
+      }
+    }
+    expand(po);
+
+    return attach(p);
+  }
+
+
   bool attach(const char *fname, const char *ext = NULL) {
     coopy::store::Property p;
     p.put("file",fname);
@@ -140,7 +166,7 @@ public:
 
   bool attach(coopy::store::Property& config);
 
-  bool expand(coopy::store::Property& config);
+  static bool expand(coopy::store::Property& config);
 
   coopy::store::Property getType(const char *fname, const char *ext = NULL) {
     coopy::store::Property p;
@@ -221,6 +247,12 @@ public:
     if (book)
       return book->getPool();
     return 0 /*NULL*/;
+  }
+
+  virtual bool writtenToFuture() const { 
+    if (book)
+      return book->writtenToFuture();
+    return false;
   }
 
 };

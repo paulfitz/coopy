@@ -1,6 +1,8 @@
 #include <coopy/SqliteTextBook.h>
 #include <coopy/SqliteSheet.h>
 #include <coopy/MergeOutputSqlDiff.h>
+#include <coopy/FormatSniffer.h>
+#include <coopy/OS.h>
 
 #include <sqlite3.h>
 #include <stdio.h>
@@ -13,6 +15,8 @@
 using namespace std;
 using namespace coopy::store;
 using namespace coopy::store::sqlite;
+using namespace coopy::os;
+using namespace coopy::format;
 
 #define DB(x) ((sqlite3 *)(x))
 
@@ -20,6 +24,7 @@ SqliteTextBook::SqliteTextBook(bool textual) {
   implementation = NULL;
   this->textual = textual;
   memory = false;
+  prewrite = false;
 }
 
 SqliteTextBook::~SqliteTextBook() {
@@ -31,41 +36,66 @@ void SqliteTextBook::clear() {
     sqlite3_close(DB(implementation));
     implementation = NULL;
   }
+  if (hold_temp!="") {
+    FILE *fin = fopen(hold_temp.c_str(),"rb");
+    char buf[10000];
+    if (fin) {
+      size_t r = 0;
+      do {
+	r = fread(buf,1,sizeof(buf),fin);
+	if (r>0) {
+	  fwrite(buf,1,r,stdout);
+	}
+      } while (r>0);
+      fclose(fin);
+    }
+    fflush(stdout);
+    OS::deleteFile(hold_temp);
+    hold_temp = "";
+  }
 }
 
-bool SqliteTextBook::read(const char *fname, bool can_create) {
+bool SqliteTextBook::read(const char *fname, bool can_create,
+			  const Property& config) {
   dbg_printf("SqliteTextBook: reading %s\n", fname);
   clear();
 
   string alt_fname = fname;
+  bool done = false;
   if (textual) {
-    alt_fname = ":memory:";
-    memory = true;
-  } else if (string(fname)=="-") {
+    const Property& pout = config.get("output_info").asMap();
+    if (pout.check("type")) {
+      if (pout.get("type").asString()=="sqlite") {
+	if (pout.check("database")) {
+	  alt_fname = pout.get("database").asString();
+	} else {
+	  alt_fname = pout.get("file").asString();
+	}
+	done = true;
+	prewrite = true;
+	if (alt_fname=="-") {
+	  //fprintf(stderr,"Cannot write raw sqlite to stdout\n");
+	  alt_fname = OS::getTemporaryFilename();
+	  hold_temp = alt_fname;
+	}
+      }
+    }
+    if (!done) {
+      alt_fname = ":memory:";
+      memory = true;
+    }
+  } 
+  if (string(alt_fname)=="-") {
     alt_fname = ":memory:";
     memory = true;
   }
 
-  int result = sqlite3_open_v2(alt_fname.c_str(),
-			       (sqlite3**)(&implementation),
-			       SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE|
-			       SQLITE_OPEN_NOMUTEX,
-			       NULL);
-  if (result!=SQLITE_OK) {
-    fprintf(stderr,"Failed to open database %s\n", fname);
-    clear();
-    return false;
-  }
-
-  const char *query = "PRAGMA synchronous = 0;";
-  sqlite3_exec((sqlite3*)implementation, query, NULL, NULL, NULL);
-
-  if (textual) {
-    string txt = "";
-    bool console = string(fname)=="-";
+  string txt = "";
+  bool console = string(fname)=="-";
+  if (textual||console) {
     FILE *fin = stdin;
     if (!console) {
-      fin = fopen(fname,"r");
+      fin = fopen(fname,"rb");
     }
     if (fin==NULL && !can_create) {
 	fprintf(stderr,"Failed to read database %s\n", fname);
@@ -82,12 +112,50 @@ bool SqliteTextBook::read(const char *fname, bool can_create) {
 	}
 	txt += string(buf,len);
       }
-      sqlite3_exec((sqlite3*)implementation, txt.c_str(), NULL, NULL, NULL);
-      //printf("LOADED: [%s]\n", txt.c_str());
     }
     if (fin!=NULL && !console) {
       fclose(fin); fin = NULL;
     }
+  }
+
+  if (txt!="") {
+      FormatSniffer f;
+      f.setString(txt.substr(0,40).c_str());
+      if (f.getFormat().id == FORMAT_BOOK_SQLITE) {
+	if (alt_fname!="") {
+	  if (alt_fname!="-") {
+	    if (memory) {
+	      alt_fname = OS::getTemporaryFilename();
+	      hold_temp = alt_fname;
+	      memory = false;
+	    }
+	    FILE *fout = fopen(alt_fname.c_str(),"wb");
+	    if (fout) {
+	      fwrite(txt.c_str(),1,txt.length(),fout);
+	      fclose(fout);
+	    }
+	  }
+	}
+	txt = "";
+      }
+  }
+  
+  int result = sqlite3_open_v2(alt_fname.c_str(),
+			       (sqlite3**)(&implementation),
+			       SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE|
+			       SQLITE_OPEN_NOMUTEX,
+			       NULL);
+  if (result!=SQLITE_OK) {
+    fprintf(stderr,"Failed to open database %s\n", fname);
+    clear();
+    return false;
+  }
+
+  const char *query = "PRAGMA synchronous = 0;";
+  sqlite3_exec((sqlite3*)implementation, query, NULL, NULL, NULL);
+
+  if (txt!="") {
+    sqlite3_exec((sqlite3*)implementation, txt.c_str(), NULL, NULL, NULL);
   }
 
   names = getNamesSql();
@@ -97,7 +165,8 @@ bool SqliteTextBook::read(const char *fname, bool can_create) {
 bool SqliteTextBook::save(const char *fname, const char *format,
 			  bool itextual) {
   if (!itextual) {
-    fprintf(stderr,"Sorry, cannot write an sqlite database this way just yet.\n");
+    fprintf(stderr,
+	    "Sorry, cannot write an sqlite database this way just yet.\n");
     return false;
   }
   sqlite3 *db = DB(implementation);
@@ -106,6 +175,7 @@ bool SqliteTextBook::save(const char *fname, const char *format,
   FILE *fout = stdout;
   if (!console) fout = fopen(fname,"w");
   if (fout==NULL) return false;
+
   fprintf(fout,"PRAGMA foreign_keys=OFF;\n");
   fprintf(fout,"BEGIN TRANSACTION;\n");
 
@@ -197,7 +267,7 @@ bool SqliteTextBook::open(const Property& config) {
     fprintf(stderr,"file parameter needed\n");
     return false;
   }
-  if (!read(config.get("file").asString().c_str(),true)) {
+  if (!read(config.get("file").asString().c_str(),true,config)) {
     fprintf(stderr,"failed to read %s\n", config.get("file").asString().c_str());
     return false;
   }

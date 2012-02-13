@@ -61,8 +61,14 @@ int main(int argc, char *argv[]) {
     return help?0:1;
   }
 
+  string out_file = "-";
+  if (core.size()==2) {
+    out_file = core[1];
+  }
+
   PolyBook src;
-  if (!src.read(core[0].c_str(),inputFormat.c_str())) {
+  if (!src.readAndWillWrite(core[0].c_str(),inputFormat.c_str(),
+			    out_file.c_str(),outputFormat.c_str())) {
     fprintf(stderr,"Failed to read %s\n", core[0].c_str());
     return 1;
   }
@@ -140,10 +146,6 @@ int main(int argc, char *argv[]) {
 
   src.setPool(&pool);
 
-  string out_file = "-";
-  if (core.size()==2) {
-    out_file = core[1];
-  }
   if (!src.write(out_file.c_str(),outputFormat.c_str())) {
     fprintf(stderr,"Failed to write %s\n", out_file.c_str());
     return 1;

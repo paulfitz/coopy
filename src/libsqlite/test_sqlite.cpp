@@ -15,7 +15,8 @@ int main(int argc, char *argv[]) {
     printf("Call with database_filename.db [table]\n");
   }
   SqliteTextBook book;
-  book.read(argv[1]);
+  Property p;
+  book.read(argv[1],true,p);
   vector<string> names = book.getNames();
   PolySheet sheet;
   if (argc>2) {

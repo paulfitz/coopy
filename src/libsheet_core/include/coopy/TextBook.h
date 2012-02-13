@@ -87,6 +87,10 @@ public:
     return true;
   }
 
+  virtual bool writtenToFuture() const {
+    return false;
+  }
+
   static bool exists(const char *fname);
 
   std::string toString() {
