@@ -1,3 +1,697 @@
+2012-02-13  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/tutorial_git.dox, scripts/check_git.sh,
+	src/libsheet/include/coopy/PolyBook.h,
+	src/libsheet_core/CMakeLists.txt, src/libsheet_core/OS.cpp,
+	src/libsheet_core/include/coopy/OS.h,
+	src/libsheet_core/include/coopy/TextBook.h,
+	src/libsqlite/SqliteTextBook.cpp,
+	src/libsqlite/include/coopy/SqliteTextBook.h,
+	src/libsqlite/test_sqlite.cpp, src/ssformat/ssformat.cpp,
+	src/testing/CMakeLists.txt: support for storing sqlite databases in
+	git
+
+2012-02-13  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/tutorial_diff.dox, doc/tutorial_diff.paradox: fix typo, add
+	link
+
+2012-02-13  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/SheetPatcher.cpp, src/testing/CMakeLists.txt: 
+	basic test for ours/theirs/neither resolution of simple conflicted
+	highlighter diff
+
+2012-02-13  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* CMakeLists.txt, conf/CoopyOptions.cmake: factor out options
+
+2012-02-11  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/cmd_sspatch.dox, doc/cmd_ssrediff.dox: options for resolving
+	conflicts
+
+2012-02-11  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Diff.cpp, src/libsheet/Options.cpp,
+	src/libsheet/PatchParser.cpp,
+	src/libsheet_core/MergeOutputFilter.cpp,
+	src/libsheet_core/SheetPatcher.cpp, src/testing/CMakeLists.txt,
+	tests/conflict/bridges_v3.csv, tests/conflict/bridges_v4.csv: allow
+	resolution of conflicts in patch file
+
+2012-02-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/PatchParser.cpp,
+	src/libsheet_core/MergeOutputTdiff.cpp,
+	src/libsheet_core/MergeOutputVerboseDiff.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	tests/conflict/bridges_v1_v2_parent.tdiff, tests/quote_me.csv,
+	tests/quote_me2.csv: keep around parent value for conflicts, in
+	tdiff rep
+
+2012-02-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* CoopyGuide.pdf: updated pdf
+
+2012-02-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* conf/CoopyDocLatex.cmake, doc/pdf_order.txt,
+	scripts/process_dox.sh: freshen pdf manual
+
+2012-02-08  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/main.dox, doc/tutorial_diff.dox, doc/tutorial_diff.paradox: 
+	freshen main page
+
+2012-02-08  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* CMakeLists.txt, doc/spec_hilite.dox, doc/spec_hilite.paradox,
+	doc/spec_hilite_schema.dox, doc/spec_hilite_schema.paradox,
+	src/libsheet/PatchParser.cpp, src/libsheet_core/SheetPatcher.cpp,
+	src/ssrender/CsvRender.cpp, src/ssrender/csv2html.cpp,
+	src/ssrender/include/coopy/CsvRender.h,
+	tests/header/bridges_quark.csvs: clean up add/remove columns in
+	highlighter format
+
+2012-01-21  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* bindings/coopy.i, bindings/example.py, src/gui/CMakeLists.txt,
+	src/libaccess/include/coopy/AccessSheet.h,
+	src/libaccess/include/coopy/AccessTextBook.h,
+	src/libsheet/CMakeLists.txt, src/libsheet/Coopy.cpp,
+	src/libsheet/PatchParser.cpp, src/libsheet/include/coopy/Coopy.h,
+	src/libsheet/include/coopy/PatchParser.h,
+	src/libsheet/include/coopy/PolyBook.h,
+	src/libsheet_core/CMakeLists.txt, src/libsheet_core/CsvPatch.cpp,
+	src/libsheet_core/MergeOutputAccum.cpp,
+	src/libsheet_core/MergeOutputCsvDiffV0p2.cpp,
+	src/libsheet_core/Merger.cpp, src/libsheet_core/Patcher.cpp,
+	src/libsheet_core/PolySheet.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/CsvPatch.h,
+	src/libsheet_core/include/coopy/MergeOutputAccum.h,
+	src/libsheet_core/include/coopy/PolySheet.h,
+	src/libsheet_core/include/coopy/TextBook.h,
+	src/libsheet_core/include/coopy/WrapBook.h,
+	src/ssfossil/src/csv_hooks.cpp, src/testing/CMakeLists.txt,
+	src/testing/test_sheet.cpp,
+	tests/result_altitude_diff_remove_row.csv,
+	tests/result_altitude_diff_typo.csv,
+	tests/result_altitude_merge_conflict.csv,
+	tests/result_company_merge_conflicting.csv,
+	tests/result_directory_merge_spelling.csv,
+	tests/result_excel_patch_002_col_insert.html,
+	tests/result_excel_patch_003_col_insert.html,
+	tests/result_excel_patch_004_col_delete.html,
+	tests/result_excel_patch_005_row_update.html,
+	tests/result_excel_patch_006_row_insert.html,
+	tests/result_excel_patch_007_row_delete.html: general cleanup
+
+2012-01-19  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* conf/coopy_doxygen.conf.in, src/libsheet/BookHook.cpp.in,
+	src/libsheet/PolyBook.cpp, src/libsheet/include/coopy/Options.h,
+	src/libsheet/include/coopy/PolyBook.h,
+	src/libsheet_core/CMakeLists.txt, src/libsheet_core/CsvMerge.cpp,
+	src/libsheet_core/DataBook.cpp, src/libsheet_core/TextBook.cpp,
+	src/libsheet_core/include/coopy/Appearance.h,
+	src/libsheet_core/include/coopy/BookCompare.h,
+	src/libsheet_core/include/coopy/ColMan.h,
+	src/libsheet_core/include/coopy/ColumnInfo.h,
+	src/libsheet_core/include/coopy/ColumnRef.h,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/libsheet_core/include/coopy/CsvMerge.h,
+	src/libsheet_core/include/coopy/DataBook.h,
+	src/libsheet_core/include/coopy/DataSheet.h,
+	src/libsheet_core/include/coopy/FoldedSheet.h,
+	src/libsheet_core/include/coopy/Patcher.h,
+	src/libsheet_core/include/coopy/RowMan.h,
+	src/libsheet_core/include/coopy/TextBook.h,
+	src/libsheet_core/include/coopy/TextBookFactory.h,
+	src/libsocialcalc/CMakeLists.txt, src/sslive/CMakeLists.txt,
+	src/sslive/sslive.cpp, src/testing/test_sheet.cpp: cleanup
+
+2011-12-17  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/spec_hilite.dox, doc/spec_hilite.paradox,
+	doc/spec_hilite_schema.dox, doc/spec_hilite_schema.paradox: clean up
+	phrasing
+
+2011-12-16  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/cmd_ssdiff.dox, doc/cmd_ssformat.dox, doc/cmd_ssmerge.dox,
+	doc/cmd_sspatch.dox, doc/cmd_ssrediff.dox, doc/cmd_ssresolve.dox,
+	doc/patch_format.dox, doc/spec_hilite.dox, doc/spec_hilite.paradox,
+	doc/tutorial_hilite.dox, doc/tutorial_hilite.paradox,
+	src/ssrender/CsvRender.cpp, src/ssrender/csv2html.cpp: add first
+	pass at hilite format spec
+
+2011-12-16  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/BookHook.cpp.in, src/libsheet/Options.cpp: add notes
+	to json options
+
+2011-12-16  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/make_packages.sh: add source package option
+
+2011-12-15  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/gui/src/coopy.cpp: fix windows build
+
+2011-12-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/PatchParser.cpp, src/libsheet_core/SheetPatcher.cpp: 
+	avoid null sheet names in pool
+
+2011-12-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/tutorial_diff.paradox, doc/tutorial_hilite.paradox,
+	doc/tutorial_ids.dox, doc/tutorial_ids.paradox,
+	scripts/process_dox.sh, src/testing/CMakeLists.txt: mention ssmerge
+	as an alternative to ssdiff+sspatch
+
+2011-12-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* CoopyGuide.pdf, doc/tutorial_diff.dox, doc/tutorial_hilite.dox,
+	doc/tutorial_ids.dox: update pdf guide
+
+2011-12-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* conf/CoopyDocLatex.cmake, doc/cmd_coopy.dox, doc/cmd_ssdiff.dox,
+	doc/cmd_ssformat.dox, doc/cmd_ssmerge.dox, doc/cmd_sspatch.dox,
+	doc/cmd_ssrediff.dox, doc/cmd_ssresolve.dox, doc/pdf_order.txt,
+	doc/tutorial_diff.dox, doc/tutorial_hilite.dox,
+	doc/tutorial_ids.dox, scripts/fix_order.sh, scripts/process_dox.sh,
+	src/ssrender/CsvRender.cpp, src/ssrender/csv2html.cpp: fix up pdf
+	manual
+
+2011-12-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/tutorial_coopy_conflict.dox, doc/tutorial_coopy_fork.dox,
+	doc/tutorial_coopy_new.dox, doc/tutorial_coopy_pull.dox,
+	doc/tutorial_coopy_push.dox, doc/tutorial_diff.paradox,
+	doc/tutorial_hilite.paradox, doc/tutorial_ids.paradox: 
+	hilite2->hilite
+
+2011-12-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* conf/CoopyDoc.cmake, scripts/process_dox.sh: separate out pdf
+	generation
+
+2011-12-13  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* conf/CoopyDocLatex.cmake, doc/pdf_order.txt,
+	doc/tutorial_diff.dox, doc/tutorial_diff.paradox,
+	doc/tutorial_hilite.dox, doc/tutorial_hilite.paradox,
+	doc/tutorial_ids.dox, doc/tutorial_ids.paradox,
+	scripts/process_dox.sh, src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/SheetPatcher.h,
+	src/ssrender/CsvRender.cpp, src/ssrender/csv2html.cpp,
+	src/ssrender/include/coopy/CsvRender.h: freshen documentation
+
+2011-12-13  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/main.dox, doc/tutorial_hilite.dox,
+	doc/tutorial_hilite.paradox, doc/tutorial_ids.dox,
+	doc/tutorial_ids.paradox, scripts/process_dox.sh,
+	src/libsheet/Diff.cpp, src/libsheet/PoolImpl.cpp,
+	src/libsheet/include/coopy/PoolImpl.h,
+	src/libsheet_core/BookCompare.cpp,
+	src/libsheet_core/MergeOutputFilter.cpp,
+	src/libsheet_core/NameSniffer.cpp, src/libsheet_core/Patcher.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/MergeOutputFilter.h,
+	src/libsheet_core/include/coopy/NameSniffer.h,
+	src/libsheet_core/include/coopy/Patcher.h,
+	src/libsheet_core/include/coopy/Pool.h, src/testing/CMakeLists.txt,
+	tests/directory/directory.tdiff,
+	tests/directory/directory_alice.tdiff,
+	tests/directory/directory_bob.tdiff: improved pool behavior for
+	patching divergent sqlite databases
+
+2011-12-12  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* bindings/CMakeLists.txt, bindings/coopy.i,
+	conf/CoopyConfig.cmake.in, conf/coopy_doxygen.conf.in,
+	doc/bridge.py, doc/bridge.rb, doc/cmd_ssdiff.dox,
+	doc/cmd_ssrediff.dox, doc/main.dox, doc/tutorial_diff.dox,
+	doc/tutorial_diff.paradox, doc/tutorial_hilite.dox,
+	doc/tutorial_hilite.paradox, scripts/process_dox.sh,
+	src/libsheet/Options.cpp, src/libsheet/PolyBook.cpp,
+	src/libsheet/include/coopy/PatchParser.h,
+	src/libsheet_core/MergeOutputRowOps.cpp,
+	tests/review/review_all.ops: document hilite format better
+
+2011-12-10  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* conf/CoopyDoc.cmake, doc/cmd_coopy.dox, doc/cmd_ssdiff.dox,
+	doc/cmd_ssformat.dox, doc/cmd_ssmerge.dox, doc/cmd_sspatch.dox,
+	doc/cmd_ssrediff.dox, doc/cmd_ssresolve.dox,
+	scripts/generate_examples.sh, scripts/process_dox.sh,
+	src/libsheet/Options.cpp, src/sspatch/sspatch.cpp: documentation
+	update
+
+2011-12-10  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Options.cpp, src/libsheet/PatchParser.cpp,
+	src/libsheet_core/MergeOutputFilter.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/libsheet_core/include/coopy/SheetPatcher.h,
+	src/sspatch/sspatch.cpp: bring back synonyms
+
+2011-12-10  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/test_coopy.sh, src/libsheet/Diff.cpp,
+	src/libsheet/Options.cpp, src/libsheet/PatchParser.cpp,
+	src/libsheet_core/BookCompare.cpp, src/libsheet_core/DataBook.cpp,
+	src/libsheet_core/MergeOutputFilter.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/DataBook.h,
+	src/libsheet_core/include/coopy/MergeOutputFilter.h,
+	src/libsqlite/SqliteSheet.cpp, src/testing/CMakeLists.txt: allow for
+	optional creation of missing tables
+
+2011-12-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/check.sh, src/libsheet/Diff.cpp,
+	src/libsheet/Options.cpp, src/libsheet_core/BookCompare.cpp,
+	src/libsheet_core/MergeOutputFilter.cpp,
+	src/libsheet_core/MergeOutputTdiff.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/libsheet_core/include/coopy/MergeOutputFilter.h: better schema
+	filtering
+
+2011-12-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/release.sh: fix release script
+
+2011-12-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* conf/CoopyVersion.cmake: version bump
+
+2011-12-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/check.sh, src/testing/CMakeLists.txt: fix call to
+	--version rather than --format-version
+
+2011-12-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Options.cpp, src/libsheet/include/coopy/PolyBook.h,
+	src/libsheet_core/BookCompare.cpp,
+	src/libsheet_core/MergeOutputTdiff.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/BookCompare.h,
+	src/libsheet_core/include/coopy/ColumnInfo.h,
+	src/libsheet_core/include/coopy/DataBook.h,
+	src/libsheet_core/include/coopy/Patcher.h,
+	src/libsqlite/SqliteSheet.cpp, src/ssdiff/ssdiff.cpp,
+	tests/header/applicants_base_fix.tdiff: generate schema as tdiff
+
+2011-12-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/PoolImpl.cpp, src/libsheet/include/coopy/PolyBook.h,
+	src/libsheet/include/coopy/PoolImpl.h,
+	src/libsheet_core/DataBook.cpp,
+	src/libsheet_core/include/coopy/DataBook.h,
+	src/libsheet_core/include/coopy/DataSheet.h,
+	src/libsheet_core/include/coopy/PolySheet.h,
+	src/libsheet_core/include/coopy/Pool.h,
+	src/libsheet_core/include/coopy/SheetSchema.h,
+	src/libsqlite/SqliteSheet.cpp, src/ssformat/ssformat.cpp: fix up
+	ssformat to respect pool info
+
+2011-12-09  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/CMakeLists.txt, src/libsheet/Diff.cpp,
+	src/libsheet/Options.cpp, src/libsheet/PatchParser.cpp,
+	src/libsheet/PolyBook.cpp, src/libsheet/PoolImpl.cpp,
+	src/libsheet/include/coopy/CsvTextBook.h,
+	src/libsheet/include/coopy/PolyBook.h,
+	src/libsheet/include/coopy/PoolImpl.h,
+	src/libsheet_core/CMakeLists.txt, src/libsheet_core/DataBook.cpp,
+	src/libsheet_core/Patcher.cpp, src/libsheet_core/Pool.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/DataBook.h,
+	src/libsheet_core/include/coopy/DataSheet.h,
+	src/libsheet_core/include/coopy/PolySheet.h,
+	src/libsheet_core/include/coopy/Pool.h,
+	src/libsheet_core/include/coopy/PoolImpl.h,
+	src/libsheet_core/include/coopy/SheetPatcher.h,
+	src/sspatch/sspatch.cpp, src/testing/CMakeLists.txt,
+	tests/fold/contacts_add_foreign.csvs,
+	tests/fold/contacts_add_multi.csvs,
+	tests/fold/contacts_add_multi_foreign.csvs,
+	tests/fold/contacts_meta.tdiff: defer rows if needed
+
+2011-12-07  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/include/coopy/MergeOutputFilter.h: support older
+	gcc
+
+2011-12-07  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/MergeOutputFilter.cpp,
+	src/libsheet_core/include/coopy/MergeOutputFilter.h: missing
+	initializer for name change
+
+2011-12-07  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Diff.cpp, src/libsheet/Options.cpp,
+	src/libsheet/PatchParser.cpp, src/libsheet_core/CMakeLists.txt,
+	src/libsheet_core/MergeOutputFilter.cpp,
+	src/libsheet_core/Patcher.cpp, src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/libsheet_core/include/coopy/MergeOutputFilter.h,
+	src/libsheet_core/include/coopy/MergeOutputPool.h,
+	src/libsheet_core/include/coopy/Patcher.h,
+	src/libsheet_core/include/coopy/Pool.h: add more filter options for
+	ssrediff
+
+2011-12-06  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/DataSheet.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/DataSheet.h: coining/autoincrement
+	for csvs format
+
+2011-12-05  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/CMakeLists.txt, src/gui/CMakeLists.txt,
+	src/libsheet/CMakeLists.txt, src/ssfossil/CMakeLists.txt,
+	src/testing/CMakeLists.txt: shuffle gnumeric dependency
+
+2011-12-05  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/cmd_ssdiff.dox, doc/cmd_ssmerge.dox,
+	src/libsheet/CMakeLists.txt, src/libsheet/Options.cpp,
+	src/libsheet_core/CMakeLists.txt, src/libsheet_core/DataBook.cpp,
+	src/libsheet_core/DataSheet.cpp, src/libsheet_core/FoldedSheet.cpp,
+	src/libsheet_core/Merger.cpp, src/libsheet_core/Patcher.cpp,
+	src/libsheet_core/SheetCompare.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/libsheet_core/include/coopy/CsvSheet.h,
+	src/libsheet_core/include/coopy/DataSheet.h,
+	src/libsheet_core/include/coopy/FoldedSheet.h,
+	src/libsheet_core/include/coopy/Patcher.h,
+	src/libsheet_core/include/coopy/PolySheet.h,
+	src/libsheet_core/include/coopy/TypedSheet.h,
+	src/libsheet_fold/CMakeLists.txt, src/libsheet_fold/FoldTool.cpp,
+	src/libsheet_fold/FoldedSheet.cpp,
+	src/libsheet_fold/include/coopy/FoldedSheet.h,
+	tests/fold/contacts_add.csvs: better row insertation
+
+2011-12-05  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libremotesql/RemoteSqlSheet.cpp,
+	src/libremotesql/include/coopy/RemoteSqlSheet.h,
+	src/libsheet/Options.cpp, src/libsheet_core/DataSheet.cpp,
+	src/libsheet_core/Pool.cpp, src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/libsheet_core/include/coopy/DataSheet.h,
+	src/libsheet_core/include/coopy/PolySheet.h,
+	src/libsheet_core/include/coopy/Pool.h,
+	src/libsheet_core/include/coopy/PoolImpl.h,
+	src/libsheet_core/include/coopy/SheetPatcher.h,
+	src/libsqlite/SqliteSheet.cpp,
+	src/libsqlite/include/coopy/SqliteSheet.h: prep for autoincrement
+	adds
+
+2011-12-05  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/testing/CMakeLists.txt, tests/gut/bobs_mods.tdiff: add gut
+	example test
+
+2011-12-05  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* BUILD.txt: use build-dep, stop being silly
+
+2011-11-21  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Diff.cpp, src/libsheet/PatchParser.cpp,
+	src/libsheet_core/BookCompare.cpp,
+	src/libsheet_core/CMakeLists.txt,
+	src/libsheet_core/MergeOutputVerboseDiff.cpp,
+	src/libsheet_core/Patcher.cpp, src/libsheet_core/Pool.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/libsheet_core/include/coopy/MergeOutputVerboseDiff.h,
+	src/libsheet_core/include/coopy/Patcher.h,
+	src/libsheet_core/include/coopy/Pool.h,
+	src/libsheet_core/include/coopy/PoolImpl.h,
+	src/libsheet_core/include/coopy/RefCount.h,
+	src/libsheet_core/include/coopy/SheetPatcher.h: tracking pool for
+	x-refs
+
+2011-11-15  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/FormatSniffer.cpp: another tdiff hint: @@@
+
+2011-11-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Options.cpp, src/libsheet_core/DataColumn.cpp,
+	src/libsheet_core/DataStat.cpp,
+	src/libsheet_core/MergeOutputIndex.cpp,
+	src/libsheet_core/SheetCompare.cpp,
+	src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/libsheet_core/include/coopy/DataColumn.h,
+	src/libsheet_core/include/coopy/SheetPatcher.h,
+	src/testing/CMakeLists.txt, src/testing/test_sheet.cpp,
+	tests/link_nn_nn_wide.csvs: correct csv header propagation control
+
+2011-11-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/MergeOutputIndex.cpp: clear old index data if
+	needed
+
+2011-11-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/cmd_ssdiff.dox, doc/cmd_sspatch.dox, doc/cmd_ssrediff.dox,
+	scripts/process_dox.sh: doc update
+
+2011-11-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/IndexSniffer.cpp: fallback when no primary key
+	specified
+
+2011-11-14  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Diff.cpp, src/libsheet_core/IndexSniffer.cpp,
+	src/libsheet_core/MergeOutputIndex.cpp,
+	src/libsheet_core/Merger.cpp, src/libsheet_core/SheetPatcher.cpp,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/libsheet_core/include/coopy/MergeOutputIndex.h,
+	src/libsheet_core/include/coopy/NameSniffer.h,
+	src/libsheet_core/include/coopy/Patcher.h,
+	src/libsheet_core/include/coopy/SheetPatcher.h,
+	src/testing/CMakeLists.txt, tests/book/contact_base.csvs,
+	tests/book/contact_change_one.csvs,
+	tests/book/contact_dreamer.csvs, tests/book/contact_remove.csvs,
+	tests/fold/contacts.csvs, tests/fold/contacts_to_thumb.csvs,
+	tests/fold/thumb.csvs, tests/link_nn_nn_wide.csvs: index format and
+	tests
+
+2011-11-13  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/MergeOutputIndex.cpp,
+	src/libsheet_core/Merger.cpp,
+	src/libsheet_core/include/coopy/MergeOutputIndex.h: fix index logic
+	given column changes
+
+2011-11-13  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/gui/src/coopy.cpp, src/libsheet/PatchParser.cpp,
+	src/libsheet_core/MergeOutputIndex.cpp,
+	src/libsheet_core/MergeOutputTdiff.cpp,
+	src/libsheet_core/Merger.cpp,
+	src/libsheet_core/include/coopy/MergeOutputIndex.h,
+	src/libsheet_core/include/coopy/MergeOutputTdiff.h,
+	src/libsheet_core/include/coopy/Patcher.h,
+	src/testing/CMakeLists.txt, tests/book/contact_remove.csvs: cleaner
+	index format
+
+2011-11-11  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/PatchParser.cpp,
+	src/libsheet_core/MergeOutputTdiff.cpp,
+	src/libsheet_core/include/coopy/MergeOutputTdiff.h,
+	src/libsheet_core/include/coopy/Patcher.h: preserve tdiff foreign
+	keys declaration: <=> |table1.key1=|table2.key2|table3.key3|
+
+2011-11-10  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Diff.cpp, src/libsheet/Options.cpp,
+	src/libsheet/PatchParser.cpp,
+	src/libsheet/include/coopy/PatchParser.h,
+	src/libsheet_core/Merger.cpp,
+	src/libsheet_core/include/coopy/CompareFlags.h,
+	src/ssdiff/ssrediff.cpp: support filter by insert/delete/update
+
+2011-11-10  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/DataBook.cpp,
+	src/libsheet_core/MergeOutputTdiff.cpp, src/testing/CMakeLists.txt,
+	tests/bug/rediff/patch.tdiff: rediffing bug: hunks with the same
+	column count but different column types could run-on into each other
+	incorrectly
+
+2011-11-10  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* CoopyGuide.pdf, conf/CoopyDoc.cmake, conf/CoopyDocLatex.cmake,
+	conf/coopy_doxygen.conf.in, doc/cmd_coopy.dox, doc/cmd_ssdiff.dox,
+	doc/cmd_ssformat.dox, doc/cmd_ssmerge.dox, doc/cmd_sspatch.dox,
+	doc/cmd_ssrediff.dox, doc/cmd_ssresolve.dox, doc/main.dox,
+	doc/patch_format_csv.dox, doc/pdf_order.txt, doc/tutorial_diff.dox,
+	doc/tutorial_diff.paradox, packaging/linux/conf/compilers.sh,
+	scripts/fix_images.sh, scripts/process_dox.sh: doc update
+
+2011-11-10  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* : doc update
+
+2011-11-08  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/cmd_coopy.dox, doc/cmd_ssdiff.dox, doc/cmd_ssformat.dox,
+	doc/cmd_ssmerge.dox, doc/cmd_sspatch.dox, doc/cmd_ssrediff.dox,
+	doc/cmd_ssresolve.dox, doc/tutorial_diff.dox: regenerate doc
+
+2011-11-08  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/gui/src/coopy.cpp, src/testing/CMakeLists.txt: respect key
+	argument
+
+2011-11-08  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Options.cpp: document clone/new
+
+2011-11-06  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/testing/CMakeLists.txt, tests/review/review_all.ops: minimal
+	test for ops format
+
+2011-11-06  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/include/coopy/MergeOutputRowOps.h: missing
+	return value
+
+2011-11-06  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Options.cpp: mention ops output format
+
+2011-11-06  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/CMakeLists.txt,
+	src/libsheet_core/MergeOutputRowOps.cpp,
+	src/libsheet_core/Patcher.cpp,
+	src/libsheet_core/include/coopy/MergeOutputRowOps.h: quickly pull
+	out rows affected by a diff
+
+2011-11-06  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet_core/Merger.cpp, src/libsqlite/SqliteSheet.cpp: 
+	sqlitesheet null token did not match other sheet types
+
+2011-11-05  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/related.dox: add more related projects
+
+2011-11-04  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* CoopyGuide.pdf, conf/CoopyDoc.cmake, conf/CoopyDocLatex.cmake,
+	doc/pdf_order.txt, doc/tutorial_diff.dox, doc/tutorial_git.dox,
+	scripts/fix_order.sh: add pdf guide
+
+2011-11-04  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* conf/CoopyDoc.cmake, scripts/fix_images.sh: add xpdf target
+
+2011-11-04  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* conf/CoopyDescribe.cmake, conf/CoopyDoc.cmake,
+	conf/CoopyDocLatex.cmake, conf/coopy_doxygen.conf.in,
+	conf/coopy_source.txt.in, doc/cmd_coopy.dox, doc/cmd_ssdiff.dox,
+	doc/cmd_ssformat.dox, doc/cmd_ssmerge.dox, doc/cmd_sspatch.dox,
+	doc/cmd_ssrediff.dox, doc/cmd_ssresolve.dox, doc/pdf_order.txt,
+	doc/tutorial_coopy_conflict.dox, doc/tutorial_coopy_fork.dox,
+	doc/tutorial_coopy_new.dox, doc/tutorial_coopy_pull.dox,
+	doc/tutorial_coopy_push.dox, scripts/fix_images.sh,
+	scripts/fix_order.sh, scripts/make_pdf.sh, src/libsheet/Options.cpp: 
+	better pdf documentation generation
+
+2011-11-03  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/snap_coopy_base.sh, scripts/snap_coopy_conflict.sh,
+	scripts/snap_coopy_merge.sh: prepare example of coopy merge
+
+2011-11-03  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Diff.cpp, src/libsheet/Options.cpp,
+	src/libsheet/PatchParser.cpp, src/libsheet/include/coopy/Options.h,
+	src/libsheet/include/coopy/PatchParser.h: allow sequence of --cmd
+	options to sspatch
+
+2011-11-03  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* doc/main.dox, doc/tutorial_coopy_conflict.dox,
+	scripts/snap_coopy_base.sh, scripts/snap_coopy_conflict.sh: show
+	coopy under conflict
+
+2011-11-03  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/snap_coopy_base.sh, scripts/snap_coopy_conflict.sh,
+	src/gui/src/coopy.cpp: show coopy conflict
+
+2011-11-03  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libgnumeric/GnumericSheet.cpp,
+	src/libsheet_core/SheetPatcher.cpp: highlight conflicts when colors
+	available
+
+2011-11-03  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* src/libsheet/Options.cpp, src/libsheet_core/Merger.cpp,
+	src/testing/CMakeLists.txt, tests/examples/numbers_conflict.csv,
+	tests/examples/numbers_merge_neither.csv,
+	tests/examples/numbers_merge_ours.csv,
+	tests/examples/numbers_merge_theirs.csv: dust off and test merging
+	with 'neither' resolution
+
+2011-11-02  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/test_coopy.sh, src/libsheet/CsvTextBook.cpp,
+	src/libsheet/Diff.cpp, src/libsheet/include/coopy/CsvTextBook.h,
+	src/libsheet_core/CsvWrite.cpp,
+	src/libsheet_core/include/coopy/CsvWrite.h,
+	src/ssfossil/src/csv_hooks.cpp, src/ssmerge/ssresolve.cpp,
+	src/testing/CMakeLists.txt, src/widesheet/WideSheetManager.cpp: deal
+	with conflicts in coopy
+
+2011-11-02  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/test_coopy.sh, src/gui/src/coopy.cpp,
+	src/testing/CMakeLists.txt, src/widesheet/WideSheetManager.cpp: 
+	fossil timestamp issues for coopy regression testing
+
+2011-11-01  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* scripts/test_coopy.sh, src/gui/src/coopy.cpp,
+	src/testing/CMakeLists.txt, tests/coopy/mini-people.csvs: coopy test
+	for easy scenario
+
+2011-11-01  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* : fossil repo for testing
+
+2011-10-29  Paul Fitzpatrick <paulfitz@alum.mit.edu>
+
+	* ChangeLog, scripts/make_packages.sh: seed neglected ChangeLog from
+	git2cl
+
 2011-10-29  Paul Fitzpatrick <paulfitz@alum.mit.edu>
 
 	* src/gui/src/coopy.cpp: fix osx path
