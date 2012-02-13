@@ -43,7 +43,7 @@ Some sad outcomes:
 \li You send your edited table to your friend, they say thanks, but
 since they don't have a quick way to see what you changed, or it is
 not in their preferred format, they never get around to actually
-merging in your changed.
+merging in your changes.
 
 \li You try to convince your friend to use the same software as you,
 but they are not convinced.  You argue, and pretty soon you are no longer
@@ -84,8 +84,8 @@ to prepare a report like this:
 
 This makes it very clear what you've changed, and if your friend's software
 understands this format, it could go ahead and apply these changes.
-Currently, only COOPY does, but we're agitating to get it more widely
-supported.
+Currently, only COOPY does, but we're working to get it more widely
+supported (see \ref spec_hilite).
 
 If your friend uses something that speaks SQL, COOPY can produce an
 equivalent report for them, along the lines of:
