@@ -1007,7 +1007,16 @@ bool SheetPatcher::setSheet(const char *name) {
     }
   }
   if (!psheet.isValid()) {
-    fprintf(stderr,"Cannot find sheet %s\n", name);
+    if (string(name)=="sheet") { // default name
+      if (book->namedSheets()) {
+	if (book->getNames().size() == 1) {
+	  psheet = book->readSheetByIndex(0);
+	}
+      }
+    }
+  }
+  if (!psheet.isValid()) {
+    fprintf(stderr,"Cannot find sheet %s, oh dear\n", name);
     return false;
   }
   dbg_printf("Moved to sheet %s\n", name);

@@ -32,6 +32,7 @@ if (COMPILE_GUI)
   get_target_property(coopy coopy LOCATION)
   set(coopy ${coopy} --delay)
 endif ()
+set(SSCOMPARE ${ssdiff} --equal)
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -638,11 +639,19 @@ ADD_TEST(conflict_with_parent_bang_tdiff_Compare
 
 
 # Pending - hilite support
-#ADD_TEST(conflict_with_parent_hilite ${ssdiff}  --format hilite --output conflict_with_parent_hilite.csv --parent ${TESTS}/conflict/bridges.csv ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
-#ADD_TEST(conflict_with_parent_hilite_rediff ${ssrediff}  --format tdiff --omit-format-name --output conflict_with_parent_hilite.tdiff conflict_with_parent_hilite.csv)
-#ADD_TEST(conflict_with_parent_hilite_Compare 
-#  ${CMAKE_COMMAND} -E compare_files conflict_with_parent_hilite.tdiff ${TESTS}/conflict/bridges_v1_v2_parent.tdiff)
-
+ADD_TEST(conflict_with_parent_hilite ${ssdiff}  --format hilite --output conflict_with_parent_hilite.csv --parent ${TESTS}/conflict/bridges.csv ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
+ADD_TEST(conflict_with_parent_hilite_theirs ${sspatch} --theirs --output conflict_with_parent_hilite_theirs.csv ${TESTS}/conflict/bridges_v1.csv conflict_with_parent_hilite.csv)
+ADD_TEST(conflict_with_parent_hilite_ours ${sspatch} --ours --output conflict_with_parent_hilite_ours.csv ${TESTS}/conflict/bridges_v1.csv conflict_with_parent_hilite.csv)
+ADD_TEST(conflict_with_parent_hilite_neither ${sspatch} --neither --output conflict_with_parent_hilite_neither.csv ${TESTS}/conflict/bridges_v1.csv conflict_with_parent_hilite.csv)
+ADD_TEST(conflict_with_parent_hilite_check_ours ${SSCOMPARE}
+  conflict_with_parent_hilite_ours.csv
+  ${TESTS}/conflict/bridges_v1.csv)
+ADD_TEST(conflict_with_parent_hilite_check_theirs ${SSCOMPARE}
+  conflict_with_parent_hilite_theirs.csv
+  ${TESTS}/conflict/bridges_v2.csv)
+ADD_TEST(conflict_with_parent_hilite_check_neither ${SSCOMPARE}
+  conflict_with_parent_hilite_neither.csv
+  ${TESTS}/conflict/bridges.csv)
 
 
 ADD_TEST(conflict_without_parent ${ssdiff}  --output conflict_without_parent.tdiff --omit-format-name ${TESTS}/conflict/bridges_v1.csv ${TESTS}/conflict/bridges_v2.csv)
