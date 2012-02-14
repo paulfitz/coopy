@@ -9,9 +9,9 @@ repository.
 \li \ref tutorial_git_config_csv
 \li \ref tutorial_git_worked_csv
 \li \ref tutorial_git_trouble
+\li \ref tutorial_git_useful
 \li \ref tutorial_git_config_sqlite
 \li \ref tutorial_git_worked_sqlite
-\li \ref tutorial_git_useful
 
 The basic steps are:
 \li Add "custom merge driver" lines to your .gitconfig file, to add
@@ -339,6 +339,72 @@ five,5
 \endverbatim
 
 If there's a problem, see \ref tutorial_git_trouble.
+
+Let's look now at what happens if there is a conflict.  Let's 
+change "2" to different values in the different repositories:
+
+\verbatim
+cd ../repo2; git pull ../repo master
+sspatch numbers.sqlite --inplace --cmd "= |two|2->22|"
+git commit -m "conflict 22" numbers.sqlite
+cd ../repo
+sspatch numbers.sqlite --inplace --cmd "= |two|2->222|"
+git commit -m "conflict 222" numbers.sqlite
+git pull ../repo2
+\endverbatim
+
+We get this message from git:
+\verbatim
+From ../repo2
+ * branch            HEAD       -> FETCH_HEAD
+# conflict: {{222}} vs {{22}} from {{2}}
+Conflict detected.
+Auto-merging numbers.sqlite
+CONFLICT (content): Merge conflict in numbers.sqlite
+Automatic merge failed; fix conflicts and then commit the result.
+\endverbatim
+And the content of numbers.sqlite is:
+\verbatim
+== sheet ==
+NAME,DIGIT,_MERGE_
+------------------
+one,1,NULL
+two,"((( 2 ))) 222 /// 22",CONFLICT
+threepio,33,NULL
+four,4,NULL
+five,5,NULL
+\endverbatim
+There's a new column marking where conflicts occurred.  We use Sqlite's
+willingness to put any kind of value in any column regardless of its
+official type to squeeze information into the conflicting cell.
+If you've ideas on other ways to present this data, please let the COOPY
+developers know.
+
+Suppose we decide that our version was best.  We resolve the conflict 
+either by editing the table or using \ref ssresolve as follows:
+\verbatim
+ssresolve --ours numbers.sqlite
+\endverbatim
+
+This gives us a non-conflicted table again:
+\verbatim
+== sheet ==
+NAME,DIGIT
+----------
+one,1
+two,222
+threepio,33
+four,4
+five,5
+\endverbatim
+
+Then we tell git:
+\verbatim
+git add numbers.sqlite
+git commit -m "resolved conflict"
+\endverbatim
+
+Done!
 
  *
  */

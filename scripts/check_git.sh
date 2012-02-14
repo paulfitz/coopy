@@ -37,4 +37,42 @@ git commit -m "scramble 3" numbers.sqlite
 
 git pull ../repo2
 
+echo "***"
+echo "***"
+echo "***"
 ssformat numbers.sqlite
+echo "***"
+echo "***"
+echo "***"
+
+cd ../repo2; git pull ../repo master
+
+sspatch numbers.sqlite --inplace --cmd "= |two|2->22|"
+git commit -m "conflict 22" numbers.sqlite
+
+cd ../repo
+sspatch numbers.sqlite --inplace --cmd "= |two|2->222|"
+git commit -m "conflict 222" numbers.sqlite
+
+git pull ../repo2
+
+echo "***"
+echo "***"
+echo "***"
+ssformat numbers.sqlite
+echo "***"
+echo "***"
+echo "***"
+
+ssresolve --ours numbers.sqlite
+
+echo "***"
+echo "***"
+echo "***"
+ssformat numbers.sqlite
+echo "***"
+echo "***"
+echo "***"
+
+git add numbers.sqlite
+git commit -m "resolved conflict"
