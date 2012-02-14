@@ -126,19 +126,26 @@ path_search (char *tmpl, size_t tmpl_len, const char *dir, const char *pfx,
          and will therefore try to put all temporary files in the root
          directory (unless $TMPDIR is set).  */
       retval = GetTempPath (PATH_MAX, dirbuf);
-      if (retval > 0 && retval < PATH_MAX && direxists (dirbuf))
+      if (retval > 0 && retval < PATH_MAX && direxists (dirbuf)) {
         dir = dirbuf;
+      } 
       else
 #endif
-      if (direxists (P_tmpdir))
-        dir = P_tmpdir;
-      else if (strcmp (P_tmpdir, "/tmp") != 0 && direxists ("/tmp"))
-        dir = "/tmp";
-      else
-        {
-          __set_errno (ENOENT);
-          return -1;
-        }
+	{
+	  if (direxists (P_tmpdir)) {
+	    dir = P_tmpdir;
+	    if (P_tmpdir[0]=='\\'&&P_tmpdir[1]=='\0') {
+	      if (direxists("/tmp")) {
+		dir = "/tmp";
+	      }
+	    }
+	  } else if (strcmp (P_tmpdir, "/tmp") != 0 && direxists ("/tmp")) {
+	    dir = "/tmp";
+	  } else {
+	    __set_errno (ENOENT);
+	    return -1;
+	  }
+	}
     }
 
   dlen = strlen (dir);

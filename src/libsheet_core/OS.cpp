@@ -9,6 +9,8 @@ extern "C" {
 #include "tempname.h"
 }
 
+#include <coopy/Dbg.h>
+
 using namespace coopy::os;
 
 std::string OS::getTemporaryFilename() {
@@ -18,7 +20,7 @@ std::string OS::getTemporaryFilename() {
     r = gen_tempname(buf,0,0,GT_FILE);
     //r = mkstemp(buf);
     if (r!=-1) close(r);
-    //fprintf(stderr,"Created %s\n", buf);
+    dbg_printf("Created %s\n", buf);
     return buf;
   }
   return "";
@@ -29,7 +31,8 @@ bool OS::deleteFile(const std::string& name) {
   int result = unlink(name.c_str());
   if (result!=0) {
     fprintf(stderr,"Problem deleting %s\n", name.c_str());
+  } else {
+    dbg_printf("Deleted %s\n", name.c_str());
   }
-  //fprintf(stderr,"Deleted %s\n", name.c_str());
   return result==0;
 }
