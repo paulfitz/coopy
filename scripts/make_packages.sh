@@ -44,7 +44,7 @@ while [ ! "k$1" = "k" ]; do
 	    echo "Creating $MINGW_BUILD"
 	    mkdir -p $MINGW_BUILD
 	    cd $MINGW_BUILD || exit 1
-	    cmake $cmake_opts_win -DCMAKE_TOOLCHAIN_FILE=$MINGW_REPO/src/coopy_scm/scripts/mingwin.cmake $MINGW_REPO || exit 1
+	    cmake $cmake_opts_win -DCMAKE_TOOLCHAIN_FILE=$MINGW_REPO/conf/mingwin.cmake $MINGW_REPO || exit 1
 	)
 	cd $MINGW_BUILD || exit 1
 	cmake $cmake_opts_win . || exit 1
