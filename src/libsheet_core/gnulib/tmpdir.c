@@ -155,3 +155,5 @@ path_search (char *tmpl, size_t tmpl_len, const char *dir, const char *pfx,
   sprintf (tmpl, "%.*s/%.*sXXXXXX", (int) dlen, dir, (int) plen, pfx);
   return 0;
 }
+
+

@@ -8,12 +8,11 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 SET(SQLITE_DIR ${CMAKE_SOURCE_DIR}/src/ssfossil/fossil/src)
 INCLUDE_DIRECTORIES(${SQLITE_DIR})
 
-ADD_LIBRARY(sqlite_base ${SQLITE_DIR}/sqlite3.c)
-ADD_LIBRARY(sqlite SqliteTextBook.cpp SqliteSheet.cpp)
+ADD_LIBRARY(sqlite SqliteTextBook.cpp SqliteSheet.cpp ${SQLITE_DIR}/sqlite3.c)
 
-TARGET_LINK_LIBRARIES(sqlite sqlite_base sheet_core)
+TARGET_LINK_LIBRARIES(sqlite sheet_core)
 IF (UNIX)
-  TARGET_LINK_LIBRARIES(sqlite_base dl pthread)
+  TARGET_LINK_LIBRARIES(sqlite dl pthread)
 ENDIF (UNIX)
 export(TARGETS sqlite APPEND FILE ${COOPY_DEPENDENCIES})
 

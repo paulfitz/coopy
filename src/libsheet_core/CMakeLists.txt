@@ -20,7 +20,7 @@ if (HAVE_TR1)
   endforeach()
 endif ()
 
-set(folder_source ${folder_source} gnulib/tmpdir.c)
+set(folder_source ${folder_source} gnulib/tmpdir.c gnulib/tempname.c)
 source_group("Source Files" FILES ${folder_source})
 source_group("Header Files" FILES ${folder_header})
 
