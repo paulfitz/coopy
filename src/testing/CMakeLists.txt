@@ -28,6 +28,9 @@ get_target_property(ssfold ssfold LOCATION)
 get_target_property(ssmerge ssmerge LOCATION)
 get_target_property(ssresolve ssresolve LOCATION)
 get_target_property(ssrediff ssrediff LOCATION)
+if (USE_GNUMERIC)
+  get_target_property(gnumeric_ss2html gnumeric_ss2html LOCATION)
+endif ()
 if (COMPILE_GUI)
   get_target_property(coopy coopy LOCATION)
   set(coopy ${coopy} --delay)
@@ -341,10 +344,10 @@ ADD_TEST(viterbi_check ${testprg_viterbi})
 #######################################################################
 
 MACRO(ADD_TEST2 name ref target)
-  ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
+  ADD_TEST(${name} ${${target}}
     --output test_out_${name}.csv
     ${ARGN})
-  ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+  ADD_TEST(${name}Compare ${ssdiff}
     --equals test_out_${name}.csv ${ref})
   #${CMAKE_COMMAND} -E compare_files 
   # test_out_${name} ${ref})
@@ -380,21 +383,21 @@ foreach(patcher patch_001_col_move patch_002_col_insert patch_003_col_insert pat
   SET(result_tdiff test_out_tdiff_${patcher}_result_tdiff.csv)
   SET(result_csv2 test_out_tdiff_${patcher}_result_csv2.csv)
 
-  ADD_TEST(tdiff_${patcher} ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+  ADD_TEST(tdiff_${patcher} ${sspatch}
     --format tdiff --output ${patch_file_tdiff} ${patch_file_csv1})
-  ADD_TEST(tdiff_${patcher}Reverse ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+  ADD_TEST(tdiff_${patcher}Reverse ${sspatch} 
     --format csv --output ${patch_file_csv2} ${patch_file_tdiff})
 
-  ADD_TEST(tdiff_${patcher}_csv1 ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+  ADD_TEST(tdiff_${patcher}_csv1 ${sspatch} 
     --output ${result_csv1} ${TESTS}/numbers.csv ${patch_file_csv1})
-  ADD_TEST(tdiff_${patcher}_tdiff ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+  ADD_TEST(tdiff_${patcher}_tdiff ${sspatch} 
     --output ${result_tdiff} ${TESTS}/numbers.csv ${patch_file_tdiff})
-  ADD_TEST(tdiff_${patcher}_csv1 ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+  ADD_TEST(tdiff_${patcher}_csv1 ${sspatch} 
     --output ${result_csv2} ${TESTS}/numbers.csv ${patch_file_csv2})
 
-  ADD_TEST(tdiff_${patcher}Compare1 ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+  ADD_TEST(tdiff_${patcher}Compare1 ${ssdiff} 
     --equals ${result_csv1} ${result_tdiff})
-  ADD_TEST(tdiff_${patcher}Compare1 ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+  ADD_TEST(tdiff_${patcher}Compare1 ${ssdiff} 
     --equals ${result_csv2} ${result_tdiff})
 endforeach()
 
@@ -413,10 +416,10 @@ IF (USE_GNUMERIC)
     ssdiff --verbose --format-version 0.2 --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
 
   MACRO(TEST_XLS name ref target)
-    ADD_TEST(${name} ${EXECUTABLE_OUTPUT_PATH}/${target}${EXE_EXT} 
+    ADD_TEST(${name} ${${target}} 
       --output test_out_${name}.xls
       ${ARGN})
-    ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/gnumeric_ss2html${EXE_EXT} 
+    ADD_TEST(${name}Compare ${gnumeric_ss2html} 
       --compare
         #test_out_${name}.xls ${ref} ${ref})
 	test_out_${name}.xls test_out_${name}.html ${ref})
@@ -451,11 +454,11 @@ MACRO(ADD_ROUND_TRIP_TEST_BASE name P1 P2 INTERFORMAT FORMAT DIFF_EXTRA)
     endif()
     set(fname "${name}_patch.${ext}")
     set(fname2 "${name}_result.${INTERFORMAT}")
-    ADD_TEST(${name}_diff ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+    ADD_TEST(${name}_diff ${ssdiff} 
       --output ${fname} --format ${FORMAT} ${ARGN} ${P1} ${P2} ${DIFF_EXTRA})
-    ADD_TEST(${name}_patch ${EXECUTABLE_OUTPUT_PATH}/sspatch${EXE_EXT} 
+    ADD_TEST(${name}_patch ${sspatch} 
       --output ${fname2} ${P1} ${fname} ${DIFF_EXTRA})
-    ADD_TEST(${name}Compare ${EXECUTABLE_OUTPUT_PATH}/ssdiff${EXE_EXT} 
+    ADD_TEST(${name}Compare ${ssdiff}
       --equals ${fname2} ${P2})
 ENDMACRO ()
 

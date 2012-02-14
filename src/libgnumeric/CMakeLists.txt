@@ -103,6 +103,6 @@ if (USE_GNUMERIC)
   target_link_libraries(test_gnumeric gnumeric)
 
   add_executable(gnumeric_ss2html ss2html.cpp)
-  target_link_libraries(gnumeric_ss2html gnumeric)
+  target_link_libraries(gnumeric_ss2html gnumeric ${GLIB2_LIBRARIES})
 
 endif ()
