@@ -136,7 +136,7 @@ bool PolyBook::expand(Property& config) {
   for (size_t i=0; i<ext.length(); i++) {
     ext[i] = tolower(ext[i]);
   }
-  dbg_printf("Attach: extension is %s\n", ext.c_str());
+  //dbg_printf("Attach: extension is %s\n", ext.c_str());
 
   if (filename.substr(0,4)!="dbi:") {
     if (ext == ".json") {
@@ -168,11 +168,11 @@ bool PolyBook::expand(Property& config) {
 	size_t div = word.find('=');
 	if (div==string::npos) {
 	  words.push_back(word);
-	  dbg_printf("dbi: part %s\n", word.c_str());
+	  //dbg_printf("dbi: part %s\n", word.c_str());
 	} else {
 	  string key = word.substr(0,div);
 	  string val = word.substr(div+1,word.length());
-	  dbg_printf("dbi: %s->%s\n", key.c_str(), val.c_str());
+	  //dbg_printf("dbi: %s->%s\n", key.c_str(), val.c_str());
 	  if (key=="port") {
 	    config.put(key.c_str(),atoi(val.c_str()));
 	  } else {
@@ -244,7 +244,7 @@ bool PolyBook::expand(Property& config) {
     }
   }
 
-  dbg_printf("Attach: type [%s] file [%s] settings [%s]\n", key.c_str(), filename.c_str(), config.toString().c_str());
+  dbg_printf("FILE: type [%s] file [%s] settings: %s\n", key.c_str(), filename.c_str(), config.toString().c_str());
 
   if (key=="") {
     fprintf(stderr,"* Extension %s not known, maybe use a .json config file?\n",
@@ -294,10 +294,10 @@ bool PolyBook::attach(Property& config) {
       }
     }
   }
-  book = nextBook;
-  if (book!=NULL) {
-    book->addReference();
+  if (nextBook!=NULL && nextBook!=book) {
+    nextBook->addReference();
   }
+  book = nextBook;
   options = config;
   return book!=NULL;
 }

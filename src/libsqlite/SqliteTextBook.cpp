@@ -25,6 +25,7 @@ SqliteTextBook::SqliteTextBook(bool textual) {
   this->textual = textual;
   memory = false;
   prewrite = false;
+  postwrite = false;
 }
 
 SqliteTextBook::~SqliteTextBook() {
@@ -37,19 +38,22 @@ void SqliteTextBook::clear() {
     implementation = NULL;
   }
   if (hold_temp!="") {
-    FILE *fin = fopen(hold_temp.c_str(),"rb");
-    char buf[10000];
-    if (fin) {
-      size_t r = 0;
-      do {
-	r = fread(buf,1,sizeof(buf),fin);
-	if (r>0) {
-	  fwrite(buf,1,r,stdout);
-	}
-      } while (r>0);
-      fclose(fin);
+    if (postwrite) {
+      FILE *fin = fopen(hold_temp.c_str(),"rb");
+      char buf[10000];
+      if (fin) {
+	size_t r = 0;
+	do {
+	  r = fread(buf,1,sizeof(buf),fin);
+	  if (r>0) {
+	    fwrite(buf,1,r,stdout);
+	  }
+	} while (r>0);
+	fclose(fin);
+      }
+      fflush(stdout);
+      postwrite = false;
     }
-    fflush(stdout);
     OS::deleteFile(hold_temp);
     hold_temp = "";
   }
@@ -66,9 +70,11 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
     const Property& pout = config.get("output_info").asMap();
     if (pout.check("type")) {
       if (pout.get("type").asString()=="sqlite") {
+	alt_fname = "";
 	if (pout.check("database")) {
 	  alt_fname = pout.get("database").asString();
-	} else {
+	}
+	if (alt_fname == "") {
 	  alt_fname = pout.get("file").asString();
 	}
 	done = true;
@@ -77,6 +83,8 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
 	  //fprintf(stderr,"Cannot write raw sqlite to stdout\n");
 	  alt_fname = OS::getTemporaryFilename();
 	  hold_temp = alt_fname;
+	  postwrite = true;
+	  //printf("Stored %s\n", hold_temp.c_str());
 	}
       }
     }
@@ -127,6 +135,7 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
 	    if (memory) {
 	      alt_fname = OS::getTemporaryFilename();
 	      hold_temp = alt_fname;
+	      //printf("Stored %s\n", hold_temp.c_str());
 	      memory = false;
 	    }
 	    FILE *fout = fopen(alt_fname.c_str(),"wb");

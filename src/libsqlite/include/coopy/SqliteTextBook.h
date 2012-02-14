@@ -60,6 +60,7 @@ private:
   bool textual;
   bool memory;
   bool prewrite;
+  bool postwrite;
   std::string hold_temp;
   
   std::vector<std::string> names;

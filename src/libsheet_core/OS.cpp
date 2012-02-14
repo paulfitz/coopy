@@ -2,14 +2,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
+extern "C" {
+#include "tmpdir.h"
+}
 
 using namespace coopy::os;
 
 std::string OS::getTemporaryFilename() {
-  // replace with better method!
-  std::string fname = tempnam(NULL,"_cpy_");
-  //fprintf(stderr,"Created %s\n", fname.c_str());
-  return fname;
+  char buf[10000];
+  int r = path_search(buf,sizeof(buf),NULL,"_cpy_",true);
+  if (r==0) {
+    r = mkstemp(buf);
+    if (r!=-1) close(r);
+    //fprintf(stderr,"Created %s\n", buf);
+    return buf;
+  }
+  return "";
 }
 
 
