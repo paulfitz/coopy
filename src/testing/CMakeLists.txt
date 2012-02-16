@@ -969,3 +969,14 @@ ADD_TEST(sqlite_sqlitext_fwd_chk ${SSCOMPARE} ${TESTS}/bridges.csv sqlite_sqlite
 ADD_TEST(sqlite_sqlitext_rev_chk ${SSCOMPARE} ${TESTS}/bridges.csv sqlite_sqlitext_base.2.sqlitext)
 
 
+#######################################################################
+#######################################################################
+
+# stream delimitation test
+
+MACRO(ADD_STREAM_TEST name in out)
+  ADD_TEST(${name} ${CMAKE_COMMAND} -Dname=${name} "-Din:STRING=${in}" "-Dout:STRING=${out}" "-Dprocess:STRING=${ARGN}" -P ${CMAKE_CURRENT_SOURCE_DIR}/harness.cmake)
+ENDMACRO()
+
+ADD_STREAM_TEST(delimit_stdin_base ${TESTS}/format/bi_bridge.txt delimit_stdin_base.tdiff ${ssdiff} --omit-format-name --omit-sheet-name dbi:csv:length=header:file=- dbi:csv:length=header:file=-)
+ADD_TEST(delimit_stdin_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_base.tdiff ${TESTS}/format/bi_bridge_diff.tdiff)

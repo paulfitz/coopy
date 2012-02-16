@@ -17,7 +17,8 @@ int CsvFile::write(const DataSheet& src, const char *fname) {
 
 static int write(const DataSheet& src, const Property& config,
 		 string *output) {
-  dbg_printf("Writing a %dx%d csv file\n", src.width(), src.height());
+  dbg_printf("Writing a %dx%d csv file: options %s\n", src.width(), src.height(),
+	     config.toString().c_str());
   std::string fname = config.get("file",PolyValue::makeString("-")).asString();
   SheetStyle style;
   FILE *fp = NULL;

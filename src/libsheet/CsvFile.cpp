@@ -11,6 +11,7 @@ extern "C" {
 #include <coopy/CsvFile.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/Stringer.h>
+#include <coopy/FileIO.h>
 
 #include <string.h>
 
@@ -232,9 +233,9 @@ int CsvFile::read(coopy::format::Reader& reader, CsvSheet& dest,
 // len = -1: file
 // len >= 0: in memory
 static int read(const char *src, int len, CsvSheetReaderState& dest, 
-		const Property& config) {
+	const Property& config) {
   bool fromFile = (len==-1);
-  FILE *fp = NULL;
+  FileIO fp;
   char buf[32768];
   size_t bytes_read;
   struct csv_parser p;
@@ -254,23 +255,15 @@ static int read(const char *src, int len, CsvSheetReaderState& dest,
   bool need_close = true;
 
   if (fromFile) {
-    if (strcmp(src,"-")==0) {
-      fp = stdin;
-      need_close = false;
-    } else {
-      fp = fopen(src,"rb");
-    }
-    if (!fp) {
+    if (!fp.open(src,config)) {
       fprintf(stderr,"CsvRead: could not open %s\n", src);
       return 1;
     }
-  } else {
-    need_close = false;
   }
 
-  if (fp==stdin) {
+  if (fp.isPiped()) {
     string pre;
-    while ((bytes_read=fread(buf,1,sizeof(buf),fp))>0) {
+    while ((bytes_read=fp.fread(buf,1,sizeof(buf)))>0) {
       pre.append(buf,bytes_read);
     }
     SheetStyle style;
@@ -286,8 +279,8 @@ static int read(const char *src, int len, CsvSheetReaderState& dest,
       fprintf(stderr,"error parsing standard input\n");
       exit(1);
     }
-  } else if (fp!=NULL) {
-    while ((bytes_read=fread(buf,1,sizeof(buf),fp))>0) {
+  } else if (fp.isValid()) {
+    while ((bytes_read=fp.fread(buf,1,sizeof(buf)))>0) {
       if (csv_parse(&p,
 		    buf,
 		    bytes_read,
@@ -314,9 +307,7 @@ static int read(const char *src, int len, CsvSheetReaderState& dest,
 	   csvfile_merge_cb1,
 	   csvfile_merge_cb2,
 	   (void*)(&dest));
-  if (need_close) {
-    fclose(fp);
-  }
+  fp.close();
   csv_free(&p);
 
   if (config.get("flip_vertical").asInt()!=0) {
