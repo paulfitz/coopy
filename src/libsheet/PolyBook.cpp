@@ -246,6 +246,10 @@ bool PolyBook::expand(Property& config) {
 
   dbg_printf("FILE: type [%s] file [%s] settings: %s\n", key.c_str(), filename.c_str(), config.toString().c_str());
 
+  if (config.get("file").asString()=="-"&&config.check("only_if_exists")) {
+    config.put("skip",true);
+  }
+
   if (key=="") {
     fprintf(stderr,"* Extension %s not known, maybe use a .json config file?\n",
 	    ext.c_str());
@@ -284,6 +288,10 @@ bool PolyBook::attach(Property& config) {
   ac.canOverwrite = true;
   ac.shouldRead = config.get("should_read").asBoolean();
   ac.shouldWrite = config.get("should_write").asBoolean();
+  if (config.check("skip")) {
+    ac.shouldRead = false;
+    ac.shouldWrite = false;
+  }
   ac.prevBook = book;
   ac.prevOptions = options;
   TextBook *nextBook = f.open(ac,ar);

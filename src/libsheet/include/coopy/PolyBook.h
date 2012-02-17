@@ -98,6 +98,16 @@ public:
     return attach(p);
   }
 
+  bool readIfExists(const char *fname) {
+    coopy::store::Property p;
+    p.put("file",fname);
+    p.put("can_create",false);
+    p.put("only_if_exists",true);
+    p.put("should_read",true);
+    p.put("should_write",false);
+    return attach(p);
+  }
+
   bool readAndWillWrite(const char *in_name, const char *in_format,
 			const char *out_name, const char *out_format) {
     coopy::store::Property p;
@@ -133,7 +143,7 @@ public:
       }
     }
     p.put("can_create",true);
-    p.put("should_read",true);
+    p.put("should_read",false);
     p.put("should_attach",true);
     p.put("should_write",false);
     return attach(p);

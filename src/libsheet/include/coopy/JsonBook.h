@@ -69,6 +69,10 @@ public:
   }
 
   virtual TextBook *open(AttachConfig& config, AttachReport& report) {
+    //static int ct = 0;
+    //printf("hallo! write %d read %d   :  '%s'\n", config.shouldWrite, config.shouldRead, config.options.get("file").asString().c_str());
+    //ct++;
+    //COOPY_ASSERT(ct<5);
     if (config.shouldWrite) {
       if (config.prevBook!=NULL) {
 	dbg_printf("writing book file %s\n", config.options.get("file").asString().c_str());

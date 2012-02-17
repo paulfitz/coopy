@@ -166,8 +166,15 @@ static bool writePart(Json::Value& root2,
 bool JsonBook::write(const char *fname, TextBook *book) {
   if (book==NULL) return false;
   Json::Value root(Json::objectValue);
-  ofstream out(fname);
-  if (out.bad()) {
+  ostream *fout = &cout;
+  ofstream out;
+  if (string(fname)!="-") {
+    out.open(fname);
+    fout = &out;
+  }
+
+
+  if (fout->bad()) {
     fprintf(stderr,"Failed to open %s for writing\n", fname);
     return false;
   }
@@ -184,7 +191,7 @@ bool JsonBook::write(const char *fname, TextBook *book) {
     if (!sheet.isValid()) return false;
     if (!writePart(root2,&sheet,hasSchema)) return false;
   }
-  out << root;
+  (*fout) << root;
   return true;
 }
 

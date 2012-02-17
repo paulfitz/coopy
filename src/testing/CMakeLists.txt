@@ -980,3 +980,7 @@ ENDMACRO()
 
 ADD_STREAM_TEST(delimit_stdin_base ${TESTS}/format/bi_bridge.txt delimit_stdin_base.tdiff ${ssdiff} --omit-format-name --omit-sheet-name dbi:csv:length=header:file=- dbi:csv:length=header:file=-)
 ADD_TEST(delimit_stdin_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_base.tdiff ${TESTS}/format/bi_bridge_diff.tdiff)
+
+ADD_STREAM_TEST(delimit_stdin_json_base ${TESTS}/format/bi_bridge.txt delimit_stdin_json_base.jsonbook ${ssdiff} --format hilite --omit-format-name --omit-sheet-name --output dbi:jsonbook:file=- dbi:csv:length=header:file=- dbi:csv:length=header:file=-)
+ADD_TEST(delimit_stdin_json_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_json_base.jsonbook ${TESTS}/format/bi_bridge_diff.jsonbook)
+

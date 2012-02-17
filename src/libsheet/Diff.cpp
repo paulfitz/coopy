@@ -187,6 +187,7 @@ int Diff::apply(const Options& opt) {
   }
   PolyBook obook;
   if (diff->needOutputBook()) {
+    // output touched
     if (!obook.attach(output.c_str())) {
       delete diff; diff = NULL;
       return 1;
@@ -196,7 +197,12 @@ int Diff::apply(const Options& opt) {
 
   PolyBook tbook;
   if (diff->outputStartsFromInput()&&!cloned) {
-    if (output!="-") {
+    char ch = 'x';
+    if (output.length()>0) {
+      ch = output[output.length()-1];
+    }
+    if (ch!='-') { // crude test for stdin/out
+      // output_touched
       if (!_local.write(output.c_str())) {
 	delete diff; diff = NULL;
 	return 1;
@@ -205,7 +211,8 @@ int Diff::apply(const Options& opt) {
 	fprintf(stderr,"Failed to read %s\n", local_file.c_str());
 	return 1;
       }
-      if (!tbook.read(output.c_str())) {
+      // output touched
+      if (!tbook.readIfExists(output.c_str())) {
 	fprintf(stderr,"Failed to read %s\n", output.c_str());
 	return 1;
       }
@@ -314,7 +321,9 @@ int Diff::apply(const Options& opt) {
   diff->stopOutput(output,flags);
   if (diff->needOutputBook()) {
     if (obook.isValid()) {
-      obook.flush();
+      if (!diff->outputStartsFromInput()) {
+	obook.flush();
+      }
     } else {
       local->flush();
     }
@@ -326,6 +335,7 @@ int Diff::apply(const Options& opt) {
   }
 
   if (diff->outputStartsFromInput()) {
+    // output touched
     if (!tbook.write(output.c_str())) {
       fprintf(stderr,"Failed to write %s\n", output.c_str());
       return 1;
