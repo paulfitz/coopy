@@ -1005,3 +1005,11 @@ ADD_STREAM_OUT_TEST(column_rename_stdout column_rename_stdout.csv ${ssdiff} --fo
 ADD_TEST(column_rename_stdout_ref ${ssdiff} --output column_rename_stdout_ref.csv --format hilite ${TESTS}/column_name/bridges_cool.csv ${TESTS}/column_name/bridges_cool_exclaim.csv)
 ADD_TEST(column_rename_stdout_equal ${ssdiff} --equal column_rename_stdout.csv column_rename_stdout_ref.csv)
 
+#######################################################################
+#######################################################################
+
+# Small tables edge cases
+
+foreach(FORMAT csv tdiff color)
+  ADD_ROUND_TRIP_TEST_BI(edge_name_age_${FORMAT} ${TESTS}/edge/name_age_1.csv ${TESTS}/edge/name_age_2.csv ${FORMAT})
+endforeach()

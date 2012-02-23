@@ -175,6 +175,12 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     spivot.sniff();
     slocal.sniff();
     sremote.sniff();
+    spivot.resniff(slocal);
+    spivot.resniff(sremote);
+    slocal.resniff(spivot);
+    slocal.resniff(sremote);
+    sremote.resniff(spivot);
+    sremote.resniff(slocal);
 
     dbg_printf("SheetCompare::compare wrapping sheets\n");
 

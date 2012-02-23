@@ -14,6 +14,7 @@ using namespace std;
 
 void SchemaSniffer::sniff(bool force) {
   dbg_printf("Sniff schema\n");
+  fallback = SimpleSheetSchema();
   COOPY_ASSERT(sheet!=NULL);
   if (!force) {
     if (sheet->getSchema()!=NULL) {
@@ -25,7 +26,11 @@ void SchemaSniffer::sniff(bool force) {
     }
   }
   CompareFlags flags;
-  NameSniffer nameSniffer(*sheet,flags);
+  if (!ns) {
+    ns = new NameSniffer(*sheet,flags);
+    COOPY_ASSERT(ns);
+  }
+  NameSniffer& nameSniffer = *ns;
   vector<string> names = nameSniffer.suggestNames();
   vector<ColumnType> ct = nameSniffer.suggestTypes();
   IndexSniffer indexSniffer(*sheet,flags,nameSniffer);
@@ -75,4 +80,12 @@ void SchemaSniffer::sniff(bool force) {
 
 SheetSchema *SchemaSniffer::suggestSchema() {
   return schema;
+}
+
+void SchemaSniffer::resniff(coopy::store::SchemaSniffer& alt) {
+  if (ns && alt.ns) {
+    if (ns->resniff(*alt.ns)) {
+      sniff();
+    }
+  }
 }

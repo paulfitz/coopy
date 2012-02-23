@@ -22,6 +22,7 @@ private:
   const coopy::cmp::CompareFlags& flags;
   bool embed;
   bool fake;
+  bool canUseTop;
   bool sniffed;
   int div;
 public:
@@ -31,12 +32,15 @@ public:
     div = -1;
     fake = true;
     sniffed = false;
+    canUseTop = false;
     if (autosniff) {
       sniff();
     }
   }
 
-  void sniff(); 
+  void sniff(int suggest = -1); 
+
+  bool resniff(NameSniffer& alt); 
 
   int getHeaderHeight() const {
     if (div<0) return 0;

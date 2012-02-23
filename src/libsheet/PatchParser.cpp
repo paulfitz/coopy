@@ -1261,6 +1261,18 @@ bool PatchParser::applyColor() {
   return applyHiliteBook(book);
 }
 
+static string remap(map<string,string>& m, const string& s) {
+  map<string,string>::const_iterator it = m.find(s);
+  if (it!=m.end()) return it->second;
+  return s;
+}
+
+static int remap(map<int,int>& m, int s) {
+  map<int,int>::const_iterator it = m.find(s);
+  if (it!=m.end()) return it->second;
+  return s;
+}
+
 bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 
   patcher->mergeStart();
@@ -1277,9 +1289,10 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
     }
     vector<string> cols;
     vector<string> activeCol;
-    vector<string> origCol;
     vector<string> statusCol;
     vector<string> nameCol;
+    vector<string> origCol;
+    vector<int> offsetCol;
     RowChange::txt2bool indexes;
     int xoff = 1;
     int yoff = 0;
@@ -1334,6 +1347,7 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	  cols.push_back(txt);
 	  activeCol.push_back(txt);
 	  statusCol.push_back("");
+	  offsetCol.push_back(0);
 	  nameCol.push_back("");
 	  indexes[txt] = true;
 	}
@@ -1362,18 +1376,64 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	      nameCol[j-1-xoff] = act.substr(1,act.length()-2);
 	      origCol.push_back(nameCol[j-1-xoff]);
 	    }
+	    if (act[0]=='<'||act[0]=='>') {
+	      statusCol[j-1-xoff] = "<>";
+	      offsetCol[j-1-xoff] = act.length()*((act[0]=='>')?-1:1);
+	    }
 	  }
 
+	  map<int,int> indexMap;
+
+	  for (int j=0; j<(int)origCol.size(); j++) {
+	    string act = statusCol[j];
+	    if (act!="<>") continue;
+	    int jj = j+offsetCol[j];
+	    printf("%d vs %d\n", j, jj);
+	    indexMap[j] = jj;
+	    indexMap[jj] = j;
+	  }
 	  NameChange nc;
 	  nc.mode = NAME_CHANGE_DECLARE;
 	  nc.final = false;
-	  nc.names = origCol;
+	  for (int j=0; j<(int)origCol.size(); j++) {
+	    nc.names.push_back(origCol[remap(indexMap,j)]);
+	  }
+	  origCol = nc.names;
 	  patcher->changeName(nc);
+
+	  indexMap.clear();
+
+	  for (int j=0; j<(int)origCol.size(); j++) {
+	    string act = statusCol[j];
+	    if (act!="<>") continue;
+
+	    OrderChange order;
+	    order.mode = ORDER_CHANGE_MOVE;
+
+	    for (int k=0; k<(int)origCol.size(); k++) {
+	      order.namesBefore.push_back(origCol[remap(indexMap,k)]);
+	      order.indicesBefore.push_back(remap(indexMap,k));
+	    }
+
+	    int jj = j+offsetCol[j];
+	    
+	    indexMap[j] = jj;
+	    indexMap[jj] = j;
+
+	    for (int k=0; k<(int)origCol.size(); k++) {
+	      order.namesAfter.push_back(origCol[remap(indexMap,k)]);
+	      order.indicesAfter.push_back(remap(indexMap,k));
+	    }
+
+	    order.subject = j;
+	    patcher->changeColumn(order);	    
+	  }
 
 	  for (int j=0; j<(int)cols.size(); j++) {
 	    string act = statusCol[j];
 	    //printf("   [%d] [%s]\n", j, act.c_str());
 	    if (act=="") continue;
+	    if (act=="<>") continue;
 	    OrderChange order;
 	    if (act=="+++") {
 	      order.mode = ORDER_CHANGE_INSERT;
@@ -1381,10 +1441,10 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	      order.mode = ORDER_CHANGE_DELETE;
 	    } else if (act=="=") {
 	      order.mode = ORDER_CHANGE_RENAME;
-	    }
+	    } 
 	    for (int k=0; k<(int)cols.size(); k++) {	
 	      string actk = statusCol[k];
-	      if (actk=="" || actk=="=" ||
+	      if (actk=="" || actk=="=" || actk=="<>" ||
 		  (k>=j&&actk=="---") || (k<j&&actk=="+++")) {
 		if (actk=="="&&k>=j) {
 		  order.namesBefore.push_back(nameCol[k]);
@@ -1396,7 +1456,7 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	    }
 	    for (int k=0; k<(int)cols.size(); k++) {	
 	      string actk = statusCol[k];
-	      if (actk=="" || actk=="=" ||
+	      if (actk=="" || actk=="=" || actk=="<>" ||
 		  (k>j&&actk=="---") || (k<=j&&actk=="+++")) {
 		if (actk=="="&&k>j) {
 		  order.namesAfter.push_back(nameCol[k]);

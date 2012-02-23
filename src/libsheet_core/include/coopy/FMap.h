@@ -80,6 +80,7 @@ public:
   }
 
   void add(std::string txt, bool query, int ctrl = 0) {
+    //printf("add %s %d %d\n", txt.c_str(), query, ctrl);
     this->query = query;
     //if (ctrl==0) {
     if (query) {

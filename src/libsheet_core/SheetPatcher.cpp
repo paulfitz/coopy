@@ -43,6 +43,7 @@ void SheetPatcher::checkHeader() {
   if (c==sheet.width()) {
     if (!sheet.hasExternalColumnNames()) {
       dbg_printf("HEADER LINE NUDGE\n");
+      //sheet.mustHaveSchema();
       rowCursor = 1;
     }
   }
@@ -139,6 +140,7 @@ int SheetPatcher::matchCol(const std::string& mover) {
     //mover.c_str());
     if (activeCol.cellString(i,0)==imover) {
       if (statusCol.cellString(i,0)!="---") {
+	//printf("Match at %d (%s)\n", i, mover.c_str());
 	return i;
       }
     }
@@ -223,6 +225,7 @@ bool SheetPatcher::renameColumn(int idx, const std::string& name,
 }
 
 bool SheetPatcher::moveColumn(int idx, int idx2) {
+  //printf("MOVE %d to %d\n", idx, idx2);
   PolySheet sheet = getSheet();
   ColumnRef from(idx);
   ColumnRef to(idx2);
@@ -232,6 +235,7 @@ bool SheetPatcher::moveColumn(int idx, int idx2) {
   if (descriptive) {
     int first = idx;
     int final = at.getIndex();
+    int xfinal = final;
     int sgn = 1;
     string name = "";
     string ch = ">";
@@ -246,7 +250,7 @@ bool SheetPatcher::moveColumn(int idx, int idx2) {
 	name += ch;
       }
     }
-    statusCol.cellString(final,0,name);
+    statusCol.cellString(xfinal,0,name);
   }
   updateCols();
   return ok;
@@ -697,6 +701,8 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       val[idx] = it->second;
       cval[idx] = it->second;
       pval[idx] = it->second;
+    } else {
+      fprintf(stderr,"Unknown column %s\n", it->first.c_str());
     }
   }
   for (RowChange::txt2cell::const_iterator it = change.conflictingVal.begin();
@@ -973,10 +979,10 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
     if (first) {
       for (int i=0; i<(int)names.size(); i++) {
 	if (names[i]!=activeCol.cellString(i,0)) {
-	  if (names[i][0]=='[') {
-	    syn2name[names[i]] = activeCol.cellString(i,0);
-	    name2syn[activeCol.cellString(i,0)] = names[i];
-	  }
+	  //if (names[i][0]=='[') {
+	  syn2name[names[i]] = activeCol.cellString(i,0);
+	  name2syn[activeCol.cellString(i,0)] = names[i];
+	  //}
 	}
       }
       updateCols();
