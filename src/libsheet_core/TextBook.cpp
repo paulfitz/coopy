@@ -151,6 +151,11 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
     if (schema->headerHeight()>0) {
       if (ext) {
 	start += schema->headerHeight();
+	if (start>0) {
+	  if (target.getSchema()!=NULL) {
+	    target.getSchema()->setHeaderHeight(0);
+	  }
+	}
       }
     }
     if (!ext) {

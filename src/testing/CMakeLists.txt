@@ -106,6 +106,7 @@ ADD_TEST(directory_merge_spelling ${testprg}
   --remote --read ${TESTS}/test001_spell.csv
   --compare
 #  --local --write ${TESTS}/result_directory_merge_spelling.csv
+#  --local --write /tmp/out.csv
   --remote --read ${TESTS}/result_directory_merge_spelling.csv
   --diff
   --prop diffs --assert 0)
@@ -529,7 +530,7 @@ ADD_TEST(format_book_sqlite ${ssformat} ${TESTS}/book/000/index.book format_book
 
 # header testing
 
-foreach(prefix applicants capital)
+foreach(prefix applicants capital argonaut)
   ADD_TEST(header_${prefix} ${ssformat} --header ${TESTS}/header/${prefix}.csv ${prefix}_header.csv)
   ADD_TEST(header_${prefix}_check ${ssdiff} --equals ${TESTS}/header/${prefix}_header.csv ${prefix}_header.csv)
 endforeach()
@@ -978,9 +979,29 @@ MACRO(ADD_STREAM_TEST name in out)
   ADD_TEST(${name} ${CMAKE_COMMAND} -Dname=${name} "-Din:STRING=${in}" "-Dout:STRING=${out}" "-Dprocess:STRING=${ARGN}" -P ${CMAKE_CURRENT_SOURCE_DIR}/harness.cmake)
 ENDMACRO()
 
+MACRO(ADD_STREAM_OUT_TEST name out)
+  ADD_TEST(${name} ${CMAKE_COMMAND} -Dname=${name} "-Dout:STRING=${out}" "-Dprocess:STRING=${ARGN}" -P ${CMAKE_CURRENT_SOURCE_DIR}/harness.cmake)
+ENDMACRO()
+
 ADD_STREAM_TEST(delimit_stdin_base ${TESTS}/format/bi_bridge.txt delimit_stdin_base.tdiff ${ssdiff} --omit-format-name --omit-sheet-name dbi:csv:length=header:file=- dbi:csv:length=header:file=-)
 ADD_TEST(delimit_stdin_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_base.tdiff ${TESTS}/format/bi_bridge_diff.tdiff)
 
 ADD_STREAM_TEST(delimit_stdin_json_base ${TESTS}/format/bi_bridge.txt delimit_stdin_json_base.jsonbook ${ssdiff} --format hilite --omit-format-name --omit-sheet-name --output dbi:jsonbook:file=- dbi:csv:length=header:file=- dbi:csv:length=header:file=-)
 ADD_TEST(delimit_stdin_json_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_json_base.jsonbook ${TESTS}/format/bi_bridge_diff.jsonbook)
+
+#######################################################################
+#######################################################################
+
+# Column renaming
+# Used to be handled in same way as cell changes, but now separated
+# as a schema change.
+
+foreach(FORMAT csv tdiff color)
+  ADD_ROUND_TRIP_TEST_BI(column_rename_base_${FORMAT} ${TESTS}/bridges.csv ${TESTS}/column_name/bridges_column_name.csv ${FORMAT})
+  ADD_ROUND_TRIP_TEST_BI(column_rename_cool_${FORMAT} ${TESTS}/column_name/bridges_cool.csv ${TESTS}/column_name/bridges_cool_exclaim.csv ${FORMAT})
+endforeach()
+
+ADD_STREAM_OUT_TEST(column_rename_stdout column_rename_stdout.csv ${ssdiff} --format hilite --output dbi:csv:header=-1:file=- ${TESTS}/column_name/bridges_cool.csv ${TESTS}/column_name/bridges_cool_exclaim.csv)
+ADD_TEST(column_rename_stdout_ref ${ssdiff} --output column_rename_stdout_ref.csv --format hilite ${TESTS}/column_name/bridges_cool.csv ${TESTS}/column_name/bridges_cool_exclaim.csv)
+ADD_TEST(column_rename_stdout_equal ${ssdiff} --equal column_rename_stdout.csv column_rename_stdout_ref.csv)
 

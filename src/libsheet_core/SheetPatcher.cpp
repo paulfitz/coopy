@@ -144,8 +144,7 @@ int SheetPatcher::matchCol(const std::string& mover) {
     }
   }
   fprintf(stderr,"column not found: %s\n", mover.c_str());
-  PolySheet sheet = getSheet();
-  //printf("Working on %s\n", sheet.toString().c_str());
+  //PolySheet sheet = getSheet();
   exit(1);
   return -1;
 }
@@ -207,6 +206,20 @@ int SheetPatcher::updateCols() {
     }
   }
   return 0;
+}
+
+bool SheetPatcher::renameColumn(int idx, const std::string& name,
+				const std::string& oldName) {
+  PolySheet sheet = getSheet();
+  dbg_printf("Should rename column %d to %s\n", idx, name.c_str());
+  bool ok = sheet.modifyColumn(ColumnRef(idx),ColumnInfo(name));
+  activeCol.cellString(idx,0,name);
+  statusCol.cellString(idx,0,string("(") + oldName + ")");
+  if (!ok) {
+    fprintf(stderr,"Failed to rename column to %s\n", name.c_str());
+  }
+  updateCols();
+  return true;
 }
 
 bool SheetPatcher::moveColumn(int idx, int idx2) {
@@ -347,6 +360,16 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
       }
       //printf("Moving %s %d->%d\n", mover.c_str(), idx, idx2);
       return moveColumn(idx,idx2);
+    }
+    break;
+  case ORDER_CHANGE_RENAME:
+    {
+      int fromSheet = change.identityToIndex(change.subject);
+      int toSheet = change.identityToIndexAfter(change.subject);
+      string target = change.namesBefore[fromSheet];
+      string newName = change.namesAfter[toSheet];
+      int idx = matchCol(target);
+      return renameColumn(idx,newName,target);
     }
     break;
   default:
@@ -1290,4 +1313,13 @@ bool SheetPatcher::updateSheet() {
 
   return true;
 }
+
+coopy::store::PolySheet SheetPatcher::getSheet() {
+  PolySheet sheet = Patcher::getSheet();
+  if (!getFlags().assume_header) {
+    sheet.forbidSchema();
+  }
+  return sheet;
+}
+
 

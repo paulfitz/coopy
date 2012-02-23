@@ -167,6 +167,17 @@ bool MergeOutputTdiff::changeColumn(const OrderChange& change) {
       }
     }
     break;
+  case ORDER_CHANGE_RENAME:
+    {
+      int idx = change.identityToIndexAfter(change.subject);
+      if (change.namesAfter.size()<=idx) {
+	fprintf(stderr, "Could not find column to rename\n");
+	exit(1);
+      } else {
+	fprintf(out,"@= %s", stringy(change.namesAfter[idx],true).c_str());
+      }
+    }
+    break;
   default:
     fprintf(stderr,"  Unknown column operation\n\n");
     exit(1);
@@ -204,7 +215,7 @@ bool MergeOutputTdiff::operateRow(const RowChange& change, const char *tag) {
 	  bool cond = check(showForCond,change.names[i]);
 	  bool view = check(showForDescribe,change.names[i]);
 	  fprintf(out,"%s%s|",
-		  change.names[i].c_str(),
+		  stringy(change.names[i]).c_str(),
 		  select?"=":"");
 	  //(view&&!(cond||select))?"":"");  // = was ->
 	}
@@ -256,7 +267,7 @@ bool MergeOutputTdiff::updateRow(const RowChange& change, const char *tag,
       bool view = check(showForDescribe,name);
       if (!factored) {
 	fprintf(out,"%s%s%s%s",
-		name.c_str(),
+		stringy(name).c_str(),
 		select?"=":"",
 		(view&&!(cond||select))?((ch=='+')?":->":":*->"):"",
 		(cond&&!(view||select))?":":"");

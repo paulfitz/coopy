@@ -17,6 +17,7 @@ private:
   SheetSchema *schema;
   bool owned_schema;
   int dh;
+  bool may_sniff;
 public:
   PolySheet() {
     sheet = 0/*NULL*/;
@@ -24,6 +25,7 @@ public:
     schema = 0/*NULL*/;
     owned_schema = false;
     dh = 0;
+    may_sniff = true;
   }
 
   PolySheet(DataSheet *sheet, bool owned) : sheet(sheet), owned(owned) {
@@ -33,6 +35,7 @@ public:
     schema = 0/*NULL*/;
     owned_schema = false;
     dh = 0;
+    may_sniff = true;
   }
 
   PolySheet(const PolySheet& alt) {
@@ -47,6 +50,7 @@ public:
     if (schema!=0/*NULL*/&&owned_schema) {
       schema->addReference();
     }
+    may_sniff = alt.may_sniff;
   }
 
   const PolySheet& operator=(const PolySheet& alt) {
@@ -62,6 +66,7 @@ public:
     if (schema!=0/*NULL*/&&owned_schema) {
       schema->addReference();
     }
+    may_sniff = alt.may_sniff;
     return *this;
   }
 
@@ -87,6 +92,7 @@ public:
   void clear() {
     clearSheet();
     clearSchema();
+    may_sniff = true;
   }
 
   void clearSheet() {
@@ -186,20 +192,7 @@ public:
 				 const ColumnInfo& info);
 
   virtual bool modifyColumn(const ColumnRef& base, 
-			    const ColumnInfo& info) {
-    COOPY_ASSERT(sheet);
-    bool result = sheet->modifyColumn(base,info);
-    if (!result) return result;
-    SheetSchema *s = getSchema();
-    if (s) {
-      if (!s->isShadow()) {
-	result = s->modifyColumn(base,info);
-      }
-    }
-    return result;
-  }
-
-
+			    const ColumnInfo& info);
 
   // move a column before base; if base is invalid move after all columns
   virtual ColumnRef moveColumn(const ColumnRef& src, const ColumnRef& base) {
@@ -432,6 +425,10 @@ public:
 
   bool mustHaveSchema();
 
+  void forbidSchema() {
+    may_sniff = false;
+  }
+
   virtual bool setPool(Pool *pool) {
     COOPY_ASSERT(sheet);
     return sheet->setPool(pool);
@@ -449,6 +446,9 @@ private:
     if (idx==-1) return r;
     return r.delta(-dh);
   }
+
+  SheetSchema *preApplyInfo(const ColumnInfo& info);
+  bool postApplyInfo(const ColumnInfo& info, const ColumnRef& result);
 };
 
 #endif

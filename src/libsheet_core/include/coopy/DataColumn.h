@@ -62,11 +62,11 @@ public:
 
   void evaluate(const char *txt, bool forward = true);  
 
-  float compare(const char *txt, bool forward = true);
+  float compare(const std::string& txt, bool forward, int x);
 
-  float uncompare(const char *txt) {
-    return compare(txt,false);
-  }
+  //float uncompare(const char *txt, int x) {
+  //return compare(txt,false,x);
+  //}
 
   float confidence();
 

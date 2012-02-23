@@ -29,6 +29,7 @@ namespace coopy {
       ORDER_CHANGE_DELETE,
       ORDER_CHANGE_INSERT,
       ORDER_CHANGE_MOVE,
+      ORDER_CHANGE_RENAME,
     };
     
     enum {
@@ -140,6 +141,8 @@ public:
       return "insert";
     case ORDER_CHANGE_MOVE:
       return "move";
+    case ORDER_CHANGE_RENAME:
+      return "rename";
     }
     return "unknown";
   }

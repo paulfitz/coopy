@@ -84,6 +84,25 @@ public:
     }
   }
 
+  string inferRename(PatchColumnNames& prior,
+		     int *dest,
+		     const char *name = NULL) {
+    COOPY_ASSERT(lst.size()==prior.lst.size());
+    int i;
+    for (i=0; i<(int)lst.size(); i++) {
+      if (lst[i]!=prior.lst[i]) {
+	break;
+      }
+    }
+    // the deleted element is named by prior.lst[i]
+    string mover = prior.lst[i];
+    indices = prior.indices;
+    int subject = i;
+    if (dest!=NULL) *dest = indices[subject];
+    return mover;
+  }
+
+
   string inferInsert(PatchColumnNames& prior,
 		     int *dest,
 		     const char *name = NULL) {
@@ -382,6 +401,15 @@ bool PatchParser::applyCsv() {
 		   change.object);
 	change.indicesAfter = names2.indices;
 	change.mode = ORDER_CHANGE_MOVE;
+	patcher->changeColumn(change);
+      } else if (cmd1=="rename") {
+	string mover = names2.inferRename(names,&change.subject);
+	dbg_printf("Rename columns to %s (%s active // subj %d)\n", 
+		   names2.toString().c_str(),
+		   mover.c_str(),
+		   change.subject);
+	change.indicesAfter = names2.indices;
+	change.mode = ORDER_CHANGE_RENAME;
 	patcher->changeColumn(change);
       } else if (cmd1=="insert") {
 	string mover = names2.inferInsert(names,&change.subject);
@@ -1010,14 +1038,14 @@ bool PatchParser::applyTdiff() {
       }
       printf("\n");
       */
-    } else if (first=="@:"||first=="@+"||first=="@-") {
+    } else if (first=="@:"||first=="@+"||first=="@-"||first=="@=") {
       vector<string> ocols;
       vector<string> ncols;
       for (int i=0; i<(int)cols.size(); i++) {
 	ocols.push_back(cols[i].key);
       }
       for (int i=2; i<(int)msg.size(); i++) {
-	ncols.push_back(msg[i]);
+	ncols.push_back(TDiffPart(msg[i],true).key);
       }
       
       OrderChange change;
@@ -1048,6 +1076,13 @@ bool PatchParser::applyTdiff() {
 		   mover.c_str(),
 		   change.subject);
 	change.mode = ORDER_CHANGE_DELETE;
+      } else if (first=="@=") {
+	string mover = names2.inferRename(names,&change.subject,msg[1].c_str());
+	dbg_printf("Renaming columns to %s (%s insert // subj %d)\n", 
+		   names2.toString().c_str(),
+		   mover.c_str(),
+		   change.subject);
+	change.mode = ORDER_CHANGE_RENAME;
       }
       change.indicesBefore = names.indices;
       change.indicesAfter = names2.indices;
@@ -1244,6 +1279,7 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
     vector<string> activeCol;
     vector<string> origCol;
     vector<string> statusCol;
+    vector<string> nameCol;
     RowChange::txt2bool indexes;
     int xoff = 1;
     int yoff = 0;
@@ -1298,6 +1334,7 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	  cols.push_back(txt);
 	  activeCol.push_back(txt);
 	  statusCol.push_back("");
+	  nameCol.push_back("");
 	  indexes[txt] = true;
 	}
 	if (acts) {
@@ -1310,13 +1347,20 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	      statusCol[j-1-xoff] = act;
 	      indexes[col] = false;
 	    } else {
-	      origCol.push_back(col);
+	      if (act[0]!='(') {
+		origCol.push_back(col);
+	      }
 	    }
 	    if (act=="---") {
 	      statusCol[j-1-xoff] = act;
 	      indexes[col] = false;
 	    } else {
 	      activeCol.push_back(col);
+	    }
+	    if (act[0]=='(') {
+	      statusCol[j-1-xoff] = "=";
+	      nameCol[j-1-xoff] = act.substr(1,act.length()-2);
+	      origCol.push_back(nameCol[j-1-xoff]);
 	    }
 	  }
 
@@ -1335,18 +1379,30 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	      order.mode = ORDER_CHANGE_INSERT;
 	    } else if (act=="---") {
 	      order.mode = ORDER_CHANGE_DELETE;
+	    } else if (act=="=") {
+	      order.mode = ORDER_CHANGE_RENAME;
 	    }
 	    for (int k=0; k<(int)cols.size(); k++) {	
 	      string actk = statusCol[k];
-	      if (actk=="" || (k>=j&&actk=="---") || (k<j&&actk=="+++")) {
-		order.namesBefore.push_back(cols[k]);
+	      if (actk=="" || actk=="=" ||
+		  (k>=j&&actk=="---") || (k<j&&actk=="+++")) {
+		if (actk=="="&&k>=j) {
+		  order.namesBefore.push_back(nameCol[k]);
+		} else {
+		  order.namesBefore.push_back(cols[k]);
+		}
 		order.indicesBefore.push_back((actk=="+++")?-(k+1):k);
 	      }
 	    }
 	    for (int k=0; k<(int)cols.size(); k++) {	
 	      string actk = statusCol[k];
-	      if (actk=="" || (k>j&&actk=="---") || (k<=j&&actk=="+++")) {
-		order.namesAfter.push_back(cols[k]);
+	      if (actk=="" || actk=="=" ||
+		  (k>j&&actk=="---") || (k<=j&&actk=="+++")) {
+		if (actk=="="&&k>j) {
+		  order.namesAfter.push_back(nameCol[k]);
+		} else {
+		  order.namesAfter.push_back(cols[k]);
+		}
 		order.indicesAfter.push_back((actk=="+++")?-(k+1):k);
 	      }
 	    }

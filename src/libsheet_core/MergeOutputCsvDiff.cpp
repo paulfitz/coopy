@@ -112,6 +112,15 @@ bool MergeOutputCsvDiff::changeColumn(const OrderChange& change) {
     }
     result.addRecord();
     break;
+  case ORDER_CHANGE_RENAME:
+    clearThroat();
+    result.addField("column",false);
+    result.addField("rename",false);
+    for (int i=0; i<(int)change.namesAfter.size(); i++) {
+      result.addField(change.namesAfter[i].c_str(),false);
+    }
+    result.addRecord();
+    break;
   default:
     fprintf(stderr,"  Unknown column operation\n\n");
     exit(1);

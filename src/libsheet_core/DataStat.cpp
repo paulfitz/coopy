@@ -169,7 +169,7 @@ void DataStat::evaluate2(const coopy::store::DataSheet& sheet,
       float tot = 0;
       float tot2 = 0;
       for (int i=0; i<hh; i++) {
-	float r = n.compare(sheet.cellString(j,i).c_str());
+	float r = n.compare(sheet.cellString(j,i).c_str(),true,i);
 	cmp.push_back(r);
 	tot += r;
 	tot2 += r*r;
@@ -230,11 +230,18 @@ void DataStat::evaluate2(const coopy::store::DataSheet& sheet,
       CsvFile::write(oddness_accum,p);
       }
     */
+
+    /*
+    for (int i=0; i<hh; i++) {
+      float v = oddness_accum.cell(0,i);
+      printf(">>> %g\n", v);
+    }
+    */
     
     int evidence = 0;
     float peak = 0;
     for (int i=0; i<hh; i++) {
-      float v = oddness_accum.cell(0,i);
+      float v = oddness_accum.cell(0,i)*((hh-i)/(float)hh);
       if (v>=0.99&&v>peak*0.75) {
 	if (i<10 && i<=hh*0.25+2) {
 	  top = i;

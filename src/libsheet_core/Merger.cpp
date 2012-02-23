@@ -791,6 +791,41 @@ bool Merger::merge(MergerState& state) {
     dbg_printf("Column order is now %s\n",
 	       vector2string(local_col_names).c_str());
 
+    // PASS 4 - column renames
+    if (flags.assume_header) {
+      for (list<MatchUnit>::iterator it=col_merge.accum.begin();
+	   it!=col_merge.accum.end(); 
+	   it++) {
+	MatchUnit& unit = *it;
+	int lCol = unit.pivotUnit;
+	int rCol = unit.remoteUnit;
+	bool deleted = unit.deleted;
+	if (lCol!=-1 && rCol!=-1 && !deleted) {
+	  string lName = local_names.suggestColumnName(lCol);
+	  string rName = remote_names.suggestColumnName(rCol);
+	  if (lName!=rName) {
+	    dbg_printf("Renamed %s -> %s\n", lName.c_str(), rName.c_str());
+	    OrderChange change;
+	    change.indicesBefore = local_cols;
+	    change.namesBefore = local_col_names;
+	    change.mode = ORDER_CHANGE_RENAME;
+	    change.indicesAfter = local_cols;
+	    vector<string>::iterator it =  std::find(local_col_names.begin(),
+						     local_col_names.end(),
+						     lName);
+	    if (it==local_col_names.end()) {
+	      fprintf(stderr,"Confused by column name %s\n", lName.c_str());
+	    } else {
+	      *it = rName;
+	      change.namesAfter = local_col_names;
+	      change.subject = local_cols[it-local_col_names.begin()];
+	      cc.push_back(change);
+	    }
+	  }
+	}
+      }
+    }
+
     if (cc.size()>0) {
       constantColumns = false;
     }

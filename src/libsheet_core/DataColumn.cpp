@@ -1,3 +1,4 @@
+#include <string.h>
 
 #include <coopy/DataColumn.h>
 
@@ -152,9 +153,9 @@ void Nature::show() {
 	 lowy.result());
 }
 
-float Nature::compare(const char *txt, bool forward) {
+float Nature::compare(const std::string& txt, bool forward, int) {
   Nature n;
-  n.evaluate(txt,forward);
+  n.evaluate(txt.c_str(),forward);
   float dot = n.web.result()*web.result() +
     n.email.result()*email.result() +
     n.text.result()*text.result() +

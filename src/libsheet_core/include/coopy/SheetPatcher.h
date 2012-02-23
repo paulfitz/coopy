@@ -67,6 +67,9 @@ private:
   void updatePool();
 
   bool moveColumn(int idx, int idx2);
+  
+  bool renameColumn(int idx, const std::string& name, 
+		    const std::string& oldName);
 
 public:
   SheetPatcher(bool descriptive = false,
@@ -195,6 +198,8 @@ public:
   bool handleConflicts();
 
   bool updateSheet();
+
+  virtual coopy::store::PolySheet getSheet();
 };
 
 #endif
