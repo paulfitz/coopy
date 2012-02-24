@@ -49,6 +49,10 @@ bool PolySheet::postApplyInfo(const ColumnInfo& info,
     if (info.hasName()) {
       if (!sheet->hasExternalColumnNames()) {
 	if (s->headerHeight()>0) {
+	  dbg_printf("Clobber %s with %s\n",
+		     sheet->cellString(result.getIndex(),s->headerHeight()-1).c_str(),
+		     info.getName().c_str());
+			    
 	  sheet->cellString(result.getIndex(),s->headerHeight()-1,
 			    info.getName());
 	}

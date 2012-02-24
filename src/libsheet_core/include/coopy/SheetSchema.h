@@ -99,6 +99,11 @@ public:
   virtual bool isShadow() const {
     return false;
   }
+
+  virtual bool copy(const SheetSchema& ss) {
+    return false;
+  }
+
 };
 
 class coopy::store::SimpleSheetSchema : public SheetSchema {
@@ -116,7 +121,7 @@ public:
     hasName = true;
   }
 
-  bool copy(const SheetSchema& ss) {
+  virtual bool copy(const SheetSchema& ss) {
     sheetName = ss.getSheetName();
     hh = ss.headerHeight();
     int ct = ss.getColumnCount();

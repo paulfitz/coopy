@@ -413,7 +413,11 @@ public:
 
   virtual bool stripMarkup() { return false; }
 
+  virtual bool metaHint(const coopy::store::DataSheet& sheet) { return false; }
 
+  //virtual bool metaHint(const coopy::store::SheetSchema *schema) { 
+  //return false; 
+  //}
 
   virtual void attachSheet(coopy::store::PolySheet sheet) {
     patch_sheet = sheet;

@@ -118,6 +118,11 @@ public:
     return patch(book2,book3);
   }
 
+  int getChangeCount() const {
+    if (!patcher) return 0;
+    return patcher->getChangeCount();
+  }
+
   static coopy::store::PolySheet createSheet();
 
   static coopy::store::PolyBook createBook(coopy::store::PolySheet sheet);

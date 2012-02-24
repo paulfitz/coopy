@@ -17,6 +17,8 @@ using namespace coopy::store;
 #define FULL_COLOR (65535)
 #define HALF_COLOR (65535/2)
 
+#define FULL_DEBUG
+
 static bool null_like(const SheetCell& a) {
   return a.escaped||a.text==""||a.text=="NULL";
 }
@@ -29,6 +31,8 @@ static bool is_match(const SheetCell& a, const SheetCell& b) {
 }
 
 void SheetPatcher::checkHeader() {
+  if (checkedHeader) return;
+  checkedHeader = true;
   if (flags.assume_header==false) return;
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return;
@@ -268,6 +272,11 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
     fprintf(stderr,"No sheet available to patch\n");
     return false;
   }
+
+#ifdef FULL_DEBUG
+  dbg_printf("STATE<<EOF\n%sEOF\n",sheet.toString().c_str());
+#endif
+
   switch (change.mode) {
   case ORDER_CHANGE_DELETE:
     //return sheet->deleteColumn(ColumnRef(change.subject));
@@ -608,13 +617,20 @@ bool SheetPatcher::handleConflicts() {
   if (!sheet.isValid()) return false;
   sheet.mustHaveSchema();
 
-  //printf("SCHEMA %s\n", sheet.getSchema()->toString().c_str()); exit(1)
-
+  //printf("SCHEMA %s\n", sheet.getSchema()->toString().c_str());
+  //printf("SCHEMA %s\n", active_sheet.getSchema()->toString().c_str());
+  //printf("sheet before %s\n", sheet.toString().c_str());
   ColumnInfo con("_MERGE_");
   con.setType("text","sqlite");
-  ColumnRef at = sheet.insertColumn(ColumnRef(-1),con);
+  ColumnRef at = active_sheet.insertColumn(ColumnRef(-1),con);
+  activeCol.insertColumn(ColumnRef(-1),con);
+  statusCol.insertColumn(ColumnRef(-1),con);
   readyForConflicts = at.isValid();
   conflictColumn = at.getIndex();
+
+  //printf("sheet after %s\n", sheet.toString().c_str());
+  //printf("SCHEMA AFTER %s\n", active_sheet.getSchema()->toString().c_str());
+
   return readyForConflicts;
 }
 
@@ -1011,6 +1027,7 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
 }
 
 bool SheetPatcher::setSheet(const char *name) {
+  checkedHeader = false;
   updateSheet();
   sheetUpdateNeeded = true;
 
@@ -1120,6 +1137,8 @@ void SheetPatcher::setNames() {
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return;
   if (sheetChange) {
+    dbg_printf("SheetPatcher Working on sheet %ld\n",
+	       (long int)(&sheet.tail_const()));
     sheetChange = false;
     clearNames();
     activeCol.resize(0,1);
@@ -1212,20 +1231,24 @@ bool SheetPatcher::updateSheet() {
       string key = clean(sheet.cellString(0,r));
       if (key == "" || key == "->") {
 	for (int i=0; i<=r; i++) {
-	  sheet.cellString(0,i,string("@")+clean(sheet.cellString(0,i)));
+	  sheet.cellString(0,i,string("@@")+clean(sheet.cellString(0,i)));
 	}
       } else {
 	r = -1;
       }
     }
+    int yoff = 0;
     if (r<0) {
       sheet.insertRow(RowRef(0)); 
       sheet.cellString(0,yoff,"@@");
-      for (int i=1; i<sheet.width(); i++) {
-	sheet.cellString(i,yoff,activeCol.cellString(i-1,0));
-      }
+      r = 0;
+    } else {
+      yoff = r;
     }
-    int yoff = 0;
+    for (int i=1; i<sheet.width(); i++) {
+      dbg_printf("Header clobber %s\n", sheet.cellString(i,yoff).c_str());
+      sheet.cellString(i,yoff,activeCol.cellString(i-1,0));
+    }
     bool colAction = false;
     for (int i=1; i<sheet.width(); i++) {
       if (statusCol.cellString(i-1,0)!="") {
@@ -1322,10 +1345,51 @@ bool SheetPatcher::updateSheet() {
 
 coopy::store::PolySheet SheetPatcher::getSheet() {
   PolySheet sheet = Patcher::getSheet();
-  if (!getFlags().assume_header) {
-    sheet.forbidSchema();
+  if (!sheet.isValid()) return sheet;
+  if (!active_sheet.isValid()) {
+    active_sheet = sheet;
   }
-  return sheet;
+  if (&sheet.tail()!=&active_sheet.tail()) {
+    active_sheet = sheet;
+  }
+  if (!getFlags().assume_header) {
+    active_sheet.forbidSchema();
+  }
+  return active_sheet;
 }
+
+bool SheetPatcher::metaHint(const DataSheet& sheet) {
+  getSheet();
+  if (!active_sheet.isValid()) return false;
+  if (!active_sheet.getMeta()) {
+    if (sheet.getMeta()) {
+      bool done = false;
+      if (active_sheet.getSchema()) {
+	dbg_printf("*** meta hint - was %s\n", 
+	       active_sheet.getSchema()->toString().c_str());
+	done = active_sheet.getSchema()->copy(*sheet.getMeta());
+      }
+      if (!done) {
+	active_sheet.setSchema(sheet.getMeta()->clone(),true);
+      }
+      sheetChange = true;
+      dbg_printf("*** meta hint - is now %s\n", 
+		 active_sheet.getSchema()->toString().c_str());
+      if (sheet.hasRowOffset()&&!active_sheet.hasRowOffset()) {
+	if (sheet.height()==active_sheet.height()) {
+	  active_sheet.getSchema()->setHeaderHeight(0);
+	}
+      }
+      //printf("offset %d\n", sheet.hasRowOffset());
+      ///printf("offset %d\n", active_sheet.hasRowOffset());
+      //printf("FROM\n%s\n\nTo\n%s\n\n",
+      //sheet.tail_const().toString().c_str(),
+      //active_sheet.tail_const().toString().c_str());
+      setNames();
+    }
+  }
+  return true;
+}
+
 
 

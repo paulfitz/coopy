@@ -151,6 +151,8 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
 	local_sheet.isValid()&&
 	remote_sheet.isValid()) {
       SheetCompare cmp;
+      /*
+	// setSheet call moved to SheetCompare
       if (local.namedSheets()&&remote.namedSheets()) {
 	bool ok = output.setSheet(name.c_str());
 	if (!ok) {
@@ -158,8 +160,10 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
 	  return -1;
 	}
       }
+      */
       int r = cmp.compare(pivot_sheet,local_sheet,remote_sheet,output,
-			  flags2);
+			  flags2,
+			  (local.namedSheets()&&remote.namedSheets())?name.c_str():NULL);
       if (r!=0) return r;
     } else if (local_sheet.isValid()&&pivot_sheet.isValid()&&
 	       !remote_sheet.isValid()) {

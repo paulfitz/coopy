@@ -162,6 +162,7 @@ ADD_TEST(altitude_diff_typo ${testprg}
   --remote --read ${TESTS}/test005_fix_typo_add.csv
   --compare=1
 #  --local --write ${TESTS}/result_altitude_diff_typo.csv
+#  --local --write /tmp/ref.csv
   --remote --read ${TESTS}/result_altitude_diff_typo.csv
   --diff
   --prop diffs --assert 0)
@@ -832,8 +833,8 @@ if (COMPILE_GUI)
     add_test(coopy_space_conflict_unresolved ${ssresolve} ${TC}/people2.xls)
     set_property(TEST coopy_space_conflict_unresolved PROPERTY WILL_FAIL TRUE)
 
-    add_test(coopy_space_conflict_resolve ${ssresolve} --theirs ${TC}/people2.xls)
-     add_test(coopy_space_conflict_resolved ${ssresolve} ${TC}/people2.xls)
+    #add_test(coopy_space_conflict_resolve ${ssresolve} --theirs ${TC}/people2.xls)
+     #add_test(coopy_space_conflict_resolved ${ssresolve} ${TC}/people2.xls)
  
   endif ()
 
@@ -1012,4 +1013,37 @@ ADD_TEST(column_rename_stdout_equal ${ssdiff} --equal column_rename_stdout.csv c
 
 foreach(FORMAT csv tdiff color)
   ADD_ROUND_TRIP_TEST_BI(edge_name_age_${FORMAT} ${TESTS}/edge/name_age_1.csv ${TESTS}/edge/name_age_2.csv ${FORMAT})
+  ADD_ROUND_TRIP_TEST_BI(edge_bridge_${FORMAT} ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv ${FORMAT})
+endforeach()
+
+ADD_STREAM_OUT_TEST(edge_bridge_stdout edge_bridge_stdout.csv ${ssdiff} --format hilite --output dbi:csv:header=-1:file=- ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv)
+ADD_TEST(edge_bridge_stdout_ref ${ssdiff} --output edge_bridge_stdout_ref.csv --format hilite ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv)
+ADD_TEST(edge_bridge_stdout_equal ${ssdiff} --equal edge_bridge_stdout.csv edge_bridge_stdout_ref.csv)
+
+
+#######################################################################
+#######################################################################
+
+# conflict _MERGE_ column
+
+set(FORMATS xls csvs csv)
+
+foreach(FORMAT0 ${FORMATS})
+  foreach(FORMAT1 ${FORMATS})
+    foreach(FORMAT2 ${FORMATS})
+      set (FORMAT ${FORMAT0}_${FORMAT1}_${FORMAT2})
+      add_test(people_header_${FORMAT}_base0 ${ssformat} ${TESTS}/coopy/mini-people.csvs
+	people_header0.${FORMAT0})
+      add_test(people_header_${FORMAT}_base1 ${ssformat} ${TESTS}/coopy/mini-people.csvs
+	people_header1.${FORMAT1})
+      add_test(people_header_${FORMAT}_base2 ${ssformat} ${TESTS}/coopy/mini-people.csvs
+	people_header2.${FORMAT2})
+      add_test(people_header_${FORMAT}_change1 ${sspatch} --inplace people_header1.${FORMAT1} --cmd "= |Name=Paul|Zip:*->07028|")
+      add_test(people_header_${FORMAT}_change2 ${sspatch} --inplace people_header2.${FORMAT2} --cmd "= |Name=Paul|Zip:*->07042|")
+      add_test(people_header_${FORMAT}_merge ${ssmerge} people_header0.${FORMAT0} people_header1.${FORMAT1} people_header2.${FORMAT2})
+      set_property(TEST people_header_${FORMAT}_merge PROPERTY WILL_FAIL TRUE)
+      add_test(people_header_${FORMAT}_merge_inplace ${ssmerge} --inplace people_header0.${FORMAT0} people_header1.${FORMAT1} people_header2.${FORMAT2})
+      set_property(TEST people_header_${FORMAT}_merge_inplace PROPERTY WILL_FAIL TRUE)
+    endforeach()
+  endforeach()
 endforeach()

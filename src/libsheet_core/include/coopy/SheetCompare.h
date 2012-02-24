@@ -16,7 +16,8 @@ public:
   int compare(coopy::store::DataSheet& pivot, 
 	      coopy::store::DataSheet& local, 
 	      coopy::store::DataSheet& remote, 
-	      Patcher& output, const CompareFlags& flags);
+	      Patcher& output, const CompareFlags& flags,
+	      const char *output_name = 0/*NULL*/);
 
   void setVerbose(bool verbose);
 };

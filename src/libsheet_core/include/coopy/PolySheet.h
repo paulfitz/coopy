@@ -331,6 +331,14 @@ public:
      return sheet->tail();
   }
 
+  virtual const DataSheet& tail_const() const {
+    if (dh!=0) {
+      return *this;
+    }
+     COOPY_ASSERT(sheet);
+     return sheet->tail_const();
+  }
+
   virtual bool isSequential() const {
     COOPY_ASSERT(sheet);
     return sheet->isSequential();
@@ -389,10 +397,8 @@ public:
     if (!hasExternalColumnNames()) {
       if (getSchema()==0/*NULL*/) {
 	setRowOffset(1);
-	return true;
       } else {
 	setRowOffset(getSchema()->headerHeight());
-	return true;
       }
     }
     return false;
@@ -437,6 +443,23 @@ public:
   virtual Pool *getPool() const {
     COOPY_ASSERT(sheet);
     return sheet->getPool();
+  }
+
+  virtual void setMeta(SheetSchema *hint) {
+    COOPY_ASSERT(sheet);
+    sheet->setMeta(hint);
+  }
+
+  virtual void setMeta() {
+    COOPY_ASSERT(sheet);
+    SheetSchema *schema = getSchema();
+    if (!schema) return;
+    setMeta(schema->clone());
+  }
+
+  virtual SheetSchema *getMeta() const {
+    COOPY_ASSERT(sheet);
+    return sheet->getMeta();
   }
 
 private:

@@ -362,7 +362,8 @@ bool WideSheetManager::mergeToLocal(const char *localName,
   int cc = diff->getChangeCount();
   stop_output2(output,flags);
   delete diff;  diff = NULL;
-  if (r!=0) {
+
+  if (r<0) {
     return false;
   }
   if (cc>0) {

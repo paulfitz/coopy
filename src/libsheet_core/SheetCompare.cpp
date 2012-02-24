@@ -151,7 +151,8 @@ static string encodeKey(DataSheet& sheet, int x, int y, int len) {
 
 int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local, 
 			  DataSheet& _remote,
-			  Patcher& output, const CompareFlags& flags) {
+			  Patcher& output, const CompareFlags& flags,
+			  const char *output_name) {
   DataSheet *ppivot = &_pivot;
   DataSheet *plocal = &_local;
   DataSheet *premote = &_remote;
@@ -186,6 +187,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
     dlocal = PolySheet(&_local,false);
     dlocal.setSchema(slocal.suggestSchema(),false);
+    dlocal.setMeta();
     dlocal.hideHeaders();
     plocal = &dlocal;
     //printf("LOCAL IS %s [%s]\n", plocal->toString().c_str(),
@@ -193,12 +195,14 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 
     dremote = PolySheet(&_remote,false);
     dremote.setSchema(sremote.suggestSchema(),false);
+    dremote.setMeta();
     dremote.hideHeaders();
     premote = &dremote;
     //printf("REMOTE IS %s\n", premote->toString().c_str());
 
     dpivot = PolySheet(&_pivot,false);
     dpivot.setSchema(spivot.suggestSchema(),false);
+    dpivot.setMeta();
     dpivot.hideHeaders();
     ppivot = &dpivot;
 
@@ -230,6 +234,15 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   DataSheet& pivot = *ppivot;
   DataSheet& local = *plocal;
   DataSheet& remote = *premote;
+
+  if (output_name) {
+    bool ok = output.setSheet(output_name);
+    if (!ok) {
+      fprintf(stderr,"Output format rejected sheet \"%s\"\n", output_name);
+      return -1;
+    }
+  }
+  output.metaHint(local);
 
   NameSniffer pivot_names(pivot,flags,false);
   NameSniffer local_names(local,flags,false);

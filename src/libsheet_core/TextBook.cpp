@@ -193,6 +193,12 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
 	       name.c_str(),
 	       sheet.width(), sheet.height(),
 	       target.width(), target.height());
+    if (sheet.getSchema()) {
+      dbg_printf("Schema src: %s\n", sheet.getSchema()->toString().c_str());
+    }
+    if (target.getSchema()) {
+      dbg_printf("Schema target: %s\n", target.getSchema()->toString().c_str());
+    }
   }
   return true;
 }

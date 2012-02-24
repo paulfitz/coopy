@@ -21,6 +21,7 @@ namespace coopy {
     class OrderedSheetRow;
     class CacheSheetRow;
     class Pool;
+    class SheetSchema;
   }
 }
 
@@ -47,9 +48,10 @@ class coopy::store::DataSheet : public RefCount {
 public:
   DataSheet() {
     pool = 0 /*NULL*/;
+    meta_hint = 0 /*NULL*/;
   }
 
-  virtual ~DataSheet() {}
+  virtual ~DataSheet();
 
   /**
    *
@@ -309,6 +311,10 @@ public:
     return *this;
   }
 
+  virtual const DataSheet& tail_const() const {
+    return *this;
+  }
+
   // has spreadsheet-like ordering, inserts happen in a "place"
   virtual bool isSequential() const {
     return true;
@@ -347,8 +353,13 @@ public:
     return pool;
   }
 
+  virtual void setMeta(SheetSchema *hint);
+
+  virtual SheetSchema *getMeta() const;
+
 private:
   std::string hash_cache;
+  SheetSchema *meta_hint;
   Pool *pool;
 };
 

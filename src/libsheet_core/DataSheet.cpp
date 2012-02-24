@@ -1,8 +1,34 @@
 
 #include <coopy/DataSheet.h>
 #include <coopy/Sha1Generator.h>
+#include <coopy/SheetSchema.h>
 
 using namespace coopy::store;
+
+DataSheet::~DataSheet() {
+  setMeta(NULL);
+}
+
+SheetSchema *DataSheet::getMeta() const {
+  //printf("Meta data? %ld %s\n", (long int) this, meta_hint?"yes":"no");
+  return meta_hint;
+}
+
+
+void DataSheet::setMeta(SheetSchema *hint) {
+  if (meta_hint) {
+    delete meta_hint;
+    meta_hint = NULL;
+  }
+  meta_hint = hint;
+  /*
+  if (hint) {
+    printf("Set some meta data! %ld %s\n", 
+	   (long int) this,
+	   hint->toString().c_str());
+  }
+  */
+}
 
 std::string DataSheet::encode(const SheetStyle& style) const {
   std::string delim = style.getDelimiter();

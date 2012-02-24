@@ -33,6 +33,12 @@ std::string SimpleSheetSchema::toString() const {
   }
   r += " columns ";
   r += stringer_encoder(getColumnCount());
+  r += " (";
+  for (int i=0; i<getColumnCount(); i++) {
+    if (i>0) r += ", ";
+    r += getColumnInfo(i).getName();
+  }
+  r += ")";
   return r;
 }
 

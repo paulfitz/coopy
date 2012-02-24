@@ -18,15 +18,38 @@ void NameSniffer::sniff(int suggest) {
   ct.clear();
 
   SheetSchema *schema = sheet.getSchema();
+
+  /*
+  if (schema==NULL) {
+    schema = sheet.getMeta();
+    if (schema!=NULL) {
+      printf("Hey! I found a schema in getMeta.\n");
+    }
+  } 
+  */
+  /*
+  else {
+    SheetSchema *schema2 = sheet.getMeta();
+    if (schema2!=NULL) {
+      dbg_printf("Hey! I found two schema %ld\n",
+		 (long int)(&sheet.tail_const()));
+      dbg_printf("schema 1 %s\n", schema->toString().c_str());
+      dbg_printf("schema 2 %s\n", schema2->toString().c_str());
+    }
+  }
+  */
+
   div = suggest;
   if (schema!=NULL) {
+    //printf("Working with %s\n", schema->toString().c_str());
+    div = schema->headerHeight()-1;
     fake = schema->isGuess();
-    if (schema->getColumnCount()==0 && schema->headerHeight()>=0) {
+    if (schema->getColumnCount()==0 && schema->headerHeight()>0) {
       // minimal schema, not complete
       dbg_printf("Sniffing... minimal schema!\n");
-      div = schema->headerHeight();
+      div = schema->headerHeight()-1;
     } else {
-      dbg_printf("Sniffing... found schema!\n");
+      dbg_printf("Sniffing... found schema! %s\n", schema->toString().c_str());
       if (sheet.width()!=schema->getColumnCount()) {
 	dbg_printf("Problem detecting schema\n");
 	dbg_printf("  table has %d columns\n", sheet.width());

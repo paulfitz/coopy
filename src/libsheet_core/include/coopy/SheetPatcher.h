@@ -20,6 +20,7 @@ namespace coopy {
 
 class coopy::cmp::SheetPatcher : public Patcher {
 private:
+  coopy::store::PolySheet active_sheet;
   ConfigChange config;
   coopy::store::CsvSheet activeRow;
   coopy::store::CsvSheet activeCol;
@@ -41,9 +42,9 @@ private:
   bool forReview;
   bool declaredNames;
   bool readyForConflicts;
+  bool checkedHeader;
   int conflictColumn;
   int xoff;
-  int yoff;
   bool killNeutral;
   bool merging;
   bool sheetChange;
@@ -84,13 +85,13 @@ public:
     chainOwned = false;
     changeCount = 0;
     xoff = 0;
-    yoff = 0;
     sniffer = 0/*NULL*/;
     sniffedSheet = 0/*NULL*/;
     killNeutral = false;
     readyForConflicts = false;
     conflictColumn = -1;
     declaredNames = false;
+    checkedHeader = false;
   }
 
   static SheetPatcher *createForApply() {
@@ -200,6 +201,9 @@ public:
   bool updateSheet();
 
   virtual coopy::store::PolySheet getSheet();
+
+  virtual bool metaHint(const coopy::store::DataSheet& sheet);
+
 };
 
 #endif
