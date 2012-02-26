@@ -60,7 +60,8 @@ public:
 	return NULL;
       }
       if (all[i]->getName()==key) {
-	dbg_printf("operating on %s\n", key.c_str());
+	dbg_printf("operating on %s (book: %ld)\n", key.c_str(),
+		   (long int)config.prevBook);
 	TextBook *result = all[i]->open(config,report);
 	dbg_printf("success [%s] msg [%s]\n", report.success?"ok":"fail",
 		   report.msg.c_str());

@@ -1,24 +1,25 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/gnulib)
 
-# need hash_map or unordered_map or something for efficient hashing.
-# hash_map is deprecated under newer gcc versions.
-ADD_DEFINITIONS(-Wno-deprecated)
-
 file(GLOB folder_source *.cpp)
 file(GLOB_RECURSE folder_header include/*.h)
 file(GLOB_RECURSE folder_header2 impl_include/*.h)
 set(folder_header ${folder_header} ${folder_header2})
 
-if (HAVE_TR1)
-  # ADD_DEFINITIONS("-std=c++0x" -DHAVE_TR1)
-  foreach(src ${folder_source})
+# ADD_DEFINITIONS("-std=c++0x" -DHAVE_TR1)
+foreach(src ${folder_source})
+  if (HAVE_TR1)
     set_property(SOURCE ${src} 
       APPEND PROPERTY COMPILE_FLAGS "-std=c++0x")
     set_property(SOURCE ${src} 
       APPEND PROPERTY COMPILE_DEFINITIONS HAVE_TR1)
-  endforeach()
-endif ()
+  else ()
+    # need hash_map or unordered_map or something for efficient hashing.
+    # hash_map is deprecated under newer gcc versions.
+    set_property(SOURCE ${src} 
+      APPEND PROPERTY COMPILE_FLAGS "-Wno-deprecated")
+  endif ()
+endforeach()
 
 set(folder_source ${folder_source} gnulib/tmpdir.c gnulib/tempname.c)
 source_group("Source Files" FILES ${folder_source})

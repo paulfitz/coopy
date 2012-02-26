@@ -106,6 +106,8 @@ public:
 	  report.success = true;
 	  return config.prevBook;
 	}
+      } else {
+	dbg_printf("CSVS write without content?\n");
       }
       return NULL;
     }

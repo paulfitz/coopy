@@ -1,0 +1,18 @@
+# tdiff version 0.3
+# +++ directory.sqlite
+
+@@@ locations
+x locations |id=|
+
+@ |id|street|city|
+
+@@@ org2loc
+x organizations |org_id|
+x locations |loc_id|
+
+@ |org_id|loc_id|
+
+@@@ organizations
+x organizations |id=|
+
+@ |id|name|

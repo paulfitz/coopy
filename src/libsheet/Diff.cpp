@@ -29,6 +29,7 @@ static bool copyFile(const char *src, const char *dest) {
 }
 
 
+// cloned should, in fact, be always true
 static bool copyBook(PolyBook& src_book, const char *src, const char *dest,
 		     bool *cloned) {
   PolyBook check;
@@ -39,7 +40,7 @@ static bool copyBook(PolyBook& src_book, const char *src, const char *dest,
     return Patcher::copyFile(src,dest);
   }
   *cloned = false;
-  return true;
+  return src_book.write(dest);
 }
 
 
@@ -149,11 +150,10 @@ int Diff::apply(const Options& opt) {
 	fprintf(stderr,"Failed to write %s\n", tmp.c_str());
 	return 1;
       }
-      if (cloned) {
-	if (!_local.read(tmp.c_str())) {
-	  fprintf(stderr,"Failed to switch to %s\n", tmp.c_str());
-	  return 1;
-	}
+      dbg_printf("Cloned copy? %d\n", cloned);
+      if (!_local.read(tmp.c_str())) {
+	fprintf(stderr,"Failed to switch to %s\n", tmp.c_str());
+	return 1;
       }
     }
   }

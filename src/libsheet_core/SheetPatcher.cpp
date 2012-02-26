@@ -761,7 +761,7 @@ bool SheetPatcher::changeRow(const RowChange& change) {
 	      link = it->second;
 	    }
 	  }
-	  if (link.isValid()) {
+	  if (link.isValid()&&!descriptive) {
 	    // Skip if inventor
 	    // But should try to recover id to place in pool
 	    
@@ -1162,6 +1162,7 @@ void SheetPatcher::updatePool() {
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) return;
   setNames();
+  if (descriptive) return;
   if (!sniffer) return;
   if (sheetName=="") return;
   name2pool.clear();

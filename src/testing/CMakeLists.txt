@@ -1,15 +1,15 @@
 if (HAVE_TR1)
   ADD_DEFINITIONS("-std=c++0x" -DHAVE_TR1)
+else ()
+  # need hash_map or unordered_map or something for efficient hashing.
+  # hash_map is deprecated under newer gcc versions.
+  ADD_DEFINITIONS(-Wno-deprecated)
 endif ()
 
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
 
 ADD_EXECUTABLE(test_sheet test_sheet.cpp)
 TARGET_LINK_LIBRARIES(test_sheet sheet_full)
-
-# need hash_map or unordered_map or something for efficient hashing.
-# hash_map is deprecated under newer gcc versions.
-ADD_DEFINITIONS(-Wno-deprecated)
 
 ADD_EXECUTABLE(test_viterbi test_viterbi.cpp)
 TARGET_LINK_LIBRARIES(test_viterbi sheet_full)
@@ -468,6 +468,10 @@ MACRO(ADD_ROUND_TRIP_TEST name P1 P2 FORMAT)
   ADD_ROUND_TRIP_TEST_BASE(${name} ${P1} ${P2} csv ${FORMAT} "")
 ENDMACRO ()
 
+MACRO(ADD_ROUND_TRIP_TEST_CSVS name P1 P2 FORMAT)
+  ADD_ROUND_TRIP_TEST_BASE(${name} ${P1} ${P2} csvs ${FORMAT} "")
+ENDMACRO ()
+
 MACRO(ADD_ROUND_TRIP_TEST_HEADERLESS name P1 P2 FORMAT)
   ADD_ROUND_TRIP_TEST_BASE(${name} ${P1} ${P2} csv ${FORMAT} "--headerless")
 ENDMACRO ()
@@ -476,6 +480,11 @@ ENDMACRO ()
 MACRO(ADD_ROUND_TRIP_TEST_BI name P1 P2 FORMAT)
   ADD_ROUND_TRIP_TEST(${name}_forward ${P1} ${P2} ${FORMAT})
   ADD_ROUND_TRIP_TEST(${name}_reverse ${P2} ${P1} ${FORMAT})
+ENDMACRO()
+
+MACRO(ADD_ROUND_TRIP_TEST_BI_CSVS name P1 P2 FORMAT)
+  ADD_ROUND_TRIP_TEST_CSVS(${name}_forward ${P1} ${P2} ${FORMAT})
+  ADD_ROUND_TRIP_TEST_CSVS(${name}_reverse ${P2} ${P1} ${FORMAT})
 ENDMACRO()
 
 MACRO(ADD_ROUND_TRIP_TEST_BI_BASE name P1 P2 INTER FORMAT)
@@ -1047,3 +1056,15 @@ foreach(FORMAT0 ${FORMATS})
     endforeach()
   endforeach()
 endforeach()
+
+
+#######################################################################
+#######################################################################
+
+# multiple-sheet comparison with hilite format
+
+foreach(FORMAT tdiff csv color)
+  ADD_ROUND_TRIP_TEST_BI_CSVS(multisheet_diff_directory_alice_${FORMAT} ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_alice.sqlite ${FORMAT})
+  ADD_ROUND_TRIP_TEST_BI_CSVS(multisheet_diff_directory_blank_${FORMAT} ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_blank.sqlite ${FORMAT})
+endforeach ()
+
