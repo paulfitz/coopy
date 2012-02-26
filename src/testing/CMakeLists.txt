@@ -1066,5 +1066,6 @@ endforeach()
 foreach(FORMAT tdiff csv color)
   ADD_ROUND_TRIP_TEST_BI_CSVS(multisheet_diff_directory_alice_${FORMAT} ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_alice.sqlite ${FORMAT})
   ADD_ROUND_TRIP_TEST_BI_CSVS(multisheet_diff_directory_blank_${FORMAT} ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_blank.sqlite ${FORMAT})
+  ADD_ROUND_TRIP_TEST_BI_CSVS(multisheet_diff_directory_blank2_${FORMAT} ${TESTS}/directory/directory_blank.sqlite ${TESTS}/directory/directory_blank.sqlite ${FORMAT})
 endforeach ()
 

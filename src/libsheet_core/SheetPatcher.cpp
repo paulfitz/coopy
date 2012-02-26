@@ -1205,6 +1205,7 @@ bool SheetPatcher::updateSheet() {
   if (descriptive) {
     PolySheet sheet = getSheet();
     if (!sheet.isValid()) return false;
+    if (sheet.height()==0) return true;
     sheet.insertColumn(ColumnRef(0)); //,ColumnInfo("_ACTION_")); 
     dbg_printf("Added description column\n");
     //sheet.insertRow(RowRef(0));
