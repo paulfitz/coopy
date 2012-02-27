@@ -1023,7 +1023,11 @@ ADD_TEST(column_rename_stdout_equal ${ssdiff} --equal column_rename_stdout.csv c
 foreach(FORMAT csv tdiff color)
   ADD_ROUND_TRIP_TEST_BI(edge_name_age_${FORMAT} ${TESTS}/edge/name_age_1.csv ${TESTS}/edge/name_age_2.csv ${FORMAT})
   ADD_ROUND_TRIP_TEST_BI(edge_bridge_${FORMAT} ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv ${FORMAT})
+  #ADD_ROUND_TRIP_TEST_BI(edge_user_${FORMAT} ${ssdiff} ${TESTS}/edge/user_2.csv ${TESTS}/edge/user_0.csv)
 endforeach()
+
+add_test(edge_user ${ssdiff} ${TESTS}/edge/user_2.csv ${TESTS}/edge/user_0.csv)
+
 
 ADD_STREAM_OUT_TEST(edge_bridge_stdout edge_bridge_stdout.csv ${ssdiff} --format hilite --output dbi:csv:header=-1:file=- ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv)
 ADD_TEST(edge_bridge_stdout_ref ${ssdiff} --output edge_bridge_stdout_ref.csv --format hilite ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv)

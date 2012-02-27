@@ -135,8 +135,8 @@ void NameSniffer::sniff(int suggest) {
   for (int i=0; i<sheet.width(); i++) {
     string name = sheet.cellString(i,adiv);
     if (name=="") {
-      string below = ".";
-      if (sheet.height()>adiv) {
+      string below = "";
+      if (sheet.height()>adiv+1) {
 	below = sheet.cellString(i,adiv+1);
       }
       if (below!="") {
