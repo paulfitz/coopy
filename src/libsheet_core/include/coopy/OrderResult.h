@@ -61,6 +61,10 @@ public:
       if (x==pre) x = post; else break;
     }
   }
+
+  virtual bool isBlank() const {
+    return alen()==0 && blen()==0;
+  }
 };
 
 class coopy::cmp::IdentityOrderResult : public OrderResult {
@@ -71,6 +75,10 @@ public:
 
   virtual int b2a(int x) const {
     return x;
+  }
+
+  virtual bool isBlank() const {
+    return false;
   }
 };
 

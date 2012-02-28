@@ -27,11 +27,11 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
 	int c = m.getCtrlMax();
 	for (int i=0; i<wa; i++) {
 	  m.setCurr(i,i);
-	  m.add(anames[i],false,c);
+	  m.add(anames[i],false,false,c);
 	}
 	for (int j=0; j<wb; j++) {
 	  m.setCurr(j,j);
-	  m.add(bnames[j],true,c);
+	  m.add(bnames[j],true,false,c);
 	}
 	dbg_printf("added column names to column comparison\n");
       }
@@ -52,13 +52,13 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
       for (int i=0; i<wa; i++) {
 	if (1) { //pass.asel.cell(0,i)==-1) {
 	  m.setCurr(i,i);
-	  m.add(pass.a.cellString(i,ra),false,c);
+	  m.add(pass.a.cellString(i,ra),false,false,c);
 	}
       }
       for (int j=0; j<wb; j++) {
 	if (1) { //pass.bsel.cell(0,j)==-1) {
 	  m.setCurr(j,j);
-	  m.add(pass.b.cellString(j,rb),true,c);
+	  m.add(pass.b.cellString(j,rb),true,false,c);
 	}
       }
     }
@@ -74,12 +74,12 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
     if (wa==(int)anames.size()) {
       for (int i=0; i<wa; i++) {
 	m.setCurr(i,i);
-	m.add(anames[i],false,c);
+	m.add(anames[i],false,false,c);
       }
       for (int rb=0; rb<hb; rb++) {
 	for (int j=0; j<wb; j++) {
 	  m.setCurr(j,j);
-	  m.add(pass.b.cellString(j,rb),true,c);
+	  m.add(pass.b.cellString(j,rb),true,false,c);
 	}
       }
     }
@@ -88,12 +88,12 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
       for (int ra=0; ra<ha; ra++) {
 	for (int i=0; i<wa; i++) {
 	  m.setCurr(i,i);
-	  m.add(pass.a.cellString(i,ra),false,c);
+	  m.add(pass.a.cellString(i,ra),false,false,c);
 	}
       }
       for (int j=0; j<wb; j++) {
 	m.setCurr(j,j);
-	m.add(bnames[j],true,c);
+	m.add(bnames[j],true,false,c);
       }
     }
   }

@@ -49,17 +49,11 @@ public:
     query = -1;
   }
 
+  void resetCache() {
+    f.clear();
+  }
+
   void queryBit(std::string txt) {
-    /*
-    if (f.find(txt)==f.end()) {
-      // miss!
-    } else {
-      FVal& val = f[Feature(txt)];
-      if (val.index>=0) {
-	rowMatch.cell(val.index,ycurr)++;
-      }
-    }
-    */
     typename Cache::iterator it = f.find(txt);
     if (it!=f.end()) {
       it->second.apply(rowMatch,ycurr);
@@ -68,27 +62,27 @@ public:
     summarize();
   }
 
-  void addBit(std::string txt) {
+  void addBit(std::string txt, bool alt) {
     if (f.find(Feature(txt))==f.end()) {
+      if (alt) return;
       f[Feature(txt)] = FVal();
     }
     FVal& val = f[Feature(txt)];
-    //val.index.insert(ycurr);
-    val.setIndex(ycurr);
-    ct++;
-    summarize();
+    val.setIndex(ycurr,alt);
+    if (!alt) {
+      ct++;
+      summarize();
+    }
   }
 
-  void add(std::string txt, bool query, int ctrl = 0) {
+  void add(std::string txt, bool query, bool alt, int ctrl) {
     //printf("add %s %d %d\n", txt.c_str(), query, ctrl);
     this->query = query;
-    //if (ctrl==0) {
     if (query) {
       queryBit(txt);
     } else {
-      addBit(txt);
+      addBit(txt,alt);
     }
-    //} else {
     if (ctrl!=0) {
       txt = std::string("^") + txt + "$";
       int len = txt.length();
@@ -105,8 +99,8 @@ public:
 	    queryBit(part);
 	    if (low!=part) queryBit(low);
 	  } else {
-	    addBit(part);
-	    if (low!=part) addBit(low);
+	    addBit(part,alt);
+	    if (low!=part) addBit(low,alt);
 	  }
 	}
       }

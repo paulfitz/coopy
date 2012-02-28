@@ -1035,6 +1035,10 @@ add_test(edge_user_2_5_stats ${ssdiff} --output edge_user_2_5_stats.csv
   ${TESTS}/edge/user_2.csv ${TESTS}/edge/user_5.csv)
 add_test(edge_user_2_5_equal ${ssdiff} --equal edge_user_2_5_stats.csv ${TESTS}/edge/user_2_5_schema_stats.csv)
 
+add_test(edge_user_2_5_row_stats ${ssdiff} --output edge_user_2_5_row_stats.csv
+  --format stats --act insert --act update --act delete
+  ${TESTS}/edge/user_2.csv ${TESTS}/edge/user_5.csv)
+add_test(edge_user_2_5_row_equal ${ssdiff} --equal edge_user_2_5_row_stats.csv ${TESTS}/edge/user_2_5_row_stats.csv)
 
 ADD_STREAM_OUT_TEST(edge_bridge_stdout edge_bridge_stdout.csv ${ssdiff} --format hilite --output dbi:csv:header=-1:file=- ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv)
 ADD_TEST(edge_bridge_stdout_ref ${ssdiff} --output edge_bridge_stdout_ref.csv --format hilite ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv)
