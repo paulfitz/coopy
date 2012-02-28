@@ -47,6 +47,8 @@ else ()
   set (BASEBIN utilities)
 endif()
 
+set (BASELIB libraries)
+
 # for binary builds -- completely optional
 SET (STATLIB "${CMAKE_BINARY_DIR}/static_libs")
 IF (EXISTS ${STATLIB})

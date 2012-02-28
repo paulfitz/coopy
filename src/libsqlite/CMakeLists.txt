@@ -16,6 +16,7 @@ IF (UNIX)
   TARGET_LINK_LIBRARIES(coopy_sqlite dl pthread)
 ENDIF (UNIX)
 export(TARGETS coopy_sqlite APPEND FILE ${COOPY_DEPENDENCIES})
+install(TARGETS coopy_sqlite COMPONENT ${BASELIB} DESTINATION lib)
 
 ADD_EXECUTABLE(test_sqlite test_sqlite.cpp)
 TARGET_LINK_LIBRARIES(test_sqlite coopy_sqlite)

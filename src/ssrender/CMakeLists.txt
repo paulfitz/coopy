@@ -11,10 +11,12 @@ ADD_CUSTOM_COMMAND(
 )
 
 ADD_LIBRARY(coopy_render include/coopy/CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
+install(TARGETS coopy_render COMPONENT ${BASELIB} DESTINATION lib)
+
 
 IF (COMPILE_PLAIN_EXECUTABLES)
   ADD_EXECUTABLE(csv2html csv2html.cpp)
-  TARGET_LINK_LIBRARIES(csv2html sheet coopy_render)
+  TARGET_LINK_LIBRARIES(csv2html coopy_plain coopy_render)
   INSTALL(TARGETS csv2html COMPONENT ${CSVBIN} DESTINATION bin)
 ENDIF ()
 

@@ -98,6 +98,7 @@ if (USE_GNUMERIC)
 
   target_link_libraries(coopy_gnumeric coopy_core)
   target_link_libraries(coopy_gnumeric ${ADD_LIBS})
+  install(TARGETS coopy_gnumeric COMPONENT ${BASELIB} DESTINATION lib)
 
   add_executable(test_gnumeric test_gnumeric.cpp)
   target_link_libraries(test_gnumeric coopy_gnumeric)
