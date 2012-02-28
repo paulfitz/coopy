@@ -248,6 +248,8 @@ void OptionRenderDoxygen::render(const Options& opt) {
     printf(" \\li %s\n", usages[i].c_str());
   }
   const vector<Example>& examples = opt.getExamples();
+  printf("\\if MAN_PAGE_COND\n");
+  printf("\\else\n");
   printf("\n\n\\section %s_index Index\n", opt.getName().c_str());
   printf("  \\li \\ref %s_options\n", opt.getName().c_str());
   printf("  \\li \\ref %s_options_detail\n", opt.getName().c_str());
@@ -263,6 +265,7 @@ void OptionRenderDoxygen::render(const Options& opt) {
     printf("  \\li \\ref %s_table\n", opt.getName().c_str());
   }
   printf("  \\li \\ref %s_version\n", opt.getName().c_str());
+  printf("\\endif\n");
 
   printf("\n\n\\section %s_options Option summary\n", opt.getName().c_str());
 

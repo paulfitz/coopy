@@ -41,7 +41,7 @@ integers; generally it will be exactly the first column.
 Here are cell values that can appear in this column:
 
 @table actiontag
-"@","the header tag marks a header row, if one exists."
+"@@","the header tag marks a header row, if one exists."
 "+++","the insert tag marks an added row (present in R, not present in L)."
 "---","the delete tag marks a removed row (present in L, not present in R)."
 "->","the update tag marks a row in which at least one cell changed.\n-->, --->, ----> etc. have the same meaning."
@@ -60,7 +60,7 @@ map straightforwardly onto columns in L and R.  Here is what the
 data columns contain, for each action tag:
 
 @table actiontag
-"@","cells contain column names."
+"@@","cells contain column names."
 "+++","cells shown are from R, and not present in L."
 "---","cells shown are from L, and not present in R."
 "->","cells shown are common to both L and R.\n When L and R cells differ, a compound ""Vl->Vr"" cell is shown."
@@ -126,6 +126,7 @@ through empty cells, rather than as strings.
 Easy!  Just the same as we've done so far, repeated,
 with appropriate sheet names.  For example:
 
+@load directory/directory.sqlite
 @load directory/directory_alice.sqlite
 @diff directory.sqlite directory_alice.sqlite out.xls hilite
 @show out.xls

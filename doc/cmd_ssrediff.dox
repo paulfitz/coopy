@@ -10,6 +10,8 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 \section ssrediff_usage Usage
  \li ssrediff [options] PATCHFILE
  \li ssrediff [options] DATAFILE PATCHFILE
+\if MAN_PAGE_COND
+\else
 
 
 \section ssrediff_index Index
@@ -19,6 +21,7 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
   \li \ref ssrediff_patch
   \li \ref ssrediff_table
   \li \ref ssrediff_version
+\endif
 
 
 \section ssrediff_options Option summary
@@ -128,7 +131,7 @@ Generate tabular form of diff for eyeballing. If ssrediff is compiled with gnume
 
 
 \section ssrediff_patch Patch formats
-  \li <b>tdiff</b>: <i>[default]</i> vaguely similar to a standard unix diff
+  \li <b>tdiff</b>: <i>[default]</i> reminiscent of the standard unix diff format for text
   \li <b>csv</b>: csv-compatible diff format
   \li <b>hilite</b>: colorful spreadsheet format
   \li <b>index</b>: tabular output showing relationship between rows and columns
@@ -136,6 +139,7 @@ Generate tabular form of diff for eyeballing. If ssrediff is compiled with gnume
   \li <b>raw</b>: verbose diff format for debugging
   \li <b>review</b>: spreadsheet diff format suitable for quickly accepting or rejecting changes
   \li <b>sql</b>: SQL format (data diffs only)
+  \li <b>stats</b>: produce statistics on table changes
 
 
 \section ssrediff_table Database/spreadsheet file formats
@@ -215,7 +219,7 @@ MYSQL: database connector<br />
 
 
 \section ssrediff_version Version
-ssrediff version 0.6.0
+ssrediff version 0.6.2
 
 
  *

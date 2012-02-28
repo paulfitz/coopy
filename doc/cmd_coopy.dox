@@ -10,6 +10,8 @@ Manage a repository of spreadsheets and databases. Usually run without options, 
 \section coopy_usage Usage
  \li coopy [options]
  \li coopy [options] DIRECTORY
+\if MAN_PAGE_COND
+\else
 
 
 \section coopy_index Index
@@ -17,6 +19,7 @@ Manage a repository of spreadsheets and databases. Usually run without options, 
   \li \ref coopy_options_detail
   \li \ref coopy_examples
   \li \ref coopy_version
+\endif
 
 
 \section coopy_options Option summary
@@ -111,7 +114,7 @@ export organizations.sqlite from the repository, with key 'orgs'.
 
 
 \section coopy_version Version
-coopy version 0.6.0
+coopy version 0.6.2
 
 
  *

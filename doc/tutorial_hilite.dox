@@ -14,7 +14,7 @@ annotations like "+++", "---", or "->" in the first column of one
 or more tables in a spreadsheet.  Here is such a table:
 
 <table>
-  <tr><th>\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
+  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
   <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td>1600</td></tr>
