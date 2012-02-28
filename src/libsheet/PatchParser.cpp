@@ -1273,6 +1273,31 @@ static int remap(map<int,int>& m, int s) {
   return s;
 }
 
+static int remap(vector<int>& m, int s) {
+  return m[s];
+}
+
+static void shuffle(vector<int>& indexMap, int j, int jj, bool undo) {
+  // What is at j came from offset jj
+  dbg_printf(">>> Move to %d, offset %d\n", j, jj);
+  vector<int> indexMap2;
+  int at = 0;
+  for (int i=0; i<(int)indexMap.size()+1; i++) {
+    if (at==j) {
+      indexMap2.push_back(indexMap[j+jj]);
+      at++;
+    }
+    if (i!=j+jj&&i<(int)indexMap.size()) {
+      indexMap2.push_back(indexMap[i]);
+      at++;
+    }
+    dbg_printf("  %s / %s\n", 
+	   vector2string(indexMap2).c_str(),
+	   vector2string(indexMap).c_str());
+  }
+  indexMap = indexMap2;
+}
+
 bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 
   patcher->mergeStart();
@@ -1322,7 +1347,8 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 
       RowChange change;
       change.names = activeCol;
-      change.allNames = cols;
+      //change.allNames = cols;
+      change.allNames = activeCol;
       dbg_printf("Columns are %s\n",vector2string(cols).c_str());
       change.indexes = indexes;
       string code = sheet.cellString(xoff,i);
@@ -1382,16 +1408,25 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	    }
 	  }
 
-	  map<int,int> indexMap;
+	  vector<int> indexMap;
+	  vector<int> indexMapBase;
+	  indexMap.clear();
+	  for (int j=0; j<(int)origCol.size(); j++) {
+	    indexMap.push_back(j);
+	  }
+	  indexMapBase = indexMap;
 
+	  int at = 0;
 	  for (int j=0; j<(int)origCol.size(); j++) {
 	    string act = statusCol[j];
 	    if (act!="<>") continue;
-	    int jj = j+offsetCol[j];
-	    printf("%d vs %d\n", j, jj);
-	    indexMap[j] = jj;
-	    indexMap[jj] = j;
+	    int jj = offsetCol[j];
+	    //printf("%d vs %d\n", j, jj);
+	    shuffle(indexMap,j+jj,-jj,true);
+	    //indexMap[j] = jj;
+	    //indexMap[jj] = j;
 	  }
+
 	  NameChange nc;
 	  nc.mode = NAME_CHANGE_DECLARE;
 	  nc.final = false;
@@ -1401,7 +1436,7 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	  origCol = nc.names;
 	  patcher->changeName(nc);
 
-	  indexMap.clear();
+	  indexMap = indexMapBase;
 
 	  for (int j=0; j<(int)origCol.size(); j++) {
 	    string act = statusCol[j];
@@ -1415,10 +1450,8 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	      order.indicesBefore.push_back(remap(indexMap,k));
 	    }
 
-	    int jj = j+offsetCol[j];
-	    
-	    indexMap[j] = jj;
-	    indexMap[jj] = j;
+	    int jj = offsetCol[j];
+	    shuffle(indexMap,j,jj,false);
 
 	    for (int k=0; k<(int)origCol.size(); k++) {
 	      order.namesAfter.push_back(origCol[remap(indexMap,k)]);

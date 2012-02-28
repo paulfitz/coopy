@@ -35,6 +35,8 @@ public:
 
   virtual bool mergeDone();
 
+  virtual bool mergeAllDone();
+
   virtual bool setSheet(const char *name);
 
   virtual bool declareLink(const LinkDeclare& decl);

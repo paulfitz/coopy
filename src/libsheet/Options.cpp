@@ -526,7 +526,7 @@ Options::Options(const char *name) : name(name) {
 
   add(OPTION_PATCH_FORMAT,
       "*tdiff",
-      "vaguely similar to a standard unix diff");
+      "reminiscent of the standard unix diff format for text");
   add(OPTION_PATCH_FORMAT,
       "raw",
       "verbose diff format for debugging");
@@ -548,6 +548,9 @@ Options::Options(const char *name) : name(name) {
   add(OPTION_PATCH_FORMAT,
       "ops",
       "summarize modified rows in a table");
+  add(OPTION_PATCH_FORMAT,
+      "stats",
+      "produce statistics on table changes");
 }
 
 std::string Options::getVersion() const {

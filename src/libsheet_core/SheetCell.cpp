@@ -12,6 +12,13 @@ SheetCell::SheetCell(int x) {
   escaped = false;
 }
 
+SheetCell SheetCell::makeInt(int x) {
+  char buf[256];
+  sprintf(buf,"%d",x);
+  return SheetCell(buf,false);
+}
+
+
 int SheetCell::asInt() const {
   if (escaped) return 0;
   return atoi(text.c_str());

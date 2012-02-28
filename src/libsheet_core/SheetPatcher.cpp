@@ -249,7 +249,7 @@ bool SheetPatcher::moveColumn(int idx, int idx2) {
       sgn = -1;
       ch = "<";
     }
-    for (int i=first; i!=final; i++) {
+    for (int i=first; i<final; i++) {
       if (statusCol.cellString(i,0)!="---") {
 	name += ch;
       }
@@ -372,7 +372,8 @@ bool SheetPatcher::changeColumn(const OrderChange& change) {
 	idx2 = matchCol(before);
       }
       //printf("Moving %s %d->%d\n", mover.c_str(), idx, idx2);
-      return moveColumn(idx,idx2);
+      bool ok = moveColumn(idx,idx2);
+      return ok;
     }
     break;
   case ORDER_CHANGE_RENAME:
@@ -636,6 +637,7 @@ bool SheetPatcher::handleConflicts() {
 
 bool SheetPatcher::changeRow(const RowChange& change) {
   sheetUpdateNeeded = true;
+
   PolySheet sheet = getSheet();
   if (!sheet.isValid()) {
     fprintf(stderr,"No sheet available to patch.\n");
@@ -718,7 +720,10 @@ bool SheetPatcher::changeRow(const RowChange& change) {
       cval[idx] = it->second;
       pval[idx] = it->second;
     } else {
-      fprintf(stderr,"Unknown column %s\n", it->first.c_str());
+      if (std::find(change.names.begin(),change.names.end(),it->first)!=
+	  change.names.end()) {
+	fprintf(stderr,"Unknown column %s\n", it->first.c_str());
+      }
     }
   }
   for (RowChange::txt2cell::const_iterator it = change.conflictingVal.begin();

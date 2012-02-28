@@ -63,7 +63,7 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
       }
     }
   }
-  if (step==1 && ha<10 && hb<10 && ct==0) {
+  if (step==1 && (ha<10 || hb<10) && (ct<ha/2||ct<hb/2)) {
     pass.va.meta.sniff();
     pass.vb.meta.sniff();
     const std::vector<std::string>& anames = pass.va.meta.suggestNames();

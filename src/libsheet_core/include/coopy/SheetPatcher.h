@@ -181,6 +181,16 @@ public:
     Patcher::setConflicted();
   }
 
+  virtual bool wantLinks() { 
+    if (chain) return chain->wantLinks();
+    return false; 
+  }
+
+  virtual bool declareLink(const LinkDeclare& decl) {
+    if (chain) return chain->declareLink(decl);
+    return false;
+  }
+
   virtual bool outputStartsFromInput() {
     return descriptive||merging;
   }

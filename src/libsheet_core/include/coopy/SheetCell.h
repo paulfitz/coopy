@@ -49,6 +49,8 @@ public:
   //}
 
   int asInt() const;
+  
+  static SheetCell makeInt(int x);
 };
 
 #endif
