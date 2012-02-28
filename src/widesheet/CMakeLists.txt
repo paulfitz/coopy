@@ -8,10 +8,11 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 SET(SQLITE_DIR ${CMAKE_SOURCE_DIR}/src/ssfossil/fossil/src)
 INCLUDE_DIRECTORIES(${SQLITE_DIR})
 
-ADD_LIBRARY(widesheet_management WideSheetManager.cpp WideSheetManager.h)
-TARGET_LINK_LIBRARIES(widesheet_management sheet_full sqlite)
+ADD_LIBRARY(coopy_widesheet WideSheetManager.cpp WideSheetManager.h)
+TARGET_LINK_LIBRARIES(coopy_widesheet coopy_full coopy_sqlite)
 
 ADD_EXECUTABLE(widesheet widesheet.cpp)
-TARGET_LINK_LIBRARIES(widesheet widesheet_management)
+TARGET_LINK_LIBRARIES(widesheet coopy_widesheet)
 
 INSTALL(TARGETS widesheet COMPONENT ${BIGBIN} DESTINATION bin)
+install(TARGETS coopy_widesheet COMPONENT ${BASELIB} DESTINATION lib)

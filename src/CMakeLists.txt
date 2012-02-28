@@ -1,6 +1,6 @@
 option(PROFILING "Turn on profiling" OFF)
 IF (PROFILING)
-#  FOREACH(target ssformat ssmerge csv sheet sheet_full remotesql remotesql_sqlxx sheet_core)
+#  FOREACH(target ssformat ssmerge csv sheet coopy_full remotesql remotesql_sqlxx sheet_core)
 #    SET_TARGET_PROPERTIES(${target} PROPERTIES COMPILE_FLAGS -pg LINK_FLAGS -pg)
 #  ENDFOREACH()
   ADD_DEFINITIONS(-pg)
@@ -47,6 +47,8 @@ else ()
   set (BASEBIN utilities)
 endif()
 
+set (BASELIB libraries)
+
 # for binary builds -- completely optional
 SET (STATLIB "${CMAKE_BINARY_DIR}/static_libs")
 IF (EXISTS ${STATLIB})
@@ -67,16 +69,16 @@ add_subdirectory(libgnumeric)
 add_subdirectory(libaccess)
 # add_subdirectory(libsocialcalc)
 
-add_subdirectory(libsheet_core)
+add_subdirectory(libcoopy_core)
 add_subdirectory(libremotesql)
 add_subdirectory(jsoncpp)
-add_subdirectory(libsheet)
-add_subdirectory(libsheet_fold)
+add_subdirectory(libcoopy_full)
+add_subdirectory(libcoopy_fold)
 set(SHEET_INCLUDE_DIRS 
-  ${CMAKE_SOURCE_DIR}/src/libsheet_core/include 
-  ${CMAKE_SOURCE_DIR}/src/libsheet_fold/include 
+  ${CMAKE_SOURCE_DIR}/src/libcoopy_core/include 
+  ${CMAKE_SOURCE_DIR}/src/libcoopy_fold/include 
   ${CMAKE_SOURCE_DIR}/src/libcsv 
-  ${CMAKE_SOURCE_DIR}/src/libsheet/include)
+  ${CMAKE_SOURCE_DIR}/src/libcoopy_full/include)
 
 add_subdirectory(ssmerge)
 add_subdirectory(ssdiff)

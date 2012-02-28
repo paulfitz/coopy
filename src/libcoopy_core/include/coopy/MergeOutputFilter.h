@@ -149,6 +149,16 @@ public:
   bool isConflicted() const {
     return chain->isConflicted();
   }
+
+  virtual bool wantLinks() { 
+    if (chain) return chain->wantLinks();
+    return false; 
+  }
+
+  virtual bool declareLink(const LinkDeclare& decl) {
+    if (chain) return chain->declareLink(decl);
+    return false;
+  }
 };
 
 #endif

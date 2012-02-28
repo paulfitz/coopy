@@ -3,10 +3,10 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 IF (COMPILE_PLAIN_EXECUTABLES)
   ADD_EXECUTABLE(csvfold ssfold.cpp)
-  TARGET_LINK_LIBRARIES(csvfold sheet sheet_fold)
+  TARGET_LINK_LIBRARIES(csvfold coopy_plain coopy_fold)
   INSTALL(TARGETS csvfold COMPONENT ${CSVBIN} DESTINATION bin)
 ENDIF ()
 
 ADD_EXECUTABLE(ssfold ssfold.cpp)
-TARGET_LINK_LIBRARIES(ssfold sheet_full sheet_fold)
+TARGET_LINK_LIBRARIES(ssfold coopy_full coopy_fold)
 INSTALL(TARGETS ssfold COMPONENT ${BIGBIN} DESTINATION bin)

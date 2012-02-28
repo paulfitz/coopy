@@ -9,13 +9,13 @@ endif ()
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
 
 ADD_EXECUTABLE(test_sheet test_sheet.cpp)
-TARGET_LINK_LIBRARIES(test_sheet sheet_full)
+TARGET_LINK_LIBRARIES(test_sheet coopy_full)
 
 ADD_EXECUTABLE(test_viterbi test_viterbi.cpp)
-TARGET_LINK_LIBRARIES(test_viterbi sheet_full)
+TARGET_LINK_LIBRARIES(test_viterbi coopy_full)
 
 ADD_EXECUTABLE(make_sheet make_sheet.cpp)
-TARGET_LINK_LIBRARIES(make_sheet sheet_full)
+TARGET_LINK_LIBRARIES(make_sheet coopy_full)
 
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 
@@ -117,6 +117,7 @@ ADD_TEST(altitude_merge ${testprg}
   --remote --read ${TESTS}/test005_replace_column.csv
   --compare
 #  --local --write ${TESTS}/result_altitude_merge.csv
+  --local --write /tmp/out.csv
   --remote --read ${TESTS}/result_altitude_merge.csv
   --diff
   --prop diffs --assert 0)
@@ -126,6 +127,7 @@ ADD_TEST(altitude_merge_without_header ${testprg}
   --local --read ${TESTS}/test005_fix_typo_add.csv --remove_row 0
   --remote --read ${TESTS}/test005_replace_column.csv --remove_row 0
   --compare
+# --local --write /tmp/ref.csv
   --remote --read ${TESTS}/result_altitude_merge.csv --remove_row 0
   --diff
   --prop diffs --assert 0)
@@ -1023,7 +1025,20 @@ ADD_TEST(column_rename_stdout_equal ${ssdiff} --equal column_rename_stdout.csv c
 foreach(FORMAT csv tdiff color)
   ADD_ROUND_TRIP_TEST_BI(edge_name_age_${FORMAT} ${TESTS}/edge/name_age_1.csv ${TESTS}/edge/name_age_2.csv ${FORMAT})
   ADD_ROUND_TRIP_TEST_BI(edge_bridge_${FORMAT} ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv ${FORMAT})
+  ADD_ROUND_TRIP_TEST_BI(edge_user5_${FORMAT} ${TESTS}/edge/user_2.csv ${TESTS}/edge/user_5.csv ${FORMAT})
 endforeach()
+
+add_test(edge_user ${ssdiff} ${TESTS}/edge/user_2.csv ${TESTS}/edge/user_0.csv)
+
+add_test(edge_user_2_5_stats ${ssdiff} --output edge_user_2_5_stats.csv
+  --format stats --act schema
+  ${TESTS}/edge/user_2.csv ${TESTS}/edge/user_5.csv)
+add_test(edge_user_2_5_equal ${ssdiff} --equal edge_user_2_5_stats.csv ${TESTS}/edge/user_2_5_schema_stats.csv)
+
+add_test(edge_user_2_5_row_stats ${ssdiff} --output edge_user_2_5_row_stats.csv
+  --format stats --act insert --act update --act delete
+  ${TESTS}/edge/user_2.csv ${TESTS}/edge/user_5.csv)
+add_test(edge_user_2_5_row_equal ${ssdiff} --equal edge_user_2_5_row_stats.csv ${TESTS}/edge/user_2_5_row_stats.csv)
 
 ADD_STREAM_OUT_TEST(edge_bridge_stdout edge_bridge_stdout.csv ${ssdiff} --format hilite --output dbi:csv:header=-1:file=- ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv)
 ADD_TEST(edge_bridge_stdout_ref ${ssdiff} --output edge_bridge_stdout_ref.csv --format hilite ${TESTS}/edge/designer_1.csv ${TESTS}/bridges.csv)
@@ -1069,3 +1084,15 @@ foreach(FORMAT tdiff csv color)
   ADD_ROUND_TRIP_TEST_BI_CSVS(multisheet_diff_directory_blank2_${FORMAT} ${TESTS}/directory/directory_blank.sqlite ${TESTS}/directory/directory_blank.sqlite ${FORMAT})
 endforeach ()
 
+#######################################################################
+#######################################################################
+
+# index diff
+
+add_test(index_diff_base ${ssmerge} --format index 
+  --output index_diff.base.csvs
+  ${TESTS}/test005_base.csv 
+  ${TESTS}/test005_fix_typo_add.csv
+  ${TESTS}/test005_replace_column.csv)
+add_test(index_diff_compare ${ssdiff} --equal index_diff.base.csvs
+  ${TESTS}/results/altitude_index.csvs)

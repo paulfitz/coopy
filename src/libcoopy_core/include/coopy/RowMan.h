@@ -4,6 +4,7 @@
 #include <coopy/Measure.h>
 #include <coopy/CompareFlags.h>
 #include <coopy/FMap.h>
+#include <coopy/OrderResult.h>
 
 namespace coopy {
   namespace cmp {
@@ -27,8 +28,10 @@ public:
   map_type m;
   std::vector<int> ref_subset, query_subset;
   coopy::store::SparseFloatSheet match;
+  const OrderResult& comp;
 
-  RowManOf(const CompareFlags& flags) : flags(flags), m(match) {
+ RowManOf(const CompareFlags& flags,
+	  const OrderResult& comp) : flags(flags), m(match), comp(comp) {
     vigor = 0;
     bound = -1;
   }
@@ -46,7 +49,10 @@ public:
   }
 
   void apply(coopy::store::DataSheet& a, 
-	     coopy::store::IntSheet& asel, bool query, int ctrl) {
+	     coopy::store::IntSheet& asel, 
+	     int target,
+	     bool query, 
+	     bool alt, int ctrl) {
     int w = a.width();
     int h = a.height();
     m.resetCount();
@@ -58,17 +64,24 @@ public:
 	  at++;
 	  if (!(flags.trust_ids)) {
 	    if (!flags.bias_ids) {
-	      for (int x=0; x<w; x++) {
+	      int first = target;
+	      int last = target;
+	      if (target==-1) {
+		first = 0;
+		last = w-1;
+	      }
+	      for (int x=first; x<=last; x++) {
 		std::string txt = a.cellString(x,y);
 		m.setCurr(x,y);
-		m.add(txt,query,ctrl);
+		m.add(txt,query,alt,ctrl);
+		//printf("ADD %d %d %s %d\n", x, y, txt.c_str(), query);
 	      }
 	    } else {
 	      const std::vector<int>& subset = query?query_subset:ref_subset;
 	      for (int x=0; x<(int)subset.size(); x++) {
 		std::string txt = a.cellString(subset[x],y);
 		m.setCurr(subset[x],y);
-		m.add(txt,query,ctrl);
+		m.add(txt,query,alt,ctrl);
 	      }
 	    }
 	  } else {
@@ -78,7 +91,7 @@ public:
 	      txt += a.cellString(subset[x],y) + "__";
 	    }
 	    m.setCurr(0,y);
-	    m.add(txt,query,0);
+	    m.add(txt,query,alt,0);
 	  }
 	} else {
 	  match.cell(0,y) = -2;
@@ -92,7 +105,7 @@ public:
 	    std::string txt = a.cellString(x,y);
 	    txt += a.cellString(x+1,y);
 	    m.setCurr(x,y);
-	    m.add(txt,query,ctrl);
+	    m.add(txt,query,alt,ctrl);
 	  }
 	}
       }
@@ -106,8 +119,23 @@ public:
 	     coopy::store::IntSheet& bsel,
 	     int ctrl) {
     match.resize(a.height(),b.height(),0);
-    apply(a,asel,false,ctrl);
-    apply(b,bsel,true,ctrl);
+    if (flags.trust_ids||flags.bias_ids||comp.isBlank()) {
+      apply(a,asel,-1,false,false,ctrl);
+      apply(b,bsel,-1,true,false,ctrl);
+      return;
+    }
+    // Have a column mapping
+
+    int w = a.width();
+    for (int i=0; i<w; i++) {
+      int j = comp.a2b(i);
+      if (j!=-1) {
+	m.resetCache();
+	apply(a,asel,i,false,false,ctrl);
+	apply(b,bsel,j,false,true,ctrl);
+	apply(b,bsel,j,true,false,ctrl);
+      }
+    }
   }
 
   virtual void measure(MeasurePass& pass, int ctrl) {
@@ -132,7 +160,8 @@ public:
   int theta;
   bool flip;
 
- CombinedRowMan(const CompareFlags& flags) : man1(flags), man2(flags) {
+ CombinedRowMan(const CompareFlags& flags,
+		const OrderResult& comp) : man1(flags,comp), man2(flags,comp) {
     theta = man1.getCtrlMax()/2;
     flip = false;
   }

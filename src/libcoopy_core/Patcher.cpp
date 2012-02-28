@@ -7,6 +7,7 @@
 #include <coopy/MergeOutputPatch.h>
 #include <coopy/MergeOutputIndex.h>
 #include <coopy/MergeOutputRowOps.h>
+#include <coopy/MergeOutputStats.h>
 #include <coopy/SheetPatcher.h>
 
 #include <algorithm>
@@ -64,6 +65,8 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
     result = SheetPatcher::createForMerge();
   } else if (mode=="ops") {
     result = new MergeOutputRowOps;
+  } else if (mode=="stats") {
+    result = new MergeOutputStats;
   } else {
     fprintf(stderr, "Format %s?\n", mode.c_str());
   }

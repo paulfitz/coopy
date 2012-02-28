@@ -1,0 +1,5 @@
+id,login,is_admin
+2,peter@frank.com,false
+3,test@test.com,true
+4,zig@zig.com,true
+5,mark@testing.com,false

@@ -26,7 +26,7 @@ needed to change L into R.  The difference is described
 in a "diff sheet" that looks like this:
 
 <table>
-  <tr><th>\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
+  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
   <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td>1600</td></tr>
@@ -49,7 +49,7 @@ integers; generally it will be exactly the first column.
 Here are cell values that can appear in this column:
 
 <table>
-  <tr><th>\@</th><th>the header tag marks a header row, if one exists.</th></tr>
+  <tr><th>\@\@</th><th>the header tag marks a header row, if one exists.</th></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>the insert tag marks an added row (present in R, not present in L).</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>the delete tag marks a removed row (present in L, not present in R).</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">the update tag marks a row in which at least one cell changed.\n-->, --->, ----> etc. have the same meaning.</td></tr>
@@ -68,7 +68,7 @@ map straightforwardly onto columns in L and R.  Here is what the
 data columns contain, for each action tag:
 
 <table>
-  <tr><th>\@</th><th>cells contain column names.</th></tr>
+  <tr><th>\@\@</th><th>cells contain column names.</th></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>cells shown are from R, and not present in L.</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>cells shown are from L, and not present in R.</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">cells shown are common to both L and R.\n When L and R cells differ, a compound "Vl->Vr" cell is shown.</td></tr>
@@ -136,7 +136,7 @@ with appropriate sheet names.  For example:
 
 <table>
   <caption>locations</caption>
-  <tr><th>\@</th><th>id</th><th>street</th><th>city</th></tr>
+  <tr><th>\@\@</th><th>id</th><th>street</th><th>city</th></tr>
   <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
   <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
@@ -144,7 +144,7 @@ with appropriate sheet names.  For example:
 
 <table>
   <caption>org2loc</caption>
-  <tr><th>\@</th><th>org_id</th><th>loc_id</th></tr>
+  <tr><th>\@\@</th><th>org_id</th><th>loc_id</th></tr>
   <tr><td></td><td>1</td><td>2</td></tr>
   <tr><td></td><td>2</td><td>1</td></tr>
   <tr><td></td><td>3</td><td>1</td></tr>
@@ -154,7 +154,7 @@ with appropriate sheet names.  For example:
 
 <table>
   <caption>organizations</caption>
-  <tr><th>\@</th><th>id</th><th>name</th></tr>
+  <tr><th>\@\@</th><th>id</th><th>name</th></tr>
   <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
   <tr><td></td><td>2</td><td>The Firm</td></tr>
   <tr><td></td><td>3</td><td>Omni Cooperative</td></tr>
@@ -171,7 +171,7 @@ a "+++".  For example:
 
 <table>
   <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td></td><td></td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">+++</td><td></td></tr>
-  <tr><th>\@</th><th>bridge</th><th>designer</th><th>quark</th><th>length</th></tr>
+  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>quark</th><th>length</th></tr>
   <tr><td>+</td><td>Brooklyn</td><td>J. A. Roebling</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">strange</td><td>1595</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>charm</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">up</td><td>1600</td></tr>
@@ -193,7 +193,7 @@ For example:
 
 <table>
   <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td></td><td></td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">---</td><td></td></tr>
-  <tr><th>\@</th><th>bridge</th><th>designer</th><th>quark</th><th>length</th></tr>
+  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>quark</th><th>length</th></tr>
   <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">strange</td><td>1595</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Manhattan</td><td>G. Lindenthal</td><td>charm</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">L. L. Buck->D. Duck</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">up</td><td>1600</td></tr>

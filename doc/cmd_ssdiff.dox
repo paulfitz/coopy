@@ -9,6 +9,8 @@ Show the difference between two tables/databases/spreadsheets.
 
 \section ssdiff_usage Usage
  \li ssdiff [options] FILE1 FILE2
+\if MAN_PAGE_COND
+\else
 
 
 \section ssdiff_index Index
@@ -18,6 +20,7 @@ Show the difference between two tables/databases/spreadsheets.
   \li \ref ssdiff_patch
   \li \ref ssdiff_table
   \li \ref ssdiff_version
+\endif
 
 
 \section ssdiff_options Option summary
@@ -161,7 +164,7 @@ Generate tabular diff for eyeballing. If ssdiff is compiled with gnumeric suppor
 
 
 \section ssdiff_patch Patch formats
-  \li <b>tdiff</b>: <i>[default]</i> vaguely similar to a standard unix diff
+  \li <b>tdiff</b>: <i>[default]</i> reminiscent of the standard unix diff format for text
   \li <b>csv</b>: csv-compatible diff format
   \li <b>hilite</b>: colorful spreadsheet format
   \li <b>index</b>: tabular output showing relationship between rows and columns
@@ -169,6 +172,7 @@ Generate tabular diff for eyeballing. If ssdiff is compiled with gnumeric suppor
   \li <b>raw</b>: verbose diff format for debugging
   \li <b>review</b>: spreadsheet diff format suitable for quickly accepting or rejecting changes
   \li <b>sql</b>: SQL format (data diffs only)
+  \li <b>stats</b>: produce statistics on table changes
 
 
 \section ssdiff_table Database/spreadsheet file formats
@@ -248,7 +252,7 @@ MYSQL: database connector<br />
 
 
 \section ssdiff_version Version
-ssdiff version 0.6.0
+ssdiff version 0.6.2
 
 
  *

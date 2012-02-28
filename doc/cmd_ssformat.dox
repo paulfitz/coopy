@@ -10,6 +10,8 @@ Reformat tables/databases/spreadsheets.
 \section ssformat_usage Usage
  \li ssformat [options] FILE
  \li ssformat [options] FILE1 FILE2
+\if MAN_PAGE_COND
+\else
 
 
 \section ssformat_index Index
@@ -19,6 +21,7 @@ Reformat tables/databases/spreadsheets.
   \li \ref ssformat_patch
   \li \ref ssformat_table
   \li \ref ssformat_version
+\endif
 
 
 \section ssformat_options Option summary
@@ -90,7 +93,7 @@ Display contents of an Sqlite database table.
 
 
 \section ssformat_patch Patch formats
-  \li <b>tdiff</b>: <i>[default]</i> vaguely similar to a standard unix diff
+  \li <b>tdiff</b>: <i>[default]</i> reminiscent of the standard unix diff format for text
   \li <b>csv</b>: csv-compatible diff format
   \li <b>hilite</b>: colorful spreadsheet format
   \li <b>index</b>: tabular output showing relationship between rows and columns
@@ -98,6 +101,7 @@ Display contents of an Sqlite database table.
   \li <b>raw</b>: verbose diff format for debugging
   \li <b>review</b>: spreadsheet diff format suitable for quickly accepting or rejecting changes
   \li <b>sql</b>: SQL format (data diffs only)
+  \li <b>stats</b>: produce statistics on table changes
 
 
 \section ssformat_table Database/spreadsheet file formats
@@ -177,7 +181,7 @@ MYSQL: database connector<br />
 
 
 \section ssformat_version Version
-ssformat version 0.6.0
+ssformat version 0.6.2
 
 
  *

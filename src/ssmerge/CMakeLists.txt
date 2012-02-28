@@ -3,18 +3,18 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 IF (COMPILE_PLAIN_EXECUTABLES)
   ADD_EXECUTABLE(csvmerge ssmerge.cpp)
-  TARGET_LINK_LIBRARIES(csvmerge sheet)
+  TARGET_LINK_LIBRARIES(csvmerge coopy_plain)
   INSTALL(TARGETS csvmerge COMPONENT ${CSVBIN} DESTINATION bin)
 
   ADD_EXECUTABLE(csvresolve ssresolve.cpp)
-  TARGET_LINK_LIBRARIES(csvresolve sheet)
+  TARGET_LINK_LIBRARIES(csvresolve coopy_plain)
   INSTALL(TARGETS csvresolve COMPONENT ${CSVBIN} DESTINATION bin)
 ENDIF ()
 
 ADD_EXECUTABLE(ssmerge ssmerge.cpp)
-TARGET_LINK_LIBRARIES(ssmerge sheet_full)
+TARGET_LINK_LIBRARIES(ssmerge coopy_full)
 INSTALL(TARGETS ssmerge COMPONENT ${BIGBIN} DESTINATION bin)
 
 ADD_EXECUTABLE(ssresolve ssresolve.cpp)
-TARGET_LINK_LIBRARIES(ssresolve sheet_full)
+TARGET_LINK_LIBRARIES(ssresolve coopy_full)
 INSTALL(TARGETS ssresolve COMPONENT ${BIGBIN} DESTINATION bin)

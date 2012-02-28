@@ -65,7 +65,7 @@ location in Denver:
 
 <table>
   <caption>locations</caption>
-  <tr><th>\@</th><th>id</th><th>street</th><th>city</th></tr>
+  <tr><th>\@\@</th><th>id</th><th>street</th><th>city</th></tr>
   <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
   <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
@@ -73,7 +73,7 @@ location in Denver:
 
 <table>
   <caption>org2loc</caption>
-  <tr><th>\@</th><th>org_id</th><th>loc_id</th></tr>
+  <tr><th>\@\@</th><th>org_id</th><th>loc_id</th></tr>
   <tr><td></td><td>1</td><td>2</td></tr>
   <tr><td></td><td>2</td><td>1</td></tr>
   <tr><td></td><td>3</td><td>1</td></tr>
@@ -83,7 +83,7 @@ location in Denver:
 
 <table>
   <caption>organizations</caption>
-  <tr><th>\@</th><th>id</th><th>name</th></tr>
+  <tr><th>\@\@</th><th>id</th><th>name</th></tr>
   <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
   <tr><td></td><td>2</td><td>The Firm</td></tr>
   <tr><td></td><td>3</td><td>Omni Cooperative</td></tr>
@@ -96,7 +96,7 @@ notes that "Omni Cooperative" also has a branch on Planet Bob:
 
 <table>
   <caption>locations</caption>
-  <tr><th>\@</th><th>id</th><th>street</th><th>city</th></tr>
+  <tr><th>\@\@</th><th>id</th><th>street</th><th>city</th></tr>
   <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
   <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>42 The Boblands</td><td>Planet Bob</td></tr>
@@ -104,7 +104,7 @@ notes that "Omni Cooperative" also has a branch on Planet Bob:
 
 <table>
   <caption>org2loc</caption>
-  <tr><th>\@</th><th>org_id</th><th>loc_id</th></tr>
+  <tr><th>\@\@</th><th>org_id</th><th>loc_id</th></tr>
   <tr><td></td><td>1</td><td>2</td></tr>
   <tr><td></td><td>2</td><td>1</td></tr>
   <tr><td></td><td>3</td><td>1</td></tr>
@@ -116,7 +116,7 @@ notes that "Omni Cooperative" also has a branch on Planet Bob:
 
 <table>
   <caption>organizations</caption>
-  <tr><th>\@</th><th>id</th><th>name</th></tr>
+  <tr><th>\@\@</th><th>id</th><th>name</th></tr>
   <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
   <tr><td></td><td>2</td><td>The Firm</td></tr>
   <tr><td></td><td>3</td><td>Omni Cooperative</td></tr>

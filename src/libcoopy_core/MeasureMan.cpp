@@ -158,10 +158,10 @@ void MeasureMan::compare1(int ctrl) {
 	bestValue = match.cell(bestIndex,y);
       }
       double ref = bnorm_pass.match.cell(0,y);
-      double ref2 = anorm_pass.match.cell(0,y);
+      double ref2 = anorm_pass.match.cell(0,bestIndex);
       if (ref2<ref) ref = ref2;
       bool ok = false;
-      if (bestValue>ref/4 && bestIndex>=0) {
+      if (bestValue>ref/4 && bestIndex>=0 && ref>0.01) {
 	//if (bestInc>bestValue/2 && bestIndex>=0) {
 	ok = true;
 	  //}
@@ -188,9 +188,9 @@ void MeasureMan::compare1(int ctrl) {
       }
       if (ok) {
        
-	dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g %g : %g)\n",
+	dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g : %g)\n",
 		   y,bestIndex,y,bestIndex,
-		   bestIndex, bestValue, -1.0, ref);
+		   bestIndex, bestValue, ref);
 	dbg_printf("  [remote/local] %s %s\n", cell(b,0,y).c_str(), cell(a,0,bestIndex).c_str());
 	
 	if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {

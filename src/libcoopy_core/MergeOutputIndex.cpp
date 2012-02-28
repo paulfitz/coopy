@@ -58,6 +58,11 @@ bool MergeOutputIndex::mergeDone() {
 }
 
 
+bool MergeOutputIndex::mergeAllDone() {
+  return true;
+}
+
+
 static SheetCell link_cell(int x) {
   if (x>=0) return SheetCell(x);
   return SheetCell();
@@ -71,12 +76,15 @@ static SheetCell link_cell(PolySheet& sheet, int x, int y) {
 }
 
 bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
-  dbg_printf("LINK %d %d %d %d\n",
-	 decl.mode,
-	 decl.rc_id_pivot,
-	 decl.rc_id_local,
-	 decl.rc_id_remote);
   std::string mode = decl.column?"column":"row";
+  dbg_printf("LINK %s %d %d %d // %s %s %s\n",
+	     mode.c_str(),
+	     decl.rc_id_pivot,
+	     decl.rc_id_local,
+	     decl.rc_id_remote,
+	     decl.rc_str_pivot.c_str(),
+	     decl.rc_str_local.c_str(),
+	     decl.rc_str_remote.c_str());
 
   if (!sheet_set) {
     setSheet("sheet");
@@ -209,7 +217,7 @@ bool MergeOutputIndex::declareLink(const LinkDeclare& decl) {
       {
 	for (int i=0; i<(int)ilocal.size(); i++) {
 	  if (ilocal[i]) {
-	    row.setCell(at,link_cell(local,i,decl.rc_id_pivot)); at++;
+	    row.setCell(at,link_cell(local,i,decl.rc_id_local)); at++;
 	  }
 	}
       }
