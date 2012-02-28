@@ -1,6 +1,7 @@
 
 option(DOXYGEN_TRICKS "Process *.paradox files for documentation" FALSE)
 option(GENERATE_PDF "Generate *.pdf files for documentation" FALSE)
+option(GENERATE_MAN_PAGES "Generate man pages" FALSE)
 
 if (DOXYGEN_TRICKS)
   file(GLOB paradox ${CMAKE_SOURCE_DIR}/doc/*.paradox)
@@ -30,12 +31,12 @@ find_program(DOXYGEN_EXE NAMES doxygen)
 mark_as_advanced(DOXYGEN_EXE)
 
 set(MAN_PAGES)
-if (DOXYGEN_EXE)
+if (GENERATE_MAN_PAGES)
   file(GLOB cmd ${CMAKE_SOURCE_DIR}/doc/cmd_*.paradox)
   foreach(f ${cmd})
     get_filename_component(pbase ${f} NAME_WE)
     string(REPLACE "cmd_" "" pbase ${pbase})
-    message(STATUS "CMD ${pbase}")
+    # message(STATUS "CMD ${pbase}")
     set(page ${CMAKE_BINARY_DIR}/gendoc/man/man3/${pbase}.3)
     install(FILES ${page} COMPONENT documentation DESTINATION man/man3)
     list(APPEND MAN_PAGES ${page})
@@ -87,7 +88,7 @@ if (DOXYGEN_EXE)
 
     make_directory(${CMAKE_BINARY_DIR}/layout/${mode})
 
-    if (GENERATE_MAN)
+    if (GENERATE_MAN AND GENERATE_MAN_PAGES)
       add_custom_command(OUTPUT ${MAN_PAGES}
 	COMMAND ${DOXYGEN_EXE} ${CMAKE_BINARY_DIR}/coopy_doxygen_${mode}.conf
 	DEPENDS ${PARADOXES})
