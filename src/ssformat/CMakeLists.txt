@@ -8,6 +8,6 @@ IF (COMPILE_PLAIN_EXECUTABLES)
 ENDIF ()
 
 ADD_EXECUTABLE(ssformat ssformat.cpp)
-TARGET_LINK_LIBRARIES(ssformat sheet_full)
+TARGET_LINK_LIBRARIES(ssformat coopy_full)
 
 INSTALL(TARGETS ssformat COMPONENT ${BIGBIN} DESTINATION bin)

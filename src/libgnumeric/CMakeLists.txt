@@ -81,28 +81,28 @@ if (USE_GNUMERIC)
     link_libraries(intl)
   endif()
 
-  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libsheet_core/include)
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcoopy_core/include)
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcsv)
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-  add_library(gnumeric include/coopy/gnumeric_link.h gnumeric_link.c 
-		       GnumericTextBook.cpp GnumericTextBookFactory.cpp
-		       GnumericSheet.cpp)
+  add_library(coopy_gnumeric include/coopy/gnumeric_link.h gnumeric_link.c 
+    GnumericTextBook.cpp GnumericTextBookFactory.cpp
+    GnumericSheet.cpp)
 
-  target_link_libraries(gnumeric spreadsheet)
-  target_link_libraries(gnumeric ${GLIB2_LIBRARIES})
-  target_link_libraries(gnumeric ${GOBJECT_LIBRARIES})
-  target_link_libraries(gnumeric ${GOFFICE_LIBRARIES})
-  target_link_libraries(gnumeric ${GSF_LIBRARIES})
-  target_link_libraries(gnumeric ${GNOMEPRINTUI_LIBRARIES})
+  target_link_libraries(coopy_gnumeric spreadsheet)
+  target_link_libraries(coopy_gnumeric ${GLIB2_LIBRARIES})
+  target_link_libraries(coopy_gnumeric ${GOBJECT_LIBRARIES})
+  target_link_libraries(coopy_gnumeric ${GOFFICE_LIBRARIES})
+  target_link_libraries(coopy_gnumeric ${GSF_LIBRARIES})
+  target_link_libraries(coopy_gnumeric ${GNOMEPRINTUI_LIBRARIES})
 
-  target_link_libraries(gnumeric sheet_core)
-  target_link_libraries(gnumeric ${ADD_LIBS})
+  target_link_libraries(coopy_gnumeric coopy_core)
+  target_link_libraries(coopy_gnumeric ${ADD_LIBS})
 
   add_executable(test_gnumeric test_gnumeric.cpp)
-  target_link_libraries(test_gnumeric gnumeric)
+  target_link_libraries(test_gnumeric coopy_gnumeric)
 
   add_executable(gnumeric_ss2html ss2html.cpp)
-  target_link_libraries(gnumeric_ss2html gnumeric ${GLIB2_LIBRARIES})
+  target_link_libraries(gnumeric_ss2html coopy_gnumeric ${GLIB2_LIBRARIES})
 
 endif ()

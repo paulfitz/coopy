@@ -52,22 +52,22 @@ ENDIF ()
 IF (USE_MYSQL OR USE_POSTGRES OR USE_ODBC)
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/sqlxx)
-  ADD_LIBRARY(remotesql_sqlxx sqlxx/sqlxx.cc sqlxx/strutilsxx.cc)
+  ADD_LIBRARY(coopy_remotesql_sqlxx sqlxx/sqlxx.cc sqlxx/strutilsxx.cc)
 
-  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libsheet_core/include)
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcoopy_core/include)
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-  ADD_LIBRARY(remotesql RemoteSqlSheet.cpp 
-			RemoteSqlTextBook.cpp
-			include/coopy/RemoteSqlSheet.h
-			include/coopy/RemoteSqlTextBook.h)
-  TARGET_LINK_LIBRARIES(remotesql remotesql_sqlxx sheet_core)
+  ADD_LIBRARY(coopy_remotesql RemoteSqlSheet.cpp 
+    RemoteSqlTextBook.cpp
+    include/coopy/RemoteSqlSheet.h
+    include/coopy/RemoteSqlTextBook.h)
+  TARGET_LINK_LIBRARIES(coopy_remotesql coopy_remotesql_sqlxx coopy_core)
 
   ADD_EXECUTABLE(test_sqlxx sqlxx/test.cpp)
-  TARGET_LINK_LIBRARIES(test_sqlxx remotesql)
+  TARGET_LINK_LIBRARIES(test_sqlxx coopy_remotesql)
 
   ADD_EXECUTABLE(test_remotesql test_remotesql.cpp)
-  TARGET_LINK_LIBRARIES(test_remotesql remotesql)
+  TARGET_LINK_LIBRARIES(test_remotesql coopy_remotesql)
 
 ENDIF ()
 

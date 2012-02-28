@@ -14,7 +14,7 @@ IF (USE_YARP)
   ENDIF ()
   
   ADD_EXECUTABLE(sslive sslive.cpp)
-  TARGET_LINK_LIBRARIES(sslive sheet_full)
+  TARGET_LINK_LIBRARIES(sslive coopy_full)
   
   INSTALL(TARGETS sslive COMPONENT ${BIGBIN} DESTINATION bin)
 

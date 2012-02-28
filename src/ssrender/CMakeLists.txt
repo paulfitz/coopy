@@ -10,15 +10,15 @@ ADD_CUSTOM_COMMAND(
   DEPENDS stringify ${CMAKE_CURRENT_SOURCE_DIR}/csv2html.css
 )
 
-ADD_LIBRARY(ssrender include/coopy/CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
+ADD_LIBRARY(coopy_render include/coopy/CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
 
 IF (COMPILE_PLAIN_EXECUTABLES)
   ADD_EXECUTABLE(csv2html csv2html.cpp)
-  TARGET_LINK_LIBRARIES(csv2html sheet ssrender)
+  TARGET_LINK_LIBRARIES(csv2html sheet coopy_render)
   INSTALL(TARGETS csv2html COMPONENT ${CSVBIN} DESTINATION bin)
 ENDIF ()
 
 ADD_EXECUTABLE(ss2html csv2html.cpp)
-TARGET_LINK_LIBRARIES(ss2html sheet_full ssrender)
+TARGET_LINK_LIBRARIES(ss2html coopy_full coopy_render)
 
 INSTALL(TARGETS ss2html COMPONENT ${BIGBIN} DESTINATION bin)

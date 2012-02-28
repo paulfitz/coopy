@@ -9,13 +9,13 @@ endif ()
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
 
 ADD_EXECUTABLE(test_sheet test_sheet.cpp)
-TARGET_LINK_LIBRARIES(test_sheet sheet_full)
+TARGET_LINK_LIBRARIES(test_sheet coopy_full)
 
 ADD_EXECUTABLE(test_viterbi test_viterbi.cpp)
-TARGET_LINK_LIBRARIES(test_viterbi sheet_full)
+TARGET_LINK_LIBRARIES(test_viterbi coopy_full)
 
 ADD_EXECUTABLE(make_sheet make_sheet.cpp)
-TARGET_LINK_LIBRARIES(make_sheet sheet_full)
+TARGET_LINK_LIBRARIES(make_sheet coopy_full)
 
 SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
 

@@ -12,9 +12,9 @@ IF (COMPILE_PLAIN_EXECUTABLES)
 ENDIF ()
 
 ADD_EXECUTABLE(ssmerge ssmerge.cpp)
-TARGET_LINK_LIBRARIES(ssmerge sheet_full)
+TARGET_LINK_LIBRARIES(ssmerge coopy_full)
 INSTALL(TARGETS ssmerge COMPONENT ${BIGBIN} DESTINATION bin)
 
 ADD_EXECUTABLE(ssresolve ssresolve.cpp)
-TARGET_LINK_LIBRARIES(ssresolve sheet_full)
+TARGET_LINK_LIBRARIES(ssresolve coopy_full)
 INSTALL(TARGETS ssresolve COMPONENT ${BIGBIN} DESTINATION bin)

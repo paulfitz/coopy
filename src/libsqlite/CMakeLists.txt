@@ -1,4 +1,4 @@
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libsheet_core/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcoopy_core/include)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # We want Sqlite.  To avoid having two copies, we "steal" the
@@ -8,16 +8,17 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 SET(SQLITE_DIR ${CMAKE_SOURCE_DIR}/src/ssfossil/fossil/src)
 INCLUDE_DIRECTORIES(${SQLITE_DIR})
 
-ADD_LIBRARY(sqlite SqliteTextBook.cpp SqliteSheet.cpp ${SQLITE_DIR}/sqlite3.c)
+ADD_LIBRARY(coopy_sqlite SqliteTextBook.cpp SqliteSheet.cpp 
+  ${SQLITE_DIR}/sqlite3.c)
 
-TARGET_LINK_LIBRARIES(sqlite sheet_core)
+TARGET_LINK_LIBRARIES(coopy_sqlite coopy_core)
 IF (UNIX)
-  TARGET_LINK_LIBRARIES(sqlite dl pthread)
+  TARGET_LINK_LIBRARIES(coopy_sqlite dl pthread)
 ENDIF (UNIX)
-export(TARGETS sqlite APPEND FILE ${COOPY_DEPENDENCIES})
+export(TARGETS coopy_sqlite APPEND FILE ${COOPY_DEPENDENCIES})
 
 ADD_EXECUTABLE(test_sqlite test_sqlite.cpp)
-TARGET_LINK_LIBRARIES(test_sqlite sqlite)
+TARGET_LINK_LIBRARIES(test_sqlite coopy_sqlite)
 
 if (HAVE_TR1)
   SET (TR1 "-std=c++0x -DHAVE_TR1")
