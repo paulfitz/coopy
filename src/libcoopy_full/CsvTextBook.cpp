@@ -118,7 +118,7 @@ bool CsvTextBook::write(const char *fname, TextBook *book, bool compact,
 	  // use Windows encoding, since UNIX is more forgiving
 	  string eol = " \r\n";
 	  if (fp) {
-	    fprintf(fp,eol.c_str());
+	    fprintf(fp,"%s",eol.c_str());
 	  } else {
 	    *output += eol;
 	  }
