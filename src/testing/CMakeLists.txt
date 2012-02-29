@@ -37,6 +37,14 @@ if (COMPILE_GUI)
 endif ()
 set(SSCOMPARE ${ssdiff} --equal)
 
+
+set(XLS_OR_CSV csv)
+set(XLS)
+if (USE_GNUMERIC)
+  set(XLS_OR_CSV xls)
+  set(XLS xls)
+endif ()
+
 ############################################################################
 # check detection of header line - not actually a used feature in the end
 
@@ -576,11 +584,11 @@ ENDFOREACH()
 #######################################################################
 
 # check csvs header
-ADD_TEST(csvs_header_sqlite ${ssformat} ${TESTS}/numbers.xls csvs_header.sqlite)
+ADD_TEST(csvs_header_sqlite ${ssformat} ${TESTS}/numbers.${XLS_OR_CSV} csvs_header.sqlite)
 ADD_TEST(csvs_header_csvs ${ssformat} csvs_header.sqlite csvs_header.csvs)
-ADD_TEST(csvs_header_equal_sqlite ${ssdiff} --equal ${TESTS}/numbers.xls csvs_header.sqlite)
-ADD_TEST(csvs_header_equal_csvs ${ssdiff} --equal ${TESTS}/numbers.xls csvs_header.csvs)
-ADD_TEST(csvs_header_diff ${ssdiff} --verbose --output csvs_header_diff.tdiff --omit-format-name ${TESTS}/numbers.xls csvs_header.csvs)
+ADD_TEST(csvs_header_equal_sqlite ${ssdiff} --equal ${TESTS}/numbers.${XLS_OR_CSV} csvs_header.sqlite)
+ADD_TEST(csvs_header_equal_csvs ${ssdiff} --equal ${TESTS}/numbers.${XLS_OR_CSV} csvs_header.csvs)
+ADD_TEST(csvs_header_diff ${ssdiff} --verbose --output csvs_header_diff.tdiff --omit-format-name ${TESTS}/numbers.${XLS_OR_CSV} csvs_header.csvs)
 ADD_TEST(csvs_header_diff_ok ${CMAKE_COMMAND} -E compare_files 
   csvs_header_diff.tdiff ${TESTS}/results/blank.tdiff)
 
@@ -911,30 +919,31 @@ endforeach()
 
 # Keep GUT examples working
 
-ADD_TEST(gut_example_bob_diff ${ssdiff} 
-  --output gut_example_bob_diff.tdiff
-  --omit-format-name
-  ${TESTS}/gut/root.xls
-  ${TESTS}/gut/bob.xls)
-
-ADD_TEST(gut_example_bob_diff_ref ${ssrediff} 
-  --output gut_example_bob_diff_ref.tdiff
-  --omit-format-name
-  ${TESTS}/gut/bobs_mods.tdiff)
-
-ADD_TEST(gut_example_bob_diff_cmp ${CMAKE_COMMAND} -E compare_files 
-  gut_example_bob_diff.tdiff
-  gut_example_bob_diff_ref.tdiff)
-
-ADD_TEST(gut_example_alice_bob ${sspatch} 
-  --output gut_example_alice_bob.xls
-  ${TESTS}/gut/alice.xls
-  gut_example_bob_diff.tdiff)
-
-ADD_TEST(gut_example_alice_bob_cmp ${ssdiff} --equal
-  gut_example_alice_bob.xls
-  ${TESTS}/gut/alice_and_bob.xls)
-
+if (USE_GNUMERIC)
+  ADD_TEST(gut_example_bob_diff ${ssdiff} 
+    --output gut_example_bob_diff.tdiff
+    --omit-format-name
+    ${TESTS}/gut/root.xls
+    ${TESTS}/gut/bob.xls)
+  
+  ADD_TEST(gut_example_bob_diff_ref ${ssrediff} 
+    --output gut_example_bob_diff_ref.tdiff
+    --omit-format-name
+    ${TESTS}/gut/bobs_mods.tdiff)
+  
+  ADD_TEST(gut_example_bob_diff_cmp ${CMAKE_COMMAND} -E compare_files 
+    gut_example_bob_diff.tdiff
+    gut_example_bob_diff_ref.tdiff)
+  
+  ADD_TEST(gut_example_alice_bob ${sspatch} 
+    --output gut_example_alice_bob.xls
+    ${TESTS}/gut/alice.xls
+    gut_example_bob_diff.tdiff)
+  
+  ADD_TEST(gut_example_alice_bob_cmp ${ssdiff} --equal
+    gut_example_alice_bob.xls
+    ${TESTS}/gut/alice_and_bob.xls)
+endif ()
 
 #######################################################################
 #######################################################################
@@ -1050,7 +1059,7 @@ ADD_TEST(edge_bridge_stdout_equal ${ssdiff} --equal edge_bridge_stdout.csv edge_
 
 # conflict _MERGE_ column
 
-set(FORMATS xls csvs csv)
+set(FORMATS ${XLS} csvs csv)
 
 foreach(FORMAT0 ${FORMATS})
   foreach(FORMAT1 ${FORMATS})
