@@ -43,8 +43,6 @@ if (GENERATE_MAN_PAGES)
   endforeach()
 endif ()
 
-message(STATUS "MAN_PAGES ARE ${MAN_PAGES}")
-
 if (DOXYGEN_EXE)
   foreach (mode html latex man)
     string(TOUPPER ${mode} mode_upper)
