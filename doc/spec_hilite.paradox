@@ -128,8 +128,8 @@ with appropriate sheet names.  For example:
 
 @load directory/directory.sqlite
 @load directory/directory_alice.sqlite
-@diff directory.sqlite directory_alice.sqlite out.xls hilite
-@show out.xls
+@diff directory.sqlite directory_alice.sqlite out_multi.xls hilite
+@show out_multi.xls
 
 @section spec_hilite_add_columns Adding columns
 

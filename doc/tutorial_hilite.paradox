@@ -66,8 +66,8 @@ Here's an SQL translation of the \ref tutorial_hilite_example "above example":
 Here's a translation to TDIFF, the preferred format for the COOPY 
 toolbox:
 \verbatim
-@rediff bridge_report.xls out.tdiff tdiff
-@show out.tdiff txt
+@rediff bridge_report.xls out_tdiff_translation.tdiff tdiff
+@show out_tdiff_translation.tdiff txt
 \endverbatim
 
 (produced with <tt>ssrediff --format tdiff diff.xls</tt>).

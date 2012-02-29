@@ -158,7 +158,8 @@ void SheetCompare::doRowMapping(OrderResult& p2l_row_order,
 				const CompareFlags& eflags,
 				SheetView& vpivot,
 				SheetView& vlocal,
-				SheetView& vremote) {
+				SheetView& vremote,
+				bool approx) {
   /////////////////////////////////////////////////////////////////////////
   // PIVOT to LOCAL row mapping
 
@@ -180,7 +181,8 @@ void SheetCompare::doRowMapping(OrderResult& p2l_row_order,
 			   p2l_row_norm1,p2l_row_pass_norm1,
 			   p2l_row_norm2,p2l_row_pass_norm2,
 			   1,
-			   eflags);
+			   eflags,
+			   approx);
     
     p2l_row_man.setup();
     FastMatch p2l_row_fast_match(p2l_row_pass_local);
@@ -208,7 +210,8 @@ void SheetCompare::doRowMapping(OrderResult& p2l_row_order,
 			   p2r_row_norm1,p2r_row_pass_norm1,
 			   p2r_row_norm2,p2r_row_pass_norm2,
 			   1,
-			   eflags);
+			   eflags,
+			   approx);
     
     p2r_row_man.setup();
     FastMatch p2r_row_fast_match(p2r_row_pass_local);
@@ -484,7 +487,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   doRowMapping(p2l_row_order,p2r_row_order,
 	       p2l_col_order,p2r_col_order,
 	       flags,eflags,
-	       vpivot,vlocal,vremote);
+	       vpivot,vlocal,vremote,!id_based);
 
   /////////////////////////////////////////////////////////////////////////
   // COLUMN MAPPING from PIVOT to LOCAL and REMOTE
@@ -502,7 +505,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     doRowMapping(p2l_row_order,p2r_row_order,
 		 p2l_col_order,p2r_col_order,
 		 flags,eflags,
-		 vpivot,vlocal,vremote);
+		 vpivot,vlocal,vremote,false);
   }
 
   /////////////////////////////////////////////////////////////////////////

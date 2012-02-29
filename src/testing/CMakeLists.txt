@@ -1096,3 +1096,12 @@ add_test(index_diff_base ${ssmerge} --format index
   ${TESTS}/test005_replace_column.csv)
 add_test(index_diff_compare ${ssdiff} --equal index_diff.base.csvs
   ${TESTS}/results/altitude_index.csvs)
+
+#######################################################################
+#######################################################################
+
+# bug related to row rematching
+
+foreach(FORMAT tdiff csv color)
+  ADD_ROUND_TRIP_TEST_BI_CSVS(row_rematch_bug_${FORMAT} ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_alice.sqlite ${FORMAT})
+endforeach()

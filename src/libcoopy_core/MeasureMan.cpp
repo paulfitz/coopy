@@ -61,6 +61,11 @@ void MeasureMan::compare() {
       dbg_printf("No more could be allocated\n");
       break;
     }
+    if (processed>remaining&&sampled) {
+      dbg_printf("Good enough, sampling only, quitting\n");
+      break;
+    }
+
     if (rem==remaining) {
       dbg_printf("No progress\n");
       if (ctrl<ctrlMax) {

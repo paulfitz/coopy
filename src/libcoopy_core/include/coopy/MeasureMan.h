@@ -20,6 +20,7 @@ public:
   MeasurePass& bnorm_pass;
   bool rowLike;
   CompareFlags flags;
+  bool sampled;
 
   MeasureMan(Measure& main,
 	     MeasurePass& main_pass,
@@ -28,14 +29,16 @@ public:
 	     Measure& bnorm,
 	     MeasurePass& bnorm_pass,
 	     bool rowLike,
-	     const CompareFlags& flags) : main(main), 
+	     const CompareFlags& flags,
+	     bool sampled = false) : main(main), 
     anorm(anorm), 
     bnorm(bnorm),
     main_pass(main_pass),
     anorm_pass(anorm_pass),
     bnorm_pass(bnorm_pass),
     rowLike(rowLike),
-    flags(flags)
+    flags(flags),
+    sampled(sampled)
   {
   }
 	     

@@ -33,7 +33,8 @@ private:
 		    const coopy::cmp::CompareFlags& eflags,
 		    coopy::store::SheetView& vpivot,
 		    coopy::store::SheetView& vlocal,
-		    coopy::store::SheetView& vremote);
+		    coopy::store::SheetView& vremote,
+		    bool approx);
 
   void doColMapping(const coopy::cmp::OrderResult& p2l_row_order,
 		    const coopy::cmp::OrderResult& p2r_row_order,
