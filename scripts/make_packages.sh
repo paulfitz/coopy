@@ -19,6 +19,7 @@ while [ ! "k$1" = "k" ]; do
 	echo "of form"
 	echo "  MINGW_REPO=/home/paulfitz/cvs/coopy/"
 	echo "  MINGW_BUILD=/home/paulfitz/cvs/coopy/mingw"
+	echo "  MINGW_PKG_CONFIG_PATH=/home/paulfitz/cvs/gnumeric/git/gnumeric/tools/win32/release/deploy/lib/pkgconfig/"
 	echo "  LINUX_CHROOT=/scratch/debian-etch-i386"
 	echo "  LINUX_CHROOT_REPO=/home/paulfitz/coopy"
 	echo "  LINUX_CHROOT_BUILD=/home/paulfitz/coopy_build"
@@ -39,7 +40,8 @@ while [ ! "k$1" = "k" ]; do
 	cd $MINGW_REPO
 	export LDFLAGS="-L$HOME/mingw/install/lib"
 	export CFLAGS="-I$HOME/mingw/install/include"
-	git pull || exit 1
+	export PKG_CONFIG=$MINGW_PKG_CONFIG_PATH
+	# git pull || exit 1
 	cd $MINGW_BUILD || (
 	    echo "Creating $MINGW_BUILD"
 	    mkdir -p $MINGW_BUILD

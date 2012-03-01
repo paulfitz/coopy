@@ -95,7 +95,7 @@ the faint of heart!
 # moduleset:
     ftp://ftp.simplesystems.org/pub/libpng/png/src/
   becomes
-    ftp://ftp.simplesystems.org/pub/libpng/png/src/history/
+    ftp://ftp.simplesystems.org/pub/libpng/png/src/history/libpng12/
 
 # moduleset:
     module="pixman-0.17.2.tar.gz"
