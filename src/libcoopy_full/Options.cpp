@@ -775,6 +775,7 @@ int Options::apply(int argc, char *argv[]) {
       {"strict", 0, 0, 0},
       {"patch-formats", 0, 0, 0},
       {"default-table", 1, 0, 0},
+      {"eol", 1, 0, 0},
       {"headerless", 0, 0, 0},
 
       {"act", 1, 0, 0},
@@ -793,8 +794,7 @@ int Options::apply(int argc, char *argv[]) {
       {0, 0, 0, 0}
     };
 
-    int c = getopt_long(argc, argv, "",
-			long_options, &option_index);
+    int c = getopt_long(argc, argv, "", long_options, &option_index);
     if (c==-1) break;
     switch (c) {
     case 0:
@@ -863,6 +863,14 @@ int Options::apply(int argc, char *argv[]) {
 	    exit(1);
 	  }
 	  option_bool["gen"] = true;
+	} else if (k=="eol") {
+	  string eol = optarg;
+	  if (eol!="native"&&eol!="CRLF"&&eol!="LF") {
+	    fprintf(stderr,"EOL style not recognized: use native, CRLF, or LF.\n");
+	    exit(1);
+	  }
+	  fprintf(stderr,"Warning: EOL style does not do anything yet. It is a placeholder.\n");
+	  coopy_set_default_eol_style(eol.c_str());
 	} else if (k=="act") {
 	  string act = optarg;
 	  if (act=="+") act = "insert";

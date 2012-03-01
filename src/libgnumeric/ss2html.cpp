@@ -4,6 +4,7 @@
 #include <coopy/Dbg.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/GnumericSheet.h>
+#include <coopy/Stringer.h>
 
 extern "C" {
 #include "coopy/gnumeric_link.h"
@@ -58,9 +59,58 @@ int main(int argc, char *argv[]) {
   const char *target_name = argv[2];
 
   gnumeric_init();
+
   GnumericWorkbookPtr book = gnumeric_load(template_name);
-  gnumeric_save(book,target_name,"Gnumeric_html:html40frag");
-  //gnumeric_save(book,target_name,"Gnumeric_html:html32");
+
+  if (!book) exit(1);
+
+  FILE *fout = fopen(target_name,"w");
+  if (!fout) exit(1);
+
+  int len = gnumeric_get_sheet_count(book);
+  for (int k=0; k<len; k++) {
+    GnumericSheetPtr s = gnumeric_get_sheet(book,k);
+    if (!s) exit(1);
+    fprintf(fout,"<h2>%s</h2>\n",gnumeric_sheet_get_name(s));
+    int w, h;
+    gnumeric_sheet_get_size(s,&w,&h);
+    fprintf(fout,"<table>\n");
+    for (int y=0; y<h; y++) {
+      fprintf(fout,"  <tr>");
+      for (int x=0; x<w; x++) {
+	fprintf(fout,"<td>");
+	int r, g, b;
+	gnumeric_sheet_get_cell_font_color(s,x,y,&r,&g,&b);
+	bool color = false;
+	if (r!=0||g!=0||b!=0) {
+	  color = true;
+	  fprintf(fout,"<font color='#%02x%02x%02x'>",
+		  r,g,b);
+	}
+	char *str = gnumeric_sheet_get_cell_as_string(s,x,y);
+	if (str) {
+	  fprintf(fout,"%s",str);
+	  gnumeric_free_string(str);
+	} else {
+	  fprintf(fout,"");
+	}
+	if (color) {
+	  fprintf(fout,"</font>");
+	}
+	fprintf(fout,"</td>");
+      }
+      fprintf(fout,"</tr>\n");
+    }
+    fprintf(fout,"</table>\n");
+  }
+
+  fclose(fout);
+  fout = NULL;
+
+  // Exporter is insufficiently stable for using in tests
+  // gnumeric_save(book,target_name,"Gnumeric_html:html40frag");
+
+
   gnumeric_free(book);
   gnumeric_fini();
 

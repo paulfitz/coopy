@@ -541,3 +541,22 @@ int gnumeric_style_set_back_color(GnumericStylePtr style,
 void gnumeric_free_style(GnumericStylePtr style) {
   gnm_style_unref((GnmStyle*)style);
 }
+
+int gnumeric_sheet_get_cell_font_color(GnumericSheetPtr sheet, int x, int y,
+				       int *r16, int *g16, int *b16) {
+  GnmCell *cell = sheet_cell_get((Sheet*)sheet,x,y);
+  if (cell==NULL) {
+    return 1;
+  }
+  GOColor c = gnm_cell_get_render_color(cell);
+  if (!c) {
+    *r16 = *g16 = *b16 = 0;
+  } else {
+      *r16 = GO_COLOR_UINT_R(c);
+      *g16 = GO_COLOR_UINT_G(c);
+      *b16 = GO_COLOR_UINT_B(c);
+  }
+  return 0;
+}
+
+

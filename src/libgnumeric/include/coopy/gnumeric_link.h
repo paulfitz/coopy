@@ -86,4 +86,8 @@ int gnumeric_style_set_back_color(GnumericStylePtr style,
 
 void gnumeric_free_style(GnumericStylePtr style);
 
+int gnumeric_sheet_get_cell_font_color(GnumericSheetPtr sheet, int x, int y,
+				       int *r, int *g, int *b);
+
+
 #endif

@@ -45,7 +45,7 @@
 #include <coopy/Dbg.h>
 #include <coopy/Options.h>
 
-static bool verb() { coopy_is_verbose(); }
+static bool verb() { return coopy_is_verbose(); }
 
 // hack to remove warning
 #define static const
@@ -464,6 +464,10 @@ public:
     }
 
     void addLog(const wxString& str, bool force = false) {
+        if (verb()) {
+            string s = conv(str);
+            printf(">>> %s\n", s.c_str());
+        }
         /*
         char buf[256];
         sprintf(buf,"[%d]", (int)str[0]);
@@ -898,7 +902,6 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
     wxString op;
     wxString op1;
     for (int i=0; i<argc; i++) {
-        //printf("[%s] ", argv[i]);
         wxString p = conv(safetxt(argv[i]));
         arr.Add(p);
         if (i>0) {
@@ -1642,7 +1645,8 @@ bool CoopyFrame::OnCloneRepo(wxCommandEvent& event) {
     retry = "";
     string src = CoopyApp::fossil_target;
     wxURL url = conv(src);
-    if (!url.HasScheme()) {
+    string scheme = conv(url.GetScheme());
+    if (scheme.length()<=1) { // no scheme, or windows drive
         wxChar sep = wxFileName::GetPathSeparator();
         wxFileName name = wxFileName::FileName(conv(src));
         if (!wxFile::Exists(name.GetFullPath())) {

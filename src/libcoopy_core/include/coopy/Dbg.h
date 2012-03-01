@@ -15,6 +15,11 @@ bool coopy_is_strict();
 
 void coopy_set_default_table_name(const char *name);
 const char *coopy_get_default_table_name();
+
+void coopy_set_default_eol_style(const char *name);
+const char *coopy_get_default_eol_style();
+const char *coopy_eol();
+
  
 void coopy_print_trace(FILE *out, const char *file, int line);
 

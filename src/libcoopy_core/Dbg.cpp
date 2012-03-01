@@ -8,6 +8,8 @@ bool _csv_verbose = false;
 bool _csv_strict = false;
 
 string coopy_default_table_name = "sheet";
+string coopy_default_eol_style = "default";
+string coopy_eol_store = "\n";
 
 #ifdef __linux__
 #include <execinfo.h>
@@ -51,8 +53,27 @@ bool coopy_is_strict() {
 
 void coopy_set_default_table_name(const char *name) {
   coopy_default_table_name = name;
+  coopy_eol_store = "\n";
+  if (coopy_default_table_name=="CRLF") {
+    coopy_eol_store = "\r\n";
+  } else {
+    coopy_eol_store = "\n";
+  }
 }
 
 const char *coopy_get_default_table_name() {
   return coopy_default_table_name.c_str();
+}
+
+
+void coopy_set_default_eol_style(const char *name) {
+  coopy_default_eol_style = name;
+}
+
+const char *coopy_get_default_eol_style() {
+  return coopy_default_eol_style.c_str();
+}
+
+const char *coopy_eol() {
+  return coopy_eol_store.c_str();
 }

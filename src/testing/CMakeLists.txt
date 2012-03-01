@@ -8,6 +8,8 @@ endif ()
 
 INCLUDE_DIRECTORIES(${SHEET_INCLUDE_DIRS})
 
+ADD_EXECUTABLE(fix_eol eol.cpp)
+
 ADD_EXECUTABLE(test_sheet test_sheet.cpp)
 TARGET_LINK_LIBRARIES(test_sheet coopy_full)
 
@@ -28,6 +30,7 @@ get_target_property(ssfold ssfold LOCATION)
 get_target_property(ssmerge ssmerge LOCATION)
 get_target_property(ssresolve ssresolve LOCATION)
 get_target_property(ssrediff ssrediff LOCATION)
+get_target_property(fix_eol fix_eol LOCATION)
 if (USE_GNUMERIC)
   get_target_property(gnumeric_ss2html gnumeric_ss2html LOCATION)
 endif ()
@@ -357,7 +360,7 @@ ADD_TEST(viterbi_check ${testprg_viterbi})
 
 MACRO(ADD_TEST2 name ref target)
   ADD_TEST(${name} ${${target}}
-    --output test_out_${name}.csv
+    --output=test_out_${name}.csv
     ${ARGN})
   ADD_TEST(${name}Compare ${ssdiff}
     --equals test_out_${name}.csv ${ref})
@@ -425,11 +428,15 @@ IF (USE_GNUMERIC)
   set(EXCEL xls)
 
   ADD_TEST2(excel_diff ${TESTS}/result_excel_diff.csv
-    ssdiff --verbose --format-version 0.2 --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
+    ssdiff --verbose --format-version=0.2 --format-csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
+
+  # tickles getopt_long bug on mingw, punt for now.
+  # ADD_TEST2(excel_diff ${TESTS}/result_excel_diff.csv
+  #  ssdiff --verbose --format-version 0.2 --format csv ${TESTS}/numbers.xls ${TESTS}/numbers_change_five.xls)
 
   MACRO(TEST_XLS name ref target)
     ADD_TEST(${name} ${${target}} 
-      --output test_out_${name}.xls
+      --output=test_out_${name}.xls
       ${ARGN})
     ADD_TEST(${name}Compare ${gnumeric_ss2html} 
       --compare
@@ -440,7 +447,7 @@ IF (USE_GNUMERIC)
   # Blank columns don't get exported by gnumeric, so some tests are not
   # that useful
   foreach(patcher patch_000_nothing patch_001_col_move patch_002_col_insert patch_003_col_insert patch_004_col_delete patch_005_row_update patch_006_row_insert patch_007_row_delete)
-    TEST_XLS(excel_${patcher} ${TESTS}/result_excel_${patcher}.html sspatch ${TESTS}/numbers.xls ${TESTS}/patch_v_0_2/${patcher}.txt)
+    TEST_XLS(excel_${patcher} ${TESTS}/color/result_excel_${patcher}.html sspatch ${TESTS}/numbers.xls ${TESTS}/patch_v_0_2/${patcher}.txt)
     
   endforeach()
 
@@ -798,14 +805,15 @@ if (COMPILE_GUI)
   IF (USE_GNUMERIC)
 
     set(TC test_coopy)
-    add_test(coopy_space_prep0 ${CMAKE_COMMAND} -E remove_directory test_coopy)
-    add_test(coopy_space_prep1 ${CMAKE_COMMAND} -E make_directory test_coopy)
+
+    add_test(coopy_space_prep0 ${CMAKE_COMMAND} -E remove_directory ${TC})
+    add_test(coopy_space_prep1 ${CMAKE_COMMAND} -E make_directory ${TC})
     add_test(coopy_space_prep3 ${CMAKE_COMMAND} -E make_directory ${TC}/store)
     add_test(coopy_space_prep4 ${CMAKE_COMMAND} -E make_directory ${TC}/clone1)
     add_test(coopy_space_prep5 ${CMAKE_COMMAND} -E make_directory ${TC}/clone2)
     
     add_test(coopy_space_new ${coopy} --new ${TC}/store)
-    add_test(coopy_space_clone1 ${coopy} --clone=${TC}/store ${TC}/clone1)
+    add_test(coopy_space_clone1 ${coopy} -v --clone=${TC}/store ${TC}/clone1)
     add_test(coopy_space_clone2 ${coopy} --clone=${TC}/store ${TC}/clone2)
     
     add_test(coopy_space_data ${ssformat} ${TESTS}/coopy/mini-people.csvs
@@ -1005,10 +1013,12 @@ MACRO(ADD_STREAM_OUT_TEST name out)
 ENDMACRO()
 
 ADD_STREAM_TEST(delimit_stdin_base ${TESTS}/format/bi_bridge.txt delimit_stdin_base.tdiff ${ssdiff} --omit-format-name --omit-sheet-name dbi:csv:length=header:file=- dbi:csv:length=header:file=-)
-ADD_TEST(delimit_stdin_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_base.tdiff ${TESTS}/format/bi_bridge_diff.tdiff)
+ADD_TEST(delimit_stdin_fix ${fix_eol} delimit_stdin_base.tdiff delimit_stdin_fix.tdiff)
+ADD_TEST(delimit_stdin_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_fix.tdiff ${TESTS}/format/bi_bridge_diff.tdiff)
 
 ADD_STREAM_TEST(delimit_stdin_json_base ${TESTS}/format/bi_bridge.txt delimit_stdin_json_base.jsonbook ${ssdiff} --format hilite --omit-format-name --omit-sheet-name --output dbi:jsonbook:file=- dbi:csv:length=header:file=- dbi:csv:length=header:file=-)
-ADD_TEST(delimit_stdin_json_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_json_base.jsonbook ${TESTS}/format/bi_bridge_diff.jsonbook)
+ADD_TEST(delimit_stdin_json_fix ${fix_eol} delimit_stdin_json_base.jsonbook delimit_stdin_json_fix.jsonbook)
+ADD_TEST(delimit_stdin_json_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_json_fix.jsonbook ${TESTS}/format/bi_bridge_diff.jsonbook)
 
 #######################################################################
 #######################################################################
