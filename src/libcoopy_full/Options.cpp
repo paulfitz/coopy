@@ -695,6 +695,11 @@ x organization |id=| \n\
 }
 
 int Options::apply(int argc, char *argv[]) {
+  //printf("Hello good evening and welcome\n");
+  //for (int i=0; i<argc; i++) {
+  //printf("[%d] [%s]\n", i, argv[i]);
+  //}
+
   core.clear();
   flags = CompareFlags();
   option_bool.clear();
@@ -707,13 +712,14 @@ int Options::apply(int argc, char *argv[]) {
   while (true) {
     int option_index = 0;
     static struct option long_options[] = {
+      {"format", 1, 0, 'f'},
+
       {"format-csv", 0, 0, 'c'},
       {"format-sql", 0, 0, 's'},
       {"format-raw", 0, 0, 'r'},
       {"format-tdiff", 0, 0, 't'},
       {"format-index", 0, 0, 'i'},
 
-      {"format", 1, 0, 'f'},
       {"input-format", 1, 0, 0},
       {"output-format", 1, 0, 0},
 
