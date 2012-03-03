@@ -1124,3 +1124,25 @@ add_test(index_diff_compare ${ssdiff} --equal index_diff.base.csvs
 foreach(FORMAT tdiff csv color)
   ADD_ROUND_TRIP_TEST_BI_CSVS(row_rematch_bug_${FORMAT} ${TESTS}/directory/directory.sqlite ${TESTS}/directory/directory_alice.sqlite ${FORMAT})
 endforeach()
+
+
+#######################################################################
+#######################################################################
+
+# socialcalc
+
+if (USE_SOCIALCALC)
+
+  add_test(socialcalc_convert_to ${ssformat} ${TESTS}/numbers.csv socialcalc_convert_to.sc)
+  add_test(socialcalc_convert_to_check ${ssdiff} --equal socialcalc_convert_to.sc ${TESTS}/numbers.csv)
+  add_test(socialcalc_convert_from ${ssformat} socialcalc_convert_to.sc socialcalc_convert_from.csv)
+  add_test(socialcalc_convert_from_check ${ssdiff} --equal socialcalc_convert_from.csv ${TESTS}/numbers.csv)
+
+
+  # NOTE: socialcalc has an issue with exporting a "foo,bar" cell 
+  # in ${TESTS}/bridges.csv
+
+endif ()
+
+
+
