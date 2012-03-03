@@ -3,6 +3,7 @@ if (HAVE_TR1)
 endif ()
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcoopy_core/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcsv/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcoopy_full/include)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
