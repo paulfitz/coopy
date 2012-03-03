@@ -21,6 +21,7 @@ endif ()
 
 option(USE_GNUMERIC "Enable gnumeric integration (For XLS, ODF, etc)" OFF)
 option(USE_ACCESS "Enable Access formats (via mdbtools)" OFF)
+option(USE_SOCIALCALC "Enable SocialCalc support (incomplete)" OFF)
 option(CREATE_SHARED_LIBRARIES "Compile shared libraries rather than static" FALSE)
 if (CREATE_SHARED_LIBRARIES)
   set(BUILD_SHARED_LIBS ON)
@@ -63,13 +64,13 @@ ENDIF (EXISTS ${STATLIB})
 
 export(TARGETS FILE ${COOPY_DEPENDENCIES})
 
-add_subdirectory(libcsv)
 add_subdirectory(libsqlite)
 add_subdirectory(libgnumeric)
 add_subdirectory(libaccess)
-# add_subdirectory(libsocialcalc)
+add_subdirectory(libsocialcalc)
 
 add_subdirectory(libcoopy_core)
+add_subdirectory(libcsv)
 add_subdirectory(libremotesql)
 add_subdirectory(jsoncpp)
 add_subdirectory(libcoopy_full)
@@ -77,7 +78,8 @@ add_subdirectory(libcoopy_fold)
 set(SHEET_INCLUDE_DIRS 
   ${CMAKE_SOURCE_DIR}/src/libcoopy_core/include 
   ${CMAKE_SOURCE_DIR}/src/libcoopy_fold/include 
-  ${CMAKE_SOURCE_DIR}/src/libcsv 
+  ${CMAKE_SOURCE_DIR}/src/libcsv
+  ${CMAKE_SOURCE_DIR}/src/libcsv/include
   ${CMAKE_SOURCE_DIR}/src/libcoopy_full/include)
 
 add_subdirectory(ssmerge)

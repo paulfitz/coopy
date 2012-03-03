@@ -4,6 +4,7 @@
 #include <string.h>
 
 using namespace coopy::store;
+using namespace std;
 
 bool FileIO::open(const char *src, const Property& config) {
   //printf("OPEN with %s\n", config.toString().c_str());
@@ -74,4 +75,26 @@ size_t FileIO::fread(void *ptr, size_t size, size_t nmemb) {
   }
   pending_length -= r;
   return r;
+}
+
+
+bool FileIO::openAndWrite(const std::string& txt, const Property& config) {
+  string name = config.get("file").asString();
+  if (name=="-") {
+    fp = stdout;
+    need_close = false;
+  } else {
+    fp = fopen(name.c_str(),"wb");
+    if (!fp) return false;
+  }
+  if (fp!=NULL) {
+    fwrite(txt.c_str(),1,txt.length(),fp);
+  }
+  if (need_close) {
+    fclose(fp);
+  }
+  fp = NULL;
+  need_close = true;
+  
+  return true;
 }

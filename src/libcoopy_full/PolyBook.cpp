@@ -210,6 +210,9 @@ bool PolyBook::expand(Property& config) {
     if (ext==".xls"||ext==".xlsx"||ext==".gnumeric"||ext==".ods") {
       key = "gnumeric";
     }
+    if (ext==".socialcalc"||ext==".sc") {
+      key = "socialcalc";
+    }
     if (ext==".jsonbook") {
       key = "jsonbook";
     }

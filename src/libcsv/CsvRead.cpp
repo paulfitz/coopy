@@ -8,7 +8,7 @@ extern "C" {
 
 #include <string>
 
-#include <coopy/CsvFile.h>
+#include <coopy/CsvRead.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/Stringer.h>
 #include <coopy/FileIO.h>

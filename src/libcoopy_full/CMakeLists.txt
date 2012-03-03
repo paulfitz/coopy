@@ -3,11 +3,12 @@ if (HAVE_TR1)
 endif ()
 
 include_directories(${CMAKE_SOURCE_DIR}/src/libcoopy_core/include)
-include_directories(${CMAKE_SOURCE_DIR}/src/libcsv)
+include_directories(${CMAKE_SOURCE_DIR}/src/libcsv/include)
 include_directories(${CMAKE_SOURCE_DIR}/src/libgnumeric/include)
 include_directories(${CMAKE_SOURCE_DIR}/src/libsqlite/include)
 include_directories(${CMAKE_SOURCE_DIR}/src/libremotesql/include)
 include_directories(${CMAKE_SOURCE_DIR}/src/libaccess/include)
+include_directories(${CMAKE_SOURCE_DIR}/src/libsocialcalc/include)
 include_directories(${CMAKE_SOURCE_DIR}/src/jsoncpp/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -22,7 +23,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/BookHook.cpp.in ${BOOK_HOOK0}
 
 set(NEED_POLYBOOK  PatchParser.cpp Options.cpp Diff.cpp PoolImpl.cpp Coopy.cpp)
 
-add_library(coopy_csv_sql CsvFile.cpp 
+add_library(coopy_csv_sql 
   CsvTextBook.cpp ShortTextBook.cpp JsonProperty.cpp JsonBook.cpp)
 
 set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Options.cpp 
@@ -60,6 +61,11 @@ endif ()
 if (USE_ACCESS)
   target_link_libraries(coopy_full coopy_access)
   export(TARGETS coopy_access APPEND FILE ${COOPY_DEPENDENCIES})
+endif ()
+
+if (USE_SOCIALCALC)
+  target_link_libraries(coopy_full coopy_socialcalc)
+  export(TARGETS coopy_socialcalc APPEND FILE ${COOPY_DEPENDENCIES})
 endif ()
 
 export(TARGETS coopy_jsoncpp APPEND FILE ${COOPY_DEPENDENCIES})

@@ -15,6 +15,7 @@ using namespace coopy::store;
 #cmakedefine USE_GNUMERIC
 #cmakedefine USE_REMOTE_SQL
 #cmakedefine USE_ACCESS
+#cmakedefine USE_SOCIALCALC
 #endif
 
 #ifdef USE_GNUMERIC
@@ -25,6 +26,11 @@ using namespace coopy::store::gnumeric;
 #ifdef USE_ACCESS
 #include <coopy/AccessTextBook.h>
 using namespace coopy::store::mdb;
+#endif
+
+#ifdef USE_SOCIALCALC
+#include <coopy/SocialCalcTextBookFactory.h>
+using namespace coopy::store::socialcalc;
 #endif
 
 #include <json/json.h>
@@ -100,6 +106,19 @@ void gatherFactories(vector<TextBookFactory *>& lst,
     lst.push_back(new RemoteSqlTextBookFactory("mysql"));
   }
 #endif
+#ifdef USE_SOCIALCALC
+  if (preview) {
+    FormatDesc desc("SOCIALCALC: SocialCalc format (via mozjs)");
+    desc.addExtension(".socialcalc","SocialCalc spreadsheet file");
+    desc.addExtension(".sc","SocialCalc spreadsheet file");
+    desc.addDbi("dbi:socialcalc:sheet.txt","Force SocialCalc interpretation");
+    desc.addOption("type",STRVAL("socialcalc"),"SocialCalc family",true);
+    desc.addOption("file",STRVAL("sheet.txt"),"File name",true);
+    descs.push_back(desc);
+  } else {
+    lst.push_back(new SocialCalcTextBookFactory());
+  }
+#endif  
 }
 
 void getFactories(vector<TextBookFactory *>& lst) {

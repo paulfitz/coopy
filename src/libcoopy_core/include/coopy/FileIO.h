@@ -38,6 +38,8 @@ public:
   bool isValid() {
     return fp!=NULL;
   }
+
+  bool openAndWrite(const std::string& txt, const Property& config);
 };
 
 #endif
