@@ -31,6 +31,11 @@ public:
 
   JSContext *context() const;
   JSObject *global() const;
+
+  int getId() const;
+  void setCurrentId(int i) const;
+  bool isCurrentId(int i) const;
+
 };
 
 #endif

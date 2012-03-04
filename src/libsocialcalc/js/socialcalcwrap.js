@@ -17,6 +17,11 @@ function set_active_sheet(sheet) {
     spreadsheet = sheet;
 }
 
+function sheet_size(w,h) {
+    spreadsheet.sheet.attribs.lastcol = w;
+    spreadsheet.sheet.attribs.lastrow = h;
+}
+
 function load_from_string(savestr) {
     var parts = spreadsheet.DecodeSpreadsheetSave(savestr);
     if (parts) {
@@ -64,14 +69,19 @@ function sheet_set_cell(x,y,v) {
     if (v!=null) {
 	SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set " + SocialCalc.crToCoord(x+1,y+1) + " text t " + v), false);
     } else {
-	SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set " + SocialCalc.crToCoord(x+1,y+1) + " text t __FIGURE_OUT_NULL__"), false);
+	SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("erase " + SocialCalc.crToCoord(x+1,y+1) + " all"), false);
     }
 }
 
 function sheet_get_cell(x,y) {
-    var cell = spreadsheet.sheet.cells[SocialCalc.crToCoord(x+1,y+1)] || null;
-    if (cell==null) return null;
-    return cell.datavalue;
+    var coord = SocialCalc.crToCoord(x+1,y+1);
+    if (coord in spreadsheet.sheet.cells) {
+	var cell = spreadsheet.sheet.cells[coord];
+	if (!cell) return null;
+	if (cell.datatype==null) return null;
+	return cell.datavalue;
+    }
+    return null;
 }
 
 function sheet_get_width() {
@@ -81,6 +91,50 @@ function sheet_get_width() {
 function sheet_get_height() {
     return spreadsheet.sheet.attribs.lastrow;
 }
+
+function sheet_move_column(x1,x2,w,h) {
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("cut " + SocialCalc.crToCoord(x1+1,1) + ":" + SocialCalc.crToCoord(x1+1,h)  + " all"), false);
+    var dest = x2;
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("deletecol " + SocialCalc.crToCoord(x1+1,1)), false);
+    if (dest>x1) {
+	dest--;
+    }
+    if (dest<0) {
+	dest = w-1;
+    }
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("insertcol " + SocialCalc.crToCoord(dest+1,1)), false);
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("paste " + SocialCalc.crToCoord(dest+1,1) + ":" + SocialCalc.crToCoord(dest+1,h)  + " all"), false);
+    return dest;
+}
+
+function sheet_insert_column(x,w,h) {
+    sheet_size(w,h);
+    if (x<0) x = w;
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("insertcol " + SocialCalc.crToCoord(x+1,1)), false);
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("erase " + SocialCalc.crToCoord(x+1,1) + ":" + SocialCalc.crToCoord(x+1,h)  + " all"), false);
+    return x;
+}
+
+function sheet_delete_column(x,w,h) {
+    sheet_size(w,h);
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("deletecol " + SocialCalc.crToCoord(x+1,1)), false);
+    return x;
+}
+
+function sheet_insert_row(y,w,h) {
+    sheet_size(w,h);
+    if (y<0) y = h;
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("insertrow " + SocialCalc.crToCoord(1,y+1)), false);
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("erase " + SocialCalc.crToCoord(1,y+1) + ":" + SocialCalc.crToCoord(w,y+1)  + " all"), false);
+    return y;
+}
+
+function sheet_delete_rows(y1,y2,w,h) {
+    sheet_size(w,h);
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("deleterow " + SocialCalc.crToCoord(1,y1+1) + ":" + SocialCalc.crToCoord(1,y2+1)), false);
+    return y2-y1+1;
+}
+
 
 function test_sheet() {
     //SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set sheet lastcol 4"), false);

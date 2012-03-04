@@ -25,8 +25,14 @@ bool SocialCalcSheet::jsSetup(JsWrap& j) {
 }
 
 bool SocialCalcSheet::select() const {
+  if (!jssheet) {
+    ((SocialCalcSheet *)this)->setup();
+  }
   if (!jssheet) return false;
-  ((JsWrap *)&js)->send("set_active_sheet",jssheet);
+  if (!js.isCurrentId(id)) {
+    ((JsWrap *)&js)->send("set_active_sheet",jssheet);
+    js.setCurrentId(id);
+  }
   return true;
 }
 
@@ -50,9 +56,11 @@ bool SocialCalcSheet::setup() {
 				  0,&lval,jssheet);
   if (!jssheet) return false;
   JS_AddValueRoot(js.context(),jssheet);
-  dbg_printf("Made a sheet!\n");
+  id = js.getId();
+  dbg_printf("Made a sheet! %d\n", id);
   js.send("set_active_sheet",jssheet);
   dbg_printf("Set a sheet!\n");
+  js.setCurrentId(id);
   return true;
 }
 
@@ -64,12 +72,12 @@ std::string SocialCalcSheet::cellString(int x, int y) const {
 
 std::string SocialCalcSheet::cellString(int x, int y, bool& escaped) const {
   escaped = true;
-  if (!select()) return "NULL";
+  if (!select()) return "";
   jsval args[3] = { INT_TO_JSVAL(x), INT_TO_JSVAL(y) };
   jsval rval;
   JSBool ok = JS_CallFunctionName(js.context(),js.global(),"sheet_get_cell",2,&args[0],&rval);
   if (JSVAL_IS_NULL(rval)) {
-    return "NULL";
+    return "";
   }
   JSString *str = JS_ValueToString(js.context(),rval);
   escaped = false;
@@ -78,7 +86,11 @@ std::string SocialCalcSheet::cellString(int x, int y, bool& escaped) const {
 
 bool SocialCalcSheet::cellString(int x, int y, const std::string& str, bool escaped) {
   if (!select()) return false;
-  jsval args[3] = { INT_TO_JSVAL(x), INT_TO_JSVAL(y), STRING_TO_JSVAL(JS_NewStringCopyN(js.context(),str.c_str(),str.length())) };
+  jsval args[3] = { INT_TO_JSVAL(x), INT_TO_JSVAL(y), JSVAL_NULL };
+  if (!escaped) {
+    args[2] = STRING_TO_JSVAL(JS_NewStringCopyN(js.context(),str.c_str(),
+						str.length()));
+  }
   jsval rval;
   JSBool ok = JS_CallFunctionName(js.context(),js.global(),"sheet_set_cell",3,&args[0],&rval);
   if (x>=w) w = x+1;
@@ -87,19 +99,52 @@ bool SocialCalcSheet::cellString(int x, int y, const std::string& str, bool esca
 }
 
 ColumnRef SocialCalcSheet::moveColumn(const ColumnRef& src, const ColumnRef& base) {
-  return ColumnRef();
+  if (!select()) return ColumnRef();
+  jsval args[4] = { 
+    INT_TO_JSVAL(src.getIndex()), 
+    INT_TO_JSVAL(base.getIndex()),
+    INT_TO_JSVAL(w),
+    INT_TO_JSVAL(h)
+  };
+  jsval rval;
+  JSBool ok = JS_CallFunctionName(js.context(),js.global(),"sheet_move_column",
+				  4,&args[0],&rval);
+  int ret = JSVAL_TO_INT(rval);
+  return ColumnRef(ret);
 }
 
 bool SocialCalcSheet::deleteColumn(const ColumnRef& column) {
-  return false;
+  if (!select()) return false;
+  jsval args[3] = { 
+    INT_TO_JSVAL(column.getIndex()) ,
+    INT_TO_JSVAL(w),
+    INT_TO_JSVAL(h)
+  };
+  jsval rval;
+  JSBool ok = JS_CallFunctionName(js.context(),js.global(),
+				  "sheet_delete_column",3,&args[0],&rval);
+  int ret = JSVAL_TO_INT(rval);
+  if (ret>=0) w--;
+  return ret>=0;
 }
 
 ColumnRef SocialCalcSheet::insertColumn(const ColumnRef& base) {
-  return ColumnRef();
+  if (!select()) return ColumnRef();
+  jsval args[3] = { 
+    INT_TO_JSVAL(base.getIndex()) ,
+    INT_TO_JSVAL(w),
+    INT_TO_JSVAL(h)
+  };
+  jsval rval;
+  JSBool ok = JS_CallFunctionName(js.context(),js.global(),
+				  "sheet_insert_column",3,&args[0],&rval);
+  int ret = JSVAL_TO_INT(rval);
+  if (ret>=0) w++;
+  return ColumnRef(ret);
 }
 
 ColumnRef SocialCalcSheet::insertColumn(const ColumnRef& base, const ColumnInfo& kind) {
-  return ColumnRef();
+  return insertColumn(base);
 }
 
 bool SocialCalcSheet::modifyColumn(const ColumnRef& base, const ColumnInfo& kind) {
@@ -107,14 +152,38 @@ bool SocialCalcSheet::modifyColumn(const ColumnRef& base, const ColumnInfo& kind
 }
 
 RowRef SocialCalcSheet::insertRow(const RowRef& base) {
-  return RowRef();
+  if (!select()) return RowRef();
+  jsval args[3] = { 
+    INT_TO_JSVAL(base.getIndex()) ,
+    INT_TO_JSVAL(w),
+    INT_TO_JSVAL(h)
+  };
+  jsval rval;
+  JSBool ok = JS_CallFunctionName(js.context(),js.global(),
+				  "sheet_insert_row",3,&args[0],&rval);
+  int ret = JSVAL_TO_INT(rval);
+  if (ret>=0) h++;
+  return RowRef(ret);
 }
 
 bool SocialCalcSheet::deleteRow(const RowRef& src) {
-  return false;
+  return deleteRows(src,src);
 }
 
 bool SocialCalcSheet::deleteRows(const RowRef& first, const RowRef& last) {
+  if (!select()) return false;
+  jsval args[4] = { 
+    INT_TO_JSVAL(first.getIndex()) ,
+    INT_TO_JSVAL(last.getIndex()) ,
+    INT_TO_JSVAL(w),
+    INT_TO_JSVAL(h)
+  };
+  jsval rval;
+  JSBool ok = JS_CallFunctionName(js.context(),js.global(),
+				  "sheet_delete_rows",4,&args[0],&rval);
+  int ret = JSVAL_TO_INT(rval);
+  if (ret>=0) h -= ret;
+  return ret>=0;
 }
 
 RowRef SocialCalcSheet::moveRow(const RowRef& src, const RowRef& base) {
@@ -123,6 +192,7 @@ RowRef SocialCalcSheet::moveRow(const RowRef& src, const RowRef& base) {
 
 bool SocialCalcSheet::fromCsvString(const std::string& str) {
   if (!setup()) return false;
+  dbg_printf("SocialCalc: Loading from csv\n");
   js.send("load_from_csv",str);
   updateSize();
   return true;
@@ -130,6 +200,7 @@ bool SocialCalcSheet::fromCsvString(const std::string& str) {
 
 bool SocialCalcSheet::fromSocialCalcString(const std::string& str) {
   if (!setup()) return false;
+  dbg_printf("SocialCalc: Loading from native:\n===\n%s\n===\n", str.c_str());
   js.send("set_src",str);
   dbg_printf("Set src!\n");
   updateSize();
@@ -139,9 +210,8 @@ bool SocialCalcSheet::fromSocialCalcString(const std::string& str) {
 std::string SocialCalcSheet::toSocialCalcString(const Property& config) {
   if (!select()) return "";
   string result = js.apply("get_full()");
+
   return result;
-  //FileIO io;
-  //return io.openAndWrite(result,config);
 }
 
 bool SocialCalcSheet::updateSize() {

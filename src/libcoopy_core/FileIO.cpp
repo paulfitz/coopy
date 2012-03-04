@@ -13,6 +13,7 @@ bool FileIO::open(const char *src, const Property& config) {
     need_close = false;
   } else {
     fp = fopen(src,"rb");
+    need_close = true;
   }
   if (fp!=NULL) {
     if (config.get("length").asString()=="header") {
@@ -80,6 +81,7 @@ size_t FileIO::fread(void *ptr, size_t size, size_t nmemb) {
 
 bool FileIO::openAndWrite(const std::string& txt, const Property& config) {
   string name = config.get("file").asString();
+  need_close = true;
   if (name=="-") {
     fp = stdout;
     need_close = false;
@@ -95,6 +97,6 @@ bool FileIO::openAndWrite(const std::string& txt, const Property& config) {
   }
   fp = NULL;
   need_close = true;
-  
+
   return true;
 }

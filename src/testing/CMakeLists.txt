@@ -47,6 +47,10 @@ if (USE_GNUMERIC)
   set(XLS_OR_CSV xls)
   set(XLS xls)
 endif ()
+set(SOCIALCALC)
+if (USE_SOCIALCALC)
+  set(SOCIALCALC socialcalc)
+endif ()
 
 ############################################################################
 # check detection of header line - not actually a used feature in the end
@@ -1141,6 +1145,11 @@ if (USE_SOCIALCALC)
 
   # NOTE: socialcalc has an issue with exporting a "foo,bar" cell 
   # in ${TESTS}/bridges.csv
+
+  foreach(patcher patch_001_col_move patch_002_col_insert patch_003_col_insert patch_004_col_delete patch_005_row_update patch_006_row_insert patch_007_row_delete)
+    ADD_TEST2(socialcalc_${patcher} ${TESTS}/db/hdr_result_${patcher}.csv sspatch ${TESTS}/numbers.socialcalc ${TESTS}/patch_v_0_2/${patcher}.txt)
+  endforeach()
+
 
 endif ()
 

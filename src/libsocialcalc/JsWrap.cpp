@@ -1,6 +1,7 @@
 #include "jsapi.h"
 
 #include <coopy/JsWrap.h>
+#include <coopy/Dbg.h>
 
 using namespace coopy::js;
 using namespace std;
@@ -31,6 +32,8 @@ public:
   JSRuntime *rt;
   JSContext *cx;
   JSObject  *global;
+  int id;
+  int cid;
 
 
   bool init();
@@ -41,6 +44,8 @@ public:
     rt = 0/*NULL*/;
     cx = 0/*NULL*/;
     global = 0/*NULL*/;
+    id = 0;
+    cid = -1;
     init();
   }
 
@@ -55,6 +60,20 @@ public:
 
   bool send(const std::string& function_name,
 	    jsval *val);
+
+  int getId() {
+    int r = id;
+    id++;
+    return id;
+  }
+
+  void setCurrentId(int i) {
+    cid = i;
+  }
+
+  bool isCurrentId(int i) {
+    return cid==i;
+  }
 };
 
 
@@ -123,6 +142,7 @@ string JsWrapGlobal::apply(const string& script) {
 
 bool JsWrapGlobal::send(const std::string& function_name, 
 			const std::string& str) {
+  dbg_printf("js: %s\n", function_name.c_str());
   JSBool ok;
   jsval rval;
   jsval lval;
@@ -135,6 +155,7 @@ bool JsWrapGlobal::send(const std::string& function_name,
 
 bool JsWrapGlobal::send(const std::string& function_name,
 			jsval *val) {
+  dbg_printf("js: %s\n", function_name.c_str());
   JSBool ok;
   jsval rval;
 
@@ -185,3 +206,18 @@ JSObject *JsWrap::global() const {
   return js_global->global;
 }
 
+
+int JsWrap::getId() const {
+  if (!js_global) return -1;
+  return js_global->getId();
+}
+
+void JsWrap::setCurrentId(int i) const {
+  if (!js_global) return;
+  js_global->setCurrentId(i);
+}
+
+bool JsWrap::isCurrentId(int i) const {
+  if (!js_global) return false;
+  return js_global->isCurrentId(i);
+}

@@ -36,9 +36,24 @@ int main(int argc, char *argv[]) {
   }
   sheet.cellString(0,0,"foo");
   sheet.cellString(1,0,"bar");
+  //sheet.moveColumn(ColumnRef(0),ColumnRef(1));
+  sheet.moveColumn(ColumnRef(1),ColumnRef(0));
+  sheet.insertColumn(ColumnRef(0));
+  sheet.cellString(1,0,"zig",true); 
+  sheet.insertColumn(ColumnRef(3));
+  printf(">>>\n%s\n", sheet.toString().c_str());
+  sheet.insertRow(RowRef(-1));
+  printf(">>>\n%s\n", sheet.toString().c_str());
+  sheet.cellString(1,0,"zig",true); 
+  printf(">>>\n%s\n", sheet.toString().c_str());
+  sheet.insertRow(RowRef(-1));
+  printf(">>>\n%s\n", sheet.toString().c_str());
+  sheet.insertRow(RowRef(0));
+  printf(">>>\n%s\n", sheet.toString().c_str());
   Property p;
   p.put("file","hi.sc");
   SocialCalcTextBook::write(&book,p);
+
   
   printf("done\n");
 

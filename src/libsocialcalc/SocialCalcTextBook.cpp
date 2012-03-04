@@ -21,38 +21,6 @@ public:
   }
 };
 
-//static void jssetup(JsWrap& js) {
-//  SocialCalcSheet::jsSetup(js);
-//}
-
-/*
-bool SocialCalcTextBook::reset() {
-  if (jssheet) {
-    JS_RemoveValueRoot(js.context(),jssheet);
-    delete jssheet;
-    jssheet = NULL;
-  }
-  return true;
-}
-
-bool SocialCalcTextBook::setup() {
-  jssetup(js);
-  reset();
-  jssheet = new jsval;
-  if (!jssheet) return false;
-  jsval lval;
-  JSBool ok = JS_CallFunctionName(js.context(), js.global(), 
-				  "create_spreadsheet", 
-				  0,&lval,jssheet);
-  if (!jssheet) return false;
-  JS_AddValueRoot(js.context(),jssheet);
-  dbg_printf("Made a sheet!\n");
-  js.send("set_active_sheet",jssheet);
-  dbg_printf("Set a sheet!\n");
-  return true;
-}
-*/
-
 bool SocialCalcTextBook::open(const Property& config) {
   if (!config.check("file")) return false;
   if (config.check("name")) {
@@ -62,11 +30,6 @@ bool SocialCalcTextBook::open(const Property& config) {
   FormatSniffer f;
   if (!f.open(config.get("file").asString().c_str(),true)) return false;
   return sheet.fromSocialCalcString(f.read());
-  //string result = js.apply("get_csv()");
-  //dbg_printf("[%s]\n", result.c_str());
-  //SCCSV reader;
-  //reader.sheet = &sheet;
-  //return CsvFile::read(result.c_str(),result.length(),reader,config)==0;
 }
 
 
@@ -75,7 +38,8 @@ bool SocialCalcTextBook::write(TextBook *book, const Property& config) {
   SocialCalcTextBook *prev = dynamic_cast<SocialCalcTextBook *>(book);
   if (prev) {
     FileIO io;
-    return io.openAndWrite(prev->sheet.toSocialCalcString(config),config);
+    string txt = prev->sheet.toSocialCalcString(config);
+    return io.openAndWrite(txt,config);
   }
   if (book->getNames().size()>1) {
     fprintf(stderr,"* socialcalc plugin cannot currently deal with multiple sheets\n");

@@ -17,6 +17,7 @@ class coopy::store::socialcalc::SocialCalcSheet : public DataSheet {
 private:
   coopy::js::JsWrap js;
   jsval *jssheet;
+  int id;
   int w, h;
   SparseStringSheet cache;
   SparseByteSheet cacheFlag;
@@ -24,7 +25,7 @@ public:
   SocialCalcSheet() {
     jssheet = 0/*NULL*/;
     w = h = 0;
-    setup();
+    id = -1;
   }
 
   virtual ~SocialCalcSheet() {
