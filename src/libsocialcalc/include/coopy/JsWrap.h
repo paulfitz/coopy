@@ -29,8 +29,8 @@ public:
 
   bool send(const std::string& function_name, jsval *val);
 
-  JSContext *context();
-  JSObject *global();
+  JSContext *context() const;
+  JSObject *global() const;
 };
 
 #endif

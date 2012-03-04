@@ -1,5 +1,9 @@
 if (USE_SOCIALCALC)
 
+  if (HAVE_TR1)
+    add_definitions("-std=c++0x" -DHAVE_TR1)
+  endif ()
+
   include(FindPkgConfig)
 
   pkg_search_module(MOZJS REQUIRED mozilla-js xulrunner-js firefox-js seamonkey-js)
@@ -37,7 +41,11 @@ if (USE_SOCIALCALC)
     include/coopy/JsWrap.h
     ${jscpp}
     SocialCalcTextBook.cpp
+    include/coopy/SocialCalcTextBook.h
     SocialCalcTextBookFactory.cpp
+    include/coopy/SocialCalcTextBookFactory.h
+    SocialCalcSheet.cpp
+    include/coopy/SocialCalcSheet.h
     )
 
 
@@ -45,6 +53,8 @@ if (USE_SOCIALCALC)
 
   add_executable(test_socialcalc SocialCalc.cpp)
   target_link_libraries(test_socialcalc coopy_socialcalc)
+
+  install(TARGETS coopy_socialcalc COMPONENT ${BASELIB} DESTINATION lib)
 
 endif ()
 

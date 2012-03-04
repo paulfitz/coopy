@@ -5,7 +5,8 @@
 #include <coopy/CsvSheet.h>
 #include <coopy/TextBookFactory.h>
 #include <coopy/Dbg.h>
-#include <coopy/JsWrap.h>
+//#include <coopy/JsWrap.h>
+#include <coopy/SocialCalcSheet.h>
 
 namespace coopy {
   namespace store {
@@ -19,22 +20,17 @@ class coopy::store::socialcalc::SocialCalcTextBook : public TextBook {
 public:
   std::string name;
   int provides;
-  CsvSheet sheet;
-  coopy::js::JsWrap js;
-  jsval *jssheet;
+  SocialCalcSheet sheet;
+  //coopy::js::JsWrap js;
+  //jsval *jssheet;
 
   SocialCalcTextBook() : name(coopy_get_default_table_name()) {
     provides = 0;
-    jssheet = 0/*NULL*/;
+    //jssheet = 0/*NULL*/;
   }
 
   virtual ~SocialCalcTextBook() {
-    reset();
   }
-
-  bool reset();
-
-  bool setup();
 
   virtual std::vector<std::string> getNames() {
     std::vector<std::string> result;
@@ -62,7 +58,7 @@ public:
       if (sheet.applySchema(schema)) {
 	PolySheet s = readSheet(name);
 	if (s.isValid()) {
-	  sheet.setSchema(Poly<SheetSchema>(schema.clone(),true));
+	  //sheet.setSchema(Poly<SheetSchema>(schema.clone(),true));
 	  return s;
 	}
 	return s;

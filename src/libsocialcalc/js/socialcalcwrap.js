@@ -1,16 +1,17 @@
 
+var spreadsheet = null;
+
 var socialcalcwrap_loaded = true;
 
 function create_spreadsheet() {
-    return new SocialCalc.SpreadsheetControl();
+    spreadsheet = new SocialCalc.SpreadsheetControl();
+    return spreadsheet;
 }
 
 var document = new Array();
 document['getElementById'] = function(x) {
     return new Array();
 }
-
-var spreadsheet = null;
 
 function set_active_sheet(sheet) {
     spreadsheet = sheet;
@@ -35,8 +36,14 @@ function get_full() {
     return sheetstr;
 }
 
+function get_sheet_save() {
+    //var r = SocialCalc.crToCoord(spreadsheet.sheet.attribs.lastcol,spreadsheet.sheet.attribs.lastrow);
+    //return spreadsheet.sheet.CreateSheetSave("A1:" + r);
+    return spreadsheet.sheet.CreateSheetSave();
+}
+
 function get_csv() {
-    var sheetstr0 = spreadsheet.sheet.CreateSheetSave();
+    var sheetstr0 = get_sheet_save();
     var sheetstr = SocialCalc.ConvertSaveToOtherFormat(sheetstr0,"csv",false);
     return sheetstr;
 }
@@ -53,4 +60,36 @@ function set_src(x) {
     return "ok";
 }
 
+function sheet_set_cell(x,y,v) {
+    if (v!=null) {
+	SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set " + SocialCalc.crToCoord(x+1,y+1) + " text t " + v), false);
+    } else {
+	SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set " + SocialCalc.crToCoord(x+1,y+1) + " text t __FIGURE_OUT_NULL__"), false);
+    }
+}
+
+function sheet_get_cell(x,y) {
+    var cell = spreadsheet.sheet.cells[SocialCalc.crToCoord(x+1,y+1)] || null;
+    if (cell==null) return null;
+    return cell.datavalue;
+}
+
+function sheet_get_width() {
+    return spreadsheet.sheet.attribs.lastcol;
+}
+
+function sheet_get_height() {
+    return spreadsheet.sheet.attribs.lastrow;
+}
+
+function test_sheet() {
+    //SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set sheet lastcol 4"), false);
+    //SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set sheet lastrow 4"), false);
+    //SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set sheet usermaxcol 4"), false);
+    //SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set sheet usermaxrow 4"), false);
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("set A1:B5 text t hello"), false);
+    SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("insertrow A1"), false);
+    //SocialCalc.ExecuteSheetCommand(spreadsheet.sheet, new SocialCalc.Parse("insertcol A1"), false);
+    return get_csv();
+}
 

@@ -175,12 +175,12 @@ bool JsWrap::send(const std::string& function_name, jsval *val) {
   return js_global->send(function_name,val);
 }
 
-JSContext *JsWrap::context() { 
+JSContext *JsWrap::context() const { 
   if (!js_global) return NULL;
   return js_global->cx;
 }
 
-JSObject *JsWrap::global() {
+JSObject *JsWrap::global() const {
   if (!js_global) return NULL;
   return js_global->global;
 }

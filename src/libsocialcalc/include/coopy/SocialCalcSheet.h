@@ -2,6 +2,8 @@
 #define COOPY_SOCIALCALCSHEET
 
 #include <coopy/DataSheet.h>
+#include <coopy/JsWrap.h>
+#include <coopy/SparseSheet.h>
 
 namespace coopy {
   namespace store {
@@ -12,10 +14,30 @@ namespace coopy {
 }
 
 class coopy::store::socialcalc::SocialCalcSheet : public DataSheet {
+private:
+  coopy::js::JsWrap js;
+  jsval *jssheet;
+  int w, h;
+  SparseStringSheet cache;
+  SparseByteSheet cacheFlag;
 public:
-  SocialCalcSheet();
+  SocialCalcSheet() {
+    jssheet = 0/*NULL*/;
+    w = h = 0;
+    setup();
+  }
 
-  virtual ~SocialCalcSheet();
+  virtual ~SocialCalcSheet() {
+    reset();
+  }
+
+  static bool jsSetup(coopy::js::JsWrap& j);
+
+  bool select() const;
+
+  bool reset();
+
+  bool setup();
 
   virtual int width() const  { return w; }
   virtual int height() const { return h; }
@@ -48,7 +70,6 @@ public:
 
   virtual RowRef moveRow(const RowRef& src, const RowRef& base);
 
-
   virtual bool hasDimension() const {
     return false;
   }
@@ -58,17 +79,15 @@ public:
     return true;
   }
 
-  virtual bool deleteData();
+  bool fromCsvString(const std::string& str);
+  bool fromSocialCalcString(const std::string& str);
+  std::string toSocialCalcString(const Property& config);
 
-  virtual Poly<Appearance> getCellAppearance(int x, int y);
+  bool updateSize();
 
-  virtual Poly<Appearance> getRowAppearance(int y);
-
-  virtual Poly<Appearance> getColAppearance(int x);
-
-private:
-  void *implementation;
-  int w, h;
+  //virtual Poly<Appearance> getCellAppearance(int x, int y);
+  //virtual Poly<Appearance> getRowAppearance(int y);
+  //virtual Poly<Appearance> getColAppearance(int x);
 };
 
 #endif
