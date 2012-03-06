@@ -1161,7 +1161,6 @@ endif ()
 
 foreach(FORMAT tdiff csv color)
   file(GLOB perm ${TESTS}/perms/bridges_*.csv)
-  message(STATUS ${perm})
   foreach(p2 ${perm})
     string(REGEX REPLACE ".*bridges_" "" s2 ${p2})
     string(REPLACE ".csv" "" s2 ${s2})
