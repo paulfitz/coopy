@@ -1154,4 +1154,17 @@ if (USE_SOCIALCALC)
 endif ()
 
 
+#######################################################################
+#######################################################################
 
+# Try lots of permutations, see ./scripts/bridge_permutations
+
+foreach(FORMAT tdiff csv color)
+  file(GLOB perm ${TESTS}/perms/bridges_*.csv)
+  message(STATUS ${perm})
+  foreach(p2 ${perm})
+    string(REGEX REPLACE ".*bridges_" "" s2 ${p2})
+    string(REPLACE ".csv" "" s2 ${s2})
+    ADD_ROUND_TRIP_TEST_BI(bridge_perm_${FORMAT}_${s2} ${TESTS}/bridges.csv ${p2} ${FORMAT})
+  endforeach()
+endforeach()

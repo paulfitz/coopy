@@ -29,6 +29,7 @@ private:
   std::vector<std::string> column_names;
   std::map<std::string,int> name2col;
   std::map<int,std::string> col2name;
+  std::map<std::string,int> original_index;
   std::map<std::string,coopy::store::PoolColumnLink> name2pool;
   std::map<std::string,std::string> syn2name;
   std::map<std::string,std::string> name2syn;

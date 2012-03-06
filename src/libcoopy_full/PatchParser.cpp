@@ -4,6 +4,7 @@
 #include <coopy/Format.h>
 #include <coopy/Dbg.h>
 #include <coopy/PolyBook.h>
+#include <coopy/Mover.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -1318,6 +1319,7 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
     vector<string> nameCol;
     vector<string> origCol;
     vector<int> offsetCol;
+    vector<int> rootCol;
     RowChange::txt2bool indexes;
     int xoff = 1;
     int yoff = 0;
@@ -1374,20 +1376,24 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	  activeCol.push_back(txt);
 	  statusCol.push_back("");
 	  offsetCol.push_back(0);
+	  rootCol.push_back(-1);
 	  nameCol.push_back("");
 	  indexes[txt] = true;
 	}
 	if (acts) {
 	  activeCol.clear();
+	  int org_ct = 0;
 	  for (int j=1+xoff; j<sheet.width(); j++) {
 	    string act = sheet.cellString(j,i-1);
 	    string col = cols[j-1-xoff];
 	    //printf("[%s] [%s]\n", act.c_str(), col.c_str());
+
+	    bool haveName = act.find("(")!=string::npos;
 	    if (act=="+++") {
 	      statusCol[j-1-xoff] = act;
 	      indexes[col] = false;
 	    } else {
-	      if (act[0]!='(') {
+	      if (!haveName) {
 		origCol.push_back(col);
 	      }
 	    }
@@ -1397,14 +1403,26 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	    } else {
 	      activeCol.push_back(col);
 	    }
-	    if (act[0]=='(') {
-	      statusCol[j-1-xoff] = "=";
-	      nameCol[j-1-xoff] = act.substr(1,act.length()-2);
+	    string rem = act;
+	    if (haveName) {
+	      int at = 0;
+	      while (rem[at]=='<'||rem[at]=='>') {
+		at++;
+	      }
+	      act = rem.substr(0,at);
+	      rem = rem.substr(at,rem.length()-at);
+	      COOPY_ASSERT(rem[0]=='(');
+	      //statusCol[j-1-xoff] = "=";
+	      nameCol[j-1-xoff] = rem.substr(1,rem.length()-2);
 	      origCol.push_back(nameCol[j-1-xoff]);
 	    }
 	    if (act[0]=='<'||act[0]=='>') {
 	      statusCol[j-1-xoff] = "<>";
 	      offsetCol[j-1-xoff] = act.length()*((act[0]=='>')?-1:1);
+	    }
+	    if (act!="+++") {
+	      rootCol[j-1-xoff] = org_ct;
+	      org_ct++;
 	    }
 	  }
 
@@ -1417,27 +1435,86 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	  indexMapBase = indexMap;
 
 	  int at = 0;
-	  for (int j=0; j<(int)origCol.size(); j++) {
+	  //printf("MAP %s\n", vector2string(indexMap).c_str());
+	  for (int j=0; j<(int)rootCol.size(); j++) {
 	    string act = statusCol[j];
 	    if (act!="<>") continue;
+	    int rr = rootCol[j];
 	    int jj = offsetCol[j];
+	    //printf(":: %d %d\n", rr, jj);
+	    int tmp = indexMap[rr+jj];
+	    indexMap[rr+jj] = rr;
+	    if (indexMap[rr] == rr) {
+	      indexMap[rr] = tmp;
+	    }
 	    //printf("%d vs %d\n", j, jj);
-	    shuffle(indexMap,j+jj,-jj,true);
+	    //shuffle(indexMap,j+jj,-jj,true);
 	    //indexMap[j] = jj;
 	    //indexMap[jj] = j;
 	  }
+	  //printf("MAP %s\n", vector2string(indexMap).c_str());
+	  Mover mover;
+	  vector<int> move_order;
+	  mover.move(indexMapBase,indexMap,move_order);
+	  //printf("MOVES %s\n", vector2string(move_order).c_str());
 
 	  NameChange nc;
 	  nc.mode = NAME_CHANGE_DECLARE;
 	  nc.final = false;
+	  vector<int> local_cols;
+	  vector<int> shuffled_cols;
+	  vector<string> local_col_names;
 	  for (int j=0; j<(int)origCol.size(); j++) {
 	    nc.names.push_back(origCol[remap(indexMap,j)]);
+	    local_cols.push_back(remap(indexMap,j));
+	    shuffled_cols.push_back(j);
+	    local_col_names.push_back(origCol[remap(indexMap,j)]);
 	  }
 	  origCol = nc.names;
 	  patcher->changeName(nc);
 
 	  indexMap = indexMapBase;
 
+	  for (int m=0; m<(int)move_order.size(); m++) {
+	    int a = move_order[m];
+	    dbg_printf("Move %d\n", a);
+
+	    OrderChange change;
+	    change.indicesBefore = local_cols;
+	    change.namesBefore = local_col_names;
+	    vector<int>::iterator it = std::find(local_cols.begin(),
+						 local_cols.end(),
+						 a);
+	    if (it==local_cols.end()) {
+	      fprintf(stderr,"Merge logic failure\n");
+	      exit(1);
+	    }
+	    vector<int>::iterator it2 = std::find(shuffled_cols.begin(),
+						  shuffled_cols.end(),
+						  a);
+	    if (it2==shuffled_cols.end()) {
+	      fprintf(stderr,"Merge logic failure\n");
+	      exit(1);
+	    }
+	    change.subject = *it;
+	    change.object = *it2;
+	    int idx = it-local_cols.begin();
+	    int idx2 = it2-shuffled_cols.begin();
+	    change.mode = ORDER_CHANGE_MOVE;
+	    local_cols.erase(it);
+	    string name = local_col_names[idx];
+	    change.object = *it2;
+	    local_col_names.erase(local_col_names.begin()+idx);
+	    local_cols.insert(local_cols.begin()+idx2,a);
+	    local_col_names.insert(local_col_names.begin()+idx2,name);
+	    change.indicesAfter = local_cols;
+	    change.namesAfter = local_col_names;
+	    if (change.namesBefore!=change.namesAfter) {
+	      patcher->changeColumn(change);
+	    }
+	  }
+
+	  /*
 	  for (int j=0; j<(int)origCol.size(); j++) {
 	    string act = statusCol[j];
 	    if (act!="<>") continue;
@@ -1458,13 +1535,17 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	      order.indicesAfter.push_back(remap(indexMap,k));
 	    }
 
-	    order.subject = j;
+	    order.subject = j+jj;
 	    patcher->changeColumn(order);	    
 	  }
+	  */
 
 	  for (int j=0; j<(int)cols.size(); j++) {
+	    string nact = nameCol[j];
+	    if (nact!="") { statusCol[j] = "="; }
+	  }
+	  for (int j=0; j<(int)cols.size(); j++) {
 	    string act = statusCol[j];
-	    //printf("   [%d] [%s]\n", j, act.c_str());
 	    if (act=="") continue;
 	    if (act=="<>") continue;
 	    OrderChange order;

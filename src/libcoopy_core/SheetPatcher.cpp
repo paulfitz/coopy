@@ -220,7 +220,9 @@ bool SheetPatcher::renameColumn(int idx, const std::string& name,
   dbg_printf("Should rename column %d to %s\n", idx, name.c_str());
   bool ok = sheet.modifyColumn(ColumnRef(idx),ColumnInfo(name));
   activeCol.cellString(idx,0,name);
-  statusCol.cellString(idx,0,string("(") + oldName + ")");
+  statusCol.cellString(idx,0,
+		       statusCol.cellString(idx,0) +
+		       string("(") + oldName + ")");
   if (!ok) {
     fprintf(stderr,"Failed to rename column to %s\n", name.c_str());
   }
@@ -237,24 +239,49 @@ bool SheetPatcher::moveColumn(int idx, int idx2) {
   activeCol.moveColumn(from,to);
   ColumnRef at = statusCol.moveColumn(from,to);
   if (descriptive) {
-    int first = idx;
-    int final = at.getIndex();
-    int xfinal = final;
-    int sgn = 1;
-    string name = "";
-    string ch = ">";
-    if (final<first) {
+    /*
+      int first = idx;
+      int final = at.getIndex();
+      int xfinal = final;
+      int sgn = 1;
+      string name = "";
+      string ch = ">";
+      if (final<first) {
       first = final;
       final = idx;
       sgn = -1;
       ch = "<";
-    }
-    for (int i=first; i<final; i++) {
-      if (statusCol.cellString(i,0)!="---") {
-	name += ch;
       }
+      for (int i=first; i<final; i++) {
+      if (statusCol.cellString(i,0)!="---") {
+      name += ch;
+      }
+      }
+    */
+    for (int k=0; k<(int)activeCol.width(); k++) {
+      string name = activeCol.cellString(k,0);
+      string code = statusCol.cellString(k,0);
+      char ch = code[0];
+      if (ch=='-'||ch=='+') continue;
+      map<string,int>::iterator it = 
+	original_index.find(name);
+      if (it == original_index.end()) {
+	continue;
+      }
+      int first = k;
+      int last = it->second;
+      ch = '<';
+      string txt = "";
+      int sgn = 1;
+      if (last<first) {
+	sgn = -1;
+	ch = '>';
+      }
+      for (int i=first; i!=last; i += sgn) {
+	txt += ch;
+      }
+      statusCol.cellString(k,0,txt);
     }
-    statusCol.cellString(xfinal,0,name);
   }
   updateCols();
   return ok;
@@ -1027,6 +1054,10 @@ bool SheetPatcher::declareNames(const std::vector<std::string>& names,
     }
     fprintf(stderr,"Named columns not implemented yet\n");
     exit(1);
+  }
+  original_index.clear();
+  for (int i=0; i<(int)names.size(); i++) {
+    original_index[names[i]] = i;
   }
   return true;
 }
