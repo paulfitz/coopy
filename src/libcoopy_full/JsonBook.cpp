@@ -1,6 +1,8 @@
 #include <coopy/JsonBook.h>
 #include <coopy/FoldedSheet.h>
 #include <coopy/Dbg.h>
+#include <coopy/FormatSniffer.h>
+#include <coopy/FileIO.h>
 
 #include <fstream>
 
@@ -9,6 +11,7 @@
 using namespace std;
 using namespace coopy::store;
 using namespace coopy::store::json;
+using namespace coopy::format;
 using namespace coopy::fold;
 
 static bool readPart(Json::Value& rows,
@@ -69,10 +72,15 @@ static bool readPart(Json::Value& rows,
 bool JsonBook::read(const char *fname) {
   clear();
 
-  ifstream in(fname);
+  FormatSniffer in;
+  if (!in.open(fname,true)) {
+    fprintf(stderr,"Failed to open %s\n", fname);
+    return false;
+  }
+
   Json::Value root;
   Json::Reader reader;
-  if (!reader.parse(in,root,false)) {
+  if (!reader.parse(in.read(),root,false)) {
     fprintf(stderr,"Failed to parse %s\n", fname);
     return false;
   }

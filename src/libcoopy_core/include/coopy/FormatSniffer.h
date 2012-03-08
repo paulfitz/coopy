@@ -1,10 +1,12 @@
 #ifndef COOPY_FORMATSNIFFER_INC
 #define COOPY_FORMATSNIFFER_INC
 
+#include <stdio.h>
 #include <string>
 
 #include <coopy/Reader.h>
 #include <coopy/Format.h>
+#include <coopy/FileIO.h>
 
 namespace coopy {
   namespace format {
@@ -15,13 +17,10 @@ namespace coopy {
 
 class coopy::format::FormatSniffer : public Reader {
 private:
-  void *impl;
-  bool need_close;
+  coopy::store::FileIO fio;
   std::string cache;
 public:
   FormatSniffer() {
-    impl = 0 /*NULL*/;
-    need_close = false;
   }
 
   virtual ~FormatSniffer() {
@@ -32,6 +31,8 @@ public:
 
   bool open(const char *fname, bool caching = true);
   bool close();
+
+  bool wrap(coopy::store::FileIO& fin, bool caching);
 
   Format getFormat();
 

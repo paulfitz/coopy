@@ -25,6 +25,10 @@ public:
     has_length = false;
   }
 
+  virtual ~FileIO() {
+    close();
+  }
+
   bool open(const char *src, const Property& config);
 
   bool close();

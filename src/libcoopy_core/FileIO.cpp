@@ -81,13 +81,13 @@ size_t FileIO::fread(void *ptr, size_t size, size_t nmemb) {
 
 bool FileIO::openAndWrite(const std::string& txt, const Property& config) {
   string name = config.get("file").asString();
-  need_close = true;
   if (name=="-") {
     fp = stdout;
     need_close = false;
   } else {
     fp = fopen(name.c_str(),"wb");
     if (!fp) return false;
+    need_close = true;
   }
   if (fp!=NULL) {
     fwrite(txt.c_str(),1,txt.length(),fp);
@@ -96,7 +96,7 @@ bool FileIO::openAndWrite(const std::string& txt, const Property& config) {
     fclose(fp);
   }
   fp = NULL;
-  need_close = true;
+  need_close = false;
 
   return true;
 }

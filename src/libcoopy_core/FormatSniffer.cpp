@@ -6,6 +6,7 @@
 
 using namespace std;
 using namespace coopy::format;
+using namespace coopy::store;
 
 bool FormatSniffer::setString(const char *str) {
   close();
@@ -13,46 +14,36 @@ bool FormatSniffer::setString(const char *str) {
   return true;
 }
 
-bool FormatSniffer::open(const char *fname, bool caching) {
-  close();
-  FILE *fp;
-  dbg_printf("Looking at %s\n", fname);
-  if (strcmp(fname,"-")==0) {
-    fp = stdin;
-    need_close = false;
-  } else {
-    fp = fopen(fname,"rb");
-    need_close = true;
-  }
-  if (!fp) {
-    fprintf(stderr,"FormatSniffer: could not open %s\n", fname);
-    need_close = false;
-    return false;
-  }
-
+bool FormatSniffer::wrap(FileIO& fin, bool caching) {
   char buf[caching?32768:100];
   cache = "";
   size_t bytes_read;
   if (caching) {
-    while ((bytes_read=fread(buf,1,sizeof(buf),fp))>0) {
+    while ((bytes_read=fin.fread(buf,1,sizeof(buf)))>0) {
       cache.append(buf,bytes_read);
     }
   } else {
-    bytes_read = fread(buf,1,sizeof(buf),fp);
+    bytes_read = fin.fread(buf,1,sizeof(buf));
     cache.append(buf,bytes_read);
   }
   return true;
 }
 
+bool FormatSniffer::open(const char *fname, bool caching) {
+  close();
+  dbg_printf("Looking at %s\n", fname);
+  Property p;
+  if (!fio.open(fname,p)) {
+    fprintf(stderr,"FormatSniffer: could not open %s\n", fname);
+    return false;
+  }
+  wrap(fio,caching);
+  return true;
+}
+
 
 bool FormatSniffer::close() {
-  if (need_close) {
-    if (impl!=NULL&&need_close) {
-      fclose((FILE*)impl);
-      impl = NULL;
-    }
-    need_close = false;
-  }
+  fio.close();
   cache = "";
   return true;
 }

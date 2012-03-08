@@ -138,6 +138,9 @@ int gnumeric_save(GnumericWorkbookPtr workbook, const char *fname,
   int res = 0;
   GOFileSaver *fs = NULL;
 
+  if (fname[0]=='-') {
+      format = "Gnumeric_Excel:excel_biff8";
+    }
   if (format!=NULL) {
     fs = go_file_saver_for_id(format);
     if (fs == NULL) {
@@ -156,8 +159,8 @@ int gnumeric_save(GnumericWorkbookPtr workbook, const char *fname,
       return 1;
     }
   }
-  g_print ("Using exporter %s\n",
-	   go_file_saver_get_id (fs));
+  //g_print ("Using exporter %s\n",
+  //go_file_saver_get_id (fs));
   if (go_file_saver_get_save_scope (fs) !=
       GO_FILE_SAVE_WORKBOOK) {
     g_printerr (_("Selected exporter (%s) does not support saving multiple sheets in one file.\n"
@@ -165,7 +168,11 @@ int gnumeric_save(GnumericWorkbookPtr workbook, const char *fname,
 		go_file_saver_get_id (fs));
   }
   char *outfile = go_filename_to_uri (fname);
-  res = !wb_view_save_as (wbv, fs, outfile, cc);
+  if (fname[0]=='-') {
+    res = !wb_view_save_as (wbv, fs, "fd://1", cc);
+  } else {
+    res = !wb_view_save_as (wbv, fs, outfile, cc);
+  }
   g_free (outfile);
   return 0;
 }

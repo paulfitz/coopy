@@ -1167,3 +1167,16 @@ foreach(FORMAT tdiff csv color)
     ADD_ROUND_TRIP_TEST_BI(bridge_perm_${FORMAT}_${s2} ${TESTS}/bridges.csv ${p2} ${FORMAT})
   endforeach()
 endforeach()
+
+#######################################################################
+#######################################################################
+
+# standard input / standard output tests
+
+ADD_STREAM_TEST(stdout_excel ${TESTS}/bridges.csv stdout_excel.xls ${ssformat} - dbi:gnumeric::file=-)
+ADD_TEST(stdout_excel_check ${ssdiff} --equal ${TESTS}/bridges.csv stdout_excel.xls)
+ADD_STREAM_TEST(stdout_jsonbook ${TESTS}/bridges.csv stdout_jsonbook.jsonbook ${ssformat} - dbi:jsonbook::file=-)
+
+# PENDING
+# ADD_TEST(stdout_jsonbook_check ${ssdiff} --equal dbi:csv:header=-1::file=${TESTS}/bridges.csv stdout_jsonbook.jsonbook)
+
