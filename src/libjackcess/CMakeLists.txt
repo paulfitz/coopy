@@ -13,13 +13,13 @@ if (USE_JACKCESS)
   file(GLOB_RECURSE js jackcess/*.java)
   file(GLOB_RECURSE js_res RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/jackcess_res jackcess_res/*.*)
   file(GLOB_RECURSE js_res_abs ${CMAKE_CURRENT_SOURCE_DIR}/jackcess_res jackcess_res/*.*)
-  message(STATUS "${js_res}")
+  # message(STATUS "${js_res}")
 
   foreach (r ${js_res}) 
     set(rabs ${CMAKE_CURRENT_SOURCE_DIR}/jackcess_res/${r})
     # string(REPLACE "/" "." base ${r})
     set(base ${r})
-    message(STATUS "==> ${r} ${base}")
+    # message(STATUS "==> ${r} ${base}")
     set_property(SOURCE ${rabs}
       PROPERTY LANGUAGE
       JavaC)
