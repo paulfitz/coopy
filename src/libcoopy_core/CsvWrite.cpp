@@ -62,20 +62,41 @@ static int write(const DataSheet& src, const Property& config,
 	for (int i=0; i<src.width(); i++) {
 	  header.cell(i,0) = sniffer.suggestColumnName(i);
 	}
-	std::string result = header.encode(style);
-	if (markHeader) {
-	  int len = result.length();
-	  len--;
-	  while (len>0 && result[len-1]=='\r') {
+	bool skip_header = false;
+	if (!markHeader) {
+	  int matches = 0;
+	  for (int j=0; j<src.width(); j++) {
+	    for (int k=0; k<3&&k<src.height(); k++) {
+	      string alt = src.cellString(j,k);
+	      if (alt==header.cellString(j,0)) {
+		matches++;
+		break;
+	      }
+	    }
+	  }
+	  dbg_printf("inplace column name matches: %d of %d\n", matches,
+		     src.width());
+	  if (matches>=1 && matches>=src.width()*0.75) {
+	    skip_header = true;
+	  }
+	}
+	std::string result = "";
+	if (!skip_header) {
+	  result = header.encode(style);
+	  if (markHeader) {
+	    int len = result.length();
 	    len--;
+	    while (len>0 && result[len-1]=='\r') {
+	      len--;
+	    }
+	    if (len<3) len = 3;
+	    if (len>79) len = 79;
+	    for (int i=0; i<len; i++) {
+	      result += '-';
+	    }
+	    result += "\r\n";
+	    style.setMarkHeader(false);
 	  }
-	  if (len<3) len = 3;
-	  if (len>79) len = 79;
-	  for (int i=0; i<len; i++) {
-	    result += '-';
-	  }
-	  result += "\r\n";
-	  style.setMarkHeader(false);
 	}
 	if (fp) {
 	  fwrite(result.c_str(),1,result.length(),fp);

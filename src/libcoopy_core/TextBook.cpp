@@ -161,11 +161,23 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
     if (!ext) {
       if (schema->headerHeight()<=0 && !schema->isGuess()) {
 	bool named = false;
+	int matches = 0;
 	for (int j=0; j<schema->getColumnCount(); j++) {
 	  ColumnInfo info = schema->getColumnInfo(j);
-	  if (info.hasName()) { named = true; break; }
+	  if (info.hasName()) { 
+	    named = true; 
+	    for (int k=0; k<3&&k<sheet.height(); k++) {
+	      string alt = sheet.cellString(j,k);
+	      if (alt==info.getName()) {
+		matches++;
+		break;
+	      }
+	    }
+	  }
 	}
-	if (named) {
+	dbg_printf("inplace column name matches: %d of %d\n", matches,
+		   schema->getColumnCount());
+	if (named && (matches==0||matches<schema->getColumnCount()*0.75)) {
 	  Poly<SheetRow> pRow = target.insertRow();
 	  SheetRow& row = *pRow;
 	  for (int j=0; j<schema->getColumnCount(); j++) {

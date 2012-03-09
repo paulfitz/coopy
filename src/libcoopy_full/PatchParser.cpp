@@ -1708,6 +1708,7 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 	    change.mode = ROW_CHANGE_CONTEXT;
 	    for (int j=1+xoff; j<sheet.width(); j++) {
 	      SheetCell c = sheet.cellSummary(j,i);
+	      // printf("? %d %d %d\n", xoff, j-1-xoff, cols.size());
 	      change.cond[cols[j-1-xoff]] = c;
 	    }
 	    if (willBeAllowed) patcher->changeRow(change);

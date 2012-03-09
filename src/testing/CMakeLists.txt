@@ -1173,8 +1173,10 @@ endforeach()
 
 # standard input / standard output tests
 
-ADD_STREAM_TEST(stdout_excel ${TESTS}/bridges.csv stdout_excel.xls ${ssformat} - dbi:gnumeric::file=-)
-ADD_TEST(stdout_excel_check ${ssdiff} --equal ${TESTS}/bridges.csv stdout_excel.xls)
+IF (USE_GNUMERIC)
+  ADD_STREAM_TEST(stdout_excel ${TESTS}/bridges.csv stdout_excel.xls ${ssformat} - dbi:gnumeric:format=.xls::file=-)
+  ADD_TEST(stdout_excel_check ${ssdiff} --equal ${TESTS}/bridges.csv stdout_excel.xls)
+ENDIF ()
 ADD_STREAM_TEST(stdout_jsonbook ${TESTS}/bridges.csv stdout_jsonbook.jsonbook ${ssformat} - dbi:jsonbook::file=-)
 
 # PENDING

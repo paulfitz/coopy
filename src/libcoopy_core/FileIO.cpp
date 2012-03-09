@@ -13,7 +13,9 @@ bool FileIO::open(const char *src, const Property& config) {
     need_close = false;
   } else {
     fp = fopen(src,"rb");
-    need_close = true;
+    if (fp!=NULL) {
+      need_close = true;
+    }
   }
   if (fp!=NULL) {
     if (config.get("length").asString()=="header") {
