@@ -18,7 +18,11 @@ TextBook *GnumericTextBookFactory::open(AttachConfig& config,
       GnumericTextBook *prev = dynamic_cast<GnumericTextBook *>(config.prevBook);
       if (prev!=NULL) {
 	//printf("FAST TRACK\n");
-	prev->save(config.fname.c_str(),NULL);
+	if (config.options.check("format")) {
+	  prev->save(config.fname.c_str(),config.options.get("format").asString().c_str());
+	} else {
+	  prev->save(config.fname.c_str(),NULL);
+	}
 	report.success = true;
 	return prev;
       }
@@ -43,7 +47,11 @@ TextBook *GnumericTextBookFactory::open(AttachConfig& config,
     if (config.prevBook!=NULL) {
       book->copy(*config.prevBook,config.options);
       if (config.shouldWrite) {
-	book->save(config.fname.c_str(),NULL);
+	if (config.options.check("format")) {
+	  book->save(config.fname.c_str(),config.options.get("format").asString().c_str());
+	} else {
+	  book->save(config.fname.c_str(),NULL);
+	}
       }
     }
   }

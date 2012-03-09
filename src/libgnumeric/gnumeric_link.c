@@ -138,15 +138,15 @@ int gnumeric_save(GnumericWorkbookPtr workbook, const char *fname,
   int res = 0;
   GOFileSaver *fs = NULL;
 
-  if (fname[0]=='-') {
-      format = "Gnumeric_Excel:excel_biff8";
-    }
   if (format!=NULL) {
     fs = go_file_saver_for_id(format);
     if (fs == NULL) {
-      res = 1;
-      g_printerr (_("Unknown exporter '%s'.\n"), format);
-      return 1;
+      fs = go_file_saver_for_file_name (format);
+      if (fs == NULL) {
+	res = 1;
+	g_printerr (_("Unknown exporter '%s'.\n"), format);
+	return 1;
+      }
     }
   }
   if (fs==NULL) {
