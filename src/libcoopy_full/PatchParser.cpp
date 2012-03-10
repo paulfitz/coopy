@@ -271,6 +271,10 @@ static SheetCell nully(string x) {
 bool PatchParser::apply() {
   if (patcher==NULL) return false;
 
+  if (preread_book!=NULL) {
+    return applyHiliteBook(*preread_book);
+  }
+
   if (fname!="") {
     sniffer.open(fname.c_str());
   } else {

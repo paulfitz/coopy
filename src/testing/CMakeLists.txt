@@ -1177,13 +1177,18 @@ IF (USE_GNUMERIC)
   ADD_STREAM_TEST(stdout_excel ${TESTS}/bridges.csv stdout_excel.xls ${ssformat} - dbi:gnumeric:format=.xls::file=-)
   ADD_TEST(stdout_excel_check ${ssdiff} --equal ${TESTS}/bridges.csv stdout_excel.xls)
 ENDIF ()
-ADD_STREAM_TEST(stdout_jsonbook ${TESTS}/bridges.csv stdout_jsonbook.jsonbook ${ssformat} - dbi:jsonbook::file=-)
-
+ADD_STREAM_TEST(stdout_jsonbook_ssformat ${TESTS}/bridges.csv stdout_jsonbook.jsonbook ${ssformat} - dbi:jsonbook::file=-)
 # PENDING
 # ADD_TEST(stdout_jsonbook_check ${ssdiff} --equal dbi:csv:header=-1::file=${TESTS}/bridges.csv stdout_jsonbook.jsonbook)
 
+ADD_STREAM_TEST(stdout_jsonbook_diff ${TESTS}/broken_bridges.csv stdout_jsonbook_diff.jsonbook ${sspatch} - ${TESTS}/fix_bridges.csv --output dbi:jsonbook::file=-)
+ADD_TEST(stdout_jsonbook_diff_check ${ssdiff} --equal ${TESTS}/bridges.csv stdout_jsonbook_diff.jsonbook)
+
+
 #######################################################################
 #######################################################################
+
+# Basic javascript/C++ compatibility check
 
 if (USE_JAVASCRIPT)
 
@@ -1197,3 +1202,12 @@ if (USE_JAVASCRIPT)
   add_test(js_parse_match ${CMAKE_COMMAND} -E compare_files js_parse_cpp.log js_parse_js.log)
 
 endif()
+
+#######################################################################
+#######################################################################
+
+# Check --scan-for-patch option
+
+add_test(scan_for_patch ${ssdiff} --scan-for-patch --format hilite --output scan_for_patch.csvs ${TESTS}/broken_bridges.csv ${TESTS}/bridges.csv)
+add_test(scan_for_patch_apply ${ssdiff} --scan-for-patch --format hilite --output scan_for_patch_result.csvs ${TESTS}/broken_bridges.csv scan_for_patch.csvs)
+add_test(scan_for_patch_check ${ssdiff} --equal ${TESTS}/bridges.csv scan_for_patch_result.csvs)

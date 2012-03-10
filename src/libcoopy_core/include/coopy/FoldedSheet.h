@@ -91,7 +91,7 @@ public:
   }
 
   virtual bool hasExternalColumnNames() const {
-    return true;
+    return false;
   }
 };
 

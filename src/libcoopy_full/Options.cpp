@@ -557,6 +557,11 @@ Options::Options(const char *name) : name(name) {
   add(OPTION_PATCH_FORMAT,
       "stats",
       "produce statistics on table changes");
+
+  add(OPTION_FOR_DIFF,
+      "scan-for-patch",
+      "check if FILE2 looks like a patch, and if so, apply it");
+
 }
 
 std::string Options::getVersion() const {
@@ -781,6 +786,7 @@ int Options::apply(int argc, char *argv[]) {
       {"eol", 1, 0, 0},
       {"headerless", 0, 0, 0},
       {"paint", 0, 0, 0},
+      {"scan-for-patch", 0, 0, 0},
 
       {"act", 1, 0, 0},
 
@@ -863,6 +869,8 @@ int Options::apply(int argc, char *argv[]) {
 	  flags.foreign_pool_set = true;
 	} else if (k=="paint") {
 	  option_bool["paint"] = true;
+	} else if (k=="scan-for-patch") {
+	  option_bool["scan-for-patch"] = true;
 	} else if (k=="test-file") {
 	  bool ok = generateExample(optarg);
 	  if (!ok) {

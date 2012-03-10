@@ -66,6 +66,7 @@ int Diff::apply(const Options& opt) {
   bool inplace = opt.checkBool("inplace",false);
   bool showPatch = opt.isPatchLike() && mode=="apply" && !apply;
   bool patchy = opt.isPatchLike()||opt.isRediffLike()||opt.isMergeLike();
+  bool scan_for_patch = opt.checkBool("scan-for-patch",false);
 
   CompareFlags flags = opt.getCompareFlags();
   PoolImpl pool;
@@ -126,12 +127,30 @@ int Diff::apply(const Options& opt) {
     output = local_file;
   }
 
+  bool patch_is_remote = false;
   if (remote_file!="") {
     if (!_remote.read(remote_file.c_str())) {
       fprintf(stderr,"Failed to read %s\n", remote_file.c_str());
       return 1;
     }
     flags.remote_uri = remote_file;
+    if (scan_for_patch) {
+      if (_remote.getSheetCount()>=1) {
+	PolySheet sheet = _remote.readSheetByIndex(0);
+	if (sheet.isValid()) {
+	  if (sheet.width()>=1) {
+	    for (int i=0; i<3 && i<sheet.height(); i++) {
+	      if (sheet.cellString(0,i)=="@@") {
+		patch_is_remote = true;
+		mode = "apply";
+		patchy = true;
+		showPatch = !apply;
+	      }
+	    }
+	  }
+	}
+      }
+    }
   }
 
   bool cloned = false;
@@ -275,12 +294,15 @@ int Diff::apply(const Options& opt) {
       filter_diff.startOutput("-",flags);
       filter_diff.setFlags(flags);
     }
-    if (patch_file==""&&(!have_cmd)) {
+    if (patch_file==""&&(!have_cmd)&&(!patch_is_remote)) {
       cmp.compare(*pivot,*local,*remote,*active_diff,flags);
     } else {
       bool ok = false;
       if (have_cmd) {
 	PatchParser parser(active_diff,opt.getStringList("cmd"),flags);
+	ok = parser.apply();
+      } else if (patch_is_remote) {
+	PatchParser parser(active_diff,remote,flags);
 	ok = parser.apply();
       } else {
 	PatchParser parser(active_diff,patch_file,flags);
@@ -318,11 +340,22 @@ int Diff::apply(const Options& opt) {
     }
   }
 
+  bool will_write_output = false;
+  if (showPatch) {
+    if ((!local->inplace())||(tmp!=output)) {
+      if (output!=local_file || !local->inplace()) {
+	will_write_output = true;
+      }
+    }
+  }
+
   diff->stopOutput(output,flags);
   if (diff->needOutputBook()) {
     if (obook.isValid()) {
       if (!diff->outputStartsFromInput()) {
-	obook.flush();
+	if (!will_write_output) {
+	  obook.flush();
+	}
       }
     } else {
       local->flush();

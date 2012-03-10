@@ -22,23 +22,34 @@ public:
   std::string fname;
   std::vector<std::string> oneliners;
   const coopy::cmp::CompareFlags& flags;
+  coopy::store::TextBook *preread_book;
 
   PatchParser(Patcher *patcher,
 	     coopy::cmp::CompareFlags& flags) : 
     patcher(patcher),
-    flags(flags) 
+    flags(flags),
+    preread_book(0/*NULL*/)
   {}
 
   PatchParser(Patcher *patcher,
 	      const std::vector<std::string>& cmd,
 	      coopy::cmp::CompareFlags& flags) : 
-  patcher(patcher), oneliners(cmd), flags(flags)
+    patcher(patcher), oneliners(cmd), flags(flags),
+    preread_book(0/*NULL*/)
   {}
 
   PatchParser(Patcher *patcher,
 	      const std::string& fname,
 	      coopy::cmp::CompareFlags& flags) :
-  patcher(patcher), fname(fname), flags(flags)
+    patcher(patcher), fname(fname), flags(flags),
+    preread_book(0/*NULL*/)
+  {}
+
+  PatchParser(Patcher *patcher,
+	      coopy::store::TextBook *book,
+	      coopy::cmp::CompareFlags& flags) :
+    patcher(patcher), fname(""), flags(flags),
+    preread_book(book)
   {}
     
   // deprecated, undesirable name in python
