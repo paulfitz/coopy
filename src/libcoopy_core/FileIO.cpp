@@ -6,6 +6,19 @@
 using namespace coopy::store;
 using namespace std;
 
+bool FileIO::openForWrite(const char *dest, const Property& config) {
+  if (strcmp(dest,"-")==0) {
+    fp = stdout;
+    need_close = false;
+  } else {
+    fp = fopen(dest,"wb");
+    if (fp!=NULL) {
+      need_close = true;
+    }
+  }
+  return fp!=NULL;
+}
+
 bool FileIO::open(const char *src, const Property& config) {
   //printf("OPEN with %s\n", config.toString().c_str());
   if (strcmp(src,"-")==0) {

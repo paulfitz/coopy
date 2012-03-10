@@ -1,7 +1,6 @@
 #include "jsapi.h"
 
 #include <coopy/JsWrap.h>
-#include <coopy/Dbg.h>
 
 using namespace coopy::js;
 using namespace std;
@@ -142,7 +141,7 @@ string JsWrapGlobal::apply(const string& script) {
 
 bool JsWrapGlobal::send(const std::string& function_name, 
 			const std::string& str) {
-  dbg_printf("js: %s\n", function_name.c_str());
+  //dbg_printf("js: %s\n", function_name.c_str());
   JSBool ok;
   jsval rval;
   jsval lval;
@@ -155,7 +154,7 @@ bool JsWrapGlobal::send(const std::string& function_name,
 
 bool JsWrapGlobal::send(const std::string& function_name,
 			jsval *val) {
-  dbg_printf("js: %s\n", function_name.c_str());
+  //dbg_printf("js: %s\n", function_name.c_str());
   JSBool ok;
   jsval rval;
 

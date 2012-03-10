@@ -171,21 +171,7 @@ static bool writePart(Json::Value& root2,
   return true;
 }
 
-bool JsonBook::write(const char *fname, TextBook *book) {
-  if (book==NULL) return false;
-  Json::Value root(Json::objectValue);
-  ostream *fout = &cout;
-  ofstream out;
-  if (string(fname)!="-") {
-    out.open(fname);
-    fout = &out;
-  }
-
-
-  if (fout->bad()) {
-    fprintf(stderr,"Failed to open %s for writing\n", fname);
-    return false;
-  }
+static bool renderJsonBook(Json::Value& root, TextBook *book) {
   vector<string> names = book->getNames();
   for (int i=0; i<(int)names.size(); i++) {
     PolySheet sheet = book->readSheet(names[i]);
@@ -199,6 +185,29 @@ bool JsonBook::write(const char *fname, TextBook *book) {
     if (!sheet.isValid()) return false;
     if (!writePart(root2,&sheet,hasSchema)) return false;
   }
+  return true;
+}
+
+std::string JsonBook::render(TextBook *book) {
+  Json::Value root(Json::objectValue);
+  if (!renderJsonBook(root,book)) return "";
+  return root.toStyledString();
+}
+
+bool JsonBook::write(const char *fname, TextBook *book) {
+  if (book==NULL) return false;
+  Json::Value root(Json::objectValue);
+  ostream *fout = &cout;
+  ofstream out;
+  if (string(fname)!="-") {
+    out.open(fname);
+    fout = &out;
+  }
+  if (fout->bad()) {
+    fprintf(stderr,"Failed to open %s for writing\n", fname);
+    return false;
+  }
+  if (!renderJsonBook(root,book)) return false;
   (*fout) << root;
   return true;
 }

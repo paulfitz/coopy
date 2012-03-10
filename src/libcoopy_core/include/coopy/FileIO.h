@@ -31,6 +31,8 @@ public:
 
   bool open(const char *src, const Property& config);
 
+  bool openForWrite(const char *dest, const Property& config);
+
   bool close();
 
   size_t fread(void *ptr, size_t size, size_t nmemb);
@@ -44,6 +46,10 @@ public:
   }
 
   bool openAndWrite(const std::string& txt, const Property& config);
+
+  FILE *get() {
+    return fp;
+  }
 };
 
 #endif

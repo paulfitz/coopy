@@ -178,12 +178,13 @@ public:
   const std::string& getDescription() const { return description; }
   int getOptionFilter() const { return option_filter; }
 
-private:
-  std::string name;
-  std::vector<std::string> core;
+public:
   coopy::cmp::CompareFlags flags;
   std::map<std::string,bool> option_bool;
   std::map<std::string,std::string> option_string;
+  std::vector<std::string> core;
+private:
+  std::string name;
   std::map<std::string,std::vector<std::string> > option_list;
   coopy::store::PolyBook mapping;
   std::vector<Option> opts;

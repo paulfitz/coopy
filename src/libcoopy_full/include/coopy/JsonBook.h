@@ -51,6 +51,8 @@ public:
 
   static bool write(const char *fname, TextBook *book);
 
+  static std::string render(TextBook *book);
+
   virtual bool open(const Property& config);
 
   bool addSheet(const SheetSchema& schema);

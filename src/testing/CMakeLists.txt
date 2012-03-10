@@ -1182,3 +1182,18 @@ ADD_STREAM_TEST(stdout_jsonbook ${TESTS}/bridges.csv stdout_jsonbook.jsonbook ${
 # PENDING
 # ADD_TEST(stdout_jsonbook_check ${ssdiff} --equal dbi:csv:header=-1::file=${TESTS}/bridges.csv stdout_jsonbook.jsonbook)
 
+#######################################################################
+#######################################################################
+
+if (USE_JAVASCRIPT)
+
+  set(book1 ${TESTS}/format/bi_bridge_diff.jsonbook)
+
+  get_target_property(test_light test_light LOCATION)
+  get_target_property(test_light_js test_light_js LOCATION)
+
+  add_test(js_parse_cpp ${test_light} ${book1} js_parse_cpp.log)
+  add_test(js_parse_js ${test_light_js} ${book1} js_parse_js.log)
+  add_test(js_parse_match ${CMAKE_COMMAND} -E compare_files js_parse_cpp.log js_parse_js.log)
+
+endif()

@@ -22,7 +22,9 @@ endif ()
 option(USE_GNUMERIC "Enable gnumeric integration (For XLS, ODF, etc)" OFF)
 option(USE_ACCESS "Enable Access formats (via mdbtools)" OFF)
 option(USE_SOCIALCALC "Enable SocialCalc support (incomplete)" OFF)
-option(CREATE_SHARED_LIBRARIES "Compile shared libraries rather than static" FALSE)
+option(CREATE_SHARED_LIBRARIES "Compile shared libraries rather than static" TRUE)
+option(TEST_JAVASCRIPT "Run Javascript tests" OFF)
+
 if (CREATE_SHARED_LIBRARIES)
   set(BUILD_SHARED_LIBS ON)
   if (UNIX)
@@ -64,6 +66,12 @@ ENDIF (EXISTS ${STATLIB})
 
 export(TARGETS FILE ${COOPY_DEPENDENCIES})
 
+if (TEST_JAVASCRIPT OR USE_SOCIALCALC)
+  include(CoopyJS)
+  set(USE_JAVASCRIPT TRUE)
+  add_subdirectory(libjs)
+endif ()
+
 add_subdirectory(libsqlite)
 add_subdirectory(libgnumeric)
 add_subdirectory(libaccess)
@@ -91,6 +99,8 @@ add_subdirectory(ssfold)
 add_subdirectory(ssfossil)
 add_subdirectory(widesheet)
 add_subdirectory(gui)
+
+add_subdirectory(light)
 
 add_subdirectory(testing)
 

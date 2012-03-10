@@ -75,4 +75,10 @@ coopy::store::PolyBook Coopy::createBook(coopy::store::PolySheet sheet) {
   return pb;
 }
 
+coopy::store::PolyBook Coopy::loadBook(const char *filename) {
+  PolyBook pb;
+  pb.read(filename);
+  return pb;
+}
+
 

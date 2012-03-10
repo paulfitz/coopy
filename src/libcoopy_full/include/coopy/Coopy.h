@@ -126,6 +126,9 @@ public:
   static coopy::store::PolySheet createSheet();
 
   static coopy::store::PolyBook createBook(coopy::store::PolySheet sheet);
+
+  static coopy::store::PolyBook loadBook(const char *filename);
+
 };
 
 
