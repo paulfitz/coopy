@@ -2,6 +2,7 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 
 add_library(coopy_light cpp/DiffRender.cpp cpp/coopy/DiffRender.h cpp/coopy/LogDiffRender.h)
+install(TARGETS coopy_light COMPONENT ${BASELIB} DESTINATION lib)
 
 include_directories(${SHEET_INCLUDE_DIRS})
 
