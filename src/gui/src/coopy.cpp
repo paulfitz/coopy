@@ -45,6 +45,8 @@
 #include <coopy/Dbg.h>
 #include <coopy/Options.h>
 
+#include "MergeFrame.h"
+
 static bool verb() { return coopy_is_verbose(); }
 
 // hack to remove warning
@@ -120,6 +122,8 @@ public:
     static int fossil_result;
     static bool force_happy;
     static wxFrame *store_frame;
+    static MergeFrame *store_mframe;
+    static CoopyApp *store_app;
 
     void OnKey(wxKeyEvent&);
 
@@ -141,6 +145,8 @@ bool CoopyApp::silent = false;
 bool CoopyApp::force_happy = false;
 int CoopyApp::fossil_result = 0;
 wxFrame *CoopyApp::store_frame = NULL;
+MergeFrame *CoopyApp::store_mframe = NULL;
+CoopyApp *CoopyApp::store_app = NULL;
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters") },
@@ -417,6 +423,11 @@ public:
     bool OnCloneRepo(wxCommandEvent& event);
     bool OnOpenRepo(bool back = true);
     void OnUndo(wxCommandEvent& event);
+
+    void OnDiff(wxCommandEvent& event);
+    void OnPatch(wxCommandEvent& event);
+    void OnMerge(wxCommandEvent& event);
+    void OnDiffPatchMerge(wxCommandEvent& event);
 
     bool havePath();
     bool haveSource();
@@ -797,6 +808,10 @@ enum
         ID_About,
         ID_Tick,
         ID_Create,
+        ID_Merge,
+        ID_Diff,
+        ID_Patch,
+        ID_DiffPatchMerge,
         ID_Reset,
     };
 };
@@ -840,6 +855,8 @@ void FossilProcess::OnTerminate(int pid, int status)
 
 bool CoopyApp::OnInit()
 {
+    store_app = this;
+
     CoopyFrame *frame = new CoopyFrame( _T("Coopy"), wxPoint(50,50), wxSize(450,340) );
 
     store_frame = frame;
@@ -849,6 +866,22 @@ bool CoopyApp::OnInit()
     if (!wxApp::OnInit()) {
         return false;
     }
+
+
+    MergeFrame *mframe = new MergeFrame(frame, _T("diff, patch, merge"), wxPoint(50,50), wxSize(450,340));
+    store_mframe = mframe;
+    if (!mframe->OnInit()) return false;
+    mframe->Show(FALSE);
+
+    SetVendorName(wxT("DataCommonsCooperative"));
+    SetAppName(wxT("coopy"));
+
+    wxConfigBase *pConfig = wxConfigBase::Get();
+
+    // uncomment this to force writing back of the defaults for all values
+    // if they're not present in the config - this can give the user an idea
+    // of all possible settings for this program
+    pConfig->SetRecordDefaults();
 
     if (!frame->OnInit()) {
         return false;
@@ -877,6 +910,9 @@ BEGIN_EVENT_TABLE(CoopyFrame, wxFrame)
     EVT_MENU(ID_Sync, CoopyFrame::OnSync)
     EVT_MENU(ID_Commit, CoopyFrame::OnCommit)
     EVT_MENU(ID_Create, CoopyFrame::OnCreate)
+    EVT_MENU(ID_Merge, CoopyFrame::OnMerge)
+    EVT_MENU(ID_Diff, CoopyFrame::OnDiff)
+    EVT_MENU(ID_Patch, CoopyFrame::OnPatch)
     EVT_MENU(ID_About, CoopyFrame::OnAbout)
     EVT_BUTTON(ID_Reset, CoopyFrame::OnReset)
     EVT_BUTTON(ID_Quit, CoopyFrame::OnQuit)
@@ -884,6 +920,7 @@ BEGIN_EVENT_TABLE(CoopyFrame, wxFrame)
     EVT_BUTTON(ID_Undo, CoopyFrame::OnUndo)
     EVT_BUTTON(ID_Commit, CoopyFrame::OnCommit)
     EVT_BUTTON(ID_Create, CoopyFrame::OnCreate)
+    EVT_BUTTON(ID_DiffPatchMerge, CoopyFrame::OnDiffPatchMerge)
     EVT_CLOSE(CoopyFrame::OnExit)
     EVT_TIMER(ID_Tick, CoopyFrame::OnProgressTimer)
     EVT_LISTBOX(ID_LISTBOX, CoopyFrame::OnListBox)
@@ -1059,6 +1096,8 @@ bool CoopyFrame::OnInit() {
     dir_bar->Add(new wxButton( panel, ID_Commit, _T("Push &out") ),
                     lflags);
     dir_bar->Add(new wxButton( panel, ID_Create, _T("&Set up repository") ),
+                    lflags);
+    dir_bar->Add(new wxButton( panel, ID_DiffPatchMerge, _T("&Diff, patch, merge") ),
                     lflags);
     topsizer->Add(dir_bar,wxSizerFlags(0).Align(wxALIGN_LEFT));
 
@@ -1822,6 +1861,53 @@ void CoopyFrame::OnCreate(wxCommandEvent& event) {
     repush("");
 }
 
+void CoopyFrame::OnDiff(wxCommandEvent& event) {
+    CoopyApp::store_mframe->SetMode("diff");
+    CoopyApp::store_mframe->Show(TRUE);
+    CoopyApp::store_app->SetTopWindow(CoopyApp::store_mframe);
+}
+
+void CoopyFrame::OnPatch(wxCommandEvent& event) {
+    CoopyApp::store_mframe->SetMode("patch");
+    CoopyApp::store_mframe->Show(TRUE);
+    CoopyApp::store_app->SetTopWindow(CoopyApp::store_mframe);
+}
+
+void CoopyFrame::OnMerge(wxCommandEvent& event) {
+    CoopyApp::store_mframe->SetMode("merge");
+    CoopyApp::store_mframe->Show(TRUE);
+    CoopyApp::store_app->SetTopWindow(CoopyApp::store_mframe);
+}
+
+void CoopyFrame::OnDiffPatchMerge(wxCommandEvent& event) {
+   wxString choices[] = { 
+        wxT("Compare two data files"), 
+        wxT("Patch a data file"), 
+        wxT("Merge data files"), 
+    };
+
+    wxSingleChoiceDialog dlg(this, wxT("What would you like to do?"),
+                             wxT("Diff, patch, merge"), 3, choices);
+    
+    if (dlg.ShowModal() != wxID_OK) {
+        return;
+    }
+ 
+    int choice = dlg.GetSelection();
+    switch (choice) {
+    case 0:
+        OnDiff(event);
+        break;
+    case 1:
+        OnPatch(event);
+        break;
+    case 2:
+        OnMerge(event);
+        break;
+    }
+}
+
+
 
 void CoopyFrame::repush(const string& retry2) {
     if (writeWouldFork) {
@@ -2122,6 +2208,9 @@ CoopyFrame::CoopyFrame(const wxString& title, const wxPoint& pos, const wxSize& 
     menuFile->Append( ID_Sync, _T("Pull &in...") );
     menuFile->Append( ID_Commit, _T("Push &out...") );
     menuFile->Append( ID_Create, _T("Set up &repository...") );
+    menuFile->Append( ID_Diff, _T("&Diff...") );
+    menuFile->Append( ID_Patch, _T("&Patch...") );
+    menuFile->Append( ID_Merge, _T("&Merge...") );
     menuFile->Append( ID_About, _T("&About...") );
     menuFile->AppendSeparator();
     menuFile->Append( ID_Quit, _T("E&xit") );

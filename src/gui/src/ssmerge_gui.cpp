@@ -8,11 +8,14 @@
 
 #include <coopy/CsvFile.h>
 #include <coopy/BookCompare.h>
-#include <coopy/MergeOutputAccum.h>
+//#include <coopy/MergeOutputAccum.h>
+#include <coopy/Options.h>
+#include <coopy/Diff.h>
 #include <coopy/PolyBook.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
+using namespace coopy::app;
 
 // wxwidgets library version issue
 #ifdef __APPLE__
@@ -38,6 +41,8 @@ using namespace coopy::cmp;
 #include <wx/txtstrm.h>
 #include <wx/arrstr.h>
 #include <wx/dir.h>
+#include <wx/config.h>
+#include <wx/log.h>
 
 #include <string>
 #include <list>
@@ -61,6 +66,20 @@ static wxString conv(const std::string& s) {
 static std::string conv(const wxString& s) {
     return std::string(s.mb_str(wxConvUTF8));
 } 
+
+static void show(const wxString& view) {
+#ifndef WIN32
+    wxString view2 = wxT("file://") + view;
+    ::wxLaunchDefaultBrowser(view2);
+#else
+    ::wxLaunchDefaultBrowser(view);
+#endif
+}
+
+static void show(const std::string& view) {
+    wxString x = conv(view);
+    show(x);
+}
 
 
 class MergeApp: public wxApp {
@@ -131,7 +150,9 @@ class MergeFrame: public wxFrame
 
 private:
     wxBoxSizer *topsizer;
-    wxFilePickerCtrl *files[3];
+    wxFilePickerCtrl *files[4];
+
+    wxString config_tags[4];
 
 public:
 
@@ -141,6 +162,9 @@ public:
 
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
+
+    void OnSaveJob(wxCommandEvent& event);
+    void OnLoadJob(wxCommandEvent& event);
 
     void OnExit(wxCloseEvent& event) {
         Destroy();
@@ -155,9 +179,15 @@ public:
         TEXT_Parent,
         TEXT_Local,
         TEXT_Remote,
+        TEXT_Output,
+        TEXT_MORE1,
+        TEXT_MORE2,
+        TEXT_MORE3,
         ID_Quit,
         ID_Merge,
         ID_About,
+        ID_SaveJob,
+        ID_LoadJob,
     };
 };
 
@@ -169,6 +199,17 @@ bool MergeApp::OnInit()
     if (!wxApp::OnInit()) {
         return false;
     }
+
+
+    SetVendorName(wxT("DataCommonsCoop"));
+    SetAppName(wxT("ssmerge_gui"));
+
+    wxConfigBase *pConfig = wxConfigBase::Get();
+
+    // uncomment this to force writing back of the defaults for all values
+    // if they're not present in the config - this can give the user an idea
+    // of all possible settings for this program
+    pConfig->SetRecordDefaults();
 
     if (!silent) {
         if (!frame->OnInit()) {
@@ -189,6 +230,8 @@ IMPLEMENT_CLASS(MergeFrame, wxFrame)
 BEGIN_EVENT_TABLE(MergeFrame, wxFrame)
     EVT_MENU(ID_Quit, MergeFrame::OnQuit)
     EVT_MENU(ID_About, MergeFrame::OnAbout)
+    EVT_MENU(ID_SaveJob, MergeFrame::OnSaveJob)
+    EVT_MENU(ID_LoadJob, MergeFrame::OnLoadJob)
     EVT_BUTTON(ID_Merge, MergeFrame::OnMerge)
     EVT_BUTTON(ID_Quit, MergeFrame::OnQuit)
     EVT_CLOSE(MergeFrame::OnExit)
@@ -223,15 +266,31 @@ bool MergeFrame::OnInit() {
         "Remote version",
         "Output"
     };
+    const char *tags[4] = {
+        "Ancestor",
+        "LocalVersion",
+        "RemoteVersion",
+        "Output"
+    };
         
-    for (int i=0; i<3; i++) {
+    wxConfigBase *pConfig = wxConfigBase::Get();
+    for (int i=0; i<4; i++) {
         wxBoxSizer *fbar = new wxBoxSizer( wxHORIZONTAL );
-        files[i] = new wxFilePickerCtrl(this,TEXT_Parent, wxT(""),
+        config_tags[i] = conv_c(tags[i]);
+        //printf("--> %s %s\n", conv(config_tags[i]).c_str(), tags[i]);
+        wxString path = pConfig->Read(config_tags[i],wxT(""));
+        //printf("  %s\n", conv(path).c_str());
+        files[i] = new wxFilePickerCtrl(this,TEXT_Parent+i, 
+                                        path,
                                         conv_c(tips[i]),
                                         wxT("*.*"),
                                         wxDefaultPosition,
                                         wxSize(400,-1),
-                                        (i==3)?(wxFLP_SAVE|wxFLP_OVERWRITE_PROMPT):wxFLP_DEFAULT_STYLE|wxFLP_CHANGE_DIR);
+                                        (i==3)?(wxFLP_USE_TEXTCTRL|wxFLP_SAVE|wxFLP_OVERWRITE_PROMPT):(wxFLP_DEFAULT_STYLE|wxFLP_CHANGE_DIR));
+        files[i]->SetPath(path);
+        if (files[i]->GetTextCtrl()) {
+            files[i]->GetTextCtrl()->SetValue(path);
+        }
         fbar->Add(new wxStaticText(this,-1,conv_c(labels[i]),
                                    wxDefaultPosition,
                                    wxSize(150,-1)),lflags);
@@ -250,10 +309,43 @@ bool MergeFrame::OnInit() {
 
 
 void MergeFrame::OnMerge(wxCommandEvent& event) {
-    printf("Merging...\n");
+    //printf("Merging...\n");
     wxString parent = files[0]->GetPath();
     wxString local = files[1]->GetPath();
     wxString remote = files[2]->GetPath();
+    wxString output = files[3]->GetPath();
+    wxConfigBase *pConfig = wxConfigBase::Get();
+    //printf("CONFIG %ld\n", (long)pConfig);
+    for (int i=0; i<4; i++) {
+        wxString key = config_tags[i];
+        wxString val = files[i]->GetPath();
+        //printf("i is %d :  %s -> %s\n", i, conv(key).c_str(), conv(val).c_str());
+        pConfig->Write(key,val);
+    }
+    pConfig->Flush();
+    Options opt("ssmerge");
+    vector<string>& core = opt.core;
+    core.push_back(conv(parent));
+    core.push_back(conv(local));
+    core.push_back(conv(remote));
+    opt.option_string["output"] = conv(output);
+
+    Diff app;
+    int result = app.apply(opt);
+
+    if (result==0) {
+        wxMessageDialog msg(NULL, wxT("Merged. View result?"),
+                            wxT("Merged."),wxYES_NO|wxCANCEL);
+        if (msg.ShowModal()==wxID_YES) {
+            show(output);
+        }
+    } else {
+        wxMessageDialog msg(NULL, wxT("That did not work out."),
+                            wxT("Sorry!"));
+        msg.ShowModal();
+    }
+
+    /*
     printf("Parent %s\n", conv(parent).c_str());
     printf("Local %s\n", conv(local).c_str());
     printf("Remote %s\n", conv(remote).c_str());
@@ -262,6 +354,8 @@ void MergeFrame::OnMerge(wxCommandEvent& event) {
     local_sheet.read(conv(local).c_str());
     remote_sheet.read(conv(remote).c_str());
     CompareFlags flags;
+
+
     BookCompare cmp;
     MergeOutputAccum accum;
     cmp.compare(parent_sheet,local_sheet,remote_sheet,accum,flags);
@@ -291,6 +385,7 @@ void MergeFrame::OnMerge(wxCommandEvent& event) {
         msg.ShowModal();
         return;
     }
+    */
 }
 
 
@@ -300,9 +395,11 @@ MergeFrame::MergeFrame(const wxString& title, const wxPoint& pos, const wxSize& 
 
     wxMenu *menuFile = new wxMenu;
 
+    //menuFile->Append( ID_LoadJob, _T("&Load Job...") );
+    //menuFile->Append( ID_SaveJob, _T("&Save Job...") );
     menuFile->Append( ID_About, _T("&About...") );
     menuFile->AppendSeparator();
-    menuFile->Append( ID_Quit, _T("E&xit") );
+    menuFile->Append( ID_Quit, _T("D&one") );
 
     wxMenuBar *menuBar = new wxMenuBar;
     menuBar->Append( menuFile, _T("&File") );
@@ -318,7 +415,21 @@ void MergeFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
     printf("Quit!\n");
     //wxCloseEvent ev;
     //wxPostEvent(this,ev);
-    Close(TRUE);
+    // Close(TRUE);
+    Show(false);
+}
+
+void MergeFrame::OnLoadJob(wxCommandEvent& WXUNUSED(event)) 
+{
+    //wxFileInputStream stream("config.ini");
+    //wxFileConfig config(stream);
+    //wxString a = config.Read("a", "");
+}
+
+void MergeFrame::OnSaveJob(wxCommandEvent& WXUNUSED(event)) 
+{
+    //wxFileOutputStream stream("config.ini");
+    //wxFileConfig
 }
 
 void MergeFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
