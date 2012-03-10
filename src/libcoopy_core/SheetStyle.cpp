@@ -3,6 +3,7 @@
 #include <ctype.h>
 
 #include <string>
+#include <map>
 
 using namespace std;
 using namespace coopy::store;
@@ -54,13 +55,45 @@ void SheetStyle::setFromProperty(const Property& config) {
   }  
 }
 
+class SeparatorHistory {
+public:
+  int ct;
+  int best_ct;
+  int best;
+  map<int,int> votes;
+  char ch;
+
+  SeparatorHistory(char ch) : ch(ch) {
+    ct = 0;
+    best = -1;
+    best_ct = 0;
+  }
+
+  void bump() {
+    ct++;
+  }
+
+  void add() {
+    if (votes.find(ct)==votes.end()) {
+      votes[ct] = 1;
+    }
+    votes[ct]++;
+    if (votes[ct]>best_ct) {
+      best_ct = votes[ct];
+      best = ct;
+    }
+    ct = 0;
+  }
+};
+
+#define SEPARATOR_COMMA 0
+#define SEPARATOR_TAB 1
+#define SEPARATOR_SEMICOLON 2
+#define SEPARATOR_COUNT 3
+
 void SheetStyle::setFromInspection(const char *buffer, int len) {
-  int comma_ct = 0;
-  int comma_prev = -1;
-  int tab_ct = 0;
-  int tab_prev = -1;
-  int semicolon_ct = 0;
-  int semicolon_prev = -1;
+  SeparatorHistory history[SEPARATOR_COUNT] = { ',', '\t', ';' };
+  int rows = 0;
   bool quoted = false;
   bool content = false;
   for (int i=0; i<=len; i++) {
@@ -75,37 +108,32 @@ void SheetStyle::setFromInspection(const char *buffer, int len) {
 	content = true;
       }
       if (ch=='\n') {
+	rows++;
 	if (content) {
-	  if (comma_prev==-1) comma_prev = comma_ct;
-	  if (tab_prev==-1) tab_prev = tab_ct;
-	  if (semicolon_prev==-1) semicolon_prev = semicolon_ct;
-	  if (comma_prev!=comma_ct) comma_prev = -2;
-	  if (tab_prev!=tab_ct) tab_prev = -2;
-	  if (semicolon_prev!=semicolon_ct) comma_prev = -2;
-	  //printf("comma %d tab %d semicolon %d\n", 
-	  //comma_ct, tab_ct, semicolon_ct);
-	  comma_ct = 0;
-	  tab_ct = 0;
-	  semicolon_ct = 0;
+	  for (int j=0; j<SEPARATOR_COUNT; j++) {
+	    history[j].add();
+	  }
 	  content = false;
 	}
-      } else if (ch==',') {
-	comma_ct++;
-      } else if (ch=='\t') {
-	tab_ct++;
-      } else if (ch==';') {
-	semicolon_ct++;
+      } else {
+	for (int j=0; j<SEPARATOR_COUNT; j++) {
+	  if (ch==history[j].ch) {
+	    history[j].bump();
+	  }
+	}
       }
     }
   }
-  if (comma_prev>0) {
-    delim = ",";
-  } else if (tab_prev>0) {
-    delim = "\t";
-  } else if (semicolon_prev>0) {
-    delim = ";";
-  } else {
-    delim = ",";
+
+  delim = ",";
+  int best_ct = 0;
+  for (int j=0; j<SEPARATOR_COUNT; j++) {
+    if (history[j].best!=0) {
+      if (history[j].best_ct>best_ct) {
+	best_ct = history[j].best_ct;
+	delim = string() + history[j].ch;
+      }
+    }
   }
 }
 
