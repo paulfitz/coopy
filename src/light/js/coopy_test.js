@@ -13,7 +13,7 @@ LogDiffRender.prototype.begin_table = function() {
 }
 
 LogDiffRender.prototype.begin_row = function(mode) {
-    row_mode = mode;
+    this.row_mode = mode;
     this.row_log.push([this.row, mode]);
     this.col = 0;
 }
