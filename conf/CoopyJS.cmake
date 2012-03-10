@@ -1,6 +1,6 @@
 include(FindPkgConfig)
 
-pkg_search_module(MOZJS REQUIRED mozilla-js xulrunner-js firefox-js seamonkey-js)
+pkg_search_module(MOZJS REQUIRED mozilla-js xulrunner-js firefox-js seamonkey-js mozjs185)
   
 include_directories(${MOZJS_INCLUDE_DIRS})
 link_directories(${MOZJS_LIBRARY_DIRS})
