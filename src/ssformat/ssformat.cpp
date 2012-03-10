@@ -12,6 +12,7 @@
 #include <coopy/PoolImpl.h>
 #include <coopy/PatchParser.h>
 #include <coopy/MergeOutputPool.h>
+#include <coopy/Highlighter.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -146,9 +147,19 @@ int main(int argc, char *argv[]) {
 
   src.setPool(&pool);
 
-  if (!src.write(out_file.c_str(),outputFormat.c_str())) {
-    fprintf(stderr,"Failed to write %s\n", out_file.c_str());
-    return 1;
+  if (opt.checkBool("paint")) {
+    if (!src.attach(out_file.c_str())) {
+      fprintf(stderr,"Failed to attach %s\n", out_file.c_str());
+      return 1;
+    }
+    Highlighter h;
+    h.apply(src);
+    src.flush();
+  } else {
+    if (!src.write(out_file.c_str(),outputFormat.c_str())) {
+      fprintf(stderr,"Failed to write %s\n", out_file.c_str());
+      return 1;
+    }
   }
 
   return 0;

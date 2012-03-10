@@ -1,5 +1,6 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/gnulib)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/light/cpp)
 
 file(GLOB folder_source *.cpp)
 file(GLOB_RECURSE folder_header include/*.h)
@@ -26,9 +27,10 @@ source_group("Source Files" FILES ${folder_source})
 source_group("Header Files" FILES ${folder_header})
 
 add_library(coopy_core ${folder_source} ${folder_header})
+target_link_libraries(coopy_core coopy_light)
 export(TARGETS coopy_core APPEND FILE ${COOPY_DEPENDENCIES})
 install(TARGETS coopy_core COMPONENT ${BASELIB} DESTINATION lib)
 
-# touch 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36
+# touch 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
 
 

@@ -24,6 +24,10 @@ public:
 
   virtual std::vector<std::string> getNames() = 0;
 
+  virtual int getSheetCount() {
+    return (int)getNames().size();
+  }
+
   virtual bool open(const Property& config) {
     return false;
   }

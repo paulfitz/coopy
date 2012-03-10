@@ -434,6 +434,9 @@ Options::Options(const char *name) : name(name) {
   add(OPTION_FOR_FORMAT,
       "table=TABLE",
       "operate on a single named table of a workbook/database");
+  add(OPTION_FOR_FORMAT,
+      "paint",
+      "add color highlighting appropriate for highlighter diffs");
   add(OPTION_FOR_DIFF|OPTION_FOR_MERGE|OPTION_FOR_PATCH|OPTION_FOR_REDIFF,
       "table=TABLE",
       "filter for a named table of a workbook/database (repeat option for multiple tables)");
@@ -777,6 +780,7 @@ int Options::apply(int argc, char *argv[]) {
       {"default-table", 1, 0, 0},
       {"eol", 1, 0, 0},
       {"headerless", 0, 0, 0},
+      {"paint", 0, 0, 0},
 
       {"act", 1, 0, 0},
 
@@ -857,6 +861,8 @@ int Options::apply(int argc, char *argv[]) {
 	} else if (k=="native") {
 	  flags.foreign_pool = false;
 	  flags.foreign_pool_set = true;
+	} else if (k=="paint") {
+	  option_bool["paint"] = true;
 	} else if (k=="test-file") {
 	  bool ok = generateExample(optarg);
 	  if (!ok) {
