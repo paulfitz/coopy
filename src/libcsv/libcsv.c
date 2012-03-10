@@ -339,7 +339,8 @@ csv_parse(struct csv_parser *p, const void *s, size_t len, void (*cb1)(void *, s
     switch (pstate) {
       case ROW_NOT_BEGUN:
       case FIELD_NOT_BEGUN:
-        if (is_space ? is_space(c) : c == CSV_SPACE || c == CSV_TAB) { /* Space or Tab */
+	/* PFHIT bugfix - do not eat "whitespace" that is the delimiter! */
+        if ((is_space ? is_space(c) : c == CSV_SPACE || c == CSV_TAB)&&c!=delim) { /* Space or Tab */
           continue;
         } else if (is_term ? is_term(c) : c == CSV_CR || c == CSV_LF) { /* Carriage Return or Line Feed */
           if (pstate == FIELD_NOT_BEGUN) {

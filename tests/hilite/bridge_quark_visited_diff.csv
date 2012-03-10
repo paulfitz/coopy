@@ -1,0 +1,11 @@
+!,,---,<(SPAN),>,+++
+@@,BRIDGE,QUARK,LENGTH,DESIGNER,VISITED
++,Brooklyn,up,1595,"J. A. Roebling",yes
++++,Manhattan,,1470,"G. Lindenthal",no
+->,Williamsburg,down,1600,"D. Duck->L. L. Buck",yes
++,Queensborough,charm,1182,"Palmer & Hornbostel",yes
++,Triborough,strange,"1380,383","O. H. Ammann",no
++,"Bronx Whitestone",top,2300,"O. H. Ammann",yes
++,"Throgs Neck",bottom,1800,"O. H. Ammann",yes
++,"George Washington",antistrange,3500,"O. H. Ammann",no
+---,Spamspan,spamspin,10000,"S. Spamington",

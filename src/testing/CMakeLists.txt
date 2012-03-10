@@ -1211,3 +1211,23 @@ endif()
 add_test(scan_for_patch ${ssdiff} --scan-for-patch --format hilite --output scan_for_patch.csvs ${TESTS}/broken_bridges.csv ${TESTS}/bridges.csv)
 add_test(scan_for_patch_apply ${ssdiff} --scan-for-patch --format hilite --output scan_for_patch_result.csvs ${TESTS}/broken_bridges.csv scan_for_patch.csvs)
 add_test(scan_for_patch_check ${ssdiff} --equal ${TESTS}/bridges.csv scan_for_patch_result.csvs)
+
+#######################################################################
+#######################################################################
+
+# Quark test case
+foreach(FORMAT csv tdiff color)
+  ADD_ROUND_TRIP_TEST_BI(quark_${FORMAT} ${TESTS}/hilite/bridge_quark.csv ${TESTS}/hilite/bridge_visited.csv ${FORMAT})
+endforeach ()
+
+#######################################################################
+#######################################################################
+
+# Tabs and blanks
+
+ADD_TEST(tab_blank_fwd ${ssformat} ${TESTS}/hilite/bridge_quark_visited_diff.csv tab_blank_fwd.tsv)
+ADD_TEST(tab_blank_rev ${ssformat} tab_blank_fwd.tsv tab_blank_rev.csv)
+ADD_TEST(tab_blank_check_fwd ${ssdiff} --equal ${TESTS}/hilite/bridge_quark_visited_diff.csv tab_blank_fwd.tsv)
+ADD_TEST(tab_blank_check_rev ${ssdiff} --equal ${TESTS}/hilite/bridge_quark_visited_diff.csv tab_blank_rev.csv)
+ADD_TEST(tab_blank_check_fwd_rev ${ssdiff} --equal tab_blank_fwd.tsv tab_blank_rev.csv)
+
