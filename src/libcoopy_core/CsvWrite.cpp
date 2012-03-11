@@ -89,7 +89,7 @@ static int write(const DataSheet& src, const Property& config,
 	    while (len>0 && result[len-1]=='\r') {
 	      len--;
 	    }
-	    if (len<3) len = 3;
+	    if (len<4) len = 4;
 	    if (len>79) len = 79;
 	    for (int i=0; i<len; i++) {
 	      result += '-';

@@ -30,3 +30,17 @@ void CsvSheet::addField(const char *s, bool escaped) {
   rec.push_back(p);
   tw++;
 }
+
+void CsvSheet::addRecord() {
+  s.arr.push_back(rec);
+  rec.clear();
+  if (s.w!=tw && s.w!=0) {
+    valid = false;
+  }
+  if (tw>s.w) {
+    s.w = tw;
+  }
+  tw = 0;
+  th++;
+  s.h = th;
+}

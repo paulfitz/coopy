@@ -97,19 +97,7 @@ public:
     addField(str.c_str(),escaped);
   }
 
-  void addRecord() {
-    s.arr.push_back(rec);
-    rec.clear();
-    if (s.w!=tw && s.w!=0) {
-      valid = false;
-    }
-    if (tw>s.w) {
-      s.w = tw;
-    }
-    tw = 0;
-    th++;
-    s.h = th;
-  }
+  void addRecord();
 
   void addRow(CsvSheet& alt, int row) {
     for (int i=0; i<alt.width(); i++) {

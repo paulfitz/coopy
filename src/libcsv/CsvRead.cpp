@@ -108,6 +108,7 @@ extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p, int quoted) {
   CsvSheetReaderState *state = (CsvSheetReaderState*)p;
   CsvSheet *sheet = state->sheet;
   char *str = (char *)s;
+
   /*
   printf("Expecting? %d  Reader? %d  WORKING ON ",
 	 state->expecting, state->reader!=NULL);
@@ -116,6 +117,7 @@ extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p, int quoted) {
   }
   printf("\n");
   */
+
   if (state->expecting && state->reader!=NULL) {
     
     if (!quoted) {
@@ -137,7 +139,7 @@ extern "C" void csvfile_merge_cb1 (void *s, size_t i, void *p, int quoted) {
       for (q=0; q<i; q++) {
 	if (str[q]!='-'&&str[q]!='\n'&&str[q]!='\r') break;
       }
-      if (q==i&&i>=3&&state->named&&!state->broken) {
+      if (q==i&&i>3&&state->named&&!state->broken) {
 	state->markBreak();
 	state->ignore = true;
 	return;

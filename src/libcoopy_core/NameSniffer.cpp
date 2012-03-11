@@ -105,6 +105,7 @@ void NameSniffer::sniff(int suggest) {
     dbg_printf("Full sniff\n");
   }
 
+  dbg_printf("NON-SCHEMA sniff\n");
   if (div<0) {
     DataStat stat;
     stat.evaluate2(sheet,flags);
