@@ -339,6 +339,11 @@ public:
      return sheet->tail_const();
   }
 
+  virtual const DataSheet& dataTail() const {
+    COOPY_ASSERT(sheet);
+    return sheet->dataTail();
+  }
+
   virtual bool isSequential() const {
     COOPY_ASSERT(sheet);
     return sheet->isSequential();

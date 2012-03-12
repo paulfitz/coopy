@@ -1231,3 +1231,11 @@ ADD_TEST(tab_blank_check_fwd ${ssdiff} --equal ${TESTS}/hilite/bridge_quark_visi
 ADD_TEST(tab_blank_check_rev ${ssdiff} --equal ${TESTS}/hilite/bridge_quark_visited_diff.csv tab_blank_rev.csv)
 ADD_TEST(tab_blank_check_fwd_rev ${ssdiff} --equal tab_blank_fwd.tsv tab_blank_rev.csv)
 
+#######################################################################
+#######################################################################
+
+# Novel/shared rows
+foreach (fmt csv csvs ${XLS})
+  add_test(shared_rows_bridge_${fmt} ${ssdiff} --format novel --output shared_rows_bridge.${fmt} ${TESTS}/broken_bridges.csv ${TESTS}/bridges.csv)
+  add_test(shared_rows_bridge_${fmt}_check ${ssdiff} --equal shared_rows_bridge.${fmt} ${TESTS}/hilite/bridge_novel.csv)
+endforeach()

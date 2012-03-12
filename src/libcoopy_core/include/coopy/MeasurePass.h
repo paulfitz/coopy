@@ -7,6 +7,8 @@
 #include <coopy/SparseSheet.h>
 #include <coopy/SheetView.h>
 
+#include <math.h>
+
 namespace coopy {
   namespace cmp {
     class MeasurePass;
@@ -51,6 +53,7 @@ public:
     int w = match.width();
     int h = match.height();
     double mean = 0;
+    double var = 0;
     int ct = 0;
     for (int y=0; y<h; y++) {
       if (y<w) {
@@ -62,6 +65,7 @@ public:
 	  if (asel.cell(0,y)==-1) {
 	    //printf(" [%d:%g] ", ct, tmp);
 	    mean += tmp;
+	    var += tmp*tmp;
 	    ct++;
 	  }
 	}
@@ -80,11 +84,14 @@ public:
       }
       */
     }
-    if (ct>0) { mean /= ct; }
+    if (ct>0) { 
+      mean /= ct; 
+      var /= ct;
+    }
     coopy::store::Stat s;
     s.mean = mean;
-    s.stddev = 0;
-    s.valid = (ct>10);
+    s.stddev = sqrt(var);
+    s.valid = (ct>=10);
     dbg_printf("Mean is %g (count %d)\n", s.mean, ct);
     return s;
   }

@@ -315,6 +315,10 @@ public:
     return *this;
   }
 
+  virtual const DataSheet& dataTail() const {
+    return *this;
+  }
+
   // has spreadsheet-like ordering, inserts happen in a "place"
   virtual bool isSequential() const {
     return true;

@@ -1169,9 +1169,12 @@ bool SheetPatcher::mergeDone() {
 }
 
 
-void SheetPatcher::setNames() {
+bool SheetPatcher::setNames(bool forceSheetChange) {
+  if (forceSheetChange) {
+    sheetChange = true;
+  }
   PolySheet sheet = getSheet();
-  if (!sheet.isValid()) return;
+  if (!sheet.isValid()) return false;
   if (sheetChange) {
     dbg_printf("SheetPatcher Working on sheet %ld\n",
 	       (long int)(&sheet.tail_const()));
@@ -1191,6 +1194,7 @@ void SheetPatcher::setNames() {
     updateCols();
     updatePool();
   }
+  return true;
 }
 
 
@@ -1381,6 +1385,7 @@ bool SheetPatcher::updateSheet() {
   return true;
 }
 
+/*
 coopy::store::PolySheet SheetPatcher::getSheet() {
   PolySheet sheet = Patcher::getSheet();
   if (!sheet.isValid()) return sheet;
@@ -1395,39 +1400,8 @@ coopy::store::PolySheet SheetPatcher::getSheet() {
   }
   return active_sheet;
 }
+*/
 
-bool SheetPatcher::metaHint(const DataSheet& sheet) {
-  getSheet();
-  if (!active_sheet.isValid()) return false;
-  if (!active_sheet.getMeta()) {
-    if (sheet.getMeta()) {
-      bool done = false;
-      if (active_sheet.getSchema()) {
-	dbg_printf("*** meta hint - was %s\n", 
-	       active_sheet.getSchema()->toString().c_str());
-	done = active_sheet.getSchema()->copy(*sheet.getMeta());
-      }
-      if (!done) {
-	active_sheet.setSchema(sheet.getMeta()->clone(),true);
-      }
-      sheetChange = true;
-      dbg_printf("*** meta hint - is now %s\n", 
-		 active_sheet.getSchema()->toString().c_str());
-      if (sheet.hasRowOffset()&&!active_sheet.hasRowOffset()) {
-	if (sheet.height()==active_sheet.height()) {
-	  active_sheet.getSchema()->setHeaderHeight(0);
-	}
-      }
-      //printf("offset %d\n", sheet.hasRowOffset());
-      ///printf("offset %d\n", active_sheet.hasRowOffset());
-      //printf("FROM\n%s\n\nTo\n%s\n\n",
-      //sheet.tail_const().toString().c_str(),
-      //active_sheet.tail_const().toString().c_str());
-      setNames();
-    }
-  }
-  return true;
-}
 
 
 

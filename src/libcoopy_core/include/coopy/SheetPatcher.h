@@ -20,7 +20,7 @@ namespace coopy {
 
 class coopy::cmp::SheetPatcher : public Patcher {
 private:
-  coopy::store::PolySheet active_sheet;
+  //coopy::store::PolySheet active_sheet;
   ConfigChange config;
   coopy::store::CsvSheet activeRow;
   coopy::store::CsvSheet activeCol;
@@ -122,7 +122,7 @@ public:
     }
   }
 
-  void setNames();
+  virtual bool setNames(bool forceSheetChange = false);
 
   void clearNames() {
     if (sniffer!=0/*NULL*/) {
@@ -211,9 +211,7 @@ public:
 
   bool updateSheet();
 
-  virtual coopy::store::PolySheet getSheet();
-
-  virtual bool metaHint(const coopy::store::DataSheet& sheet);
+  //virtual coopy::store::PolySheet getSheet();
 
 };
 

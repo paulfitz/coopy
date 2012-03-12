@@ -557,6 +557,9 @@ Options::Options(const char *name) : name(name) {
   add(OPTION_PATCH_FORMAT,
       "stats",
       "produce statistics on table changes");
+  add(OPTION_PATCH_FORMAT,
+      "novel",
+      "mark all shared rows - remaining rows are unmatched");
 
   add(OPTION_FOR_DIFF,
       "scan-for-patch",

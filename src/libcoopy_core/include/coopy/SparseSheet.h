@@ -185,6 +185,12 @@ public:
     }
   }
 
+  void offset(double offset) {
+    for (efficient_map<long long,float>::iterator it=data.begin(); it!=data.end(); it++) {
+      it->second += offset;
+    }
+  }
+
   void findBest(IntSheet& bestIndex, FloatSheet& bestValue, FloatSheet& bestInc);
 
   bool resize(int w, int h) {

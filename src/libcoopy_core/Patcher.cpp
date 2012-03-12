@@ -8,6 +8,7 @@
 #include <coopy/MergeOutputIndex.h>
 #include <coopy/MergeOutputRowOps.h>
 #include <coopy/MergeOutputStats.h>
+#include <coopy/MergeOutputNovel.h>
 #include <coopy/SheetPatcher.h>
 
 #include <algorithm>
@@ -67,6 +68,8 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
     result = new MergeOutputRowOps;
   } else if (mode=="stats") {
     result = new MergeOutputStats;
+  } else if (mode=="novel") {
+    result = new MergeOutputNovel;
   } else {
     fprintf(stderr, "Format %s?\n", mode.c_str());
   }
@@ -131,7 +134,7 @@ void Patcher::attachBook(coopy::store::TextBook& book) {
   pending  = true;
 }
 
-coopy::store::PolySheet Patcher::getSheet() {
+coopy::store::PolySheet Patcher::getSheetBase() {
   if (pending) {
     pending = false;
     coopy::store::TextBook *pbook = getBook();
@@ -144,6 +147,61 @@ coopy::store::PolySheet Patcher::getSheet() {
     }
   }
   return patch_sheet;
+}
+
+
+coopy::store::PolySheet Patcher::getSheet() {
+  PolySheet sheet = getSheetBase();
+  if (!sheet.isValid()) return sheet;
+  if (!active_sheet.isValid()) {
+    active_sheet = sheet;
+  }
+  if (&sheet.dataTail()!=&active_sheet.dataTail()) {
+    active_sheet = sheet;
+  }
+  if (!getFlags().assume_header) {
+    active_sheet.forbidSchema();
+  }
+  return active_sheet;
+}
+
+
+bool Patcher::metaHint(const DataSheet& sheet) {
+  getSheet();
+  if (!active_sheet.isValid()) return false;
+
+  if (!active_sheet.getMeta()) {
+    if (sheet.getMeta()) {
+      bool done = false;
+      if (active_sheet.getSchema()) {
+	dbg_printf("*** meta hint - was %s\n", 
+	       active_sheet.getSchema()->toString().c_str());
+	done = active_sheet.getSchema()->copy(*sheet.getMeta());
+      }
+      if (!done) {
+	active_sheet.setSchema(sheet.getMeta()->clone(),true);
+      }
+      dbg_printf("*** meta hint - is now %s\n", 
+		 active_sheet.getSchema()->toString().c_str());
+      if (sheet.hasRowOffset()&&!active_sheet.hasRowOffset()) {
+	if (sheet.height()==active_sheet.height()) {
+	  active_sheet.getSchema()->setHeaderHeight(0);
+	}
+      }
+      /*
+      if (sheet.height()!=active_sheet.height()) {
+	dbg_printf("Height mismatch? %d v %d\n", sheet.height(), active_sheet.height());
+	active_sheet.mustHaveSchema();
+	active_sheet.hideHeaders();
+	if (sheet.height()!=active_sheet.height()) {
+	  dbg_printf("Height mismatch persists\n");
+	}
+      }
+      */
+      setNames(true);
+    }
+  }
+  return true;
 }
 
 

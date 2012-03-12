@@ -118,6 +118,7 @@ void MeasureMan::compare1(int ctrl) {
   Stat astat, bstat;
   dbg_printf("== Control level: %d, checking means...\n",ctrl);  
   main.measure(main_pass,ctrl);
+
   anorm_pass.asel = main_pass.asel;
   anorm_pass.bsel = main_pass.asel;
   anorm.measure(anorm_pass,ctrl);
@@ -128,14 +129,14 @@ void MeasureMan::compare1(int ctrl) {
   bnorm.measure(bnorm_pass,ctrl);
   //dbg_printf("Checking [remote] statistics\n");
   bstat = bnorm_pass.flatten();
-  double scale = 1;
+
   if (bstat.valid && astat.valid) {
-    if (bstat.mean>0.01) {
-      scale = astat.mean/bstat.mean;
+    // make bnorm look like anorm, statistically
+    if (bstat.stddev>0.001) {
+      bnorm_pass.match.offset(-bstat.mean);
+      bnorm_pass.match.rescale(astat.stddev/bstat.stddev);
+      bnorm_pass.match.offset(+astat.mean);
     }
-    //dbg_printf("Rescaling bnorm by %g\n", scale);
-    bnorm_pass.match.rescale(scale);
-    //dbg_printf("Done rescaling\n");
   }
     
   SparseFloatSheet match = main_pass.match;
@@ -197,9 +198,7 @@ void MeasureMan::compare1(int ctrl) {
       if (ref2<ref) ref = ref2;
       bool ok = false;
       if (bestValue>ref/4 && bestIndex>=0 && ref>0.01) {
-	//if (bestInc>bestValue/2 && bestIndex>=0) {
 	ok = true;
-	  //}
       }
       if (!ok) {
 	if (bestIndex>=0 && y>=0) {

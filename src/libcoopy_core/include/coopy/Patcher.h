@@ -282,10 +282,13 @@ public:
 class coopy::cmp::Patcher {
 private:
   int ct;
+  coopy::store::PolySheet getSheetBase();
+
 protected:
   CompareFlags flags;
   FILE *out;
   coopy::store::PolySheet patch_sheet;
+  coopy::store::PolySheet active_sheet;
   coopy::store::TextBook *patch_book;
   coopy::store::TextBook *output_book;
   bool conflicted;
@@ -413,8 +416,6 @@ public:
 
   virtual bool stripMarkup() { return false; }
 
-  virtual bool metaHint(const coopy::store::DataSheet& sheet) { return false; }
-
   //virtual bool metaHint(const coopy::store::SheetSchema *schema) { 
   //return false; 
   //}
@@ -425,8 +426,6 @@ public:
 
   void attachBook(coopy::store::TextBook& book);
   
-  virtual coopy::store::PolySheet getSheet();
-
   coopy::store::TextBook *getBook() {
     return patch_book;
   }
@@ -475,6 +474,14 @@ public:
 			  const coopy::store::NameSniffer& sniffer,
 			  const std::string& sheetName,
 			  bool msg=true);
+
+
+  virtual coopy::store::PolySheet getSheet();
+
+  virtual bool metaHint(const coopy::store::DataSheet& sheet);
+
+  virtual bool setNames(bool forceSheetChange = false) { return true; }
+
 };
 
 
