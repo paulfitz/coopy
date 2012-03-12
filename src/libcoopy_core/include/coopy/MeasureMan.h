@@ -72,6 +72,8 @@ public:
 
   void compare();
 
+  void compareCore();
+
   void compare1(int ctrl);
 };
 

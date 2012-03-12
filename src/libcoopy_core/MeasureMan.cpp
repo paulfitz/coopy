@@ -8,6 +8,8 @@ using namespace std;
 
 #include <math.h>
 
+#define dbg2_printf if(0) printf
+
 static float costify(float x) {
   //if (x<0.01) x = 0.01;
   //return 1/x;
@@ -21,6 +23,32 @@ void MeasureMan::setup() {
 }
 
 void MeasureMan::compare() {
+  compareCore();
+  if (coopy_is_verbose()) {
+    if (main_pass.bsel.height()!=main_pass.asel.height()) {
+      for (int j=0; j<main_pass.bsel.height(); j++) {
+	int i = main_pass.bsel.cell(0,j);
+	if (i>=0) {
+	  dbg_printf("%d -> %d ", i, j);
+	  for (int x=0; x<4&&x<main_pass.a.width(); x++) {
+	    if (i<main_pass.a.height()) {
+	      dbg_printf("%s ", main_pass.a.cellString(x,i).c_str());
+	    }
+	  }
+	  dbg_printf("// ");
+	  for (int x=0; x<4&&x<main_pass.b.width(); x++) {
+	    if (j<main_pass.b.height()) {
+	      dbg_printf("%s ", main_pass.b.cellString(x,j).c_str());
+	    }
+	  }
+	  dbg_printf("\n");
+	}
+      }
+    }
+  }
+}
+
+void MeasureMan::compareCore() {
   int rem = -1;
   int ctrl = 0;
   int ctrlMax = main.getCtrlMax();
@@ -38,7 +66,8 @@ void MeasureMan::compare() {
   }
 
   for (int i=0; i<20; i++) {
-    dbg_printf("MeasureMan::compare pass %d\n", i);
+    dbg_printf("\n====================================================\n");
+    dbg_printf("== MeasureMan::compare pass %d\n", i);
     compare1(ctrl);
     int processed = 0;
     remaining = 0;
@@ -53,7 +82,8 @@ void MeasureMan::compare() {
       dbg_printf("Everything allocated\n");
       break;
     }
-    dbg_printf("Not everything allocated, %d remain (a-total %d b-total %d)\n",
+    dbg_printf("Not everything allocated, %d processed, %d remain (a-total %d b-total %d)\n",
+	       processed,
 	       remaining,
 	       main_pass.asel.height(),
 	       main_pass.bsel.height());
@@ -86,26 +116,26 @@ void MeasureMan::compare() {
 
 void MeasureMan::compare1(int ctrl) {
   Stat astat, bstat;
-  dbg_printf("MeasureMan::compare1(%d)\n",ctrl);  
+  dbg_printf("== Control level: %d, checking means...\n",ctrl);  
   main.measure(main_pass,ctrl);
   anorm_pass.asel = main_pass.asel;
   anorm_pass.bsel = main_pass.asel;
   anorm.measure(anorm_pass,ctrl);
-  dbg_printf("Checking [local] statistics\n");
+  //dbg_printf("Checking [local] statistics\n");
   astat = anorm_pass.flatten();
   bnorm_pass.asel = main_pass.bsel;
   bnorm_pass.bsel = main_pass.bsel;
   bnorm.measure(bnorm_pass,ctrl);
-  dbg_printf("Checking [remote] statistics\n");
+  //dbg_printf("Checking [remote] statistics\n");
   bstat = bnorm_pass.flatten();
   double scale = 1;
   if (bstat.valid && astat.valid) {
     if (bstat.mean>0.01) {
       scale = astat.mean/bstat.mean;
     }
-    dbg_printf("Rescaling bnorm by %g\n", scale);
+    //dbg_printf("Rescaling bnorm by %g\n", scale);
     bnorm_pass.match.rescale(scale);
-    dbg_printf("Done rescaling\n");
+    //dbg_printf("Done rescaling\n");
   }
     
   SparseFloatSheet match = main_pass.match;
@@ -174,7 +204,7 @@ void MeasureMan::compare1(int ctrl) {
       if (!ok) {
 	if (bestIndex>=0 && y>=0) {
 	  // let's examine the best match in detail
-	  dbg_printf("Detail check... %d->%d\n",y,bestIndex);
+	  dbg2_printf("Detail check... %d->%d\n",y,bestIndex);
 	  if (cellLength(a)==cellLength(b)) {
 	    int misses = 0;
 	    for (int kk=0; kk<cellLength(a); kk++) {
@@ -182,8 +212,8 @@ void MeasureMan::compare1(int ctrl) {
 		misses++;
 	      }
 	    }
-	    dbg_printf("Detailed examination gives %d misses for best match\n", 
-		       misses);
+	    dbg2_printf("Detailed examination gives %d misses for best match\n", 
+			misses);
 	    if (misses==0) {
 	      // perfect match, let it through
 	      ok = true;
@@ -193,25 +223,25 @@ void MeasureMan::compare1(int ctrl) {
       }
       if (ok) {
        
-	dbg_printf("%d->%d, remote unit %d maps to local unit %d (%d %g : %g)\n",
+	dbg2_printf("%d->%d, remote unit %d maps to local unit %d (%d %g : %g)\n",
 		   y,bestIndex,y,bestIndex,
 		   bestIndex, bestValue, ref);
-	dbg_printf("  [remote/local] %s %s\n", cell(b,0,y).c_str(), cell(a,0,bestIndex).c_str());
+	dbg2_printf("  [remote/local] %s %s\n", cell(b,0,y).c_str(), cell(a,0,bestIndex).c_str());
 	
 	if (asel.cell(0,bestIndex)!=-1 && asel.cell(0,bestIndex)!=y) {
-	  dbg_printf("COLLISION! Ignoring unavailable match\n");
-	  dbg_printf("This case has not been optimized\n");
+	  dbg2_printf("COLLISION! Ignoring unavailable match\n");
+	  dbg2_printf("This case has not been optimized\n");
 	} else {
 	  bsel.cell(0,y) = bestIndex;
 	  asel.cell(0,bestIndex) = y;
 	}
       }
       if (!ok) {
-	dbg_printf("%d->?, do not know what to make of remote unit %d (%d %g %g : %g)\n",
+	dbg2_printf("%d->?, do not know what to make of remote unit %d (%d %g %g : %g)\n",
 		   y, y, bestIndex, bestValue, -1.0, ref);
-	dbg_printf("  [remote] %s\n", cell(b,0,y).c_str());
+	dbg2_printf("  [remote] %s\n", cell(b,0,y).c_str());
 	if (bestIndex>=0) {
-	  dbg_printf("  [local] [MISS] %s\n", cell(a,0,bestIndex).c_str());
+	  dbg2_printf("  [local] [MISS] %s\n", cell(a,0,bestIndex).c_str());
 	}
       }
     }
@@ -280,5 +310,5 @@ void MeasureMan::compare1(int ctrl) {
     }
   }
   */
-  dbg_printf("Done in MeasureMan::compare1\n");
+  //dbg_printf("Done in MeasureMan::compare1\n");
 }

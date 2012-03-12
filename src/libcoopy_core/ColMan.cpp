@@ -1,9 +1,12 @@
 #include <coopy/ColMan.h>
 #include <coopy/FMap.h>
 
+#include <vector>
+
 #include <math.h>
 
 using namespace coopy::cmp;
+using namespace std;
 
 void ColMan::measure(MeasurePass& pass, int ctrl) {
   int wa = pass.a.width();
@@ -38,12 +41,24 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
     }
   }
 
-  int step = (int)(hb/pow(2,ctrl+4));
+  vector<int> aa;
+  vector<int> bb;
+  for (int rb=0; rb<hb; rb++) {
+    int ra = comp.b2a(rb);
+    if (ra!=-1) {
+      aa.push_back(ra);
+      bb.push_back(rb);
+    }
+  }
+  int hh = (int)aa.size();
+
+  int step = (int)(hh/pow(2,ctrl+4));
   if (step<1) step = 1;
   dbg_printf("Desperation %d, step size %d\n", ctrl, step);
   int ct = 0;
-  for (int rb=0; rb<hb; rb+=step) {
-    int ra = comp.b2a(rb);
+  for (int rr=0; rr<hh; rr+=step) {
+    int rb = bb[rr];
+    int ra = aa[rr];
     if (ra!=-1) {
       ct++;
       FMultiMap m(pass.match);

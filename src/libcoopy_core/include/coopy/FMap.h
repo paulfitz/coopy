@@ -111,7 +111,7 @@ public:
 
   void summarize(bool force = false) {
     if (ct%10000==0 || force) {
-      dbg_printf("%s %d features\n", query?"Queried":"Added",ct);
+      //dbg_printf("%s %d features\n", query?"Queried":"Added",ct);
     }
   }
 
