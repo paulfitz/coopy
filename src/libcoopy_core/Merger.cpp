@@ -842,41 +842,6 @@ bool Merger::merge(MergerState& state) {
       }
     }
 
-    vector<RowChange> rc;
-    // Now process rows
-    if (!state.allIdentical) {
-      for (list<MatchUnit>::iterator it=row_merge.accum.begin();
-	   it!=row_merge.accum.end(); 
-	   it++) {
-	MatchUnit& unit = *it;
-
-	// Special case: if all columns were deleted, then we assume
-	// all local rows are deleted.
-	if (allGone) {
-	  unit.localUnit = -1;
-	  unit.pivotUnit = -1;
-	}
-
-	if (link) {
-	  LinkDeclare decl;
-	  decl.mode = LINK_DECLARE_MERGE;
-	  decl.column = false;
-	  decl.rc_id_pivot = unit.pivotUnit;
-	  decl.rc_id_local = unit.localUnit;
-	  decl.rc_id_remote = unit.remoteUnit;
-	  decl.rc_deleted = unit.deleted;
-	  decl.pivot = PolySheet(&pivot,false);
-	  decl.local = PolySheet(&local,false);
-	  decl.remote = PolySheet(&remote,false);
-	  output.declareLink(decl);
-	}
-	if (unit.remoteUnit!=-1 || !allGone) {
-	  bool ok = mergeRow(pivot,local,remote,unit,output,flags,rc);
-	  if (!ok) { return false; }
-	}
-      }
-    }
-
     if (fixedColumns) {
       local_col_names = original_col_names;
     }
@@ -917,6 +882,42 @@ bool Merger::merge(MergerState& state) {
 	}
       }
     }
+
+    vector<RowChange> rc;
+    // Now process rows
+    if (!state.allIdentical) {
+      for (list<MatchUnit>::iterator it=row_merge.accum.begin();
+	   it!=row_merge.accum.end(); 
+	   it++) {
+	MatchUnit& unit = *it;
+
+	// Special case: if all columns were deleted, then we assume
+	// all local rows are deleted.
+	if (allGone) {
+	  unit.localUnit = -1;
+	  unit.pivotUnit = -1;
+	}
+
+	if (link) {
+	  LinkDeclare decl;
+	  decl.mode = LINK_DECLARE_MERGE;
+	  decl.column = false;
+	  decl.rc_id_pivot = unit.pivotUnit;
+	  decl.rc_id_local = unit.localUnit;
+	  decl.rc_id_remote = unit.remoteUnit;
+	  decl.rc_deleted = unit.deleted;
+	  decl.pivot = PolySheet(&pivot,false);
+	  decl.local = PolySheet(&local,false);
+	  decl.remote = PolySheet(&remote,false);
+	  output.declareLink(decl);
+	}
+	if (unit.remoteUnit!=-1 || !allGone) {
+	  bool ok = mergeRow(pivot,local,remote,unit,output,flags,rc);
+	  if (!ok) { return false; }
+	}
+      }
+    }
+
 
     if (!fixedColumns) {
       NameChange nc;

@@ -16,11 +16,15 @@ class coopy::cmp::MergeOutputNovel : public Patcher {
 private:
   std::string sheet_name;
   int yoffset;
+  std::map<int,int> col_map;
+  std::map<int,std::string> remote_name;
   std::map<std::string,int> noted;
+  std::string base_col_name;
 public:
   MergeOutputNovel() {
     sheet_name = coopy_get_default_table_name();
     yoffset = 0;
+    base_col_name = "_ROW_";
   }
   
   virtual bool wantLinks() { 
@@ -29,6 +33,8 @@ public:
 
   virtual bool setSheet(const char *name) {
     sheet_name = name;
+    col_map.clear();
+    remote_name.clear();
     return true;
   }
 
@@ -42,6 +48,7 @@ public:
     return true;
   }
 
+  bool formatSheet();
 };
 
 

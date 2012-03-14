@@ -31,7 +31,10 @@ bool TextBook::operator==(const TextBook& alt) const {
       s1.setSchema(sniffer1.suggestSchema(),false);
     }
     s1.hideHeaders();
-    PolySheet s2 = b2->readSheet(altNames[k]);
+    PolySheet s2 = b2->readSheet(names[k]);
+    if (!s2.isValid()) {
+      s2 = b2->readSheet(altNames[k]);
+    }
     SchemaSniffer sniffer2(s2,altNames[k].c_str());
     if (s2.getSchema()==NULL) {
       s2.setSchema(sniffer2.suggestSchema(),false);
