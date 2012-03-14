@@ -27,10 +27,12 @@ public:
   Cache f;
   coopy::store::SparseFloatSheet& rowMatch;
   bool query;
+  int len;
 
-  FPolyMap(coopy::store::SparseFloatSheet& sheet) : rowMatch(sheet) {
+  FPolyMap(coopy::store::SparseFloatSheet& sheet, int len) : rowMatch(sheet) {
     query = false;
     ct = 0;
+    this->len = len;
   }
 
   coopy::store::FloatSheet& getMatch();

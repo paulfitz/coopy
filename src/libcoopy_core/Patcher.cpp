@@ -9,6 +9,7 @@
 #include <coopy/MergeOutputRowOps.h>
 #include <coopy/MergeOutputStats.h>
 #include <coopy/MergeOutputNovel.h>
+#include <coopy/MergeOutputEditList.h>
 #include <coopy/SheetPatcher.h>
 
 #include <algorithm>
@@ -70,6 +71,8 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
     result = new MergeOutputStats;
   } else if (mode=="novel") {
     result = new MergeOutputNovel;
+  } else if (mode=="edit") {
+    result = new MergeOutputEditList;
   } else {
     fprintf(stderr, "Format %s?\n", mode.c_str());
   }

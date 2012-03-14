@@ -15,10 +15,12 @@ namespace coopy {
 class coopy::cmp::MergeOutputNovel : public Patcher {
 private:
   std::string sheet_name;
+  int yoffset;
   std::map<std::string,int> noted;
 public:
   MergeOutputNovel() {
     sheet_name = coopy_get_default_table_name();
+    yoffset = 0;
   }
   
   virtual bool wantLinks() { 

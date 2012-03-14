@@ -172,10 +172,32 @@ void SheetCompare::doRowMapping(OrderResult& p2l_row_order,
     MeasurePass p2l_row_pass_local(vpivot,vlocal);
     MeasurePass p2l_row_pass_norm1(vpivot,vpivot);
     MeasurePass p2l_row_pass_norm2(vlocal,vlocal);
-    
-    CombinedRowMan p2l_row_local(eflags,p2l_col_order);
-    CombinedRowMan p2l_row_norm1(eflags,id);
-    CombinedRowMan p2l_row_norm2(eflags,id);
+
+    IntSheet p2l_p = p2l_col_order.allA2b();
+    IntSheet p2l_l = p2l_col_order.allB2a();
+    for (int i=0; i<p2l_p.height(); i++) {
+      if (p2l_p.cell(0,i)>=0) {
+	p2l_p.cell(0,i) = i;
+      }
+    }
+    for (int i=0; i<p2l_l.height(); i++) {
+      if (p2l_l.cell(0,i)>=0) {
+	p2l_l.cell(0,i) = i;
+      }
+    }
+
+    OrderResult p2l_1, p2l_2;
+    p2l_1.setup(p2l_p,p2l_p);
+    p2l_2.setup(p2l_l,p2l_l);
+
+    if (p2l_p.height()>0 || p2l_l.height()>0) {
+      COOPY_ASSERT(p2l_p.height()==vpivot.sheet.width());
+      COOPY_ASSERT(p2l_l.height()==vlocal.sheet.width());
+    }
+
+    CombinedRowMan p2l_row_local(eflags,p2l_col_order,vlocal.sheet.height());
+    CombinedRowMan p2l_row_norm1(eflags,p2l_1,vpivot.sheet.height());
+    CombinedRowMan p2l_row_norm2(eflags,p2l_2,vlocal.sheet.height());
     
     MeasureMan p2l_row_man(p2l_row_local,p2l_row_pass_local,
 			   p2l_row_norm1,p2l_row_pass_norm1,
@@ -201,10 +223,32 @@ void SheetCompare::doRowMapping(OrderResult& p2l_row_order,
     MeasurePass p2r_row_pass_local(vpivot,vremote);
     MeasurePass p2r_row_pass_norm1(vpivot,vpivot);
     MeasurePass p2r_row_pass_norm2(vremote,vremote);
+
+    IntSheet p2r_p = p2r_col_order.allA2b();
+    IntSheet p2r_r = p2r_col_order.allB2a();
+    for (int i=0; i<p2r_p.height(); i++) {
+      if (p2r_p.cell(0,i)>=0) {
+	p2r_p.cell(0,i) = i;
+      }
+    }
+    for (int i=0; i<p2r_r.height(); i++) {
+      if (p2r_r.cell(0,i)>=0) {
+	p2r_r.cell(0,i) = i;
+      }
+    }
+
+    OrderResult p2r_1, p2r_2;
+    p2r_1.setup(p2r_p,p2r_p);
+    p2r_2.setup(p2r_r,p2r_r);
+
+    if (p2r_p.height()>0 || p2r_r.height()>0) {
+      COOPY_ASSERT(p2r_p.height()==vpivot.sheet.width());
+      COOPY_ASSERT(p2r_r.height()==vremote.sheet.width());
+    }
     
-    CombinedRowMan p2r_row_local(eflags,p2r_col_order);
-    CombinedRowMan p2r_row_norm1(eflags,id);
-    CombinedRowMan p2r_row_norm2(eflags,id);
+    CombinedRowMan p2r_row_local(eflags,p2r_col_order,vremote.sheet.height());
+    CombinedRowMan p2r_row_norm1(eflags,p2r_1,vpivot.sheet.height());
+    CombinedRowMan p2r_row_norm2(eflags,p2r_2,vremote.sheet.height());
     
     MeasureMan p2r_row_man(p2r_row_local,p2r_row_pass_local,
 			   p2r_row_norm1,p2r_row_pass_norm1,

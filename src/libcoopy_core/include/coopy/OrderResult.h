@@ -14,6 +14,8 @@ class coopy::cmp::OrderResult {
 private:
   coopy::store::IntSheet _a2b, _b2a;
 public:
+  const coopy::store::IntSheet& allA2b() const { return _a2b; }
+  const coopy::store::IntSheet& allB2a() const { return _b2a; }
 
   void setup(coopy::store::IntSheet& _a2b, 
 	     coopy::store::IntSheet& _b2a) {

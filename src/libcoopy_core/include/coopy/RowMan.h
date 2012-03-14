@@ -31,7 +31,8 @@ public:
   const OrderResult& comp;
 
  RowManOf(const CompareFlags& flags,
-	  const OrderResult& comp) : flags(flags), m(match), comp(comp) {
+	  const OrderResult& comp,
+	  int len) : flags(flags), m(match,len), comp(comp) {
     vigor = 0;
     bound = -1;
   }
@@ -161,7 +162,8 @@ public:
   bool flip;
 
  CombinedRowMan(const CompareFlags& flags,
-		const OrderResult& comp) : man1(flags,comp), man2(flags,comp) {
+		const OrderResult& comp,
+		int len) : man1(flags,comp,len), man2(flags,comp,len) {
     theta = man1.getCtrlMax()/2;
     flip = false;
   }

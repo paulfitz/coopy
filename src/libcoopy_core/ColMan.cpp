@@ -8,6 +8,8 @@
 using namespace coopy::cmp;
 using namespace std;
 
+#define FColMap FMultiMap
+
 void ColMan::measure(MeasurePass& pass, int ctrl) {
   int wa = pass.a.width();
   int wb = pass.b.width();
@@ -26,11 +28,15 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
       dbg_printf("anames.size() %d wa %d ha %d   bnames.size() %d wb %d hb %d\n",
 		 anames.size(), wa, ha, bnames.size(), wb, hb);
       if (anames.size()==wa && bnames.size()==wb) {
-	FMultiMap m(pass.match);
+	FColMap m(pass.match,hb);
 	int c = m.getCtrlMax();
 	for (int i=0; i<wa; i++) {
 	  m.setCurr(i,i);
 	  m.add(anames[i],false,false,c);
+	}
+	for (int j=0; j<wb; j++) {
+	  m.setCurr(j,j);
+	  m.add(bnames[j],false,true,c);
 	}
 	for (int j=0; j<wb; j++) {
 	  m.setCurr(j,j);
@@ -55,27 +61,31 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
   int step = (int)(hh/pow(2,ctrl+4));
   if (step<1) step = 1;
   dbg_printf("Desperation %d, step size %d\n", ctrl, step);
-  int ct = 0;
+  int ct = hh;
+  FColMap m(pass.match,hb);
+  int c = m.getCtrlMax();
   for (int rr=0; rr<hh; rr+=step) {
     int rb = bb[rr];
     int ra = aa[rr];
-    if (ra!=-1) {
-      ct++;
-      FMultiMap m(pass.match);
-      int c = m.getCtrlMax();
-      //m.resize(wa,wb);
-      for (int i=0; i<wa; i++) {
-	if (1) { //pass.asel.cell(0,i)==-1) {
-	  m.setCurr(i,i);
-	  m.add(pass.a.cellString(i,ra),false,false,c);
-	}
-      }
-      for (int j=0; j<wb; j++) {
-	if (1) { //pass.bsel.cell(0,j)==-1) {
-	  m.setCurr(j,j);
-	  m.add(pass.b.cellString(j,rb),true,false,c);
-	}
-      }
+    for (int i=0; i<wa; i++) {
+      m.setCurr(i,i);
+      m.add(pass.a.cellString(i,ra),false,false,c);
+    }
+  }
+  for (int rr=0; rr<hh; rr+=step) {
+    int rb = bb[rr];
+    int ra = aa[rr];
+    for (int j=0; j<wb; j++) {
+      m.setCurr(j,j);
+      m.add(pass.b.cellString(j,rb),false,true,c);
+    }
+  }
+  for (int rr=0; rr<hh; rr+=step) {
+    int rb = bb[rr];
+    int ra = aa[rr];
+    for (int j=0; j<wb; j++) {
+      m.setCurr(j,j);
+      m.add(pass.b.cellString(j,rb),true,false,c);
     }
   }
   if (step==1 && (ha<10 || hb<10) && (ct<ha/2||ct<hb/2)) {
@@ -83,13 +93,19 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
     pass.vb.meta.sniff();
     const std::vector<std::string>& anames = pass.va.meta.suggestNames();
     const std::vector<std::string>& bnames = pass.vb.meta.suggestNames();
-    FMultiMap m(pass.match);
+    FColMap m(pass.match,hb);
     int c = m.getCtrlMax();
 
     if (wa==(int)anames.size()) {
       for (int i=0; i<wa; i++) {
 	m.setCurr(i,i);
 	m.add(anames[i],false,false,c);
+      }
+      for (int rb=0; rb<hb; rb++) {
+	for (int j=0; j<wb; j++) {
+	  m.setCurr(j,j);
+	  m.add(pass.b.cellString(j,rb),false,true,c);
+	}
       }
       for (int rb=0; rb<hb; rb++) {
 	for (int j=0; j<wb; j++) {
@@ -108,9 +124,21 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
       }
       for (int j=0; j<wb; j++) {
 	m.setCurr(j,j);
+	m.add(bnames[j],false,true,c);
+      }
+      for (int j=0; j<wb; j++) {
+	m.setCurr(j,j);
 	m.add(bnames[j],true,false,c);
       }
     }
   }
-  //printf(">>> I HAVE %s\n", pass.match.toString().c_str());
+  /*
+  static int ctt = 0;
+  char buf[256];
+  sprintf(buf,"/tmp/col_%04d.csv",ctt);
+  ctt++;
+  FILE *fout = fopen(buf,"w");
+  fprintf(fout,"%s\n", pass.match.toString().c_str());
+  fclose(fout);
+  */
 }

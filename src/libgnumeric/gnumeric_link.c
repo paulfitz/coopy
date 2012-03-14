@@ -33,6 +33,11 @@
 #include "sheet-style.h"
 #include "style-color.h"
 
+#include "hlink.h"
+#include "func.h"
+#include "expr.h"
+#include "expr-impl.h"
+
 #include "coopy/gnumeric_link.h"
 
 #ifndef GNM_VERSION_FULL
@@ -250,9 +255,77 @@ int gnumeric_sheet_get_size(GnumericSheetPtr sheet, int *w, int *h) {
 }
 
 char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
-  GnmValue const *value = sheet_cell_get_value((Sheet*)sheet,x, y);
+  GnmValue const *value = sheet_cell_get_value((Sheet*)sheet,x,y);
   if (value==NULL) return NULL;
   if (value->type == VALUE_EMPTY) return NULL;
+
+  GnmCell const *cell = sheet_cell_get((Sheet*)sheet,x,y);
+  if (cell) {
+    if (gnm_cell_has_expr (cell)) {
+      if (cell->base.texpr->expr) {
+	const GnmExpr *expr = cell->base.texpr->expr;
+	if (expr) {
+	  if (expr->oper==GNM_EXPR_OP_FUNCALL) {
+	    if (expr->func.func) {
+	      const char *name = expr->func.func->name;
+	      if (name) {
+		if (strcasecmp(name,"hyperlink")==0) {
+		  // Hyperlink. Take url part.
+		  char *url = NULL;
+		  char *txt = NULL;
+		  if (expr->func.argc==2) {
+		    const GnmExpr *expr0 = expr->func.argv[0];
+		    if (expr0) {
+		      if (expr0->oper == GNM_EXPR_OP_CONSTANT) {
+			url = value_get_as_string(expr0->constant.value);
+		      }
+		    }
+		    const GnmExpr *expr1 = expr->func.argv[1];
+		    if (expr1) {
+		      if (expr1->oper == GNM_EXPR_OP_CONSTANT) {
+			txt = value_get_as_string(expr1->constant.value);
+		      }
+		    }
+		  }
+		  if (url&&txt) {
+		    if (strcasecmp(url,txt)==0) {
+		      g_free(url);
+		      return txt;
+		    }
+		    char *result = g_strconcat("[",url,"|",txt,"]",NULL);
+		    g_free(url);
+		    g_free(txt);
+		    return result;
+		  } else {
+		    if (url) g_free(url);
+		    if (txt) g_free(txt);
+		  }
+		}
+	      }
+	    }
+	  }
+	}
+      }
+      return gnm_cell_get_entered_text(cell);
+    }
+  }
+
+  GnmStyle const *style = sheet_style_get((Sheet*)sheet,x,y);
+  GnmHLink* hlink = gnm_style_get_hlink (style);
+  const guchar* hlink_target = NULL;
+  if (hlink && IS_GNM_HLINK_URL (hlink)) {
+    hlink_target = gnm_hlink_get_target (hlink);
+    if (hlink_target) {
+      //char *str = value_get_as_string(value);
+      //if (!str) return str;
+      //const char *str2 = " ";
+      //char *result = g_strconcat(str,str2,hlink_target);
+      //g_free(str);
+      //return result;
+      return g_strdup(hlink_target);
+    }
+  }
+
   return value_get_as_string(value);
 }
 

@@ -194,11 +194,17 @@ public:
   bool sequential;
   bool conflicted;
   RowChangeContext context;
+  int pRow, lRow, rRow;
 
   RowChange() {
     mode = ROW_CHANGE_NONE;
     sequential = true;
     conflicted = false;
+    pRow = lRow = rRow = -2;
+  }
+
+  bool rowsKnown() const {
+    return pRow>=-1;
   }
 
   std::string modeString() const {

@@ -348,6 +348,9 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     rowChange.conflictingParentVal = conflicted_parent_value;
     rowChange.names = names;
     rowChange.conflicted = conflict;
+    rowChange.pRow = pRow;
+    rowChange.lRow = lRow;
+    rowChange.rRow = rRow;
     bool prev_had_row = had_row;
     if (last_local_row!=-1) {
       had_row = true;

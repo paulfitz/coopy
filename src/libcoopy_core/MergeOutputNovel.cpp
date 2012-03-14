@@ -8,8 +8,35 @@ using namespace std;
 #define HALF_COLOR (65535/2)
 
 bool MergeOutputNovel::declareLink(const LinkDeclare& decl) {
-  // ignore columns
-  if (decl.column) return true;
+
+  if (decl.column) {
+    int xoff = 0;
+    if (noted.find(sheet_name)!=noted.end()) {
+      xoff++;
+    }
+    PolySheet sheet = getSheet();
+    int x = decl.rc_id_local;
+    if (x>=0) {
+      int x2 = decl.rc_id_remote;
+      if (x2>=0) {
+	x += xoff;
+	if (sheet.height()>0) {
+	  sheet.cellString(x,0,sheet.cellString(x,0) + "::" +
+			   SheetCell(x2+1).toString());
+	}
+	Poly<Appearance> appear = sheet.getColAppearance(x);
+	if (appear.isValid()) {
+	  appear->begin();
+	  appear->setBackgroundRgb16(HALF_COLOR,
+				     FULL_COLOR,
+				     HALF_COLOR,
+				     AppearanceRange::full());
+	  appear->end();
+	}
+      }
+    }
+    return true;
+  }
 
   dbg_printf("LINK %d %d %d // %s %s %s\n",
 	     decl.rc_id_pivot,
