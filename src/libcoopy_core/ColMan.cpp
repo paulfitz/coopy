@@ -10,6 +10,8 @@ using namespace std;
 
 #define FColMap FMultiMap
 
+#define USE_HEADER 1
+
 void ColMan::measure(MeasurePass& pass, int ctrl) {
   int wa = pass.a.width();
   int wb = pass.b.width();
@@ -19,6 +21,7 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
   dbg_printf("Column comparison\n");
   pass.clearMatch();
 
+#ifdef USE_HEADER
   if (ha<10 || hb<10) {
     pass.va.meta.sniff();
     pass.vb.meta.sniff();
@@ -46,6 +49,7 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
       }
     }
   }
+#endif
 
   vector<int> aa;
   vector<int> bb;
@@ -62,32 +66,26 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
   if (step<1) step = 1;
   dbg_printf("Desperation %d, step size %d\n", ctrl, step);
   int ct = hh;
-  FColMap m(pass.match,hb);
-  int c = m.getCtrlMax();
   for (int rr=0; rr<hh; rr+=step) {
+    FColMap m(pass.match,hb);
+    int c = m.getCtrlMax();
     int rb = bb[rr];
     int ra = aa[rr];
     for (int i=0; i<wa; i++) {
       m.setCurr(i,i);
       m.add(pass.a.cellString(i,ra),false,false,c);
     }
-  }
-  for (int rr=0; rr<hh; rr+=step) {
-    int rb = bb[rr];
-    int ra = aa[rr];
     for (int j=0; j<wb; j++) {
       m.setCurr(j,j);
       m.add(pass.b.cellString(j,rb),false,true,c);
     }
-  }
-  for (int rr=0; rr<hh; rr+=step) {
-    int rb = bb[rr];
-    int ra = aa[rr];
     for (int j=0; j<wb; j++) {
       m.setCurr(j,j);
       m.add(pass.b.cellString(j,rb),true,false,c);
     }
   }
+
+#ifdef USE_HEADER
   if (step==1 && (ha<10 || hb<10) && (ct<ha/2||ct<hb/2)) {
     pass.va.meta.sniff();
     pass.vb.meta.sniff();
@@ -132,6 +130,7 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
       }
     }
   }
+#endif
   /*
   static int ctt = 0;
   char buf[256];
