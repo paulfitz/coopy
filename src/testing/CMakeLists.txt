@@ -132,7 +132,7 @@ ADD_TEST(altitude_merge ${testprg}
   --remote --read ${TESTS}/test005_replace_column.csv
   --compare
 #  --local --write ${TESTS}/result_altitude_merge.csv
-  --local --write /tmp/out.csv
+#  --local --write /tmp/out.csv
   --remote --read ${TESTS}/result_altitude_merge.csv
   --diff
   --prop diffs --assert 0)

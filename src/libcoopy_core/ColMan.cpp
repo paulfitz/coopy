@@ -131,6 +131,7 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
     }
   }
 #endif
+  /*
   static int ctt = 0;
   char buf[256];
   sprintf(buf,"/tmp/col_%04d.csv",ctt);
@@ -138,4 +139,5 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
   FILE *fout = fopen(buf,"w");
   fprintf(fout,"%s\n", pass.match.toString().c_str());
   fclose(fout);
+  */
 }
