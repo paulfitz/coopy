@@ -16,7 +16,7 @@ static std::string trim(const std::string &s1) {
   bool have_text = false;
   bool have_space = false;
   for (int i=0; i<(int)s1.length(); i++) {
-    char ch = s1[i];
+    unsigned char ch = s1[i];
     if (ch<=32||ch>=128) ch = ' ';
     if (ch==' ') {
       if (have_text) {
