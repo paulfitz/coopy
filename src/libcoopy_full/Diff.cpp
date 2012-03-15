@@ -154,7 +154,7 @@ int Diff::apply(const Options& opt) {
   }
 
   bool cloned = false;
-  if ((mode=="apply"||mode=="merge")&&!apply) {
+  if ((mode=="apply"||mode=="merge"||mode=="novel")&&!apply) {
     if (local_file!=""&&local->inplace()&&local->getNames().size()>0&&!inplace&&output!=local_file) {
       if (output=="-"&&tmp=="") {
 	fprintf(stderr,"This operation would modify an input. Not sure if you want this.\n");

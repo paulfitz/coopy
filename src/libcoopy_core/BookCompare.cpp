@@ -126,8 +126,8 @@ int BookCompare::compare(TextBook& pivot, TextBook& local, TextBook& remote,
     PolySheet pivot_sheet;
     PolySheet local_sheet;
     PolySheet remote_sheet;
-    if (pivot_names.size()==1 && 
-	local_names.size()==1 && 
+    if (pivot_names.size()==1 ||
+	local_names.size()==1 ||
 	remote_names.size()==1) {
       pivot_sheet = pivot.readSheetByIndex(0);
       local_sheet = pivot_is_local?pivot_sheet:local.readSheetByIndex(0);

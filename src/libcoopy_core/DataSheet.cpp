@@ -166,6 +166,7 @@ bool DataSheet::applyRowCache(const RowCache& cache, int row,
   }
   for (int i=0; i<(int)cache.cells.size(); i++) {
     if (cache.flags[i]) {
+      //printf("SET CELL TO %s\n", cache.cells[i].toString().c_str());
       setCell(i,row,cache.cells[i]);
     }
   }

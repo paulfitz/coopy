@@ -139,11 +139,16 @@ void MeasureMan::compare1(int ctrl) {
     }
   }
     
+
   SparseFloatSheet match = main_pass.match;
+  bool flip = match.width()<match.height();
+
   IntSheet asel;
   IntSheet bsel;
-  DataSheet& a = main_pass.a;
-  DataSheet& b = main_pass.b;
+  DataSheet& a = flip?main_pass.b:main_pass.a;
+  DataSheet& b = flip?main_pass.a:main_pass.b;
+  int match_width = flip?match.height():match.width();
+  int match_height = flip?match.width():match.height();
 
   bool repeatNeeded = false;
   map<int,int> stateNode, stateNodePrev;
@@ -151,8 +156,8 @@ void MeasureMan::compare1(int ctrl) {
   int stateNodePower = 1;
 
   do {
-    asel = main_pass.asel;
-    bsel = main_pass.bsel;
+    asel = flip?main_pass.bsel:main_pass.asel;
+    bsel = flip?main_pass.asel:main_pass.bsel;
 
     repeatNeeded = false;
 
@@ -167,20 +172,20 @@ void MeasureMan::compare1(int ctrl) {
       x from 1 to W: "matches against remote column x-1, no preexisting-nodes" 
                   (or lingering without match)
     */
-    int column_stride = match.width()+1;
+    int column_stride = match_width+1;
     int history_stride = stateNodePower;
     vector<int> history_offset;
-    for (int i=0; i<match.width(); i++) {
+    for (int i=0; i<match_width; i++) {
       if (stateNode.find(i)!=stateNode.end()) {
 	history_offset.push_back(stateNode[i]);
       } else {
 	history_offset.push_back(0);
       }
     }
-    v.setSize(column_stride*history_stride,match.height());
-    for (int i=0; i<match.height(); i++) {
-      const set<int>& idx0 = match.getCellsInRow(i-1);
-      const set<int>& idx1 = match.getCellsInRow(i);
+    v.setSize(column_stride*history_stride,match_height);
+    for (int i=0; i<match_height; i++) {
+      const set<int>& idx0 = flip?match.getCellsInCol(i-1):match.getCellsInRow(i-1);
+      const set<int>& idx1 = flip?match.getCellsInCol(i):match.getCellsInRow(i);
       const set<int> *pidx0 = &idx0;
       v.beginTransitions();
       for (int k=0; k<history_stride; k++) {
@@ -192,7 +197,7 @@ void MeasureMan::compare1(int ctrl) {
 	  if (offset&k) continue; // cannot transition here - was there already
 	  int kdest = (k+offset)*column_stride;
 	  
-	  float c = costify(match.cell(i1,i));
+	  float c = costify(flip?match.cell(i,i1):match.cell(i1,i));
 	  double mod = 0.1*log(1+fabs((double)(i-i1)))/log(2);
 	  for (set<int>::const_iterator it0=pidx0->begin(); it0!=pidx0->end(); 
 	       it0++) {
@@ -240,15 +245,15 @@ void MeasureMan::compare1(int ctrl) {
     }
 
     stateNodePrev = stateNode;
-    for (int y=0; y<match.height(); y++) {
+    for (int y=0; y<match_height; y++) {
       if (bsel.cell(0,y)==-1) {
 	int bestIndex = v(y)%column_stride-1;
 	double bestValue = 0;
 	if (bestIndex>=0) {
-	  bestValue = match.cell(bestIndex,y);
+	  bestValue = flip?match.cell(y,bestIndex):match.cell(bestIndex,y);
 	}
-	double ref = bnorm_pass.match.cell(0,y);
-	double ref2 = anorm_pass.match.cell(0,bestIndex);
+	double ref = bnorm_pass.match.cell(0,flip?bestIndex:y);
+	double ref2 = anorm_pass.match.cell(0,flip?y:bestIndex);
 	if (ref2<ref) ref = ref2;
 	bool ok = false;
 	if (bestValue>ref/4 && bestIndex>=0 && ref>0.01) {
@@ -328,6 +333,6 @@ void MeasureMan::compare1(int ctrl) {
       dbg_printf("Repeating with more state\n");
     }
   } while (repeatNeeded);
-  main_pass.asel = asel;
-  main_pass.bsel = bsel;
+  main_pass.asel = flip?bsel:asel;
+  main_pass.bsel = flip?asel:bsel;
 }

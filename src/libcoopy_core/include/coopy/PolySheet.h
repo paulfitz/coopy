@@ -151,6 +151,16 @@ public:
     return sheet->cellString(x,y+dh,str,escaped);
   }
 
+  virtual SheetCell cellSummary(int x, int y) const {
+    COOPY_ASSERT(sheet);
+    return sheet->cellSummary(x,y+dh);
+  }
+
+  virtual bool cellSummary(int x, int y, const SheetCell& c) {
+    COOPY_ASSERT(sheet);
+    return sheet->cellSummary(x,y+dh,c);
+  }
+
   std::string encode(const SheetStyle& style) const {
     COOPY_ASSERT(sheet);
     return sheet->encode(style);

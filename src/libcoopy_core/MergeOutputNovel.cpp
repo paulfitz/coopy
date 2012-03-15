@@ -1,4 +1,7 @@
 #include <coopy/MergeOutputNovel.h>
+#include <coopy/Stringer.h>
+
+#include <ctype.h>
 
 using namespace coopy::cmp;
 using namespace coopy::store;
@@ -7,6 +10,62 @@ using namespace std;
 #define FULL_COLOR (65535)
 #define HALF_COLOR (65535/2)
 
+// utf-unfriendly for now.
+static std::string trim(const std::string &s1) {
+  string s;
+  bool have_text = false;
+  bool have_space = false;
+  for (int i=0; i<(int)s1.length(); i++) {
+    char ch = s1[i];
+    if (ch<=32||ch>=128) ch = ' ';
+    if (ch==' ') {
+      if (have_text) {
+	have_space = true;
+      }
+      have_text = false;
+    } else {
+      if (have_space) {
+	s += ' ';
+	have_space = false;
+      }
+      s += tolower(ch);
+      have_text = true;
+    }
+  }
+  if (s.length()>0) {
+    if (s[s.length()-1]=='/') {
+      s = s.substr(0,s.length()-1);
+    }
+  }
+  Stringer::replace(s,"www.","");
+  Stringer::replace(s,"https://","http://");
+  return s;
+}
+
+static bool looseCompareUrl(const SheetCell& url, const SheetCell& b) {
+  if (!url.meta.isValid()) return false;
+  if (!url.meta->isUrl()) return false;
+  if (trim(url.meta->getUrl())==trim(b.text)) return true;
+  if (!b.meta.isValid()) return false;
+  if (!b.meta->isUrl()) return false;
+  if (trim(url.meta->getUrl())==trim(b.meta->getUrl())) return true;
+  if (trim(url.meta->getUrl())==trim(b.meta->getText())) return true;
+  return false;
+}
+
+
+static bool looseCompare(const SheetCell& a, const SheetCell& b) {
+  if (a==b) return true;
+  if (a.escaped&&b.escaped) return true;
+  string ta = trim(a.text);
+  string tb = trim(b.text);
+  if (a.escaped&&tb=="") return true;
+  if (b.escaped&&ta=="") return true;
+  if (ta==tb) return true;
+  if (looseCompareUrl(a,b)) return true;
+  if (looseCompareUrl(b,a)) return true;
+  return false;
+}
 
 bool MergeOutputNovel::formatSheet() {
   bool success = true;
@@ -130,7 +189,7 @@ bool MergeOutputNovel::declareLink(const LinkDeclare& decl) {
 	SheetCell cell = decl.remote.cellSummary(xx,yy);
 	//printf("WORKING on %d (%d %d : %s)\n", i, xx, yy, cell.toString().c_str());
 	sheet.cellSummary(i*2+2,y,cell);
-	if (cell!=sheet.cellSummary(i*2+1,y)) {
+	if (!looseCompare(cell,sheet.cellSummary(i*2+1,y))) {
 	  for (int k=i*2+1; k<=i*2+2; k++) {
 	    Poly<Appearance> appear = sheet.getCellAppearance(k,y);
 	    if (appear.isValid()) {

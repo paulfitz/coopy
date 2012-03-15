@@ -25,40 +25,68 @@ GnumericSheet::GnumericSheet(void *sheet) {
 GnumericSheet::~GnumericSheet() {
 }
 
-std::string GnumericSheet::cellString(int x, int y) const {
-  bool tmp;
-  return cellString(x,y,tmp);
-}
 
-
-std::string GnumericSheet::cellString(int x, int y, 
-				      bool& escaped) const {
-  char *txt = gnumeric_sheet_get_cell_as_string(SHEET(implementation),
-						x, y);
-  escaped = (txt==NULL);
-  if (txt==NULL) return "NULL";
-  string result = txt;
-  //printf("GOT [%s]\n", result.c_str());
-  // if txt is blank, it seems like we should not free it?
-  //if (txt[0]!='\0') {
-  gnumeric_free_string(txt);
-  //}
-  return result;  
-}
-
-
-bool GnumericSheet::cellString(int x, int y, const std::string& str,
-			       bool escaped) {
-  //printf("Setting %d %d to %s\n", x, y, str.c_str());
-  if (!escaped) {
-    return gnumeric_sheet_set_cell_as_string(SHEET(implementation),
-					     x, y,
-					     str.c_str()) == 0;
+SheetCell GnumericSheet::cellSummary(int x, int y) const {
+  SheetCell cell;
+  GSheetCell gscell;
+  gsheetcell_zero(&gscell);
+  int r = gnumeric_sheet_get_cell(SHEET(implementation),
+				  x, y,
+				  &gscell);
+  if (r!=0) return SheetCell();
+  if (!gscell.is_url) {
+    if (gscell.all==NULL) {
+      gsheetcell_free(&gscell);
+      cell.text = "NULL";
+      return cell;
+    }
+    cell.text = gscell.all;
+    cell.escaped = false;
+    gsheetcell_free(&gscell);
+    return cell;
   }
-  return gnumeric_sheet_remove_cell(SHEET(implementation),
-				    x, y);
+  SheetCellSimpleMeta *meta = new SheetCellSimpleMeta;
+  COOPY_ASSERT(meta);
+  if (gscell.all) {
+    cell.text = gscell.all;
+  }
+  if (gscell.url) {
+    meta->url = gscell.url;
+  }
+  if (gscell.txt) {
+    meta->txt = gscell.txt;
+  }
+  gsheetcell_free(&gscell);
+  cell.meta = Poly<SheetCellMeta>(meta,true);
+  cell.escaped = false;
+  return cell;
 }
 
+bool GnumericSheet::cellSummary(int x, int y, const SheetCell& c) {
+  if (!c.meta.isValid()) {
+    if (!c.escaped) {
+      return gnumeric_sheet_set_cell_as_string(SHEET(implementation),
+					       x, y,
+					       c.text.c_str()) == 0;
+    }
+    return gnumeric_sheet_remove_cell(SHEET(implementation),
+				      x, y) == 0;
+  }
+  //printf("SET a URL: %s\n", c.toString().c_str());
+  GSheetCell gscell;
+  gsheetcell_zero(&gscell);
+  gscell.all = (char*)c.text.c_str();
+  SheetCellMeta *meta = c.meta.getContent();
+  if (meta->isUrl()) {
+    gscell.is_url = 1;
+    gscell.url = (char*)meta->getUrl().c_str();
+    gscell.txt = (char*)meta->getText().c_str();
+  }
+  bool ok = gnumeric_sheet_set_cell(SHEET(implementation),
+				    x, y, &gscell) == 0;
+  //printf("REREAD: %s\n", cellSummary(x,y).toString().c_str());
+  return ok;
+}
 
 ColumnRef GnumericSheet::moveColumn(const ColumnRef& src, 
 				    const ColumnRef& base) {
@@ -178,8 +206,9 @@ RowRef GnumericSheet::moveRow(const RowRef& src, const RowRef& base) {
   return RowRef(i2);
 }
 
-bool GnumericSheet::deleteData() {
-  bool ok = gnumeric_delete_data(SHEET(implementation)) == 0;
+bool GnumericSheet::deleteData(int offset) {
+  //bool ok = gnumeric_delete_data(SHEET(implementation)) == 0;
+  bool ok = gnumeric_delete_rows(SHEET(implementation),offset,height()) == 0;
   h = 0;
   return ok;
 }

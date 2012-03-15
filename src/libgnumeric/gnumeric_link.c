@@ -258,12 +258,21 @@ char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
   GnmValue const *value = sheet_cell_get_value((Sheet*)sheet,x,y);
   if (value==NULL) return NULL;
   if (value->type == VALUE_EMPTY) return NULL;
+  return value_get_as_string(value);
+}
 
-  GnmCell const *cell = sheet_cell_get((Sheet*)sheet,x,y);
-  if (cell) {
-    if (gnm_cell_has_expr (cell)) {
-      if (cell->base.texpr->expr) {
-	const GnmExpr *expr = cell->base.texpr->expr;
+int gnumeric_sheet_get_cell(GnumericSheetPtr sheet, int x, int y,
+			    GSheetCellPtr cell) {
+  gsheetcell_zero(cell);
+  GnmValue const *value = sheet_cell_get_value((Sheet*)sheet,x,y);
+  if (value==NULL) return 0;
+  if (value->type == VALUE_EMPTY) return 0;
+
+  GnmCell const *gcell = sheet_cell_get((Sheet*)sheet,x,y);
+  if (gcell) {
+    if (gnm_cell_has_expr (gcell)) {
+      if (gcell->base.texpr->expr) {
+	const GnmExpr *expr = gcell->base.texpr->expr;
 	if (expr) {
 	  if (expr->oper==GNM_EXPR_OP_FUNCALL) {
 	    if (expr->func.func) {
@@ -289,13 +298,17 @@ char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
 		  }
 		  if (url&&txt) {
 		    if (strcasecmp(url,txt)==0) {
-		      g_free(url);
-		      return txt;
+		      cell->all = url;
+		      cell->url = g_strdup(url);
+		      cell->txt = g_strdup(url);
+		      cell->is_url = 1;
+		      return 0;
 		    }
-		    char *result = g_strconcat("[",url,"|",txt,"]",NULL);
-		    g_free(url);
-		    g_free(txt);
-		    return result;
+		    cell->all = g_strconcat("[",url,"|",txt,"]",NULL);
+		    cell->url = url;
+		    cell->txt = txt;
+		    cell->is_url = 1;
+		    return 0;
 		  } else {
 		    if (url) g_free(url);
 		    if (txt) g_free(txt);
@@ -306,7 +319,7 @@ char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
 	  }
 	}
       }
-      return gnm_cell_get_entered_text(cell);
+      //return gnm_cell_get_entered_text(cell);
     }
   }
 
@@ -322,12 +335,55 @@ char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
       //char *result = g_strconcat(str,str2,hlink_target);
       //g_free(str);
       //return result;
-      return g_strdup(hlink_target);
+      cell->is_url = 1;
+      cell->all = g_strdup(hlink_target);
+      cell->url = g_strdup(hlink_target);
+      cell->txt = g_strdup(hlink_target);
+      return 0;
     }
   }
 
-  return value_get_as_string(value);
+  cell->all = value_get_as_string(value);
+  return 0;
 }
+
+int gnumeric_sheet_set_cell(GnumericSheetPtr sheet, int x, int y,
+			    GSheetCellPtr cell) {
+  if (!cell->is_url) {
+    if (cell->all) {
+      gnumeric_sheet_set_cell_as_string(sheet,x,y,cell->all);
+      return 0;
+    }
+    gnumeric_sheet_remove_cell(sheet,x,y);
+    return 0;
+  }
+
+  if (cell->url&&cell->txt) {
+    GnmFunc *func = gnm_func_lookup("hyperlink",((Sheet *)sheet)->workbook);
+    if (!func) {
+      fprintf(stderr,"hyperlink unknown\n");
+      exit(1);
+    }
+    GnmExpr const *expr = 
+      gnm_expr_new_funcall2(func,
+			    gnm_expr_new_constant(value_new_string(cell->url)),
+			    gnm_expr_new_constant(value_new_string(cell->txt)));
+    GnmExprTop const *texpr = gnm_expr_top_new(expr);
+    GnmCell *cell2 = sheet_cell_get((Sheet*)sheet,x,y);
+    if (cell2==NULL) {
+      cell2 = sheet_cell_create((Sheet*)sheet,x,y);
+    }
+    GnmValue *val = value_new_string(cell->txt);
+    //sheet_cell_set_value(cell2,val);
+    gnm_cell_set_expr_and_value(cell2,texpr,val,0);
+  }
+
+  return 0;
+}
+
+
+//char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
+//}
 
 static void
 coopy_add_attr (PangoAttrList *attrs, PangoAttribute *attr)
@@ -532,14 +588,16 @@ int gnumeric_insert_row(GnumericSheetPtr sheet, int before) {
 }
 
 int gnumeric_delete_row(GnumericSheetPtr sheet, int at) {
+  //printf("deleting %d\n", at);
   BEGIN_UNDO;
   sheet_delete_rows(sheet,at,1,DO_UNDO,cc);
   END_UNDO;
+  //sheet_row_destroy(sheet,at,TRUE);
   return 0;
 }
 
 int gnumeric_delete_rows(GnumericSheetPtr sheet, int first, int last) {
-  printf("delete from %d to %d\n", first, last);
+  //printf("delete from %d to %d\n", first, last);
   BEGIN_UNDO;
   sheet_delete_rows(sheet,first,last-first+1,DO_UNDO,cc);
   END_UNDO;
@@ -548,6 +606,8 @@ int gnumeric_delete_rows(GnumericSheetPtr sheet, int first, int last) {
 
 
 int gnumeric_delete_data(GnumericSheetPtr sheet) {
+  printf("delete all\n");
+  //sheet_destroy_contents(sheet);
   BEGIN_UNDO;
   int w, h;
   gnumeric_sheet_get_size(sheet, &w, &h);
@@ -639,4 +699,19 @@ int gnumeric_sheet_get_cell_font_color(GnumericSheetPtr sheet, int x, int y,
   return 0;
 }
 
+
+void gsheetcell_zero(GSheetCellPtr cell) {
+  if (!cell) return;
+  cell->all = cell->url = cell->txt = NULL;
+  cell->is_url = 0;
+}
+
+
+void gsheetcell_free(GSheetCellPtr cell) {
+  if (!cell) return;
+  if (cell->all) g_free(cell->all);
+  if (cell->url) g_free(cell->url);
+  if (cell->txt) g_free(cell->txt);
+  gsheetcell_zero(cell);
+}
 

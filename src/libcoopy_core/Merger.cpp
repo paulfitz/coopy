@@ -53,7 +53,6 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 		      Patcher& output,
 		      const CompareFlags& flags, 
 		      std::vector<coopy::cmp::RowChange>& rc) {
-
   bool fixedColumns = flags.fixed_columns;
   bool diff = output.wantDiff();
   bool link = output.wantLinks();
@@ -117,6 +116,13 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
 	//names[at].c_str());
 	//cond[names[at]] = pivot.cellSummary(pCol,pRow);
 	cond[names[at]] = local.cellSummary(lCol,lRow);
+	/*
+	printf("LOCAL %s IS\n%s\n", 
+	       local.desc().c_str(),
+	       local.toString().c_str());
+	printf("CONDITION %s %d %d\n", cond[names[at]].toString().c_str(),
+	       lCol, lRow);
+	*/
       }
     }
     if (!deleted) {
@@ -222,16 +228,6 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
       }
     }
     
-    /*
-    if (_csv_verbose) {
-      printf(" expandMerge: %s\n", vector2string(expandMerge).c_str());
-      printf(" expandPivot: %s\n", vector2string(expandPivot).c_str());
-      printf(" expandLocal: %s\n", vector2string(expandLocal).c_str());
-      printf(" expandRemote: %s\n", vector2string(expandRemote).c_str());
-      printf(" change %d novel %d conflict %d\n", change, novel, conflict);
-    }
-    */
-
     if (diff) {
       if (!deleted) {
 	if (novel) {

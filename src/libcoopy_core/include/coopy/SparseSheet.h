@@ -27,6 +27,7 @@ class coopy::store::SparseSheet : public DataSheet {
 public:
   efficient_map<long long,T> data;
   efficient_map<long, std::set<int> > row;
+  efficient_map<long, std::set<int> > col;
   int h, w;
 
   SparseSheet() {
@@ -37,6 +38,7 @@ public:
   const SparseSheet& operator = (const SparseSheet& alt) {
     data = alt.data;
     row = alt.row;
+    col = alt.col;
     h = alt.h;
     w = alt.w;
     zero = alt.zero;
@@ -46,6 +48,7 @@ public:
   bool resize(int w, int h, const T& zero) {
     data.clear();
     row.clear();
+    col.clear();
     this->zero = zero;
     this->h = h;
     this->w = w;
@@ -68,6 +71,7 @@ public:
   void clear() {
     data.clear();
     row.clear();
+    col.clear();
   }
 
   int width() const {
@@ -115,6 +119,7 @@ public:
     if (it==data.end()) {
       T& result = data[((long long)y)*w+x];
       row[y].insert(x);
+      col[x].insert(y);
       result = zero;
       return result;
     }
@@ -134,6 +139,15 @@ public:
     typename efficient_map<long, std::set<int> >::const_iterator it = 
       row.find(y);
     if (it==row.end()) {
+      return empty_set;
+    }
+    return it->second;
+  }
+
+  const std::set<int>& getCellsInCol(int x) const {
+    typename efficient_map<long, std::set<int> >::const_iterator it = 
+      col.find(x);
+    if (it==col.end()) {
       return empty_set;
     }
     return it->second;

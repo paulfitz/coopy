@@ -5,6 +5,18 @@ typedef void *GnumericWorkbookPtr;
 typedef void *GnumericSheetPtr;
 typedef void *GnumericStylePtr;
 
+typedef struct GSheetCellStruct {
+  char *all;
+  char *url;
+  char *txt;
+  int is_url;
+} GSheetCell;
+typedef GSheetCell *GSheetCellPtr;
+
+
+void gsheetcell_zero(GSheetCellPtr cell);
+void gsheetcell_free(GSheetCellPtr cell);
+
 /* initialization (nesting ok) */
 int gnumeric_init();
 int gnumeric_fini();
@@ -37,6 +49,12 @@ char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y);
 
 int gnumeric_sheet_set_cell_as_string(GnumericSheetPtr sheet, int x, int y,
 				      const char *str);
+
+int gnumeric_sheet_get_cell(GnumericSheetPtr sheet, int x, int y,
+			    GSheetCellPtr cell);
+
+int gnumeric_sheet_set_cell(GnumericSheetPtr sheet, int x, int y,
+			    GSheetCellPtr cell);
 
 int gnumeric_sheet_remove_cell(GnumericSheetPtr sheet, int x, int y);
 

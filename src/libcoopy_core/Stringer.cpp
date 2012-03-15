@@ -29,9 +29,9 @@ string stringer_encoder(const string& x) {
 }
 
 string stringer_encoder(const coopy::store::SheetCell& x) {
+  //return x.toString();
   SheetStyle style;
   string result = DataSheet::encodeCell(x,style);
-  //printf("Encoding %s as %s\n", x.text.c_str(), result.c_str());
   return (result!="")?result:"\"\"";
 }
 
