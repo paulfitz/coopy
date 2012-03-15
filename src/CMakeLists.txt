@@ -58,10 +58,12 @@ IF (EXISTS ${STATLIB})
     MESSAGE(STATUS "static_libs directory present: ${STATLIB}")
     LINK_DIRECTORIES(${STATLIB})
     ADD_DEFINITIONS(-static-libgcc)
+    ADD_DEFINITIONS(-DSQLITE_OMIT_LOAD_EXTENSION=TRUE)
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
     SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
     FILE(GLOB statlibs ${STATLIB}/*.a)
     LINK_LIBRARIES(${statlibs})
-    LINK_LIBRARIES(gconf-2 bonobo-2)  # chance not including these
+#    LINK_LIBRARIES(gconf-2 bonobo-2)  # chance not including these
 ENDIF (EXISTS ${STATLIB})
 
 export(TARGETS FILE ${COOPY_DEPENDENCIES})
