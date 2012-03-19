@@ -30,11 +30,13 @@ if (USE_JACKCESS)
 
   make_directory(${CMAKE_BINARY_DIR}/gcjgen)
   add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/jackcess.h
-    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/jackcess.java .
-    COMMAND gcj --classpath ${CMAKE_CURRENT_SOURCE_DIR}/jackcess -C jackcess.java
-    COMMAND gcjh --classpath ${CMAKE_BINARY_DIR}/gcjgen jackcess
+    OUTPUT ${CMAKE_BINARY_DIR}/gcjgen/JackBox.h
+    COMMAND ${CMAKE_COMMAND} -E remove -f JackBox.class JackBox.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/JackBox.java .
+    COMMAND gcj --classpath ${CMAKE_CURRENT_SOURCE_DIR}/jackcess -C JackBox.java
+    COMMAND gcjh --classpath ${CMAKE_BINARY_DIR}/gcjgen JackBox
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gcjgen
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/JackBox.java
     )
   include_directories(${CMAKE_BINARY_DIR}/gcjgen)
 
@@ -44,7 +46,7 @@ if (USE_JACKCESS)
 
   #add_library(coopy_jackcess jackcess.java ${js} ${CMAKE_BINARY_DIR}/jackcess.h ${js_res_abs2})
 
-  add_library(coopy_jackcess jackcess.java ${CMAKE_BINARY_DIR}/jackcess.h)
+  add_library(coopy_jackcess ${CMAKE_CURRENT_SOURCE_DIR}/JackBox.java ${CMAKE_BINARY_DIR}/gcjgen/JackBox.h)
   target_link_libraries(coopy_jackcess coopy_jackcess_main coopy_jackcess_res)
 
   add_executable(test_jackcess test_jackcess.cpp)
