@@ -70,19 +70,6 @@ public:
 	  }
 	}
       }
-      /*
-      if (y<w) {
-	float tmp = match.cell(0,y);
-	match.cell(0,y) = match.cell(y,y);
-	match.cell(y,y) = tmp;
-	if (asel.cell(0,y)==-1) {
-	  mean += match.cell(0,y);
-	  ct++;
-	}
-      } else {
-	match.cell(0,y) = 0;
-      }
-      */
     }
     if (ct>0) { 
       mean /= ct; 
