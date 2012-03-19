@@ -77,32 +77,37 @@ public:
     }
   }
 
+  void applyBit(const std::string& bit, bool query, bool alt) {
+    if (query) {
+      queryBit(bit);
+    } else {
+      addBit(bit,alt);
+    }
+  }
+
+
   void add(std::string txt, bool query, bool alt, int ctrl) {
     //printf("add %s %d %d\n", txt.c_str(), query, ctrl);
     this->query = query;
-    if (query) {
-      queryBit(txt);
-    } else {
-      addBit(txt,alt);
-    }
+    applyBit(txt,query,alt);
     if (ctrl!=0) {
       txt = std::string("^") + txt + "$";
       int len = txt.length();
-      for (int k=8-ctrl*2; k<10; k++) {
+      std::string txt_low = txt;
+      for (size_t c=0; c<txt_low.length(); c++) {
+	txt_low[c] = tolower(txt_low[c]);
+      }
+      bool need_case = (txt_low!=txt);
+      int base = 8-ctrl*2;
+      for (int k=base; k<10; k+=2) {
 	for (int i=0; i<len-k; i++){
-	  std::string part;
-	  std::string low;
-	  part = txt.substr(i,k+1);
-	  low = part;
-	  for (size_t c=0; c<low.length(); c++) {
-	    low[c] = tolower(low[c]);
-	  }
-	  if (query) {
-	    queryBit(part);
-	    if (low!=part) queryBit(low);
-	  } else {
-	    addBit(part,alt);
-	    if (low!=part) addBit(low,alt);
+	  std::string part = txt.substr(i,k+1);
+	  applyBit(part,query,alt);
+	  if (need_case) {
+	    std::string low = txt_low.substr(i,k+1);
+	    if (low!=part) {
+	      applyBit(low,query,alt);
+	    }
 	  }
 	}
       }

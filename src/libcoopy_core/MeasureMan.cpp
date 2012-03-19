@@ -105,6 +105,7 @@ void MeasureMan::compareCore() {
 	  break;
 	}
 	ctrl++;
+	if (ctrl>ctrlMax) ctrl = ctrlMax;
       } else {
 	break;
       }

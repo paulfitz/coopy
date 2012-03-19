@@ -54,16 +54,19 @@ public:
 
 class coopy::cmp::FMultiVal {
 public:
-  std::set<int> indices;
-  size_t len2;
+  std::set<int> indices, indices2;
+  //size_t len2;
 
   FMultiVal() {
-    len2 = 0;
+    //len2 = 0;
   }
 
   void setIndex(int idx, bool alt) {
     if (alt) {
-      if (len2<50) len2++;
+      if (indices2.size()<50) {
+	indices2.insert(idx);
+      }
+      //if (len2<50) len2++;
     } else {
       if (indices.size()<50) {
 	indices.insert(idx);
@@ -73,6 +76,7 @@ public:
 
   void apply(coopy::store::SparseFloatSheet& match,int row) {
     size_t len = indices.size();
+    size_t len2 = indices2.size();
     if (len2>len) len = len2;
     if (len<=0) return;
     if (len>=50) return;
