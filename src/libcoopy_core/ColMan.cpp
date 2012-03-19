@@ -61,6 +61,7 @@ void ColMan::measure(MeasurePass& pass, int ctrl) {
     }
   }
   int hh = (int)aa.size();
+  if (hh>100) hh = 100;
 
   int step = (int)(hh/pow(2,ctrl+4));
   if (step<1) step = 1;
