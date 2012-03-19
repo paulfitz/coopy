@@ -720,20 +720,14 @@ public class Database
                                 TimeZone timeZone)
     throws IOException
   {
-      System.out.println("create");
     if (fileFormat.getJetFormat().READ_ONLY) {
       throw new IOException("jet format '" + fileFormat.getJetFormat() + "' does not support writing");
     }
-      System.out.println("create");
 
     FileChannel channel = openChannel(mdbFile, false);
-      System.out.println("create");
     channel.truncate(0);
-      System.out.println("create");
     transferFrom(channel, getResourceAsStream(fileFormat._emptyFile));
-      System.out.println("create");
     channel.force(true);
-      System.out.println("create");
     return new Database(mdbFile, channel, autoSync, fileFormat, charset, 
                         timeZone, null);
   }
@@ -2133,18 +2127,13 @@ public class Database
     throws IOException
   {
     ReadableByteChannel readChannel = Channels.newChannel(in);
-    System.out.println("transferFrom");
     if(!BROKEN_NIO) {
       // sane implementation
-    System.out.println("transferFrom 2");
       channel.transferFrom(readChannel, 0, MAX_EMPTYDB_SIZE);    
-    System.out.println("transferFrom 2");
     } else {
-	  System.out.println("transferFrom 3");
       // do things the hard way for broken vms
       ByteBuffer bb = ByteBuffer.allocate(8096);
       while(readChannel.read(bb) >= 0) {
-	  System.out.println("transferFrom 3");
         bb.flip();
         channel.write(bb);
         bb.clear();
