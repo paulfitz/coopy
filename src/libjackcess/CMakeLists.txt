@@ -41,8 +41,16 @@ if (USE_JACKCESS)
 
   #add_library(coopy_jackcess jackcess.java ${js} ${CMAKE_BINARY_DIR}/jackcess.h ${js_res_abs2})
 
-  add_library(coopy_jackcess ${CMAKE_CURRENT_SOURCE_DIR}/JackBox.java ${CMAKE_BINARY_DIR}/gcjgen/JackBox.h)
-  target_link_libraries(coopy_jackcess coopy_jackcess_main coopy_jackcess_res)
+  if (HAVE_TR1)
+    ADD_DEFINITIONS("-std=c++0x" -DHAVE_TR1)
+  endif()
+
+  add_library(coopy_jackcess ${CMAKE_CURRENT_SOURCE_DIR}/JackBox.java ${CMAKE_BINARY_DIR}/gcjgen/JackBox.h
+    include/coopy/JackSheet.h JackSheet.cpp
+    include/coopy/JackTextBook.h JackTextBook.cpp
+    )
+  target_link_libraries(coopy_jackcess coopy_jackcess_main 
+    coopy_jackcess_res coopy_core)
 
   add_executable(test_jackcess test_jackcess.cpp)
   target_link_libraries(test_jackcess coopy_jackcess)
