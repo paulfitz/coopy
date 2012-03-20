@@ -1,10 +1,5 @@
 if (USE_JACKCESS)
 
-  message(STATUS "JACKCESS compilation is gcj-dependent, and a bit delicate.")
-
-  set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_MODULE_PATH}")
-  enable_language(JavaC)
-
   add_definitions("-w") # just too verbose for java
   add_definitions("--classpath ${CMAKE_CURRENT_SOURCE_DIR}/jackcess") # :/usr/share/java/log4j.jar:/usr/share/java/commons-logging.jar:/usr/share/java/commons-lang.jar:/usr/share/java/commons-collections.jar")
   include_directories(${CMAKE_SOURCE_DIR}/src/libcoopy_core/include)
