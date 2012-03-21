@@ -56,6 +56,22 @@ bool MergeOutputSqlDiff::changeColumn(const OrderChange& change) {
       }
     }
     break;
+  case ORDER_CHANGE_RENAME:
+    {
+      int idx = change.identityToIndexAfter(change.subject);
+      if (change.namesAfter.size()<=idx) {
+	fprintf(stderr, "Could not find column to rename\n");
+	exit(1);
+      } else {
+	string c = quoteSql(change.namesAfter[idx],k,false);
+	string c2 = quoteSql(change.namesBefore[idx],k,false);
+	fprintf(out,"ALTER TABLE %s RENAME COLUMN %s TO %s;\n",
+		name.c_str(),
+		c.c_str(),
+		c2.c_str());
+      }
+    }
+    break;
   }
   return true;
 }
