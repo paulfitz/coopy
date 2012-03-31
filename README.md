@@ -5,7 +5,7 @@ Diffing, patching, merging, and revision-control for spreadsheets and
 databases.  Focused on keeping data in sync across different 
 technologies (e.g. a MySQL table and an Excel spreedsheet).
 
-* See BUILD.txt for information on building the programs.
+* See BUILD.md for information on building the programs.
   - Summary: CMake
 * See SERVE.txt for server-side information.
   - Summary: fossil
