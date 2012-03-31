@@ -33,30 +33,26 @@ Gnumeric support on Linux
 
 Coopy links Gnumeric's core library for reading/writing spreadsheet files.  At the time of writing, that library is not exposed in a very friendly way in most package managers.  On OSX, no problem, the homebrew script given earlier works fine. On Linux, a few more steps are needed.
 
-* Install gnumeric, ideally through your package manager, e.g.:
+* Install gnumeric, ideally through your package manager (e.g.
+  `apt-get install gnumeric`)
 
-    apt-get install gnumeric
-
-* Install matching gnumeric source, ideally through your package manager, e.g.:
-
-    apt-get source gnumeric
+* Install matching gnumeric source, ideally through your package manager (e.g.
+  `apt-get source gnumeric`)
 
 * If possible, install all build dependencies of gnumeric through your package
-  manager, e.g:
+  manager (e.g `apt-get build-dep gnumeric`)
 
-    apt-get build-dep gnumeric
-
-* Run "./configure" on your gnumeric source, do anything it needs
+* Run `./configure` on your gnumeric source, do anything it needs
   you to do in order to get configured.
-* In the "src" subdirectory of gnumeric source, do 
-  "make gnumeric-paths.h".  If having trouble, just do "make" in the 
+* In the `src` subdirectory of gnumeric source, do 
+  `make gnumeric-paths.h`.  If having trouble, go ahead and do `make` in the 
   gnumeric source directory.
 * That's it!  If we are lucky, there's no need to actually compile gnumeric, 
   we just need its header files.
-* When compiling Coopy, turn on "GNUMERIC" flag in ccmake/cmake-gui
-* Give the path to Gnumeric source in "GNUMERIC_ROOT" in ccmake/cmake-gui
+* When compiling Coopy, turn on the `USE_GNUMERIC` flag with ccmake/cmake-gui
+* Give the path to Gnumeric source in `GNUMERIC_ROOT` with ccmake/cmake-gui
 
-E.g. on Debian/Ubuntu/...:
+Complete steps on Debian/Ubuntu:
 
     apt-get install gnumeric
     apt-get build-dep gnumeric
@@ -78,20 +74,21 @@ If you don't know what that means, you'll need to go learn about that first.
 A lot of the steps described here involve fixes that have been submitted upstream
 so your experience may vary.
 
-* First, get gnumeric from git:
+First, get gnumeric from git:
 
     git clone git://git.gnome.org/gnumeric && cd gnumeric
 
-* Configure gnumeric - we won't actually be compiling under Linux, so
+Configure gnumeric - we won't actually be compiling under Linux, so
   dependencies can be skipped
   
     ./autogen.sh
     LIBSPREADSHEET_CFLAGS=UNUSED LIBSPREADSHEET_LIBS=UNUSED GTK_CFLAGS=UNUSED GTK_LIBS=UNUSED GNUMERIC_LIBS=UNUSED GNUMERIC_CFLAGS=UNUSED ./configure
 
-* Install jhbuild
-* Go to: gnumeric/tools/win32
-* Do "make release"
-* Now, some fixes you may need to make (do "make release" again afterwards)
+Install jhbuild, go to `gnumeric/tools/win32` and do:
+
+    make release
+
+Now, things get messy.  Some fixes you may need to make (do `make release` again afterwards):
 
     # may need to add the "mv" line as below in "build" script:
     (
@@ -122,19 +119,19 @@ so your experience may vary.
 
     # moduleset - specify versions of goffice and gnumeric
       <autotools id="goffice">
-	<branch tag="GOFFICE_0_8_16"/>
+         <branch tag="GOFFICE_0_8_16"/>
       <autotools id="gnumeric">
-	<branch tag="GNUMERIC_1_10_16"/>
+         <branch tag="GNUMERIC_1_10_16"/>
 
     # if gnumeric fails to install because of documentation problem:
       tools/win32/release/src/gnumeric/doc/C/chm$ touch gnumeric.chm
 
-* Once tools/win32/release/deploy/bin/gnumeric.exe exists, you are done.
+Once `tools/win32/release/deploy/bin/gnumeric.exe` exists, you know you are done
+(we don't actually need that executable, but a library that comes with it).
+Just tell Coopy about it:
+
 * Turn on USE_GNUMERIC in coopy
 * Set the GNUMERIC_ROOT in coopy to ../tools/win32/release/deploy
 * Cross-compile Coopy (see scripts/make_packages.sh mingw for tips)
-* You may need to force pkgconfig to look at gnumeric's libraries:
-  
-    PKG_CONFIG_PATH=/home/paulfitz/cvs/gnumeric/gnumeric-1.10.16/tools/win32/release/deploy/lib/pkgconfig/ cmake .
-
+* You may need to force pkgconfig to look at gnumeric's libraries (`PKG_CONFIG_PATH=/home/paulfitz/cvs/gnumeric/gnumeric-1.10.16/tools/win32/release/deploy/lib/pkgconfig/ cmake .`)
 * When testing binaries, you'll need to get the DLLs in release/deploy/bin into your path (or just copy them to Coopy's bin directory).
