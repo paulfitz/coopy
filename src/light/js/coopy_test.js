@@ -36,16 +36,8 @@ LogDiffRender.prototype.end_row = function() {
 LogDiffRender.prototype.end_table = function() {
 }
 
-var input = null;
-
-function set_input(jsn) {
-    input = eval('(' + jsn + ')').sheet.rows;
-}
-
-function test_reader() {
-    var render = new LogDiffRender();
-    render_diff(render,input);
-    var log = render.cell_log;
+LogDiffRender.prototype.to_string = function() {
+    var log = this.cell_log;
     var txt = "";
     for (var it in log) {
 	var v = log[it];
@@ -53,4 +45,22 @@ function test_reader() {
 	    v.row_mode + "] " + v.separator + " : " + v.txt + "\n";
     }
     return txt;
+}
+
+
+var input = null;
+var format = null;
+
+function set_input(jsn) {
+    input = eval('(' + jsn + ')').sheet.rows;
+}
+
+function set_format(fmt) {
+    format = fmt;
+}
+
+function test_reader() {
+    var render = (format=="html")?(new DiffRender()):(new LogDiffRender());
+    render_diff(render,input);
+    return render.to_string();
 }

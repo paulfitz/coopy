@@ -34,6 +34,8 @@ public:
   virtual bool end_row() = 0;
   virtual bool end_table() = 0;
 
+  virtual std::string to_string() const = 0;
+
   virtual bool render(const Table& table);
 };
 

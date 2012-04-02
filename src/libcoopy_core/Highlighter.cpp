@@ -125,6 +125,10 @@ public:
   virtual bool end_table() {
     return true;
   }
+
+  virtual std::string to_string() const {
+    return "";
+  }
 };
 
 

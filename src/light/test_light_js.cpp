@@ -15,12 +15,10 @@ using namespace coopy::js;
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  if (argc<2||argc>3) return 1;
+  if (argc!=4) return 1;
   const char *in_name = argv[1];
-  const char *out_name = "-";
-  if (argc==3) {
-    out_name = argv[2];
-  }
+  const char *format = argv[2];
+  const char *out_name = argv[3];
   Coopy coopy;
   PolyBook book = coopy.loadBook(in_name);
   if (!book.isValid()) return 2;
@@ -30,6 +28,7 @@ int main(int argc, char *argv[]) {
   JsWrap wrap;
   wrap.apply(coopy_js());
   wrap.apply(coopy_test_js());
+  wrap.send("set_format",format);
   wrap.send("set_input",JsonBook::render(&book));
 
   FileIO fout;

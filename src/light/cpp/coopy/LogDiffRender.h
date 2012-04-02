@@ -5,6 +5,8 @@
 
 #include <list>
 
+#include <stdio.h>
+
 namespace coopy {
   namespace light {
     class LogRow;
@@ -71,6 +73,22 @@ public:
   virtual bool end_table() {
     return true;
   }
+
+  virtual std::string to_string() const {
+    std::string result = "";
+    char buf[1000]; // finite length since this is a test class
+    for (std::list<LogCell>::const_iterator it = cell_log.begin();
+	 it != cell_log.end(); it++) {
+      sprintf(buf,"%d,%d [%s/%s] %s : %s\n", it->col, it->row,
+	      it->cell_mode.c_str(),
+	      it->row_mode.c_str(),
+	      it->separator.c_str(),
+	      it->cell.txt.c_str());
+      result += buf;
+    }
+    return result;
+  }
+
 };
 
 #endif

@@ -1190,17 +1190,35 @@ ADD_TEST(stdout_jsonbook_diff_check ${ssdiff} --equal ${TESTS}/bridges.csv stdou
 
 # Basic javascript/C++ compatibility check
 
+set(light_test1_jsonbook ${TESTS}/format/bi_bridge_diff.jsonbook)
+set(light_test1_csv ${TESTS}/format/bi_bridge_diff.csv)
+get_target_property(test_light test_light LOCATION)
+add_test(xx_parse_cpp_log ${test_light} ${light_test1_jsonbook} log xx_parse_cpp.log)
+add_test(xx_parse_cpp_html ${test_light} ${light_test1_jsonbook} html xx_parse_cpp.html)
+
 if (USE_JAVASCRIPT)
-
-  set(book1 ${TESTS}/format/bi_bridge_diff.jsonbook)
-
-  get_target_property(test_light test_light LOCATION)
   get_target_property(test_light_js test_light_js LOCATION)
+  add_test(xx_parse_js_log ${test_light_js} ${light_test1_jsonbook} log xx_parse_js.log)
+  add_test(xx_parse_js_html ${test_light_js} ${light_test1_jsonbook} html xx_parse_js.html)
+  add_test(xx_parse_js_log_match ${CMAKE_COMMAND} -E compare_files xx_parse_cpp.log xx_parse_js.log)
+  add_test(xx_parse_js_html_match ${CMAKE_COMMAND} -E compare_files xx_parse_cpp.html xx_parse_js.html)
+endif()
 
-  add_test(js_parse_cpp ${test_light} ${book1} js_parse_cpp.log)
-  add_test(js_parse_js ${test_light_js} ${book1} js_parse_js.log)
-  add_test(js_parse_match ${CMAKE_COMMAND} -E compare_files js_parse_cpp.log js_parse_js.log)
+option(TEST_RUBY "Test ruby code" OFF)
+if (TEST_RUBY)
+  add_test(xx_parse_ruby_log ruby -I${CMAKE_SOURCE_DIR}/src/light/ruby/ ${CMAKE_SOURCE_DIR}/src/light/ruby/coopy_test.rb ${light_test1_csv} log xx_parse_ruby.log)
+  add_test(xx_parse_ruby_html ruby -I${CMAKE_SOURCE_DIR}/src/light/ruby/ ${CMAKE_SOURCE_DIR}/src/light/ruby/coopy_test.rb ${light_test1_csv} html xx_parse_ruby.html)
+  add_test(xx_parse_ruby_log_match ${CMAKE_COMMAND} -E compare_files xx_parse_cpp.log xx_parse_ruby.log)
+  add_test(xx_parse_ruby_html_match ${CMAKE_COMMAND} -E compare_files xx_parse_cpp.html xx_parse_ruby.html)
+endif()
 
+
+option(TEST_PYTHON "Test python code" OFF)
+if (TEST_PYTHON)
+  add_test(xx_parse_python_log python ${CMAKE_SOURCE_DIR}/src/light/python/coopy_test.py ${light_test1_csv} log xx_parse_python.log)
+  add_test(xx_parse_python_html python ${CMAKE_SOURCE_DIR}/src/light/python/coopy_test.py ${light_test1_csv} html xx_parse_python.html)
+  add_test(xx_parse_python_log_match ${CMAKE_COMMAND} -E compare_files xx_parse_cpp.log xx_parse_python.log)
+  add_test(xx_parse_python_html_match ${CMAKE_COMMAND} -E compare_files xx_parse_cpp.html xx_parse_python.html)
 endif()
 
 #######################################################################

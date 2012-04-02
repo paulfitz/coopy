@@ -77,6 +77,10 @@ DiffRender.prototype.html = function() {
     return this.text_to_insert.join('');
 }
 
+DiffRender.prototype.to_string = function() {
+    return this.html();
+}
+
 function render_diff(render,rows) {
     render.begin_table();
     var change_row = [];
