@@ -93,9 +93,11 @@ function render_diff(render,rows) {
 	    txt = r[0];
 	    if (txt=="@"||txt=="@@") {
 		row_mode = "@@";
-	    } else if (txt=="!"||txt=="+++"||txt=="---") {
+	    } else if (txt=="!"||txt=="+++"||txt=="---"||txt=="...") {
 		row_mode = txt;
                 if (txt=="!") { change_row = r; }
+	    } else if (txt.indexOf("->")>=0) {
+		row_mode = "->";
 	    } else {
 		open = true;
 	    }

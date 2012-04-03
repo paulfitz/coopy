@@ -29,10 +29,12 @@ class DiffRender:
       txt = r[0]
       if txt=="@" or txt=="@@":
         row_mode = "@@"
-      elif txt=="!" or txt=="+++" or txt=="---":
+      elif txt=="!" or txt=="+++" or txt=="---" or txt=="...":
         row_mode = txt
-      elif txt=="!":
-        change_row = r
+        if txt=="!":
+            change_row = r
+      elif str(txt).find("->")>=0:
+        row_mode = "->"
       else:
         open = True
 

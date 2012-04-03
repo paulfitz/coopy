@@ -16,9 +16,11 @@ bool DiffRender::render(const Table& table) {
       cell = table.get_cell(0,y);
       if (cell.txt=="@"||cell.txt=="@@") {
 	row_mode = "@@";
-      } else if (cell.txt=="!"||cell.txt=="+++"||cell.txt=="---") {
+      } else if (cell.txt=="!"||cell.txt=="+++"||cell.txt=="---"||cell.txt=="...") {
 	row_mode = cell.txt;
 	if (cell.txt=="!") { change_row = y; }
+      } else if (cell.txt.find("->")!=string::npos) {
+	row_mode = "->";
       } else {
 	open = true;
       }

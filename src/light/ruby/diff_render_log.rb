@@ -1,6 +1,6 @@
-require 'diff_render'
+require 'diff_output_table'
 
-class DiffRenderLog < DiffRender
+class DiffRenderLog < DiffOutputTable
   def initialize
     @r = 0
     @c = 0

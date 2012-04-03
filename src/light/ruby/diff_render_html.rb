@@ -1,6 +1,6 @@
-require 'diff_render'
+require 'diff_output_table'
 
-class DiffRenderHtml < DiffRender
+class DiffRenderHtml < DiffOutputTable
   def initialize
     @text_to_insert = []
   end

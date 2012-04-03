@@ -1,6 +1,7 @@
 require 'csv'
 require 'diff_render_html.rb'
 require 'diff_render_log.rb'
+require 'diff_parser.rb'
 
 if ARGV.length < 1
   puts "Please supply a filename, pointing to a highlighter diff in CSV format"
@@ -20,7 +21,8 @@ else
   diff = DiffRenderHtml.new
 end
 
-diff.apply rows
+parser = DiffParser.new diff
+parser.apply rows
 
 if ARGV.length == 3
   f = File.open(ARGV[2],"w")
