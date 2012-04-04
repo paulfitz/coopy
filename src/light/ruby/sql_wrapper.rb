@@ -7,4 +7,8 @@ class SqlWrapper
 
   def update(tbl,set_cols,set_vals,cond_cols,cond_vals)
   end
+
+  def columns(tbl)
+    []
+  end
 end

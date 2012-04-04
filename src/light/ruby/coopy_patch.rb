@@ -1,9 +1,13 @@
 #!/usr/bin/env ruby
 
 require 'csv'
-require 'diff_parser.rb'
-require 'diff_apply_sql.rb'
-require 'dbi_sql_wrapper.rb'
+require 'diff_parser'
+require 'diff_apply_sql'
+
+use_sequel = false # switch from dbi to sequel
+
+require 'dbi_sql_wrapper' unless use_sequel
+require 'sequel_sql_wrapper' if use_sequel
 
 if ARGV.length < 2
   puts "call as:"
@@ -14,20 +18,25 @@ end
 fname = ARGV[1]
 rows = CSV.read(fname)
 
-db = DBI.connect('DBI:SQLite3:' + ARGV[0], 'ruby', 'ruby')
-sql = DbiSqlWrapper.new(db)
+if use_sequel
+  sql = SequelSqlWrapper.new('sqlite://' + ARGV[0])
+else
+  db = DBI.connect('DBI:SQLite3:' + ARGV[0], 'ruby', 'ruby')
+  sql = DbiSqlWrapper.new(db)
+end
+
 diff = DiffApplySql.new(sql)
 
 parser = DiffParser.new diff
 
 begin
-  sql.start_transaction
-  parser.apply rows
-  sql.commit
+  sql.transaction do
+    parser.apply rows
+  end
 rescue Exception => e
   puts "Problem: #{e.inspect}"
   puts "Rolling back any changes made."
-  sql.rollback
+  raise e
   exit(1)
 end
 

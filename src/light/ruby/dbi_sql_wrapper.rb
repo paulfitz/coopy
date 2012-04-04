@@ -4,7 +4,15 @@ require 'dbi'
 class DbiSqlWrapper
   def initialize(db)
     @db = db
+    @t = nil
     @qt = nil
+  end
+
+  def complete_table(tbl)
+    return tbl unless tbl.nil?
+    return @t unless @t.nil?
+    @t = @db.tables[0]
+    @t
   end
 
   def quote_table(tbl)
@@ -44,15 +52,20 @@ class DbiSqlWrapper
     stmt.finish
   end
 
-  def start_transaction
+  def transaction(&block)
     @db["AutoCommit"]=false
+    begin
+      block.call
+      @db.commit
+    rescue Exception => e
+      @db.rollback
+      raise e
+    end
   end
 
-  def commit
-    @db.commit
-  end
-
-  def rollback
-    @db.rollback
+  def columns(tbl)
+    tbl = complete_table(tbl)
+    puts tbl.inspect
+    @db.columns(tbl)
   end
 end
