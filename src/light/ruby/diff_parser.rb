@@ -34,7 +34,10 @@ class DiffParser
       end
       cmd = txt
       cells = []
-      row.each_with_index do |txt, c|
+      row.each_with_index do |val, c|
+        nval = nil
+        txt = ""
+        txt = val.to_s unless val.nil?
         txt = "" if txt=="NULL"
         cell_mode = ""
         separator = ""
@@ -45,13 +48,18 @@ class DiffParser
           end
         end
         if cmd.to_s.include? "->"
-          if txt.to_s.include? cmd
+          if txt.include? cmd
             cell_mode = "->"
             separator = cmd
+            b = txt.index(cmd)
+            val = txt[0,b]
+            nval = txt[b+cmd.length,txt.length]
           end
         end
         cells << {
           :txt => txt,
+          :value => val,
+          :new_value => nval,
           :cell_mode => cell_mode,
           :separator => separator,
           :r => r,

@@ -12,4 +12,12 @@ class RowChange
     return [] if @columns.nil?
     @columns.column_by_offset
   end
+
+  def value_at(column)
+    @cells[column[:diff_offset]][:value]
+  end
+
+  def new_value_at(column)
+    @cells[column[:diff_offset]][:new_value]
+  end
 end
