@@ -2,9 +2,8 @@ require 'sql_wrapper'
 require 'dbi'
 
 class DbiSqlWrapper
-  # just sqlite for now
-  def initialize(fname)
-    @db = DBI.connect('DBI:SQLite3:' + fname, 'ruby', 'ruby')
+  def initialize(db)
+    @db = db
     @qt = nil
   end
 

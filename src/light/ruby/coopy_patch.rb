@@ -14,7 +14,8 @@ end
 fname = ARGV[1]
 rows = CSV.read(fname)
 
-sql = DbiSqlWrapper.new(ARGV[0])
+db = DBI.connect('DBI:SQLite3:' + ARGV[0], 'ruby', 'ruby')
+sql = DbiSqlWrapper.new(db)
 diff = DiffApplySql.new(sql)
 
 parser = DiffParser.new diff

@@ -1,5 +1,5 @@
 require 'diff_output_action'
-require 'dbi'
+require 'sql_wrapper'
 
 # for now, assume no schema changes, and a single table
 class DiffApplySql < DiffOutputAction
