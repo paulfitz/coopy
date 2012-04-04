@@ -3,6 +3,8 @@
 require 'csv'
 require 'dbi_sql_wrapper'
 require 'sql_compare'
+require 'diff_output_raw'
+require 'diff_output_tdiff'
 
 use_sequel = false # switch from dbi to sequel
 
@@ -24,5 +26,6 @@ end
 
 cmp = SqlCompare.new(sql,ARGV[1],ARGV[2])
 
-cmp.apply
+cmp.set_output(DiffOutputTdiff.new)
 
+cmp.apply

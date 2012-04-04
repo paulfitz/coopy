@@ -82,7 +82,7 @@ class DbiSqlWrapper < SqlWrapper
 
   def fetch(sql,names)
     @db.select_all(sql) do |row|
-      yield enhash(names,row)
+      yield row
     end
   end
 

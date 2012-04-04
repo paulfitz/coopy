@@ -8,13 +8,13 @@ class DiffColumns
   attr_accessor :column_by_name
   attr_accessor :column_by_offset
 
-  def update
+  def update(prefix=1)
     return if @title_row.nil?
     @column_name = {}
     @column_offset = {}
     @column_by_name = {}
     @column_by_offset = []
-    offset = -1
+    offset = -prefix
     @title_row.each_with_index do |title,idx|
       @column_name[idx] = title
       if offset>=0

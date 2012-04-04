@@ -1,21 +1,40 @@
-require 'diff_output'
+require 'diff_output_action'
 
 # this is just a stub, not yet functional
-class DiffOutputTdiff < DiffOutput
+class DiffOutputTdiff < DiffOutputAction
   def begin_diff
     puts "# tdiff version 0.3"
   end
 
+  def row_show(rc)
+    rc.active_columns.each do |col|
+      title = col[:title]
+      offset = col[:diff_offset]
+      print "|"
+      print title
+      print "="
+      print rc.cells[offset][:txt]
+      unless rc.cells[offset][:new_value].nil?
+        print "->"
+        print rc.cells[offset][:new_value]
+      end
+    end
+    puts "|"
+  end
+
   def row_insert(rc)
-    puts "insert"
+    print "+ "
+    row_show(rc)
   end
 
   def row_delete(rc)
-    puts "delete"
+    print "- "
+    row_show(rc)
   end
 
   def row_update(rc)
-    puts "update"
+    print "= "
+    row_show(rc)
   end
 
   def row_skip(rc)
@@ -24,32 +43,6 @@ class DiffOutputTdiff < DiffOutput
 
   def row_context(rc)
     print "* "
-    rc.active_columns.each do |col|
-      title = col[:title]
-      offset = col[:diff_offset]
-      print "|"
-      print title
-      print "="
-      print rc.cells[offset][:txt]
-    end
-    puts "|"
-  end
-
-  def apply_row(rc)
-    mode = rc.row_mode
-    case mode
-    when "+++"
-      row_insert(rc)
-    when "---"
-      row_delete(rc)
-    when "->"
-      row_update(rc)
-    when "..."
-      row_skip(rc)
-    when ""
-      row_context(rc)
-    else
-      puts "[#{mode}]"
-    end
+    row_show(rc)
   end
 end

@@ -60,7 +60,7 @@ class SequelSqlBare < SqlWrapper
 
   def fetch(sql,names)
     @db.fetch(sql) do |row|
-      yield row
+      yield names.map{|n| row[n]}
     end
   end
 end
