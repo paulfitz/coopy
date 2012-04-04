@@ -4,7 +4,7 @@ require 'csv'
 require 'diff_parser'
 require 'diff_apply_sql'
 
-use_sequel = false # switch from dbi to sequel
+use_sequel = true # switch from dbi to sequel
 
 require 'dbi_sql_wrapper' unless use_sequel
 require 'sequel_sql_wrapper' if use_sequel

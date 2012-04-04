@@ -1,11 +1,15 @@
 require 'sql_wrapper'
 require 'dbi'
 
-class DbiSqlWrapper
+class DbiSqlWrapper < SqlWrapper
   def initialize(db)
     @db = db
     @t = nil
     @qt = nil
+  end
+
+  def clone
+    DbiSqlWrapper.new(@db)
   end
 
   def complete_table(tbl)
@@ -65,7 +69,25 @@ class DbiSqlWrapper
 
   def columns(tbl)
     tbl = complete_table(tbl)
-    puts tbl.inspect
     @db.columns(tbl)
+  end
+
+  def column_names(tbl)
+    columns(tbl).map{|c| c[:name]}
+  end
+
+  def enhash(cols,vals)
+    Hash[*cols.map{|c| c.to_sym}.zip(vals).flatten]
+  end
+
+  def fetch(sql,names)
+    @db.select_all(sql) do |row|
+      yield enhash(names,row)
+    end
+  end
+
+  def primary_key(tbl)
+    # don't seem to have this information? oy.
+    [column_names(tbl)[0]]
   end
 end

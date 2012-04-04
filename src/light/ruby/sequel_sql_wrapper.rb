@@ -1,9 +1,9 @@
 require 'sql_wrapper'
 require 'sequel'
 
-class SequelSqlWrapper
-  def initialize(*params)
-    @db = Sequel.connect(*params)
+class SequelSqlBare < SqlWrapper
+  def initialize(db)
+    @db = db
     @tname = nil
     @t = nil
   end
@@ -40,8 +40,34 @@ class SequelSqlWrapper
   end
 
   def columns(tbl)
-    tbl = complete_table(tbl)
-    puts tbl.inspect
-    @db.columns(tbl)
+    sync_table(tbl)
+    @db.schema(@tname)
+  end
+
+  def column_names(tbl)
+    columns(tbl).map{|x| x[0]}
+  end
+  
+  def primary_key(tbl)
+    cols = columns(tbl)
+    cols.select{|x| x[1][:primary_key]}.map{|x| x[0]}
+  end
+
+  def index(tbl)
+    key = primary_key(tbl)
+    @t.select(*key)
+  end
+
+  def fetch(sql,names)
+    @db.fetch(sql) do |row|
+      yield row
+    end
+  end
+end
+
+
+class SequelSqlWrapper < SequelSqlBare
+  def initialize(*params)
+    super(Sequel.connect(*params))
   end
 end
