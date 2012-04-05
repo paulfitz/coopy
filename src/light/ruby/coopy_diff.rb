@@ -5,6 +5,7 @@ require 'dbi_sql_wrapper'
 require 'sql_compare'
 require 'diff_output_raw'
 require 'diff_output_tdiff'
+require 'diff_render_html'
 
 use_sequel = false # switch from dbi to sequel
 
@@ -26,6 +27,10 @@ end
 
 cmp = SqlCompare.new(sql,ARGV[1],ARGV[2])
 
-cmp.set_output(DiffOutputTdiff.new)
+patch = DiffRenderHtml.new
+cmp.set_output(patch)
+# cmp.set_output(DiffOutputTdiff.new)
 
 cmp.apply
+result = patch.to_string
+puts result unless result == ""

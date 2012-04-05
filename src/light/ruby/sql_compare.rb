@@ -41,7 +41,12 @@ class SqlCompare
     raise "not implemented"
   end
 
-  # within a single database, so we can delegate more work
+  def keyify(lst)
+    # adequate hack for now
+    lst.map{|x| x.to_s}.join("___")
+  end
+
+  # within a single database, so we can delegate more work to sql
   def apply_single
     cols1 = @db1.primary_key(@table1)
     cols2 = @db2.primary_key(@table2)
@@ -66,6 +71,17 @@ class SqlCompare
 
     @patch.begin_diff
 
+    rc_columns = DiffColumns.new
+    rc_columns.title_row = all_cols
+    rc_columns.update(0)
+
+    cells = all_cols.map{|v| { :txt => v, :value => v, :cell_mode => "" }}
+    rc = RowChange.new("@@",cells)
+    @patch.apply_row(rc)
+
+    pending_rcs = []
+    want_context = @patch.want_context
+
     # find rows in table1 that are not in table2
     # join t1 and t2, find
     # select .., .. from t1 where not exists (select 1 from x=x y=y)
@@ -79,17 +95,19 @@ class SqlCompare
     qkeys = cols.map{|c| @db1.quote_column(c)}.map{|c| "#{qtable1}.#{c} = #{qtable2}.#{c}"}.join(" AND ")
     qekeys = ecols.map{|c| @db1.quote_column(c)}.map{|c| "#{qtable1}.#{c} <> #{qtable2}.#{c}"}.join(" OR ")
 
-    rc_columns = DiffColumns.new
-    rc_columns.title_row = all_cols
-    rc_columns.update(0)
-
     # Things in R that are not in L
     sel = "SELECT #{qall} FROM #{qtable2} WHERE NOT EXISTS (SELECT 1 FROM #{qtable1} WHERE #{qkeys})"
+    active = all_cols.each_with_index.map{|c,i| cols.include?(c) ? i : nil}.compact
     @db1.fetch(sel,all_cols) do |row|
       cells = row.map{|v| { :txt => v, :value => v, :cell_mode => "" }}
       rc = RowChange.new("+++",cells)
       rc.columns = rc_columns
-      @patch.apply_row(rc)
+      if want_context
+        rc.key = keyify(row.values_at(*active))
+        pending_rcs << rc
+      else
+        @patch.apply_row(rc)
+      end
     end
 
     # Things in L and R that are not equal
@@ -109,6 +127,7 @@ class SqlCompare
     qall2 = qall2.flatten.join(", ")
 
     sel = "SELECT #{qall2} FROM #{qtable1} INNER JOIN #{qtable2} ON #{qkeys} WHERE #{qekeys}"
+    active2 = active.map{|x| 2*x}
     @db1.fetch(sel,nall2) do |row|
       pairs = row.enum_for(:each_slice,2).to_a
       cells = pairs.map do |v| 
@@ -120,20 +139,82 @@ class SqlCompare
       end
       rc = RowChange.new("->",cells)
       rc.columns = rc_columns
-      @patch.apply_row(rc)
+      if want_context
+        rc.key = keyify(row.values_at(*active2))
+        pending_rcs << rc
+      else
+        @patch.apply_row(rc)
+      end
     end
 
-    rc_columns = DiffColumns.new
-    rc_columns.title_row = cols
-    rc_columns.update(0)
+    # rc_columns = DiffColumns.new
+    # rc_columns.title_row = cols
+    # rc_columns.update(0)
 
     # Things in L that are not in R
-    sel = "SELECT #{qkey} FROM #{qtable1} WHERE NOT EXISTS (SELECT 1 FROM #{qtable2} WHERE #{qkeys})"
-    @db1.fetch(sel,cols) do |row|
+    sel = "SELECT #{qall} FROM #{qtable1} WHERE NOT EXISTS (SELECT 1 FROM #{qtable2} WHERE #{qkeys})"
+    @db1.fetch(sel,all_cols) do |row|
       cells = row.map{|v| { :txt => v, :value => v, :cell_mode => "" }}
       rc = RowChange.new("---",cells)
       rc.columns = rc_columns
-      @patch.apply_row(rc)
+      if want_context
+        rc.key = keyify(row.values_at(*active))
+        pending_rcs << rc
+      else
+        @patch.apply_row(rc)
+      end
+    end
+
+    if want_context
+      # in that case we need to do somewhat less nippy stuff
+      hits = {}
+      pending_rcs.each do |rc|
+        hits[rc.key] = rc
+      end
+      sel = "SELECT #{qall}, 0 AS __coopy_tag__ FROM #{qtable1} UNION SELECT #{qall}, 1 AS __coopy_tag__ FROM #{qtable2} ORDER BY #{qkey}"
+      hist = []
+      n = 2
+      pending = 0
+      skipped = false
+      @db1.fetch(sel,all_cols + ["__coopy_tag__"]) do |row|
+        tag = row.pop.to_i
+        # puts "passing by #{row.inspect} #{tag.inspect}"
+        k = keyify(row.values_at(*active))
+        if hits[k]
+          hist.each do |row0|
+            cells = row0.map{|v| { :txt => v, :value => v, :cell_mode => "" }}
+            rc = RowChange.new("",cells)
+            rc.columns = rc_columns
+            @patch.apply_row(rc)
+          end
+          hist.clear
+          pending = n
+          @patch.apply_row(hits[k])
+          hits.delete(k)
+          skipped = false
+        elsif tag == 1
+          # puts "skip tag 1"
+        elsif pending>0
+          cells = row.map{|v| { :txt => v, :value => v, :cell_mode => "" }}
+          rc = RowChange.new("",cells)
+          rc.columns = rc_columns
+          @patch.apply_row(rc)
+          pending = pending-1
+          skipped = false
+        else
+          hist << row
+          if hist.length>n
+            if !skipped
+              cells = row.map{|v| { :txt => "...", :value => "...", :cell_mode => "" }}
+              rc = RowChange.new("...",cells)
+              rc.columns = rc_columns
+              @patch.apply_row(rc)
+              skipped = true
+            end
+            hist.shift
+          end
+        end
+      end
     end
 
     @patch.end_diff

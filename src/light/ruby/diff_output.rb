@@ -14,4 +14,8 @@ class DiffOutput
   def to_string
     ""
   end
+
+  def want_context
+    true
+  end
 end
