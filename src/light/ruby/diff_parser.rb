@@ -35,6 +35,7 @@ class DiffParser
       cmd = txt
       cells = []
       row.each_with_index do |val, c|
+        next if c == 0
         nval = nil
         txt = ""
         txt = val.to_s unless val.nil?
@@ -61,9 +62,7 @@ class DiffParser
           :value => val,
           :new_value => nval,
           :cell_mode => cell_mode,
-          :separator => separator,
-          :r => r,
-          :c => c
+          :separator => separator
         }
       end
       rc = RowChange.new(row_mode,cells)

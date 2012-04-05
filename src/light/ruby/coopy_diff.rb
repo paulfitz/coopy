@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'csv'
 require 'dbi_sql_wrapper'
 require 'sql_compare'
 require 'diff_output_raw'
 require 'diff_output_tdiff'
 require 'diff_render_html'
+require 'diff_render_csv'
 
 use_sequel = false # switch from dbi to sequel
 
@@ -28,8 +28,10 @@ end
 cmp = SqlCompare.new(sql,ARGV[1],ARGV[2])
 
 patch = DiffRenderHtml.new
+# patch = DiffOutputTdiff.new
+patch = DiffRenderCsv.new("output.csv")
+
 cmp.set_output(patch)
-# cmp.set_output(DiffOutputTdiff.new)
 
 cmp.apply
 result = patch.to_string
