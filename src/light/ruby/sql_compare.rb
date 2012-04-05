@@ -1,6 +1,5 @@
 require 'diff_columns'
 require 'row_change'
-require 'enumerator'
 
 class SqlCompare
   def initialize(db1,db2)
@@ -89,7 +88,7 @@ class SqlCompare
     weave = all_cols.map{|c| [[sql_table1,@db1.quote_column(c)],
                               [sql_table2,@db2.quote_column(c)]]}.flatten(1)
     dbl_cols = weave.map{|c| "#{c[0]}.#{c[1]}"}
-    sql_dbl_cols = weave.map{|c| "#{c[0]}.#{c[1]} AS #{c[0]}_#{c[1]}"}.join(",")
+    sql_dbl_cols = weave.map{|c| "#{c[0]}.#{c[1]} AS #{c[0].gsub('.','_')}_#{c[1].gsub('.','_')}"}.join(",")
 
     # Prepare a map of primary key offsets.
     keys_in_all_cols = key_cols.each.map{|c| all_cols.index(c)}

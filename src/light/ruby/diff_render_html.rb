@@ -44,11 +44,11 @@ class DiffRenderHtml < DiffOutputTable
     cell_decorate = ""
     case mode
     when "+++"
-      cell_decorate = " bgcolor=\"#7fff7f\" style=\"background-color: #7fff7f;\"";
+      cell_decorate = " bgcolor=\"#7fff7f\" style=\"background-color: #7fff7f;\""
     when "---"
-      cell_decorate = " bgcolor=\"#ff7f7f\" style=\"background-color: #ff7f7f;\"";
-    when "->":
-	cell_decorate = " bgcolor=\"#7f7fff\" style=\"background-color: #7f7fff;\"";
+      cell_decorate = " bgcolor=\"#ff7f7f\" style=\"background-color: #ff7f7f;\""
+    when "->"
+      cell_decorate = " bgcolor=\"#7f7fff\" style=\"background-color: #7f7fff;\""
     end
     self.insert @td_open+cell_decorate+">"
     self.insert txt
