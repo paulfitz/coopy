@@ -1,0 +1,10 @@
+option(TEST_RUBY "Test ruby code" OFF)
+if (TEST_RUBY)
+  set(light_test1_jsonbook ${TESTS}/format/bi_bridge_diff.jsonbook)
+  set(light_test1_csv ${TESTS}/format/bi_bridge_diff.csv)
+  add_test(xx_parse_ruby_log ruby -I${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/coopy_test.rb ${light_test1_csv} log xx_parse_ruby.log)
+  add_test(xx_parse_ruby_html ruby -I${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/coopy_test.rb ${light_test1_csv} html xx_parse_ruby.html)
+  add_test(xx_parse_ruby_log_match ${CMAKE_COMMAND} -E compare_files ${TEST_STORE}/xx_parse_cpp.log xx_parse_ruby.log)
+  add_test(xx_parse_ruby_html_match ${CMAKE_COMMAND} -E compare_files ${TEST_STORE}/xx_parse_cpp.html xx_parse_ruby.html)
+endif()
+

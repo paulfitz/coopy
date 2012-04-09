@@ -105,6 +105,11 @@ add_subdirectory(gui)
 
 add_subdirectory(light)
 
+SET(TESTS ${CMAKE_SOURCE_DIR}/tests)
+set(TEST_STORE ${CMAKE_CURRENT_BINARY_DIR}/test_store)
+make_directory(${TEST_STORE})
+
 add_subdirectory(testing)
+add_subdirectory(ruby)
 
 include(CoopyDescribe)

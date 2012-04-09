@@ -17,6 +17,10 @@ class SqliteSqlWrapper < SqlWrapper
     return @db.execute(template,*vals)
   end
 
+  def get_table_names
+    return sqlite_execute("SELECT name FROM sqlite_master WHERE type='table'",[]).flatten
+  end
+
   def complete_table(tbl)
     @t = tbl unless tbl.nil?
     @t
@@ -59,7 +63,13 @@ class SqliteSqlWrapper < SqlWrapper
     tbl = quote_table(tbl)
     cols = @info[tbl]
     if cols.nil?
-      query = "PRAGMA table_info(#{tbl})"
+      if tbl.include? '.'
+        dbname = tbl.gsub(/\..*/,'.')
+        tbname = tbl.gsub(/.*\./,'')
+        query = "PRAGMA #{dbname}table_info(#{tbname})"
+      else
+        query = "PRAGMA table_info(#{tbl})"
+      end
       cols = @info[tbl] = sqlite_execute(query,[])
     end
     cols
