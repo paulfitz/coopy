@@ -1,16 +1,16 @@
 require 'sql_wrapper'
-require 'sqlite3'
 
 class SqliteSqlWrapper < SqlWrapper
   def initialize(db)
     @db = db
     @t = nil
     @qt = nil
+    @pk = nil
     @info = {}
   end
 
-  def clone
-    SqliteSqlWrapper.new(@db)
+  def set_primary_key(lst)
+    @pk = lst
   end
 
   def sqlite_execute(template,vals)
@@ -31,6 +31,11 @@ class SqliteSqlWrapper < SqlWrapper
     @t
   end
 
+  def quote_column(col)
+    return col if col.match(/^[a-zA-Z0-9_]+$/)
+    "`#{col}`"
+  end
+
   def insert(tbl,cols,vals)
     tbl = quote_table(tbl)
     template = cols.map{|x| '?'}.join(",")
@@ -40,16 +45,16 @@ class SqliteSqlWrapper < SqlWrapper
 
   def delete(tbl,cols,vals)
     tbl = quote_table(tbl)
-    template = cols.map{|c| @db.quote(c) + ' = ?'}.join(" AND ")
+    template = cols.map{|c| quote_column(c) + ' = ?'}.join(" AND ")
     template = "DELETE FROM #{tbl} WHERE #{template}"
     sqlite_execute(template,vals)
   end
   
   def update(tbl,set_cols,set_vals,cond_cols,cond_vals)
     tbl = quote_table(tbl)
-    conds = cond_cols.map{|c| @db.quote(c) + ' = ?'}.join(" AND ")
-    sets = set_cols.map{|c| @db.quote(c) + ' = ?'}.join(", ")
-    template = "UPDATE #{@qt} SET #{sets} WHERE #{conds}"
+    conds = cond_cols.map{|c| quote_column(c) + ' = ?'}.join(" AND ")
+    sets = set_cols.map{|c| quote_column(c) + ' = ?'}.join(", ")
+    template = "UPDATE #{tbl} SET #{sets} WHERE #{conds}"
     v = set_vals + cond_vals
     sqlite_execute(template,v)
   end
@@ -59,24 +64,30 @@ class SqliteSqlWrapper < SqlWrapper
     block.call
   end
 
+  def pragma(tbl,info)
+    if tbl.include? '.'
+      dbname = tbl.gsub(/\..*/,'.')
+      tbname = tbl.gsub(/.*\./,'')
+      query = "PRAGMA #{dbname}#{info}(#{tbname})"
+    else
+      query = "PRAGMA #{info}(#{tbl})"
+    end
+    result = sqlite_execute(query,[])
+    result
+  end
+
+  def part(row,n,name)
+    row[n]
+  end
+
   def columns(tbl)
     tbl = quote_table(tbl)
-    cols = @info[tbl]
-    if cols.nil?
-      if tbl.include? '.'
-        dbname = tbl.gsub(/\..*/,'.')
-        tbname = tbl.gsub(/.*\./,'')
-        query = "PRAGMA #{dbname}table_info(#{tbname})"
-      else
-        query = "PRAGMA table_info(#{tbl})"
-      end
-      cols = @info[tbl] = sqlite_execute(query,[])
-    end
-    cols
+    @info[tbl] = pragma(tbl,"table_info") unless @info.has_key? tbl
+    @info[tbl]
   end
 
   def column_names(tbl)
-    columns(tbl).map{|c| c[1]}
+    columns(tbl).map{|c| part(c,1,"name")}
   end
 
   def fetch(sql,names)
@@ -86,7 +97,23 @@ class SqliteSqlWrapper < SqlWrapper
   end
 
   def primary_key(tbl)
+    return @pk unless @pk.nil?
     cols = columns(tbl)
-    cols.select{|c| c[5]==1}.map{|c| c[1]}
+    cols = cols.select{|c| part(c,5,"pk").to_s=="1"}.map{|c| part(c,1,"name")}
+    if cols.length == 0
+      cols = pk_from_unique_index(tbl)
+    end
+    @pk = cols if cols.length>0
+    cols
+  end
+
+  def pk_from_unique_index(tbl)
+    pragma(tbl,"index_list").each do |row|
+      if part(row,2,"unique").to_s == "1"
+        idx = part(row,1,"name")
+        return pragma(idx,"index_info").map{|r| part(r,2,"name")}
+      end
+    end
+    nil
   end
 end

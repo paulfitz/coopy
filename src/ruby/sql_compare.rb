@@ -88,7 +88,7 @@ class SqlCompare
     weave = all_cols.map{|c| [[sql_table1,@db1.quote_column(c)],
                               [sql_table2,@db2.quote_column(c)]]}.flatten(1)
     dbl_cols = weave.map{|c| "#{c[0]}.#{c[1]}"}
-    sql_dbl_cols = weave.map{|c| "#{c[0]}.#{c[1]} AS #{c[0].gsub('.','_')}_#{c[1].gsub('.','_')}"}.join(",")
+    sql_dbl_cols = weave.map{|c| "#{c[0]}.#{c[1]} AS #{c[0].gsub(/[^a-zA-Z0-9]/,'_')}_#{c[1].gsub(/[^a-zA-Z0-9]/,'_')}"}.join(",")
 
     # Prepare a map of primary key offsets.
     keys_in_all_cols = key_cols.each.map{|c| all_cols.index(c)}
@@ -109,7 +109,7 @@ class SqlCompare
 
     # If we are supposed to provide context, we need to deal with row order.
     if @patch.want_context
-      sql = "SELECT #{sql_all_cols}, 0 AS __coopy_tag__ FROM #{sql_table1} UNION SELECT #{sql_all_cols}, 1 AS __coopy_tag__ FROM #{sql_table2} ORDER BY #{sql_key_cols}"
+      sql = "SELECT #{sql_all_cols}, 0 AS __coopy_tag__ FROM #{sql_table1} UNION SELECT #{sql_all_cols}, 1 AS __coopy_tag__ FROM #{sql_table2} ORDER BY #{sql_key_cols}, __coopy_tag__"
       apply_with_context(sql,all_cols,keys_in_all_cols)
     end
 
@@ -161,6 +161,13 @@ class SqlCompare
     end
   end
 
+  def emit_skip(row)
+    cells = row.map{|v| { :txt => "...", :value => "...", :cell_mode => "" }}
+    rc = RowChange.new("...",cells)
+    rc.columns = @rc_columns
+    @patch.apply_row(rc)
+  end
+
   # Do the context dance.
   def apply_with_context(sql,all_cols,keys_in_all_cols)
     hits = {}
@@ -171,10 +178,13 @@ class SqlCompare
     n = 2
     pending = 0
     skipped = false
+    noted = false
+    last_row = nil
     @db1.fetch(sql,all_cols + ["__coopy_tag__"]) do |row|
       tag = row.pop.to_i
       k = keyify(row.values_at(*keys_in_all_cols))
       if hits[k]
+        emit_skip(row) if skipped
         hist.each do |row0|
           cells = row0.map{|v| { :txt => v, :value => v, :cell_mode => "" }}
           rc = RowChange.new("",cells)
@@ -186,9 +196,11 @@ class SqlCompare
         @patch.apply_row(hits[k])
         hits.delete(k)
         skipped = false
+        noted =  true
       elsif tag == 1
         # ignore redundant row
       elsif pending>0
+        emit_skip(row) if skipped
         cells = row.map{|v| { :txt => v, :value => v, :cell_mode => "" }}
         rc = RowChange.new("",cells)
         rc.columns = @rc_columns
@@ -198,17 +210,13 @@ class SqlCompare
       else
         hist << row
         if hist.length>n
-          if !skipped
-            cells = row.map{|v| { :txt => "...", :value => "...", :cell_mode => "" }}
-            rc = RowChange.new("...",cells)
-            rc.columns = @rc_columns
-            @patch.apply_row(rc)
-            skipped = true
-          end
+          skipped = true
+          last_row = row
           hist.shift
         end
       end
     end
+    emit_skip(last_row) if skipped and noted
   end
 end
 

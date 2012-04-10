@@ -4,9 +4,13 @@ require 'diff_output_raw'
 require 'diff_output_tdiff'
 require 'diff_render_html'
 require 'diff_render_csv'
+require 'diff_output_action'
+require 'diff_output_group'
+require 'diff_apply_sql'
 
 require 'sqlite_sql_wrapper'
 require 'sql_compare'
+require 'sqlite3'
 
 if ARGV.length < 2
   puts "call as:"
@@ -39,12 +43,14 @@ end
 
 cmp = SqlCompare.new(sql,name1,name2)
 
-patch = DiffRenderHtml.new
+patches = DiffOutputGroup.new
+patches << DiffRenderHtml.new
 # patch = DiffOutputTdiff.new
-patch = DiffRenderCsv.new("output.csv")
+patches << DiffRenderCsv.new("output.csv")
+# patches << DiffApplySql.new(sql,name1)
 
-cmp.set_output(patch)
+cmp.set_output(patches)
 
 cmp.apply
-result = patch.to_string
+result = patches.to_string
 puts result unless result == ""
