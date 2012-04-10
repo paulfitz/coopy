@@ -26,14 +26,20 @@ class SqliteSqlWrapper < SqlWrapper
     @t
   end
 
+  def quote_with_dots(x)
+    return x if x.match(/^[a-zA-Z0-9_]+$/)
+    x.split('.').map{|p| "`#{p}`"}.join('.')
+  end
+
   def quote_table(tbl)
     complete_table(tbl)
-    @t
+    return @t if @t.match(/^[a-zA-Z0-9_]+$/)
+    quote_with_dots(@t)
   end
 
   def quote_column(col)
     return col if col.match(/^[a-zA-Z0-9_]+$/)
-    "`#{col}`"
+    quote_with_dots(col)
   end
 
   def insert(tbl,cols,vals)
@@ -66,10 +72,12 @@ class SqliteSqlWrapper < SqlWrapper
 
   def pragma(tbl,info)
     if tbl.include? '.'
-      dbname = tbl.gsub(/\..*/,'.')
-      tbname = tbl.gsub(/.*\./,'')
-      query = "PRAGMA #{dbname}#{info}(#{tbname})"
+      dbname, tbname, *ignore = tbl.split('.')
+      dbname = quote_with_dots(dbname)
+      tbname = quote_with_dots(tbname)
+      query = "PRAGMA #{dbname}.#{info}(#{tbname})"
     else
+      tbl = quote_with_dots(tbl)
       query = "PRAGMA #{info}(#{tbl})"
     end
     result = sqlite_execute(query,[])
@@ -81,7 +89,7 @@ class SqliteSqlWrapper < SqlWrapper
   end
 
   def columns(tbl)
-    tbl = quote_table(tbl)
+    tbl = complete_table(tbl)
     @info[tbl] = pragma(tbl,"table_info") unless @info.has_key? tbl
     @info[tbl]
   end
@@ -115,5 +123,20 @@ class SqliteSqlWrapper < SqlWrapper
       end
     end
     nil
+  end
+
+  # copy the structure of an attached table, along with any indexes
+  def copy_table_structure(rdb,tbl)
+    template = "SELECT sql, type from X.sqlite_master WHERE tbl_name = ? ORDER BY type DESC"
+    lsql = template.gsub('X',"main")
+    rsql = template.gsub('X',quote_with_dots(rdb))
+    args = [quote_with_dots(tbl)]
+    lschema = sqlite_execute(lsql,args)
+    rschema = sqlite_execute(rsql,args)
+    if lschema.length>0
+      return false
+    end
+    rschema.each{ |row| sqlite_execute(row[0],[]) }
+    true
   end
 end

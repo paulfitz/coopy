@@ -1,14 +1,6 @@
 def link_tables(watch_scraper,watch_tables)
-  current_tables = ScraperWiki.show_tables()
-  remote_tables = nil
-  watch_tables.each do |tbl|
-    unless current_tables.has_key? tbl
-      remote_tables = ScraperWiki.show_tables("#{watch_scraper}") if remote_tables.nil? 
-      sql = remote_tables[tbl]
-      #puts "Making #{tbl}= #{sql}"
-      ScraperWiki.sqliteexecute(sql)
-    end
-  end
+  sql = ScraperwikiSqlWrapper.new(ScraperWiki)
+  watch_tables.each { |tbl| sql.copy_table_structure(watch_scraper,tbl) }
 end
 
 class CoopyResult

@@ -28,9 +28,9 @@ name2 = nil
 case ARGV.length
 when 2
   name0 = sql.get_table_names[0]
-  db.execute("ATTACH ? AS __peer__",ARGV[1])
+  db.execute("ATTACH ? AS `__peer_ - _`",ARGV[1])
   name1 = "main.#{name0}"
-  name2 = "__peer__.#{name0}"
+  name2 = "__peer_ - _.#{name0}"
 when 3
   name1 = ARGV[1]
   name2 = ARGV[2]
@@ -39,7 +39,6 @@ when 4
   db.execute("ATTACH ? AS __peer__",ARGV[2])
   name2 = "__peer__.#{ARGV[3]}"
 end
-
 
 cmp = SqlCompare.new(sql,name1,name2)
 
