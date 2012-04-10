@@ -80,8 +80,8 @@ class SqlCompare
     sql_table2 = @db1.quote_table(@table2)
     sql_key_cols = key_cols.map{|c| @db1.quote_column(c)}.join(",")
     sql_all_cols = all_cols.map{|c| @db1.quote_column(c)}.join(",")
-    sql_key_match = key_cols.map{|c| @db1.quote_column(c)}.map{|c| "#{sql_table1}.#{c} = #{sql_table2}.#{c}"}.join(" AND ")
-    sql_data_mismatch = data_cols.map{|c| @db1.quote_column(c)}.map{|c| "#{sql_table1}.#{c} <> #{sql_table2}.#{c}"}.join(" OR ")
+    sql_key_match = key_cols.map{|c| @db1.quote_column(c)}.map{|c| "#{sql_table1}.#{c} IS #{sql_table2}.#{c}"}.join(" AND ")
+    sql_data_mismatch = data_cols.map{|c| @db1.quote_column(c)}.map{|c| "#{sql_table1}.#{c} IS NOT #{sql_table2}.#{c}"}.join(" OR ")
 
     # For one query we will need to interleave columns from two tables.  For
     # portability we need to give these columns distinct names.

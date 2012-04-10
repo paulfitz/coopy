@@ -16,6 +16,11 @@ class DiffOutputTable < DiffOutput
   def end_row
   end
 
+  def quote(x)
+    return "" if x.nil?
+    x
+  end
+
   def apply_row(rc)
     self.begin_row(rc.row_mode)
     self.insert_cell(rc.row_mode,
@@ -23,7 +28,7 @@ class DiffOutputTable < DiffOutput
                      (rc.row_mode=="->") ? rc.row_mode : "")
     rc.cells.each do |cell|
       if cell[:new_value]
-        self.insert_cell(cell[:value] + "->" + cell[:new_value],
+        self.insert_cell(quote(cell[:value]) + "->" + quote(cell[:new_value]),
                          cell[:cell_mode],
                          "->")
       else

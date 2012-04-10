@@ -51,14 +51,14 @@ class SqliteSqlWrapper < SqlWrapper
 
   def delete(tbl,cols,vals)
     tbl = quote_table(tbl)
-    template = cols.map{|c| quote_column(c) + ' = ?'}.join(" AND ")
+    template = cols.map{|c| quote_column(c) + ' IS ?'}.join(" AND ")
     template = "DELETE FROM #{tbl} WHERE #{template}"
     sqlite_execute(template,vals)
   end
   
   def update(tbl,set_cols,set_vals,cond_cols,cond_vals)
     tbl = quote_table(tbl)
-    conds = cond_cols.map{|c| quote_column(c) + ' = ?'}.join(" AND ")
+    conds = cond_cols.map{|c| quote_column(c) + ' IS ?'}.join(" AND ")
     sets = set_cols.map{|c| quote_column(c) + ' = ?'}.join(", ")
     template = "UPDATE #{tbl} SET #{sets} WHERE #{conds}"
     v = set_vals + cond_vals
