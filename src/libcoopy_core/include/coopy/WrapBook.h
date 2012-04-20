@@ -31,6 +31,7 @@ public:
   bool attach(DataSheet& sheet, bool owned=false) {
     sheet = PolySheet(&sheet,owned);
     name = coopy_get_default_table_name();
+    return true;
   }
 
   virtual std::vector<std::string> getNames() {

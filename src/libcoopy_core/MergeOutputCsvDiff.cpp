@@ -169,7 +169,7 @@ bool MergeOutputCsvDiff::operateRow(const RowChange& change, const char *tag) {
 
   if (prevSelect!=showForSelect || prevDescribe!=showForDescribe) {
     clearThroat();
-    result.addField((tag=="act")?"link":"row",false);
+    result.addField((string(tag)=="act")?"link":"row",false);
     result.addField(tag,false);
     for (int i=0; i<(int)change.names.size(); i++) {
       if (activeColumn[change.names[i]]) {

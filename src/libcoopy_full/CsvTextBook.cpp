@@ -217,7 +217,7 @@ CsvSheet *CsvTextBook::nextSheet(const char *name, bool named) {
   CsvSheet *data = new CsvSheet;
   if (data==NULL) {
     fprintf(stderr,"Failed to allocated data sheet\n");
-    return false;
+    return NULL;
   }
   PolySheet sheet(data,true);
   name2index[name] = (int)sheets.size();

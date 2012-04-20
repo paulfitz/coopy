@@ -128,6 +128,7 @@ void MergeOutputTdiff::showSheet(bool bound) {
 
 bool MergeOutputTdiff::mergeDone() {
   flushRows();
+  return true;
 }
 
 bool MergeOutputTdiff::changeColumn(const OrderChange& change) {

@@ -64,6 +64,7 @@ public:
   virtual bool addedHeader() {
     fprintf(stderr, "Don't know what to do with header\n");
     COOPY_ASSERT(1==0);
+    return false;
   }
 
   virtual bool deleteColumn(const ColumnRef& column) {
@@ -138,6 +139,7 @@ public:
 
   virtual bool addedHeader() {
     hh++;
+    return true;
   }  
 
   virtual bool setHeaderHeight(int hh) {

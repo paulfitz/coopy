@@ -124,6 +124,7 @@ public:
 
   bool setOutput(const CompareOutput& o) {
     out = o.out;
+    return true;
   }
 
   bool canInsert() const {

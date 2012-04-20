@@ -130,6 +130,7 @@ bool Patcher::copyFile(const char *src, const char *dest) {
 bool Patcher::setFlags(const CompareFlags& flags) {
   this->flags = flags;
   out = flags.out;
+  return true;
 }
 
 void Patcher::attachBook(coopy::store::TextBook& book) {

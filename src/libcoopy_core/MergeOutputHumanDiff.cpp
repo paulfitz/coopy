@@ -135,6 +135,7 @@ bool MergeOutputHumanDiff::mergeStart() {
 
 bool MergeOutputHumanDiff::mergeDone() {
   checkMessage();
+  return true;
 }
 
 bool MergeOutputHumanDiff::changeColumn(const OrderChange& change) {

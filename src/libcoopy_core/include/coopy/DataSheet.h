@@ -383,7 +383,7 @@ public:
 
   virtual bool invent(int x) = 0;
 
-  virtual bool setDelta(int dh) { delta = dh; }
+  virtual bool setDelta(int dh) { delta = dh; return true; }
 
   // only valid AFTER flush
   virtual RowRef getRowAfterFlush() = 0;
@@ -456,6 +456,7 @@ public:
 
   virtual bool invent(int x) {
     cache.invent[x] = true;
+    return true;
   }
 
   virtual bool flush() {

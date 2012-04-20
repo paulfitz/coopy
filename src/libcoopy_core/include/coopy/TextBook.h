@@ -105,8 +105,8 @@ public:
       result += ":\n";
       result += readSheet(names[i]).toString();
       result += "\n";
-      return result;
     }
+    return result;
   }
 
 private:

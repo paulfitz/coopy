@@ -48,6 +48,7 @@ public:
   virtual bool changeRow(const RowChange& change) {
     //rowCache.push_back(change);
     changeRow(change,false,true);
+    return true;
   }
 
   bool changeRow(const RowChange& change, bool factored, bool caching);

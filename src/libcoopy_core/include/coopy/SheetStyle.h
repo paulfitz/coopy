@@ -93,6 +93,7 @@ public:
 
   bool setEolAtEof(bool flag) {
     eolAtEof = flag;
+    return true;
   }
 
   static const SheetStyle defaultStyle;

@@ -1,7 +1,7 @@
 #include <coopy/Stat.h>
 
-using namespace std;
-using namespace coopy::store;
+//using namespace std;
+//using namespace coopy::store;
 
 /*
 Stat Stat::normalize(const FloatSheet& sheet, 

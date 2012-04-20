@@ -50,6 +50,7 @@ public:
 
   bool setStrict(bool strict) {
     this->strict = strict;
+    return strict;
   }
 
   bool isStrict() {

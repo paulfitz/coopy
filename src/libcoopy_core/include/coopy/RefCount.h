@@ -74,6 +74,7 @@ public:
     if (ref!=0/*NULL*/&&owned) {
       ref->addReference();
     }
+    return *this;
   }
 
   virtual ~Poly() {

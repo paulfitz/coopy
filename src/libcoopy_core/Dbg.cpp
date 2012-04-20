@@ -12,6 +12,14 @@ string coopy_default_eol_style = "default";
 string coopy_eol_store = "\n";
 
 #ifdef __linux__
+#ifdef __GNUC__
+#ifndef __llvm__
+#define USE_TRACE
+#endif
+#endif
+#endif
+
+#ifdef USE_TRACE
 #include <execinfo.h>
 #include <stdio.h>
 #include <stdlib.h>

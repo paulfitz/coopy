@@ -109,6 +109,7 @@ bool PolyValue::setString(const std::string& str) {
 
 bool PolyValue::setNull() {
   clear();
+  return true;
 }
 
 bool PolyValue::setMap() {

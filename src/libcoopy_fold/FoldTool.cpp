@@ -20,7 +20,7 @@ typedef vector<int> ints;
 
 class SheetCellCmp {
 public:
-  bool operator() (const SheetCell& e1, const SheetCell& e2) {
+  bool operator() (const SheetCell& e1, const SheetCell& e2) const {
     if (e1.text<e2.text) return true;
     if (e1.text>e2.text) return false;
     return (e1.escaped?1:0)<(e2.escaped?1:0);
@@ -148,6 +148,7 @@ public:
     if (dest!=NULL) {
       destTable = dest->sheet;
     }
+    return true;
   }
 
   bool updateIds() {
@@ -219,7 +220,7 @@ public:
 
 class FoldEdgeCmp {
 public:
-  bool operator() (const FoldEdge& e1, const FoldEdge& e2) {
+  bool operator() (const FoldEdge& e1, const FoldEdge& e2) const {
     if (e1.table<e2.table) return true;
     if (e1.table>e2.table) return false;
     return e1.key<e2.key;

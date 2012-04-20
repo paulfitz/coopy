@@ -62,6 +62,7 @@ public:
     if (book!=0) {
       book->addReference();
     }
+    return *this;
   }
 
   virtual std::vector<std::string> getNames() {
@@ -88,7 +89,7 @@ public:
     coopy::store::Property p;
     p.put("file",fname);
     if (ext!=NULL) {
-      if (ext!="") {
+      if (std::string(ext)!="") {
 	p.put("ext",ext);
       }
     }
@@ -113,7 +114,7 @@ public:
     coopy::store::Property p;
     p.put("file",in_name);
     if (in_format!=NULL) {
-      if (in_format!="") {
+      if (std::string(in_format)!="") {
 	p.put("ext",in_format);
       }
     }
@@ -124,7 +125,7 @@ public:
     Property& po = p.nest("output_info");
     po.put("file",out_name);
     if (out_format!=NULL) {
-      if (out_format!="") {
+      if (std::string(out_format)!="") {
 	po.put("ext",out_format);
       }
     }
@@ -138,7 +139,7 @@ public:
     coopy::store::Property p;
     p.put("file",fname);
     if (ext!=NULL) {
-      if (ext!="") {
+      if (std::string(ext)!="") {
 	p.put("ext",ext);
       }
     }
@@ -164,7 +165,7 @@ public:
     coopy::store::Property p;
     p.put("file",fname);
     if (ext!=NULL) {
-      if (ext!="") {
+      if (std::string(ext)!="") {
 	p.put("ext",ext);
       }
     }
@@ -182,7 +183,7 @@ public:
     coopy::store::Property p;
     p.put("file",fname);
     if (ext!=NULL) {
-      if (ext!="") {
+      if (std::string(ext)!="") {
 	p.put("ext",ext);
       }
     }
