@@ -18,6 +18,23 @@ using namespace std;
 using namespace coopy::cmp;
 using namespace coopy::store;
 
+
+void RowChange::copy(const RowChange& alt) {
+  mode = alt.mode;
+  cond = alt.cond;
+  val = alt.val;
+  conflictingVal = alt.conflictingVal;
+  conflictingParentVal = alt.conflictingParentVal;
+  names = alt.names;
+  allNames = alt.allNames;
+  indexes = alt.indexes;
+  sequential = alt.sequential;
+  conflicted = alt.conflicted;
+  pRow = alt.pRow;
+  lRow = alt.lRow;
+  rRow = alt.rRow;
+}
+
 int OrderChange::identityToIndex(int id) const {
   //if (id==-1) return -1;
   vector<int>::const_iterator it = find(indicesBefore.begin(),

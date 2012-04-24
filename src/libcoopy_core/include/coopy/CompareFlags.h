@@ -118,6 +118,17 @@ public:
     clean_sheets = false;
   }
 
+  // js build has problem with implicit copy
+  CompareFlags(const CompareFlags& alt) {
+    copy(alt);
+  }
+
+  const CompareFlags& operator= (const CompareFlags& alt) {
+    setOutput(0/*NULL*/);
+    copy(alt);
+    return *this;
+  }
+
   ~CompareFlags() {
     setOutput(NULL);
   }
@@ -146,6 +157,8 @@ public:
     if (acts.size()==0) return true;
     return acts.find("schema")!=acts.end();
   }
+private:
+  void copy(const CompareFlags& alt);
 };
 
 #endif

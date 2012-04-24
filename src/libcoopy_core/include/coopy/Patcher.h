@@ -179,6 +179,8 @@ public:
  * Description of a difference between rows.
  */
 class coopy::cmp::RowChange {
+private:
+  void copy(const RowChange& alt);
 public:
   typedef std::map<std::string,coopy::store::SheetCell> txt2cell;
   typedef std::map<std::string,bool> txt2bool;
@@ -193,7 +195,7 @@ public:
   txt2bool indexes; // conditions which are indexical, rather than confirming
   bool sequential;
   bool conflicted;
-  RowChangeContext context;
+  //RowChangeContext context;
   int pRow, lRow, rRow;
 
   RowChange() {
@@ -201,6 +203,15 @@ public:
     sequential = true;
     conflicted = false;
     pRow = lRow = rRow = -2;
+  }
+
+  RowChange(const RowChange& alt) {
+    copy(alt);
+  }
+  
+  const RowChange& operator= (const RowChange& alt) {
+    copy(alt);
+    return *this;
   }
 
   bool rowsKnown() const {
