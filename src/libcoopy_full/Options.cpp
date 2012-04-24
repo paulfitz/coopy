@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <getopt.h>
 
 #include <coopy/Options.h>
 #include <coopy/CsvSheet.h>
@@ -12,6 +11,12 @@
 #include <coopy/Stringer.h>
 
 #include <algorithm>
+
+#ifdef USE_GNULIB_GETOPT
+#include <gnulib_getopt/getopt.h>
+#else
+#include <getopt.h>
+#endif
 
 #define QUOTED_BASE(x) # x
 #define QUOTED_VERSION(x) QUOTED_BASE(x)
@@ -720,7 +725,16 @@ int Options::apply(int argc, char *argv[]) {
   option_string["parent"] = "";
   option_string["version"] = "";
 
-  while (true) {
+  bool process = (argc>1);
+
+  // an escape-hatch for systems where getopt_long does not exist
+  // (javascript/emscripten, I'm looking at you)
+
+  if (argc>=2) {
+    if (string(argv[1])=="--no-get-opt") process = false;
+  }
+
+  while (process) {
     int option_index = 0;
     static struct option long_options[] = {
       {(char*)"format", 1, 0, 'f'},
@@ -807,7 +821,11 @@ int Options::apply(int argc, char *argv[]) {
       {0, 0, 0, 0}
     };
 
+#ifdef USE_GNULIB_GETOPT
+    int c = gnulib_getopt_long(argc, argv, "", long_options, &option_index);
+#else
     int c = getopt_long(argc, argv, "", long_options, &option_index);
+#endif
     if (c==-1) break;
     switch (c) {
     case 0:

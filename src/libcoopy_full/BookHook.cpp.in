@@ -1,6 +1,5 @@
 
 #include <coopy/PolyBook.h>
-#include <coopy/JsonProperty.h>
 #include <coopy/ShortTextBook.h>
 #include <coopy/FormatDesc.h>
 
@@ -17,6 +16,8 @@ using namespace coopy::store;
 #cmakedefine USE_ACCESS
 #cmakedefine USE_SOCIALCALC
 #cmakedefine USE_JACKCESS
+#cmakedefine USE_SQLITE
+#cmakedefine USE_JSON
 #endif
 
 #ifdef USE_GNUMERIC
@@ -39,24 +40,49 @@ using namespace coopy::store::socialcalc;
 using namespace coopy::store::mdb;
 #endif
 
-#include <json/json.h>
-
 #ifdef USE_REMOTE_SQL
 #include <coopy/RemoteSqlTextBook.h>
 using namespace coopy::store::remotesql;
 #endif
 
+#ifdef USE_SQLITE
 #include <coopy/SqliteTextBook.h>
 using namespace coopy::store::sqlite;
+#endif
 
+#ifdef USE_JSON
+#include <json/json.h>
+#include <coopy/JsonProperty.h>
 #include <coopy/JsonBook.h>
 using namespace coopy::store::json;
+#endif
 
 #define STRVAL PolyValue::makeString
 
 void gatherFactories(vector<TextBookFactory *>& lst,
 		     vector<FormatDesc>& descs,
 		     bool preview) {
+#ifdef USE_SQLITE
+  if (preview) {
+    FormatDesc sqlite("SQLITE: file-based database");
+    sqlite.addExtension(".sqlite","Sqlite database file");
+    sqlite.addDbi("dbi:sqlite:fname.db","Force sqlite interpretation");
+    sqlite.addOption("type",STRVAL("sqlite"),"Sqlite family",true);
+    sqlite.addOption("file",STRVAL("fname.db"),"File name",true);
+    descs.push_back(sqlite);
+
+    FormatDesc sqlitext("SQLITEXT: sqlite-format sql dump");
+    sqlitext.addExtension(".sqlitext","SQL dump of Sqlite database");
+    sqlitext.addDbi("dbi:sqlitext:fname.sql","Force sqlitext interpretation");
+    sqlitext.addOption("type",STRVAL("sqlitext"),"Sqlitext family",true);
+    sqlitext.addOption("file",STRVAL("fname.sql"),"File name",true);
+    descs.push_back(sqlitext);
+  } else {
+    lst.push_back(new SqliteTextBookFactory());
+    lst.push_back(new SqliteTextBookFactory(true));
+  }
+#endif
+#ifdef USE_JSON
   if (preview) {
     FormatDesc desc("JSONBOOK: Spreadsheet formats in json");
     desc.addExtension(".jsonbook","Json spreadsheet");
@@ -68,6 +94,7 @@ void gatherFactories(vector<TextBookFactory *>& lst,
   } else {
     lst.push_back(new JsonBookFactory());
   }  
+#endif
 #ifdef USE_GNUMERIC
   if (preview) {
     FormatDesc desc("GNUMERIC: Spreadsheet formats (via gnumeric)");
@@ -155,9 +182,14 @@ TextBook *readHelper(const char *fname,
   dbg_printf("Trying plugin data formats...\n");
   TextBook *result = NULL;
   if (string(ext)==".json") {
-    dbg_printf("Trying with JSON...\n");
     Property p;
+#ifdef USE_JSON
+    dbg_printf("Trying with JSON...\n");
     if (!JsonProperty::add(p,fname)) return NULL;
+#else
+    fprintf(stderr,"Compiled without support for JSON\n");
+    return NULL;
+#endif
     TextBook *book = NULL;
     string key = p.get("type",PolyValue::makeString("none")).asString();
     if (key=="mysql") {
@@ -167,11 +199,15 @@ TextBook *readHelper(const char *fname,
     } else if (key=="csv") {
       book = new ShortTextBook();
     } else if (key=="sqlite") {
+#ifdef USE_SQLITE
       dbg_printf("Trying sqlite\n");
       book = new SqliteTextBook();
+#endif
     } else if (key=="sqlitext") {
+#ifdef USE_SQLITE
       dbg_printf("Trying sqlitext\n");
       book = new SqliteTextBook(true);
+#endif
     } else {
       fprintf(stderr,"Type not recognized: %s\n", key.c_str());
       return NULL;
@@ -204,3 +240,14 @@ TextBook *readHelper(const char *fname,
   return result;
 }
 
+
+bool readHelperJson(coopy::store::Property& config,
+		    const char *filename) {
+  dbg_printf("Asked to attach, with json configuration\n");
+#ifdef USE_JSON
+  return JsonProperty::add(config,filename);
+#else
+  fprintf(stderr,"Compiled without support for JSON\n");
+  return false;
+#endif
+}

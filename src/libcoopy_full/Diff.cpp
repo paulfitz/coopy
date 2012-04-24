@@ -58,7 +58,7 @@ int Diff::apply(const Options& opt) {
   std::string version = opt.checkString("version");
   std::string tmp = opt.checkString("tmp","");
   std::string resolve = opt.checkString("resolve","");
-  std::string defMode = "tdiff";
+  std::string defMode = "default";
   bool apply = opt.checkBool("apply",opt.isResolveLike()?true:false);
   if (opt.isMergeLike()) defMode = "merge";
   if (opt.isPatchLike()&&!opt.isRediffLike()) defMode = "apply";

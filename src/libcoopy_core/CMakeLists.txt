@@ -1,5 +1,6 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/gnulib)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/light/cpp)
 
 file(GLOB folder_source *.cpp)
@@ -22,7 +23,14 @@ foreach(src ${folder_source})
   endif ()
 endforeach()
 
+if (JUST_HIGHLIGHT)
+  add_definitions(-DJUST_HIGHLIGHT)
+endif ()
+  
 set(folder_source ${folder_source} gnulib/tmpdir.c gnulib/tempname.c)
+
+
+
 source_group("Source Files" FILES ${folder_source})
 source_group("Header Files" FILES ${folder_header})
 

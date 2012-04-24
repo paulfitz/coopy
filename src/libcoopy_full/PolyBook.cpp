@@ -1,14 +1,11 @@
 #include <coopy/PolyBook.h>
 #include <coopy/ShortTextBook.h>
-#include <coopy/SqliteTextBook.h>
 #include <coopy/CsvTextBook.h>
 #include <coopy/CsvFile.h>
 #include <coopy/FormatSniffer.h>
 #include <coopy/Dbg.h>
-#include <coopy/JsonProperty.h>
 #include <coopy/TextBookFactory.h>
 #include <coopy/ShortTextBookFactory.h>
-#include <coopy/SqliteTextBook.h>
 #include <coopy/FormatDesc.h>
 
 #include <stdlib.h>
@@ -17,16 +14,16 @@
 #include <map>
 #include <fstream>
 
-#include <json/json.h>
-
 using namespace std;
 using namespace coopy::store;
-using namespace coopy::store::sqlite;
 using namespace coopy::format;
 
 extern TextBook *readHelper(const char *fname,
 			    const char *ext,
 			    const char *data);
+
+extern bool readHelperJson(coopy::store::Property& config,
+			   const char *filename);
 
 extern void getFactories(vector<TextBookFactory *>& lst);
 extern void getFactoriesList(vector<FormatDesc>& descs);
@@ -39,8 +36,6 @@ public:
     all.push_back(new ShortTextBookFactory);
     all.push_back(CsvTextBookFactory::makeFactory());
     all.push_back(CsvTextBookFactory::makeCompactFactory());
-    all.push_back(new SqliteTextBookFactory);
-    all.push_back(new SqliteTextBookFactory(true));
     getFactories(all);
   }
 
@@ -142,7 +137,7 @@ bool PolyBook::expand(Property& config) {
   if (filename.substr(0,4)!="dbi:") {
     if (ext == ".json") {
       dbg_printf("Asked to attach, with json configuration\n");
-      if (!JsonProperty::add(config,filename)) {
+      if (!readHelperJson(config,filename.c_str())) {
 	return false;
       }
       filename = config.get("file",PolyValue::makeString("-")).asString();
@@ -339,23 +334,6 @@ std::vector<FormatDesc> PolyBook::getFormatList() {
   csv.addOption("file",STRVAL("fname.dsv"),"File name",true);
   csv.addOption("delimiter",STRVAL("|"),"Delimiter character",true);
   descs.push_back(csv);
-
-  //printf("  file extensions: .csv .tsv .ssv\n");
-  //printf("  .json options:   { \"type\": \"csv\", \"file\": \"fname.csv\", \"delimiter\": \",\", \"header\": 0, }\n");
-  FormatDesc sqlite("SQLITE: file-based database");
-  sqlite.addExtension(".sqlite","Sqlite database file");
-  sqlite.addDbi("dbi:sqlite:fname.db","Force sqlite interpretation");
-  sqlite.addOption("type",STRVAL("sqlite"),"Sqlite family",true);
-  sqlite.addOption("file",STRVAL("fname.db"),"File name",true);
-  descs.push_back(sqlite);
-
-
-  FormatDesc sqlitext("SQLITEXT: sqlite-format sql dump");
-  sqlitext.addExtension(".sqlitext","SQL dump of Sqlite database");
-  sqlitext.addDbi("dbi:sqlitext:fname.sql","Force sqlitext interpretation");
-  sqlitext.addOption("type",STRVAL("sqlitext"),"Sqlitext family",true);
-  sqlitext.addOption("file",STRVAL("fname.sql"),"File name",true);
-  descs.push_back(sqlitext);
 
   getFactoriesList(descs);
   

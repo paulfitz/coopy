@@ -39,20 +39,15 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
   string _version;
   if (version!=NULL) _version = version;
   Patcher *result = NULL;
+#ifndef JUST_HIGHLIGHT
   if (mode=="sql") {
     result = new MergeOutputSqlDiff;
   } else if (mode=="human") {
     result = new MergeOutputHumanDiff;
   } else if (mode=="raw") {
     result = new MergeOutputVerboseDiff;
-  } else if (mode=="tdiff") {
+  } else if (mode=="tdiff"||mode=="default") {
     result = new MergeOutputTdiff;
-  } else if (mode=="apply") {
-    result = SheetPatcher::createForApply();
-  } else if (mode=="sheet"||mode=="color"||mode=="hilite"||mode=="highlight"||mode=="hiliter"||mode=="highlighter") {
-    result = SheetPatcher::createForDescription();
-  } else if (mode=="review") {
-    result = SheetPatcher::createForReview();
   } else if (mode=="csv") {
     if (_version=="0.2") {
       result = new MergeOutputCsvDiffV0p2;
@@ -63,8 +58,6 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
     result = new MergeOutputPatch;
   } else if (mode=="index") {
     result = new MergeOutputIndex;
-  } else if (mode=="merge") {
-    result = SheetPatcher::createForMerge();
   } else if (mode=="ops") {
     result = new MergeOutputRowOps;
   } else if (mode=="stats") {
@@ -73,6 +66,16 @@ Patcher *Patcher::createByName(const char *name, const char *version) {
     result = new MergeOutputNovel;
   } else if (mode=="edit") {
     result = new MergeOutputEditList;
+  } else 
+#endif
+  if (mode=="apply") {
+    result = SheetPatcher::createForApply();
+  } else if (mode=="sheet"||mode=="color"||mode=="hilite"||mode=="highlight"||mode=="hiliter"||mode=="highlighter"||mode=="default") {
+    result = SheetPatcher::createForDescription();
+  } else if (mode=="review") {
+    result = SheetPatcher::createForReview();
+  } else if (mode=="merge") {
+    result = SheetPatcher::createForMerge();
   } else {
     fprintf(stderr, "Format %s?\n", mode.c_str());
   }
