@@ -1,20 +1,37 @@
 
-if [ ! -e coopy_source.txt ] ; then
-    echo "Please run from build directory"
-    exit 1
+if [ "k$1" = "k" ]; then
+
+    if [ ! -e coopy_source.txt ] ; then
+	echo "Please run from build directory"
+	exit 1
+    fi
+
+    SRC=`cat coopy_source.txt`
+    BIN="$PWD"
+else
+    SRC="$1"
+    BIN="$2"
+    cd "$3"
+    rm -f ssdiff_core.js
 fi
 
-SRC=`cat coopy_source.txt`
+BASE=$PWD
 
 if [ ! -e ssdiff_core.js ] ; then
 
-    EMCC_CFLAGS="--ignore-dynamic-linking" make ssdiff || exit 1
-    cp bin/ssdiff ssdiff.bc || exit 1
+    cd $BIN
+    # EMCC_CFLAGS="--ignore-dynamic-linking" make emdiff || exit 1
+    cp bin/emdiff $BASE/ssdiff.bc || exit 1
+    cd $BASE
     rm -rf /tmp/emscripten_temp
     
 # EMCC_DEBUG=1 emcc lib/libcoopy_csv_sql.so lib/libcoopy_light.so lib/libcoopy_core.so lib/libcoopy_csv.so lib/libcoopy_full.so --embed-file broken_bridges.csv --embed-file bridges.csv -O3 --llvm-opts 2 x.bc -o foo.js
     
-    EMCC_DEBUG=1 emcc lib/libcoopy_csv_sql.so lib/libcoopy_light.so lib/libcoopy_core.so lib/libcoopy_csv.so lib/libcoopy_full.so --pre-js $SRC/scripts/emscripten/pre.js -O3 --llvm-opts 2 x.bc -o ssdiff_core.js || exit 1
+#    EMCC_DEBUG=1 emcc $BIN/lib/libcoopy_csv_sql.so $BIN/lib/libcoopy_light.so $BIN/lib/libcoopy_core.so $BIN/lib/libcoopy_csv.so $BIN/lib/libcoopy_full.so --pre-js $SRC/scripts/emscripten/pre.js -O3 --llvm-opts 2 $BASE/ssdiff.bc -o ssdiff_core.js || exit 1
+
+    # EMCC_DEBUG=1 emcc $BIN/lib/libcoopy_csv_sql.so $BIN/lib/libcoopy_light.so $BIN/lib/libcoopy_core.so $BIN/lib/libcoopy_csv.so $BIN/lib/libcoopy_full.so --pre-js $SRC/scripts/emscripten/pre.js $BASE/ssdiff.bc -o ssdiff_core.js || exit 1
+
+    EMCC_DEBUG=1 emcc --pre-js $SRC/scripts/emscripten/pre.js $BASE/ssdiff.bc -o ssdiff_core.js || exit 1
 
 fi
 
@@ -39,14 +56,10 @@ cat <<EOF
 <html>
 <head>
 <title>Testing ssdiff.js</title>
-<link href='http://fonts.googleapis.com/css?family=Just+Me+Again+Down+Here' rel='stylesheet' type='text/css' />
 <style>
 textarea {
   width:300px; height:75px;
   background:ffc;
-}
-body {
-  font-family: 'Just Me Again Down Here', cursive;
 }
 </style>
 
