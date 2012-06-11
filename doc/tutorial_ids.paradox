@@ -66,7 +66,8 @@ would result in garbage, due to conflicting IDs.  But when Alice
 applies Bob's changes using \ref sspatch, she gets a happier
 result:
 
-@diff directory_alice.sqlite directory_alice_add_bob.sqlite out.xls hilite
+@diff directory_alice.sqlite directory_alice_add_bob.sqlite out_ab.xls hilite
+@show out_ab.xls
 
 (Command: <tt>sspatch --inplace directory.sqlite bob.tdiff</tt>)
 
