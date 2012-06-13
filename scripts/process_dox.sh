@@ -9,6 +9,7 @@ echo target is $target 1>&2
 
 CSV2HTML="$bin/bin/ss2html"
 SSDIFF="$bin/bin/ssdiff"
+SSPATCH="$bin/bin/sspatch"
 SSREDIFF="$bin/bin/ssrediff"
 SSFORMAT="$bin/bin/ssformat"
 SSMERGE="$bin/bin/ssmerge"
@@ -154,6 +155,17 @@ while read -r line; do
 	shift 5
 	rm -f $out
 	$SSDIFF --output $out $@ --omit-format-name --format $fmt $a $b > /dev/null 2> /dev/null
+	continue
+    fi
+    m=`expr match "$line" "@patch"`
+    if [ "$m" = "6" ]; then
+	set -- $line
+	a="$prefix$2"
+	b="$prefix$3"
+	d="$prefix$4"
+	rm -f $d
+	$SSFORMAT $a $d
+	$SSPATCH --inplace $d $b > /dev/null 2> /dev/null
 	continue
     fi
     m=`expr match "$line" "@merge"`

@@ -30,6 +30,7 @@ Reformat tables/databases/spreadsheets.
  \li \ref ssformat_main_help "--help"
  \li \ref ssformat_main_index "--index"
  \li \ref ssformat_main_input-formats "--input-formats"
+ \li \ref ssformat_main_paint "--paint"
  \li \ref ssformat_main_table "--table=TABLE"
 
 
@@ -47,6 +48,9 @@ Reformat tables/databases/spreadsheets.
 
 
 \anchor ssformat_main_input-formats <b>--input-formats</b> <br />list supported input database formats
+
+
+\anchor ssformat_main_paint <b>--paint</b> <br />add color highlighting appropriate for highlighter diffs
 
 
 \anchor ssformat_main_table <b>--table=TABLE</b> <br />operate on a single named table of a workbook/database
@@ -97,6 +101,7 @@ Display contents of an Sqlite database table.
   \li <b>csv</b>: csv-compatible diff format
   \li <b>hilite</b>: colorful spreadsheet format
   \li <b>index</b>: tabular output showing relationship between rows and columns
+  \li <b>novel</b>: mark all shared rows - remaining rows are unmatched
   \li <b>ops</b>: summarize modified rows in a table
   \li <b>raw</b>: verbose diff format for debugging
   \li <b>review</b>: spreadsheet diff format suitable for quickly accepting or rejecting changes
@@ -164,6 +169,15 @@ MDB: Access database format (via Mdbtools, READ-ONLY)<br />
   \li <b>dbi:access:fname.db</b> (Force Access interpretation) 
 
 
+JMDB: Access database format (via Jackcess)<br />
+  \li<b>.mdb</b>: Access database file
+  \li<b>.json</b>: {<br />
+      "type": "access",  <i>// Jackcess/access family</i><br />
+      "file": "fname.db"  <i>// File name</i><br />
+}
+  \li <b>dbi:jackess:fname.db</b> (Force Access interpretation) 
+
+
 MYSQL: database connector<br />
   \li<b>.json</b>: {<br />
       "type": "mysql",  <i>// MYSQL connector</i><br />
@@ -178,10 +192,20 @@ MYSQL: database connector<br />
   \li <b>dbi:mysql:database_name:host=HOST:port=PORT</b>
 
 
+SOCIALCALC: SocialCalc format (via mozjs)<br />
+  \li<b>.socialcalc</b>: SocialCalc spreadsheet file
+  \li<b>.sc</b>: SocialCalc spreadsheet file
+  \li<b>.json</b>: {<br />
+      "type": "socialcalc",  <i>// SocialCalc family</i><br />
+      "file": "sheet.txt"  <i>// File name</i><br />
+}
+  \li <b>dbi:socialcalc:sheet.txt</b> (Force SocialCalc interpretation) 
+
+
 
 
 \section ssformat_version Version
-ssformat version 0.6.2
+ssformat version 0.6.3
 
 
  *

@@ -152,6 +152,38 @@ would result in garbage, due to conflicting IDs.  But when Alice
 applies Bob's changes using \ref sspatch, she gets a happier
 result:
 
+<table>
+  <caption>locations</caption>
+  <tr><th>id</th><th>street</th><th>city</th></tr>
+  <tr><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
+  <tr><td>2</td><td>Big Crater</td><td>Moon</td></tr>
+  <tr><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
+  <tr><td>4</td><td>42 The Boblands</td><td>Planet Bob</td></tr>
+</table>
+
+<table>
+  <caption>org2loc</caption>
+  <tr><th>org_id</th><th>loc_id</th></tr>
+  <tr><td>1</td><td>2</td></tr>
+  <tr><td>2</td><td>1</td></tr>
+  <tr><td>3</td><td>1</td></tr>
+  <tr><td>3</td><td>2</td></tr>
+  <tr><td>5</td><td>3</td></tr>
+  <tr><td>3</td><td>4</td></tr>
+  <tr><td>6</td><td>1</td></tr>
+  <tr><td>6</td><td>4</td></tr>
+</table>
+
+<table>
+  <caption>organizations</caption>
+  <tr><th>id</th><th>name</th></tr>
+  <tr><td>1</td><td>Dracula Inc</td></tr>
+  <tr><td>2</td><td>The Firm</td></tr>
+  <tr><td>3</td><td>Omni Cooperative</td></tr>
+  <tr><td>4</td><td>Nonexistence Unlimited</td></tr>
+  <tr><td>5</td><td>Alice and Company</td></tr>
+  <tr><td>6</td><td>Bob's World</td></tr>
+</table>
 
 (Command: <tt>sspatch --inplace directory.sqlite bob.tdiff</tt>)
 

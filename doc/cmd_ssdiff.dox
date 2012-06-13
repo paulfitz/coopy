@@ -41,6 +41,7 @@ Show the difference between two tables/databases/spreadsheets.
  \li \ref ssdiff_main_output "--output=OUTPUTFILE"
  \li \ref ssdiff_main_parent "--parent=PARENT"
  \li \ref ssdiff_main_patch-formats "--patch-formats"
+ \li \ref ssdiff_main_scan-for-patch "--scan-for-patch"
  \li \ref ssdiff_main_table "--table=TABLE"
  \li \ref ssdiff_main_tail-trimmed "--tail-trimmed"
  \li \ref ssdiff_main_unordered "--unordered"
@@ -97,6 +98,9 @@ Show the difference between two tables/databases/spreadsheets.
 
 
 \anchor ssdiff_main_patch-formats <b>--patch-formats</b> <br />list supported patch formats
+
+
+\anchor ssdiff_main_scan-for-patch <b>--scan-for-patch</b> <br />check if FILE2 looks like a patch, and if so, apply it
 
 
 \anchor ssdiff_main_table <b>--table=TABLE</b> <br />filter for a named table of a workbook/database (repeat option for multiple tables)
@@ -168,6 +172,7 @@ Generate tabular diff for eyeballing. If ssdiff is compiled with gnumeric suppor
   \li <b>csv</b>: csv-compatible diff format
   \li <b>hilite</b>: colorful spreadsheet format
   \li <b>index</b>: tabular output showing relationship between rows and columns
+  \li <b>novel</b>: mark all shared rows - remaining rows are unmatched
   \li <b>ops</b>: summarize modified rows in a table
   \li <b>raw</b>: verbose diff format for debugging
   \li <b>review</b>: spreadsheet diff format suitable for quickly accepting or rejecting changes
@@ -235,6 +240,15 @@ MDB: Access database format (via Mdbtools, READ-ONLY)<br />
   \li <b>dbi:access:fname.db</b> (Force Access interpretation) 
 
 
+JMDB: Access database format (via Jackcess)<br />
+  \li<b>.mdb</b>: Access database file
+  \li<b>.json</b>: {<br />
+      "type": "access",  <i>// Jackcess/access family</i><br />
+      "file": "fname.db"  <i>// File name</i><br />
+}
+  \li <b>dbi:jackess:fname.db</b> (Force Access interpretation) 
+
+
 MYSQL: database connector<br />
   \li<b>.json</b>: {<br />
       "type": "mysql",  <i>// MYSQL connector</i><br />
@@ -249,10 +263,20 @@ MYSQL: database connector<br />
   \li <b>dbi:mysql:database_name:host=HOST:port=PORT</b>
 
 
+SOCIALCALC: SocialCalc format (via mozjs)<br />
+  \li<b>.socialcalc</b>: SocialCalc spreadsheet file
+  \li<b>.sc</b>: SocialCalc spreadsheet file
+  \li<b>.json</b>: {<br />
+      "type": "socialcalc",  <i>// SocialCalc family</i><br />
+      "file": "sheet.txt"  <i>// File name</i><br />
+}
+  \li <b>dbi:socialcalc:sheet.txt</b> (Force SocialCalc interpretation) 
+
+
 
 
 \section ssdiff_version Version
-ssdiff version 0.6.2
+ssdiff version 0.6.3
 
 
  *
