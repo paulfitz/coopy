@@ -167,7 +167,13 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
     sqlite3_exec((sqlite3*)implementation, txt.c_str(), NULL, NULL, NULL);
   }
 
-  names = getNamesSql();
+  if (config.check("table")) {
+    names.clear();
+    names.push_back(config.get("table").asString());
+  } else {
+    names = getNamesSql();
+  }
+
   return true;
 }
 
