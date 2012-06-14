@@ -78,15 +78,25 @@ public:
     return name;
   }
 
- virtual bool isSequential() const {
-   return false;
- }
+  virtual bool isSequential() const {
+    return false;
+  }
+
+  virtual bool deleteData(int offset);  
 
   virtual bool hasExternalColumnNames() const {
     return true;
   }
 
   virtual bool applyRowCache(const RowCache& cache, int row, SheetCell *result);
+
+  virtual bool beginTransaction();
+  virtual bool endTransaction();
+  
+  virtual bool rollbackTransaction() {
+    return false;
+  }
+  
 
 private:
   RemoteSqlSheetSchema *schema;

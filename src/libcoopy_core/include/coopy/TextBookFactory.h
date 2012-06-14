@@ -66,6 +66,12 @@ public:
     applicable = true;
     msg = std::string("Creation not implemented yet (") + str + ")";
   }
+
+  void errorWriteNotImplemented(const char *str) {
+    success = false;
+    applicable = true;
+    msg = std::string("Writing not implemented yet (") + str + ")";
+  }
 };
 
 /**

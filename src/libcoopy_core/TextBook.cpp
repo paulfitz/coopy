@@ -64,6 +64,7 @@ bool TextBook::operator==(const TextBook& alt) const {
 
 
 bool TextBook::copy(const TextBook& alt, const Property& options) {
+  bool failure = false;
   dbg_printf("Copying book\n");
   TextBook& src = (TextBook &) alt;
   vector<string> names = src.getNames();
@@ -118,7 +119,8 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
       }
       if (!addSheet(*pschema)) {
 	fprintf(stderr, "Failed to create sheet %s\n", name.c_str());
-	return false;
+	failure = true;
+	continue;
       }
       target = readSheet(target_name);
     }
@@ -194,6 +196,7 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
     }
     dbg_printf("Copying rows from %s to %s\n",
 	       sheet.desc().c_str(), target.desc().c_str());
+    target.beginTransaction();
     for (int i=start; i<sheet.height(); i++) {
       dbg_printf("Row %d (src height %d target height %d)\n", i,
 		 sheet.height(),target.height());
@@ -204,6 +207,7 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
       }
       row.flush();
     }
+    target.endTransaction();
     dbg_printf("Final size for %s: src %dx%d target %dx%d\n", 
 	       name.c_str(),
 	       sheet.width(), sheet.height(),
@@ -215,7 +219,7 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
       dbg_printf("Schema target: %s\n", target.getSchema()->toString().c_str());
     }
   }
-  return true;
+  return !failure;
 }
 
 

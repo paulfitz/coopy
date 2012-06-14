@@ -102,6 +102,11 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
   cache.resize(w,0,"");
   cacheFlag.resize(w,0,0);
 
+  if (key_list.length()==0) {
+    fprintf(stderr,"mysql table is unexpectedly empty\n");
+    return;
+  }
+
   {
     string query = string("SELECT * FROM ") + name + " ORDER BY " + key_list;
     dbg_printf("Query is %s\n", query.c_str());
@@ -272,8 +277,45 @@ bool RemoteSqlSheet::applyRowCache(const RowCache& cache, int row,
   if (result2==NULL) return false;
   SQL.closeQuery(result2);
 
-  printf("Remote SQL insertions are currently incomplete\n");
+  static bool warned = false;
+  if (!warned) {
+    fprintf(stderr,"Warning: remote SQL insertions are currently incomplete\n");
+    warned = true;
+  }
 
   h++;
   return true;
 }
+
+
+bool RemoteSqlSheet::deleteData(int offset) {
+  if (offset!=0) DataSheet::deleteData(offset);
+
+  cache.clear();
+  cacheFlag.clear();
+  h = 0;
+
+  CSQL& SQL = SQL_CONNECTION(book);
+
+  string query = string("DELETE FROM ") + name + " WHERE 1";
+  dbg_printf("Query is %s\n", query.c_str());
+  CSQLResult *result = SQL.openQuery(query);
+  if (result==NULL) return false;
+  SQL.closeQuery(result);
+  return true;
+}
+
+
+bool RemoteSqlSheet::beginTransaction() {
+  CSQL& SQL = SQL_CONNECTION(book);
+  dbg_printf("START TRANSACTION\n");
+  SQL.execQuery("START TRANSACTION");
+  return true;
+}
+
+bool RemoteSqlSheet::endTransaction() {
+  CSQL& SQL = SQL_CONNECTION(book);
+  dbg_printf("COMMIT\n");
+  return true;
+}
+

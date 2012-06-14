@@ -64,7 +64,8 @@ public:
   }
 
   virtual TextBook *open(AttachConfig& config, AttachReport& report) {
-    if (config.shouldCreate||config.shouldWrite) {
+    if (config.shouldCreate) {
+      report.errorCreateNotImplemented("mysql");
       return NULL;
     }
     RemoteSqlTextBook *book = new RemoteSqlTextBook();
@@ -72,6 +73,11 @@ public:
     if (!book->open(config.options)) {
       delete book;
       book = NULL;
+    }
+    if (config.prevBook!=NULL) {
+      if (config.shouldWrite) {
+	book->copy(*config.prevBook,config.options);
+      }
     }
     if (book!=NULL) {
       report.success = true;

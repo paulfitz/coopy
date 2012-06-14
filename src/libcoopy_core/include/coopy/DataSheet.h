@@ -361,6 +361,18 @@ public:
 
   virtual SheetSchema *getMeta() const;
 
+  virtual bool beginTransaction() {
+    return false;
+  }
+  
+  virtual bool rollbackTransaction() {
+    return false;
+  }
+  
+  virtual bool endTransaction() {
+    return false;
+  }
+
 private:
   std::string hash_cache;
   SheetSchema *meta_hint;

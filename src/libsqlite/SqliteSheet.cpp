@@ -827,7 +827,9 @@ bool SqliteSheet::applyRowCache(const RowCache& cache, int row,
 }
 
 
-bool SqliteSheet::deleteData() {
+bool SqliteSheet::deleteData(int offset) {
+  if (offset!=0) DataSheet::deleteData(offset);
+
   clearCache();
 
   sqlite3 *db = DB(implementation);

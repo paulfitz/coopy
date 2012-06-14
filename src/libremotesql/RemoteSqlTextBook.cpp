@@ -71,7 +71,7 @@ bool RemoteSqlTextBook::open(const Property& config) {
     }
     return false;
   }
-  printf("RemoteSqlTextBook is a stub\n");
+  printf("RemoteSqlTextBook failed\n");
   return false;
 }
 

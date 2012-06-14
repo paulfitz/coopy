@@ -477,6 +477,21 @@ public:
     return sheet->getMeta();
   }
 
+  virtual bool beginTransaction() {
+    COOPY_ASSERT(sheet);
+    return sheet->beginTransaction();
+  }
+  
+  virtual bool rollbackTransaction() {
+    COOPY_ASSERT(sheet);
+    return sheet->rollbackTransaction();
+  }
+  
+  virtual bool endTransaction() {
+    COOPY_ASSERT(sheet);
+    return sheet->endTransaction();
+  }
+
 private:
   RowRef fixRow(const RowRef& r) {
     if (dh==0) return r;

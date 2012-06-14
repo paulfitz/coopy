@@ -72,7 +72,7 @@ public:
 
   virtual bool applyRowCache(const RowCache& cache, int row, SheetCell *result);
 
-  virtual bool deleteData();  
+  virtual bool deleteData(int offset);
 
   virtual bool hasExternalColumnNames() const {
     return true;
