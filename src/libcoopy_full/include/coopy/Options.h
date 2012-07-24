@@ -71,6 +71,7 @@ public:
   int apply(int argc, char *argv[]);
 
   const std::vector<std::string>& getCore() const { return core; }
+  std::vector<std::string>& getCoreMod() { return core; }
   const coopy::cmp::CompareFlags& getCompareFlags() const { return flags; }
 
   bool checkBool(const char *name, bool fallback=false) const { 

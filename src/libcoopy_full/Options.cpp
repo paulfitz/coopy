@@ -570,6 +570,9 @@ Options::Options(const char *name) : name(name) {
       "scan-for-patch",
       "check if FILE2 looks like a patch, and if so, apply it");
 
+  add(OPTION_FOR_DIFF,
+      "git",
+      "expect git-compatible parameters (path old-file old-hex old-mode new-file new-hex new-mode)");
 }
 
 std::string Options::getVersion() const {
@@ -818,6 +821,8 @@ int Options::apply(int argc, char *argv[]) {
 
       {(char*)"create", 0, 0, 0},
 
+      {(char*)"git", 0, 0, 0},
+
       {0, 0, 0, 0}
     };
 
@@ -890,6 +895,8 @@ int Options::apply(int argc, char *argv[]) {
 	  flags.foreign_pool_set = true;
 	} else if (k=="paint") {
 	  option_bool["paint"] = true;
+	} else if (k=="git") {
+	  option_bool["git"] = true;
 	} else if (k=="scan-for-patch") {
 	  option_bool["scan-for-patch"] = true;
 	} else if (k=="test-file") {

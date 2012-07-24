@@ -13,6 +13,27 @@ int main(int argc, char *argv[]) {
   bool help = opt.checkBool("help");
 
   const vector<string>& core = opt.getCore();
+  if (opt.checkBool("git")) {
+    if (core.size()!=7) {
+      fprintf(stderr, "Expected 7 parameters from git, but got %d\n",
+	      core.size());
+      return 1;
+    }
+    
+    string path = core[0];
+    string old_file = core[1];
+    string old_hex = core[2];
+    string old_mode = core[3];
+    string new_file = core[4];
+    string new_hex = core[5];
+    string new_mode = core[6];
+    vector<string>& coreMod = opt.getCoreMod();
+    coreMod.clear();
+    coreMod.push_back(old_file);
+    coreMod.push_back(new_file);
+    printf("--- a/%s\n", path.c_str());
+    printf("+++ b/%s\n", path.c_str());
+  }
   if (core.size()>2) {
     fprintf(stderr, "Options not understood\n");
     return 1;
