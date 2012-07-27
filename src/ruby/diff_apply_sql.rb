@@ -24,7 +24,7 @@ class DiffApplySql < DiffOutputAction
 
   def row_update(rc)
     cols = rc.active_columns
-    touched_cols = cols.select{|c| !rc.new_value_at(c).nil?}
+    touched_cols = cols.select{|c| rc.has_new_value_at(c)}
     @db.update(@name,
                touched_cols.map{|c| c[:title]},
                touched_cols.map{|c| rc.new_value_at(c)},

@@ -14,7 +14,7 @@ class DiffOutputTdiff < DiffOutputAction
       print title
       print "="
       print rc.cells[offset][:txt]
-      unless rc.cells[offset][:new_value].nil?
+      if rc.cells[offset].key? :new_value
         print "->"
         print rc.cells[offset][:new_value]
       end

@@ -1,5 +1,5 @@
 cat<<EOF
-# SOURCE: https://github.com/paulfitz/coopy/tree/master/src/light/ruby
+# SOURCE: https://github.com/paulfitz/coopy/tree/master/src/ruby
 # EXAMPLE USE:
 # see https://scraperwiki.com/views/paulfitzplaygroundview/
 # show difference between paulfitzplayground.broken_bridge and paulfitzplayground.bridge

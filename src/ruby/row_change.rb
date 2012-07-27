@@ -22,4 +22,8 @@ class RowChange
   def new_value_at(column)
     @cells[column[:diff_offset]][:new_value]
   end
+
+  def has_new_value_at(column)
+    @cells[column[:diff_offset]].key? :new_value
+  end
 end

@@ -27,7 +27,7 @@ class DiffOutputTable < DiffOutput
                      (rc.row_mode=="->") ? rc.row_mode : "",
                      (rc.row_mode=="->") ? rc.row_mode : "")
     rc.cells.each do |cell|
-      if cell[:new_value]
+      if cell.key? :new_value
         self.insert_cell(quote(cell[:value]) + "->" + quote(cell[:new_value]),
                          cell[:cell_mode],
                          "->")

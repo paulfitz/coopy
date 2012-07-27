@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__))) unless $LOAD_PATH.include?(File.expand_path(File.dirname(__FILE__)))
+
 require 'diff_output_raw'
 require 'diff_output_tdiff'
 require 'diff_render_html'
@@ -44,9 +46,9 @@ cmp = SqlCompare.new(sql,name1,name2)
 
 patches = DiffOutputGroup.new
 patches << DiffRenderHtml.new
-# patch = DiffOutputTdiff.new
-patches << DiffRenderCsv.new("output.csv")
-# patches << DiffApplySql.new(sql,name1)
+#patches << DiffOutputTdiff.new
+#patches << DiffRenderCsv.new("output.csv")
+patches << DiffApplySql.new(sql,name1)
 
 cmp.set_output(patches)
 
