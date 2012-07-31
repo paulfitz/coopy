@@ -261,7 +261,7 @@ bool PolyBook::expand(Property& config) {
   return true;
 }
 
-bool PolyBook::attach(Property& config) {
+bool PolyBook::attach(Property& config, PolyBook *base) {
   dbg_printf("PolyBook::attach %s\n", config.toString().c_str());
   if (config.check("should_clear")) {
     if (config.get("should_clear").asBoolean()) {
@@ -292,6 +292,7 @@ bool PolyBook::attach(Property& config) {
     ac.shouldWrite = false;
   }
   ac.prevBook = book;
+  ac.baseBook = base;
   ac.prevOptions = options;
   TextBook *nextBook = f.open(ac,ar);
   if (nextBook!=NULL) {

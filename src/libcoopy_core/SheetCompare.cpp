@@ -11,6 +11,7 @@
 #include <coopy/MeasureMan.h>
 #include <coopy/Merger.h>
 #include <coopy/SchemaSniffer.h>
+#include <coopy/Compare.h>
 
 #include <string>
 #include <map>
@@ -511,6 +512,18 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     }
   }
 
+  if (!eflags.boring) {
+    if (!output.wantLinks()) {
+      void *local_db = local.getDatabase();
+      void *remote_db = remote.getDatabase();
+      void *pivot_db = pivot.getDatabase();
+      if (local_db!=NULL && local_db == remote_db && local_db == pivot_db) {
+	int result = homogeneousCompare(pivot,local,remote,output,flags);
+	if (result==0) return result;
+      }
+    }
+  }
+
   std::string local_hash = local.getHash(true);
   std::string remote_hash = remote.getHash(true);
   std::string pivot_hash = pivot.getHash(true);
@@ -582,3 +595,15 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
 void SheetCompare::setVerbose(bool verbose) {
   _csv_verbose = verbose;
 }
+
+
+int SheetCompare::homogeneousCompare(coopy::store::DataSheet& pivot, 
+				     coopy::store::DataSheet& local, 
+				     coopy::store::DataSheet& remote, 
+				     Patcher& output, 
+				     const CompareFlags& flags) {
+  Compare *cmp = pivot.getComparisonMethod();
+  if (cmp==NULL) return -1;
+  return cmp->compare(pivot,local,remote,output,flags);
+}
+

@@ -492,6 +492,16 @@ public:
     return sheet->endTransaction();
   }
 
+  virtual void *getDatabase() {
+    COOPY_ASSERT(sheet);
+    return sheet->getDatabase();
+  }
+
+  virtual coopy::cmp::Compare *getComparisonMethod() {
+    COOPY_ASSERT(sheet);
+    return sheet->getComparisonMethod();
+  }
+
 private:
   RowRef fixRow(const RowRef& r) {
     if (dh==0) return r;

@@ -1,6 +1,7 @@
 if (USE_SQLITE)
 
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcoopy_core/include)
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/libcoopy_sqldiff/include)
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
   
   # We want Sqlite.  To avoid having two copies, we "steal" the
@@ -13,7 +14,7 @@ if (USE_SQLITE)
   ADD_LIBRARY(coopy_sqlite SqliteTextBook.cpp SqliteSheet.cpp 
     ${SQLITE_DIR}/sqlite3.c)
   
-  TARGET_LINK_LIBRARIES(coopy_sqlite coopy_core)
+  TARGET_LINK_LIBRARIES(coopy_sqlite coopy_core coopy_sqldiff)
   IF (UNIX)
     TARGET_LINK_LIBRARIES(coopy_sqlite dl pthread)
   ENDIF (UNIX)

@@ -5,6 +5,7 @@
 #include <coopy/SparseSheet.h>
 #include <coopy/EfficientMap.h>
 #include <coopy/ColumnInfo.h>
+#include <coopy/Compare.h>
 
 #include <vector>
 
@@ -17,9 +18,10 @@ namespace coopy {
   }
 }
 
-class coopy::store::sqlite::SqliteSheet : public DataSheet {
+class coopy::store::sqlite::SqliteSheet : public DataSheet, 
+  public coopy::cmp::Compare  {
 public:
-  SqliteSheet(void *db, const char *name);
+  SqliteSheet(void *db, const char *name, const char *prefix);
 
   bool connect();
   bool create(const SheetSchema& schema);
@@ -92,10 +94,28 @@ public:
    return false;
  }
 
+ virtual void *getDatabase() {
+   return implementation;
+ }
+
+
+ virtual coopy::cmp::Compare *getComparisonMethod() {
+   return this;
+ }
+
+ virtual int compare(coopy::store::DataSheet& pivot, 
+		     coopy::store::DataSheet& local, 
+		     coopy::store::DataSheet& remote, 
+		     coopy::cmp::Patcher& output, 
+		     const coopy::cmp::CompareFlags& flags);
+
 private:
   SqliteSheetSchema *schema;
   void *implementation;
   std::string name;
+  std::string quoted_name;
+  std::string prefix;
+  std::string prefix_dot;
   int w, h;
   std::vector<int> row2sql;
   std::vector<ColumnInfo> col2sql;

@@ -86,6 +86,7 @@ add_subdirectory(libsocialcalc)
 add_subdirectory(libjackcess)
 
 add_subdirectory(libcoopy_core)
+add_subdirectory(libcoopy_sqldiff)
 add_subdirectory(libcsv)
 add_subdirectory(libremotesql)
 add_subdirectory(jsoncpp)

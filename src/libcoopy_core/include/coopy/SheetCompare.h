@@ -25,6 +25,11 @@ public:
 
 private:
 
+  int homogeneousCompare(coopy::store::DataSheet& pivot, 
+			 coopy::store::DataSheet& local, 
+			 coopy::store::DataSheet& remote, 
+			 Patcher& output, const CompareFlags& flags);
+
   void doRowMapping(coopy::cmp::OrderResult& p2l_row_order,
 		    coopy::cmp::OrderResult& p2r_row_order,
 		    const coopy::cmp::OrderResult& p2l_col_order,

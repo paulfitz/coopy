@@ -25,6 +25,12 @@ namespace coopy {
   }
 }
 
+namespace coopy {
+  namespace cmp {
+    class Compare;
+  }
+}
+
 class coopy::store::RowCache {
 public:
   std::vector<bool> flags;
@@ -371,6 +377,15 @@ public:
   
   virtual bool endTransaction() {
     return false;
+  }
+
+
+  virtual void *getDatabase() {
+    return 0/*NULL*/;
+  }
+
+  virtual coopy::cmp::Compare *getComparisonMethod() {
+    return 0/*NULL*/;
   }
 
 private:

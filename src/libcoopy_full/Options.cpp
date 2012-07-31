@@ -463,6 +463,10 @@ Options::Options(const char *name) : name(name) {
       "omit-sheet-name",
       "omit any sheet/table name from diff");
 
+  add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
+      "boring",
+      "don't try any tricks, just plod on through");
+
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "act=ACT",
       "filter for an action of a particular type (update, insert, delete, none, schema)");
@@ -821,6 +825,8 @@ int Options::apply(int argc, char *argv[]) {
 
       {(char*)"create", 0, 0, 0},
 
+      {(char*)"boring", 0, 0, 0},
+
       {(char*)"git", 0, 0, 0},
 
       {0, 0, 0, 0}
@@ -897,6 +903,9 @@ int Options::apply(int argc, char *argv[]) {
 	  option_bool["paint"] = true;
 	} else if (k=="git") {
 	  option_bool["git"] = true;
+	} else if (k=="boring") {
+	  option_bool["boring"] = true;
+	  flags.boring = true;
 	} else if (k=="scan-for-patch") {
 	  option_bool["scan-for-patch"] = true;
 	} else if (k=="test-file") {

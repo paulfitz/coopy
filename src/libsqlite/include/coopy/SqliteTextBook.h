@@ -27,12 +27,13 @@ public:
   void clear();
 
   virtual bool read(const char *fname, bool can_create,
-		    const Property& config);
+		    const Property& config,
+		    SqliteTextBook *base = 0/*NULL*/);
 
   virtual bool save(const char *fname, const char *format, 
 		    bool itextual = false);
 
-  virtual bool open(const Property& config);
+  virtual bool open(const Property& config, SqliteTextBook *base = 0/*NULL*/);
   
   std::vector<std::string> getNames() {
     return names;
@@ -57,11 +58,14 @@ public:
 
 private:
   void *implementation;
+  Poly<RefCount> implementation_count;
   bool textual;
   bool memory;
   bool prewrite;
   bool postwrite;
   std::string hold_temp;
+  std::string prefix;
+  std::string prefix_dot;
   
   std::vector<std::string> names;
 
@@ -92,7 +96,13 @@ public:
     //config.options.toString().c_str());
     SqliteTextBook *book = new SqliteTextBook(textual);
     if (book==NULL) return NULL;
-    if (!book->open(config.options)) {
+
+    SqliteTextBook *base = NULL;
+    if (config.baseBook!=NULL) {
+      base = dynamic_cast<SqliteTextBook *>(&(config.baseBook->tail()));
+    }
+
+    if (!book->open(config.options,base)) {
       delete book;
       book = NULL;
     }

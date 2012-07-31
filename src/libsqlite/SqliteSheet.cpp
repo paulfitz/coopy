@@ -2,9 +2,11 @@
 #include <coopy/SqliteSheet.h>
 #include <coopy/Stringer.h>
 #include <sqlite3.h>
+#include <coopy/SqlCompare.h>
 
 using namespace coopy::store;
 using namespace coopy::store::sqlite;
+using namespace coopy::cmp;
 using namespace std;
 
 namespace coopy {
@@ -162,9 +164,25 @@ public:
 
 #define DB(x) ((sqlite3 *)(x))
 
-SqliteSheet::SqliteSheet(void *db1, const char *name) {
+SqliteSheet::SqliteSheet(void *db1, const char *name, const char *prefix) {
   implementation = db1;
   this->name = name;
+  this->prefix = prefix;
+  char *query;
+  if (this->prefix == "") {
+    query = sqlite3_mprintf("%Q", this->name.c_str());
+  } else {
+    query = sqlite3_mprintf("%Q.%Q", this->prefix.c_str(),
+			    this->name.c_str());
+  }
+  this->quoted_name = query;
+  sqlite3_free(query);
+  prefix_dot = "";
+  if (this->prefix != "") {
+    query = sqlite3_mprintf("%Q.", this->prefix.c_str());
+    prefix_dot = query;
+    sqlite3_free(query);
+  }
   w = h = 0;
 
   schema = new SqliteSheetSchema;
@@ -220,8 +238,8 @@ bool SqliteSheet::connect() {
   //////////////////////////////////////////////////////////////////
   // Check dimensions
 
-  query = sqlite3_mprintf("SELECT COUNT(*), * FROM %Q",
-			  this->name.c_str());
+  query = sqlite3_mprintf("SELECT COUNT(*), * FROM %s",
+			  quoted_name.c_str());
  
   int iresult = sqlite3_prepare_v2(db, query, -1, 
 				   &statement, NULL);
@@ -247,8 +265,8 @@ bool SqliteSheet::connect() {
   //////////////////////////////////////////////////////////////////
   // Check ROWIDs
 
-  query = sqlite3_mprintf("SELECT ROWID FROM %Q ORDER BY ROWID",
-			  this->name.c_str());
+  query = sqlite3_mprintf("SELECT ROWID FROM %s ORDER BY ROWID",
+			  this->quoted_name.c_str());
 
   iresult = sqlite3_prepare_v2(db, query, -1, 
 			       &statement, NULL);
@@ -273,7 +291,8 @@ bool SqliteSheet::connect() {
   //////////////////////////////////////////////////////////////////
   // Check column names
 
-  query = sqlite3_mprintf("PRAGMA table_info(%Q)",
+  query = sqlite3_mprintf("PRAGMA %stable_info(%Q)",
+			  this->prefix_dot.c_str(),
 			  this->name.c_str());
 
   iresult = sqlite3_prepare_v2(db, query, -1, 
@@ -308,8 +327,8 @@ bool SqliteSheet::connect() {
   cacheFlag.resize(w,h,0);
 
   {
-    query = sqlite3_mprintf("SELECT * FROM %Q ORDER BY ROWID",
-			    this->name.c_str());
+    query = sqlite3_mprintf("SELECT * FROM %s ORDER BY ROWID",
+			    this->quoted_name.c_str());
     
     iresult = sqlite3_prepare_v2(db, query, -1, 
 				 &statement, NULL);
@@ -469,8 +488,8 @@ std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
   sqlite3_stmt *statement = NULL;
   char *query = NULL;
 
-  query = sqlite3_mprintf("SELECT * FROM %Q WHERE ROWID = %d", 
-			  name.c_str(),
+  query = sqlite3_mprintf("SELECT * FROM %s WHERE ROWID = %d", 
+			  quoted_name.c_str(),
 			  row2sql[y]);
 
   //printf("LOOKUP %s\n", query);
@@ -521,8 +540,8 @@ bool SqliteSheet::cellString(int x, int y, const std::string& str, bool escaped)
   if (escaped) { 
     tstr = NULL;
   }
-  query = sqlite3_mprintf("UPDATE %Q SET %Q = %Q WHERE ROWID = %d", 
-			  name.c_str(),
+  query = sqlite3_mprintf("UPDATE %s SET %Q = %Q WHERE ROWID = %d", 
+			  quoted_name.c_str(),
 			  col2sql[x].getName().c_str(),
 			  tstr,
 			  row2sql[y]);
@@ -645,8 +664,8 @@ ColumnRef SqliteSheet::insertColumn(const ColumnRef& base,
   info.setName(col_name);
   
   if (index==-1) {
-    char *query = sqlite3_mprintf("ALTER TABLE %Q ADD COLUMN %Q",
-				  name.c_str(), col_name.c_str());
+    char *query = sqlite3_mprintf("ALTER TABLE %s ADD COLUMN %Q",
+				  quoted_name.c_str(), col_name.c_str());
 
     int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
     if (iresult!=SQLITE_OK) {
@@ -698,8 +717,8 @@ RowRef SqliteSheet::insertRow(const RowRef& base) {
     fprintf(stderr,"*** WARNING: Row insertion order ignored for Sqlite\n");
   }
 
-  char *query = sqlite3_mprintf("INSERT INTO %Q DEFAULT VALUES",
-				name.c_str());
+  char *query = sqlite3_mprintf("INSERT INTO %s DEFAULT VALUES",
+				quoted_name.c_str());
 
   int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
   if (iresult!=SQLITE_OK) {
@@ -730,8 +749,8 @@ bool SqliteSheet::deleteRow(const RowRef& src) {
   int index = src.getIndex();
   if (index==-1) return false;
   int rid = row2sql[index];
-  char *query = sqlite3_mprintf("DELETE FROM %Q WHERE ROWID=%d",
-				name.c_str(), rid);
+  char *query = sqlite3_mprintf("DELETE FROM %s WHERE ROWID=%d",
+				quoted_name.c_str(), rid);
 
   int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
   if (iresult!=SQLITE_OK) {
@@ -788,8 +807,8 @@ bool SqliteSheet::applyRowCache(const RowCache& cache, int row,
     return r.isValid();
   }
 
-  char *query = sqlite3_mprintf("INSERT INTO %Q (%s) VALUES (%s)",
-				name.c_str(),
+  char *query = sqlite3_mprintf("INSERT INTO %s (%s) VALUES (%s)",
+				quoted_name.c_str(),
 				cols.c_str(),
 				vals.c_str());
 
@@ -835,7 +854,7 @@ bool SqliteSheet::deleteData(int offset) {
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
 
-  char *query = sqlite3_mprintf("DELETE FROM %Q WHERE 1", name.c_str());
+  char *query = sqlite3_mprintf("DELETE FROM %s WHERE 1", quoted_name.c_str());
 
   int iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
   if (iresult!=SQLITE_OK) {
@@ -861,7 +880,8 @@ void SqliteSheet::checkPrimaryKeys() {
   sqlite3_stmt *statement = NULL;
   char *query = NULL;
 
-  query = sqlite3_mprintf("PRAGMA table_info(%Q)", 
+  query = sqlite3_mprintf("PRAGMA %stable_info(%Q)", 
+			  prefix_dot.c_str(),
 			  name.c_str());
  
   int iresult = sqlite3_prepare_v2(db, query, -1, 
@@ -901,7 +921,8 @@ void SqliteSheet::checkForeignKeys() {
   sqlite3_stmt *statement = NULL;
   char *query = NULL;
 
-  query = sqlite3_mprintf("PRAGMA foreign_key_list(%Q)",
+  query = sqlite3_mprintf("PRAGMA %sforeign_key_list(%Q)",
+			  this->prefix_dot.c_str(),
 			  this->name.c_str());
 
   int iresult = sqlite3_prepare_v2(db, query, -1, 
@@ -1100,3 +1121,162 @@ COMMIT;						    \
   sqlite3_free(query);
   return true;
 }
+
+
+class SqliteDbiSqlWrapper : public DbiSqlWrapper {
+public:
+  sqlite3 *db;  
+  sqlite3_stmt *statement;
+
+  SqliteDbiSqlWrapper() {
+    statement = NULL;
+    db = NULL;
+  }
+
+  ~SqliteDbiSqlWrapper() {
+    end();
+  }
+
+  // put quoting functions here
+
+  std::string getQuotedColumnName(const std::string& name) {
+    string tname ;
+    char *query = NULL;
+    query = sqlite3_mprintf("`%q`", name.c_str());
+    tname = query;
+    sqlite3_free(query);
+    return tname;
+  }
+
+  std::string getQuotedTableName(const SqlTableName& name) {
+    string tname;
+    char *query = NULL;
+    if (name.prefix == "") {
+      query = sqlite3_mprintf("`%q`", name.name.c_str());
+    } else {
+      query = sqlite3_mprintf("`%q`.`%q`", name.prefix.c_str(),
+			      name.name.c_str());
+    }
+    tname = query;
+    sqlite3_free(query);
+    return tname;
+  }
+
+  std::vector<ColumnInfo> getColumns(const SqlTableName& name) {
+    std::vector<ColumnInfo> col2sql;
+
+    if (db==NULL) return col2sql;
+
+    string tname = name.name;
+    string prefix_dot = "";
+    char *query = NULL;
+    if (name.prefix!="") {
+      query = sqlite3_mprintf("%Q.", 
+			      name.prefix.c_str());
+      prefix_dot = query;
+      sqlite3_free(query);
+    }
+
+    sqlite3_stmt *statement = NULL;
+
+    query = sqlite3_mprintf("PRAGMA %stable_info(%Q)", 
+			    prefix_dot.c_str(),
+			    tname.c_str());
+    
+    int iresult = sqlite3_prepare_v2(db, query, -1, 
+				     &statement, NULL);
+    if (iresult!=SQLITE_OK) {
+      sqlite3_finalize(statement);
+      sqlite3_free(query);
+      col2sql.clear();
+      return col2sql;
+    }
+    int i = 0;
+    while (sqlite3_step(statement) == SQLITE_ROW) {
+      char *col = (char *)sqlite3_column_text(statement,1);
+      ColumnInfo info(col);
+      col2sql.push_back(info);
+      int pk = sqlite3_column_int(statement,5);
+      col2sql[i].setPk(pk!=0);
+      bool ai = false;
+      if (pk) {
+	if (col2sql[i].getColumnType().family == ColumnType::COLUMN_FAMILY_INTEGER) {
+	  ai = true;
+	}
+      }
+      col2sql[i].setAutoIncrement(ai);
+      i++;
+    }
+    sqlite3_finalize(statement);
+    sqlite3_free(query);
+
+    return col2sql;
+  }
+
+  virtual bool begin(const std::string& query) {
+    end();
+    int result = sqlite3_prepare_v2(db, query.c_str(), -1, 
+				    &statement, NULL);
+    if (result!=SQLITE_OK) {
+      const char *msg = sqlite3_errmsg(db);
+      if (msg!=NULL) {
+	fprintf(stderr,"Error: %s\n", msg);
+	fprintf(stderr,"Query was: %s\n", query.c_str());
+      }
+      end();
+      return false;
+    }
+    return true;
+  }
+
+  virtual bool read() {
+    return (sqlite3_step(statement) == SQLITE_ROW);
+  }
+
+  virtual SheetCell get(int index) {
+    char *result = (char*)sqlite3_column_text(statement,index);
+    if (!result) return SheetCell();
+    return SheetCell(result,false);
+  }
+
+  virtual bool end() {
+    if (!statement) return false;
+    sqlite3_finalize(statement);
+    statement = NULL;
+    return true;
+  }
+  virtual int width() {
+    return sqlite3_column_count(statement);
+  }
+};
+
+int SqliteSheet::compare(coopy::store::DataSheet& pivot, 
+			 coopy::store::DataSheet& local, 
+			 coopy::store::DataSheet& remote, 
+			 coopy::cmp::Patcher& output, 
+			 const coopy::cmp::CompareFlags& flags) {
+  //printf("sqlite compare anyone?\n");
+  SqliteSheet *spivot = dynamic_cast<SqliteSheet *>(&(pivot.tail()));
+  SqliteSheet *slocal = dynamic_cast<SqliteSheet *>(&(local.tail()));
+  SqliteSheet *sremote = dynamic_cast<SqliteSheet *>(&(remote.tail()));
+  if (spivot==NULL || slocal==NULL || sremote==NULL) return -1;
+  if (spivot->prefix != slocal->prefix) return -1;
+  if (spivot->name != slocal->name) return -1;
+  //printf("name %s %s\n", slocal->name.c_str(), sremote->name.c_str());
+  //printf("prefix |%s| |%s|\n", slocal->prefix.c_str(), sremote->prefix.c_str());
+
+  SqliteDbiSqlWrapper wrap;
+  wrap.db = DB(slocal->implementation);
+  SqlTableName t1, t2;
+  t1.prefix = slocal->prefix;
+  t1.name = slocal->name;
+  t2.prefix = sremote->prefix;
+  t2.name = sremote->name;
+  if (t1.prefix=="") t1.prefix = "main";
+  if (t2.prefix=="") t2.prefix = "main";
+  SqlCompare cmp(&wrap,t1,t2,output);
+
+  return cmp.apply()?0:-1;
+}
+
+

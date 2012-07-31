@@ -31,6 +31,7 @@ public:
   bool shouldRead;
   bool shouldWrite;
   TextBook *prevBook;
+  TextBook *baseBook;
   Property prevOptions;
 
   AttachConfig() {
@@ -40,6 +41,7 @@ public:
     shouldRead = false;
     shouldWrite = false;
     prevBook = NULL;
+    baseBook = NULL;
   }
 
   void show() const;

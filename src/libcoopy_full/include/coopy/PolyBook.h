@@ -85,7 +85,11 @@ public:
 
   bool isValid() const { return book!=NULL; }
 
-  bool read(const char *fname, const char *ext = NULL) {
+  bool readForReference(const char *fname, PolyBook& base) {
+    return read(fname,NULL,&base);
+  }
+
+  bool read(const char *fname, const char *ext = NULL, PolyBook *base = NULL) {
     coopy::store::Property p;
     p.put("file",fname);
     if (ext!=NULL) {
@@ -96,7 +100,7 @@ public:
     p.put("can_create",false);
     p.put("should_read",true);
     p.put("should_write",false);
-    return attach(p);
+    return attach(p,base);
   }
 
   bool readIfExists(const char *fname) {
@@ -175,7 +179,7 @@ public:
     return attach(p);
   }
 
-  bool attach(coopy::store::Property& config);
+  bool attach(coopy::store::Property& config, PolyBook *base = NULL);
 
   static bool expand(coopy::store::Property& config);
 

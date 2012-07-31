@@ -34,9 +34,18 @@ SqliteTextBook::~SqliteTextBook() {
 
 void SqliteTextBook::clear() {
   if (implementation!=NULL) {
-    sqlite3_close(DB(implementation));
+    bool skip = false;
+    if (implementation_count.isValid()) {
+      if (implementation_count->getReferenceCount()>1) {
+	skip = true;
+      }
+    }
+    if (!skip) {
+      sqlite3_close(DB(implementation));
+    }
     implementation = NULL;
   }
+  implementation_count.clear();
   if (hold_temp!="") {
     if (postwrite) {
       FILE *fin = fopen(hold_temp.c_str(),"rb");
@@ -60,7 +69,8 @@ void SqliteTextBook::clear() {
 }
 
 bool SqliteTextBook::read(const char *fname, bool can_create,
-			  const Property& config) {
+			  const Property& config,
+			  SqliteTextBook *base) {
   dbg_printf("SqliteTextBook: reading %s\n", fname);
   clear();
 
@@ -149,15 +159,43 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
       }
   }
   
-  int result = sqlite3_open_v2(alt_fname.c_str(),
-			       (sqlite3**)(&implementation),
-			       SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE|
-			       SQLITE_OPEN_NOMUTEX,
-			       NULL);
-  if (result!=SQLITE_OK) {
-    fprintf(stderr,"Failed to open database %s\n", fname);
-    clear();
-    return false;
+
+  if (base) {
+    if (base->implementation) {
+      implementation = base->implementation;
+      base->implementation_count = Poly<RefCount>(new RefCount(), true);
+      implementation_count = base->implementation_count;
+
+      sqlite3 *db = DB(implementation);
+      string pre = "__coopy_peer__";
+      char *query = sqlite3_mprintf("ATTACH %Q AS %s",
+				    alt_fname.c_str(), pre.c_str());
+      int result = sqlite3_exec(db, query, NULL, NULL, NULL);
+      if (result!=SQLITE_OK) {
+	clear();
+	base = NULL;
+	return false;
+      } else {
+	dbg_printf("Attached sqlite database to existing one as: %s\n",
+		   pre.c_str());
+	prefix = pre;
+	prefix_dot = prefix + ".";
+      }
+    }
+  } 
+
+  if (!base) {
+
+    int result = sqlite3_open_v2(alt_fname.c_str(),
+				 (sqlite3**)(&implementation),
+				 SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE|
+				 SQLITE_OPEN_NOMUTEX,
+				 NULL);
+    if (result!=SQLITE_OK) {
+      fprintf(stderr,"Failed to open database %s\n", fname);
+      clear();
+      return false;
+    }
   }
 
   const char *query = "PRAGMA synchronous = 0;";
@@ -276,13 +314,13 @@ bool SqliteTextBook::save(const char *fname, const char *format,
   return true;
 }
 
-bool SqliteTextBook::open(const Property& config) {
+bool SqliteTextBook::open(const Property& config, SqliteTextBook *base) {
   clear();
   if (!config.check("file")) {
     fprintf(stderr,"file parameter needed\n");
     return false;
   }
-  if (!read(config.get("file").asString().c_str(),true,config)) {
+  if (!read(config.get("file").asString().c_str(),true,config,base)) {
     fprintf(stderr,"failed to read %s\n", config.get("file").asString().c_str());
     return false;
   }
@@ -304,7 +342,7 @@ vector<string> SqliteTextBook::getNamesSql() {
   if (db==NULL) return result;
 
   sqlite3_stmt *statement = NULL;
-  string cmd_get_tables = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
+  string cmd_get_tables = "SELECT name FROM " + prefix_dot + "sqlite_master WHERE type='table' ORDER BY name;";
   int iresult = sqlite3_prepare_v2(db, cmd_get_tables.c_str(), -1, 
 				   &statement, NULL);
   if (iresult!=SQLITE_OK) {
@@ -332,7 +370,8 @@ PolySheet SqliteTextBook::readSheet(const std::string& name) {
   if (find(names.begin(),names.end(),name)==names.end()) {
     return PolySheet();
   }
-  SqliteSheet *sheet = new SqliteSheet(implementation,name.c_str());
+  SqliteSheet *sheet = new SqliteSheet(implementation,name.c_str(),
+				       prefix.c_str());
   if (sheet!=NULL) sheet->connect();
   return PolySheet(sheet,true);
 }
@@ -346,7 +385,7 @@ bool SqliteTextBook::addSheet(const SheetSchema& schema) {
   }
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
-  SqliteSheet sheet(db,schema.getSheetName().c_str());
+  SqliteSheet sheet(db,schema.getSheetName().c_str(),prefix.c_str());
   bool ok = sheet.create(schema);
   names.push_back(name);
   return ok;
