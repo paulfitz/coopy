@@ -91,7 +91,7 @@ public:
   coopy::store::Pool *pool;
   bool foreign_pool;
   bool foreign_pool_set;
-  bool boring;
+  bool offload_to_sql_when_possible;
 
   CompareFlags() {
     head_trimmed = false;
@@ -117,7 +117,7 @@ public:
     meta_book = 0 /*NULL*/;
     create_unknown_sheets = false;
     clean_sheets = false;
-    boring = false;
+    offload_to_sql_when_possible = false;
   }
 
   // js build has problem with implicit copy

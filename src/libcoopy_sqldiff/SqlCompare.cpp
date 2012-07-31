@@ -80,6 +80,20 @@ bool SqlCompare::apply() {
 
   string sql_updates = string("SELECT ") + sql_dbl_cols + " FROM " + sql_table1 + " INNER JOIN " + sql_table2 + " ON " + sql_key_match + " WHERE " + sql_data_mismatch;
 
+  /*
+  string sql_concat1 = "";
+  string sql_concat2 = "";
+  for (int i=0; i<(int)all_cols.size(); i++) {
+    if (i>0) sql_concat1 += " || ";
+    if (i>0) sql_concat2 += " || ";
+    char buf[256];
+    sprintf(buf,"__coopy_%d", i);
+    sql_concat1 += string("quote(") + buf + ")";
+    sql_concat2 += string("quote(") + buf + "b)";
+  }
+  string sql_updates2 = string("SELECT ") + sql_dbl_cols + " FROM " + sql_table1 + " INNER JOIN " + sql_table2 + " ON " + sql_key_match + " AND (" + sql_concat1 + ") IS NOT (" + sql_concat2 + ")";
+  */
+
   string sql_deletes = string("SELECT ") + sql_all_cols + " FROM " + sql_table1 + " WHERE NOT EXISTS (SELECT 1 FROM " + sql_table2 + " WHERE " + sql_key_match + ")";
 
   dbg_printf(" SQL to find inserts: %s\n", sql_inserts.c_str());

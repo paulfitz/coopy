@@ -512,7 +512,7 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
     }
   }
 
-  if (!eflags.boring) {
+  if (eflags.offload_to_sql_when_possible) {
     if (!output.wantLinks()) {
       void *local_db = local.getDatabase();
       void *remote_db = remote.getDatabase();
