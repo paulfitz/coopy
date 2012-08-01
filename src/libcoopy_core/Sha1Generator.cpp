@@ -442,6 +442,8 @@ static void DigestToBase16(unsigned char *digest, char *zBuf){
 static SHA1Context incrCtx;
 static int incrInit = 0;
 
+static int hashLen = 0;
+
 /*
 ** Add more text to the incremental SHA1 checksum.
 */
@@ -454,6 +456,7 @@ void sha1sum_step_text(const char *zText, int nBytes){
     if( nBytes==0 ) return;
     nBytes = strlen(zText);
   }
+  hashLen += nBytes;
   SHA1Input(&incrCtx, (unsigned char*)zText, nBytes);
 }
 
@@ -472,6 +475,10 @@ char *sha1sum_finish(){
   SHA1Result(&incrCtx, zResult);
   incrInit = 0;
   DigestToBase16(zResult, zOut);
+  if (hashLen!=0) { 
+    //printf("Length %d\n", hashLen);
+  }
+  hashLen = 0;
   return zOut;
 }
 

@@ -718,6 +718,13 @@ x organization |id=| \n\
 }
 
 int Options::apply(int argc, char *argv[]) {
+  /*fprintf(stderr,">>> IT BEGINS: %s =", getName().c_str());
+  for (int i=0; i<argc; i++) {
+    fprintf(stderr," %s", argv[i]);
+  }
+  fprintf(stderr,"\n");
+  */
+
   //printf("Hello good evening and welcome\n");
   //for (int i=0; i<argc; i++) {
   //printf("[%d] [%s]\n", i, argv[i]);

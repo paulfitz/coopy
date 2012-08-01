@@ -194,8 +194,12 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
 	}
       }
     }
-    dbg_printf("Copying rows from %s to %s\n",
-	       sheet.desc().c_str(), target.desc().c_str());
+    dbg_printf("Copying rows from %s to %s (%ld -> %ld)\n",
+	       sheet.desc().c_str(), target.desc().c_str(),
+	       (long int)(&sheet.tail()),
+	       (long int)(&target.tail()));
+    //printf("Origin is %s\n", sheet.toString().c_str());
+    //printf("Target is %s\n", target.toString().c_str());
     target.beginTransaction();
     for (int i=start; i<sheet.height(); i++) {
       dbg_printf("Row %d (src height %d target height %d)\n", i,
@@ -208,6 +212,8 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
       row.flush();
     }
     target.endTransaction();
+    //printf("Origin is after %s\n", sheet.toString().c_str());
+    //printf("Target is after %s\n", target.toString().c_str());
     dbg_printf("Final size for %s: src %dx%d target %dx%d\n", 
 	       name.c_str(),
 	       sheet.width(), sheet.height(),

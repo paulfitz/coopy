@@ -511,6 +511,10 @@ bool Merger::merge(MergerState& state) {
 
   bool diff = output.wantDiff();
   bool link = output.wantLinks();
+  
+  if (state.allIdentical && !link) {
+    return true;
+  }
 
   dbg_printf("Merging column order...\n");
   CompareFlags cflags = flags;

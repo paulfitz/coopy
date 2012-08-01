@@ -94,10 +94,13 @@ public:
    return false;
  }
 
- virtual void *getDatabase() {
+ virtual void *getDatabase() const {
    return implementation;
  }
 
+  virtual std::string getDescription() const {
+    return "sqlite";
+  }
 
  virtual coopy::cmp::Compare *getComparisonMethod() {
    return this;
@@ -109,6 +112,8 @@ public:
 		     coopy::cmp::Patcher& output, 
 		     const coopy::cmp::CompareFlags& flags);
 
+  virtual std::string getRawHash() const;
+
 private:
   SqliteSheetSchema *schema;
   void *implementation;
@@ -117,6 +122,7 @@ private:
   std::string prefix;
   std::string prefix_dot;
   int w, h;
+  bool pending_load;
   std::vector<int> row2sql;
   std::vector<ColumnInfo> col2sql;
 
@@ -127,6 +133,8 @@ private:
   SparseByteSheet cacheFlag;
   void checkPrimaryKeys();
   void checkForeignKeys();
+
+  void check();
 
 public:
   static bool isReserved(const std::string& name);

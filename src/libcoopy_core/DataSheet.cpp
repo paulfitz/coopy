@@ -201,13 +201,23 @@ std::string DataSheet::getHash(bool cache) const {
     dbg_printf("(sha1 %ld %s %s)\n", (long int)this, hash_cache.c_str(), desc().c_str());
     return hash_cache;
   }
+  mod->hash_cache = mod->getRawHash();
+  if (hash_cache!="") {
+    dbg_printf("(raw sha1 %ld %s %s)\n", (long int)this, hash_cache.c_str(), desc().c_str());
+    return hash_cache;
+  }
   dbg_printf("Computing sha1\n");
   Sha1Generator sha1;
   for (int y=0;y<height();y++) {
     std::string txt;
     for (int x=0;x<width();x++) {
       SheetCell cell = cellSummary(x,y);
-      txt += cell.toString();
+      if (cell.escaped) {
+	txt += "N";
+      } else {
+	txt += "X";
+	txt += cell.text;
+      }
     }
     sha1.add(txt);
   }

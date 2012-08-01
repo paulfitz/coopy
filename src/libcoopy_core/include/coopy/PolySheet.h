@@ -333,6 +333,15 @@ public:
     return DataSheet::getHash(cache);
   }
 
+
+  virtual std::string getRawHash() const {
+    if (dh==0) {
+      COOPY_ASSERT(sheet);
+      return sheet->getRawHash();
+    }
+    return DataSheet::getRawHash();
+  }
+
   virtual DataSheet& tail() {
     if (dh!=0) {
       return *this;
@@ -492,7 +501,7 @@ public:
     return sheet->endTransaction();
   }
 
-  virtual void *getDatabase() {
+  virtual void *getDatabase() const {
     COOPY_ASSERT(sheet);
     return sheet->getDatabase();
   }

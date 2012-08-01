@@ -20,6 +20,41 @@ using namespace coopy::format;
 
 #define DB(x) ((sqlite3 *)(x))
 
+void coopy_set_function(sqlite3_context *context, int argc, 
+			sqlite3_value **argv){
+  coopy::store::Sha1Generator& hasher = *((coopy::store::Sha1Generator*)sqlite3_user_data(context));
+
+  COOPY_ASSERT( argc==1 );
+  std::string result = "start";
+  if (sqlite3_value_int64(argv[0])>0) {
+    result = hasher.finish();
+  } else {
+    hasher.finish();
+  }
+  //printf("HASHER %s\n", result.c_str());
+  sqlite3_result_text(context, result.c_str(), result.length()+1, 
+		      SQLITE_TRANSIENT);
+}
+
+void coopy_add_function(sqlite3_context *context, int argc, 
+			sqlite3_value **argv){
+  coopy::store::Sha1Generator& hasher = *((coopy::store::Sha1Generator*)sqlite3_user_data(context));
+
+  //printf("HALLO?? %d\n", argc);
+  for (int i=0; i<argc; i++) {
+    char *txt = (char *)sqlite3_value_text(argv[i]);
+    //printf("Adding %s\n", txt);
+    if (!txt) {
+      hasher.add("N",1);
+    } else {
+      hasher.add("X",1);
+      int len = sqlite3_value_bytes(argv[i]);
+      hasher.add(txt,len);
+    }
+  }
+  sqlite3_result_null(context);
+}
+
 SqliteTextBook::SqliteTextBook(bool textual) {
   implementation = NULL;
   this->textual = textual;
@@ -160,6 +195,10 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
   }
   
 
+  base = NULL;
+#if 0
+  // turns out to be not very useful
+
   if (base) {
     if (base->implementation) {
       implementation = base->implementation;
@@ -183,6 +222,7 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
       }
     }
   } 
+#endif
 
   if (!base) {
 
@@ -196,6 +236,13 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
       clear();
       return false;
     }
+
+    sqlite3_create_function((sqlite3*)implementation, 
+			    "coopy_set", 1, SQLITE_UTF8, (void*)&hasher,
+			    &coopy_set_function, NULL, NULL);
+    sqlite3_create_function((sqlite3*)implementation, 
+			    "coopy_add", -1, SQLITE_UTF8, (void*)&hasher,
+			    &coopy_add_function, NULL, NULL);
   }
 
   const char *query = "PRAGMA synchronous = 0;";

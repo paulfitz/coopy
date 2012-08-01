@@ -80,7 +80,7 @@ void NameSniffer::sniff(int suggest) {
 	  }
 	  */
 	  if (!embed && sheet.width()==names.size() && 
-	      sheet.height()>=1) {
+	      sheet.height()>=1 && sheet.getDatabase()==NULL) {
 	    bool ok = true;
 	    for (int i=0; i<(int)names.size(); i++) {
 	      if (sheet.cellString(i,0)!=names[i]) {

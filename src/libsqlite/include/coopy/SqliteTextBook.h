@@ -3,6 +3,7 @@
 
 #include <coopy/TextBook.h>
 #include <coopy/TextBookFactory.h>
+#include <coopy/Sha1Generator.h>
 
 namespace coopy {
   namespace store {
@@ -66,6 +67,7 @@ private:
   std::string hold_temp;
   std::string prefix;
   std::string prefix_dot;
+  coopy::store::Sha1Generator hasher;
   
   std::vector<std::string> names;
 

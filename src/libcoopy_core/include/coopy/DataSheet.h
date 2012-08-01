@@ -313,6 +313,10 @@ public:
 
   virtual std::string getHash(bool cache=false) const;
 
+  virtual std::string getRawHash() const {
+    return "";
+  }
+
   virtual DataSheet& tail() {
     return *this;
   }
@@ -380,7 +384,7 @@ public:
   }
 
 
-  virtual void *getDatabase() {
+  virtual void *getDatabase() const {
     return 0/*NULL*/;
   }
 

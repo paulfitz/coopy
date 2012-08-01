@@ -233,15 +233,47 @@ bool SqliteSheet::connect() {
 
   sqlite3_stmt *statement = NULL;
   char *query = NULL;
+  int iresult = 0;
 
-  
+
+  //////////////////////////////////////////////////////////////////
+  // Check column names
+
+  query = sqlite3_mprintf("PRAGMA %stable_info(%Q)",
+			  this->prefix_dot.c_str(),
+			  this->name.c_str());
+
+  iresult = sqlite3_prepare_v2(db, query, -1, 
+			       &statement, NULL);
+  if (iresult!=SQLITE_OK) {
+    const char *msg = sqlite3_errmsg(db);
+    if (msg!=NULL) {
+      fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
+    }
+    sqlite3_finalize(statement);
+    sqlite3_free(query);
+  } 
+
+  col2sql.clear();
+  while (sqlite3_step(statement) == SQLITE_ROW) {
+    const char *col = (const char *)sqlite3_column_text(statement,1);
+    const char *kind = (const char *)sqlite3_column_text(statement,2);
+    ColumnInfo info(col);
+    //printf("col is %s kind is %s\n", col, kind);
+    info.setType(kind,"sqlite");
+    col2sql.push_back(info);
+  }
+  sqlite3_finalize(statement);
+  sqlite3_free(query);
+
   //////////////////////////////////////////////////////////////////
   // Check dimensions
 
   query = sqlite3_mprintf("SELECT COUNT(*), * FROM %s",
 			  quoted_name.c_str());
  
-  int iresult = sqlite3_prepare_v2(db, query, -1, 
+  iresult = sqlite3_prepare_v2(db, query, -1, 
 				   &statement, NULL);
   if (iresult!=SQLITE_OK) {
     const char *msg = sqlite3_errmsg(db);
@@ -260,7 +292,6 @@ bool SqliteSheet::connect() {
   //printf("Dimensions %dx%d\n", w, h);
   sqlite3_finalize(statement);
   sqlite3_free(query);
-
 
   //////////////////////////////////////////////////////////////////
   // Check ROWIDs
@@ -288,13 +319,57 @@ bool SqliteSheet::connect() {
   sqlite3_free(query);
 
 
-  //////////////////////////////////////////////////////////////////
-  // Check column names
+  checkPrimaryKeys();
+  checkForeignKeys();
 
-  query = sqlite3_mprintf("PRAGMA %stable_info(%Q)",
-			  this->prefix_dot.c_str(),
-			  this->name.c_str());
+  cache.resize(w,h,"");
+  cacheFlag.resize(w,h,0);
 
+  pending_load = true;
+
+  dbg_printf("Preloaded SqliteSheet\n");
+
+  return true;
+}
+
+std::string SqliteSheet::getRawHash() const {
+  char *query = NULL;
+  int iresult = 0;
+  sqlite3 *db = DB(implementation);
+  sqlite3_stmt *statement = NULL;
+
+  string column_list = "";
+  for (int i=0; i<(int)col2sql.size(); i++) {
+    string base = col2sql[i].getName().c_str();
+    string add = base;
+    if (add.find('\"')!=string::npos) {
+      printf("Quoting of sql column names not done yet\n");
+      exit(1);
+    }
+    add = string("\"") + add + "\"";
+    if (i>0) {
+      column_list += ',';
+    }
+    column_list += add;
+  }
+
+  sqlite3_exec(db, "SELECT coopy_set(0)", NULL, NULL, NULL);
+  query = sqlite3_mprintf("SELECT coopy_add(%s) FROM %s ORDER BY ROWID",
+			  column_list.c_str(),
+			  quoted_name.c_str());
+  iresult = sqlite3_exec(db, query, NULL, NULL, NULL);
+  if (iresult!=SQLITE_OK) {
+    const char *msg = sqlite3_errmsg(db);
+    if (msg!=NULL) {
+      fprintf(stderr,"Error: %s\n", msg);
+      fprintf(stderr,"Query was: %s\n", query);
+    }
+    sqlite3_free(query);
+    return "";
+  } 
+  sqlite3_free(query);
+
+  query = sqlite3_mprintf("SELECT coopy_set(1)"); 
   iresult = sqlite3_prepare_v2(db, query, -1, 
 			       &statement, NULL);
   if (iresult!=SQLITE_OK) {
@@ -305,27 +380,27 @@ bool SqliteSheet::connect() {
     }
     sqlite3_finalize(statement);
     sqlite3_free(query);
+    return "";
   } 
-
-  while (sqlite3_step(statement) == SQLITE_ROW) {
-    const char *col = (const char *)sqlite3_column_text(statement,1);
-    const char *kind = (const char *)sqlite3_column_text(statement,2);
-    ColumnInfo info(col);
-    //printf("col is %s kind is %s\n", col, kind);
-    info.setType(kind,"sqlite");
-    col2sql.push_back(info);
+  string key;
+  if (sqlite3_step(statement) == SQLITE_ROW) {
+    key = (char *)sqlite3_column_text(statement,0);
+    //printf("HASH IS %s\n", key.c_str());
   }
   sqlite3_finalize(statement);
   sqlite3_free(query);
+  return key;
+}
 
 
+void SqliteSheet::check() {
+  if (!pending_load) return;
+  pending_load = false;
 
-  checkPrimaryKeys();
-  checkForeignKeys();
-
-  cache.resize(w,h,"");
-  cacheFlag.resize(w,h,0);
-
+  char *query = NULL;
+  int iresult = 0;
+  sqlite3 *db = DB(implementation);
+  sqlite3_stmt *statement = NULL;
   {
     query = sqlite3_mprintf("SELECT * FROM %s ORDER BY ROWID",
 			    this->quoted_name.c_str());
@@ -340,6 +415,7 @@ bool SqliteSheet::connect() {
       }
       sqlite3_finalize(statement);
       sqlite3_free(query);
+      return;
     } 
 
     int yy = 0;
@@ -360,8 +436,6 @@ bool SqliteSheet::connect() {
   }
 
   dbg_printf("Loaded SqliteSheet\n");
-
-  return true;
 }
 
 bool SqliteSheet::create(const SheetSchema& schema) {
@@ -468,6 +542,7 @@ std::string SqliteSheet::cellString(int x, int y) const {
 }
 
 std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
+  ((SqliteSheet *)this)->check();
   escaped = false;
   const unsigned char *f = cacheFlag.pcell_const(x,y);
   if (f!=NULL) {
@@ -521,6 +596,7 @@ std::string SqliteSheet::cellString(int x, int y, bool& escaped) const {
 
 
 bool SqliteSheet::cellString(int x, int y, const std::string& str, bool escaped) {
+  check();
   // starting with a COMPLETELY brain-dead implementation
 
   cache.cell(x,y) = str;
@@ -771,6 +847,7 @@ bool SqliteSheet::deleteRow(const RowRef& src) {
 
 bool SqliteSheet::applyRowCache(const RowCache& cache, int row,
 				SheetCell *result) {
+  check();
 
   sqlite3 *db = DB(implementation);
   if (db==NULL) return false;
@@ -847,6 +924,7 @@ bool SqliteSheet::applyRowCache(const RowCache& cache, int row,
 
 
 bool SqliteSheet::deleteData(int offset) {
+  check();
   if (offset!=0) DataSheet::deleteData(offset);
 
   clearCache();

@@ -45,6 +45,7 @@ static bool copyBook(PolyBook& src_book, const char *src, const char *dest,
 
 
 int Diff::apply(const Options& opt) {
+  dbg_printf("{} Diff::apply begins\n");
   bool resolved = true;
   bool verbose = opt.checkBool("verbose");
   bool equality = opt.checkBool("equals");
@@ -116,6 +117,8 @@ int Diff::apply(const Options& opt) {
     remote_file = core[1];
   }
 
+  dbg_printf("\n{} Diff::apply checking local file if any\n");
+
   if (local_file!="") {
     if (!_local.read(local_file.c_str())) {
       fprintf(stderr,"Failed to read %s\n", local_file.c_str());
@@ -126,6 +129,8 @@ int Diff::apply(const Options& opt) {
   if (inplace) {
     output = local_file;
   }
+
+  dbg_printf("\n{} Diff::apply checking remote file if any\n");
 
   bool patch_is_remote = false;
   if (remote_file!="") {
@@ -154,6 +159,8 @@ int Diff::apply(const Options& opt) {
     }
   }
 
+  dbg_printf("\n{} Diff::apply doing inplace tweaks if needed\n");
+
   bool cloned = false;
   if ((mode=="apply"||mode=="merge"||mode=="novel")&&!apply) {
     if (local_file!=""&&local->inplace()&&local->getNames().size()>0&&!inplace&&output!=local_file) {
@@ -178,6 +185,8 @@ int Diff::apply(const Options& opt) {
     }
   }
 
+  dbg_printf("\n{} Diff::apply dealing with pivot if any\n");
+
   if (parent_file!="") {
     if (!_pivot.read(parent_file.c_str())) {
       fprintf(stderr,"Failed to read %s\n", parent_file.c_str());
@@ -198,6 +207,8 @@ int Diff::apply(const Options& opt) {
     return 1;
   }
 
+  dbg_printf("\n{} Diff::apply creating tool\n");
+
   Patcher *diff = createTool(mode,version);
   MergeOutputPool pooler;
   if (diff==NULL) {
@@ -207,6 +218,7 @@ int Diff::apply(const Options& opt) {
   }
   PolyBook obook;
   if (diff->needOutputBook()) {
+    dbg_printf("\n{} Diff::apply preparing output book\n");
     // output touched
     if (!obook.attach(output.c_str())) {
       delete diff; diff = NULL;
@@ -217,21 +229,25 @@ int Diff::apply(const Options& opt) {
 
   PolyBook tbook;
   if (diff->outputStartsFromInput()&&!cloned) {
+    dbg_printf("\n{} Diff::apply fiddling with output book #1\n");
     char ch = 'x';
     if (output.length()>0) {
       ch = output[output.length()-1];
     }
     if (ch!='-') { // crude test for stdin/out
       // output_touched
+      dbg_printf("{} Diff::apply writing local to output\n");
       if (!_local.write(output.c_str())) {
 	delete diff; diff = NULL;
 	return 1;
       }
+      dbg_printf("{} Diff::apply re-reading local\n");
       if (!_local.read(local_file.c_str())) {
 	fprintf(stderr,"Failed to read %s\n", local_file.c_str());
 	return 1;
       }
       // output touched
+      dbg_printf("{} Diff::apply reading output if exists\n");
       if (!tbook.readIfExists(output.c_str())) {
 	fprintf(stderr,"Failed to read %s\n", output.c_str());
 	return 1;
@@ -244,11 +260,13 @@ int Diff::apply(const Options& opt) {
     diff->attachBook(tbook);
     pooler.attachBook(tbook);
   } else {
+    dbg_printf("\n{} Diff::apply fiddling with output book #2\n");
     diff->attachBook(*local);
     pooler.attachBook(*local);
   }
 
   if (apply) {
+    dbg_printf("\n{} Diff::apply prepare for application\n");
     SheetPatcher *apply_diff = SheetPatcher::createForApply();
     COOPY_ASSERT(apply_diff!=NULL);
     apply_diff->showSummary(diff);
@@ -257,13 +275,16 @@ int Diff::apply(const Options& opt) {
     pooler.attachBook(*local);
   }
 
+  dbg_printf("\n{} Diff::apply start output\n");
   if (!diff->startOutput(output,flags)) {
     fprintf(stderr,"Patch output failed\n");
     delete diff;
     diff = NULL;
     return 1;
   }
+
   if (meta_file!="") {
+    dbg_printf("{} Diff::apply add meta file\n");
     pooler.startOutput(output,flags);
     pooler.setFlags(flags);
     PatchParser parser(&pooler,meta_file,flags);
@@ -278,6 +299,7 @@ int Diff::apply(const Options& opt) {
   }
 
   if (!resolving) {
+    dbg_printf("\n{} Diff::apply diff/patch/merge\n");
     diff->setFlags(flags);
     bool filter = flags.ordered_tables.size()>0 || flags.acts.size()>0 || 
       flags.create_unknown_sheets || patchy || flags.resolve!="";
@@ -317,6 +339,7 @@ int Diff::apply(const Options& opt) {
       filter_diff.stopOutput("-",flags);
     }
   } else {
+    dbg_printf("\n{} Diff::apply resolve\n");
     flags.resolving = true;
     if (flags.remote_uri == "") {
       flags.remote_uri = flags.local_uri;
@@ -340,6 +363,8 @@ int Diff::apply(const Options& opt) {
       cmp.resolve(*pivot,*local,*remote,*diff,flags);
     }
   }
+
+  dbg_printf("\n{} Diff::apply finish up\n");
 
   bool will_write_output = false;
   if (showPatch) {
@@ -370,14 +395,18 @@ int Diff::apply(const Options& opt) {
 
   if (diff->outputStartsFromInput()) {
     // output touched
-    if (!tbook.write(output.c_str())) {
-      fprintf(stderr,"Failed to write %s\n", output.c_str());
-      return 1;
+    if (!tbook.inplace()) {
+      dbg_printf("{} Diff::apply write tbook\n");
+      if (!tbook.write(output.c_str())) {
+	fprintf(stderr,"Failed to write %s\n", output.c_str());
+	return 1;
+      }
     }
   }
   if (mode=="apply"&&!showPatch) {
     if (diff->getChangeCount()>0) {
       if (!local->inplace()) {
+	dbg_printf("{} Diff::apply write local #1\n");
 	if (!local->write(local_file.c_str())) {
 	  fprintf(stderr,"Failed to write %s\n", local_file.c_str());
 	  return 1;
@@ -388,6 +417,7 @@ int Diff::apply(const Options& opt) {
   if (showPatch) {
     if ((!local->inplace())||(tmp!=output)) {
       if (output!=local_file || !local->inplace()) {
+	dbg_printf("{} Diff::apply write local #2\n");
 	if (!local->write(output.c_str())) {
 	  fprintf(stderr,"Failed to write %s\n", output.c_str());
 	  delete diff; diff = NULL;
