@@ -135,9 +135,16 @@ int Diff::apply(const Options& opt) {
   bool patch_is_remote = false;
   if (remote_file!="") {
     //if (!_remote.read(remote_file.c_str())) {
-    if (!_remote.readForReference(remote_file.c_str(),_local)) {
-      fprintf(stderr,"Failed to read %s\n", remote_file.c_str());
-      return 1;
+    if (flags.offload_to_sql_when_possible) {
+      if (!_remote.readForReference(remote_file.c_str(),_local)) {
+	fprintf(stderr,"Failed to read %s\n", remote_file.c_str());
+	return 1;
+      }
+    } else {
+      if (!_remote.read(remote_file.c_str())) {
+	fprintf(stderr,"Failed to read %s\n", remote_file.c_str());
+	return 1;
+      }
     }
     flags.remote_uri = remote_file;
     if (scan_for_patch) {

@@ -194,11 +194,6 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
       }
   }
   
-
-  base = NULL;
-#if 0
-  // turns out to be not very useful
-
   if (base) {
     if (base->implementation) {
       implementation = base->implementation;
@@ -222,7 +217,6 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
       }
     }
   } 
-#endif
 
   if (!base) {
 

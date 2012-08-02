@@ -31,6 +31,7 @@ bool SqlCompare::validateSchema() {
 
 
 bool SqlCompare::apply() {
+
   if (!db) return false;
   if (!validateSchema()) return false;
 
@@ -96,10 +97,6 @@ bool SqlCompare::apply() {
 
   string sql_deletes = string("SELECT ") + sql_all_cols + " FROM " + sql_table1 + " WHERE NOT EXISTS (SELECT 1 FROM " + sql_table2 + " WHERE " + sql_key_match + ")";
 
-  dbg_printf(" SQL to find inserts: %s\n", sql_inserts.c_str());
-  dbg_printf(" SQL to find updates: %s\n", sql_updates.c_str());
-  dbg_printf(" SQL to find deletes: %s\n", sql_deletes.c_str());
-
   RowChange::txt2bool indexes;
   for (int i=0; i<(int)data_cols.size(); i++) {
     indexes[data_cols[i]] = false;
@@ -107,6 +104,8 @@ bool SqlCompare::apply() {
   for (int i=0; i<(int)key_cols.size(); i++) {
     indexes[key_cols[i]] = true;
   }
+
+  dbg_printf(" SQL to find inserts: %s\n", sql_inserts.c_str());
 
   if (db->begin(sql_inserts)) {
     while (db->read()) {
@@ -127,6 +126,8 @@ bool SqlCompare::apply() {
     }
     db->end();
   }
+
+  dbg_printf(" SQL to find updates: %s\n", sql_updates.c_str());
 
   if (db->begin(sql_updates)) {
     // double all_cols
@@ -152,6 +153,8 @@ bool SqlCompare::apply() {
     }
     db->end();
   }
+
+  dbg_printf(" SQL to find deletes: %s\n", sql_deletes.c_str());
 
   if (db->begin(sql_deletes)) {
     while (db->read()) {
