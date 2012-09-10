@@ -14,6 +14,10 @@ bool ColumnType::setType(const std::string& name,
   std::string _name = name;
   for (int i=0; i<(int)_name.length(); i++) {
     _name[i] = tolower(_name[i]);
+    if (_name[i]=='(') {
+      _name = _name.substr(0,i);
+      break;
+    }
   }
   if (_name=="int"||_name=="integer"||_name=="tinyint"||_name=="byte") {
     family = COLUMN_FAMILY_INTEGER;
@@ -38,7 +42,7 @@ bool ColumnType::setType(const std::string& name,
   }
   if (family==COLUMN_FAMILY_NONE) {
     if (name!="") {
-      fprintf(stderr,"Unrecognized type \'%s\'; update src/libsheet_core/ColumnInfo.cpp\n", name.c_str());
+      fprintf(stderr,"Unrecognized type \'%s\'; update src/libcoopy_core/ColumnInfo.cpp\n", name.c_str());
       if (name=="INTEGER REFERENCE blob") {
 	fprintf(stderr,"Seems like a typo? To be confirmed...\n");
       } else {
