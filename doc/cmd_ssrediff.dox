@@ -26,9 +26,11 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 
 \section ssrediff_options Option summary
  \li \ref ssrediff_main_act "--act=ACT"
+ \li \ref ssrediff_main_context "--context=N"
  \li \ref ssrediff_main_default-table "--default-table=TABLE"
  \li \ref ssrediff_main_format "--format=FORMAT"
  \li \ref ssrediff_main_help "--help"
+ \li \ref ssrediff_main_low-memory "--low-memory"
  \li \ref ssrediff_main_neither "--neither"
  \li \ref ssrediff_main_omit-format-name "--omit-format-name"
  \li \ref ssrediff_main_omit-sheet-name "--omit-sheet-name"
@@ -44,6 +46,9 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 \anchor ssrediff_main_act <b>--act=ACT</b> <br />filter for an action of a particular type (update, insert, delete, none, schema)
 
 
+\anchor ssrediff_main_context <b>--context=N</b> <br />Number of rows of context before and after changes for highlighter diffs ("all" to include all rows)
+
+
 \anchor ssrediff_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
 
 
@@ -51,6 +56,9 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 
 
 \anchor ssrediff_main_help <b>--help</b> <br />show how to use this program
+
+
+\anchor ssrediff_main_low-memory <b>--low-memory</b> <br />prioritize low memory usage over speed
 
 
 \anchor ssrediff_main_neither <b>--neither</b> <br />in case of conflict use cell value from common ancestor
@@ -239,7 +247,7 @@ SOCIALCALC: SocialCalc format (via mozjs)<br />
 
 
 \section ssrediff_version Version
-ssrediff version 0.6.3
+ssrediff version 0.6.4
 
 
  *

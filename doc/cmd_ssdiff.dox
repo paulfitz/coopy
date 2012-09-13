@@ -27,14 +27,17 @@ Show the difference between two tables/databases/spreadsheets.
  \li \ref ssdiff_main_act "--act=ACT"
  \li \ref ssdiff_main_apply "--apply"
  \li \ref ssdiff_main_bid "--bid=COLUMN"
+ \li \ref ssdiff_main_context "--context=N"
  \li \ref ssdiff_main_default-table "--default-table=TABLE"
  \li \ref ssdiff_main_fixed-columns "--fixed-columns"
  \li \ref ssdiff_main_format "--format=FORMAT"
+ \li \ref ssdiff_main_git "--git"
  \li \ref ssdiff_main_head-trimmed "--head-trimmed"
  \li \ref ssdiff_main_headerless "--headerless"
  \li \ref ssdiff_main_help "--help"
  \li \ref ssdiff_main_id "--id=COLUMN"
  \li \ref ssdiff_main_input-formats "--input-formats"
+ \li \ref ssdiff_main_low-memory "--low-memory"
  \li \ref ssdiff_main_named "--named"
  \li \ref ssdiff_main_omit-format-name "--omit-format-name"
  \li \ref ssdiff_main_omit-sheet-name "--omit-sheet-name"
@@ -58,6 +61,9 @@ Show the difference between two tables/databases/spreadsheets.
 \anchor ssdiff_main_bid <b>--bid=COLUMN</b> <br />boost a column (repeat option for multiple columns)
 
 
+\anchor ssdiff_main_context <b>--context=N</b> <br />Number of rows of context before and after changes for highlighter diffs ("all" to include all rows)
+
+
 \anchor ssdiff_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
 
 
@@ -65,6 +71,9 @@ Show the difference between two tables/databases/spreadsheets.
 
 
 \anchor ssdiff_main_format <b>--format=FORMAT</b> <br />set difference format for output
+
+
+\anchor ssdiff_main_git <b>--git</b> <br />expect git-compatible parameters (path old-file old-hex old-mode new-file new-hex new-mode)
 
 
 \anchor ssdiff_main_head-trimmed <b>--head-trimmed</b> <br />ignore rows removed at the beginning of a table (such as a log file)
@@ -80,6 +89,9 @@ Show the difference between two tables/databases/spreadsheets.
 
 
 \anchor ssdiff_main_input-formats <b>--input-formats</b> <br />list supported input database formats
+
+
+\anchor ssdiff_main_low-memory <b>--low-memory</b> <br />prioritize low memory usage over speed
 
 
 \anchor ssdiff_main_named <b>--named</b> <br />trust names of columns, omitting checks for column renames
@@ -276,7 +288,7 @@ SOCIALCALC: SocialCalc format (via mozjs)<br />
 
 
 \section ssdiff_version Version
-ssdiff version 0.6.3
+ssdiff version 0.6.4
 
 
  *

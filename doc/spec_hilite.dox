@@ -25,8 +25,9 @@ describe the difference between it and R in terms of operations
 needed to change L into R.  The difference is described
 in a "diff sheet" that looks like this:
 
-<table>
-  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
+\htmlonly
+<table border=1>
+  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">bridge</font></th><th bgcolor='#000088'><font color="#ffffff">designer</font></th><th bgcolor='#000088'><font color="#ffffff">length</font></th></tr>
   <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td>1600</td></tr>
@@ -37,6 +38,14 @@ in a "diff sheet" that looks like this:
   <tr><td></td><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
 </table>
+\endhtmlonly
+\latexonly
+\begin{center}
+\endlatexonly
+\image latex images/screenshot/spec_hilite_0.pdf
+\latexonly
+\end{center}
+\endlatexonly
 
 A diff sheet consists of a single action column and a block
 of data columns, as follows.
@@ -48,15 +57,24 @@ The action column is the first column that does not contain
 integers; generally it will be exactly the first column.
 Here are cell values that can appear in this column:
 
-<table>
-  <tr><th>\@\@</th><th>the header tag marks a header row, if one exists.</th></tr>
+\htmlonly
+<table border=1>
+  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">the header tag marks a header row, if one exists.</font></th></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>the insert tag marks an added row (present in R, not present in L).</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>the delete tag marks a removed row (present in L, not present in R).</td></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">the update tag marks a row in which at least one cell changed.\n-->, --->, ----> etc. have the same meaning.</td></tr>
+  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">the update tag marks a row in which at least one cell changed.<br/>-->, --->, ----> etc. have the same meaning.</td></tr>
   <tr><td>Blank</td><td>A blank string or NULL marks a row common to L and R.</td></tr>
   <tr><td>...</td><td>the skip tag marks that rows common to L and R are being skipped.</td></tr>
   <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td>The schema tag marks a change in the sheet structure.</td></tr>
 </table>
+\endhtmlonly
+\latexonly
+\begin{center}
+\endlatexonly
+\image latex images/screenshot/spec_hilite_1.pdf
+\latexonly
+\end{center}
+\endlatexonly
 
 @section spec_hilite_data Data columns
 
@@ -67,14 +85,23 @@ L and R have the same columns, and the data columns
 map straightforwardly onto columns in L and R.  Here is what the
 data columns contain, for each action tag:
 
-<table>
-  <tr><th>\@\@</th><th>cells contain column names.</th></tr>
+\htmlonly
+<table border=1>
+  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">cells contain column names.</font></th></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>cells shown are from R, and not present in L.</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>cells shown are from L, and not present in R.</td></tr>
-  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">cells shown are common to both L and R.\n When L and R cells differ, a compound "Vl->Vr" cell is shown.</td></tr>
+  <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">cells shown are common to both L and R.<br/> When L and R cells differ, a compound "Vl->Vr" cell is shown.</td></tr>
   <tr><td>Blank</td><td>cells shown are common to both L and R.</td></tr>
   <tr><td>...</td><td>skipping rows common to both L and R.</td></tr>
 </table>
+\endhtmlonly
+\latexonly
+\begin{center}
+\endlatexonly
+\image latex images/screenshot/spec_hilite_2.pdf
+\latexonly
+\end{center}
+\endlatexonly
 
 In added rows, the data columns are copied from R, and in deleted
 rows, the data columns are copied from R. For updates, data columns
@@ -118,13 +145,22 @@ and for which NULLs and blank strings are distinct.
 If the diff contains any string ending in "NULL" then "NULL-quoting"
 is in effect, and any such string should be interpreted as follows:
 
-<table>
-  <tr><th>STRING</th><th>VALUE</th></tr>
+\htmlonly
+<table border=1>
+  <tr><th bgcolor='#000088'><font color="#ffffff">STRING</font></th><th bgcolor='#000088'><font color="#ffffff">VALUE</font></th></tr>
   <tr><td>"NULL"</td><td>This string represents a NULL value</td></tr>
   <tr><td>"_NULL"</td><td>This represents the string "NULL"</td></tr>
   <tr><td>"__NULL"</td><td>This represents the string "_NULL"</td></tr>
   <tr><td>...</td><td>...</td></tr>
 </table>
+\endhtmlonly
+\latexonly
+\begin{center}
+\endlatexonly
+\image latex images/screenshot/spec_hilite_3.pdf
+\latexonly
+\end{center}
+\endlatexonly
 
 When possible, NULL values may be represented in the diff directly
 through empty cells, rather than as strings.
@@ -134,17 +170,18 @@ through empty cells, rather than as strings.
 Easy!  Just the same as we've done so far, repeated,
 with appropriate sheet names.  For example:
 
-<table>
+\htmlonly
+<table border=1>
   <caption>locations</caption>
-  <tr><th>\@\@</th><th>id</th><th>street</th><th>city</th></tr>
+  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">street</font></th><th bgcolor='#000088'><font color="#ffffff">city</font></th></tr>
   <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
   <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
 </table>
 
-<table>
+<table border=1>
   <caption>org2loc</caption>
-  <tr><th>\@\@</th><th>org_id</th><th>loc_id</th></tr>
+  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">org_id</font></th><th bgcolor='#000088'><font color="#ffffff">loc_id</font></th></tr>
   <tr><td></td><td>1</td><td>2</td></tr>
   <tr><td></td><td>2</td><td>1</td></tr>
   <tr><td></td><td>3</td><td>1</td></tr>
@@ -152,15 +189,23 @@ with appropriate sheet names.  For example:
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>3</td></tr>
 </table>
 
-<table>
+<table border=1>
   <caption>organizations</caption>
-  <tr><th>\@\@</th><th>id</th><th>name</th></tr>
+  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">name</font></th></tr>
   <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
   <tr><td></td><td>2</td><td>The Firm</td></tr>
   <tr><td></td><td>3</td><td>Omni Cooperative</td></tr>
   <tr><td></td><td>4</td><td>Nonexistence Unlimited</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>Alice and Company</td></tr>
 </table>
+\endhtmlonly
+\latexonly
+\begin{center}
+\endlatexonly
+\image latex images/screenshot/spec_hilite_4.pdf
+\latexonly
+\end{center}
+\endlatexonly
 
 @section spec_hilite_add_columns Adding columns
 
@@ -169,9 +214,10 @@ adding an initial "schema" row (identified by having an exclamation
 mark in the first column).  Columns to be added are identified with
 a "+++".  For example:
 
-<table>
+\htmlonly
+<table border=1>
   <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td></td><td></td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">+++</td><td></td></tr>
-  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>quark</th><th>length</th></tr>
+  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">bridge</font></th><th bgcolor='#000088'><font color="#ffffff">designer</font></th><th bgcolor='#000088'><font color="#ffffff">quark</font></th><th bgcolor='#000088'><font color="#ffffff">length</font></th></tr>
   <tr><td>+</td><td>Brooklyn</td><td>J. A. Roebling</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">strange</td><td>1595</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>charm</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">up</td><td>1600</td></tr>
@@ -182,6 +228,14 @@ a "+++".  For example:
   <tr><td>+</td><td>George Washington</td><td>O. H. Ammann</td><td bgcolor="#7fff7f" style="background-color: #7fff7f;">moody</td><td>3500</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Spamspan</td><td>S. Spamington</td><td></td><td>10000</td></tr>
 </table>
+\endhtmlonly
+\latexonly
+\begin{center}
+\endlatexonly
+\image latex images/screenshot/spec_hilite_5.pdf
+\latexonly
+\end{center}
+\endlatexonly
 
 A new action called "+" has been added, to mark rows that have
 no change other than added cells.
@@ -191,9 +245,10 @@ no change other than added cells.
 Columns to be removed are identified with a "---" in the schema row.
 For example:
 
-<table>
+\htmlonly
+<table border=1>
   <tr bgcolor="#aaaaaa" style="background-color: #aaaaaa;"><td>!</td><td></td><td></td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">---</td><td></td></tr>
-  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>quark</th><th>length</th></tr>
+  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">bridge</font></th><th bgcolor='#000088'><font color="#ffffff">designer</font></th><th bgcolor='#000088'><font color="#ffffff">quark</font></th><th bgcolor='#000088'><font color="#ffffff">length</font></th></tr>
   <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">strange</td><td>1595</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Manhattan</td><td>G. Lindenthal</td><td>charm</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">L. L. Buck->D. Duck</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">up</td><td>1600</td></tr>
@@ -204,6 +259,14 @@ For example:
   <tr><td></td><td>George Washington</td><td>O. H. Ammann</td><td bgcolor="#ff7f7f" style="background-color: #ff7f7f;">moody</td><td>3500</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Spamspan</td><td>S. Spamington</td><td></td><td>10000</td></tr>
 </table>
+\endhtmlonly
+\latexonly
+\begin{center}
+\endlatexonly
+\image latex images/screenshot/spec_hilite_6.pdf
+\latexonly
+\end{center}
+\endlatexonly
 
 @section spec_hilite_row_order Row and column order?
 
