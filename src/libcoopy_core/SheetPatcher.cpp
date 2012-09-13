@@ -1313,62 +1313,69 @@ bool SheetPatcher::updateSheet() {
       appear->end();
     }
 
-    vector<int> show;
-    show.resize(sheet.height(),0);
-    for (int i=0; i<sheet.height(); i++) {
-      bool present = clean(sheet.cellString(0,i))!="";
-      if (present) {
-	for (int j=-2; j<=2; j++) {
-	  int k = i+j;
-	  if (k>=0 && k<sheet.height()) {
-	    show[k] = 1;
+    int lines = getFlags().context_lines;
+    if (lines==-2) lines = 2;
+    if (lines>=0) {
+      vector<int> show;
+      show.resize(sheet.height(),0);
+      for (int i=0; i<sheet.height(); i++) {
+	bool present = clean(sheet.cellString(0,i))!="";
+	if (present) {
+	  for (int j=-lines; j<=lines; j++) {
+	    int k = i+j;
+	    if (k>=0 && k<sheet.height()) {
+	      show[k] = 1;
+	      dbg_printf("* Marking %d...\n", k);
+	    }
 	  }
 	}
       }
-    }
-    int offset = 0;
-    bool addedBreak = false;
-    int start_delete = -1;
-    int count_delete = 0;
-    for (int i=0; i<(int)show.size(); i++) {
-      dbg_printf("Checking %d...\n", i);
-      if (show[i]==0) {	
-	int k = i+offset;
-	if (addedBreak) {
-	  dbg_printf("Deleting row %d\n", k);
-	  if (start_delete==-1) {
-	    start_delete = k;
-	    count_delete = 0;
-	  }
-	  count_delete++;
-	  //sheet.deleteRow(RowRef(k));
-	  offset--;
-	} else {
-	  if (start_delete!=-1) {
-	    dbg_printf("Implementing deletion of %d rows starting at %d\n",
-		       count_delete,
-		       start_delete);
+      int offset = 0;
+      bool addedBreak = false;
+      int start_delete = -1;
+      int count_delete = 0;
+      for (int i=0; i<(int)show.size(); i++) {
+	dbg_printf("Checking %d (%d)...\n", i, show[i]);
+	if (show[i]==0) {
+	  int k = i+offset;
+	  if (addedBreak) {
+	    dbg_printf("Deleting row %d\n", k);
+	    if (start_delete==-1) {
+	      start_delete = k;
+	      count_delete = 0;
+	    }
+	    count_delete++;
+	    //sheet.deleteRow(RowRef(k));
+	    offset--;
+	  } else {
+	    if (start_delete!=-1) {
+	      dbg_printf("Implementing deletion of %d rows starting at %d\n",
+			 count_delete,
+			 start_delete);
 	    
-	    sheet.deleteRows(RowRef(start_delete),
-			     RowRef(start_delete+count_delete-1));
-	    start_delete = -1;
+	      sheet.deleteRows(RowRef(start_delete),
+			       RowRef(start_delete+count_delete-1));
+	      start_delete = -1;
+	    }
+	    dbg_printf("Adding ... marks to %d\n", k);
+	    sheet.cellString(0,k,"...");
+	    for (int j=1; j<sheet.width(); j++) {
+	      sheet.cellString(j,k,"...");
+	    }
+	    addedBreak = true;
 	  }
-	  dbg_printf("Adding ... marks\n");
-	  sheet.cellString(0,k,"...");
-	  for (int j=1; j<sheet.width(); j++) {
-	    sheet.cellString(j,k,"...");
-	  }
-	  dbg_printf("Done adding ... marks\n");
-	  addedBreak = true;
+	} else {
+	  addedBreak = false;
 	}
-      } else {
-	addedBreak = false;
       }
-    }    
-    if (start_delete!=-1) {
-      sheet.deleteRows(RowRef(start_delete),
-		       RowRef(start_delete+count_delete-1));
-      start_delete = -1;
+      if (start_delete!=-1) {
+	dbg_printf("Implementing deletion of %d rows starting at %d\n",
+		   count_delete,
+		   start_delete);
+	sheet.deleteRows(RowRef(start_delete),
+			 RowRef(start_delete+count_delete-1));
+	start_delete = -1;
+      }
     }
   }
 

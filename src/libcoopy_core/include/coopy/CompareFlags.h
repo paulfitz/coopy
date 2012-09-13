@@ -92,6 +92,7 @@ public:
   bool foreign_pool;
   bool foreign_pool_set;
   bool offload_to_sql_when_possible;
+  int context_lines;
 
   CompareFlags() {
     head_trimmed = false;
@@ -118,6 +119,7 @@ public:
     create_unknown_sheets = false;
     clean_sheets = false;
     offload_to_sql_when_possible = false;
+    context_lines = -2; // use default
   }
 
   // js build has problem with implicit copy

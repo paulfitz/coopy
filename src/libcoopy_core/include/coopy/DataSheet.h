@@ -219,8 +219,9 @@ public:
   }
 
   virtual bool deleteRows(const RowRef& first, const RowRef& last) {
+    int start = first.getIndex();
     for (int i=first.getIndex(); i<=last.getIndex(); i++) {
-      bool ok = deleteRow(RowRef(i));
+      bool ok = deleteRow(RowRef(start));
       if (!ok) return false;
     }
     return true;

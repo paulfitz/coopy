@@ -39,4 +39,5 @@ void CompareFlags::copy(const CompareFlags& alt) {
   foreign_pool = alt.foreign_pool;
   foreign_pool_set = alt.foreign_pool_set;
   offload_to_sql_when_possible = alt.offload_to_sql_when_possible;
+  context_lines = alt.context_lines;
 }

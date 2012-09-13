@@ -467,6 +467,10 @@ Options::Options(const char *name) : name(name) {
       "low-memory",
       "prioritize low memory usage over speed");
 
+  add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
+      "context=N",
+      "Number of rows of context before and after changes for highlighter diffs (\"all\" to include all rows)");
+
   add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "act=ACT",
       "filter for an action of a particular type (update, insert, delete, none, schema)");
@@ -836,6 +840,8 @@ int Options::apply(int argc, char *argv[]) {
 
       {(char*)"git", 0, 0, 0},
 
+      {(char*)"context", 1, 0, 0},
+
       {0, 0, 0, 0}
     };
 
@@ -953,6 +959,10 @@ int Options::apply(int argc, char *argv[]) {
 	  option_string["pool"] = optarg;
 	} else if (k == "create") {
 	  flags.create_unknown_sheets = true;
+	} else if (k=="context") {
+	  flags.context_lines = atoi(optarg);
+	  if (string(optarg)=="all") flags.context_lines = -1;
+	  if (string(optarg)=="default") flags.context_lines = -2;
 	} else {
 	  fprintf(stderr,"Unknown option %s\n", k.c_str());
 	  return 1;
