@@ -15,15 +15,26 @@ using namespace coopy::format;
 using namespace coopy::fold;
 
 static bool readPart(Json::Value& rows,
-		     FoldedSheet *psheet) {
+		     FoldedSheet *psheet,
+		     SheetSchema *schema) {
   FoldedSheet& sheet = *psheet;
 
   int y = 0;
+  Json::Value arr(Json::arrayValue);
   for (Json::Value::iterator it2=rows.begin(); it2!=rows.end(); it2++) {
     //for (int i=0; i<rows.size(); i++) {
     dbg_printf("JSON Row %d\n", y);
-    if ((*it2).isArray()) {
-      Json::Value& cols = *it2;
+    if ((*it2).isArray() || (schema && (*it2).isObject())) {
+      bool subst = false;
+      if ((*it2).isObject()) {
+	arr = Json::Value(Json::arrayValue);
+	for (int x=0; x<schema->getColumnCount(); x++) {
+	  ColumnInfo info = schema->getColumnInfo(x);
+	  arr.append((*it2)[info.getName()]);
+	}
+	subst = true;
+      }
+      Json::Value& cols = subst?arr:*it2;
       if (y==0) {
 	FoldedCell zero;
 	sheet.resize((int)cols.size(),1,zero);
@@ -49,7 +60,7 @@ static bool readPart(Json::Value& rows,
 	  s = "NULL";
 	  escaped = true;
 	} else if ((*it3).isArray()||(*it3).isObject()) {
-	  if (!readPart((*it3),sheet.cell(x,y).getOrCreateSheet())) {
+	  if (!readPart((*it3),sheet.cell(x,y).getOrCreateSheet(),NULL)) {
 	    return false;
 	  }
 	  nested = true;
@@ -84,6 +95,8 @@ bool JsonBook::read(const char *fname) {
     fprintf(stderr,"Failed to parse %s\n", fname);
     return false;
   }
+  SheetSchema *schema = NULL;
+
   for (Json::Value::iterator it=root.begin(); it!=root.end(); it++) {
     FoldedSheet *psheet = new FoldedSheet;
     COOPY_ASSERT(psheet);
@@ -111,12 +124,13 @@ bool JsonBook::read(const char *fname) {
 	ss->addColumn((*it).asString().c_str());
       }
       p.setSchema(ss,true);
+      schema = ss;
       //printf("Configured sheet\n");
     }
     if (prows->isArray()) {
       dbg_printf("JSON Working on %s\n", it.memberName());
       Json::Value& rows = *prows;
-      if (!readPart(rows,psheet)) return false;
+      if (!readPart(rows,psheet,schema)) return false;
       name2index[it.memberName()] = (int)sheets.size();
       sheets.push_back(p);
       names.push_back(it.memberName());
@@ -131,6 +145,8 @@ static bool writePart(Json::Value& root2,
 		      bool hasSchema) {
   DataSheet& sheet = *psheet;
   Json::Value *rows = &root2;
+  vector<string> names;
+  bool hasNames = false;
   if (hasSchema) {
     root2["columns"] = Json::Value(Json::arrayValue);
     Json::Value& cols = root2["columns"];
@@ -140,21 +156,31 @@ static bool writePart(Json::Value& root2,
     }
     for (int x=0; x<schema->getColumnCount(); x++) {
       ColumnInfo info = schema->getColumnInfo(x);
+      names.push_back(info.getName());
+      hasNames = true;
       cols.append(Json::Value(info.getName()));
     }    
     root2["rows"] = Json::Value(Json::arrayValue);
     rows = &root2["rows"];
   }
   for (int y=0; y<sheet.height(); y++) {
-    Json::Value row(Json::arrayValue);
+    Json::Value row(hasNames?Json::objectValue:Json::arrayValue);
     for (int x=0; x<sheet.width(); x++) {
       DataSheet *next = sheet.getNestedSheet(x,y);
       if (next==NULL) {
 	SheetCell c = sheet.cellSummary(x,y);
 	if (c.escaped) {
-	  row.append(Json::Value(Json::nullValue));
+	  if (hasNames) {
+	    row[names[x]] = Json::Value(Json::nullValue);
+	  } else {
+	    row.append(Json::Value(Json::nullValue));
+	  }
 	} else {
-	  row.append(Json::Value(sheet.cellString(x,y)));
+	  if (hasNames) {
+	    row[names[x]] = Json::Value(sheet.cellString(x,y));
+	  } else {
+	    row.append(Json::Value(sheet.cellString(x,y)));
+	  }
 	}
       } else {
 	bool hasSchema2 = (next->getSchema()!=NULL);
