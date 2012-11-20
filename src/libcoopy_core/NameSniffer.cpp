@@ -112,6 +112,43 @@ void NameSniffer::sniff(int suggest) {
     div = stat.getRowDivider();
     ct = stat.suggestTypes();
   }
+  if (div<0 && sheet.height()==2) {
+    int low = 0;
+    int high = 0;
+    for (int i=0; i<sheet.width(); i++) {
+      string x = sheet.cellString(i,0);
+      for (int j=0; j<(int)x.length(); j++) {
+	char ch = x[j];
+	if (ch>='a'&&ch<='z') {
+	  low++;
+	}
+	if (ch>='A'&&ch<='Z') {
+	  high++;
+	}
+      }
+    }
+    if (low==0 && high>0) {
+      low = 0;
+      high = 0;
+      for (int i=0; i<sheet.width(); i++) {
+	string x = sheet.cellString(i,1);
+	for (int j=0; j<(int)x.length(); j++) {
+	  char ch = x[j];
+	  if (ch>='a'&&ch<='z') {
+	    low++;
+	  }
+	  if (ch>='A'&&ch<='Z') {
+	    high++;
+	  }
+	}
+      }
+      if (low>0) {
+	div = 0;
+	dbg_printf("Detected two-liner table.\n");
+      }
+    }
+  }
+
 
   int adiv = div;
   if (div<0) {

@@ -1247,3 +1247,11 @@ foreach (fmt csv csvs ${XLS})
   add_test(shared_rows_bridge_${fmt} ${ssdiff} --format novel --output shared_rows_bridge.${fmt} ${TESTS}/broken_bridges.csv ${TESTS}/bridges.csv)
   add_test(shared_rows_bridge_${fmt}_check ${ssdiff} --equal shared_rows_bridge.${fmt} ${TESTS}/hilite/bridge_novel.csv)
 endforeach()
+
+#######################################################################
+#######################################################################
+
+# Deal with two-liner tables
+
+add_test(twoliner_prepare ${ssformat} --header ${TESTS}/twoline.csv twoliner_test_header.csv)
+add_test(twoliner_check ${ssdiff} --equal ${TESTS}/twoline_header.csv twoliner_test_header.csv)
