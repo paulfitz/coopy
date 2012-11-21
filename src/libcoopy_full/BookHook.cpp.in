@@ -90,6 +90,7 @@ void gatherFactories(vector<TextBookFactory *>& lst,
 		"Force Json spreadsheet interpretation");
     desc.addOption("type",STRVAL("jsonbook"),"Json spreadsheet",true);
     desc.addOption("file",STRVAL("fname.sheet"),"File name",true);
+    desc.addOption("hash",STRVAL("1"),"Generate hash/dict/objects for each row when schema available",true);
     descs.push_back(desc);
   } else {
     lst.push_back(new JsonBookFactory());

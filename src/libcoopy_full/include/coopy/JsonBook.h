@@ -46,10 +46,11 @@ public:
   bool read(const char *fname);
 
   bool write(const char *fname) {
-    return write(fname,this);
+    Property p;
+    return write(fname,this,p);
   }
 
-  static bool write(const char *fname, TextBook *book);
+  static bool write(const char *fname, TextBook *book, const Property& options);
 
   static std::string render(TextBook *book);
 
@@ -79,7 +80,8 @@ public:
       if (config.prevBook!=NULL) {
 	dbg_printf("writing book file %s\n", config.options.get("file").asString().c_str());
 	if (JsonBook::write(config.options.get("file").asString().c_str(),
-			    config.prevBook)) {
+			    config.prevBook,
+			    config.options)) {
 	  report.success = true;
 	  return config.prevBook;
 	}

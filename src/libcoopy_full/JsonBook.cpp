@@ -197,11 +197,17 @@ static bool writePart(Json::Value& root2,
   return true;
 }
 
-static bool renderJsonBook(Json::Value& root, TextBook *book) {
+static bool renderJsonBook(Json::Value& root, TextBook *book, 
+			   const Property& options) {
   vector<string> names = book->getNames();
   for (int i=0; i<(int)names.size(); i++) {
     PolySheet sheet = book->readSheet(names[i]);
-    bool hasSchema = (sheet.getSchema()!=NULL);
+    bool hasSchema = false;
+    if (sheet.getSchema()!=NULL) {
+      if (options.check("hash")) {
+	hasSchema = true;
+      }
+    }
     if (hasSchema) {
       root[names[i]] = Json::Value(Json::objectValue);
     } else {
@@ -216,11 +222,12 @@ static bool renderJsonBook(Json::Value& root, TextBook *book) {
 
 std::string JsonBook::render(TextBook *book) {
   Json::Value root(Json::objectValue);
-  if (!renderJsonBook(root,book)) return "";
+  Property p;
+  if (!renderJsonBook(root,book,p)) return "";
   return root.toStyledString();
 }
 
-bool JsonBook::write(const char *fname, TextBook *book) {
+bool JsonBook::write(const char *fname, TextBook *book, const Property& options) {
   if (book==NULL) return false;
   Json::Value root(Json::objectValue);
   ostream *fout = &cout;
@@ -233,7 +240,7 @@ bool JsonBook::write(const char *fname, TextBook *book) {
     fprintf(stderr,"Failed to open %s for writing\n", fname);
     return false;
   }
-  if (!renderJsonBook(root,book)) return false;
+  if (!renderJsonBook(root,book,options)) return false;
   (*fout) << root;
   return true;
 }
