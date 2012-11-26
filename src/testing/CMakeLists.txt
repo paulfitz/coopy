@@ -1255,3 +1255,18 @@ endforeach()
 
 add_test(twoliner_prepare ${ssformat} --header ${TESTS}/twoline.csv twoliner_test_header.csv)
 add_test(twoliner_check ${ssdiff} --equal ${TESTS}/twoline_header.csv twoliner_test_header.csv)
+
+#######################################################################
+#######################################################################
+
+# Including/excluding parts of a table
+
+add_test(part_include_filter ${ssformat} --include-column designer --include-column length ${TESTS}/bridges.csv part_include_filter.csv)
+add_test(part_include_check ${ssdiff} --equal ${TESTS}/parts/bridges_designer_length.csv part_include_filter.csv)
+
+add_test(part_exclude_filter ${ssformat} --exclude-column bridge ${TESTS}/bridges.csv part_exclude_filter.csv)
+add_test(part_exclude_check ${ssdiff} --equal ${TESTS}/parts/bridges_designer_length.csv part_exclude_filter.csv)
+
+add_test(part_exclude_header_filter ${ssformat} --omit-header ${TESTS}/bridges.csv part_exclude_header_filter.csv)
+add_test(part_exclude_header_check ${ssdiff} --equal ${TESTS}/parts/bridges_no_header.csv part_exclude_header_filter.csv)
+

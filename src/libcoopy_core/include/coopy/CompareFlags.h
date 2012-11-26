@@ -64,6 +64,8 @@ public:
   std::vector<std::string> ordered_tables;
   std::vector<std::string> ids;
   std::vector<std::string> coined;
+  std::vector<std::string> include_columns;
+  std::vector<std::string> exclude_columns;
   std::vector<int> ids_local;
   std::vector<int> ids_remote;
   bool trust_ids;

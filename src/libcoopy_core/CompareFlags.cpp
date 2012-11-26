@@ -11,6 +11,8 @@ void CompareFlags::copy(const CompareFlags& alt) {
   ordered_tables = alt.ordered_tables;
   ids = alt.ids;
   coined = alt.coined;
+  include_columns = alt.include_columns;
+  exclude_columns = alt.exclude_columns;
   ids_local = alt.ids_local;
   ids_remote = alt.ids_remote;
   trust_ids = alt.trust_ids;

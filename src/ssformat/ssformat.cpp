@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
   if (r!=0) return r;
 
   bool extractHeader = opt.checkBool("header");
+  bool omitHeader = opt.checkBool("omit-header");
   bool extractIndex = opt.checkBool("index");
   bool verbose = opt.checkBool("verbose");
   bool help = opt.checkBool("help");
@@ -144,8 +145,61 @@ int main(int argc, char *argv[]) {
     }
     src.take(book);
   }
-
+  
   src.setPool(&pool);
+  
+  const vector<string>& include_columns = opt.getCompareFlags().include_columns;
+  const vector<string>& exclude_columns = opt.getCompareFlags().exclude_columns;
+  
+  bool have_includes = (include_columns.size() > 0);
+  bool have_excludes = (exclude_columns.size() > 0);
+  
+  if (have_includes||have_excludes) {
+    map<string,int> includes;
+    map<string,int> excludes;
+    for (int i=0; i<(int)include_columns.size(); i++) { 
+      includes[include_columns[i]] = 1;
+    }
+    for (int i=0; i<(int)exclude_columns.size(); i++) { 
+      excludes[exclude_columns[i]] = 1;
+    }
+    for (int i=0; i<src.getSheetCount(); i++) {
+      PolySheet sheet = src.readSheetByIndex(i);
+      CompareFlags flags;
+      NameSniffer sniff(sheet,flags);
+      const std::vector<std::string>& names = sniff.suggestNames();
+      int at = 0;
+      for (int j=0; j<(int)names.size(); j++) {
+	string name = names[j];
+	bool included = includes.find(name) != includes.end();
+	bool excluded = excludes.find(name) != excludes.end();
+	if (have_excludes && excluded) {
+	  ColumnRef col(at);
+	  sheet.deleteColumn(at);
+	  continue;
+	}
+	if (have_includes && !included) {
+	  ColumnRef col(at);
+	  sheet.deleteColumn(at);
+	  continue;
+	}
+	at++;
+      }
+    }
+  }
+
+  if (omitHeader) {
+    for (int i=0; i<src.getSheetCount(); i++) {
+      PolySheet sheet = src.readSheetByIndex(i);
+      CompareFlags flags;
+      NameSniffer sniff(sheet,flags);
+      if (sniff.isEmbedded()) {
+	RowRef row0(0);
+	RowRef rowh(sniff.getHeaderHeight()-1);
+	sheet.deleteRows(row0,rowh);
+      }
+    }
+  }
 
   if (opt.checkBool("paint")) {
     if (!src.attach(out_file.c_str())) {

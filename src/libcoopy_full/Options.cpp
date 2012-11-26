@@ -484,8 +484,20 @@ Options::Options(const char *name) : name(name) {
       "extract column names only");
 
   add(OPTION_FOR_FORMAT,
+      "omit-header",
+      "remove column names");
+
+  add(OPTION_FOR_FORMAT,
       "index",
       "extract content of key columns only");
+
+  add(OPTION_FOR_FORMAT,
+      "include_column=COLUMN",
+      "include only the specified column in the output (repeat option to include multiple columns)");
+
+  add(OPTION_FOR_FORMAT,
+      "exclude_column=COLUMN",
+      "include all but the specified column in the output (repeat option to exclude multiple columns)");
 
   add(OPTION_FOR_RESOLVE|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "theirs",
@@ -776,6 +788,8 @@ int Options::apply(int argc, char *argv[]) {
       {(char*)"id", 1, 0, 'k'},
       {(char*)"bid", 1, 0, 'b'},
       {(char*)"coin", 1, 0, 0},
+      {(char*)"exclude-column", 1, 0, 0},
+      {(char*)"include-column", 1, 0, 0},
 
       {(char*)"named", 0, 0, 'd'},
 
@@ -790,6 +804,7 @@ int Options::apply(int argc, char *argv[]) {
       {(char*)"omit-format-name", 0, 0, 'O'},
       {(char*)"omit-sheet-name", 0, 0, 'P'},
       {(char*)"header", 0, 0, 0},
+      {(char*)"omit-header", 0, 0, 0},
 
       {(char*)"table", 1, 0, 'T'},
 
@@ -869,6 +884,8 @@ int Options::apply(int argc, char *argv[]) {
 	  option_string["patch"] = optarg;
 	} else if (k=="header") {
 	  option_bool["header"] = true;
+	} else if (k=="omit-header") {
+	  option_bool["omit-header"] = true;
 	} else if (k=="input-format") {
 	  option_string["input-format"] = optarg;
 	} else if (k=="output-format") {
@@ -951,6 +968,12 @@ int Options::apply(int argc, char *argv[]) {
 	    fprintf(stderr,"Try: update, insert, delete\n");
 	    return 1;
 	  }
+	} else if (k == "coin") {
+	  flags.coined.push_back(optarg);
+	} else if (k == "include-column") {
+	  flags.include_columns.push_back(optarg);
+	} else if (k == "exclude-column") {
+	  flags.exclude_columns.push_back(optarg);
 	} else if (k == "coin") {
 	  flags.coined.push_back(optarg);
 	} else if (k == "meta") {

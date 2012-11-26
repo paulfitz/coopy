@@ -142,7 +142,8 @@ bool JsonBook::read(const char *fname) {
 
 static bool writePart(Json::Value& root2,
 		      DataSheet *psheet,
-		      bool hasSchema) {
+		      bool hasSchema,
+		      bool nestSchema) {
   DataSheet& sheet = *psheet;
   Json::Value *rows = &root2;
   vector<string> names;
@@ -157,7 +158,7 @@ static bool writePart(Json::Value& root2,
     for (int x=0; x<schema->getColumnCount(); x++) {
       ColumnInfo info = schema->getColumnInfo(x);
       names.push_back(info.getName());
-      hasNames = true;
+      hasNames = nestSchema;
       cols.append(Json::Value(info.getName()));
     }    
     root2["rows"] = Json::Value(Json::arrayValue);
@@ -189,7 +190,7 @@ static bool writePart(Json::Value& root2,
 	} else {
 	  row.append(Json::Value(Json::arrayValue));
 	}
-	if (!writePart(row[x],next,hasSchema2)) return false;
+	if (!writePart(row[x],next,hasSchema2,nestSchema)) return false;
       }
     }
     rows->append(row);
@@ -203,9 +204,11 @@ static bool renderJsonBook(Json::Value& root, TextBook *book,
   for (int i=0; i<(int)names.size(); i++) {
     PolySheet sheet = book->readSheet(names[i]);
     bool hasSchema = false;
+    bool nestSchema = false;
     if (sheet.getSchema()!=NULL) {
+      hasSchema = true;
       if (options.check("hash")) {
-	hasSchema = true;
+	nestSchema = true;
       }
     }
     if (hasSchema) {
@@ -215,7 +218,7 @@ static bool renderJsonBook(Json::Value& root, TextBook *book,
     }
     Json::Value& root2 = root[names[i]];
     if (!sheet.isValid()) return false;
-    if (!writePart(root2,&sheet,hasSchema)) return false;
+    if (!writePart(root2,&sheet,hasSchema,nestSchema)) return false;
   }
   return true;
 }
