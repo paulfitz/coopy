@@ -49,6 +49,14 @@ public:
     }
   }
 
+  TextBook *give() {
+    if (!book) return 0/*NULL*/;
+    book->removeReference();
+    TextBook *result = book;
+    book = 0/*NULL*/;
+    return result;
+  }
+
   PolyBook(const PolyBook& alt) {
     book = alt.book;
     if (book!=0) {

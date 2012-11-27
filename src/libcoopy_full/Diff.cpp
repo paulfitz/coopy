@@ -14,6 +14,7 @@
 #include <coopy/Options.h>
 #include <coopy/Highlighter.h>
 #include <coopy/ShortTextBook.h>
+#include <coopy/FilteredTextBook.h>
 #include <coopy/IndexSniffer.h>
 
 #include <coopy/Diff.h>
@@ -158,6 +159,22 @@ int Diff::apply(const Options& opt) {
   }
   if (inplace) {
     output = local_file;
+  }
+
+  // an option to select a particular table - for ssformat
+  if (flags.ordered_tables.size()>0 && opt.isFormatLike()) {
+    TextBook *orig = _local.give();
+    if (orig) {
+      orig->namedSheets();
+      FilteredTextBook *book = new FilteredTextBook(orig,flags.ordered_tables);
+      if (book==NULL) {
+	fprintf(stderr,"Failed to allocate output\n");
+	return 1;
+      }
+      book->namedSheets();
+      _local.take(book);
+      _local.namedSheets();
+    }
   }
 
   // an option to extract header - mostly of interest for ssformat

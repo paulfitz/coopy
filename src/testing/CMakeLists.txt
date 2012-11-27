@@ -1281,3 +1281,12 @@ ADD_STREAM_TEST(sqliteio_to_sqlite sqliteio_to_sqlitext.sqlitext sqliteio_to_sql
 ADD_TEST(sqliteio_round_trip ${ssdiff} --equal ${TESTS}/numbers.sqlite sqliteio_to_sqlitext.sqlite)
 ADD_TEST(sqliteio_to_sqlitext_fix ${fix_eol} sqliteio_to_sqlitext.sqlitext sqliteio_to_sqlitext.fix.sqlitext)
 ADD_TEST(sqliteio_to_sqlitext_check ${CMAKE_COMMAND} -E compare_files sqliteio_to_sqlitext.fix.sqlitext ${TESTS}/numbers.sqlitext)
+
+
+#######################################################################
+#######################################################################
+
+# ssformat table select
+
+add_test(ssformat_table ${ssformat} ${TESTS}/directory/directory.sqlite --table organizations ssformat_table.csvs)
+add_test(ssformat_table_check ${ssdiff} --equal ${TESTS}/directory/directory_organizations.csvs ssformat_table.csvs)
