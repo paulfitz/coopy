@@ -1270,3 +1270,14 @@ add_test(part_exclude_check ${ssdiff} --equal ${TESTS}/parts/bridges_designer_le
 add_test(part_exclude_header_filter ${ssformat} --omit-header ${TESTS}/bridges.csv part_exclude_header_filter.csv)
 add_test(part_exclude_header_check ${ssdiff} --equal ${TESTS}/parts/bridges_no_header.csv part_exclude_header_filter.csv)
 
+
+#######################################################################
+#######################################################################
+
+# sqlite stdin/stdout
+
+ADD_STREAM_TEST(sqliteio_to_sqlitext ${TESTS}/numbers.sqlite sqliteio_to_sqlitext.sqlitext ${ssformat} dbi:sqlite:file=- dbi:sqlitext:file=-)
+ADD_STREAM_TEST(sqliteio_to_sqlite sqliteio_to_sqlitext.sqlitext sqliteio_to_sqlitext.sqlite ${ssformat} dbi:sqlitext:file=- dbi:sqlite:file=-)
+ADD_TEST(sqliteio_round_trip ${ssdiff} --equal ${TESTS}/numbers.sqlite sqliteio_to_sqlitext.sqlite)
+ADD_TEST(sqliteio_to_sqlitext_fix ${fix_eol} sqliteio_to_sqlitext.sqlitext sqliteio_to_sqlitext.fix.sqlitext)
+ADD_TEST(sqliteio_to_sqlitext_check ${CMAKE_COMMAND} -E compare_files sqliteio_to_sqlitext.fix.sqlitext ${TESTS}/numbers.sqlitext)

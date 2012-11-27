@@ -1015,7 +1015,9 @@ int Options::apply(int argc, char *argv[]) {
       option_bool["equals"] = true;
       break;
     case 'i':
-      option_string["mode"] = "index";
+      if (!isFormatLike()) {
+	option_string["mode"] = "index";
+      }
       option_bool["index"] = true;
       break;
     case 'd':

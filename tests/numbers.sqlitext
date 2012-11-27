@@ -1,0 +1,9 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE numbers (name TEXT, rep INTEGER PRIMARY KEY);
+INSERT INTO "numbers" VALUES('one',1);
+INSERT INTO "numbers" VALUES('two',2);
+INSERT INTO "numbers" VALUES('three',3);
+INSERT INTO "numbers" VALUES('four',4);
+INSERT INTO "numbers" VALUES('five',5);
+COMMIT;

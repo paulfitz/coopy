@@ -21,12 +21,14 @@ public:
   coopy::store::Property config;
   std::string fname;
   std::vector<std::string> oneliners;
+  bool use_oneliners;
   const coopy::cmp::CompareFlags& flags;
   coopy::store::TextBook *preread_book;
 
   PatchParser(Patcher *patcher,
 	     coopy::cmp::CompareFlags& flags) : 
     patcher(patcher),
+    use_oneliners(false),
     flags(flags),
     preread_book(0/*NULL*/)
   {}
@@ -34,21 +36,27 @@ public:
   PatchParser(Patcher *patcher,
 	      const std::vector<std::string>& cmd,
 	      coopy::cmp::CompareFlags& flags) : 
-    patcher(patcher), oneliners(cmd), flags(flags),
+    patcher(patcher), oneliners(cmd), 
+    use_oneliners(true),
+    flags(flags),
     preread_book(0/*NULL*/)
   {}
 
   PatchParser(Patcher *patcher,
 	      const std::string& fname,
 	      coopy::cmp::CompareFlags& flags) :
-    patcher(patcher), fname(fname), flags(flags),
+    patcher(patcher), fname(fname), 
+    use_oneliners(false),
+    flags(flags),
     preread_book(0/*NULL*/)
   {}
 
   PatchParser(Patcher *patcher,
 	      coopy::store::TextBook *book,
 	      coopy::cmp::CompareFlags& flags) :
-    patcher(patcher), fname(""), flags(flags),
+    patcher(patcher), fname(""), 
+    use_oneliners(false),
+    flags(flags),
     preread_book(book)
   {}
     

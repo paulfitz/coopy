@@ -12,6 +12,9 @@
 #include <coopy/PatchParser.h>
 #include <coopy/PoolImpl.h>
 #include <coopy/Options.h>
+#include <coopy/Highlighter.h>
+#include <coopy/ShortTextBook.h>
+#include <coopy/IndexSniffer.h>
 
 #include <coopy/Diff.h>
 
@@ -56,6 +59,8 @@ int Diff::apply(const Options& opt) {
   std::string meta_file = opt.checkString("meta");
   std::string pool_file = opt.checkString("pool");
   bool have_cmd = opt.isStringList("cmd");
+  std::vector<std::string> cmds;
+  if (have_cmd) cmds = opt.getStringList("cmd");
   std::string version = opt.checkString("version");
   std::string tmp = opt.checkString("tmp","");
   std::string resolve = opt.checkString("resolve","");
@@ -65,9 +70,16 @@ int Diff::apply(const Options& opt) {
   if (opt.isPatchLike()&&!opt.isRediffLike()) defMode = "apply";
   std::string mode = opt.checkString("mode",defMode.c_str());
   bool inplace = opt.checkBool("inplace",false);
-  bool showPatch = opt.isPatchLike() && mode=="apply" && !apply;
+  bool showPatch = opt.isPatchLike() && mode=="apply" && (!apply);
   bool patchy = opt.isPatchLike()||opt.isRediffLike()||opt.isMergeLike();
   bool scan_for_patch = opt.checkBool("scan-for-patch",false);
+  bool couldChangeInput = false;
+  bool extractHeader = opt.checkBool("header");
+  bool extractIndex = opt.checkBool("index");
+  const vector<string>& include_columns = opt.getCompareFlags().include_columns;
+  const vector<string>& exclude_columns = opt.getCompareFlags().exclude_columns;
+  bool have_includes = (include_columns.size() > 0);
+  bool have_excludes = (exclude_columns.size() > 0);
 
   CompareFlags flags = opt.getCompareFlags();
   PoolImpl pool;
@@ -88,7 +100,8 @@ int Diff::apply(const Options& opt) {
       core.erase(core.begin());
     }
   }
-  if (opt.isPatchLike()) {
+  if (opt.isPatchLike()&&!opt.isFormatLike()) {
+    couldChangeInput = true;
     if (core.size()>0) {
       if ((!have_cmd)||core.size()>1) {
 	patch_file = core.back();
@@ -113,22 +126,103 @@ int Diff::apply(const Options& opt) {
   }
   
   string remote_file;
+  bool read_and_will_write = false;
   if (core.size()>=2) {
-    remote_file = core[1];
+    if (opt.isFormatLike()) {
+      output = core[1];
+      read_and_will_write = true;
+    } else {
+      remote_file = core[1];
+    }
   }
 
   dbg_printf("\n{} Diff::apply checking local file if any\n");
 
   if (local_file!="") {
-    if (!_local.read(local_file.c_str())) {
-      fprintf(stderr,"Failed to read %s\n", local_file.c_str());
-      return 1;
+    if (read_and_will_write) {
+      if (!_local.readAndWillWrite(local_file.c_str(),
+				   "",
+				   output.c_str(),
+				   "")) {
+	fprintf(stderr,"Failed to read %s\n", local_file.c_str());
+	return 1;
+      }
+    } else {
+      if (!_local.read(local_file.c_str())) {
+	fprintf(stderr,"Failed to read %s\n", local_file.c_str());
+	return 1;
+      }
     }
     flags.local_uri = local_file;
   }
   if (inplace) {
     output = local_file;
   }
+
+  // an option to extract header - mostly of interest for ssformat
+  if (extractHeader) {
+    PolySheet sheet = _local.readSheetByIndex(0);
+    CompareFlags flags;
+    NameSniffer sniff(sheet,flags);
+    ShortTextBook *book = new ShortTextBook();
+    if (book==NULL) {
+      fprintf(stderr,"Failed to allocate output\n");
+      return 1;
+    }
+    for (int i=0; i<sheet.width(); i++) {
+      book->sheet.addField(sniff.suggestColumnName(i).c_str(),false);
+    }
+    book->sheet.addRecord();
+    _local.take(book);
+  }
+
+  // an option to extract index - mostly of interest for ssformat
+  if (extractIndex) {
+    PolySheet sheet = _local.readSheetByIndex(0);
+    CompareFlags flags;
+    NameSniffer nsniff(sheet,flags);
+    IndexSniffer sniff(sheet,flags,nsniff);
+    vector<int> indexes = sniff.suggestIndexes();
+    dbg_printf("Index count %d\n", (int)indexes.size());
+    ShortTextBook *book = new ShortTextBook();
+    if (book==NULL) {
+      fprintf(stderr,"Failed to allocate output\n");
+      return 1;
+    }
+    book->sheet.copy(sheet);
+    int at = 0;
+    for (int i=0; i<sheet.width(); i++) {
+      if (indexes[i]==0) {
+	book->sheet.deleteColumn(at);
+      } else {
+	at++;
+      }
+    }
+    _local.take(book);
+  }
+
+  // options to omit/include columns
+  if (have_excludes) {
+    for (int i=0; i<(int)exclude_columns.size(); i++) { 
+      have_cmd = true;
+      string cmd = "@- |";
+      cmd += exclude_columns[i];
+      cmd += "|";
+      cmds.push_back(cmd);
+    }
+    couldChangeInput = true;
+  }
+  if (have_includes) {
+    string cmd = "@@= |";
+    for (int i=0; i<(int)include_columns.size(); i++) { 
+      cmd += include_columns[i];
+      cmd += "|";
+    }
+    have_cmd = true;
+    cmds.push_back(cmd);
+    couldChangeInput = true;
+  }
+
 
   dbg_printf("\n{} Diff::apply checking remote file if any\n");
 
@@ -169,11 +263,11 @@ int Diff::apply(const Options& opt) {
   dbg_printf("\n{} Diff::apply doing inplace tweaks if needed\n");
 
   bool cloned = false;
-  if ((mode=="apply"||mode=="merge"||mode=="novel")&&!apply) {
+  if (couldChangeInput&&(mode=="apply"||mode=="merge"||mode=="novel")&&!apply) {
     if (local_file!=""&&local->inplace()&&local->getNames().size()>0&&!inplace&&output!=local_file) {
       if (output=="-"&&tmp=="") {
-	fprintf(stderr,"This operation would modify an input. Not sure if you want this.\n");
-	fprintf(stderr,"Please specify:\n  --inplace, to confirm you want the input changed.\n  --output OUTPUT_FILE, to redirect the output.\n  --tmp TMP_FILE, use temporary storage to avoid changing the input.\n");
+	fprintf(stderr,"This operation could modify an input.  Please confirm by specifying one of:\n");
+	fprintf(stderr,"  --inplace, to confirm you want the input changed.\n  --output OUTPUT_FILE, to redirect the output.\n  --tmp TMP_FILE, use temporary storage to avoid changing the input.\n");
 	return 1;
       }
       if (tmp=="") {
@@ -214,7 +308,7 @@ int Diff::apply(const Options& opt) {
     return 1;
   }
 
-  dbg_printf("\n{} Diff::apply creating tool\n");
+  dbg_printf("\n{} Diff::apply creating tool: %s %s\n", mode.c_str(), version.c_str());
 
   Patcher *diff = createTool(mode,version);
   MergeOutputPool pooler;
@@ -324,18 +418,26 @@ int Diff::apply(const Options& opt) {
       filter_diff.startOutput("-",flags);
       filter_diff.setFlags(flags);
     }
-    if (patch_file==""&&(!have_cmd)&&(!patch_is_remote)) {
+    if (patch_file==""&&(!have_cmd)&&(!patch_is_remote)&&(!opt.isFormatLike())) {
       cmp.compare(*pivot,*local,*remote,*active_diff,flags);
     } else {
       bool ok = false;
       if (have_cmd) {
-	PatchParser parser(active_diff,opt.getStringList("cmd"),flags);
+	dbg_printf("\n{} Diff::apply diff/patch/merge with command\n");
+	PatchParser parser(active_diff,cmds,flags);
 	ok = parser.apply();
       } else if (patch_is_remote) {
+	dbg_printf("\n{} Diff::apply diff/patch/merge from remote\n");
 	PatchParser parser(active_diff,remote,flags);
 	ok = parser.apply();
-      } else {
+      } else if (patch_file!="") {
+	dbg_printf("\n{} Diff::apply diff/patch/merge from file\n");
 	PatchParser parser(active_diff,patch_file,flags);
+	ok = parser.apply();
+      } else {
+	dbg_printf("\n{} Diff::apply diff/patch/merge from other\n");
+	vector<string> acts;
+	PatchParser parser(active_diff,acts,flags);
 	ok = parser.apply();
       }
       if (!ok) {
@@ -433,6 +535,21 @@ int Diff::apply(const Options& opt) {
       }
     }
   }
+
+
+  TextBook *output_book = diff->getBook();
+  if (opt.checkBool("paint")) {
+    // Reopen file for painting - not optimal, but adequate
+    PolyBook src;
+    if (!src.attach(output.c_str())) {
+      fprintf(stderr,"Failed to attach %s\n", output.c_str());
+      return 1;
+    }
+    Highlighter h;
+    h.apply(src);
+    src.flush();
+  }
+
   bool conflicted = diff->isConflicted();
   delete diff;
   diff = NULL;

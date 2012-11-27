@@ -1098,7 +1098,7 @@ bool SheetPatcher::setSheet(const char *name) {
     }
   }
   if (!psheet.isValid()) {
-    fprintf(stderr,"Cannot find sheet %s, oh dear\n", name);
+    fprintf(stderr,"Cannot find patch\n", name);
     return false;
   }
   dbg_printf("Moved to sheet %s\n", name);
@@ -1412,3 +1412,31 @@ coopy::store::PolySheet SheetPatcher::getSheet() {
 
 
 
+bool SheetPatcher::changeName(const NameChange& change) {
+  if (change.strong) {
+    PolySheet sheet = getSheet();
+    setNames();
+    map<string,int> includes;
+    for (int i=0; i<(int)change.names.size(); i++) { 
+      includes[change.names[i]] = 1;
+    }
+    int at = 0;
+    int mods = 0;
+    for (int i=0; i<activeCol.width(); i++) {
+      string name = activeCol.cellString(i,0);
+      bool included = includes.find(name) != includes.end();
+      if (!included) {
+	ColumnRef col(at);
+	sheet.deleteColumn(at);
+	mods++;
+      } else {
+	at++;
+      }
+    }
+    if (mods) setNames(true);
+  }
+  if (chain) chain->changeName(change);
+  bool ok = Patcher::changeName(change);
+  if (!ok) return ok;
+  return ok;
+}

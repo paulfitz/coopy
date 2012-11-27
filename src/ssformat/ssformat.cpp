@@ -13,6 +13,7 @@
 #include <coopy/PatchParser.h>
 #include <coopy/MergeOutputPool.h>
 #include <coopy/Highlighter.h>
+#include <coopy/Diff.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -24,6 +25,36 @@ int main(int argc, char *argv[]) {
   int r = opt.apply(argc,argv);
   if (r!=0) return r;
 
+  bool help = opt.checkBool("help");
+  const vector<string>& core = opt.getCore();
+  if ((core.size()<1 && (opt.checkString("mode")=="")) || help) {
+    opt.beginHelp();
+    opt.addUsage("ssformat [options] FILE");
+    opt.addUsage("ssformat [options] FILE1 FILE2");
+    opt.addDescription("Reformat tables/databases/spreadsheets.");
+    opt.showOptions(OPTION_FOR_FORMAT);
+    opt.addExample("ssformat numbers.csv numbers_converted.sqlite",
+		   "Convert CSV format table to an Sqlite database table.").require("numbers.csv");
+    opt.addExample("ssformat numbers.sqlite numbers_converted.csv",
+		   "Convert Sqlite database table to a CSV format table.").require("numbers.sqlite");
+    opt.addExample("ssformat numbers.sqlite -",
+		   "Display contents of an Sqlite database table.").require("numbers.sqlite");
+    opt.endHelp();
+    return help?0:1;
+  }
+
+  Diff diff;
+  return diff.apply(opt);
+
+  /*
+
+    // old implementation of ssformat
+    // delete when sure nothing of importance was left unreimplemented
+
+  Options opt("ssformat");
+  int r = opt.apply(argc,argv);
+  if (r!=0) return r;
+
   bool extractHeader = opt.checkBool("header");
   bool omitHeader = opt.checkBool("omit-header");
   bool extractIndex = opt.checkBool("index");
@@ -31,7 +62,12 @@ int main(int argc, char *argv[]) {
   bool help = opt.checkBool("help");
   string inputFormat = opt.checkString("input-format");
   string outputFormat = opt.checkString("output-format");
+  const vector<string>& include_columns = opt.getCompareFlags().include_columns;
+  const vector<string>& exclude_columns = opt.getCompareFlags().exclude_columns;
+  bool have_includes = (include_columns.size() > 0);
+  bool have_excludes = (exclude_columns.size() > 0);
   string sheetSelection = "";
+
   if (opt.getCompareFlags().tables.size()>1) {
     fprintf(stderr,"sorry, can only select one table right now\n");
     return 1;
@@ -147,14 +183,10 @@ int main(int argc, char *argv[]) {
   }
   
   src.setPool(&pool);
-  
-  const vector<string>& include_columns = opt.getCompareFlags().include_columns;
-  const vector<string>& exclude_columns = opt.getCompareFlags().exclude_columns;
-  
-  bool have_includes = (include_columns.size() > 0);
-  bool have_excludes = (exclude_columns.size() > 0);
-  
+    
   if (have_includes||have_excludes) {
+    printf("INPLACE? %d\n", src.inplace());
+
     map<string,int> includes;
     map<string,int> excludes;
     for (int i=0; i<(int)include_columns.size(); i++) { 
@@ -217,4 +249,5 @@ int main(int argc, char *argv[]) {
   }
 
   return 0;
+  */
 }

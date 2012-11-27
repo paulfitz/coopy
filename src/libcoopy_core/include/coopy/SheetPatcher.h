@@ -142,10 +142,7 @@ public:
     return changeCount;
   }
 
-  virtual bool changeName(const NameChange& change) { 
-    if (chain) chain->changeName(change);
-    return Patcher::changeName(change);
-  }
+  virtual bool changeName(const NameChange& change);
 
   virtual bool changeConfig(const ConfigChange& change) { 
     if (chain) chain->changeConfig(change);

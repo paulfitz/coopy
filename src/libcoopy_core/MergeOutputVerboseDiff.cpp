@@ -101,6 +101,9 @@ bool MergeOutputVerboseDiff::changeName(const NameChange& change) {
 	  vector2string(names).c_str());
   fprintf(out,"       final: %d\n", final?1:0);
   fprintf(out,"    constant: %d\n", constant?1:0);
+  if (change.strong) {
+    fprintf(out,"      strong: %d\n", change.strong?1:0);
+  }
   fprintf(out,"\n");
   return true;
 }

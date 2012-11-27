@@ -249,6 +249,7 @@ public:
   bool final;
   bool constant;
   bool loud;
+  bool strong;
   std::vector<std::string> names;
 
   NameChange() {
@@ -256,6 +257,7 @@ public:
     final = false;
     constant = false;
     loud = false;
+    strong = false;
   }
 
   std::string modeString() const {

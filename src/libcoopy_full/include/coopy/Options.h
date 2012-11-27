@@ -110,11 +110,11 @@ public:
   Options(const char *name);
 
   bool isDiffLike() const {
-    return (name=="ssdiff"||name=="ssrediff"||name=="sspatch"||name=="ssresolve");
+    return (name=="ssdiff"||name=="ssrediff"||name=="sspatch"||name=="ssresolve"||(name=="ssformat"));
   }
 
   bool isPatchLike() const {
-    return (name=="sspatch")||(name=="ssrediff");
+    return (name=="sspatch")||(name=="ssrediff")||(name=="ssformat");
   }
 
   bool isRediffLike() const {
@@ -127,6 +127,10 @@ public:
 
   bool isMergeLike() const {
     return (name=="ssmerge");
+  }
+
+  bool isFormatLike() const {
+    return (name=="ssformat");
   }
 
   std::string getVersion() const;

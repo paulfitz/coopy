@@ -283,10 +283,15 @@ bool PatchParser::apply() {
       txt += oneliners[i];
       txt += "\n";
     }
+    if (txt=="") return true;
     sniffer.setString(txt.c_str());
   }
 
   Format format = sniffer.getFormat();
+  if (use_oneliners) {
+    return applyTdiff();
+  }
+
   if (format.id==FORMAT_PATCH_CSV) {
     dbg_printf("Looks like DTBL\n");
     return applyCsv();
@@ -1022,17 +1027,18 @@ bool PatchParser::applyTdiff() {
 	  patcher->changePool(pc);
 	}
       }
-    } else if (first=="@"||first=="@@") {
+    } else if (first=="@"||first=="@@"||first=="@@=") {
       vector<string> names;
       cols.clear();
       for (int i=1; i<(int)msg.size(); i++) {
 	cols.push_back(TDiffPart(msg[i],true));
 	names.push_back(cols[i-1].key);
       }
-      if (first=="@@") {
+      if (first=="@@"||first=="@@=") {
 	NameChange nc;
 	nc.mode = NAME_CHANGE_DECLARE;
 	nc.final = false;
+	nc.strong = (first=="@@=");
 	nc.names = names;
 	patcher->changeName(nc);
       }
@@ -1044,6 +1050,12 @@ bool PatchParser::applyTdiff() {
       printf("\n");
       */
     } else if (first=="@:"||first=="@+"||first=="@-"||first=="@=") {
+      if (table_name=="") {
+	if (flags.ordered_tables.size()>0) {
+	  table_name = flags.ordered_tables[0];
+	  patcher->setSheet(table_name.c_str());
+	}
+      }
       vector<string> ocols;
       vector<string> ncols;
       for (int i=0; i<(int)cols.size(); i++) {
@@ -1051,6 +1063,9 @@ bool PatchParser::applyTdiff() {
       }
       for (int i=2; i<(int)msg.size(); i++) {
 	ncols.push_back(TDiffPart(msg[i],true).key);
+      }
+      if (first=="@+" && ncols.size()==0) {
+	ncols.push_back(msg[1].c_str());
       }
       
       OrderChange change;
