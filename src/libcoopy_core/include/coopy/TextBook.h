@@ -4,6 +4,7 @@
 #include <coopy/PolySheet.h>
 #include <coopy/Property.h>
 #include <coopy/RefCount.h>
+#include <coopy/CompareFlags.h>
 
 #include <vector>
 #include <string>
@@ -50,7 +51,12 @@ public:
 
   virtual bool canWrite() const { return true; }
 
-  bool operator==(const TextBook& alt) const;
+  bool operator==(const TextBook& alt) const {
+    coopy::cmp::CompareFlags flags;
+    return equals(alt,flags);
+  }
+
+  bool equals(const TextBook& alt, const coopy::cmp::CompareFlags& flags) const;
 
   virtual bool copy(const TextBook& alt, const Property& options);
 

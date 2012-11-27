@@ -76,6 +76,7 @@ int Diff::apply(const Options& opt) {
   bool couldChangeInput = false;
   bool extractHeader = opt.checkBool("header");
   bool extractIndex = opt.checkBool("index");
+  bool omitHeader = opt.checkBool("omit-header");
   const vector<string>& include_columns = opt.getCompareFlags().include_columns;
   const vector<string>& exclude_columns = opt.getCompareFlags().exclude_columns;
   bool have_includes = (include_columns.size() > 0);
@@ -286,6 +287,20 @@ int Diff::apply(const Options& opt) {
     }
   }
 
+  // an option to omit header - mostly of interest for ssformat
+  if (omitHeader) {
+    for (int i=0; i<_local.getSheetCount(); i++) {
+      PolySheet sheet = _local.readSheetByIndex(i);
+      CompareFlags flags;
+      NameSniffer sniff(sheet,flags);
+      if (sniff.isEmbedded()) {
+	RowRef row0(0);
+	RowRef rowh(sniff.getHeaderHeight()-1);
+	sheet.deleteRows(row0,rowh);
+      }
+    }
+  }
+
   dbg_printf("\n{} Diff::apply dealing with pivot if any\n");
 
   if (parent_file!="") {
@@ -302,7 +317,7 @@ int Diff::apply(const Options& opt) {
   }
 
   if (equality) {
-    if (*local == *remote) {
+    if (local->equals(*remote,flags)) {
       return 0;
     }
     return 1;

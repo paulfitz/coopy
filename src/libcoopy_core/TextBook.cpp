@@ -13,7 +13,7 @@
 using namespace std;
 using namespace coopy::store;
 
-bool TextBook::operator==(const TextBook& alt) const {
+bool TextBook::equals(const TextBook& alt, const coopy::cmp::CompareFlags& flags) const {
   TextBook *b1 = (TextBook *)this;
   TextBook *b2 = (TextBook *)&alt;
   vector<string> names = b1->getNames();
@@ -30,7 +30,7 @@ bool TextBook::operator==(const TextBook& alt) const {
     if (s1.getSchema()==NULL) {
       s1.setSchema(sniffer1.suggestSchema(),false);
     }
-    s1.hideHeaders();
+    if (flags.assume_header) s1.hideHeaders();
     PolySheet s2 = b2->readSheet(names[k]);
     if (!s2.isValid()) {
       s2 = b2->readSheet(altNames[k]);
@@ -39,7 +39,7 @@ bool TextBook::operator==(const TextBook& alt) const {
     if (s2.getSchema()==NULL) {
       s2.setSchema(sniffer2.suggestSchema(),false);
     }
-    s2.hideHeaders();
+    if (flags.assume_header) s2.hideHeaders();
     if (s1.width()!=s2.width() || s1.height()!=s2.height()) {
       dbg_printf("Size mismatch, %dx%d vs %dx%d\n",
 		 s1.width(), s1.height(),
