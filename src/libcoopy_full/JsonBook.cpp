@@ -204,12 +204,16 @@ static bool renderJsonBook(Json::Value& root, TextBook *book,
   for (int i=0; i<(int)names.size(); i++) {
     PolySheet sheet = book->readSheet(names[i]);
     bool hasSchema = false;
-    bool nestSchema = false;
+    bool nestSchema = true;
+    if (options.check("hash")) {
+      int h = options.get("hash").asInt();
+      nestSchema = (h>0);
+    }
+    if (nestSchema) {
+      sheet.mustHaveSchema();
+    }
     if (sheet.getSchema()!=NULL) {
       hasSchema = true;
-      if (options.check("hash")) {
-	nestSchema = true;
-      }
     }
     if (hasSchema) {
       root[names[i]] = Json::Value(Json::objectValue);

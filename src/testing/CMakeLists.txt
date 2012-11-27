@@ -1018,7 +1018,7 @@ ADD_STREAM_TEST(delimit_stdin_base ${TESTS}/format/bi_bridge.txt delimit_stdin_b
 ADD_TEST(delimit_stdin_fix ${fix_eol} delimit_stdin_base.tdiff delimit_stdin_fix.tdiff)
 ADD_TEST(delimit_stdin_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_fix.tdiff ${TESTS}/format/bi_bridge_diff.tdiff)
 
-ADD_STREAM_TEST(delimit_stdin_json_base ${TESTS}/format/bi_bridge.txt delimit_stdin_json_base.jsonbook ${ssdiff} --format hilite --omit-format-name --omit-sheet-name --output dbi:jsonbook:file=- dbi:csv:length=header:file=- dbi:csv:length=header:file=-)
+ADD_STREAM_TEST(delimit_stdin_json_base ${TESTS}/format/bi_bridge.txt delimit_stdin_json_base.jsonbook ${ssdiff} --format hilite --omit-format-name --omit-sheet-name --output dbi:jsonbook:hash=0:file=- dbi:csv:length=header:file=- dbi:csv:length=header:file=-)
 ADD_TEST(delimit_stdin_json_fix ${fix_eol} delimit_stdin_json_base.jsonbook delimit_stdin_json_fix.jsonbook)
 ADD_TEST(delimit_stdin_json_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_json_fix.jsonbook ${TESTS}/format/bi_bridge_diff.jsonbook)
 
@@ -1175,11 +1175,11 @@ IF (USE_GNUMERIC)
   ADD_STREAM_TEST(stdout_excel ${TESTS}/bridges.csv stdout_excel.xls ${ssformat} - dbi:gnumeric:format=.xls::file=-)
   ADD_TEST(stdout_excel_check ${ssdiff} --equal ${TESTS}/bridges.csv stdout_excel.xls)
 ENDIF ()
-ADD_STREAM_TEST(stdout_jsonbook_ssformat ${TESTS}/bridges.csv stdout_jsonbook.jsonbook ${ssformat} - dbi:jsonbook::file=-)
+ADD_STREAM_TEST(stdout_jsonbook_ssformat ${TESTS}/bridges.csv stdout_jsonbook.jsonbook ${ssformat} - dbi:jsonbook:hash=0::file=-)
 # PENDING
 # ADD_TEST(stdout_jsonbook_check ${ssdiff} --equal dbi:csv:header=-1::file=${TESTS}/bridges.csv stdout_jsonbook.jsonbook)
 
-ADD_STREAM_TEST(stdout_jsonbook_diff ${TESTS}/broken_bridges.csv stdout_jsonbook_diff.jsonbook ${sspatch} - ${TESTS}/fix_bridges.csv --output dbi:jsonbook::file=-)
+ADD_STREAM_TEST(stdout_jsonbook_diff ${TESTS}/broken_bridges.csv stdout_jsonbook_diff.jsonbook ${sspatch} - ${TESTS}/fix_bridges.csv --output dbi:jsonbook:hash=0::file=-)
 ADD_TEST(stdout_jsonbook_diff_check ${ssdiff} --equal ${TESTS}/bridges.csv stdout_jsonbook_diff.jsonbook)
 
 
