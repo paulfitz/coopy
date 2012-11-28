@@ -1,0 +1,6 @@
+#ifndef COOPY_VERSION_INC
+#define COOPY_VERSION_INC
+
+#define COOPY_VERSION @COOPY_VERSION@
+
+#endif
