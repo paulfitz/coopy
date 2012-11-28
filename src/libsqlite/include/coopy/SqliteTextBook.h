@@ -154,12 +154,8 @@ public:
     SqliteTextBook *book = new SqliteTextBook(true);
     if (book==NULL) return book;
     bool ok = false;
-    if (!config.shouldRead) {
-      ok = true; 
-    } else {
-      if (book->read(config.fname.c_str(),true,config.options)) {
-	ok = true;
-      }
+    if (book->read(config.fname.c_str(),true,config.options)) {
+      ok = true;
     }
     if (!ok) {
       delete book;

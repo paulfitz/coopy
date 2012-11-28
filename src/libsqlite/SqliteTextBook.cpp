@@ -422,12 +422,20 @@ bool SqliteTextBook::addSheet(const SheetSchema& schema) {
   string name = schema.getSheetName();
   getNames();
   if (find(names.begin(),names.end(),name)!=names.end()) {
+    fprintf(stderr,"Tried to add a sheet that already exists\n");
     return false;
   }
   sqlite3 *db = DB(implementation);
-  if (db==NULL) return false;
+  if (db==NULL) {
+    fprintf(stderr,"No database available.\n");
+    return false;
+  }
   SqliteSheet sheet(db,schema.getSheetName().c_str(),prefix.c_str());
   bool ok = sheet.create(schema);
+  if (!ok) {
+    fprintf(stderr,"Cannot create sheet with given structure.\n");
+    return false;
+  }
   names.push_back(name);
   return ok;
 }

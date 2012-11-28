@@ -225,6 +225,7 @@ bool TextBook::copy(const TextBook& alt, const Property& options) {
       dbg_printf("Schema target: %s\n", target.getSchema()->toString().c_str());
     }
   }
+  if (failure) exit(1);
   return !failure;
 }
 
