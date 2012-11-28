@@ -15,7 +15,7 @@ using namespace coopy::format;
 using namespace coopy::fold;
 
 static Json::Value cellToJson(const SheetCell& cell, const ColumnInfo& info) {
-  ColumnType t = info.getColumnType();
+  const ColumnType& t = info.getColumnType();
   if (t.family == ColumnType::COLUMN_FAMILY_INTEGER) return Json::Value(cell.asInt());
   return Json::Value(cell.text);
 }
@@ -189,8 +189,7 @@ static bool writePart(Json::Value& root2,
 	    row[names[x]] = cellToJson(c,infos[x]);
 	      //Json::Value(sheet.cellString(x,y));
 	  } else {
-	    row.append(cellToJson(c,infos[x]));
-	    //row.append(Json::Value(sheet.cellString(x,y)));
+	    row.append(Json::Value(sheet.cellString(x,y)));
 	  }
 	}
       } else {
