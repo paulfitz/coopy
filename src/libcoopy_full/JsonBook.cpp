@@ -14,6 +14,12 @@ using namespace coopy::store::json;
 using namespace coopy::format;
 using namespace coopy::fold;
 
+static Json::Value cellToJson(const SheetCell& cell, const ColumnInfo& info) {
+  ColumnType t = info.getColumnType();
+  if (t.family == ColumnType::COLUMN_FAMILY_INTEGER) return Json::Value(cell.asInt());
+  return Json::Value(cell.text);
+}
+
 static bool readPart(Json::Value& rows,
 		     FoldedSheet *psheet,
 		     SheetSchema *schema) {
@@ -147,6 +153,7 @@ static bool writePart(Json::Value& root2,
   DataSheet& sheet = *psheet;
   Json::Value *rows = &root2;
   vector<string> names;
+  vector<ColumnInfo> infos;
   bool hasNames = false;
   if (hasSchema) {
     root2["columns"] = Json::Value(Json::arrayValue);
@@ -158,6 +165,7 @@ static bool writePart(Json::Value& root2,
     for (int x=0; x<schema->getColumnCount(); x++) {
       ColumnInfo info = schema->getColumnInfo(x);
       names.push_back(info.getName());
+      infos.push_back(info);
       hasNames = nestSchema;
       cols.append(Json::Value(info.getName()));
     }    
@@ -178,9 +186,11 @@ static bool writePart(Json::Value& root2,
 	  }
 	} else {
 	  if (hasNames) {
-	    row[names[x]] = Json::Value(sheet.cellString(x,y));
+	    row[names[x]] = cellToJson(c,infos[x]);
+	      //Json::Value(sheet.cellString(x,y));
 	  } else {
-	    row.append(Json::Value(sheet.cellString(x,y)));
+	    row.append(cellToJson(c,infos[x]));
+	    //row.append(Json::Value(sheet.cellString(x,y)));
 	  }
 	}
       } else {
@@ -227,10 +237,9 @@ static bool renderJsonBook(Json::Value& root, TextBook *book,
   return true;
 }
 
-std::string JsonBook::render(TextBook *book) {
+std::string JsonBook::render(TextBook *book, const Property& options) {
   Json::Value root(Json::objectValue);
-  Property p;
-  if (!renderJsonBook(root,book,p)) return "";
+  if (!renderJsonBook(root,book,options)) return "";
   return root.toStyledString();
 }
 

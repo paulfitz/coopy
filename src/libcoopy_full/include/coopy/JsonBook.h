@@ -52,7 +52,7 @@ public:
 
   static bool write(const char *fname, TextBook *book, const Property& options);
 
-  static std::string render(TextBook *book);
+  static std::string render(TextBook *book, const Property& options);
 
   virtual bool open(const Property& config);
 
