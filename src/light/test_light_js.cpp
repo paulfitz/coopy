@@ -29,7 +29,9 @@ int main(int argc, char *argv[]) {
   wrap.apply(coopy_js());
   wrap.apply(coopy_test_js());
   wrap.send("set_format",format);
-  wrap.send("set_input",JsonBook::render(&book));
+  Property opts;
+  opts.put("hash",0);
+  wrap.send("set_input",JsonBook::render(&book,opts));
 
   FileIO fout;
   if (!fout.openForWrite(out_name,Property())) {
