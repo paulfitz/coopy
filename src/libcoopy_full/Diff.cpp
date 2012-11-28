@@ -220,7 +220,7 @@ int Diff::apply(const Options& opt) {
   }
 
   // options to omit/include columns
-  if (have_excludes) {
+  if (have_excludes && opt.isFormatLike()) {
     for (int i=0; i<(int)exclude_columns.size(); i++) { 
       have_cmd = true;
       string cmd = "@- |";
@@ -230,7 +230,7 @@ int Diff::apply(const Options& opt) {
     }
     couldChangeInput = true;
   }
-  if (have_includes) {
+  if (have_includes && opt.isFormatLike()) {
     string cmd = "@@= |";
     for (int i=0; i<(int)include_columns.size(); i++) { 
       cmd += include_columns[i];
@@ -240,7 +240,6 @@ int Diff::apply(const Options& opt) {
     cmds.push_back(cmd);
     couldChangeInput = true;
   }
-
 
   dbg_printf("\n{} Diff::apply checking remote file if any\n");
 

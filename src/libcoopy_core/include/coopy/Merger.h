@@ -7,6 +7,7 @@
 #include <coopy/MergeOutput.h>
 #include <coopy/CompareFlags.h>
 #include <coopy/NameSniffer.h>
+#include <coopy/EfficientMap.h>
 
 #include <vector>
 #include <set>
@@ -83,6 +84,8 @@ private:
   RowChange lastRowChange;
   bool had_row;
   bool had_foreign_row;
+  efficient_map<std::string,int> include_column;
+  efficient_map<std::string,int> exclude_column;
 
   int current_row;
   int last_row;

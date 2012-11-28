@@ -110,19 +110,22 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
       }
     }
     if (lRow>=0 && lCol>=0 && !deleted) {
-      if (diff) {
-	//printf("I think that %s has name %s\n",
-	//local.cellSummary(lCol,lRow).toString().c_str(),
-	//names[at].c_str());
-	//cond[names[at]] = pivot.cellSummary(pCol,pRow);
-	cond[names[at]] = local.cellSummary(lCol,lRow);
-	/*
-	printf("LOCAL %s IS\n%s\n", 
-	       local.desc().c_str(),
-	       local.toString().c_str());
-	printf("CONDITION %s %d %d\n", cond[names[at]].toString().c_str(),
-	       lCol, lRow);
-	*/
+      string n = names[at];
+      if (diff || include_column.find(n)!=include_column.end()) {
+	if (exclude_column.find(n)==exclude_column.end()) {
+	  //printf("I think that %s has name %s\n",
+	  //local.cellSummary(lCol,lRow).toString().c_str(),
+	  //names[at].c_str());
+	  //cond[names[at]] = pivot.cellSummary(pCol,pRow);
+	  cond[names[at]] = local.cellSummary(lCol,lRow);
+	  /*
+	    printf("LOCAL %s IS\n%s\n", 
+	    local.desc().c_str(),
+	    local.toString().c_str());
+	    printf("CONDITION %s %d %d\n", cond[names[at]].toString().c_str(),
+	    lCol, lRow);
+	  */
+	}
       }
     }
     if (!deleted) {
@@ -231,11 +234,14 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     if (diff) {
       if (!deleted) {
 	if (novel) {
-	  value[names[at]] = _l;
-	  if (conflicted1) {
-	    //printf("SETTING conflicted value\n");
-	    conflicted_value[names[at]] = _r;
-	    conflicted_parent_value[names[at]] = _p;
+	  string n = names[at];
+	  if (exclude_column.find(n)==exclude_column.end()) {
+	    value[n] = _l;
+	    if (conflicted1) {
+	      //printf("SETTING conflicted value\n");
+	      conflicted_value[n] = _r;
+	      conflicted_parent_value[n] = _p;
+	    }
 	  }
 	}
 	at++;
@@ -516,6 +522,13 @@ bool Merger::merge(MergerState& state) {
     return true;
   }
 
+  for (int i=0; i<(int)flags.include_columns.size(); i++) { 
+    include_column[flags.include_columns[i]] = 1;
+  }
+  for (int i=0; i<(int)flags.exclude_columns.size(); i++) { 
+    exclude_column[flags.exclude_columns[i]] = 1;
+  }
+
   dbg_printf("Merging column order...\n");
   CompareFlags cflags = flags;
   cflags.head_trimmed = false;
@@ -587,6 +600,8 @@ bool Merger::merge(MergerState& state) {
     for (int i=0; i<(int)original_col_names.size(); i++) {
       string name = original_col_names[i];
       indexes[name] = (index_flags[i]>0);
+      if (include_column.find(name)!=include_column.end()) indexes[name] = true;
+      if (exclude_column.find(name)!=exclude_column.end()) indexes[name] =false;
       atLeastOne = atLeastOne||indexes[name];
     }
     if (!atLeastOne) {
