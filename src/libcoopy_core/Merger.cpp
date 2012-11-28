@@ -110,14 +110,15 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
       }
     }
     if (lRow>=0 && lCol>=0 && !deleted) {
-      string n = names[at];
+      string n;
+      if (names.size()>at) n = names[at];
       if (diff || include_column.find(n)!=include_column.end()) {
 	if (exclude_column.find(n)==exclude_column.end()) {
 	  //printf("I think that %s has name %s\n",
 	  //local.cellSummary(lCol,lRow).toString().c_str(),
 	  //names[at].c_str());
 	  //cond[names[at]] = pivot.cellSummary(pCol,pRow);
-	  cond[names[at]] = local.cellSummary(lCol,lRow);
+	  cond[n] = local.cellSummary(lCol,lRow);
 	  /*
 	    printf("LOCAL %s IS\n%s\n", 
 	    local.desc().c_str(),
@@ -234,7 +235,8 @@ bool Merger::mergeRow(coopy::store::DataSheet& pivot,
     if (diff) {
       if (!deleted) {
 	if (novel) {
-	  string n = names[at];
+	  string n;
+	  if (names.size()>at) n = names[at];
 	  if (exclude_column.find(n)==exclude_column.end()) {
 	    value[n] = _l;
 	    if (conflicted1) {
