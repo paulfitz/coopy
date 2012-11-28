@@ -10,6 +10,8 @@
 #include <coopy/PoolImpl.h>
 #include <coopy/Stringer.h>
 
+#include <coopy/CoopyVersion.h>
+
 #include <algorithm>
 
 #ifdef USE_GNULIB_GETOPT
@@ -492,12 +494,20 @@ Options::Options(const char *name) : name(name) {
       "extract content of key columns only");
 
   add(OPTION_FOR_FORMAT,
-      "include_column=COLUMN",
+      "include-column=COLUMN",
       "include only the specified column in the output (repeat option to include multiple columns)");
 
   add(OPTION_FOR_FORMAT,
-      "exclude_column=COLUMN",
+      "exclude-column=COLUMN",
       "include all but the specified column in the output (repeat option to exclude multiple columns)");
+
+  add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
+      "include-column=COLUMN",
+      "include the specified column even if unchanged");
+
+  add(OPTION_FOR_DIFF|OPTION_FOR_REDIFF,
+      "exclude-column=COLUMN",
+      "exclude the specified column even if changed");
 
   add(OPTION_FOR_RESOLVE|OPTION_FOR_REDIFF|OPTION_FOR_PATCH,
       "theirs",

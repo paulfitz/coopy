@@ -26,6 +26,11 @@ set(BOOK_HOOK0 ${CMAKE_BINARY_DIR}/generated_code/BookHook0.cpp)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/BookHook.cpp.in ${BOOK_HOOK0}
                 IMMEDIATE)
 
+configure_file(${CMAKE_SOURCE_DIR}/conf/CoopyVersion.h.in 
+  ${CMAKE_BINARY_DIR}/generated_code/coopy/CoopyVersion.h
+  @ONLY)
+include_directories(${CMAKE_BINARY_DIR}/generated_code)
+
 set(NEED_POLYBOOK  PatchParser.cpp Options.cpp Diff.cpp PoolImpl.cpp Coopy.cpp)
 
 set(JSON_ADDITIONS)
@@ -47,9 +52,9 @@ if (EMBED_GETOPT)
     USE_GNULIB_GETOPT=1)
 endif ()
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Options.cpp 
-    APPEND PROPERTY COMPILE_DEFINITIONS 
-    COOPY_VERSION=${COOPY_VERSION})
+# set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Options.cpp 
+#     APPEND PROPERTY COMPILE_DEFINITIONS 
+#     COOPY_VERSION=${COOPY_VERSION})
 
 
 target_link_libraries(coopy_csv_sql coopy_csv)
@@ -73,13 +78,13 @@ foreach(src PolyBook.cpp ${BOOK_HOOK0} ${NEED_POLYBOOK})
 endforeach()
 
 if (COMPILE_PLAIN_EXECUTABLES)
-  add_library(coopy_plain PolyBook.cpp ${BOOK_HOOK0} ${NEED_POLYBOOK} ${GETOPT_ADDITIONS})
+  add_library(coopy_plain PolyBook.cpp ${BOOK_HOOK0} ${NEED_POLYBOOK} ${GETOPT_ADDITIONS} ${CMAKE_BINARY_DIR}/generated_code/coopy/CoopyVersion.h)
   target_link_libraries(coopy_plain coopy_csv_sql)
   export(TARGETS coopy_plain APPEND FILE ${COOPY_DEPENDENCIES})
   install(TARGETS coopy_plain COMPONENT ${BASELIB} DESTINATION lib)
 endif ()
 
-add_library(coopy_full PolyBook.cpp ${BOOK_HOOK} ${NEED_POLYBOOK} ${GETOPT_ADDITIONS})
+add_library(coopy_full PolyBook.cpp ${BOOK_HOOK} ${NEED_POLYBOOK} ${GETOPT_ADDITIONS} ${CMAKE_BINARY_DIR}/generated_code/coopy/CoopyVersion.h)
 target_link_libraries(coopy_full coopy_csv_sql)
 export(TARGETS coopy_full APPEND FILE ${COOPY_DEPENDENCIES})
 install(TARGETS coopy_full COMPONENT ${BASELIB} DESTINATION lib)
