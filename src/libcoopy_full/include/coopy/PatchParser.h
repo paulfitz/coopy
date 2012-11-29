@@ -20,6 +20,7 @@ public:
   Patcher *patcher;
   coopy::store::Property config;
   std::string fname;
+  std::string table_name;
   std::vector<std::string> oneliners;
   bool use_oneliners;
   const coopy::cmp::CompareFlags& flags;
@@ -75,6 +76,8 @@ private:
   bool applyTdiff();
 
   bool applyColor();
+
+  void needTable();
 };
 
 #endif

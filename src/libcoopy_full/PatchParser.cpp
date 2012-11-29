@@ -948,7 +948,6 @@ string stringer_encoder(const TDiffPart& part) {
 
 bool PatchParser::applyTdiff() {
   vector<string> allNames;
-  string table_name = "";
 
   patcher->mergeStart();
 
@@ -1035,6 +1034,7 @@ bool PatchParser::applyTdiff() {
 	names.push_back(cols[i-1].key);
       }
       if (first=="@@"||first=="@@=") {
+	needTable();
 	NameChange nc;
 	nc.mode = NAME_CHANGE_DECLARE;
 	nc.final = false;
@@ -1050,12 +1050,7 @@ bool PatchParser::applyTdiff() {
       printf("\n");
       */
     } else if (first=="@:"||first=="@+"||first=="@-"||first=="@=") {
-      if (table_name=="") {
-	if (flags.ordered_tables.size()>0) {
-	  table_name = flags.ordered_tables[0];
-	  patcher->setSheet(table_name.c_str());
-	}
-      }
+      needTable();
       vector<string> ocols;
       vector<string> ncols;
       for (int i=0; i<(int)cols.size(); i++) {
@@ -1117,12 +1112,7 @@ bool PatchParser::applyTdiff() {
       }
  
     } else if (first=="="||first=="-"||first=="+"||first=="*"||first==":") {
-      if (table_name=="") {
-	if (flags.ordered_tables.size()>0) {
-	  table_name = flags.ordered_tables[0];
-	  patcher->setSheet(table_name.c_str());
-	}
-      }
+      needTable();
       vector<TDiffPart> assign;
       bool mod = false;
       for (int i=1; i<(int)msg.size(); i++) {
@@ -1742,5 +1732,16 @@ bool PatchParser::applyHiliteBook(coopy::store::TextBook& book) {
 
   return true;
 }
+
+
+void PatchParser::needTable() {
+  if (table_name=="") {
+    if (flags.ordered_tables.size()>0) {
+      table_name = flags.ordered_tables[0];
+      patcher->setSheet(table_name.c_str());
+    }
+  }
+}
+
 
 

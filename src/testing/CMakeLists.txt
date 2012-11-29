@@ -1290,3 +1290,6 @@ ADD_TEST(sqliteio_to_sqlitext_check ${CMAKE_COMMAND} -E compare_files sqliteio_t
 
 add_test(ssformat_table ${ssformat} ${TESTS}/directory/directory.sqlite --table organizations ssformat_table.csvs)
 add_test(ssformat_table_check ${ssdiff} --equal ${TESTS}/directory/directory_organizations.csvs ssformat_table.csvs)
+
+add_test(ssformat_table_name ${ssformat} ${TESTS}/directory/directory.sqlite --table organizations --include-column name ssformat_table_name.csvs)
+add_test(ssformat_table_name_check ${ssdiff} --equal ${TESTS}/directory/directory_organizations_name.csvs ssformat_table_name.csvs)
