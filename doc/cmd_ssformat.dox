@@ -26,10 +26,13 @@ Reformat tables/databases/spreadsheets.
 
 \section ssformat_options Option summary
  \li \ref ssformat_main_default-table "--default-table=TABLE"
+ \li \ref ssformat_main_exclude-column "--exclude-column=COLUMN"
  \li \ref ssformat_main_header "--header"
  \li \ref ssformat_main_help "--help"
+ \li \ref ssformat_main_include-column "--include-column=COLUMN"
  \li \ref ssformat_main_index "--index"
  \li \ref ssformat_main_input-formats "--input-formats"
+ \li \ref ssformat_main_omit-header "--omit-header"
  \li \ref ssformat_main_paint "--paint"
  \li \ref ssformat_main_table "--table=TABLE"
 
@@ -38,16 +41,25 @@ Reformat tables/databases/spreadsheets.
 \anchor ssformat_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
 
 
+\anchor ssformat_main_exclude-column <b>--exclude-column=COLUMN</b> <br />include all but the specified column in the output (repeat option to exclude multiple columns)
+
+
 \anchor ssformat_main_header <b>--header</b> <br />extract column names only
 
 
 \anchor ssformat_main_help <b>--help</b> <br />show how to use this program
 
 
+\anchor ssformat_main_include-column <b>--include-column=COLUMN</b> <br />include only the specified column in the output (repeat option to include multiple columns)
+
+
 \anchor ssformat_main_index <b>--index</b> <br />extract content of key columns only
 
 
 \anchor ssformat_main_input-formats <b>--input-formats</b> <br />list supported input database formats
+
+
+\anchor ssformat_main_omit-header <b>--omit-header</b> <br />remove column names
 
 
 \anchor ssformat_main_paint <b>--paint</b> <br />add color highlighting appropriate for highlighter diffs
@@ -143,7 +155,8 @@ JSONBOOK: Spreadsheet formats in json<br />
   \li<b>.jsonbook</b>: Json spreadsheet
   \li<b>.json</b>: {<br />
       "type": "jsonbook",  <i>// Json spreadsheet</i><br />
-      "file": "fname.sheet"  <i>// File name</i><br />
+      "file": "fname.sheet",  <i>// File name</i><br />
+      "hash": "1"  <i>// Generate hash/dict/objects for each row when schema available</i><br />
 }
   \li <b>dbi:jsonbook:fname.sheet</b> (Force Json spreadsheet interpretation) 
 
@@ -205,7 +218,7 @@ SOCIALCALC: SocialCalc format (via mozjs)<br />
 
 
 \section ssformat_version Version
-ssformat version 0.6.4
+ssformat version 0.6.5
 
 
  *

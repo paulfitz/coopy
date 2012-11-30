@@ -28,8 +28,10 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
  \li \ref ssrediff_main_act "--act=ACT"
  \li \ref ssrediff_main_context "--context=N"
  \li \ref ssrediff_main_default-table "--default-table=TABLE"
+ \li \ref ssrediff_main_exclude-column "--exclude-column=COLUMN"
  \li \ref ssrediff_main_format "--format=FORMAT"
  \li \ref ssrediff_main_help "--help"
+ \li \ref ssrediff_main_include-column "--include-column=COLUMN"
  \li \ref ssrediff_main_low-memory "--low-memory"
  \li \ref ssrediff_main_neither "--neither"
  \li \ref ssrediff_main_omit-format-name "--omit-format-name"
@@ -52,10 +54,16 @@ Reformat a tabular diff file. Converting to hilite/review formats will require s
 \anchor ssrediff_main_default-table <b>--default-table=TABLE</b> <br />name to use when a table name is needed and not supplied
 
 
+\anchor ssrediff_main_exclude-column <b>--exclude-column=COLUMN</b> <br />exclude the specified column even if changed
+
+
 \anchor ssrediff_main_format <b>--format=FORMAT</b> <br />set difference format for output
 
 
 \anchor ssrediff_main_help <b>--help</b> <br />show how to use this program
+
+
+\anchor ssrediff_main_include-column <b>--include-column=COLUMN</b> <br />include the specified column even if unchanged
 
 
 \anchor ssrediff_main_low-memory <b>--low-memory</b> <br />prioritize low memory usage over speed
@@ -185,7 +193,8 @@ JSONBOOK: Spreadsheet formats in json<br />
   \li<b>.jsonbook</b>: Json spreadsheet
   \li<b>.json</b>: {<br />
       "type": "jsonbook",  <i>// Json spreadsheet</i><br />
-      "file": "fname.sheet"  <i>// File name</i><br />
+      "file": "fname.sheet",  <i>// File name</i><br />
+      "hash": "1"  <i>// Generate hash/dict/objects for each row when schema available</i><br />
 }
   \li <b>dbi:jsonbook:fname.sheet</b> (Force Json spreadsheet interpretation) 
 
@@ -247,7 +256,7 @@ SOCIALCALC: SocialCalc format (via mozjs)<br />
 
 
 \section ssrediff_version Version
-ssrediff version 0.6.4
+ssrediff version 0.6.5
 
 
  *

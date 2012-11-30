@@ -186,7 +186,8 @@ JSONBOOK: Spreadsheet formats in json<br />
   \li<b>.jsonbook</b>: Json spreadsheet
   \li<b>.json</b>: {<br />
       "type": "jsonbook",  <i>// Json spreadsheet</i><br />
-      "file": "fname.sheet"  <i>// File name</i><br />
+      "file": "fname.sheet",  <i>// File name</i><br />
+      "hash": "1"  <i>// Generate hash/dict/objects for each row when schema available</i><br />
 }
   \li <b>dbi:jsonbook:fname.sheet</b> (Force Json spreadsheet interpretation) 
 
@@ -248,7 +249,7 @@ SOCIALCALC: SocialCalc format (via mozjs)<br />
 
 
 \section ssmerge_version Version
-ssmerge version 0.6.4
+ssmerge version 0.6.5
 
 
  *
