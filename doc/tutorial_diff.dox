@@ -8,9 +8,8 @@ between two versions of a table (or tables).  Suppose you
 are a bridge geek, and have been working with this
 table of New York bridges compiled by a friend:
 
-\htmlonly
-<table border=1>
-  <tr><th bgcolor='#000088'><font color="#ffffff">bridge</font></th><th bgcolor='#000088'><font color="#ffffff">designer</font></th><th bgcolor='#000088'><font color="#ffffff">length</font></th></tr>
+<table>
+  <tr><th>bridge</th><th>designer</th><th>length</th></tr>
   <tr><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
   <tr><td>Williamsburg</td><td>D. Duck</td><td>1600</td></tr>
   <tr><td>Queensborough</td><td>Palmer &amp; Hornbostel</td><td>1182</td></tr>
@@ -20,20 +19,11 @@ table of New York bridges compiled by a friend:
   <tr><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
   <tr><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_diff_0.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 That table has some problems (D. Duck? Spamington?). So you fix them.
 
-\htmlonly
-<table border=1>
-  <tr><th bgcolor='#000088'><font color="#ffffff">bridge</font></th><th bgcolor='#000088'><font color="#ffffff">designer</font></th><th bgcolor='#000088'><font color="#ffffff">length</font></th></tr>
+<table>
+  <tr><th>bridge</th><th>designer</th><th>length</th></tr>
   <tr><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
   <tr><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
   <tr><td>Williamsburg</td><td>L. L. Buck</td><td>1600</td></tr>
@@ -43,14 +33,6 @@ That table has some problems (D. Duck? Spamington?). So you fix them.
   <tr><td>Throgs Neck</td><td>O. H. Ammann</td><td>1800</td></tr>
   <tr><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_diff_1.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 As a public-spirited type, you'd like to offer your fixes to your
 friend.  If you both happen to run the same software, chances are it
@@ -85,9 +67,8 @@ your friend.
 For example, if your friend is a spreadsheet user, you can use COOPY
 to prepare a report like this:
 
-\htmlonly
-<table border=1>
-  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">bridge</font></th><th bgcolor='#000088'><font color="#ffffff">designer</font></th><th bgcolor='#000088'><font color="#ffffff">length</font></th></tr>
+<table>
+  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
   <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td>1600</td></tr>
@@ -98,14 +79,6 @@ to prepare a report like this:
   <tr><td></td><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_diff_2.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 (produced with <tt>ssdiff --format hilite --output report.xls FILE1 FILE2</tt>)
 
@@ -148,9 +121,8 @@ Let's switch perspective now.  Suppose we've received an
 email from a friend, saying they've made some fixes to our
 bridge list, and they've attached this spreadsheet:
 
-\htmlonly
-<table border=1>
-  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">bridge</font></th><th bgcolor='#000088'><font color="#ffffff">designer</font></th><th bgcolor='#000088'><font color="#ffffff">length</font></th></tr>
+<table>
+  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
   <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td>1600</td></tr>
@@ -161,14 +133,6 @@ bridge list, and they've attached this spreadsheet:
   <tr><td></td><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_diff_3.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 That's handy, it is easy to see what has changed.  The L.L.Buck fix
 is important, and how did we forget the Manhattan bridge - but the

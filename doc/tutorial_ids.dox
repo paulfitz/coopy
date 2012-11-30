@@ -23,39 +23,30 @@ That's a table listing locations, a table listing organizations,
 and a table linking organizations and locations (org2loc).
 Suppose the database holds the following data:
 
-\htmlonly
-<table border=1>
+<table>
   <caption>locations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">street</font></th><th bgcolor='#000088'><font color="#ffffff">city</font></th></tr>
+  <tr><th>id</th><th>street</th><th>city</th></tr>
   <tr><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
   <tr><td>2</td><td>Big Crater</td><td>Moon</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>org2loc</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">org_id</font></th><th bgcolor='#000088'><font color="#ffffff">loc_id</font></th></tr>
+  <tr><th>org_id</th><th>loc_id</th></tr>
   <tr><td>1</td><td>2</td></tr>
   <tr><td>2</td><td>1</td></tr>
   <tr><td>3</td><td>1</td></tr>
   <tr><td>3</td><td>2</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>organizations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">name</font></th></tr>
+  <tr><th>id</th><th>name</th></tr>
   <tr><td>1</td><td>Dracula Inc</td></tr>
   <tr><td>2</td><td>The Firm</td></tr>
   <tr><td>3</td><td>Omni Cooperative</td></tr>
   <tr><td>4</td><td>Nonexistence Unlimited</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_ids_0.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 See \ref tutorial_ids_material for how to get a copy of this database
 to play with.  This toy database contains <tt>organizations</tt> and
@@ -72,18 +63,17 @@ Suppose Alice and Bob both have a copy of directory.sqlite.
 Alice adds in a new organization to her copy, "Alice and Company", with a
 location in Denver:
 
-\htmlonly
-<table border=1>
+<table>
   <caption>locations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">street</font></th><th bgcolor='#000088'><font color="#ffffff">city</font></th></tr>
+  <tr><th>\@\@</th><th>id</th><th>street</th><th>city</th></tr>
   <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
   <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>org2loc</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">org_id</font></th><th bgcolor='#000088'><font color="#ffffff">loc_id</font></th></tr>
+  <tr><th>\@\@</th><th>org_id</th><th>loc_id</th></tr>
   <tr><td></td><td>1</td><td>2</td></tr>
   <tr><td></td><td>2</td><td>1</td></tr>
   <tr><td></td><td>3</td><td>1</td></tr>
@@ -91,39 +81,30 @@ location in Denver:
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>3</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>organizations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">name</font></th></tr>
+  <tr><th>\@\@</th><th>id</th><th>name</th></tr>
   <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
   <tr><td></td><td>2</td><td>The Firm</td></tr>
   <tr><td></td><td>3</td><td>Omni Cooperative</td></tr>
   <tr><td></td><td>4</td><td>Nonexistence Unlimited</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>Alice and Company</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_ids_1.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 Bob, in his copy, adds "Bob's World" located on Planet Bob and in Cambridge, and
 notes that "Omni Cooperative" also has a branch on Planet Bob:
 
-\htmlonly
-<table border=1>
+<table>
   <caption>locations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">street</font></th><th bgcolor='#000088'><font color="#ffffff">city</font></th></tr>
+  <tr><th>\@\@</th><th>id</th><th>street</th><th>city</th></tr>
   <tr><td></td><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
   <tr><td></td><td>2</td><td>Big Crater</td><td>Moon</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>3</td><td>42 The Boblands</td><td>Planet Bob</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>org2loc</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">org_id</font></th><th bgcolor='#000088'><font color="#ffffff">loc_id</font></th></tr>
+  <tr><th>\@\@</th><th>org_id</th><th>loc_id</th></tr>
   <tr><td></td><td>1</td><td>2</td></tr>
   <tr><td></td><td>2</td><td>1</td></tr>
   <tr><td></td><td>3</td><td>1</td></tr>
@@ -133,23 +114,15 @@ notes that "Omni Cooperative" also has a branch on Planet Bob:
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>3</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>organizations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">name</font></th></tr>
+  <tr><th>\@\@</th><th>id</th><th>name</th></tr>
   <tr><td></td><td>1</td><td>Dracula Inc</td></tr>
   <tr><td></td><td>2</td><td>The Firm</td></tr>
   <tr><td></td><td>3</td><td>Omni Cooperative</td></tr>
   <tr><td></td><td>4</td><td>Nonexistence Unlimited</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>5</td><td>Bob's World</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_ids_2.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 Bob then sends a "diff" bob.tdiff to Alice with his changes, either
 in the highlighter format shown above, or as a tdiff file:
@@ -179,19 +152,18 @@ would result in garbage, due to conflicting IDs.  But when Alice
 applies Bob's changes using \ref sspatch, she gets a happier
 result:
 
-\htmlonly
-<table border=1>
+<table>
   <caption>locations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">street</font></th><th bgcolor='#000088'><font color="#ffffff">city</font></th></tr>
+  <tr><th>id</th><th>street</th><th>city</th></tr>
   <tr><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
   <tr><td>2</td><td>Big Crater</td><td>Moon</td></tr>
   <tr><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
   <tr><td>4</td><td>42 The Boblands</td><td>Planet Bob</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>org2loc</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">org_id</font></th><th bgcolor='#000088'><font color="#ffffff">loc_id</font></th></tr>
+  <tr><th>org_id</th><th>loc_id</th></tr>
   <tr><td>1</td><td>2</td></tr>
   <tr><td>2</td><td>1</td></tr>
   <tr><td>3</td><td>1</td></tr>
@@ -202,9 +174,9 @@ result:
   <tr><td>6</td><td>4</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>organizations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">name</font></th></tr>
+  <tr><th>id</th><th>name</th></tr>
   <tr><td>1</td><td>Dracula Inc</td></tr>
   <tr><td>2</td><td>The Firm</td></tr>
   <tr><td>3</td><td>Omni Cooperative</td></tr>
@@ -212,14 +184,6 @@ result:
   <tr><td>5</td><td>Alice and Company</td></tr>
   <tr><td>6</td><td>Bob's World</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_ids_3.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 (Command: <tt>sspatch --inplace directory.sqlite bob.tdiff</tt>)
 
@@ -237,19 +201,18 @@ ssmerge --inplace directory.sqlite directory_alice.sqlite directory_bob.sqlite
 
 Alice well get:
 
-\htmlonly
-<table border=1>
+<table>
   <caption>locations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">street</font></th><th bgcolor='#000088'><font color="#ffffff">city</font></th></tr>
+  <tr><th>id</th><th>street</th><th>city</th></tr>
   <tr><td>1</td><td>305 Memorial Drive</td><td>Cambridge</td></tr>
   <tr><td>2</td><td>Big Crater</td><td>Moon</td></tr>
   <tr><td>3</td><td>10 Ten Street</td><td>Denver</td></tr>
   <tr><td>4</td><td>42 The Boblands</td><td>Planet Bob</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>org2loc</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">org_id</font></th><th bgcolor='#000088'><font color="#ffffff">loc_id</font></th></tr>
+  <tr><th>org_id</th><th>loc_id</th></tr>
   <tr><td>1</td><td>2</td></tr>
   <tr><td>2</td><td>1</td></tr>
   <tr><td>3</td><td>1</td></tr>
@@ -260,9 +223,9 @@ Alice well get:
   <tr><td>6</td><td>4</td></tr>
 </table>
 
-<table border=1>
+<table>
   <caption>organizations</caption>
-  <tr><th bgcolor='#000088'><font color="#ffffff">id</font></th><th bgcolor='#000088'><font color="#ffffff">name</font></th></tr>
+  <tr><th>id</th><th>name</th></tr>
   <tr><td>1</td><td>Dracula Inc</td></tr>
   <tr><td>2</td><td>The Firm</td></tr>
   <tr><td>3</td><td>Omni Cooperative</td></tr>
@@ -270,14 +233,6 @@ Alice well get:
   <tr><td>5</td><td>Alice and Company</td></tr>
   <tr><td>6</td><td>Bob's World</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_ids_4.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 For merging, it is important that Alice has a copy of the last
 "common ancestor" between her own database and Bob's.

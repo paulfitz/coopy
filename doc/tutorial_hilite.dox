@@ -13,9 +13,8 @@ A good clue that you are looking at a highlighter diff is if you see
 annotations like "+++", "---", or "->" in the first column of one
 or more tables in a spreadsheet.  Here is such a table:
 
-\htmlonly
-<table border=1>
-  <tr><th bgcolor='#000088'><font color="#ffffff">@@</font></th><th bgcolor='#000088'><font color="#ffffff">bridge</font></th><th bgcolor='#000088'><font color="#ffffff">designer</font></th><th bgcolor='#000088'><font color="#ffffff">length</font></th></tr>
+<table>
+  <tr><th>\@\@</th><th>bridge</th><th>designer</th><th>length</th></tr>
   <tr><td></td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td></tr>
   <tr bgcolor="#7fff7f" style="background-color: #7fff7f;"><td>+++</td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
   <tr><td bgcolor="#7f7fff" style="background-color: #7f7fff;">-></td><td>Williamsburg</td><td bgcolor="#7f7fff" style="background-color: #7f7fff;">D. Duck->L. L. Buck</td><td>1600</td></tr>
@@ -26,14 +25,6 @@ or more tables in a spreadsheet.  Here is such a table:
   <tr><td></td><td>George Washington</td><td>O. H. Ammann</td><td>3500</td></tr>
   <tr bgcolor="#ff7f7f" style="background-color: #ff7f7f;"><td>---</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_hilite_0.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 A highlighter diff shows the differences between two versions
 of a spreadsheet.  It says what should be done to the first
@@ -99,22 +90,13 @@ toolbox:
 Here's a translation to "ROWOPS" format, a simple tabular representation
 of changes this can be useful if you don't have to worry about NULLs.
 
-\htmlonly
-<table border=1>
-  <tr><th bgcolor='#000088'><font color="#ffffff">name</font></th><th bgcolor='#000088'><font color="#ffffff">op</font></th><th bgcolor='#000088'><font color="#ffffff">bridge0</font></th><th bgcolor='#000088'><font color="#ffffff">designer0</font></th><th bgcolor='#000088'><font color="#ffffff">length0</font></th><th bgcolor='#000088'><font color="#ffffff">bridge1</font></th><th bgcolor='#000088'><font color="#ffffff">designer1</font></th><th bgcolor='#000088'><font color="#ffffff">length1</font></th></tr>
+<table>
+  <tr><th>name</th><th>op</th><th>bridge0</th><th>designer0</th><th>length0</th><th>bridge1</th><th>designer1</th><th>length1</th></tr>
   <tr><td>sheet</td><td>context</td><td>Brooklyn</td><td>J. A. Roebling</td><td>1595</td><td></td><td></td><td></td></tr>
   <tr><td>sheet</td><td>insert</td><td></td><td></td><td></td><td>Manhattan</td><td>G. Lindenthal</td><td>1470</td></tr>
   <tr><td>sheet</td><td>update</td><td>Williamsburg</td><td>D. Duck</td><td>1600</td><td></td><td>L. L. Buck</td><td></td></tr>
   <tr><td>sheet</td><td>delete</td><td>Spamspan</td><td>S. Spamington</td><td>10000</td><td></td><td></td><td></td></tr>
 </table>
-\endhtmlonly
-\latexonly
-\begin{center}
-\endlatexonly
-\image latex images/screenshot/tutorial_hilite_1.pdf
-\latexonly
-\end{center}
-\endlatexonly
 
 (produced with <tt>ssrediff --format ops diff.xls</tt>).
 
