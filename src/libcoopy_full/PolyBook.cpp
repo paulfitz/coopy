@@ -215,7 +215,7 @@ bool PolyBook::expand(Property& config) {
     if (ext==".mdb") {
       key = "access";
     }
-    if (ext==".sqlite") {
+    if (ext==".sqlite"||ext==".sqlite3") {
       key = "sqlite";
     }
     if (ext==".sqlitext") {
