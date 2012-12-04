@@ -86,14 +86,16 @@ static bool readPart(Json::Value& rows,
   return true;
 }
 
-bool JsonBook::read(const char *fname) {
+bool JsonBook::read(const char *fname, const Property& options) {
   clear();
 
+  FileIO fio;
   FormatSniffer in;
-  if (!in.open(fname,true)) {
+  if (!fio.open(fname,options)) {
     fprintf(stderr,"Failed to open %s\n", fname);
     return false;
   }
+  in.wrap(fio,true);
 
   Json::Value root;
   Json::Reader reader;
@@ -262,7 +264,7 @@ bool JsonBook::write(const char *fname, TextBook *book, const Property& options)
 
 bool JsonBook::open(const Property& config) {
   if (!config.check("file")) return false;
-  return read(config.get("file").asString().c_str());
+  return read(config.get("file").asString().c_str(),config);
 }
 
 bool JsonBook::addSheet(const SheetSchema& schema) {

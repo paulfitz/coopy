@@ -43,7 +43,7 @@ public:
     return true;
   }
   
-  bool read(const char *fname);
+  bool read(const char *fname, const Property& options);
 
   bool write(const char *fname) {
     Property p;
@@ -95,7 +95,7 @@ public:
     if (config.shouldRead) {
       if (!config.options.check("should_attach")) {
 	dbg_printf("reading jsonbook file %s\n", config.options.get("file").asString().c_str());
-	bool r = book->read(config.fname.c_str());
+	bool r = book->read(config.fname.c_str(),config.options);
 	if (!r) {
 	  delete book;
 	  book = NULL;

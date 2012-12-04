@@ -1022,6 +1022,11 @@ ADD_STREAM_TEST(delimit_stdin_json_base ${TESTS}/format/bi_bridge.txt delimit_st
 ADD_TEST(delimit_stdin_json_fix ${fix_eol} delimit_stdin_json_base.jsonbook delimit_stdin_json_fix.jsonbook)
 ADD_TEST(delimit_stdin_json_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_json_fix.jsonbook ${TESTS}/format/bi_bridge_diff.jsonbook)
 
+ADD_STREAM_TEST(delimit_stdin_json2_base ${TESTS}/format/bi_bridge.jsonbook delimit_stdin_json2_base.jsonbook ${ssdiff} --format hilite --omit-format-name --omit-sheet-name --output dbi:jsonbook:hash=0:file=- dbi:jsonbook:length=header:file=- dbi:jsonbook:length=header:file=-)
+ADD_TEST(delimit_stdin_json2_fix ${fix_eol} delimit_stdin_json2_base.jsonbook delimit_stdin_json2_fix.jsonbook)
+ADD_TEST(delimit_stdin_json2_check ${CMAKE_COMMAND} -E compare_files delimit_stdin_json2_fix.jsonbook ${TESTS}/format/bi_bridge_diff.jsonbook)
+
+
 #######################################################################
 #######################################################################
 
