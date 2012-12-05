@@ -276,7 +276,9 @@ bool PatchParser::apply() {
   }
 
   if (fname!="") {
-    sniffer.open(fname.c_str());
+    if (fname.find("dbi:")!=0) {
+      sniffer.open(fname.c_str());
+    }
   } else {
     string txt = "";
     for (int i=0; i<(int)oneliners.size(); i++) {
