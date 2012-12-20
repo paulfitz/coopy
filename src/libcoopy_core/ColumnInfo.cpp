@@ -19,7 +19,7 @@ bool ColumnType::setType(const std::string& name,
       break;
     }
   }
-  if (_name=="int"||_name=="integer"||_name=="tinyint"||_name=="byte") {
+  if (_name=="int"||_name=="integer"||_name=="tinyint"||_name=="byte"||_name=="smallint"||_name=="smallint unsigned") {
     family = COLUMN_FAMILY_INTEGER;
   } else if (_name=="text") {
     family = COLUMN_FAMILY_TEXT;
@@ -29,7 +29,7 @@ bool ColumnType::setType(const std::string& name,
     family = COLUMN_FAMILY_REAL;
   } else if (_name == "datetime (short)"||_name=="datetime"||_name=="date"||_name=="timestamp") {
     family = COLUMN_FAMILY_DATETIME;
-  } else if (_name=="text"||_name=="varchar"||_name.substr(0,7)=="varchar") {
+  } else if (_name=="text"||_name=="varchar"||_name.substr(0,7)=="varchar"||_name=="longtext") {
     family = COLUMN_FAMILY_TEXT;
   } else if (_name=="memo"||_name=="hyperlink"||_name=="memo/hyperlink") {
     family = COLUMN_FAMILY_TEXT;
