@@ -999,7 +999,7 @@ bool PatchParser::applyTdiff() {
       dbg_printf("\n");
     }
     if (first=="@@@") {
-      table_name = msg[1];
+      table_name = TDiffPart(msg[1],true).key;
       patcher->setSheet(table_name.c_str());
       allNames.clear();
     } else if (first=="x") {

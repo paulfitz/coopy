@@ -1298,3 +1298,13 @@ add_test(ssformat_table_check ${ssdiff} --equal ${TESTS}/directory/directory_org
 
 add_test(ssformat_table_name ${ssformat} ${TESTS}/directory/directory.sqlite --table organizations --include-column name ssformat_table_name.csvs)
 add_test(ssformat_table_name_check ${ssdiff} --equal ${TESTS}/directory/directory_organizations_name.csvs ssformat_table_name.csvs)
+
+#######################################################################
+#######################################################################
+
+# Check handling of tables with spaces in their name
+
+add_test(space_handling_setup ${sspatch} ${TESTS}/space.csvs --cmd "+ |whale|also not a fish|" --output space_handling_alt.csvs)
+add_test(space_handling_diff ${ssdiff} ${TESTS}/space.csvs space_handling_alt.csvs --output space_handling_diff.tdiff)
+add_test(space_handling_patch ${sspatch} ${TESTS}/space.csvs space_handling_diff.tdiff --output space_handling_patched.csvs)
+add_test(space_handling_check ${ssdiff} --equal space_handling_alt.csvs space_handling_patched.csvs)

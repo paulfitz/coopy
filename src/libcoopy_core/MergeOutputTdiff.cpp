@@ -110,7 +110,7 @@ void MergeOutputTdiff::showSheet(bool bound) {
   if (!sheetNameShown) {
     const CompareFlags& flags = getFlags();
     if (!flags.omit_sheet_name) {
-      fprintf(out,"\n@@@ %s\n", sheetName.c_str());
+      fprintf(out,"\n@@@ %s\n", stringy(sheetName,true).c_str());
     }
     sheetNameShown = true;
     sheetNameBreakShown = false;
