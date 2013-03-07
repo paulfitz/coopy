@@ -74,7 +74,7 @@ result:
 
 Notice how IDs have been modified appropriately.  They are allocated
 by Sqlite rather than slavishly copied.  If this is not the desired
-behavior, turn on the "--native" flag when calling \ref sspatch.
+behavior, turn on the <tt>--native</tt> flag when calling \ref sspatch.
 
 If Bob didn't make a patch but instead sent a copy of his database,
 Alice could either use \ref ssdiff followed by \ref sspatch, or
