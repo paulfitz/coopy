@@ -12,6 +12,7 @@ namespace coopy {
   namespace cmp {
     class CompareFlags;
     class CompareOutput;
+    class Compare;
   }
   namespace store {
     // forward declarations
@@ -91,10 +92,12 @@ public:
   std::string resolve;
   std::string variant;
   coopy::store::Pool *pool;
+
   bool foreign_pool;
   bool foreign_pool_set;
   bool offload_to_sql_when_possible;
   int context_lines;
+  Compare *default_compare;
 
   CompareFlags() {
     head_trimmed = false;
@@ -122,6 +125,7 @@ public:
     clean_sheets = false;
     offload_to_sql_when_possible = false;
     context_lines = -2; // use default
+    default_compare = 0 /*NULL*/;
   }
 
   // js build has problem with implicit copy

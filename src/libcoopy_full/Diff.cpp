@@ -19,6 +19,10 @@
 
 #include <coopy/Diff.h>
 
+#ifdef USE_COOPYHX
+#include <coopy/Coopyhx.h>
+#endif
+
 using namespace std;
 using namespace coopy::app;
 using namespace coopy::store;
@@ -86,6 +90,13 @@ int Diff::apply(const Options& opt) {
   CompareFlags flags = opt.getCompareFlags();
   PoolImpl pool;
   flags.pool = &pool;
+#ifdef USE_COOPYHX
+  CoopyhxCompare hx;
+  if (opt.checkBool("hx",false)) {
+    hx.init();
+    flags.default_compare = &hx;
+  }
+#endif
   PolyBook pool_book;
   if (pool_file!="") {
     if (!pool_book.attachReadWrite(pool_file.c_str())) {

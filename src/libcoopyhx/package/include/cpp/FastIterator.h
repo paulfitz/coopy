@@ -1,0 +1,75 @@
+#ifndef INCLUDED_cpp_FastIterator
+#define INCLUDED_cpp_FastIterator
+
+namespace cpp
+{
+
+class HXCPP_EXTERN_CLASS_ATTRIBUTES IteratorBase : public hx::Object
+{
+public:
+   Dynamic __Field(const String &inString ,bool inCallProp);
+   virtual bool hasNext() = 0;
+   virtual Dynamic _dynamicNext() = 0;
+
+   Dynamic hasNext_dyn( );
+   Dynamic next_dyn( );
+   Dynamic _dynamicNext_dyn( );
+};
+
+
+template<typename T>
+class HXCPP_EXTERN_CLASS_ATTRIBUTES FastIterator_obj : public IteratorBase
+{
+public:
+   virtual bool hasNext() = 0;
+   virtual T next() = 0;
+
+   virtual Dynamic _dynamicNext() { return next(); }
+};
+
+
+
+template<typename T>
+class HXCPP_EXTERN_CLASS_ATTRIBUTES DynamicIterator : public FastIterator_obj<T>
+{
+public:
+   Dynamic mNext;
+   Dynamic mHasNext;
+
+   DynamicIterator(Dynamic inValue)
+   {
+      mNext = inValue->__Field(HX_CSTRING("next"), true);
+      mHasNext = inValue->__Field(HX_CSTRING("hasNext"), true);
+   }
+
+   bool hasNext() { return mHasNext(); }
+   T next() { return mNext(); }
+
+   void __Mark(hx::MarkContext *__inCtx)
+   {
+      HX_MARK_MEMBER_NAME(mNext,"mNext");
+      HX_MARK_MEMBER_NAME(mHasNext,"mHasNext");
+   }
+
+   #ifdef HXCPP_VISIT_ALLOCS
+   void __Visit(hx::VisitContext *__inCtx)
+   {
+      HX_VISIT_MEMBER_NAME(mNext,"mNext");
+      HX_VISIT_MEMBER_NAME(mHasNext,"mHasNext");
+   }
+   #endif
+
+};
+
+
+template<typename T>
+FastIterator_obj<T> *CreateFastIterator(Dynamic inValue)
+{
+   FastIterator_obj<T> *result = dynamic_cast< FastIterator_obj<T> *>(inValue.GetPtr());
+   if (result) return result;
+   return new DynamicIterator<T>(inValue);
+}
+
+}
+
+#endif

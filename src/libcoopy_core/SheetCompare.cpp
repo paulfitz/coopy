@@ -537,32 +537,41 @@ int SheetCompare::compare(DataSheet& _pivot, DataSheet& _local,
   OrderResult p2l_col_order;
   OrderResult p2r_col_order;
 
-  /////////////////////////////////////////////////////////////////////////
-  // ROW MAPPING from PIVOT to LOCAL and REMOTE
-  dbg_printf("SheetCompare::compare row mapping\n");
+  bool ordered = false;
+  if (flags.default_compare) {
+    int result = flags.default_compare->compare(pivot,local,remote,p2l_row_order,p2r_row_order,p2l_col_order,p2r_col_order,flags);
+    if (result==0) ordered = true;
+  }
 
-  doRowMapping(p2l_row_order,p2r_row_order,
-	       p2l_col_order,p2r_col_order,
-	       flags,eflags,
-	       vpivot,vlocal,vremote,!id_based);
+  if (!ordered) {
 
-  /////////////////////////////////////////////////////////////////////////
-  // COLUMN MAPPING from PIVOT to LOCAL and REMOTE
-  dbg_printf("SheetCompare::compare row mapping\n");
-
-  doColMapping(p2l_row_order,p2r_row_order,
-	       p2l_col_order,p2r_col_order,
-	       flags,eflags,
-	       vpivot,vlocal,vremote);
-
-  if (!id_based) {
-    // worth repeating row mapping, now we have columns
-    dbg_printf("SheetCompare::compare review row mapping\n");
-
+    /////////////////////////////////////////////////////////////////////////
+    // ROW MAPPING from PIVOT to LOCAL and REMOTE
+    dbg_printf("SheetCompare::compare row mapping\n");
+    
     doRowMapping(p2l_row_order,p2r_row_order,
 		 p2l_col_order,p2r_col_order,
 		 flags,eflags,
-		 vpivot,vlocal,vremote,false);
+		 vpivot,vlocal,vremote,!id_based);
+    
+    /////////////////////////////////////////////////////////////////////////
+    // COLUMN MAPPING from PIVOT to LOCAL and REMOTE
+    dbg_printf("SheetCompare::compare row mapping\n");
+    
+    doColMapping(p2l_row_order,p2r_row_order,
+		 p2l_col_order,p2r_col_order,
+		 flags,eflags,
+		 vpivot,vlocal,vremote);
+    
+    if (!id_based) {
+      // worth repeating row mapping, now we have columns
+      dbg_printf("SheetCompare::compare review row mapping\n");
+      
+      doRowMapping(p2l_row_order,p2r_row_order,
+		   p2l_col_order,p2r_col_order,
+		   flags,eflags,
+		   vpivot,vlocal,vremote,false);
+    }
   }
 
   /////////////////////////////////////////////////////////////////////////

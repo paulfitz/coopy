@@ -419,6 +419,11 @@ Options::Options(const char *name) : name(name) {
   add(OPTION_FOR_DIFF|OPTION_FOR_MERGE,
       "headerless",
       "treat any embedded column names as regular parts of the table (for formats like CSV)");
+#ifdef USE_COOPYHX
+  add(OPTION_FOR_DIFF|OPTION_FOR_MERGE,
+      "hx",
+      "use the simpler/faster comparison algorithm from https://github.com/paulfitz/coopyhx");
+#endif
   addTransform("patch-formats",
 	       "list supported patch formats");
   addCompare("id=COLUMN",
@@ -862,6 +867,7 @@ int Options::apply(int argc, char *argv[]) {
       {(char*)"create", 0, 0, 0},
 
       {(char*)"low-memory", 0, 0, 0},
+      {(char*)"hx", 0, 0, 0},
 
       {(char*)"git", 0, 0, 0},
 
@@ -946,6 +952,8 @@ int Options::apply(int argc, char *argv[]) {
 	} else if (k=="low-memory") {
 	  option_bool["low-memory"] = true;
 	  flags.offload_to_sql_when_possible = true;
+	} else if (k=="hx") {
+	  option_bool["hx"] = true;
 	} else if (k=="scan-for-patch") {
 	  option_bool["scan-for-patch"] = true;
 	} else if (k=="test-file") {
