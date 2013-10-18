@@ -1,12 +1,22 @@
 body {
   background-color: #fff;
+  font-family: "Times New Roman", Times, serif;
 }
-.csv2html table {
-  background-color: #ddd;
+table.csv_sheet {
+  border-collapse:collapse;
+  border: 1px solid black;
 }
-.csv2html td {
-  background-color: #ffa;
-  padding: 3px;
+
+table.csv_sheet td {
+  padding: 5px;
+  border: 1px solid #2D4068;
+}
+
+table.csv_sheet th {
+  background: #374F7F;
+  color: #fff;
+  padding: 5px;
+  border: 1px solid #2D4068;
 }
 tr.csv_row_err td { background-color: #f00; text-color: #fff; }
 tr.csv_row_local td { background-color: #aaf; }

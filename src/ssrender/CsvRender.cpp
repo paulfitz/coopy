@@ -20,11 +20,11 @@ static void replace(string& str, const string& old, const string& rep) {
 string ml_encode(string x, bool dox) {
   replace(x,"&amp;","&");
   replace(x,"&lt;","<");
-  replace(x,"&rt;",">");
+  replace(x,"&gt;",">");
   replace(x,"&","&amp;");
   replace(x,"<","&lt;");
   if (!dox) {
-    replace(x,">","&rt;");
+    replace(x,">","&gt;");
   }
 
   if (dox) {
