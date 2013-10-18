@@ -1,5 +1,4 @@
 #include <stdio.h>
-//#include <gnumeric-config.h>
 #include <glib/gi18n.h>
 #include "gnumeric.h"
 #include "position.h"
@@ -123,8 +122,10 @@ GnumericWorkbookPtr gnumeric_load(const char *fname) {
   char *uri = go_filename_to_uri (fname);
   //printf("Have uri %s\n", uri);
 
-  WorkbookView *wbv = wb_view_new_from_uri (uri, NULL,
-					    io_context, NULL);
+  WorkbookView *wbv = workbook_view_new_from_uri (uri, NULL,
+						  io_context, NULL);
+  //WorkbookView *wbv = wb_view_new_from_uri (uri, NULL,
+  //					    io_context, NULL);
   g_free (uri);
   //printf("Have workbook view\n");
   g_object_unref (io_context);
@@ -249,7 +250,7 @@ GnumericSheetPtr gnumeric_add_sheet(GnumericWorkbookPtr workbook,
 int gnumeric_sheet_get_size(GnumericSheetPtr sheet, int *w, int *h) {
   Sheet *s = (Sheet *)sheet;
   //GnmSheetSize const *size = gnm_sheet_get_size(sheet);
-  GnmRange range = sheet_get_extent(s,FALSE);
+  GnmRange range = sheet_get_extent(s,FALSE,TRUE);
   if (w!=NULL) *w = range.end.col+1;
   if (h!=NULL) *h = range.end.row+1;
 }
@@ -664,14 +665,16 @@ int gnumeric_style_set_font_bold(GnumericStylePtr style, int flag) {
 
 int gnumeric_style_set_font_color(GnumericStylePtr style, 
 				  int r16, int g16, int b16) {
-  GnmColor *color = style_color_new_i16(r16,g16,b16);
+  GnmColor *color = gnm_color_new_rgba16(r16,g16,b16,0);
+  //GnmColor *color = style_color_new_i16(r16,g16,b16);
   gnm_style_set_font_color((GnmStyle*)style,color);
   return 0;
 }
 
 int gnumeric_style_set_back_color(GnumericStylePtr style, 
 				  int r16, int g16, int b16) {
-  GnmColor *color = style_color_new_i16(r16,g16,b16);
+  GnmColor *color = gnm_color_new_rgba16(r16,g16,b16,0);
+  //GnmColor *color = style_color_new_i16(r16,g16,b16);
   gnm_style_set_back_color((GnmStyle*)style,color);
   gnm_style_set_pattern((GnmStyle*)style,1);
   return 0;
