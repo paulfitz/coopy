@@ -47,7 +47,7 @@ bool Mover::move(const std::vector<int>& src, const std::vector<int>& dest,
     bool moving = false;
     bool toStart = false;
     int x2 = -1;
-    if (it==dest.begin()) {
+    if (it==src.begin()) {
       if (i!=0) {
 	x2 = dest[i-1];
 	moving = true;
