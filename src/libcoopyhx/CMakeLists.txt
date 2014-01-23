@@ -8,4 +8,6 @@ if (USE_COOPYHX)
   add_library(coopy_coopyhx Coopyhx.cpp include/coopy/Coopyhx.h)
   target_link_libraries(coopy_coopyhx coopy_coopyhx_core)
 
+  # some haxe symbols collide with mysql
+  set_target_properties(coopy_coopyhx PROPERTIES LINK_FLAGS -fvisibility=hidden)
 endif()
