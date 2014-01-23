@@ -361,12 +361,15 @@ string format(const char *sString, ...) {
   int iSize;
   
   va_start(args,sString);
+  va_list args2;
+  va_copy(args2, args);
   hFile=fopen("/dev/null","wt");
   iSize=vfprintf(hFile,sString,args);
+  va_end(args);
   fclose(hFile);
   pBuffer=(char *) malloc(iSize+1);
-  vsprintf(pBuffer,sString,args);
-  va_end(args);
+  vsprintf(pBuffer,sString,args2);
+  va_end(args2);
   sResult=pBuffer;
   free(pBuffer);
   return sResult;
