@@ -5,7 +5,7 @@ Diffing, patching, merging, and revision-control for spreadsheets and
 databases.  Focused on keeping data in sync across different 
 technologies (e.g. a MySQL table and an Excel spreedsheet).
 
-* For a stripped-down js version see http://paulfitz.github.com/coopyhx/
+* For a stripped-down js/py/rb/php version see http://paulfitz.github.io/daff/
 * See BUILD.md for information on building the programs.
   - Summary: CMake
 * See SERVE.txt for server-side information.
