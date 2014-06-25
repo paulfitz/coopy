@@ -84,3 +84,12 @@ Status
 COOPY targets a stable, fully-documented release at version 1.0.  At 
 the time of writing, the version number is just beyond 0.5.  It is 
 about half way there.
+
+Apparently COOPY is the closest thing right now to git for data:
+
+ * http://opendata.stackexchange.com/questions/748/is-there-a-git-for-data
+
+But if you deal with big data sets and don't care so much about diffs
+and patches and whatnot, you may want to look at `dat`:
+
+ * https://github.com/maxogden/dat
