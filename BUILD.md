@@ -7,31 +7,33 @@ Building the essentials on Linux:
 
     mkdir build && cd build && cmake .. && make
 
-Use the CMake GUI to enable optional support for various kinds of spreadsheets or databases.  
+Use the CMake GUI to enable optional support for various kinds of spreadsheets or databases.  In the build directory, do:
+
+    ccmake .
+
+and look for the options starting with `USE_*`
 
 Homebrew formula
 ----------------
 
 On OSX there's a [homebrew formula available](https://github.com/paulfitz/homebrew/blob/coopy/Library/Formula/coopy.rb) that includes most commonly asked for dependencies.
 
-Bindings
----------
-
-To make python/ruby bindings, first install the development 
-libraries for the language of interest (a -dev or -devel package usually). 
-Then set the environment variable Coopy_DIR to the directory in which Coopy is built, and Coopy_ROOT to the source directory, and do something like:
-
-    cd $Coopy_ROOT
-    mkdir -p build/python
-    cd build/python
-    cmake -DCREATE_PYTHON=TRUE ../../bindings
-    make
-    python example.py
-
 Gnumeric support on Linux
 -------------------------
 
-Coopy links Gnumeric's core library for reading/writing spreadsheet files.  At the time of writing, that library is not exposed in a very friendly way in most package managers.  On OSX, no problem, the homebrew script given earlier works fine. On Linux, a few more steps are needed.
+Install gnumeric, `apt-get install gnumeric` or similar
+
+* When compiling Coopy, turn on the `USE_GNUMERIC` flag with `ccmake .` in
+  the build directory.
+
+That's it!  Maybe.
+
+Coopy links Gnumeric's core library for reading/writing spreadsheet
+files.  ~~At the time of writing, that library is not exposed in a very
+friendly way in most package managers.~~ The library is now exposed
+in several package managers and in recent Debian.  If you are on
+an older Ubuntu/Debian distribution, you may need to jump through the
+following hoops.
 
 * Install gnumeric, ideally through your package manager (e.g.
   `apt-get install gnumeric`)
@@ -135,3 +137,18 @@ Just tell Coopy about it:
 * Cross-compile Coopy (see scripts/make_packages.sh mingw for tips)
 * You may need to force pkgconfig to look at gnumeric's libraries (`PKG_CONFIG_PATH=/home/paulfitz/cvs/gnumeric/gnumeric-1.10.16/tools/win32/release/deploy/lib/pkgconfig/ cmake .`)
 * When testing binaries, you'll need to get the DLLs in release/deploy/bin into your path (or just copy them to Coopy's bin directory).
+
+Bindings
+---------
+
+To make python/ruby bindings, first install the development 
+libraries for the language of interest (a -dev or -devel package usually). 
+Then set the environment variable Coopy_DIR to the directory in which Coopy is built, and Coopy_ROOT to the source directory, and do something like:
+
+    cd $Coopy_ROOT
+    mkdir -p build/python
+    cd build/python
+    cmake -DCREATE_PYTHON=TRUE ../../bindings
+    make
+    python example.py
+
