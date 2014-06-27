@@ -13,6 +13,14 @@ technologies (e.g. a MySQL table and an Excel spreedsheet).
 * See COPYING.txt for copyright and license information.
   - Summary: GPL.  Relicensing of library core planned for version 1.0.
 
+Help!
+-----
+
+* OSX user? Would you be willing to test new versions of a homebrew formula for Coopy?
+* Windows user? Would you be willing to test new releases of Coopy?
+
+Please get in touch and help a lazy linux guy stay in his comfort zone. [Chime in on an issue](https://github.com/paulfitz/coopy/issues/2) about this, or I'm [@fitzyfitzyfitzy](https://twitter.com/) on twitter.
+
 Example uses
 ------------
 * Enumerating differences between any pairwise combination of CSV files,
