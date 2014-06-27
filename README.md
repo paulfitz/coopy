@@ -5,21 +5,41 @@ Diffing, patching, merging, and revision-control for spreadsheets and
 databases.  Focused on keeping data in sync across different 
 technologies (e.g. a MySQL table and an Excel spreedsheet).
 
-* For a stripped-down js/py/rb/php version see http://paulfitz.github.io/daff/
-* See BUILD.md for information on building the programs.
-  - Summary: CMake
-* See SERVE.txt for server-side information.
-  - Summary: fossil
-* See COPYING.txt for copyright and license information.
-  - Summary: GPL.  Relicensing of library core planned for version 1.0.
+The main programs
+-----------------
+* [`ssdiff`](http://share.find.coop/doc/ssdiff.html) - generate diffs for spreadsheets and databases.
+* [`sspatch`](http://share.find.coop/doc/sspatch.html) - apply patches to spreadsheets and databases.
+* [`ssmerge`](http://share.find.coop/doc/ssmerge.html) - merge tables with a common ancestor.
+* [`ssformat`](http://share.find.coop/doc/ssformat.html) - convert tables from one format to another.
+* [`ssfossil`](http://share.find.coop/doc/ssfossil.html) - the fossil DVCS, modified to use tabular diffs
+  rather than line-based diffs. You can also [work with git](http://share.find.coop/doc/tutorial_git.html).
+  If you use github, you may want to check out [CSVHub](http://theodi.org/blog/csvhub-github-diffs-for-csv-files),
+  which uses a simplified version of `ssdiff` called [`daff`](http://paulfitz.github.io/daff/) to show pretty
+  data diffs on github.
+* [`coopy`](http://share.find.coop/doc/coopy.html) - a graphical interface to ssfossil.
 
-Help!
------
+Supported data formats
+----------------------
+* CSV (comma separated values)
+* SSV (semicolon separated values)
+* TSV (tab separated values)
+* Excel formats (via gnumeric's libspreadsheet)
+* Other spreadsheet formats (via gnumeric's libspreadsheet)
+* Sqlite
+* MySQL
+* Microsoft Access format (via mdbtools - READ ONLY, or via jackcess for read/write)
+* A JSON representation of tables.
+* A custom "CSVS" format that is a minimal extension of CSV
+  to handle multiple sheets in a single file, allow
+  for unambiguous header rows, and have a clear representation
+  of NULL.
 
-* OSX user? Would you be willing to test new versions of a homebrew formula for Coopy?
-* Windows user? Would you be willing to test new releases of Coopy?
-
-Please get in touch and help a lazy linux guy stay in his comfort zone. [Chime in on an issue](https://github.com/paulfitz/coopy/issues/2) about this, or I'm [@fitzyfitzyfitzy](https://twitter.com/) on twitter.
+Supported diff formats
+----------------------
+* Highlighter diff format, see spec at http://dataprotocols.org/tabular-diff-format/
+* TDIFF (format developed with Joe Panico of diffkit.org)
+* DTBL (csv-compatible format, COOPY specific, may be dropped)
+* SQL (Sqlite flavor)
 
 Example uses
 ------------
@@ -34,37 +54,6 @@ Example uses
   Benefits: revision history, offline editing in tool of choice,
   self-hosting possible.
 
-The main programs
------------------
-* ssdiff - generate diffs for spreadsheets and databases.
-* sspatch - apply patches to spreadsheets and databases.
-* ssmerge - merge tables with a common ancestor.
-* ssfossil - the fossil DVCS, modified to use tabular diffs
-  rather than line-based diffs.
-* coopy - a graphical interface to ssfossil.
-
-Supported data formats
-----------------------
-* CSV (comma separated values)
-* SSV (semicolon separated values)
-* TSV (tab separated values)
-* Excel formats (via gnumeric's libspreadsheet)
-* Other spreadsheet formats (via gnumeric's libspreadsheet)
-* Sqlite
-* MySQL
-* Microsoft Access format (via mdbtools - READ ONLY)
-* A JSON representation of tables.
-* A custom "CSVS" format that is a minimal extension of CSV
-  to handle multiple sheets in a single file, allow
-  for unambiguous header rows, and have a clear representation
-  of NULL.
-
-Supported diff formats
-----------------------
-* TDIFF (format developed with Joe Panico of diffkit.org)
-* DTBL (csv-compatible format, COOPY specific, may be dropped)
-* SQL (Sqlite flavor)
-
 Features
 --------
 * By default, when comparing tables, no initial assumption is
@@ -75,6 +64,7 @@ Features
   to use certain columns as a trusted identity for rows (a key).
 * Respects row order for table representations for which row
   order is meaningful (spreadsheets, csv).
+* By default, COOPY assumes your data is very messy.  If it is clean, you can get much faster results by tweaking some options.
 
 Algorithm
 ---------
@@ -86,6 +76,23 @@ column assignments are optimized and ordered using a Viterbi lattice.
 Once the pairwise relationships between each descendent and its
 ancestor are known, differences are computed, and a good merged
 ordering is determined (again using the Viterbi algorithm).
+
+Building
+--------
+* For a stripped-down js/py/rb/php version see http://paulfitz.github.io/daff/
+* See BUILD.md for information on building the programs.
+  - Summary: CMake
+* See SERVE.txt for server-side information.
+  - Summary: fossil
+* See COPYING.txt for copyright and license information.
+  - Summary: GPL.  Relicensing of library core planned for version 1.0.
+
+Help!
+-----
+* OSX user? Would you be willing to test new versions of a homebrew formula for Coopy?
+* Windows user? Would you be willing to test new releases of Coopy?
+
+Please get in touch and help a lazy linux guy stay in his comfort zone. [Chime in on an issue](https://github.com/paulfitz/coopy/issues/2) about this, or I'm [@fitzyfitzyfitzy](https://twitter.com/) on twitter.
 
 Status
 ------
