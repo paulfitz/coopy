@@ -1,3 +1,9 @@
+
+set(DESTINATION_LIB DESTINATION lib)
+if (MINGW)
+  set(DESTINATION_LIB RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
+endif ()
+
 option(PROFILING "Turn on profiling" OFF)
 IF (PROFILING)
 #  FOREACH(target ssformat ssmerge csv sheet coopy_full remotesql remotesql_sqlxx sheet_core)

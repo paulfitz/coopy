@@ -15,4 +15,4 @@ ADD_EXECUTABLE(widesheet widesheet.cpp)
 TARGET_LINK_LIBRARIES(widesheet coopy_widesheet)
 
 INSTALL(TARGETS widesheet COMPONENT ${BIGBIN} DESTINATION bin)
-install(TARGETS coopy_widesheet COMPONENT ${BASELIB} DESTINATION lib)
+install(TARGETS coopy_widesheet COMPONENT ${BASELIB} ${DESTINATION_LIB})

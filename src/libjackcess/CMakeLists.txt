@@ -36,10 +36,10 @@ if (USE_JACKCESS)
   include_directories(${CMAKE_BINARY_DIR}/gcjgen)
 
   add_library(coopy_jackcess_main ${js})
-  install(TARGETS coopy_jackcess_main COMPONENT ${BASELIB} DESTINATION lib)
+  install(TARGETS coopy_jackcess_main COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
   add_library(coopy_jackcess_res ${js_res_abs})
-  install(TARGETS coopy_jackcess_res COMPONENT ${BASELIB} DESTINATION lib)
+  install(TARGETS coopy_jackcess_res COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
   #add_library(coopy_jackcess jackcess.java ${js} ${CMAKE_BINARY_DIR}/jackcess.h ${js_res_abs2})
 
@@ -53,12 +53,12 @@ if (USE_JACKCESS)
     )
   target_link_libraries(coopy_jackcess coopy_jackcess_main 
     coopy_jackcess_res coopy_core)
-  install(TARGETS coopy_jackcess COMPONENT ${BASELIB} DESTINATION lib)
+  install(TARGETS coopy_jackcess COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
   add_executable(test_jackcess test_jackcess.cpp)
   target_link_libraries(test_jackcess coopy_jackcess)
 
-  #install(TARGETS coopy_socialcalc COMPONENT ${BASELIB} DESTINATION lib)
+  #install(TARGETS coopy_socialcalc COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
 endif ()
 

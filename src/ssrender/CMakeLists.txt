@@ -11,7 +11,7 @@ ADD_CUSTOM_COMMAND(
 )
 
 ADD_LIBRARY(coopy_render include/coopy/CsvRender.h CsvRender.cpp ${CMAKE_CURRENT_BINARY_DIR}/csv2html_css.cpp)
-install(TARGETS coopy_render COMPONENT ${BASELIB} DESTINATION lib)
+install(TARGETS coopy_render COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
 
 IF (COMPILE_PLAIN_EXECUTABLES)

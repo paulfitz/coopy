@@ -76,7 +76,7 @@ add_library(coopy_fossil ${GEN_SRCS} ${GEN_HDRS}
   src/csv_hooks.cpp 
   src/ssfossil.h src/ssfossil.cpp
 )
-install(TARGETS coopy_fossil COMPONENT ${BASELIB} DESTINATION lib)
+install(TARGETS coopy_fossil COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
 target_link_libraries(coopy_fossil z)
 if (OPENSSL_FOUND)

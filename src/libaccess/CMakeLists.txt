@@ -16,7 +16,7 @@ if (USE_ACCESS)
   add_library(coopy_access AccessTextBook.cpp AccessSheet.cpp)
   target_link_libraries(coopy_access coopy_core)
   target_link_libraries(coopy_access ${Mdbtools_LIBRARIES} ${GLIB2_LIBRARIES})
-  install(TARGETS coopy_access COMPONENT ${BASELIB} DESTINATION lib)
+  install(TARGETS coopy_access COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
   add_executable(test_access test_access.cpp)
   target_link_libraries(test_access coopy_access)

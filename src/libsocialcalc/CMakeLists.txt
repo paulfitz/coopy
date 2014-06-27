@@ -42,7 +42,7 @@ if (USE_SOCIALCALC)
   add_executable(test_socialcalc SocialCalc.cpp)
   target_link_libraries(test_socialcalc coopy_socialcalc)
 
-  install(TARGETS coopy_socialcalc COMPONENT ${BASELIB} DESTINATION lib)
+  install(TARGETS coopy_socialcalc COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
 endif ()
 

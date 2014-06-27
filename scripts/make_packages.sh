@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ "k$1" = "k" ]; then
     echo "Call with any of: mingw linux osx doc src"
     exit 1
@@ -20,6 +22,7 @@ while [ ! "k$1" = "k" ]; do
 	echo "  MINGW_REPO=/home/paulfitz/cvs/coopy/"
 	echo "  MINGW_BUILD=/home/paulfitz/cvs/coopy/mingw"
 	echo "  MINGW_PKG_CONFIG_PATH=/home/paulfitz/cvs/gnumeric/git/gnumeric/tools/win32/release/deploy/lib/pkgconfig/"
+	echo "  MINGW_GNUMERIC_ROOT=/home/paulfitz/cvs/gnumeric/git/gnumeric/tools/win32/release/deploy/"
 	echo "  LINUX_CHROOT=/scratch/debian-etch-i386"
 	echo "  LINUX_CHROOT_REPO=/home/paulfitz/coopy"
 	echo "  LINUX_CHROOT_BUILD=/home/paulfitz/coopy_build"
@@ -37,16 +40,18 @@ while [ ! "k$1" = "k" ]; do
     
     if [ "k$1" = "kmingw" ]; then
 	echo "Working on MINGW"
+	mkdir -p $MINGW_REPO
 	cd $MINGW_REPO
 	export LDFLAGS="-L$HOME/mingw/install/lib"
 	export CFLAGS="-I$HOME/mingw/install/include"
-	export PKG_CONFIG=$MINGW_PKG_CONFIG_PATH
+	export PKG_CONFIG_PATH=$MINGW_PKG_CONFIG_PATH
+	export PKG_CONFIG_LIBDIR=/sabotage/this/does/not/exist
 	# git pull || exit 1
 	cd $MINGW_BUILD || (
 	    echo "Creating $MINGW_BUILD"
 	    mkdir -p $MINGW_BUILD
 	    cd $MINGW_BUILD || exit 1
-	    cmake $cmake_opts_win -DCMAKE_TOOLCHAIN_FILE=$MINGW_REPO/conf/mingwin.cmake $MINGW_REPO || exit 1
+	    cmake $cmake_opts_win -DCMAKE_TOOLCHAIN_FILE=$MINGW_REPO/conf/mingwin.cmake -DGNUMERIC_ROOT=$MINGW_GNUMERIC_ROOT -DINSTALL_GNUMERIC=TRUE $MINGW_REPO || exit 1
 	)
 	cd $MINGW_BUILD || exit 1
 	cmake $cmake_opts_win . || exit 1

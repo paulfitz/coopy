@@ -9,7 +9,7 @@ if (USE_JSON)
   source_group("Header Files" FILES ${folder_header})
   
   add_library(coopy_jsoncpp ${folder_source} ${folder_header})
-  install(TARGETS coopy_jsoncpp COMPONENT ${BASELIB} DESTINATION lib)
+  install(TARGETS coopy_jsoncpp COMPONENT ${BASELIB} ${DESTINATION_LIB})
   
   add_executable(test_jsoncpp test_jsoncpp.cpp)
   target_link_libraries(test_jsoncpp coopy_jsoncpp)

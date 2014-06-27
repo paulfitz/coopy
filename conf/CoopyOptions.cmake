@@ -13,6 +13,11 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 message(STATUS "Libraries are placed in ${LIBRARY_OUTPUT_PATH}")
 message(STATUS "Executables are placed in ${EXECUTABLE_OUTPUT_PATH}")
+
+if (MINGW)
+  SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+endif ()
+
 make_directory(${LIBRARY_OUTPUT_PATH})
 make_directory(${EXECUTABLE_OUTPUT_PATH})
 
