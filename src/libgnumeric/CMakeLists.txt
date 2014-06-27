@@ -26,7 +26,7 @@ if (USE_GNUMERIC)
     include_directories(${GDK_PIXBUF_INCLUDE_DIRS})
     pkg_search_module (GNOMEPRINTUI libgnomeprintui-2.2)
     # independent spreadsheet library exists now, yay!
-    pkg_search_module (SPREADSHEET libspreadsheet-1.10)
+    pkg_search_module (SPREADSHEET libspreadsheet-1.14 libspreadsheet-1.13 libspreadsheet-1.12 libspreadsheet-1.11 libspreadsheet-1.10)
     include_directories(${SPREADSHEET_INCLUDE_DIRS})
   else ()
     link_libraries(goffice-0.8 gobject-2.0)
