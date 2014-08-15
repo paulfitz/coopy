@@ -53,6 +53,7 @@ if (USE_MYSQL OR USE_POSTGRES OR USE_ODBC)
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/sqlxx)
   add_library(coopy_remotesql_sqlxx sqlxx/sqlxx.cc sqlxx/strutilsxx.cc)
+  export(TARGETS coopy_remotesql_sqlxx APPEND FILE ${COOPY_DEPENDENCIES})
   install(TARGETS coopy_remotesql_sqlxx COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
   include_directories(${CMAKE_SOURCE_DIR}/src/libcoopy_core/include)
@@ -63,6 +64,7 @@ if (USE_MYSQL OR USE_POSTGRES OR USE_ODBC)
     include/coopy/RemoteSqlSheet.h
     include/coopy/RemoteSqlTextBook.h)
   target_link_libraries(coopy_remotesql coopy_remotesql_sqlxx coopy_core)
+  export(TARGETS coopy_remotesql APPEND FILE ${COOPY_DEPENDENCIES})
   install(TARGETS coopy_remotesql COMPONENT ${BASELIB} ${DESTINATION_LIB})
 
   add_executable(test_sqlxx sqlxx/test.cpp)
