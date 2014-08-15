@@ -149,33 +149,33 @@ MergeFrame *CoopyApp::store_mframe = NULL;
 CoopyApp *CoopyApp::store_app = NULL;
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] = {
-    { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters") },
-    { wxCMD_LINE_SWITCH, wxT("H"), wxT("help-dox"), wxT("prepare doxygen help") },
+    { wxCMD_LINE_SWITCH, wxT_2("h"), wxT_2("help"), wxT_2("displays help on the command line parameters") },
+    { wxCMD_LINE_SWITCH, wxT_2("H"), wxT_2("help-dox"), wxT_2("prepare doxygen help") },
     //wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-    { wxCMD_LINE_SWITCH, wxT("g"), wxT("gui"), wxT("force show GUI") },
-    { wxCMD_LINE_SWITCH, wxT("n"), wxT("new"), wxT("new repository") },
-    { wxCMD_LINE_OPTION, wxT("c"), wxT("clone"), wxT("clone repository"),
+    { wxCMD_LINE_SWITCH, wxT_2("g"), wxT_2("gui"), wxT_2("force show GUI") },
+    { wxCMD_LINE_SWITCH, wxT_2("n"), wxT_2("new"), wxT_2("new repository") },
+    { wxCMD_LINE_OPTION, wxT_2("c"), wxT_2("clone"), wxT_2("clone repository"),
       wxCMD_LINE_VAL_STRING, 0  },
-    { wxCMD_LINE_SWITCH, wxT("v"), wxT("verbose"), wxT("show debug information") },
-    { wxCMD_LINE_SWITCH, wxT("l"), wxT("silent"), wxT("keep it quiet") },
-    //{ wxCMD_LINE_OPTION, wxT("r"), wxT("res"), wxT("set resource location"),
+    { wxCMD_LINE_SWITCH, wxT_2("v"), wxT_2("verbose"), wxT_2("show debug information") },
+    { wxCMD_LINE_SWITCH, wxT_2("l"), wxT_2("silent"), wxT_2("keep it quiet") },
+    //{ wxCMD_LINE_OPTION, wxT_2("r"), wxT_2("res"), wxT_2("set resource location"),
     //wxCMD_LINE_VAL_STRING, 0  },
-    { wxCMD_LINE_SWITCH, wxT("p"), wxT("pull"), wxT("pull in data") },
-    { wxCMD_LINE_SWITCH, wxT("s"), wxT("push"), wxT("push out data") },
-    { wxCMD_LINE_OPTION, wxT("k"), wxT("key"), wxT("key for adding/export"),
+    { wxCMD_LINE_SWITCH, wxT_2("p"), wxT_2("pull"), wxT_2("pull in data") },
+    { wxCMD_LINE_SWITCH, wxT_2("s"), wxT_2("push"), wxT_2("push out data") },
+    { wxCMD_LINE_OPTION, wxT_2("k"), wxT_2("key"), wxT_2("key for adding/export"),
       wxCMD_LINE_VAL_STRING, 0  },
-    { wxCMD_LINE_OPTION, wxT("r"), wxT("repo"), wxT("repository link"),
+    { wxCMD_LINE_OPTION, wxT_2("r"), wxT_2("repo"), wxT_2("repository link"),
       wxCMD_LINE_VAL_STRING, 0  },
-    { wxCMD_LINE_OPTION, wxT("a"), wxT("add"), wxT("add a spreadsheet/database"),
+    { wxCMD_LINE_OPTION, wxT_2("a"), wxT_2("add"), wxT_2("add a spreadsheet/database"),
       wxCMD_LINE_VAL_STRING, 0  },
-    { wxCMD_LINE_OPTION, wxT("e"), wxT("export"), wxT("export a spreadsheet/database"),
+    { wxCMD_LINE_OPTION, wxT_2("e"), wxT_2("export"), wxT_2("export a spreadsheet/database"),
       wxCMD_LINE_VAL_STRING, 0,
     },
-    { wxCMD_LINE_OPTION, wxT("m"), wxT("message"), wxT("message for log"),
+    { wxCMD_LINE_OPTION, wxT_2("m"), wxT_2("message"), wxT_2("message for log"),
       wxCMD_LINE_VAL_STRING, 0  },
-    { wxCMD_LINE_PARAM, NULL, NULL, wxT("input file"), wxCMD_LINE_VAL_STRING,
+    { wxCMD_LINE_PARAM, NULL, NULL, wxT_2("input file"), wxCMD_LINE_VAL_STRING,
       wxCMD_LINE_PARAM_OPTIONAL },
-    { wxCMD_LINE_SWITCH, wxT("d"), wxT("delay"), wxT("add fossil delay") },
+    { wxCMD_LINE_SWITCH, wxT_2("d"), wxT_2("delay"), wxT_2("add fossil delay") },
     { wxCMD_LINE_NONE },
 };
 
@@ -1081,12 +1081,9 @@ bool CoopyFrame::OnInit() {
         askPath = false;
     } else {
 #ifdef __LINUX__
-        //dir_box->SetPath(::wxGetCwd());
         dir_box_path = conv(::wxGetCwd());
 #else
-        wxStandardPaths sp;
-        //dir_box->SetPath(sp.GetDocumentsDir());
-        dir_box_path = conv(sp.GetDocumentsDir());
+        dir_box_path = conv(wxStandardPaths::Get().GetDocumentsDir());
 #endif
     }
 
