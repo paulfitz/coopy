@@ -37,8 +37,6 @@
 #include "expr.h"
 #include "expr-impl.h"
 
-#include "gnumeric-gconf.h"
-
 #include "coopy/gnumeric_link.h"
 
 #ifndef GNM_VERSION_FULL
@@ -51,6 +49,10 @@
 #  elif GNM_VERSION_MINOR <= 10  // this may be inaccurate
 #    define OLD_GNUMERIC_2
 #  endif
+#endif
+
+#ifdef OLD_GNUMERIC_2
+#include "gnumeric-gconf.h"
 #endif
 
 #ifdef OLD_GNUMERIC
