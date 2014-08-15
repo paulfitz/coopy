@@ -77,6 +77,20 @@ Once the pairwise relationships between each descendent and its
 ancestor are known, differences are computed, and a good merged
 ordering is determined (again using the Viterbi algorithm).
 
+Installing on OSX
+-----------------
+* Use homebrew.
+* Do `brew tap paulfitz/data` to get a formula for coopy.
+* Then `brew install coopy` should work fine.
+
+Installing on Windows
+---------------------
+* Get an installer from the [releases page](https://github.com/paulfitz/coopy/releases).
+
+Installing on Linux
+-------------------
+* Sorry, this is where I develop myself, but I don't have an installer. Building is easy though!
+
 Building
 --------
 * For a stripped-down js/py/rb/php version see http://paulfitz.github.io/daff/
@@ -86,13 +100,6 @@ Building
   - Summary: fossil
 * See COPYING.txt for copyright and license information.
   - Summary: GPL.  Relicensing of library core planned for version 1.0.
-
-Help!
------
-* OSX user? Would you be willing to test new versions of a homebrew formula for Coopy?
-* Windows user? Would you be willing to test new releases of Coopy?
-
-Please get in touch and help a lazy linux guy stay in his comfort zone. [Chime in on an issue](https://github.com/paulfitz/coopy/issues/2) about this, or I'm [@fitzyfitzyfitzy](https://twitter.com/) on twitter.
 
 Status
 ------
