@@ -37,10 +37,20 @@
 #include "expr.h"
 #include "expr-impl.h"
 
+#include "gnumeric-gconf.h"
+
 #include "coopy/gnumeric_link.h"
 
 #ifndef GNM_VERSION_FULL
 #define OLD_GNUMERIC
+#endif
+
+#if GNM_VERSION_MAJOR <= 12
+#  if GNM_VERSION_MAJOR < 12
+#    define OLD_GNUMERIC_2
+#  elif GNM_VERSION_MINOR <= 10  // this may be inaccurate
+#    define OLD_GNUMERIC_2
+#  endif
 #endif
 
 #ifdef OLD_GNUMERIC
@@ -61,6 +71,14 @@
 #define DO_UNDO NULL
 #define BEGIN_UNDO
 #define END_UNDO
+#endif
+
+#ifdef OLD_GNUMERIC
+#define OLD_GNUMERIC_1_OR_2
+#endif
+
+#ifdef OLD_GNUMERIC_2
+#define OLD_GNUMERIC_1_OR_2
 #endif
 
 static GOErrorInfo	*plugin_errs = NULL;
@@ -122,10 +140,13 @@ GnumericWorkbookPtr gnumeric_load(const char *fname) {
   char *uri = go_filename_to_uri (fname);
   //printf("Have uri %s\n", uri);
 
+#ifdef OLD_GNUMERIC_2
+  WorkbookView *wbv = wb_view_new_from_uri (uri, NULL,
+					    io_context, NULL);
+#else
   WorkbookView *wbv = workbook_view_new_from_uri (uri, NULL,
 						  io_context, NULL);
-  //WorkbookView *wbv = wb_view_new_from_uri (uri, NULL,
-  //					    io_context, NULL);
+#endif
   g_free (uri);
   //printf("Have workbook view\n");
   g_object_unref (io_context);
@@ -249,8 +270,11 @@ GnumericSheetPtr gnumeric_add_sheet(GnumericWorkbookPtr workbook,
 
 int gnumeric_sheet_get_size(GnumericSheetPtr sheet, int *w, int *h) {
   Sheet *s = (Sheet *)sheet;
-  //GnmSheetSize const *size = gnm_sheet_get_size(sheet);
+#ifdef OLD_GNUMERIC_2
+  GnmRange range = sheet_get_extent(s,FALSE);
+#else
   GnmRange range = sheet_get_extent(s,FALSE,TRUE);
+#endif
   if (w!=NULL) *w = range.end.col+1;
   if (h!=NULL) *h = range.end.row+1;
 }
@@ -665,16 +689,22 @@ int gnumeric_style_set_font_bold(GnumericStylePtr style, int flag) {
 
 int gnumeric_style_set_font_color(GnumericStylePtr style, 
 				  int r16, int g16, int b16) {
+#ifdef OLD_GNUMERIC_2
+  GnmColor *color = style_color_new_i16(r16,g16,b16);
+#else
   GnmColor *color = gnm_color_new_rgba16(r16,g16,b16,0);
-  //GnmColor *color = style_color_new_i16(r16,g16,b16);
+#endif
   gnm_style_set_font_color((GnmStyle*)style,color);
   return 0;
 }
 
 int gnumeric_style_set_back_color(GnumericStylePtr style, 
 				  int r16, int g16, int b16) {
+#ifdef OLD_GNUMERIC_2
+  GnmColor *color = style_color_new_i16(r16,g16,b16);
+#else
   GnmColor *color = gnm_color_new_rgba16(r16,g16,b16,0);
-  //GnmColor *color = style_color_new_i16(r16,g16,b16);
+#endif
   gnm_style_set_back_color((GnmStyle*)style,color);
   gnm_style_set_pattern((GnmStyle*)style,1);
   return 0;
