@@ -13,6 +13,9 @@ if (OPENSSL_FOUND)
   include_directories(${OPENSSL_INCLUDE_DIR})
 endif ()
 
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIR})
+
 add_executable(makeheaders fossil/src/makeheaders.c)
 add_executable(translate fossil/src/translate.c)
 add_executable(mkindex fossil/src/mkindex.c)
