@@ -2,7 +2,9 @@
 set(DESTINATION_LIB DESTINATION lib)
 if (MINGW)
   set(DESTINATION_LIB RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
+  add_definitions(-DNEED_UNIMAIN) # unicode hack
 endif ()
+include_directories(unicode)
 
 option(PROFILING "Turn on profiling" OFF)
 IF (PROFILING)

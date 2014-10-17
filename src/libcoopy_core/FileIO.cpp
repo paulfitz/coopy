@@ -2,6 +2,7 @@
 #include <coopy/FileIO.h>
 
 #include <string.h>
+#include <coopy/unistdio.h>
 
 using namespace coopy::store;
 using namespace std;
@@ -25,7 +26,7 @@ bool FileIO::open(const char *src, const Property& config) {
     fp = stdin;
     need_close = false;
   } else {
-    fp = fopen(src,"rb");
+    fp = uni_fopen(src,"rb");
     if (fp!=NULL) {
       need_close = true;
     }
@@ -115,3 +116,16 @@ bool FileIO::openAndWrite(const std::string& txt, const Property& config) {
 
   return true;
 }
+
+
+
+#ifdef NEED_UNIMAIN
+#include <windows.h>
+FILE *uni_fopen(const char *path, const char *mode) {
+    wchar_t wPath[MAX_PATH];
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, MAX_PATH);
+    wchar_t wMode[MAX_PATH];
+    MultiByteToWideChar(CP_UTF8, 0, mode, -1, wMode, MAX_PATH);
+    return _wfopen(wPath,wMode);
+}
+#endif
