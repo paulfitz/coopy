@@ -22,7 +22,7 @@ static void show(const wxString& view) {
     wxString view2 = wxT("file://") + view;
     ::wxLaunchDefaultBrowser(view2);
 #else
-    ::wxLaunchDefaultBrowser(view);
+    ::wxLaunchDefaultApplication(view);
 #endif
 }
 
