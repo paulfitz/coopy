@@ -23,6 +23,9 @@
 #include <iostream>
 #include <algorithm>
 #ifdef USE_MYSQL
+#ifdef _WIN32
+#include <winsock.h>
+#endif
 #include <mysql.h>
 #endif
 #ifdef USE_POSTGRES
