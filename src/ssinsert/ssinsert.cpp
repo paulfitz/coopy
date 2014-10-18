@@ -10,6 +10,7 @@ extern "C" {
 using namespace coopy::store;
 using namespace std;
 
+#include <coopy/unimain.h>
 int main(int argc, char *argv[]) {
   if (argc<4) {
     printf("Call as:\n");

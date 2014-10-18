@@ -6,6 +6,7 @@
 using namespace std;
 using namespace coopy::app;
 
+#include <coopy/unimain.h>
 int main(int argc, char *argv[]) {
   Options opt("ssmerge");
   int r = opt.apply(argc,argv);

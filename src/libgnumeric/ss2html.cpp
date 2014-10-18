@@ -33,6 +33,7 @@ string ingest(const char *fname, string def) {
     return result;
 }
 
+#include <coopy/unimain.h>
 int main(int argc, char *argv[]) {
   bool compare = false;
   while (argc>1) {

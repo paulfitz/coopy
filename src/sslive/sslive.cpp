@@ -21,6 +21,7 @@ using namespace yarp::os;
 
 using namespace std;
 
+#include <coopy/unimain.h>
 int main(int argc, char *argv[]) {
   bool verbose = false;
   bool help = false;

@@ -5,6 +5,7 @@
 using namespace coopy::app;
 using namespace std;
 
+#include <coopy/unimain.h>
 int main(int argc, char *argv[]) {
   Options opt("sspatch");
   int r = opt.apply(argc,argv);

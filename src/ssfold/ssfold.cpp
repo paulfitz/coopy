@@ -11,6 +11,7 @@ using namespace coopy::store;
 using namespace coopy::fold;
 using namespace std;
 
+#include <coopy/unimain.h>
 int main(int argc, char *argv[]) {
   std::string recipe_file = "";
   std::string table_name = "";
