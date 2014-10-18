@@ -2,6 +2,7 @@
 #include <coopy/CsvTextBook.h>
 #include <coopy/CsvFile.h>
 #include <coopy/FormatSniffer.h>
+#include <coopy/unistdio.h>
 
 #include <algorithm>
 
@@ -107,7 +108,7 @@ bool CsvTextBook::write(const char *fname, TextBook *book, bool compact,
 	  if (string(fname)=="-") {
 	    fp = stdout;
 	  } else {
-	    fp = fopen(fname,(i>0)?"ab":"wb");
+	    fp = uni_fopen(fname,(i>0)?"ab":"wb");
 	    if (!fp) {
 	      fprintf(stderr,"CsvTextBook: could not open %s\n", fname);
 	      return false;

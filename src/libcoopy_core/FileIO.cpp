@@ -12,7 +12,7 @@ bool FileIO::openForWrite(const char *dest, const Property& config) {
     fp = stdout;
     need_close = false;
   } else {
-    fp = fopen(dest,"wb");
+    fp = uni_fopen(dest,"wb");
     if (fp!=NULL) {
       need_close = true;
     }
@@ -101,7 +101,7 @@ bool FileIO::openAndWrite(const std::string& txt, const Property& config) {
     fp = stdout;
     need_close = false;
   } else {
-    fp = fopen(name.c_str(),"wb");
+    fp = uni_fopen(name.c_str(),"wb");
     if (!fp) return false;
     need_close = true;
   }

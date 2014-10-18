@@ -10,6 +10,7 @@
 #include <coopy/MergeOutputTdiff.h>
 #include <coopy/BookCompare.h>
 #include <coopy/SheetPatcher.h>
+#include <coopy/unistdio.h>
 
 #ifndef WIN32
 #include <unistd.h>
@@ -303,7 +304,7 @@ static void start_output2(string output, CompareFlags& flags) {
     flags.out = stdout;
     return;
   }
-  FILE *fout = fopen(output.c_str(),"wb");
+  FILE *fout = uni_fopen(output.c_str(),"wb");
   if (fout==NULL) {
     fprintf(stderr,"Could not open %s for writing\n", output.c_str());
     exit(1);

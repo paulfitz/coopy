@@ -11,6 +11,7 @@
 #include <coopy/MergeOutputNovel.h>
 #include <coopy/MergeOutputEditList.h>
 #include <coopy/SheetPatcher.h>
+#include <coopy/unistdio.h>
 
 #include <algorithm>
 
@@ -107,7 +108,7 @@ bool Patcher::startOutput(const std::string& output, CompareFlags& flags) {
     flags.out = stdout;
     return true;
   }
-  FILE *fout = fopen(output.c_str(),"wb");
+  FILE *fout = uni_fopen(output.c_str(),"wb");
   if (fout==NULL) {
     fprintf(stderr,"Could not open %s for writing\n", output.c_str());
     exit(1);
@@ -130,9 +131,9 @@ bool Patcher::stopOutput(const std::string& output, CompareFlags& flags) {
 bool Patcher::copyFile(const char *src, const char *dest) {
   FILE *fin = NULL;
   FILE *fout = NULL;
-  fin = fopen(src,"rb");
+  fin = uni_fopen(src,"rb");
   if (fin==NULL) return false;
-  fout = fopen(dest,"wb");
+  fout = uni_fopen(dest,"wb");
   if (fout==NULL) {
     fclose(fin);
     return false;

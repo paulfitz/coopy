@@ -4,6 +4,7 @@
 #include <coopy/CsvWrite.h>
 #include <coopy/CsvSheet.h>
 #include <coopy/NameSniffer.h>
+#include <coopy/unistdio.h>
 
 using namespace coopy::store;
 using namespace coopy::cmp;
@@ -31,7 +32,7 @@ static int write(const DataSheet& src, const Property& config,
     } else {
       bool append = config.get("append",
 			       PolyValue::makeBoolean(false)).asBoolean();
-      fp = fopen(fname.c_str(),append?"ab":"wb");
+      fp = uni_fopen(fname.c_str(),append?"ab":"wb");
       if (!fp) {
 	fprintf(stderr,"CsvFile: could not open %s\n", fname.c_str());
 	exit(1);

@@ -6,6 +6,7 @@
 #include <set>
 #include <string>
 
+#include <coopy/unistdio.h>
 #include <coopy/Pool.h>
 
 namespace coopy {
@@ -47,7 +48,7 @@ public:
       out = stdout;
     }
     if (fname==NULL) return true;
-    out = fopen(fname,"wb");
+    out = uni_fopen(fname,"wb");
     return (out!=NULL);
   }
 };

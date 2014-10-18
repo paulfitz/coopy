@@ -6,6 +6,7 @@
 
 #include <sqlite3.h>
 #include <stdio.h>
+#include <coopy/unistdio.h>
 
 #define WANT_VECTOR2STRING
 #include <coopy/Stringer.h>
@@ -83,7 +84,7 @@ void SqliteTextBook::clear() {
   implementation_count.clear();
   if (hold_temp!="") {
     if (postwrite) {
-      FILE *fin = fopen(hold_temp.c_str(),"rb");
+      FILE *fin = uni_fopen(hold_temp.c_str(),"rb");
       char buf[10000];
       if (fin) {
 	size_t r = 0;
@@ -148,7 +149,7 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
   if (textual||console) {
     FILE *fin = stdin;
     if (!console) {
-      fin = fopen(fname,"rb");
+      fin = uni_fopen(fname,"rb");
     }
     if (fin==NULL && !can_create) {
 	fprintf(stderr,"Failed to read database %s\n", fname);
@@ -183,7 +184,7 @@ bool SqliteTextBook::read(const char *fname, bool can_create,
 	      //printf("Stored %s\n", hold_temp.c_str());
 	      memory = false;
 	    }
-	    FILE *fout = fopen(alt_fname.c_str(),"wb");
+	    FILE *fout = uni_fopen(alt_fname.c_str(),"wb");
 	    if (fout) {
 	      fwrite(txt.c_str(),1,txt.length(),fout);
 	      fclose(fout);
@@ -267,7 +268,7 @@ bool SqliteTextBook::save(const char *fname, const char *format,
   if (db==NULL) return false;
   bool console = string(fname)=="-";
   FILE *fout = stdout;
-  if (!console) fout = fopen(fname,"w");
+  if (!console) fout = uni_fopen(fname,"w");
   if (fout==NULL) return false;
 
   fprintf(fout,"PRAGMA foreign_keys=OFF;\n");
