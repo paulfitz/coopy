@@ -1,9 +1,9 @@
 
 #include "MergeFrame.h"
 
+#include <wx/base64.h>
+
 using namespace std;
-
-
 
 static wxString conv_c(const char *s) {
     return wxString(s, wxConvUTF8);
@@ -16,6 +16,27 @@ static wxString conv(const std::string& s) {
 static std::string conv(const wxString& s) {
     return std::string(s.mb_str(wxConvUTF8));
 } 
+
+// we count on UTF-8 build
+static wxString toReg(wxString str) {
+  wxScopedCharBuffer buf = str.ToUTF8();
+  return wxString("coopy_v1_") + wxBase64Encode(buf.data(),buf.length());
+}
+
+static wxString fromReg(wxString str) {
+  //printf("Reading %s\n", conv(str).c_str());
+  if (str.Mid(0,9)!="coopy_v1_") {
+    return "";
+  }
+  str = str.Mid(9);
+  //printf("Part is %s\n", conv(str).c_str());
+  wxMemoryBuffer buf = wxBase64Decode(str.c_str(),str.Length());
+  //printf("Buffer length is %d\n", buf.GetDataLen());
+  wxString result = wxString::FromUTF8((const char *)buf.GetData(),
+				       (size_t)buf.GetDataLen());
+  //printf("Outcome is %s\n", conv(result).c_str());
+  return result;
+}
 
 static void show(const wxString& view) {
 #ifndef WIN32
@@ -90,7 +111,7 @@ bool MergeFrame::OnInit() {
 	boxes[i] = fbar;
         config_tags[i] = conv_c(tags[i]);
         //printf("--> %s %s\n", conv(config_tags[i]).c_str(), tags[i]);
-        wxString path = pConfig->Read(config_tags[i],wxT(""));
+        wxString path = fromReg(pConfig->Read(config_tags[i],wxT("")));
         //printf("  %s\n", conv(path).c_str());
         files[i] = new wxFilePickerCtrl(this,TEXT_Parent+i, 
                                         path,
@@ -133,7 +154,8 @@ void MergeFrame::OnMerge(wxCommandEvent& event) {
         wxString key = config_tags[i];
         wxString val = files[i]->GetPath();
         //printf("i is %d :  %s -> %s\n", i, conv(key).c_str(), conv(val).c_str());
-        pConfig->Write(key,val);
+	//printf("Writing %s for %s\n", conv(toReg(val)).c_str(),conv(val).c_str());
+        pConfig->Write(key,toReg(val));
     }
     pConfig->Flush();
     Options opt((string("ss")+mode).c_str());
