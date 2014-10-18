@@ -32,6 +32,7 @@
 
 #include <wchar.h>
 #include <stdlib.h>
+#include <string.h>
 
 extern int _CRT_glob;
 extern 
@@ -65,10 +66,10 @@ printf("Converting...\n");
  if (!argvConverted) return 1;
  
  for (int i=0; i<argc; i++) {
-   int len = wcslen(argv[i]);
-   int tlen = WideCharToMultiByte(CP_UTF8, 0, argv[i], len, NULL, 0, NULL, NULL);
+   int tlen = WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, NULL, 0, NULL, NULL);
    char *str = new char[tlen+1];
-   WideCharToMultiByte(CP_UTF8, 0, argv[i], len, str, tlen, NULL, NULL);
+   memset(str,tlen+1,0);
+   WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, str, tlen, NULL, NULL);
    argvConverted[i] = str;
    if (!argvConverted[i]) return 1;
  }
