@@ -38,8 +38,8 @@ void ssfossil_set_handler(FossilHandler *handler) {
 }
 
 int _ssfossil_exit(int result) {
+  db_close();
   if (_ssfossil_handler) {
-    db_close();
     return _ssfossil_handler->exit(result);
     // must not actually return!
   }
@@ -79,13 +79,14 @@ int _ssfossil_printf(const char *format, ...) {
     va_end(listPointer);
   }
 
+  fflush(stdout);
   return result;
 }
 
 
 
 int _ssfossil_fprintf(FILE *target, const char *format, ...) {
-  // exactly the same as _ssfossil_printf
+  // exactly the same as _ssfossil_printf, we ignore target
 
   va_list listPointer;
 
@@ -117,6 +118,7 @@ int _ssfossil_fprintf(FILE *target, const char *format, ...) {
     va_end(listPointer);
   }
 
+  fflush(stdout);
   return result;
 }
 

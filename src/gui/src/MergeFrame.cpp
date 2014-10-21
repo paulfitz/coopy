@@ -1,7 +1,7 @@
 
 #include "MergeFrame.h"
 
-#include <wx/base64.h>
+//#include <wx/base64.h>
 
 using namespace std;
 
@@ -19,11 +19,14 @@ static std::string conv(const wxString& s) {
 
 // we count on UTF-8 build
 static wxString toReg(wxString str) {
-  wxScopedCharBuffer buf = str.ToUTF8();
-  return wxString("coopy_v1_") + wxBase64Encode(buf.data(),buf.length());
+  return str;
+  //wxScopedCharBuffer buf = str.ToUTF8();
+  //return wxString("coopy_v1_") + wxBase64Encode(buf.data(),buf.length());
 }
 
 static wxString fromReg(wxString str) {
+  return str;
+  /*
   //printf("Reading %s\n", conv(str).c_str());
   if (str.Mid(0,9)!="coopy_v1_") {
     return "";
@@ -36,6 +39,7 @@ static wxString fromReg(wxString str) {
 				       (size_t)buf.GetDataLen());
   //printf("Outcome is %s\n", conv(result).c_str());
   return result;
+  */
 }
 
 static void show(const wxString& view) {
@@ -43,7 +47,8 @@ static void show(const wxString& view) {
     wxString view2 = wxT("file://") + view;
     ::wxLaunchDefaultBrowser(view2);
 #else
-    ::wxLaunchDefaultApplication(view);
+    ::wxLaunchDefaultBrowser(view);
+    //::wxLaunchDefaultApplication(view);
 #endif
 }
 
@@ -104,26 +109,28 @@ bool MergeFrame::OnInit() {
         "Patch",
         "Output"
     };
-        
+
+
     wxConfigBase *pConfig = wxConfigBase::Get();
     for (int i=0; i<5; i++) {
         wxBoxSizer *fbar = new wxBoxSizer( wxHORIZONTAL );
 	boxes[i] = fbar;
         config_tags[i] = conv_c(tags[i]);
-        //printf("--> %s %s\n", conv(config_tags[i]).c_str(), tags[i]);
         wxString path = fromReg(pConfig->Read(config_tags[i],wxT("")));
-        //printf("  %s\n", conv(path).c_str());
         files[i] = new wxFilePickerCtrl(this,TEXT_Parent+i, 
                                         path,
                                         conv_c(tips[i]),
                                         wxT("*.*"),
                                         wxDefaultPosition,
                                         wxSize(400,-1),
-                                        (i==4)?(wxFLP_USE_TEXTCTRL|wxFLP_SAVE|wxFLP_OVERWRITE_PROMPT):(wxFLP_DEFAULT_STYLE|wxFLP_CHANGE_DIR));
-        files[i]->SetPath(path);
+					(i==4)?(wxFLP_USE_TEXTCTRL|wxFLP_SAVE|wxFLP_OVERWRITE_PROMPT):(wxFLP_DEFAULT_STYLE));
         if (files[i]->GetTextCtrl()) {
-            files[i]->GetTextCtrl()->SetValue(path);
+	  // there's a strange wxmsw crash otherwise
+	  //files[i]->GetTextCtrl()->AutoComplete(NULL);
+	  //files[i]->GetTextCtrl()->SetEditable(false);
+	  //files[i]->GetTextCtrl()->SetValue(path);
         }
+        files[i]->SetPath(path);
         fbar->Add(new wxStaticText(this,-1,conv_c(labels[i]),
                                    wxDefaultPosition,
                                    wxSize(150,-1)),lflags);
@@ -193,6 +200,7 @@ void MergeFrame::OnMerge(wxCommandEvent& event) {
     printf("Parent %s\n", conv(parent).c_str());
     printf("Local %s\n", conv(local).c_str());
     printf("Remote %s\n", conv(remote).c_str());
+    printf("Output %s\n", conv(output).c_str());
     PolyBook parent_sheet, local_sheet, remote_sheet;
     parent_sheet.read(conv(parent).c_str());
     local_sheet.read(conv(local).c_str());

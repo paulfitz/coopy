@@ -17,7 +17,8 @@ find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIR})
 
 add_executable(makeheaders fossil/src/makeheaders.c)
-add_executable(translate fossil/src/translate.c)
+add_executable(translate src/fossil/translate.c)
+# add_executable(translate fossil/src/translate.c)
 add_executable(mkindex fossil/src/mkindex.c)
 
 get_target_property(MAKEHEADERS_LOC makeheaders LOCATION)

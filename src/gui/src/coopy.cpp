@@ -300,12 +300,7 @@ bool CoopyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
     return true;
 }
 
-#ifdef WIN32
-IMPLEMENT_APP_NO_MAIN(CoopyApp);
-#else
 IMPLEMENT_APP(CoopyApp);
-#endif
-
 
 class CoopyFrame: public wxFrame
 {
@@ -322,7 +317,7 @@ private:
     wxTextCtrl *log_box;
     wxTextCtrl *src_box;
     wxTextCtrl *dest_box;
-    wxDirPickerCtrl *dir_box;
+    //wxDirPickerCtrl *dir_box;
     string dir_box_path;
     wxTimer *timer;
     wxListBox *list_box;
@@ -452,7 +447,7 @@ public:
     void processSubInput(wxInputStream& in) {
         wxTextInputStream tis(in);
         wxString str = tis.ReadLine();
-        //printf("Got %s\n", conv(str).c_str());
+        printf("Got %s\n", conv(str).c_str());
         //replace(str,string("\r"),string(" * "));
         //replace(str,"Received:","\nReceived:");
         if (logging) { 
@@ -466,7 +461,7 @@ public:
     }
 
     void processInput() {
-        while (report->CanRead()) {
+       while (report->CanRead()) {
             processSubInput(*report);
         }
         while (reportErr->CanRead()) {
@@ -867,12 +862,6 @@ bool CoopyApp::OnInit()
         return false;
     }
 
-
-    MergeFrame *mframe = new MergeFrame(frame, _T("diff, patch, merge"), wxPoint(50,50), wxSize(450,340));
-    store_mframe = mframe;
-    if (!mframe->OnInit()) return false;
-    mframe->Show(FALSE);
-
     SetVendorName(wxT("DataCommonsCooperative"));
     SetAppName(wxT("coopy"));
 
@@ -898,6 +887,12 @@ bool CoopyApp::OnInit()
             exit(fossil_result);
         }
     }
+
+    MergeFrame *mframe = new MergeFrame(frame, _T("diff, patch, merge"), wxPoint(50,50), wxSize(450,340));
+    store_mframe = mframe;
+    if (!mframe->OnInit()) return false;
+    mframe->Show(FALSE);
+
     return (fossil_result==0)?TRUE:FALSE;
 };
 
@@ -969,24 +964,22 @@ int CoopyFrame::ssfossil(int argc, char *argv[], bool sync) {
     }
     //printf("\n");
     cmd[argc] = NULL;
-    /*
-    string cmd;
-    for (int i=0; i<argc; i++) {
-        printf("[%s] ", argv[i]);
-        cmd += safetxt(argv[i]);
-        cmd += " ";
-    }
-    */
-    //printf("\n");
-    //printf("Doing: %s\n", cmd.c_str());
 
-    // Create the process string
-    //wxEvtHandler *eventHandler = NULL;
-    //wxProcess *proc = new wxProcess(eventHandler);
     FossilProcess *proc = new FossilProcess(this,_T("ssfossil"),sync);
     proc->Redirect();
-    //if(::wxExecute(conv(cmd), wxEXEC_ASYNC, proc) == 0){
-    if(::wxExecute(cmd, wxEXEC_ASYNC, proc) == 0){
+
+    int at = 0;
+    while (cmd[at]!=NULL) {
+        printf("Run [%d] %s\n", at, conv(wxString(cmd[at])).c_str());
+        at++;
+    }
+#ifdef WIN32
+    // There's some type transition going on...
+    char **target = argv;
+#else
+    wchar_t **target = cmd;
+#endif
+    if(::wxExecute(target, wxEXEC_ASYNC, proc) == 0){
         fprintf(stderr,"Fossil error (1)\n");
         exit(1);
     }
@@ -1029,7 +1022,7 @@ bool CoopyFrame::OnInit() {
     wxPanel *panel = new wxPanel(this, wxID_ANY,
                                  wxDefaultPosition, wxSize(400,400));
 
-    timer = new wxTimer(panel,ID_Tick);
+    timer = new wxTimer(this,ID_Tick);
 
     SetIcon(wxIcon((char**)appicon_xpm));
 
@@ -2251,6 +2244,7 @@ void CoopyApp::OnKey(wxKeyEvent& e) {
 }
 
 
+/*
 #ifdef _WIN32
 
 FILE *FOUT = NULL;
@@ -2264,4 +2258,4 @@ int WINAPI WinMain(HINSTANCE hInstance,
 }
 
 #endif
-
+*/

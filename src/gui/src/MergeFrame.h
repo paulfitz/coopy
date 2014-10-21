@@ -159,6 +159,7 @@ public:
         TEXT_Parent,
         TEXT_Local,
         TEXT_Remote,
+        TEXT_Patch,
         TEXT_Output,
         TEXT_MORE1,
         TEXT_MORE2,
