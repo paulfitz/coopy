@@ -81,6 +81,7 @@ Installing on OSX
 -----------------
 * Use homebrew.
 * Do `brew tap paulfitz/data` to get a formula for coopy.
+* Installing XQuartz from http://xquartz.macosforge.org
 * Then `brew install coopy` should work fine.
 
 Installing on Windows
