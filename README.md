@@ -1,6 +1,8 @@
 The COOPY toolbox
 =================
 
+[![Build Status](https://travis-ci.org/paulfitz/coopy.svg?branch=master)](https://travis-ci.org/paulfitz/coopy)
+
 Diffing, patching, merging, and revision-control for spreadsheets and
 databases.  Focused on keeping data in sync across different 
 technologies (e.g. a MySQL table and an Excel spreedsheet).
