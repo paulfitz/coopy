@@ -1,0 +1,12 @@
+before_install:
+  - sudo apt-get update
+
+install:
+  - sudo apt-get install cmake libsqlite3-dev -y
+
+script:
+  - mkdir -p build && cd build
+  - cmake ..
+  - make
+  - make test
+
