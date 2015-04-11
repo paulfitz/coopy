@@ -46,7 +46,7 @@
 #if GNM_VERSION_MAJOR <= 12
 #  if GNM_VERSION_MAJOR < 12
 #    define OLD_GNUMERIC_2
-#  elif GNM_VERSION_MINOR <= 10  // this may be inaccurate
+#  elif GNM_VERSION_MINOR <= 8  // this may be inaccurate
 #    define OLD_GNUMERIC_2
 #  endif
 #endif
