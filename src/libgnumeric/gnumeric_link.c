@@ -83,6 +83,19 @@
 #define OLD_GNUMERIC_1_OR_2
 #endif
 
+#ifndef GNM_IS_HLINK_URL
+#define GNM_IS_HLINK_URL IS_GNM_HLINK_URL
+#define gnm_cmd_context_stderr_new cmd_context_stderr_new
+#endif
+
+#ifndef GNM_EXPR_GET_OPER
+#define GNM_EXPR_GET_OPER(x) ((x)->oper)
+#endif
+
+#ifndef VALUE_IS_EMPTY
+#define VALUE_IS_EMPTY(x) ((x)==NULL || (x)->type==VALUE_EMPTY)
+#endif
+
 static GOErrorInfo	*plugin_errs = NULL;
 static GOCmdContext	*cc = NULL;
 static int gnumeric_init_ct = 0;
@@ -111,7 +124,7 @@ int gnumeric_init() {
 	gnm_init ();
 #endif
   
-  cc = cmd_context_stderr_new ();
+  cc = gnm_cmd_context_stderr_new ();
   gnm_plugins_init (GO_CMD_CONTEXT (cc));
   go_plugin_db_activate_plugin_list (
 				     go_plugins_get_available_plugins (), &plugin_errs);
@@ -283,8 +296,7 @@ int gnumeric_sheet_get_size(GnumericSheetPtr sheet, int *w, int *h) {
 
 char *gnumeric_sheet_get_cell_as_string(GnumericSheetPtr sheet, int x, int y) {
   GnmValue const *value = sheet_cell_get_value((Sheet*)sheet,x,y);
-  if (value==NULL) return NULL;
-  if (value->type == VALUE_EMPTY) return NULL;
+  if (VALUE_IS_EMPTY(value)) return NULL;
   return value_get_as_string(value);
 }
 
@@ -292,8 +304,7 @@ int gnumeric_sheet_get_cell(GnumericSheetPtr sheet, int x, int y,
 			    GSheetCellPtr cell) {
   gsheetcell_zero(cell);
   GnmValue const *value = sheet_cell_get_value((Sheet*)sheet,x,y);
-  if (value==NULL) return 0;
-  if (value->type == VALUE_EMPTY) return 0;
+  if (VALUE_IS_EMPTY(value)) return 0;
 
   GnmCell const *gcell = sheet_cell_get((Sheet*)sheet,x,y);
   if (gcell) {
@@ -301,7 +312,7 @@ int gnumeric_sheet_get_cell(GnumericSheetPtr sheet, int x, int y,
       if (gcell->base.texpr->expr) {
 	const GnmExpr *expr = gcell->base.texpr->expr;
 	if (expr) {
-	  if (expr->oper==GNM_EXPR_OP_FUNCALL) {
+	  if (GNM_EXPR_GET_OPER(expr)==GNM_EXPR_OP_FUNCALL) {
 	    if (expr->func.func) {
 	      const char *name = expr->func.func->name;
 	      if (name) {
@@ -312,13 +323,13 @@ int gnumeric_sheet_get_cell(GnumericSheetPtr sheet, int x, int y,
 		  if (expr->func.argc==2) {
 		    const GnmExpr *expr0 = expr->func.argv[0];
 		    if (expr0) {
-		      if (expr0->oper == GNM_EXPR_OP_CONSTANT) {
+		      if (GNM_EXPR_GET_OPER(expr0) == GNM_EXPR_OP_CONSTANT) {
 			url = value_get_as_string(expr0->constant.value);
 		      }
 		    }
 		    const GnmExpr *expr1 = expr->func.argv[1];
 		    if (expr1) {
-		      if (expr1->oper == GNM_EXPR_OP_CONSTANT) {
+		      if (GNM_EXPR_GET_OPER(expr1) == GNM_EXPR_OP_CONSTANT) {
 			txt = value_get_as_string(expr1->constant.value);
 		      }
 		    }
@@ -353,7 +364,7 @@ int gnumeric_sheet_get_cell(GnumericSheetPtr sheet, int x, int y,
   GnmStyle const *style = sheet_style_get((Sheet*)sheet,x,y);
   GnmHLink* hlink = gnm_style_get_hlink (style);
   const guchar* hlink_target = NULL;
-  if (hlink && IS_GNM_HLINK_URL (hlink)) {
+  if (hlink && GNM_IS_HLINK_URL (hlink)) {
     hlink_target = gnm_hlink_get_target (hlink);
     if (hlink_target) {
       //char *str = value_get_as_string(value);
