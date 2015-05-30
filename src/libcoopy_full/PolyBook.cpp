@@ -133,7 +133,50 @@ bool PolyBook::expand(Property& config) {
   for (size_t i=0; i<ext.length(); i++) {
     ext[i] = tolower(ext[i]);
   }
-  //dbg_printf("Attach: extension is %s\n", ext.c_str());
+
+  size_t idx = filename.find("://");
+  if (idx!=string::npos) {
+    // support uris just enough for heroku DATABASE_URL
+    string kind = filename.substr(0,idx);
+    string meat = filename.substr(idx+3,filename.length());
+    string username = "";
+    string password = "";
+    string host = "";
+    string port = "";
+    string db = "";
+    size_t idx_at = meat.find("@");
+    if (idx_at!=string::npos) {
+      username = meat.substr(0,idx_at);
+      meat = meat.substr(idx_at+1,meat.length());
+      size_t idx_colon = username.find(":");
+      if (idx_colon!=string::npos) {
+        password = username.substr(idx_colon+1,username.length());
+        username = username.substr(0,idx_colon);
+      }
+    }
+    size_t idx_div = meat.find("/");
+    if (idx_div!=string::npos) {
+      host = meat.substr(0,idx_div);
+      db = meat.substr(idx_div+1,meat.length());
+
+      size_t idx_colon = host.find(":");
+      if (idx_colon!=string::npos) {
+        port = host.substr(idx_colon+1,host.length());
+        host = host.substr(0,idx_colon);
+      }
+      filename = string("dbi:") + kind + ":" + db;
+      if (username!="") {
+        filename += string(":username=") + username;
+      }
+      if (password!="") {
+        filename += string(":password=") + password;
+      }
+      filename += string(":host=") + host;
+      if (port!="") {
+        filename += string(":port=") + port;
+      }
+    }
+  }
 
   if (filename.substr(0,4)!="dbi:") {
     if (ext == ".json") {
@@ -165,11 +208,9 @@ bool PolyBook::expand(Property& config) {
 	size_t div = word.find('=');
 	if (div==string::npos) {
 	  words.push_back(word);
-	  //dbg_printf("dbi: part %s\n", word.c_str());
 	} else {
 	  string key = word.substr(0,div);
 	  string val = word.substr(div+1,word.length());
-	  //dbg_printf("dbi: %s->%s\n", key.c_str(), val.c_str());
 	  if (key=="port") {
 	    config.put(key.c_str(),atoi(val.c_str()));
 	  } else {

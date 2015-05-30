@@ -169,6 +169,7 @@ void gatherFactories(vector<TextBookFactory *>& lst,
     descs.push_back(desc);
   } else {
     lst.push_back(new RemoteSqlTextBookFactory("pg"));
+    lst.push_back(new RemoteSqlTextBookFactory("postgres"));
   }
 #endif
 #ifdef USE_SOCIALCALC
@@ -217,7 +218,7 @@ TextBook *readHelper(const char *fname,
 #ifdef USE_MYSQL
       book = new RemoteSqlTextBook("mysql");
 #endif
-    } else if (key=="pg") {
+    } else if (key=="pg"||key=="postgres") {
 #ifdef USE_POSTGRES
       book = new RemoteSqlTextBook("pg");
 #endif
