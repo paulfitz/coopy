@@ -28,6 +28,7 @@ Supported data formats
 * Excel formats (via gnumeric's libspreadsheet)
 * Other spreadsheet formats (via gnumeric's libspreadsheet)
 * Sqlite
+* PostgreSQL
 * MySQL
 * Microsoft Access format (via mdbtools - READ ONLY, or via jackcess for read/write)
 * A JSON representation of tables.
