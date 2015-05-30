@@ -6,15 +6,14 @@ option(USE_REMOTE_SQL "Enable remote sql access" OFF)
 if (USE_REMOTE_SQL)
 
 option(USE_MYSQL "Enable mysql access" ON)
+option(USE_POSTGRES "Enable postgresql access" ON)
 
-# option(USE_POSTGRES OFF "Enable postgres access")
 # option(USE_ODBC OFF "Enable odbc access")
-set (USE_POSTGRES OFF)
 set (USE_ODBC OFF)
 
-if (NOT USE_MYSQL)
-  message(FATAL_ERROR "Please turn on USE_MYSQL")
-endif ()
+#if (NOT USE_MYSQL)
+#  message(FATAL_ERROR "Please turn on USE_MYSQL")
+#endif ()
 
 if (USE_MYSQL)
   add_definitions(-DUSE_MYSQL)

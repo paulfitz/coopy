@@ -15,9 +15,10 @@ using namespace sqlxx;
 
 #define HELPER(x) (*((CSQL*)(x)))
 
-RemoteSqlTextBook::RemoteSqlTextBook() {
+RemoteSqlTextBook::RemoteSqlTextBook(const std::string& kind) {
   implementation = NULL;
   dirty = false;
+  this->kind = kind;
 }
 
 RemoteSqlTextBook::~RemoteSqlTextBook() {
@@ -42,12 +43,17 @@ bool RemoteSqlTextBook::open(const Property& config) {
     SQL.setPassword(config.get("password").asString().c_str());
     SQL.setHostname(config.get("host").asString().c_str());
     SQL.setPort(config.get("port",PolyValue::makeInt(3128)).asInt());
-//    SQL.setSocket("/var/run/mysqld/mysqld.sock");
     database_name = config.get("database").asString().c_str();
     SQL.setDatabase(database_name);
-    SQL.setType(SQLXX_MYSQL);
-    //SQL.setType(SQLXX_ODBC);
-    //SQL.setDriver("/usr/lib/libmyodbc.so");
+    SQL.setType((kind=="mysql")?SQLXX_MYSQL:SQLXX_POSTGRES);
+    if (kind=="mysql") {
+      table_schema = database_name;
+      table_catalog = "";
+    } else {
+      // postgres
+      table_schema = "public";
+      table_catalog = database_name;
+    }
     SQL.connect();
     if (config.check("table")) {
       names_cache.clear();
@@ -82,12 +88,15 @@ std::vector<std::string> RemoteSqlTextBook::getNames() {
   dirty = false;
   if (implementation==NULL) return names;
   CSQL& SQL = HELPER(implementation);
-  string query = string("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA=")+quote(database_name);
-  //printf("Query is %s\n", query.c_str());
+  string query;
+  query = string("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA = ")+quote(table_schema);
+  if (table_catalog!="") {
+    query += " AND TABLE_CATALOG = "+quote(table_catalog);
+  }
+  dbg_printf("Query is %s\n", query.c_str());
   CSQLResult *result = SQL.openQuery(query);
   if (result==NULL) return names;
   while (result->fetch()) {
-    //printf("Got %s\n", result->get(0).c_str());
     names.push_back(result->get(0));
   }
   SQL.closeQuery(result);

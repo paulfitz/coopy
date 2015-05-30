@@ -21,7 +21,7 @@ namespace coopy {
 
 class coopy::store::remotesql::RemoteSqlTextBook : public TextBook {
 public:
-  RemoteSqlTextBook();
+  RemoteSqlTextBook(const std::string& kind);
   virtual ~RemoteSqlTextBook();
 
   void clear();
@@ -44,11 +44,32 @@ public:
     return database_name;
   }
 
+  std::string getTableSchema() {
+    return table_schema;
+  }
+
+  std::string getTableCatalog() {
+    return table_catalog;
+  }
+
+  bool hasFirstClassAutoIncrement() {
+    return kind=="mysql";
+  }
+
+  bool isMysql() {
+    return kind=="mysql";
+  }
+
+  bool isPg() {
+    return kind=="pg";
+  }
+
 private:
   void *implementation;
-  std::string database_name;
+  std::string database_name, table_schema, table_catalog;
   std::vector<std::string> names_cache;
   bool dirty;
+  std::string kind;
 };
 
 
@@ -65,10 +86,10 @@ public:
 
   virtual TextBook *open(AttachConfig& config, AttachReport& report) {
     if (config.shouldCreate) {
-      report.errorCreateNotImplemented("mysql");
+      report.errorCreateNotImplemented(name.c_str());
       return NULL;
     }
-    RemoteSqlTextBook *book = new RemoteSqlTextBook();
+    RemoteSqlTextBook *book = new RemoteSqlTextBook(name);
     if (book==NULL) return NULL;
     if (!book->open(config.options)) {
       delete book;

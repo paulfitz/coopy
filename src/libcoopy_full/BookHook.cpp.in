@@ -18,6 +18,8 @@ using namespace coopy::store;
 #cmakedefine USE_JACKCESS
 #cmakedefine USE_SQLITE
 #cmakedefine USE_JSON
+#cmakedefine USE_MYSQL
+#cmakedefine USE_POSTGRES
 #endif
 
 #ifdef USE_GNUMERIC
@@ -135,7 +137,7 @@ void gatherFactories(vector<TextBookFactory *>& lst,
     lst.push_back(new JackTextBookFactory());
   }
 #endif  
-#ifdef USE_REMOTE_SQL
+#ifdef USE_MYSQL
   if (preview) {
     FormatDesc desc("MYSQL: database connector");
     desc.addDbi("dbi:mysql:database_name","Use default port, username, etc");
@@ -152,6 +154,23 @@ void gatherFactories(vector<TextBookFactory *>& lst,
     lst.push_back(new RemoteSqlTextBookFactory("mysql"));
   }
 #endif
+#ifdef USE_POSTGRES
+  if (preview) {
+    FormatDesc desc("PostgreSQL: database connector");
+    desc.addDbi("dbi:pg:database_name","Use default port, username, etc");
+    desc.addDbi("dbi:pg:database_name:username=USER:password=PASS","");
+    desc.addDbi("dbi:pg:database_name:host=HOST:port=PORT","");
+    desc.addOption("type",STRVAL("pg"),"PostgreSQL connector",true);
+    desc.addOption("database",STRVAL("db_name"),"Database name",true);
+    desc.addOption("host",STRVAL("localhost"),"Host name",true);
+    desc.addOption("port",STRVAL("1111"),"Port number",true);
+    desc.addOption("username",STRVAL("root"),"Username",true);
+    desc.addOption("password",STRVAL("****"),"Password",true);
+    descs.push_back(desc);
+  } else {
+    lst.push_back(new RemoteSqlTextBookFactory("pg"));
+  }
+#endif
 #ifdef USE_SOCIALCALC
   if (preview) {
     FormatDesc desc("SOCIALCALC: SocialCalc format (via mozjs)");
@@ -164,6 +183,7 @@ void gatherFactories(vector<TextBookFactory *>& lst,
   } else {
     lst.push_back(new SocialCalcTextBookFactory());
   }
+
 #endif  
 }
 
@@ -194,8 +214,12 @@ TextBook *readHelper(const char *fname,
     TextBook *book = NULL;
     string key = p.get("type",PolyValue::makeString("none")).asString();
     if (key=="mysql") {
-#ifdef USE_REMOTE_SQL
-      book = new RemoteSqlTextBook();
+#ifdef USE_MYSQL
+      book = new RemoteSqlTextBook("mysql");
+#endif
+    } else if (key=="pg") {
+#ifdef USE_POSTGRES
+      book = new RemoteSqlTextBook("pg");
 #endif
     } else if (key=="csv") {
       book = new ShortTextBook();

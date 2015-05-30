@@ -6,7 +6,7 @@ using namespace coopy::store::remotesql;
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  RemoteSqlTextBook book;
+  RemoteSqlTextBook book("mysql");
   Property p;
   p.put("username","root");
   p.put("password","");

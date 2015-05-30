@@ -31,52 +31,56 @@ RemoteSqlSheet::RemoteSqlSheet(RemoteSqlTextBook *owner, const char *name) {
   CSQL& SQL = SQL_CONNECTION(book);
 
   {
-    string query = string("SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, EXTRA, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=")+quote(name) + " AND TABLE_SCHEMA=" + quote(book->getDatabaseName());
+    string query = string("SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, ") + (book->hasFirstClassAutoIncrement()?"EXTRA, ":"") + " 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME="+quote(name) + " AND TABLE_SCHEMA=" + quote(book->getTableSchema());
+    if (book->getTableCatalog()!="") {
+      query += " AND TABLE_CATALOG=" + quote(book->getTableCatalog());
+    }
     dbg_printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     if (result==NULL) return;
     while (result->fetch()) {
-      //printf("Got %s\n", result->get(0).c_str());
       col2sql.push_back(result->get(0));
       col2type.push_back(result->get(1));
       col2nullable.push_back(result->get(2)=="YES");
-      col2autoinc.push_back(result->get(3)=="auto_increment");
+      if (book->hasFirstClassAutoIncrement()) {
+        col2autoinc.push_back(result->get(3)=="auto_increment");
+      } else {
+        col2autoinc.push_back(false);
+      }
       w++;
     }
     SQL.closeQuery(result);
   }
 
   {
-    string query = string("SELECT k.column_name FROM information_schema.table_constraints t JOIN information_schema.key_column_usage k USING(constraint_name,table_schema,table_name) WHERE t.constraint_type='PRIMARY KEY' AND t.table_schema=") + quote(book->getDatabaseName()) + " AND t.table_name=" + quote(name);
+    string query = string("SELECT k.column_name FROM information_schema.table_constraints t JOIN information_schema.key_column_usage k USING(constraint_name,table_schema,table_name) WHERE t.constraint_type='PRIMARY KEY' AND t.table_schema=") + quote(book->getTableSchema()) + " AND t.table_name=" + quote(name);
+    if (book->getTableCatalog()!="") {
+      query += " AND t.table_catalog=" + quote(book->getTableCatalog());
+    }
     dbg_printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     if (result==NULL) return;
     map<string,int> pks;
     while (result->fetch()) {
-      //printf("Got %s\n", result->get(0).c_str());
       pks[result->get(0)] = 1;
     }
     SQL.closeQuery(result);
     for (int i=0; i<(int)col2sql.size(); i++) {
       col2pk.push_back(pks.find(col2sql[i])!=pks.end());
-      //printf("Primary key? %s %d\n", col2sql[i].c_str(), (bool)col2pk[i]);
     }
   }
-
-  /*
-  {
-    string query = string("SELECT * FROM ")+name;
-    //printf("Query is %s\n", query.c_str());
-    CSQLResult *result = SQL.openQuery(query);
-    SQL.closeQuery(result);
-  }
-  */
 
   //////////////////////////////////////////////////////////////////
   // Check rows
 
   {
-    string query = string("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ") + quote(book->getDatabaseName()) + " AND TABLE_NAME = " + quote(name) + " AND COLUMN_KEY = 'PRI'";
+    string query;
+    if (book->isMysql()) {
+      query = string("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ") + quote(book->getDatabaseName()) + " AND TABLE_NAME = " + quote(name) + " AND COLUMN_KEY = 'PRI'";
+    } else {
+      // postgres
+      query = string("SELECT a.attname, format_type(a.atttypid, a.atttypmod) AS data_type FROM   pg_index i JOIN   pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey) WHERE  i.indrelid = ") + quote(name) + "::regclass AND    i.indisprimary;";
+    }
     dbg_printf("Query is %s\n", query.c_str());
     CSQLResult *result = SQL.openQuery(query);
     while (result->fetch()) {

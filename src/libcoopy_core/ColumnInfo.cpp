@@ -25,11 +25,11 @@ bool ColumnType::setType(const std::string& name,
     family = COLUMN_FAMILY_TEXT;
   } else if (_name == "long integer") {
     family = COLUMN_FAMILY_INTEGER;
-  } else if (_name == "float" || _name=="single" || _name=="double" || _name == "real") {
+  } else if (_name == "float" || _name=="single" || _name=="double" || _name == "real" || _name == "double precision") {
     family = COLUMN_FAMILY_REAL;
-  } else if (_name == "datetime (short)"||_name=="datetime"||_name=="date"||_name=="timestamp") {
+  } else if (_name == "datetime (short)"||_name=="datetime"||_name=="date"||_name=="timestamp"||_name=="timestamp without time zone") {
     family = COLUMN_FAMILY_DATETIME;
-  } else if (_name=="text"||_name=="varchar"||_name.substr(0,7)=="varchar"||_name=="longtext") {
+  } else if (_name=="text"||_name=="varchar"||_name.substr(0,7)=="varchar"||_name=="longtext"||_name=="character varying") {
     family = COLUMN_FAMILY_TEXT;
   } else if (_name=="memo"||_name=="hyperlink"||_name=="memo/hyperlink") {
     family = COLUMN_FAMILY_TEXT;
