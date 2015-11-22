@@ -149,7 +149,6 @@ bool JsonBook::read(const char *fname, const Property& options) {
     if (names.isArray()&&tables.isObject()) {
       for (Json::Value::iterator it=names.begin(); it!=names.end(); it++) {
         std::string name = (*it).asString();
-        printf("%s.\n", name.c_str());
         Json::Value& sheet = tables[name];
         readTable(this,sheet,name);
       }
