@@ -28,7 +28,6 @@ static bool readPart(Json::Value& rows,
   int y = 0;
   Json::Value arr(Json::arrayValue);
   for (Json::Value::iterator it2=rows.begin(); it2!=rows.end(); it2++) {
-    //for (int i=0; i<rows.size(); i++) {
     dbg_printf("JSON Row %d\n", y);
     if ((*it2).isArray() || (schema && (*it2).isObject())) {
       bool subst = false;
@@ -53,12 +52,10 @@ static bool readPart(Json::Value& rows,
 	bool escaped = false;
 	bool nested = false;
 	if ((*it3).isInt()) {
-	  //printf("At %d %d -> %d\n", x, y, (*it3).asInt());
 	  char buf[1000];
 	  snprintf(buf,sizeof(buf),"%d",(*it3).asInt());
 	  s = buf;
 	} else if ((*it3).isNumeric()) {
-	  //printf("At %d %d -> %g\n", x, y, (*it3).asDouble());	
 	  char buf[1000];
 	  snprintf(buf,sizeof(buf),"%g",(*it3).asDouble());
 	  s = buf;
@@ -71,7 +68,6 @@ static bool readPart(Json::Value& rows,
 	  }
 	  nested = true;
 	} else {
-	  //printf("At %d %d -> %s\n", x, y, (*it3).asString().c_str());
 	  s = (*it3).asString();
 	}
 	if (!nested) {
@@ -83,6 +79,49 @@ static bool readPart(Json::Value& rows,
     y++;
   }
 
+  return true;
+}
+
+static bool readTable(JsonBook *self,
+                      Json::Value& table,
+                      const std::string& table_name) {
+
+  FoldedSheet *psheet = new FoldedSheet;
+  COOPY_ASSERT(psheet);
+  FoldedSheet& sheet = *psheet;
+  PolySheet p(psheet,true);
+  SheetSchema *schema = NULL;
+
+  Json::Value *prows = &table;
+  if (prows->isObject()) {
+    Json::Value& crows = table;
+    prows = &(crows["rows"]);
+    if (prows->isNull()) {
+      fprintf(stderr,"Cannot find rows for %s\n", table_name.c_str());
+      return false;
+    }
+    const Json::Value& cols = table["columns"];
+    if (cols.isNull()) {
+      fprintf(stderr,"Cannot find columns for %s\n", table_name.c_str());
+      return false;
+    }
+    SimpleSheetSchema *ss = new SimpleSheetSchema();
+    COOPY_ASSERT(ss);
+    ss->setSheetName(table_name.c_str());
+    for (Json::Value::iterator it=cols.begin(); it!=cols.end(); it++) {
+      ss->addColumn((*it).asString().c_str());
+    }
+    p.setSchema(ss,true);
+    schema = ss;
+  }
+  if (prows->isArray()) {
+    dbg_printf("JSON Working on %s\n", table_name.c_str());
+    Json::Value& rows = *prows;
+    if (!readPart(rows,psheet,schema)) return false;
+    self->name2index[table_name] = (int)self->sheets.size();
+    self->sheets.push_back(p);
+    self->names.push_back(table_name);
+  }
   return true;
 }
 
@@ -103,46 +142,24 @@ bool JsonBook::read(const char *fname, const Property& options) {
     fprintf(stderr,"Failed to parse %s\n", fname);
     return false;
   }
-  SheetSchema *schema = NULL;
+
+  if (root.isMember("names") && root.isMember("tables")) {
+    Json::Value& names = root["names"];
+    Json::Value& tables = root["tables"];
+    if (names.isArray()&&tables.isObject()) {
+      for (Json::Value::iterator it=names.begin(); it!=names.end(); it++) {
+        std::string name = (*it).asString();
+        printf("%s.\n", name.c_str());
+        Json::Value& sheet = tables[name];
+        readTable(this,sheet,name);
+      }
+    }
+    return true;
+  }
 
   for (Json::Value::iterator it=root.begin(); it!=root.end(); it++) {
-    FoldedSheet *psheet = new FoldedSheet;
-    COOPY_ASSERT(psheet);
-    FoldedSheet& sheet = *psheet;
-    PolySheet p(psheet,true);
-
-    Json::Value *prows = &(*it);
-    if (prows->isObject()) {
-      Json::Value& crows = (*it);
-      prows = &(crows["rows"]);
-      if (prows->isNull()) {
-	fprintf(stderr,"Cannot find rows for %s\n", it.memberName());
-	return false;
-      }
-      const Json::Value& cols = (*it)["columns"];
-      if (cols.isNull()) {
-	fprintf(stderr,"Cannot find columns for %s\n", it.memberName());
-	return false;
-      }
-      SimpleSheetSchema *ss = new SimpleSheetSchema();
-      COOPY_ASSERT(ss);
-      ss->setSheetName(it.memberName());
-      for (Json::Value::iterator it=cols.begin(); it!=cols.end(); it++) {
-	//printf("Got col %s\n", (*it).asString().c_str());
-	ss->addColumn((*it).asString().c_str());
-      }
-      p.setSchema(ss,true);
-      schema = ss;
-      //printf("Configured sheet\n");
-    }
-    if (prows->isArray()) {
-      dbg_printf("JSON Working on %s\n", it.memberName());
-      Json::Value& rows = *prows;
-      if (!readPart(rows,psheet,schema)) return false;
-      name2index[it.memberName()] = (int)sheets.size();
-      sheets.push_back(p);
-      names.push_back(it.memberName());
-    }
+    Json::Value& table = *it;
+    readTable(this,table,it.memberName());
   }
 
   return true;
@@ -189,7 +206,6 @@ static bool writePart(Json::Value& root2,
 	} else {
 	  if (hasNames) {
 	    row[names[x]] = cellToJson(c,infos[x]);
-	      //Json::Value(sheet.cellString(x,y));
 	  } else {
 	    row.append(Json::Value(sheet.cellString(x,y)));
 	  }
